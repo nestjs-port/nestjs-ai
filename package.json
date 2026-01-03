@@ -1,0 +1,32 @@
+{
+	"name": "nestjs-ai",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "NestJS AI Monorepo",
+	"scripts": {
+		"build": "pnpm -r build",
+		"dev": "pnpm -r --parallel dev",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"test": "vitest",
+		"clean": "pnpm -r clean"
+	},
+	"keywords": [
+		"nestjs",
+		"ai",
+		"monorepo"
+	],
+	"author": "",
+	"license": "MIT",
+	"packageManager": "pnpm@9.15.1",
+	"engines": {
+		"node": ">=18.0.0",
+		"pnpm": ">=9.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.10",
+		"vitest": "^4.0.16"
+	}
+}

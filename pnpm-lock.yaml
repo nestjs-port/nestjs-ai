@@ -17,6 +17,9 @@ importers:
       lint-staged:
         specifier: ^16.2.7
         version: 16.2.7
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vitest:
         specifier: ^4.0.16
         version: 4.0.16(yaml@2.8.2)
@@ -616,6 +619,11 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   vite@7.3.0:
     resolution: {integrity: sha512-dZwN5L1VlUBewiP6H9s2+B3e3Jg96D0vzN+Ry73sOefebhYr9f94wwkMNN/9ouoU8pV1BqA1d1zGk8928cx0rg==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1175,6 +1183,8 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  typescript@5.9.3: {}
 
   vite@7.3.0(yaml@2.8.2):
     dependencies:

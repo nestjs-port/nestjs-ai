@@ -1,4 +1,9 @@
-import type { Model, ModelRequest, ModelResponse, ModelResult } from "./core";
+import type {
+	Model,
+	ModelRequest,
+	ModelResponse,
+	ModelResult,
+} from "@nestjs-ai/model";
 import type { AiModelType } from "./types";
 
 export function getChatModel(

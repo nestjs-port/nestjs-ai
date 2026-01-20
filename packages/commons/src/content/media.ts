@@ -1,67 +1,149 @@
 import { v4 as uuidv4 } from "uuid";
 
 /**
- * Common media formats with their MIME types.
+ * Common media formats.
  */
-export const MediaFormat = {
+export enum MediaFormat {
 	// Document formats
-	DOC_PDF: "application/pdf",
-	DOC_CSV: "text/csv",
-	DOC_DOC: "application/msword",
-	DOC_DOCX:
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-	DOC_XLS: "application/vnd.ms-excel",
-	DOC_XLSX: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	DOC_HTML: "text/html",
-	DOC_TXT: "text/plain",
-	DOC_MD: "text/markdown",
+	/** Public constant mime type for {@code application/pdf}. */
+	DOC_PDF = "application/pdf",
+	/** Public constant mime type for {@code text/csv}. */
+	DOC_CSV = "text/csv",
+	/** Public constant mime type for {@code application/msword}. */
+	DOC_DOC = "application/msword",
+	/** Public constant mime type for {@code application/vnd.openxmlformats-officedocument.wordprocessingml.document}. */
+	DOC_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	/** Public constant mime type for {@code application/vnd.ms-excel}. */
+	DOC_XLS = "application/vnd.ms-excel",
+	/** Public constant mime type for {@code application/vnd.openxmlformats-officedocument.spreadsheetml.sheet}. */
+	DOC_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	/** Public constant mime type for {@code text/html}. */
+	DOC_HTML = "text/html",
+	/** Public constant mime type for {@code text/plain}. */
+	DOC_TXT = "text/plain",
+	/** Public constant mime type for {@code text/markdown}. */
+	DOC_MD = "text/markdown",
 
 	// Video formats
-	VIDEO_MKV: "video/x-matros",
-	VIDEO_MOV: "video/quicktime",
-	VIDEO_MP4: "video/mp4",
-	VIDEO_WEBM: "video/webm",
-	VIDEO_FLV: "video/x-flv",
-	VIDEO_MPEG: "video/mpeg",
-	VIDEO_WMV: "video/x-ms-wmv",
-	VIDEO_THREE_GP: "video/3gpp",
+	/** Public constant mime type for {@code video/x-matros}. */
+	VIDEO_MKV = "video/x-matros",
+	/** Public constant mime type for {@code video/quicktime}. */
+	VIDEO_MOV = "video/quicktime",
+	/** Public constant mime type for {@code video/mp4}. */
+	VIDEO_MP4 = "video/mp4",
+	/** Public constant mime type for {@code video/webm}. */
+	VIDEO_WEBM = "video/webm",
+	/** Public constant mime type for {@code video/x-flv}. */
+	VIDEO_FLV = "video/x-flv",
+	/** Public constant mime type for {@code video/mpeg}. */
+	VIDEO_MPEG = "video/mpeg",
+	/** Public constant mime type for {@code video/x-ms-wmv}. */
+	VIDEO_WMV = "video/x-ms-wmv",
+	/** Public constant mime type for {@code video/3gpp}. */
+	VIDEO_THREE_GP = "video/3gpp",
 
 	// Image formats
-	IMAGE_PNG: "image/png",
-	IMAGE_JPEG: "image/jpeg",
-	IMAGE_GIF: "image/gif",
-	IMAGE_WEBP: "image/webp",
-} as const;
+	/** Public constant mime type for {@code image/png}. */
+	IMAGE_PNG = "image/png",
+	/** Public constant mime type for {@code image/jpeg}. */
+	IMAGE_JPEG = "image/jpeg",
+	/** Public constant mime type for {@code image/gif}. */
+	IMAGE_GIF = "image/gif",
+	/** Public constant mime type for {@code image/webp}. */
+	IMAGE_WEBP = "image/webp",
+}
 
-export type MediaFormatType = (typeof MediaFormat)[keyof typeof MediaFormat];
+/**
+ * Options for creating a Media instance.
+ */
+export interface CreateMediaOptions {
+	/**
+	 * The media MIME type.
+	 */
+	mimeType: string;
+	/**
+	 * The media data as binary array or string.
+	 */
+	data: string | Uint8Array;
+	/**
+	 * The media id, usually defined when the model returns a reference to
+	 * media it has been passed.
+	 */
+	id?: string | null;
+	/**
+	 * The name of the media object that can be referenced by the AI model.
+	 *
+	 * Important security note: This field is vulnerable to prompt injections, as the
+	 * model might inadvertently interpret it as instructions. It is recommended to
+	 * specify neutral names.
+	 *
+	 * The name must only contain:
+	 * - Alphanumeric characters
+	 * - Whitespace characters (no more than one in a row)
+	 * - Hyphens
+	 * - Parentheses
+	 * - Square brackets
+	 */
+	name?: string | null;
+}
 
 /**
  * The Media class represents the data and metadata of a media attachment in a message.
  * It consists of a MIME type, raw data, and optional metadata such as id and name.
+ *
+ * Media objects can be used in the UserMessage class to attach various types of content
+ * like images, documents, or videos. When interacting with AI models, the id and name
+ * fields help track and reference specific media objects.
+ *
+ * The id field is typically assigned by AI models when they reference previously provided media.
+ *
+ * The name field can be used to provide a descriptive identifier to the model, though
+ * care should be taken to avoid prompt injection vulnerabilities. For Amazon AWS the name
+ * must only contain:
+ * - Alphanumeric characters
+ * - Whitespace characters (no more than one in a row)
+ * - Hyphens
+ * - Parentheses
+ * - Square brackets
+ *
+ * Note, this class does not directly enforce that restriction.
+ *
+ * If no name is provided, one will be automatically generated using the pattern:
+ * `media-{mimeType.subtype}-{UUID}`
  */
 export class Media {
 	private static readonly NAME_PREFIX = "media-";
 
+	/**
+	 * An Id of the media object, usually defined when the model returns a reference to
+	 * media it has been passed.
+	 */
 	private readonly _id: string | null;
+
 	private readonly _mimeType: string;
+
 	private readonly _data: string | Uint8Array;
+
 	private readonly _name: string;
 
-	private constructor(
-		mimeType: string,
-		data: string | Uint8Array,
-		id: string | null,
-		name: string | null,
-	) {
+	/**
+	 * Create a new Media instance.
+	 * @param options the media options containing mimeType and data
+	 */
+	constructor(options: CreateMediaOptions) {
+		const { mimeType, data, id, name } = options;
+
 		if (!mimeType) {
 			throw new Error("MimeType must not be null");
 		}
+
 		if (!data) {
 			throw new Error("Data must not be null");
 		}
+
 		this._mimeType = mimeType;
 		this._data = data;
-		this._id = id;
+		this._id = id ?? null;
 		this._name = name ?? Media.generateDefaultName(mimeType);
 	}
 
@@ -71,28 +153,8 @@ export class Media {
 	}
 
 	/**
-	 * Create a new Media instance from a URI.
-	 */
-	static fromUri(mimeType: string, uri: string): Media {
-		return new Media(mimeType, uri, null, null);
-	}
-
-	/**
-	 * Create a new Media instance from binary data.
-	 */
-	static fromData(mimeType: string, data: Uint8Array): Media {
-		return new Media(mimeType, data, null, null);
-	}
-
-	/**
-	 * Creates a new Media builder.
-	 */
-	static builder(): MediaBuilder {
-		return new MediaBuilder();
-	}
-
-	/**
 	 * Get the media MIME type.
+	 * @returns the media MIME type
 	 */
 	get mimeType(): string {
 		return this._mimeType;
@@ -108,6 +170,8 @@ export class Media {
 
 	/**
 	 * Get the media data as a byte array.
+	 * @returns the media data as a byte array
+	 * @throws Error if the media data is not a Uint8Array
 	 */
 	getDataAsByteArray(): Uint8Array {
 		if (this._data instanceof Uint8Array) {
@@ -118,6 +182,7 @@ export class Media {
 
 	/**
 	 * Get the media id.
+	 * @returns the media id
 	 */
 	get id(): string | null {
 		return this._id;
@@ -125,103 +190,9 @@ export class Media {
 
 	/**
 	 * Get the media name.
+	 * @returns the media name
 	 */
 	get name(): string {
 		return this._name;
 	}
 }
-
-/**
- * Builder class for Media.
- */
-export class MediaBuilder {
-	private _id: string | null = null;
-	private _mimeType: string | null = null;
-	private _data: string | Uint8Array | null = null;
-	private _name: string | null = null;
-
-	/**
-	 * Sets the MIME type for the media object.
-	 */
-	mimeType(mimeType: string): MediaBuilder {
-		if (!mimeType) {
-			throw new Error("MimeType must not be null");
-		}
-		this._mimeType = mimeType;
-		return this;
-	}
-
-	/**
-	 * Sets the media data from binary data.
-	 */
-	data(data: Uint8Array | string): MediaBuilder {
-		if (!data) {
-			throw new Error("Data must not be null");
-		}
-		this._data = data;
-		return this;
-	}
-
-	/**
-	 * Sets the ID for the media object.
-	 */
-	id(id: string): MediaBuilder {
-		this._id = id;
-		return this;
-	}
-
-	/**
-	 * Sets the name for the media object.
-	 */
-	name(name: string): MediaBuilder {
-		this._name = name;
-		return this;
-	}
-
-	/**
-	 * Builds a new Media instance with the configured properties.
-	 */
-	build(): Media {
-		if (!this._mimeType) {
-			throw new Error("MimeType must not be null");
-		}
-		if (!this._data) {
-			throw new Error("Data must not be null");
-		}
-		return Media.builder()
-			.mimeType(this._mimeType)
-			.data(this._data)
-			.id(this._id ?? "")
-			.name(this._name ?? "")
-			.build();
-	}
-}
-
-// Fix circular reference in builder
-Object.defineProperty(MediaBuilder.prototype, "build", {
-	value: function (this: MediaBuilder): Media {
-		const mimeType = (this as unknown as { _mimeType: string | null })
-			._mimeType;
-		const data = (this as unknown as { _data: string | Uint8Array | null })
-			._data;
-		const id = (this as unknown as { _id: string | null })._id;
-		const name = (this as unknown as { _name: string | null })._name;
-
-		if (!mimeType) {
-			throw new Error("MimeType must not be null");
-		}
-		if (!data) {
-			throw new Error("Data must not be null");
-		}
-
-		// Use reflection to call private constructor
-		return Object.assign(Object.create(Media.prototype), {
-			_mimeType: mimeType,
-			_data: data,
-			_id: id,
-			_name:
-				name ||
-				`${Media.NAME_PREFIX}${mimeType.split("/")[1] || "unknown"}-${uuidv4()}`,
-		}) as Media;
-	},
-});

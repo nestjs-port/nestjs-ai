@@ -1,7 +1,7 @@
 import type { DynamicModule, Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import { getChatModel } from "../get-chat-model";
-import { CHAT_MODEL_TOKEN } from "../tokens";
+import { CHAT_MODEL_TOKEN } from "../constants";
+import { createChatModel } from "./create-chat-model";
 import type { NestAIModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
@@ -13,7 +13,7 @@ export class NestAIModule {
 		if (options.chatModel) {
 			providers.push({
 				provide: CHAT_MODEL_TOKEN,
-				useValue: getChatModel(options.chatModel),
+				useValue: createChatModel(options.chatModel),
 			});
 		}
 

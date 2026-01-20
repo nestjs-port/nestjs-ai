@@ -1,6 +1,6 @@
 import type { DynamicModule, Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import { getChatModel } from "@nestjs-ai/model";
+import { getChatModel } from "../get-chat-model";
 import { CHAT_MODEL_TOKEN } from "../tokens";
 import type { NestAIModuleOptions } from "./nest-ai-module.options";
 

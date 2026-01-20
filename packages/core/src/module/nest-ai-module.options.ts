@@ -1,4 +1,4 @@
-import type { AiModelType } from "@nestjs-ai/model";
+import type { AiModelType } from "../types";
 
 export interface NestAIModuleOptions {
 	chatModel?: AiModelType;

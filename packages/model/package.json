@@ -16,14 +16,9 @@
 		"clean": "rm -rf dist"
 	},
 	"peerDependencies": {
-		"@nestjs/common": "^10.0.0 || ^11.0.0",
-		"@nestjs/core": "^10.0.0 || ^11.0.0",
 		"rxjs": "^7.0.0"
 	},
 	"devDependencies": {
-		"@nestjs/common": "^11.1.11",
-		"@nestjs/core": "^11.1.11",
-		"@nestjs/testing": "^11.1.11",
 		"rxjs": "^7.8.2"
 	}
 }

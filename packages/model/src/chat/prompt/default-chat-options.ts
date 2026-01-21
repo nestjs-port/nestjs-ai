@@ -1,6 +1,6 @@
 import type { ChatOptions } from "./chat-options.interface";
 
-export interface CreateDefaultChatOptions {
+export interface DefaultChatOptionsProps {
 	model?: string | null;
 	frequencyPenalty?: number | null;
 	maxTokens?: number | null;
@@ -24,7 +24,7 @@ export class DefaultChatOptions implements ChatOptions {
 	topK?: number | null;
 	topP?: number | null;
 
-	constructor(options?: CreateDefaultChatOptions) {
+	constructor(options?: DefaultChatOptionsProps) {
 		if (options) {
 			this.model = options.model;
 			this.frequencyPenalty = options.frequencyPenalty;

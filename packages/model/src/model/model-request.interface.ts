@@ -14,11 +14,11 @@ export interface ModelRequest<T> {
 	 * Retrieves the instructions or input required by the AI model.
 	 * @returns the instructions or input required by the AI model
 	 */
-	getInstructions(): T;
+	get instructions(): T;
 
 	/**
 	 * Retrieves the customizable options for AI model interactions.
 	 * @returns the customizable options for AI model interactions
 	 */
-	getOptions(): ModelOptions | null;
+	get options(): ModelOptions | null;
 }

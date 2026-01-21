@@ -5,5 +5,5 @@ export interface MediaContent extends Content {
 	/**
 	 * Get the media associated with the content.
 	 */
-	getMedia(): Media[];
+	get media(): Media[];
 }

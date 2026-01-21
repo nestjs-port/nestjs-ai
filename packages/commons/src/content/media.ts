@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -56,7 +57,7 @@ export enum MediaFormat {
 /**
  * Options for creating a Media instance.
  */
-export interface CreateMediaOptions {
+export interface MediaOptionsProps {
 	/**
 	 * The media MIME type.
 	 */
@@ -130,16 +131,12 @@ export class Media {
 	 * Create a new Media instance.
 	 * @param options the media options containing mimeType and data
 	 */
-	constructor(options: CreateMediaOptions) {
+	constructor(options: MediaOptionsProps) {
 		const { mimeType, data, id, name } = options;
 
-		if (!mimeType) {
-			throw new Error("MimeType must not be null");
-		}
+		assert(mimeType, "MimeType must not be null");
 
-		if (!data) {
-			throw new Error("Data must not be null");
-		}
+		assert(data, "Data must not be null");
 
 		this._mimeType = mimeType;
 		this._data = data;
@@ -173,7 +170,7 @@ export class Media {
 	 * @returns the media data as a byte array
 	 * @throws Error if the media data is not a Uint8Array
 	 */
-	getDataAsByteArray(): Uint8Array {
+	get dataAsByteArray(): Uint8Array {
 		if (this._data instanceof Uint8Array) {
 			return this._data;
 		}

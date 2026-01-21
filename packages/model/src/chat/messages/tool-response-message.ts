@@ -10,66 +10,41 @@ export interface ToolResponse {
 	readonly responseData: string;
 }
 
+export interface ToolResponseMessageProps {
+	responses?: ToolResponse[];
+	properties?: Record<string, unknown>;
+}
+
 /**
  * The ToolResponseMessage class represents a message with function/tool content
  * in a chat application.
  */
 export class ToolResponseMessage extends AbstractMessage {
-	protected readonly responses: ToolResponse[];
+	protected readonly _responses: ToolResponse[];
 
-	private constructor(
-		responses: ToolResponse[],
-		metadata: Record<string, unknown>,
-	) {
-		super(MessageType.TOOL, "", metadata);
-		this.responses = responses;
+	constructor(options: ToolResponseMessageProps = {}) {
+		super(MessageType.TOOL, "", options.properties ?? {});
+		this._responses = options.responses ?? [];
 	}
 
 	/**
 	 * Get the tool responses.
 	 */
-	getResponses(): ToolResponse[] {
-		return this.responses;
+	get responses(): ToolResponse[] {
+		return this._responses;
 	}
 
 	/**
-	 * Create a new builder for ToolResponseMessage.
+	 * Create a copy of this message.
 	 */
-	static builder(): ToolResponseMessageBuilder {
-		return new ToolResponseMessageBuilder();
-	}
-
-	toString(): string {
-		return `ToolResponseMessage{responses=${JSON.stringify(this.responses)}, messageType=${this.messageType}, metadata=${JSON.stringify(this.metadata)}}`;
-	}
-}
-
-/**
- * Builder for ToolResponseMessage.
- */
-export class ToolResponseMessageBuilder {
-	private _responses: ToolResponse[] = [];
-	private _metadata: Record<string, unknown> = {};
-
-	responses(responses: ToolResponse[]): ToolResponseMessageBuilder {
-		this._responses = responses;
-		return this;
-	}
-
-	metadata(metadata: Record<string, unknown>): ToolResponseMessageBuilder {
-		this._metadata = metadata;
-		return this;
-	}
-
-	build(): ToolResponseMessage {
-		return Object.assign(Object.create(ToolResponseMessage.prototype), {
-			messageType: MessageType.TOOL,
-			textContent: "",
-			metadata: {
-				...this._metadata,
-				[AbstractMessage.MESSAGE_TYPE]: MessageType.TOOL,
-			},
+	copy(): ToolResponseMessage {
+		return new ToolResponseMessage({
 			responses: [...this._responses],
-		}) as ToolResponseMessage;
+			properties: { ...this.metadata },
+		});
+	}
+
+	[Symbol.toPrimitive](): string {
+		return `ToolResponseMessage{responses=${JSON.stringify(this.responses)}, messageType=${this.messageType}, metadata=${JSON.stringify(this.metadata)}}`;
 	}
 }

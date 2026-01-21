@@ -1,10 +1,11 @@
+import assert from "node:assert/strict";
 import type { ModelOptions, ModelRequest } from "../../model";
 import {
 	AssistantMessage,
 	type Message,
 	MessageType,
 	SystemMessage,
-	ToolResponseMessage,
+	type ToolResponseMessage,
 	UserMessage,
 } from "../messages";
 import type { ChatOptions } from "./chat-options.interface";
@@ -15,7 +16,7 @@ import type { ChatOptions } from "./chat-options.interface";
  */
 export class Prompt implements ModelRequest<Message[]> {
 	private readonly messages: Message[];
-	private chatOptions: ChatOptions | null;
+	private readonly chatOptions: ChatOptions | null;
 
 	constructor(content: string);
 	constructor(message: Message);
@@ -30,9 +31,7 @@ export class Prompt implements ModelRequest<Message[]> {
 		if (typeof contentOrMessageOrMessages === "string") {
 			this.messages = [UserMessage.of(contentOrMessageOrMessages)];
 		} else if (Array.isArray(contentOrMessageOrMessages)) {
-			if (!contentOrMessageOrMessages) {
-				throw new Error("messages cannot be null");
-			}
+			assert(contentOrMessageOrMessages, "messages cannot be null");
 			this.messages = contentOrMessageOrMessages;
 		} else {
 			this.messages = [contentOrMessageOrMessages];
@@ -43,23 +42,21 @@ export class Prompt implements ModelRequest<Message[]> {
 	/**
 	 * Get the contents of all messages concatenated.
 	 */
-	getContents(): string {
-		return this.getInstructions()
-			.map((message) => message.getText() ?? "")
-			.join("");
+	get contents(): string {
+		return this.instructions.map((message) => message.text ?? "").join("");
 	}
 
 	/**
 	 * Get the chat options.
 	 */
-	getOptions(): ModelOptions | null {
+	get options(): ModelOptions | null {
 		return this.chatOptions;
 	}
 
 	/**
 	 * Get the messages (instructions).
 	 */
-	getInstructions(): Message[] {
+	get instructions(): Message[] {
 		return this.messages;
 	}
 
@@ -67,9 +64,9 @@ export class Prompt implements ModelRequest<Message[]> {
 	 * Get the first system message in the prompt.
 	 * If no system message is found, an empty SystemMessage is returned.
 	 */
-	getSystemMessage(): SystemMessage {
+	get systemMessage(): SystemMessage {
 		for (const message of this.messages) {
-			if (message.getMessageType() === MessageType.SYSTEM) {
+			if (message.messageType === MessageType.SYSTEM) {
 				return message as SystemMessage;
 			}
 		}
@@ -80,10 +77,10 @@ export class Prompt implements ModelRequest<Message[]> {
 	 * Get the last user message in the prompt.
 	 * If no user message is found, an empty UserMessage is returned.
 	 */
-	getUserMessage(): UserMessage {
+	get userMessage(): UserMessage {
 		for (let i = this.messages.length - 1; i >= 0; i--) {
 			const message = this.messages[i];
-			if (message.getMessageType() === MessageType.USER) {
+			if (message.messageType === MessageType.USER) {
 				return message as UserMessage;
 			}
 		}
@@ -94,12 +91,12 @@ export class Prompt implements ModelRequest<Message[]> {
 	 * Get the last user or tool response message in the prompt.
 	 * If no user or tool response message is found, an empty UserMessage is returned.
 	 */
-	getLastUserOrToolResponseMessage(): Message {
+	get lastUserOrToolResponseMessage(): Message {
 		for (let i = this.messages.length - 1; i >= 0; i--) {
 			const message = this.messages[i];
 			if (
-				message.getMessageType() === MessageType.USER ||
-				message.getMessageType() === MessageType.TOOL
+				message.messageType === MessageType.USER ||
+				message.messageType === MessageType.TOOL
 			) {
 				return message;
 			}
@@ -110,9 +107,9 @@ export class Prompt implements ModelRequest<Message[]> {
 	/**
 	 * Get all user messages in the prompt.
 	 */
-	getUserMessages(): UserMessage[] {
+	get userMessages(): UserMessage[] {
 		return this.messages.filter(
-			(message) => message.getMessageType() === MessageType.USER,
+			(message) => message.messageType === MessageType.USER,
 		) as UserMessage[];
 	}
 
@@ -128,7 +125,7 @@ export class Prompt implements ModelRequest<Message[]> {
 
 	private instructionsCopy(): Message[] {
 		return this.messages.map((message) => {
-			const messageType = message.getMessageType();
+			const messageType = message.messageType;
 
 			if (messageType === MessageType.USER) {
 				return (message as UserMessage).copy();
@@ -138,18 +135,16 @@ export class Prompt implements ModelRequest<Message[]> {
 			}
 			if (messageType === MessageType.ASSISTANT) {
 				const assistantMessage = message as AssistantMessage;
-				return AssistantMessage.builder()
-					.content(assistantMessage.getText() ?? "")
-					.properties(assistantMessage.getMetadata())
-					.toolCalls(assistantMessage.getToolCalls())
-					.build();
+				return new AssistantMessage({
+					content: assistantMessage.text ?? "",
+					properties: assistantMessage.metadata,
+					toolCalls: assistantMessage.toolCalls,
+					media: assistantMessage.media,
+				});
 			}
 			if (messageType === MessageType.TOOL) {
 				const toolResponseMessage = message as ToolResponseMessage;
-				return ToolResponseMessage.builder()
-					.responses([...toolResponseMessage.getResponses()])
-					.metadata({ ...toolResponseMessage.getMetadata() })
-					.build();
+				return toolResponseMessage.copy();
 			}
 
 			throw new Error(`Unsupported message type: ${messageType}`);
@@ -164,8 +159,12 @@ export class Prompt implements ModelRequest<Message[]> {
 		augmenter: string | ((systemMessage: SystemMessage) => SystemMessage),
 	): Prompt {
 		if (typeof augmenter === "string") {
-			return this.augmentSystemMessage((systemMessage) =>
-				systemMessage.mutate().text(augmenter).build(),
+			return this.augmentSystemMessage(
+				(systemMessage) =>
+					new SystemMessage({
+						content: augmenter,
+						properties: { ...systemMessage.metadata },
+					}),
 			);
 		}
 
@@ -174,7 +173,7 @@ export class Prompt implements ModelRequest<Message[]> {
 
 		for (let i = 0; i < messagesCopy.length; i++) {
 			const message = messagesCopy[i];
-			if (message.getMessageType() === MessageType.SYSTEM) {
+			if (message.messageType === MessageType.SYSTEM) {
 				messagesCopy[i] = augmenter(message as SystemMessage);
 				found = true;
 				break;
@@ -196,8 +195,13 @@ export class Prompt implements ModelRequest<Message[]> {
 		augmenter: string | ((userMessage: UserMessage) => UserMessage),
 	): Prompt {
 		if (typeof augmenter === "string") {
-			return this.augmentUserMessage((userMessage) =>
-				userMessage.mutate().text(augmenter).build(),
+			return this.augmentUserMessage(
+				(userMessage) =>
+					new UserMessage({
+						content: augmenter,
+						properties: { ...userMessage.metadata },
+						media: [...userMessage.media],
+					}),
 			);
 		}
 
@@ -205,7 +209,7 @@ export class Prompt implements ModelRequest<Message[]> {
 
 		for (let i = messagesCopy.length - 1; i >= 0; i--) {
 			const message = messagesCopy[i];
-			if (message.getMessageType() === MessageType.USER) {
+			if (message.messageType === MessageType.USER) {
 				messagesCopy[i] = augmenter(message as UserMessage);
 				return new Prompt(messagesCopy, this.chatOptions?.copy() ?? null);
 			}
@@ -272,9 +276,7 @@ export class PromptBuilder {
 	}
 
 	build(): Prompt {
-		if (!this._messages) {
-			throw new Error("either messages or content needs to be set");
-		}
+		assert(this._messages, "either messages or content needs to be set");
 		return new Prompt(this._messages, this._chatOptions);
 	}
 }

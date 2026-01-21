@@ -7,11 +7,11 @@ export interface Content {
 	 * Get the text content.
 	 * @returns the text content, or null if not available
 	 */
-	getText(): string | null;
+	get text(): string | null;
 
 	/**
 	 * Get the metadata associated with the content.
 	 * @returns the metadata associated with the content
 	 */
-	getMetadata(): Record<string, unknown>;
+	get metadata(): Record<string, unknown>;
 }

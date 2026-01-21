@@ -11,5 +11,5 @@ export interface Message extends Content {
 	 * Get the message type.
 	 * @returns the message type
 	 */
-	getMessageType(): MessageType;
+	get messageType(): MessageType;
 }

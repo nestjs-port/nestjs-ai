@@ -1,15 +1,6 @@
 import type { ChatOptions } from "./chat-options.interface";
 
-export interface DefaultChatOptionsProps {
-	model?: string | null;
-	frequencyPenalty?: number | null;
-	maxTokens?: number | null;
-	presencePenalty?: number | null;
-	stopSequences?: string[] | null;
-	temperature?: number | null;
-	topK?: number | null;
-	topP?: number | null;
-}
+export type DefaultChatOptionsProps = Omit<Partial<ChatOptions>, "copy">;
 
 /**
  * Default implementation for the {@link ChatOptions}.

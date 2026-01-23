@@ -54,10 +54,7 @@ export interface ResponseMetadata {
 	isEmpty(): boolean;
 }
 
-/**
- * Abstract implementation of {@link ResponseMetadata}.
- */
-export abstract class AbstractResponseMetadata implements ResponseMetadata {
+export class AbstractResponseMetadata implements ResponseMetadata {
 	/**
 	 * Metadata map.
 	 */

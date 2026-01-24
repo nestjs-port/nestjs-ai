@@ -1,12 +1,10 @@
 export {
 	ChatGenerationMetadata,
 	type ChatGenerationMetadataBuilder,
-} from "./chat-generation-metadata.interface";
-export { ChatResponseMetadata } from "./chat-response-metadata";
-export {
 	DefaultChatGenerationMetadata,
 	type DefaultChatGenerationMetadataProps,
-} from "./default-chat-generation-metadata";
+} from "./chat-generation-metadata.interface";
+export { ChatResponseMetadata } from "./chat-response-metadata";
 export { DefaultChatGenerationMetadataBuilder } from "./default-chat-generation-metadata-builder";
 export { DefaultUsage, type DefaultUsageProps } from "./default-usage";
 export { EmptyRateLimit } from "./empty-rate-limit";

@@ -9,20 +9,28 @@ export abstract class ChatModel
 	extends StreamingChatModel
 	implements Model<Prompt, ChatResponse>
 {
-	callString(message: string): Promise<string | null> {
+	async callString(message: string): Promise<string | null> {
 		const prompt = new Prompt(message);
-		return this.call(prompt).then((response) => {
-			const generation = response.result;
-			return generation?.output.text ?? null;
-		});
+		const response = await this.call(prompt);
+		const generation = response.result;
+
+		if (!generation) {
+			return "";
+		}
+
+		return generation?.output.text;
 	}
 
-	callMessages(...messages: Message[]): Promise<string | null> {
+	async callMessages(...messages: Message[]): Promise<string | null> {
 		const prompt = new Prompt(messages);
-		return this.call(prompt).then((response) => {
-			const generation = response.result;
-			return generation?.output.text ?? null;
-		});
+		const response = await this.call(prompt);
+		const generation = response.result;
+
+		if (!generation) {
+			return "";
+		}
+
+		return generation?.output.text;
 	}
 
 	abstract call(prompt: Prompt): Promise<ChatResponse>;

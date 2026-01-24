@@ -40,7 +40,7 @@ export class DefaultUsage extends Usage {
 		return this._nativeUsage;
 	}
 
-	toJson() {
+	toJSON() {
 		return {
 			promptTokens: this._promptTokens,
 			completionTokens: this._completionTokens,

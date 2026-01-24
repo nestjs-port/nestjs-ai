@@ -6,6 +6,5 @@ export {
 
 export {
 	Generation,
-	GenerationBuilder,
 	type GenerationProps,
 } from "./generation";

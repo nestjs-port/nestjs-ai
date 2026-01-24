@@ -70,12 +70,18 @@ export class Prompt implements ModelRequest<Message[]> {
 		contentOrMessageOrMessages: string | Message | Message[],
 		chatOptions: ChatOptions | null = null,
 	) {
+		assert(
+			contentOrMessageOrMessages != null,
+			"content or messages cannot be null",
+		);
+
 		if (typeof contentOrMessageOrMessages === "string") {
 			this.messages = [UserMessage.of(contentOrMessageOrMessages)];
 		} else if (Array.isArray(contentOrMessageOrMessages)) {
 			assert(contentOrMessageOrMessages, "messages cannot be null");
 			this.messages = contentOrMessageOrMessages;
 		} else {
+			assert(contentOrMessageOrMessages, "message cannot be null");
 			this.messages = [contentOrMessageOrMessages];
 		}
 		this.chatOptions = chatOptions;

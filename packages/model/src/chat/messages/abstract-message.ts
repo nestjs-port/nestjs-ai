@@ -47,7 +47,7 @@ export abstract class AbstractMessage implements Message {
 			messageType === MessageType.USER
 		) {
 			assert(
-				textContent,
+				typeof textContent === "string",
 				"Content must not be null for SYSTEM or USER messages",
 			);
 		}

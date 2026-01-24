@@ -1,3 +1,5 @@
+export { ChatModel } from "./chat-model";
+
 export {
 	ChatResponse,
 	ChatResponseBuilder,
@@ -8,3 +10,5 @@ export {
 	Generation,
 	type GenerationProps,
 } from "./generation";
+
+export { StreamingChatModel } from "./streaming-chat-model";

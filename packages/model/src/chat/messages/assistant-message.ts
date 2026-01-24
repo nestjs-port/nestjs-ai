@@ -1,4 +1,3 @@
-import assert from "node:assert/strict";
 import type { Media, MediaContent } from "@nestjs-ai/commons";
 import { AbstractMessage } from "./abstract-message";
 import { MessageType } from "./message-type";
@@ -30,21 +29,11 @@ export class AssistantMessage extends AbstractMessage implements MediaContent {
 	private readonly _toolCalls: ToolCall[];
 	protected readonly _media: Media[];
 
-	constructor(options: AssistantMessageProps = {}) {
-		super(
-			MessageType.ASSISTANT,
-			options.content ?? null,
-			options.properties ?? {},
-		);
+	constructor(props: AssistantMessageProps = {}) {
+		super(MessageType.ASSISTANT, props.content ?? null, props.properties ?? {});
 
-		const toolCalls = options.toolCalls;
-		const media = options.media;
-
-		assert(toolCalls, "Tool calls must not be null");
-		assert(media, "Media must not be null");
-
-		this._toolCalls = toolCalls;
-		this._media = media;
+		this._toolCalls = props.toolCalls ?? [];
+		this._media = props.media ?? [];
 	}
 
 	/**

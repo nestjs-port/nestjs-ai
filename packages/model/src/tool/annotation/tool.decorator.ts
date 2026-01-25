@@ -36,7 +36,7 @@ export interface ToolAnnotationMetadata {
 /**
  * Symbol key for storing tool metadata on methods
  */
-const TOOL_METADATA_KEY = Symbol("tool:metadata");
+export const TOOL_METADATA_KEY = Symbol("tool:metadata");
 
 /**
  * Marks a method as a tool in Spring AI.

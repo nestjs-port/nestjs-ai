@@ -4,4 +4,5 @@
  * OpenAI model implementation for NestJS AI
  */
 
-export {};
+export * from "./api";
+export * from "./metadata";

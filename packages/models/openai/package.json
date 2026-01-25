@@ -16,9 +16,11 @@
 		"clean": "rm -rf dist"
 	},
 	"peerDependencies": {
+		"@nestjs-ai/commons": "*",
 		"@nestjs-ai/model": "*"
 	},
 	"devDependencies": {
+		"@nestjs-ai/commons": "workspace:*",
 		"@nestjs-ai/model": "workspace:*"
 	}
 }

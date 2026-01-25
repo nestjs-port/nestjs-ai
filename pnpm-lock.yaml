@@ -60,6 +60,12 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
 
+  packages/models/openai:
+    devDependencies:
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../model
+
 packages:
 
   '@biomejs/biome@2.3.10':

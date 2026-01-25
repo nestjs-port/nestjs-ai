@@ -12,3 +12,4 @@ export {
 } from "./generation";
 
 export { StreamingChatModel } from "./streaming-chat-model";
+export { ToolContext } from "./tool-context";

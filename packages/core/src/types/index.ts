@@ -1,1 +1,22 @@
-export type { AiModelType } from "./ai-model-type";
+export type { ChatModelType } from "./ai-model-type";
+export type {
+	ApproximateLocation,
+	AudioParameters,
+	AudioResponseFormat,
+	AudioVoice,
+	FunctionDefinition,
+	FunctionTool,
+	FunctionToolType,
+	JsonSchema,
+	OpenAiChatOptions,
+	ReasoningEffort,
+	ResponseFormat,
+	ResponseFormatType,
+	SearchContextSize,
+	ServiceTier,
+	StreamOptions,
+	ToolChoice,
+	UserLocation,
+	Verbosity,
+	WebSearchOptions,
+} from "./openai-chat-options";

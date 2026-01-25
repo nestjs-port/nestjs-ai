@@ -9,3 +9,4 @@ export {
 } from "./response-metadata.interface";
 export type { ResultMetadata } from "./result-metadata.interface";
 export type { StreamingModel } from "./streaming-model.interface";
+export type { StructuredOutputChatOptions } from "./tool";

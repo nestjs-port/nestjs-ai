@@ -1,5 +1,5 @@
-import type { AiModelType } from "../types";
+import type { ChatModelType } from "../types";
 
 export interface NestAIModuleOptions {
-	chatModel?: AiModelType;
+	chatModel?: ChatModelType;
 }

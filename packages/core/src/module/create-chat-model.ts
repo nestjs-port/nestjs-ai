@@ -4,10 +4,10 @@ import type {
 	ModelResponse,
 	ModelResult,
 } from "@nestjs-ai/model";
-import type { AiModelType } from "../types";
+import type { ChatModelType } from "../types";
 
 export function createChatModel(
-	_modelType: AiModelType,
+	_modelType: ChatModelType,
 ): Model<ModelRequest<unknown>, ModelResponse<ModelResult<unknown>>> {
 	throw new Error("Invalid model type");
 }

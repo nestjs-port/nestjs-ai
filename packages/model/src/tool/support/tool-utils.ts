@@ -115,7 +115,7 @@ export abstract class ToolUtils {
 
 		const nameCounts = new Map<string, number>();
 		for (const toolCallback of toolCallbacks) {
-			const name = toolCallback.getToolDefinition().name;
+			const name = toolCallback.toolDefinition.name;
 			nameCounts.set(name, (nameCounts.get(name) || 0) + 1);
 		}
 

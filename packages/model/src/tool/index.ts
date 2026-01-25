@@ -1,4 +1,6 @@
 export * from "./annotation";
 export * from "./definition";
 export * from "./execution";
-export { ToolMetadata, ToolMetadataBuilder } from "./metadata";
+export * from "./metadata";
+export * from "./support";
+export * from "./tool-callback";

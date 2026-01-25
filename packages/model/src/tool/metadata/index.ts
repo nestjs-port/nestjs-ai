@@ -1,1 +1,1 @@
-export { ToolMetadata, ToolMetadataBuilder } from "./tool-metadata";
+export { ToolMetadata, type ToolMetadataProps } from "./tool-metadata";

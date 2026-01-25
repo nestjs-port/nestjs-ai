@@ -62,6 +62,9 @@ importers:
 
   packages/models/openai:
     devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model

@@ -12,15 +12,10 @@ export class OpenAiResponseHeaderExtractor {
 
 	/**
 	 * Extract rate limit information from HTTP response headers.
-	 * @param headers - HTTP response headers (can be Headers object, Record<string, string>, or Map<string, string>)
+	 * @param headers - HTTP response headers
 	 * @returns RateLimit instance with extracted values
 	 */
-	static extractAiResponseHeaders(
-		headers:
-			| Headers
-			| Record<string, string | string[] | undefined>
-			| Map<string, string | string[]>,
-	): RateLimit {
+	static extractAiResponseHeaders(headers: Headers): RateLimit {
 		const requestsLimit = OpenAiResponseHeaderExtractor.getHeaderAsLong(
 			headers,
 			OpenAiApiResponseHeaders.REQUESTS_LIMIT_HEADER,
@@ -48,26 +43,20 @@ export class OpenAiResponseHeaderExtractor {
 		);
 
 		return new OpenAiRateLimit(
-			requestsLimit,
-			requestsRemaining,
-			requestsReset,
-			tokensLimit,
-			tokensRemaining,
-			tokensReset,
+			requestsLimit ?? 0,
+			requestsRemaining ?? 0,
+			requestsReset ?? 0,
+			tokensLimit ?? 0,
+			tokensRemaining ?? 0,
+			tokensReset ?? 0,
 		);
 	}
 
 	private static getHeaderAsDuration(
-		headers:
-			| Headers
-			| Record<string, string | string[] | undefined>
-			| Map<string, string | string[]>,
+		headers: Headers,
 		headerName: OpenAiApiResponseHeaders,
 	): number | null {
-		const value = OpenAiResponseHeaderExtractor.getHeaderValue(
-			headers,
-			headerName,
-		);
+		const value = headers.get(headerName);
 		if (value) {
 			return parseDuration(value);
 		}
@@ -75,49 +64,12 @@ export class OpenAiResponseHeaderExtractor {
 	}
 
 	private static getHeaderAsLong(
-		headers:
-			| Headers
-			| Record<string, string | string[] | undefined>
-			| Map<string, string | string[]>,
+		headers: Headers,
 		headerName: OpenAiApiResponseHeaders,
 	): number | null {
-		const value = OpenAiResponseHeaderExtractor.getHeaderValue(
-			headers,
-			headerName,
-		);
+		const value = headers.get(headerName);
 		if (value) {
 			return OpenAiResponseHeaderExtractor.parseLong(headerName, value);
-		}
-		return null;
-	}
-
-	private static getHeaderValue(
-		headers:
-			| Headers
-			| Record<string, string | string[] | undefined>
-			| Map<string, string | string[]>,
-		headerName: OpenAiApiResponseHeaders,
-	): string | null {
-		if (headers instanceof Headers) {
-			return headers.get(headerName) ?? null;
-		}
-		if (headers instanceof Map) {
-			const value = headers.get(headerName);
-			if (typeof value === "string") {
-				return value;
-			}
-			if (Array.isArray(value) && value.length > 0) {
-				return value[0];
-			}
-			return null;
-		}
-		// Record<string, string | string[] | undefined>
-		const value = headers[headerName];
-		if (typeof value === "string") {
-			return value;
-		}
-		if (Array.isArray(value) && value.length > 0) {
-			return value[0];
 		}
 		return null;
 	}
@@ -142,7 +94,7 @@ export class OpenAiResponseHeaderExtractor {
 
 const TIME_UNIT_PATTERN = /\d+[a-zA-Z]{1,2}/g;
 
-function parseDuration(text: string): number {
+export function parseDuration(text: string): number {
 	if (!text || text.trim().length === 0) {
 		throw new Error(
 			`Text [${text}] to parse as a Duration must not be null or empty`,
@@ -154,7 +106,9 @@ function parseDuration(text: string): number {
 
 	for (const match of matches) {
 		const value = match[0];
-		totalMs += DurationUnit.parseUnit(value).toDuration(value);
+		const unit = DurationUnit.parseUnit(value);
+		const time = parseTime(value);
+		totalMs += unit.toMs(time);
 	}
 
 	return totalMs;
@@ -212,12 +166,6 @@ const DurationUnit = {
 			throw new Error(`Value [${value}] does not contain a valid time unit`);
 		}
 		return unit;
-	},
-
-	toDuration(value: string): number {
-		const unit = DurationUnit.parseUnit(value);
-		const time = parseTime(value);
-		return unit.toMs(time);
 	},
 };
 

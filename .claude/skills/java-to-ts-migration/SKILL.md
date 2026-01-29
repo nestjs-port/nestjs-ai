@@ -642,7 +642,26 @@ get contents(): string {
 
 ## Test Migration
 
-### JUnit → Vitest
+### Critical Rules
+
+1. **Preserve test structure exactly**: Do NOT nest `describe` blocks unless Java has nested test classes
+2. **Preserve test case names**: Convert Java method names to space-separated words only (no "should" prefix, no rephrasing)
+3. **Do NOT add tests**: Only migrate existing tests. Do not create additional test cases
+
+### Test Case Name Conversion
+
+| Java Method Name                                              | TypeScript it() Name                                              |
+|---------------------------------------------------------------|-------------------------------------------------------------------|
+| `parseTimeAsDurationWithDaysHoursMinutesSeconds`              | `"parse time as duration with days hours minutes seconds"`        |
+| `userMessageWithNullText`                                     | `"user message with null text"`                                   |
+| `testSerializationWithAllFields`                              | `"test serialization with all fields"`                            |
+
+**Rule:** Split camelCase at capital letters, lowercase all words, join with single spaces. Do NOT:
+- Add "should" prefix
+- Rephrase or "improve" the description
+- Change the meaning or structure
+
+### JUnit → Vitest Structure
 
 **Java (JUnit):**
 ```java
@@ -684,7 +703,13 @@ describe("UserMessage", () => {
 });
 ```
 
-**Assertion Mapping:**
+**Key points:**
+- One `describe()` block per Java test class (class name without "Tests" suffix)
+- One `it()` block per `@Test` method
+- Test name = Java method name converted to space-separated words
+- Do NOT nest `describe()` unless Java has `@Nested` classes
+
+### Assertion Mapping
 
 | AssertJ (Java)                        | Vitest (TypeScript)                     |
 |---------------------------------------|-----------------------------------------|

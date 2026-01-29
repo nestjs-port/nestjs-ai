@@ -1,3 +1,5 @@
+import type { Milliseconds } from "@nestjs-ai/commons";
+
 /**
  * Abstract Data Type (ADT) encapsulating metadata from an AI provider's API rate limits
  * granted to the API key in use and the API key's current balance.
@@ -31,7 +33,7 @@ export interface RateLimit {
 	 * (based on requests) resets to its {@link requestsLimit initial state}
 	 * @see {@link requestsLimit}
 	 */
-	get requestsReset(): number;
+	get requestsReset(): Milliseconds;
 
 	/**
 	 * Returns the maximum number of tokens that are permitted before exhausting the rate
@@ -61,5 +63,5 @@ export interface RateLimit {
 	 * (based on tokens) resets to its {@link tokensLimit initial state}
 	 * @see {@link tokensLimit}
 	 */
-	get tokensReset(): number;
+	get tokensReset(): Milliseconds;
 }

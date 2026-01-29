@@ -1,3 +1,5 @@
+import type { Milliseconds } from "@nestjs-ai/commons";
+import { ms } from "@nestjs-ai/commons";
 import type { RateLimit } from "./rate-limit";
 
 /**
@@ -12,8 +14,8 @@ export class EmptyRateLimit implements RateLimit {
 		return 0;
 	}
 
-	get requestsReset(): number {
-		return 0;
+	get requestsReset(): Milliseconds {
+		return ms(0);
 	}
 
 	get tokensLimit(): number {
@@ -24,7 +26,7 @@ export class EmptyRateLimit implements RateLimit {
 		return 0;
 	}
 
-	get tokensReset(): number {
-		return 0;
+	get tokensReset(): Milliseconds {
+		return ms(0);
 	}
 }

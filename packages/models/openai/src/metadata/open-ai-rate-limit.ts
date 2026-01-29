@@ -1,3 +1,4 @@
+import type { Milliseconds } from "@nestjs-ai/commons";
 import type { RateLimit } from "@nestjs-ai/model";
 
 /**
@@ -9,10 +10,10 @@ export class OpenAiRateLimit implements RateLimit {
 	constructor(
 		readonly requestsLimit: number,
 		readonly requestsRemaining: number,
-		readonly requestsReset: number,
+		readonly requestsReset: Milliseconds,
 		readonly tokensLimit: number,
 		readonly tokensRemaining: number,
-		readonly tokensReset: number,
+		readonly tokensReset: Milliseconds,
 	) {}
 
 	[Symbol.toPrimitive](): string {

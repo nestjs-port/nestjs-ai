@@ -1,3 +1,5 @@
+import type { Milliseconds } from "@nestjs-ai/commons";
+import { ms } from "@nestjs-ai/commons";
 import type { RateLimit } from "@nestjs-ai/model";
 import { OpenAiRateLimit } from "../open-ai-rate-limit";
 import { OpenAiApiResponseHeaders } from "./open-ai-api-response-headers";
@@ -45,17 +47,17 @@ export class OpenAiResponseHeaderExtractor {
 		return new OpenAiRateLimit(
 			requestsLimit ?? 0,
 			requestsRemaining ?? 0,
-			requestsReset ?? 0,
+			requestsReset ?? ms(0),
 			tokensLimit ?? 0,
 			tokensRemaining ?? 0,
-			tokensReset ?? 0,
+			tokensReset ?? ms(0),
 		);
 	}
 
 	private static getHeaderAsDuration(
 		headers: Headers,
 		headerName: OpenAiApiResponseHeaders,
-	): number | null {
+	): Milliseconds | null {
 		const value = headers.get(headerName);
 		if (value) {
 			return parseDuration(value);
@@ -94,7 +96,7 @@ export class OpenAiResponseHeaderExtractor {
 
 const TIME_UNIT_PATTERN = /\d+[a-zA-Z]{1,2}/g;
 
-export function parseDuration(text: string): number {
+export function parseDuration(text: string): Milliseconds {
 	if (!text || text.trim().length === 0) {
 		throw new Error(
 			`Text [${text}] to parse as a Duration must not be null or empty`,
@@ -111,7 +113,7 @@ export function parseDuration(text: string): number {
 		totalMs += unit.toMs(time);
 	}
 
-	return totalMs;
+	return ms(totalMs);
 }
 
 interface DurationUnitInfo {

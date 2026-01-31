@@ -1,7 +1,7 @@
 /**
  * Type alias for error constructor types.
  */
-type ErrorType = new (...args: unknown[]) => Error;
+type ErrorType = new (...args: never[]) => Error;
 
 /**
  * A filter that handles exception types with include/exclude collections.

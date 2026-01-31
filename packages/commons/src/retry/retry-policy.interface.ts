@@ -170,8 +170,8 @@ export class RetryPolicyBuilder {
 	private _jitter?: Milliseconds;
 	private _multiplier?: number;
 	private _maxDelay?: Milliseconds;
-	private readonly _includes: Array<new (...args: unknown[]) => Error> = [];
-	private readonly _excludes: Array<new (...args: unknown[]) => Error> = [];
+	private readonly _includes: Array<new (...args: never[]) => Error> = [];
+	private readonly _excludes: Array<new (...args: never[]) => Error> = [];
 	private _predicate?: (throwable: unknown) => boolean;
 
 	/**
@@ -355,7 +355,7 @@ export class RetryPolicyBuilder {
 	 * @see excludes
 	 * @see predicate
 	 */
-	includes(...types: Array<new (...args: unknown[]) => Error>): this {
+	includes(...types: Array<new (...args: never[]) => Error>): this {
 		this._includes.push(...types);
 		return this;
 	}
@@ -377,7 +377,7 @@ export class RetryPolicyBuilder {
 	 * @see includes
 	 * @see predicate
 	 */
-	excludes(...types: Array<new (...args: unknown[]) => Error>): this {
+	excludes(...types: Array<new (...args: never[]) => Error>): this {
 		this._excludes.push(...types);
 		return this;
 	}

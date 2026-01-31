@@ -13,8 +13,8 @@ export class DefaultRetryPolicy extends RetryPolicy {
 	private readonly _predicate?: (throwable: unknown) => boolean;
 
 	constructor(
-		includes: Array<new (...args: unknown[]) => Error>,
-		excludes: Array<new (...args: unknown[]) => Error>,
+		includes: Array<new (...args: never[]) => Error>,
+		excludes: Array<new (...args: never[]) => Error>,
 		predicate: ((throwable: unknown) => boolean) | undefined,
 		timeout: Milliseconds,
 		backOff: BackOff,
@@ -29,7 +29,7 @@ export class DefaultRetryPolicy extends RetryPolicy {
 	shouldRetry(throwable: Error): boolean {
 		return (
 			this.exceptionTypeFilter.match(throwable) &&
-			!!this._predicate?.(throwable)
+			(this._predicate == null || this._predicate(throwable))
 		);
 	}
 

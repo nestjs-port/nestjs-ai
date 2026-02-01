@@ -1,5 +1,5 @@
-import type { Milliseconds } from "@nestjs-ai/commons";
-import { ms } from "@nestjs-ai/commons";
+import type { Logger, Milliseconds } from "@nestjs-ai/commons";
+import { LoggerFactory, ms } from "@nestjs-ai/commons";
 import type { RateLimit } from "@nestjs-ai/model";
 import { OpenAiRateLimit } from "../open-ai-rate-limit";
 import { OpenAiApiResponseHeaders } from "./open-ai-api-response-headers";
@@ -8,6 +8,16 @@ import { OpenAiApiResponseHeaders } from "./open-ai-api-response-headers";
  * Utility used to extract known HTTP response headers for the OpenAI API.
  */
 export class OpenAiResponseHeaderExtractor {
+	private static _logger: Logger | null = null;
+	private static get logger(): Logger {
+		if (!OpenAiResponseHeaderExtractor._logger) {
+			OpenAiResponseHeaderExtractor._logger = LoggerFactory.getLogger(
+				OpenAiResponseHeaderExtractor.name,
+			);
+		}
+		return OpenAiResponseHeaderExtractor._logger;
+	}
+
 	private constructor() {
 		// Prevent instantiation
 	}
@@ -84,7 +94,7 @@ export class OpenAiResponseHeaderExtractor {
 			try {
 				return Number.parseInt(headerValue.trim(), 10);
 			} catch (error) {
-				console.warn(
+				OpenAiResponseHeaderExtractor.logger.warn(
 					`Value [${headerValue}] for HTTP header [${headerName}] is not valid: ${error instanceof Error ? error.message : String(error)}`,
 				);
 			}

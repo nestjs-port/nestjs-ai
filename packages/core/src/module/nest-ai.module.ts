@@ -1,6 +1,8 @@
 import type { DynamicModule, Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
+import { LoggerFactory } from "@nestjs-ai/commons";
 import { CHAT_MODEL_TOKEN } from "../constants";
+import { NestLoggerFactory } from "../logging";
 import { createChatModel } from "./create-chat-model";
 import type { NestAIModuleOptions } from "./nest-ai-module.options";
 
@@ -18,6 +20,8 @@ export class NestAIModule {
 		}
 
 		const exports = options.chatModel ? [CHAT_MODEL_TOKEN] : [];
+
+		LoggerFactory.bind(new NestLoggerFactory());
 
 		return {
 			module: NestAIModule,

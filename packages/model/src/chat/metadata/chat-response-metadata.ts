@@ -1,3 +1,4 @@
+import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
 import { AbstractResponseMetadata, type ResponseMetadata } from "../../model";
 import { EmptyRateLimit } from "./empty-rate-limit";
 import { EmptyUsage } from "./empty-usage";
@@ -12,6 +13,16 @@ export class ChatResponseMetadata
 	extends AbstractResponseMetadata
 	implements ResponseMetadata
 {
+	private static _logger: Logger | null = null;
+	private static get logger(): Logger {
+		if (!ChatResponseMetadata._logger) {
+			ChatResponseMetadata._logger = LoggerFactory.getLogger(
+				ChatResponseMetadata.name,
+			);
+		}
+		return ChatResponseMetadata._logger;
+	}
+
 	protected _id: string = ""; // Set to blank to preserve backward compat with previous interface default methods
 
 	protected _model: string = "";
@@ -115,8 +126,9 @@ export class ChatResponseMetadata
 			}
 			if (value !== null && value !== undefined) {
 				this.#chatResponseMetadata.map.set(key, value);
+			} else {
+				ChatResponseMetadata.logger.debug(`Ignore null value for key [${key}]`);
 			}
-			console.log(`Ignore null value for key [${key}]`);
 			return this;
 		}
 

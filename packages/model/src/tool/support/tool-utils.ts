@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import assert from "node:assert/strict";
-import { ParsingUtils } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory, ParsingUtils } from "@nestjs-ai/commons";
 import {
 	TOOL_METADATA_KEY,
 	type ToolAnnotationMetadata,
@@ -19,6 +19,14 @@ export abstract class ToolUtils {
 	 * compatibility across different LLMs.
 	 */
 	private static readonly RECOMMENDED_NAME_PATTERN = /^[a-zA-Z0-9_.-]+$/;
+
+	private static _logger: Logger | null = null;
+	private static get logger(): Logger {
+		if (!ToolUtils._logger) {
+			ToolUtils._logger = LoggerFactory.getLogger(ToolUtils.name);
+		}
+		return ToolUtils._logger;
+	}
 
 	private constructor() {
 		// Utility class - prevent instantiation
@@ -147,7 +155,7 @@ export abstract class ToolUtils {
 			"Tool name cannot be null or empty",
 		);
 		if (!ToolUtils.RECOMMENDED_NAME_PATTERN.test(toolName)) {
-			console.warn(
+			ToolUtils.logger.warn(
 				`Tool name '${toolName}' may not be compatible with some LLMs (e.g., OpenAI). ` +
 					"Consider using only alphanumeric characters, underscores, hyphens, and dots.",
 			);

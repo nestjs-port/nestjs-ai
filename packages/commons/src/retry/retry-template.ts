@@ -1,24 +1,12 @@
 import assert from "node:assert/strict";
 
+import { LoggerFactory } from "../logging";
+import { BackOffExecution } from "./back-off.interface";
 import { RetryException } from "./retry-exception";
 import type { RetryListener } from "./retry-listener.interface";
 import { RetryPolicy } from "./retry-policy.interface";
 import { RetryState } from "./retry-state";
 import type { Retryable } from "./retryable.interface";
-
-const BACK_OFF_STOP = -1;
-
-function debugLog(message: () => string): void {
-	if (process.env.LOG_LEVEL === "debug") {
-		console.debug(`[RetryTemplate] ${message()}`);
-	}
-}
-
-function debugLogWithError(error: unknown, message: () => string): void {
-	if (process.env.LOG_LEVEL === "debug") {
-		console.debug(`[RetryTemplate] ${message()}`, error);
-	}
-}
 
 /**
  * Private mutable state holder during retry execution.
@@ -71,6 +59,7 @@ class MutableRetryState extends RetryState {
 export class RetryTemplate {
 	private _retryPolicy: RetryPolicy = RetryPolicy.withDefaults();
 	private _retryListener: RetryListener = {};
+	private logger = LoggerFactory.getLogger(RetryTemplate.name);
 
 	/**
 	 * Create a new {@code RetryTemplate} with maximum 3 retry attempts and a
@@ -152,18 +141,23 @@ export class RetryTemplate {
 		const retryState = new MutableRetryState();
 
 		// Initial attempt
-		debugLog(
-			() => `Preparing to execute retryable operation '${retryableName}'`,
+		this.logger.debug(
+			`Preparing to execute retryable operation '${retryableName}'`,
 		);
 		let result: R;
 		try {
 			result = await retryable();
 		} catch (initialException) {
-			debugLogWithError(
-				initialException,
-				() =>
+			if (initialException instanceof Error) {
+				this.logger.debug(
 					`Execution of retryable operation '${retryableName}' failed; initiating the retry process`,
-			);
+					initialException,
+				);
+			} else {
+				this.logger.debug(
+					`Execution of retryable operation '${retryableName}' failed; initiating the retry process`,
+				);
+			}
 			retryState.addException(initialException);
 			this._retryListener.onRetryableExecution?.(
 				this._retryPolicy,
@@ -188,7 +182,7 @@ export class RetryTemplate {
 				);
 
 				const sleepTime = backOffExecution.nextBackOff();
-				if (sleepTime === BACK_OFF_STOP) {
+				if (sleepTime === BackOffExecution.STOP) {
 					break;
 				}
 				this.checkIfTimeoutExceeded(
@@ -199,13 +193,12 @@ export class RetryTemplate {
 					retryableName,
 					retryState,
 				);
-				debugLog(
-					() =>
-						`Backing off for ${sleepTime}ms after retryable operation '${retryableName}'`,
+				this.logger.debug(
+					`Backing off for ${sleepTime}ms after retryable operation '${retryableName}'`,
 				);
 				await new Promise((resolve) => setTimeout(resolve, sleepTime));
 
-				debugLog(() => `Preparing to retry operation '${retryableName}'`);
+				this.logger.debug(`Preparing to retry operation '${retryableName}'`);
 				retryState.increaseRetryCount();
 				this._retryListener.beforeRetry?.(
 					this._retryPolicy,
@@ -215,11 +208,16 @@ export class RetryTemplate {
 				try {
 					result = await retryable();
 				} catch (currentException) {
-					debugLogWithError(
-						currentException,
-						() =>
+					if (currentException instanceof Error) {
+						this.logger.debug(
+							`Retry attempt for operation '${retryableName}' failed`,
+							currentException,
+						);
+					} else {
+						this.logger.debug(
 							`Retry attempt for operation '${retryableName}' failed due to '${currentException}'`,
-					);
+						);
+					}
 					retryState.addException(currentException);
 					this._retryListener.onRetryFailure?.(
 						this._retryPolicy,
@@ -238,9 +236,8 @@ export class RetryTemplate {
 				}
 
 				// Did not enter catch block above -> retry success.
-				debugLog(
-					() =>
-						`Retryable operation '${retryableName}' completed successfully after retry`,
+				this.logger.debug(
+					`Retryable operation '${retryableName}' completed successfully after retry`,
 				);
 				this._retryListener.onRetrySuccess?.(
 					this._retryPolicy,
@@ -273,8 +270,8 @@ export class RetryTemplate {
 		}
 
 		// Never entered initial catch block -> initial success.
-		debugLog(
-			() => `Retryable operation '${retryableName}' completed successfully`,
+		this.logger.debug(
+			`Retryable operation '${retryableName}' completed successfully`,
 		);
 		this._retryListener.onRetryableExecution?.(
 			this._retryPolicy,

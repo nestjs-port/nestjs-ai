@@ -8,10 +8,6 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"require": "./dist/index.js"
-		},
-		"./retry": {
-			"types": "./dist/retry/index.d.ts",
-			"require": "./dist/retry/index.js"
 		}
 	},
 	"scripts": {

@@ -1,5 +1,32 @@
 # Documentation Migration (Javadoc → JSDoc)
 
+## Important Rule: Do NOT Migrate License Headers
+
+**Critical:** Do NOT migrate the file-level license header comments from Java to TypeScript.
+
+**Java (has license header - do NOT copy):**
+```java
+/*
+ * Copyright 2023-2024 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * ...
+ */
+
+package org.springframework.ai.retry;
+```
+
+**TypeScript (correct - no license header):**
+```typescript
+/**
+ * Root of the hierarchy of Model access exceptions...
+ */
+export class NonTransientAiException extends Error {
+```
+
+The license for the NestJS AI project is managed at the repository level, not per file.
+
 ## Important Rule: Preserve Documentation State
 
 **Critical:** Only migrate documentation that exists in the Java source. If a Java class, method, field, or variable has no Javadoc, do NOT add JSDoc comments to the TypeScript equivalent.

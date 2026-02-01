@@ -1,0 +1,19 @@
+import type { ResponseLike } from "./response-like.interface";
+
+/**
+ * Response error handler interface for handling HTTP response errors.
+ */
+export interface ResponseErrorHandler {
+	/**
+	 * Check if the response has an error.
+	 * @param response - The HTTP response object
+	 * @returns true if the response has an error
+	 */
+	hasError(response: ResponseLike): boolean;
+
+	/**
+	 * Handle the error response.
+	 * @param response - The HTTP response object
+	 */
+	handleError(response: ResponseLike): void;
+}

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import type { GoogleGenerativeAI } from "@google/generative-ai";
-import type { Media } from "@nestjs-ai/commons";
+import { type Media, ms, RetryPolicy, RetryTemplate } from "@nestjs-ai/commons";
 import type {
 	ToolCall,
 	ToolCallingManager,
@@ -50,6 +50,7 @@ export class GoogleGenAiChatModel extends ChatModel {
 	private readonly _defaultOptions: GoogleGenAiChatOptions;
 	private readonly toolCallingManager: ToolCallingManager;
 	private readonly cachedContentService: GoogleGenAiCachedContentService | null;
+	private readonly retryTemplate: RetryTemplate;
 
 	constructor(
 		client: GoogleGenerativeAI,
@@ -80,6 +81,14 @@ export class GoogleGenAiChatModel extends ChatModel {
 		}
 
 		this.cachedContentService = new GoogleGenAiCachedContentService(client);
+		this.retryTemplate = new RetryTemplate(
+			RetryPolicy.builder()
+				.maxRetries(10)
+				.delay(ms(2000))
+				.multiplier(5)
+				.maxDelay(ms(180000))
+				.build(),
+		);
 	}
 
 	/**
@@ -667,13 +676,19 @@ export class GoogleGenAiChatModel extends ChatModel {
 	private async internalCallGemini(request: unknown): Promise<unknown> {
 		const model = (request as Record<string, unknown>).model as string;
 		const generativeModel = this.client.getGenerativeModel({ model });
-		return generativeModel.generateContent(request as any);
+		return this.retryTemplate.execute(
+			() => generativeModel.generateContent(request as any),
+			"GoogleGenAiChatModel.internalCallGemini",
+		);
 	}
 
 	private async *internalStream(request: unknown): AsyncGenerator<unknown> {
 		const model = (request as Record<string, unknown>).model as string;
 		const generativeModel = this.client.getGenerativeModel({ model });
-		const result = await generativeModel.generateContentStream(request as any);
+		const result = await this.retryTemplate.execute(
+			() => generativeModel.generateContentStream(request as any),
+			"GoogleGenAiChatModel.internalStream",
+		);
 		for await (const chunk of result.stream) {
 			yield chunk;
 		}
@@ -803,6 +818,10 @@ export class GoogleGenAiChatModel extends ChatModel {
 
 		public static readonly GEMINI_3_PRO_PREVIEW = new ChatModel(
 			"gemini-3-pro-preview",
+		);
+
+		public static readonly GEMINI_3_FLASH_PREVIEW = new ChatModel(
+			"gemini-3-flash-preview",
 		);
 
 		public readonly value: string;

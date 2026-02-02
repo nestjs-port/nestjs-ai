@@ -1204,13 +1204,3 @@ export interface EmbeddingList {
 	/** Usage statistics for the completion request. */
 	usage: Usage;
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-export const DEFAULT_CHAT_MODEL = ChatModel.GPT_4_O;
-export const DEFAULT_EMBEDDING_MODEL = EmbeddingModel.TEXT_EMBEDDING_ADA_002;
-export const DEFAULT_BASE_URL = "https://api.openai.com";
-export const DEFAULT_COMPLETIONS_PATH = "/v1/chat/completions";
-export const DEFAULT_EMBEDDINGS_PATH = "/v1/embeddings";

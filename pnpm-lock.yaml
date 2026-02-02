@@ -71,6 +71,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
 
   packages/retry:
     devDependencies:

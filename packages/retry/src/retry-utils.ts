@@ -3,7 +3,6 @@ import {
 	LoggerFactory,
 	ms,
 	type ResponseErrorHandler,
-	type ResponseLike,
 	type Retryable,
 	RetryException,
 	RetryPolicy,
@@ -44,19 +43,15 @@ export class RetryUtils {
 	 * Default ResponseErrorHandler implementation.
 	 */
 	static readonly DEFAULT_RESPONSE_ERROR_HANDLER: ResponseErrorHandler = {
-		hasError(response: ResponseLike): boolean {
-			const status = response.status;
-			return status >= 400;
+		hasError(response: Response): boolean {
+			return !response.ok;
 		},
 
-		handleError(response: ResponseLike): void {
+		async handleError(response: Response): Promise<void> {
 			const status = response.status;
 			if (status >= 400) {
-				const errorBody =
-					typeof response.data === "string"
-						? response.data
-						: JSON.stringify(response.data ?? response.statusText ?? "");
-				const message = `${status} - ${errorBody}`;
+				const errorBody = await response.text();
+				const message = `${status} - ${errorBody || response.statusText}`;
 
 				/*
 				 * Thrown on 4xx client errors, such as:

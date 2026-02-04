@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import type { HttpClient, ResponseErrorHandler } from "@nestjs-ai/commons";
-import { FetchHttpClient } from "@nestjs-ai/commons";
+import { FetchHttpClient, parseServerSentEvents } from "@nestjs-ai/commons";
 import type { ApiKey } from "@nestjs-ai/model";
 import { NoopApiKey, SimpleApiKey } from "@nestjs-ai/model";
 import { from, Observable } from "rxjs";
-import { filter, map, mergeMap, scan, takeWhile } from "rxjs/operators";
+import { map, mergeMap, scan, takeWhile } from "rxjs/operators";
 import { OpenAiApiConstants } from "./common";
 import type {
 	ChatCompletion,
@@ -186,37 +186,15 @@ export class OpenAiApi {
 					body: JSON.stringify(chatRequest),
 					signal: abortController.signal,
 				})
-				.then(async (response) => {
+				.then((response) => {
 					if (!response.body) {
 						throw new Error("Response body is null");
 					}
-
-					const textStream = response.body.pipeThrough(new TextDecoderStream());
-					const reader = textStream.getReader();
-					let buffer = "";
-
-					try {
-						while (true) {
-							const { done, value } = await reader.read();
-							if (done) break;
-
-							buffer += value;
-							const lines = buffer.split("\n");
-							buffer = lines.pop() ?? ""; // 마지막 불완전한 라인 보관
-
-							for (const line of lines) {
-								const trimmed = line.trim();
-								if (trimmed?.startsWith("data:")) {
-									subscriber.next(trimmed.slice(5).trim());
-								}
-							}
-						}
-						subscriber.complete();
-					} catch (error) {
-						subscriber.error(error);
-					} finally {
-						reader.releaseLock();
-					}
+					parseServerSentEvents(response).subscribe({
+						next: (event) => subscriber.next(event.data),
+						error: (error) => subscriber.error(error),
+						complete: () => subscriber.complete(),
+					});
 				})
 				.catch((error) => {
 					if ((error as Error).name !== "AbortError") {
@@ -228,114 +206,50 @@ export class OpenAiApi {
 				abortController.abort();
 			};
 		}).pipe(
-			// cancels the stream after the "[DONE]" is received.
-			takeWhile((line) => line !== OpenAiApi.SSE_DONE_PREDICATE, true),
-			// filters out the "[DONE]" message.
-			filter((line) => line !== OpenAiApi.SSE_DONE_PREDICATE),
+			// cancels the stream after the "[DONE]" is received (exclusive: doesn't emit [DONE]).
+			takeWhile((line) => line !== OpenAiApi.SSE_DONE_PREDICATE),
 			// Parse JSON to ChatCompletionChunk
-			map((content) => {
-				try {
-					return JSON.parse(content) as ChatCompletionChunk;
-				} catch {
-					// Skip invalid JSON lines
-					return null;
-				}
-			}),
-			filter((chunk): chunk is ChatCompletionChunk => chunk !== null),
-			// Detect if the chunk is part of a streaming function call.
+			map((content) => JSON.parse(content) as ChatCompletionChunk),
+			// Group chunks belonging to the same function call into windows.
+			// Tool call chunks are buffered until finish, non-tool chunks emit immediately.
 			scan<
 				ChatCompletionChunk,
-				{ isInsideTool: boolean; chunk: ChatCompletionChunk | null }
+				{ buffer: ChatCompletionChunk[]; ready: ChatCompletionChunk[][] }
 			>(
 				(acc, chunk) => {
-					if (this._chunkMerger.isStreamingToolFunctionCall(chunk)) {
-						return { isInsideTool: true, chunk };
+					const isToolCall =
+						this._chunkMerger.isStreamingToolFunctionCall(chunk);
+					const isFinish =
+						this._chunkMerger.isStreamingToolFunctionCallFinish(chunk);
+					const isBuffering = acc.buffer.length > 0;
+
+					if (isToolCall && !isFinish) {
+						// Start buffering tool call chunks
+						return { buffer: [chunk], ready: [] };
 					}
-					return { ...acc, chunk };
-				},
-				{ isInsideTool: false, chunk: null },
-			),
-			filter(
-				(acc): acc is { isInsideTool: boolean; chunk: ChatCompletionChunk } =>
-					acc.chunk !== null,
-			),
-			map((acc) => acc.chunk),
-			// Group all chunks belonging to the same function call.
-			// Similar to windowUntil in Reactor: Flux<ChatCompletionChunk> -> Flux<Flux<ChatCompletionChunk>>
-			scan<
-				ChatCompletionChunk,
-				{
-					isInsideTool: boolean;
-					currentWindow: ChatCompletionChunk[];
-					windowsToEmit: ChatCompletionChunk[][];
-				}
-			>(
-				(acc, chunk) => {
-					// windowUntil condition: close window if (!isInsideTool) or (isInsideTool && isFinish)
-					const shouldCloseWindow =
-						!acc.isInsideTool ||
-						(acc.isInsideTool &&
-							this._chunkMerger.isStreamingToolFunctionCallFinish(chunk));
-
-					if (shouldCloseWindow) {
-						// Close current window and start new one
-						const windowsToEmit =
-							acc.currentWindow.length > 0 ? [acc.currentWindow] : [];
-
-						const newIsInsideTool =
-							this._chunkMerger.isStreamingToolFunctionCall(chunk);
-
-						return {
-							isInsideTool: newIsInsideTool,
-							currentWindow: [chunk],
-							windowsToEmit,
-						};
-					} else {
-						// Continue accumulating in current window
-						return {
-							...acc,
-							currentWindow: [...acc.currentWindow, chunk],
-							windowsToEmit: [],
-						};
+					if (isFinish && isBuffering) {
+						// Complete the buffer and emit as a window
+						return { buffer: [], ready: [[...acc.buffer, chunk]] };
 					}
+					if (isBuffering) {
+						// Continue buffering tool call chunks
+						return { buffer: [...acc.buffer, chunk], ready: [] };
+					}
+					// Non-tool chunk: emit immediately as single-item window
+					return { buffer: [], ready: [[chunk]] };
 				},
-				{
-					isInsideTool: false,
-					currentWindow: [],
-					windowsToEmit: [],
-				},
+				{ buffer: [], ready: [] },
 			),
-			// Emit windows as they are closed
-			mergeMap((acc) => {
-				if (acc.windowsToEmit.length > 0) {
-					return from(acc.windowsToEmit);
-				}
-				return from([] as ChatCompletionChunk[][]);
-			}),
-			// Merging the window chunks into a single chunk.
-			// Reduce the inner window into a single ChatCompletionChunk
-			// Similar to concatMapIterable + reduce in Reactor
-			map((window: ChatCompletionChunk[]): ChatCompletionChunk => {
-				// Create empty ChatCompletionChunk similar to Java's new ChatCompletionChunk(null, ...)
-				const emptyChunk: ChatCompletionChunk = {
-					id: "",
-					choices: [],
-					created: 0,
-					model: "",
-					object: "chat.completion.chunk",
-				};
-				const merged = window.reduce<ChatCompletionChunk | null>(
-					(
-						previous: ChatCompletionChunk | null,
-						current: ChatCompletionChunk,
-					) => this._chunkMerger.merge(previous, current),
-					emptyChunk,
-				);
-				// merged is never null because emptyChunk is provided as initial value
-				// and merge always returns a valid ChatCompletionChunk
-				return merged as ChatCompletionChunk;
-			}),
-		) as Observable<ChatCompletionChunk>;
+			// Emit ready windows
+			mergeMap(({ ready }) => from(ready)),
+			// Merge each window into a single chunk
+			map((window) =>
+				window.reduce(
+					(prev, curr) => this._chunkMerger.merge(prev, curr),
+					{} as ChatCompletionChunk,
+				),
+			),
+		);
 	}
 
 	/**

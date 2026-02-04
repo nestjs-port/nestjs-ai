@@ -17,5 +17,11 @@
 	},
 	"dependencies": {
 		"uuid": "^13.0.0"
+	},
+	"devDependencies": {
+		"rxjs": "^7.0.0"
+	},
+	"peerDependencies": {
+		"rxjs": "^7.0.0"
 	}
 }

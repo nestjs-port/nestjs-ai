@@ -29,7 +29,6 @@ This will migrate only `UserMessage.java`, assuming any dependencies like `Abstr
 
 For detailed patterns and examples, see:
 - [Code Patterns](reference/code-patterns.md) - Interface, class, builder, enum conversions
-- [Documentation Migration](reference/documentation.md) - Javadoc to JSDoc conversion
 - [Test Migration](reference/test-migration.md) - JUnit to Vitest conversion
 
 ## Directory Structure Mapping
@@ -171,17 +170,20 @@ Add exports to `index.ts`:
 export { NewMessage, type NewMessageProps } from "./new-message";
 ```
 
-### Step 5: Migrate Documentation
-1. Convert Javadoc to JSDoc (only for elements that have documentation)
-2. Remove `@author` and `@since` tags
-3. Convert `@return` → `@returns`, `@param <T>` → `@template T`
-4. **Important:** Do NOT add JSDoc to elements that had no Javadoc
-
-### Step 6: Convert Tests
+### Step 5: Convert Tests
 1. Change `@Test` methods to `it()` blocks
 2. Wrap in `describe()` block
 3. Convert AssertJ assertions to Vitest expectations
 4. Run tests: `npm test`
+
+## Comments Handling
+
+**Do NOT migrate:**
+- Javadoc comments (class, method, field documentation)
+- License header comments
+
+**DO migrate:**
+- Comments inside method bodies (implementation comments)
 
 ## Checklist
 
@@ -194,8 +196,8 @@ Migration Checklist:
 - [ ] Static methods converted
 - [ ] Builder pattern converted (Props or Builder class)
 - [ ] toString → [Symbol.toPrimitive]
-- [ ] Javadoc migrated to JSDoc (only for elements that had Javadoc)
-- [ ] @author tags removed (not migrated)
+- [ ] Javadoc and license comments NOT migrated
+- [ ] Comments inside method bodies preserved
 - [ ] Imports use correct package paths
 - [ ] Exported in index.ts
 - [ ] Tests migrated to __tests__/*.spec.ts

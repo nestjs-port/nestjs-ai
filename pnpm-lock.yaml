@@ -32,6 +32,10 @@ importers:
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
+    devDependencies:
+      rxjs:
+        specifier: ^7.0.0
+        version: 7.8.2
 
   packages/core:
     devDependencies:
@@ -60,7 +64,7 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       rxjs:
-        specifier: ^7.8.2
+        specifier: ^7.0.0
         version: 7.8.2
 
   packages/models/openai:
@@ -72,7 +76,7 @@ importers:
         specifier: workspace:*
         version: link:../../model
       rxjs:
-        specifier: ^7.8.1
+        specifier: ^7.0.0
         version: 7.8.2
 
   packages/retry:

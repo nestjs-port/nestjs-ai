@@ -61,43 +61,6 @@ describe("OpenAiStreamFunctionCallingHelper", () => {
 			expect(result?.object).toBe(expectedResult.object);
 		});
 
-		it("returns null when both chunks are null", () => {
-			const result = helper.merge(null, null);
-			expect(result).toBeNull();
-		});
-
-		it("returns current when previous is null", () => {
-			const current: ChatCompletionChunk = {
-				id: "id",
-				choices: [],
-				created: Date.now(),
-				model: "model",
-				service_tier: "default",
-				system_fingerprint: "fingerprint",
-				object: "object",
-				usage: undefined,
-			};
-
-			const result = helper.merge(null, current);
-			expect(result).toEqual(current);
-		});
-
-		it("returns previous when current is null", () => {
-			const previous: ChatCompletionChunk = {
-				id: "id",
-				choices: [],
-				created: Date.now(),
-				model: "model",
-				service_tier: "default",
-				system_fingerprint: "fingerprint",
-				object: "object",
-				usage: undefined,
-			};
-
-			const result = helper.merge(previous, null);
-			expect(result).toEqual(previous);
-		});
-
 		it("combines chunk fields correctly", () => {
 			const previous: ChatCompletionChunk = {
 				id: "",

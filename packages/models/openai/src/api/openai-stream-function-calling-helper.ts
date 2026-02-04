@@ -25,9 +25,9 @@ export class OpenAiStreamFunctionCallingHelper {
 	 * @returns the merged ChatCompletionChunk
 	 */
 	merge(
-		previous: ChatCompletionChunk | null,
-		current: ChatCompletionChunk | null,
-	): ChatCompletionChunk | null {
+		previous: ChatCompletionChunk,
+		current: ChatCompletionChunk,
+	): ChatCompletionChunk {
 		if (previous === null) {
 			return current;
 		}

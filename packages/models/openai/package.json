@@ -23,6 +23,6 @@
 	"devDependencies": {
 		"@nestjs-ai/commons": "workspace:*",
 		"@nestjs-ai/model": "workspace:*",
-		"rxjs": "^7.8.1"
+		"rxjs": "^7.0.0"
 	}
 }

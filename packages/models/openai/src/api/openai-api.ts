@@ -3,7 +3,8 @@ import type { HttpClient, ResponseErrorHandler } from "@nestjs-ai/commons";
 import { FetchHttpClient } from "@nestjs-ai/commons";
 import type { ApiKey } from "@nestjs-ai/model";
 import { NoopApiKey, SimpleApiKey } from "@nestjs-ai/model";
-import { Observable } from "rxjs";
+import { from, Observable } from "rxjs";
+import { filter, map, mergeMap, scan, takeWhile } from "rxjs/operators";
 import { OpenAiApiConstants } from "./common";
 import type {
 	ChatCompletion,
@@ -173,111 +174,168 @@ export class OpenAiApi {
 			"Request must set the stream property to true.",
 		);
 
-		return new Observable<ChatCompletionChunk>((subscriber) => {
+		return new Observable<string>((subscriber) => {
 			const abortController = new AbortController();
+			const headers = this.buildHeaders(additionalHeaders);
+			const url = `${this._baseUrl}${this._completionsPath}`;
 
-			const execute = async () => {
-				try {
-					const headers = this.buildHeaders(additionalHeaders);
-					const url = `${this._baseUrl}${this._completionsPath}`;
-
-					const response = await this._httpClient.fetch(url, {
-						method: "POST",
-						headers,
-						body: JSON.stringify(chatRequest),
-						signal: abortController.signal,
-					});
-
-					await this.handleResponseError(response);
-
+			this._httpClient
+				.fetch(url, {
+					method: "POST",
+					headers,
+					body: JSON.stringify(chatRequest),
+					signal: abortController.signal,
+				})
+				.then(async (response) => {
 					if (!response.body) {
 						throw new Error("Response body is null");
 					}
 
-					const reader = response.body.getReader();
-					const decoder = new TextDecoder();
+					const textStream = response.body.pipeThrough(new TextDecoderStream());
+					const reader = textStream.getReader();
 					let buffer = "";
-					let isInsideTool = false;
-					let accumulatedChunk: ChatCompletionChunk | null = null;
 
-					while (true) {
-						const { done, value } = await reader.read();
-						if (done) break;
+					try {
+						while (true) {
+							const { done, value } = await reader.read();
+							if (done) break;
 
-						buffer += decoder.decode(value, { stream: true });
-						const lines = buffer.split("\n");
-						buffer = lines.pop() ?? "";
+							buffer += value;
+							const lines = buffer.split("\n");
+							buffer = lines.pop() ?? ""; // 마지막 불완전한 라인 보관
 
-						for (const line of lines) {
-							const trimmedLine = line.trim();
-							if (!trimmedLine || !trimmedLine.startsWith("data:")) continue;
-
-							const data = trimmedLine.slice(5).trim();
-							if (data === OpenAiApi.SSE_DONE_PREDICATE) {
-								if (accumulatedChunk) {
-									subscriber.next(accumulatedChunk);
+							for (const line of lines) {
+								const trimmed = line.trim();
+								if (trimmed?.startsWith("data:")) {
+									subscriber.next(trimmed.slice(5).trim());
 								}
-								subscriber.complete();
-								return;
-							}
-
-							try {
-								const chunk = JSON.parse(data) as ChatCompletionChunk;
-
-								// Detect if the chunk is part of a streaming function call
-								if (this._chunkMerger.isStreamingToolFunctionCall(chunk)) {
-									isInsideTool = true;
-								}
-
-								if (isInsideTool) {
-									// Accumulate chunks for tool calls
-									accumulatedChunk = this._chunkMerger.merge(
-										accumulatedChunk,
-										chunk,
-									);
-
-									// Check if this is the finish of the tool call
-									if (
-										this._chunkMerger.isStreamingToolFunctionCallFinish(chunk)
-									) {
-										isInsideTool = false;
-										if (accumulatedChunk) {
-											subscriber.next(accumulatedChunk);
-											accumulatedChunk = null;
-										}
-									}
-								} else {
-									// Emit non-tool chunks immediately
-									if (accumulatedChunk) {
-										subscriber.next(accumulatedChunk);
-										accumulatedChunk = null;
-									}
-									subscriber.next(chunk);
-								}
-							} catch {
-								// Skip invalid JSON lines
 							}
 						}
+						subscriber.complete();
+					} catch (error) {
+						subscriber.error(error);
+					} finally {
+						reader.releaseLock();
 					}
-
-					// Emit any remaining accumulated chunk
-					if (accumulatedChunk) {
-						subscriber.next(accumulatedChunk);
-					}
-					subscriber.complete();
-				} catch (error) {
+				})
+				.catch((error) => {
 					if ((error as Error).name !== "AbortError") {
 						subscriber.error(error);
 					}
-				}
-			};
-
-			execute();
+				});
 
 			return () => {
 				abortController.abort();
 			};
-		});
+		}).pipe(
+			// cancels the stream after the "[DONE]" is received.
+			takeWhile((line) => line !== OpenAiApi.SSE_DONE_PREDICATE, true),
+			// filters out the "[DONE]" message.
+			filter((line) => line !== OpenAiApi.SSE_DONE_PREDICATE),
+			// Parse JSON to ChatCompletionChunk
+			map((content) => {
+				try {
+					return JSON.parse(content) as ChatCompletionChunk;
+				} catch {
+					// Skip invalid JSON lines
+					return null;
+				}
+			}),
+			filter((chunk): chunk is ChatCompletionChunk => chunk !== null),
+			// Detect if the chunk is part of a streaming function call.
+			scan<
+				ChatCompletionChunk,
+				{ isInsideTool: boolean; chunk: ChatCompletionChunk | null }
+			>(
+				(acc, chunk) => {
+					if (this._chunkMerger.isStreamingToolFunctionCall(chunk)) {
+						return { isInsideTool: true, chunk };
+					}
+					return { ...acc, chunk };
+				},
+				{ isInsideTool: false, chunk: null },
+			),
+			filter(
+				(acc): acc is { isInsideTool: boolean; chunk: ChatCompletionChunk } =>
+					acc.chunk !== null,
+			),
+			map((acc) => acc.chunk),
+			// Group all chunks belonging to the same function call.
+			// Similar to windowUntil in Reactor: Flux<ChatCompletionChunk> -> Flux<Flux<ChatCompletionChunk>>
+			scan<
+				ChatCompletionChunk,
+				{
+					isInsideTool: boolean;
+					currentWindow: ChatCompletionChunk[];
+					windowsToEmit: ChatCompletionChunk[][];
+				}
+			>(
+				(acc, chunk) => {
+					// windowUntil condition: close window if (!isInsideTool) or (isInsideTool && isFinish)
+					const shouldCloseWindow =
+						!acc.isInsideTool ||
+						(acc.isInsideTool &&
+							this._chunkMerger.isStreamingToolFunctionCallFinish(chunk));
+
+					if (shouldCloseWindow) {
+						// Close current window and start new one
+						const windowsToEmit =
+							acc.currentWindow.length > 0 ? [acc.currentWindow] : [];
+
+						const newIsInsideTool =
+							this._chunkMerger.isStreamingToolFunctionCall(chunk);
+
+						return {
+							isInsideTool: newIsInsideTool,
+							currentWindow: [chunk],
+							windowsToEmit,
+						};
+					} else {
+						// Continue accumulating in current window
+						return {
+							...acc,
+							currentWindow: [...acc.currentWindow, chunk],
+							windowsToEmit: [],
+						};
+					}
+				},
+				{
+					isInsideTool: false,
+					currentWindow: [],
+					windowsToEmit: [],
+				},
+			),
+			// Emit windows as they are closed
+			mergeMap((acc) => {
+				if (acc.windowsToEmit.length > 0) {
+					return from(acc.windowsToEmit);
+				}
+				return from([] as ChatCompletionChunk[][]);
+			}),
+			// Merging the window chunks into a single chunk.
+			// Reduce the inner window into a single ChatCompletionChunk
+			// Similar to concatMapIterable + reduce in Reactor
+			map((window: ChatCompletionChunk[]): ChatCompletionChunk => {
+				// Create empty ChatCompletionChunk similar to Java's new ChatCompletionChunk(null, ...)
+				const emptyChunk: ChatCompletionChunk = {
+					id: "",
+					choices: [],
+					created: 0,
+					model: "",
+					object: "chat.completion.chunk",
+				};
+				const merged = window.reduce<ChatCompletionChunk | null>(
+					(
+						previous: ChatCompletionChunk | null,
+						current: ChatCompletionChunk,
+					) => this._chunkMerger.merge(previous, current),
+					emptyChunk,
+				);
+				// merged is never null because emptyChunk is provided as initial value
+				// and merge always returns a valid ChatCompletionChunk
+				return merged as ChatCompletionChunk;
+			}),
+		) as Observable<ChatCompletionChunk>;
 	}
 
 	/**
@@ -329,18 +387,18 @@ export class OpenAiApi {
 			OpenAiApi.SPRING_AI_USER_AGENT,
 		);
 
-		// Add instance headers
 		this._headers.forEach((value, key) => {
 			headers.set(key, value);
 		});
 
-		// Add additional headers
 		additionalHeaders.forEach((value, key) => {
 			headers.set(key, value);
 		});
 
-		// Add authorization if not NoopApiKey
-		if (!(this._apiKey instanceof NoopApiKey)) {
+		if (
+			!headers.get("Authorization") &&
+			!(this._apiKey instanceof NoopApiKey)
+		) {
 			headers.set("Authorization", `Bearer ${this._apiKey.value}`);
 		}
 

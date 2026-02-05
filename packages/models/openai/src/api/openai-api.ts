@@ -7,24 +7,13 @@ import { from, Observable } from "rxjs";
 import { map, mergeMap, scan, takeWhile } from "rxjs/operators";
 import { OpenAiApiConstants } from "./common";
 import type {
-	ChatCompletion,
 	ChatCompletionChunk,
 	ChatCompletionRequest,
-	EmbeddingList,
 	EmbeddingRequest,
 	MediaContent,
 } from "./openai-api.types";
 import { ChatModel, EmbeddingModel } from "./openai-api.types";
 import { OpenAiStreamFunctionCallingHelper } from "./openai-stream-function-calling-helper";
-
-/**
- * Response wrapper containing status, headers, and body.
- */
-export interface ResponseEntity<T> {
-	status: number;
-	headers: Headers;
-	body: T;
-}
 
 /**
  * Props for creating an OpenAiApi instance.
@@ -127,12 +116,12 @@ export class OpenAiApi {
 	 * Creates a model response for the given chat conversation.
 	 * @param chatRequest - The chat completion request.
 	 * @param additionalHeaders - Optional, additional HTTP headers to be added to the request.
-	 * @returns Entity response with ChatCompletion as a body and HTTP status code and headers.
+	 * @returns Fetch Response object containing the chat completion.
 	 */
 	async chatCompletionEntity(
 		chatRequest: ChatCompletionRequest,
 		additionalHeaders: Headers = new Headers(),
-	): Promise<ResponseEntity<ChatCompletion>> {
+	): Promise<Response> {
 		assert(chatRequest != null, "The request body can not be null.");
 		assert(
 			!chatRequest.stream,
@@ -150,12 +139,7 @@ export class OpenAiApi {
 
 		await this.handleResponseError(response);
 
-		const body = (await response.json()) as ChatCompletion;
-		return {
-			status: response.status,
-			headers: response.headers,
-			body,
-		};
+		return response;
 	}
 
 	/**
@@ -255,11 +239,9 @@ export class OpenAiApi {
 	/**
 	 * Creates an embedding vector representing the input text or token array.
 	 * @param embeddingRequest - The embedding request.
-	 * @returns Returns list of Embedding wrapped in EmbeddingList.
+	 * @returns Fetch Response object containing the embedding list.
 	 */
-	async embeddings(
-		embeddingRequest: EmbeddingRequest,
-	): Promise<ResponseEntity<EmbeddingList>> {
+	async embeddings(embeddingRequest: EmbeddingRequest): Promise<Response> {
 		assert(embeddingRequest != null, "The request body can not be null.");
 		assert(embeddingRequest.input != null, "The input can not be null.");
 
@@ -285,12 +267,7 @@ export class OpenAiApi {
 
 		await this.handleResponseError(response);
 
-		const body = (await response.json()) as EmbeddingList;
-		return {
-			status: response.status,
-			headers: response.headers,
-			body,
-		};
+		return response;
 	}
 
 	private buildHeaders(additionalHeaders: Headers): Headers {

@@ -1,9 +1,12 @@
 import { Observable, type Subscriber } from "rxjs";
+import { map, switchMap, takeWhile } from "rxjs/operators";
+import type { HttpClient } from "./http-client.interface";
+import type { ResponseErrorHandler } from "./response-error-handler.interface";
 
 /**
  * Represents a parsed Server-Sent Event.
  */
-export interface ServerSentEvent {
+interface ServerSentEvent {
 	/** Event type (defaults to 'message' if not specified) */
 	type: string;
 	/** Event data */
@@ -127,7 +130,7 @@ function processField(
  *     .pipeThrough(new ServerSentEventTransformStream());
  * ```
  */
-export class ServerSentEventTransformStream extends TransformStream<
+class ServerSentEventTransformStream extends TransformStream<
 	string,
 	ServerSentEvent
 > {
@@ -220,7 +223,7 @@ export class ServerSentEventTransformStream extends TransformStream<
  * });
  * ```
  */
-export function parseServerSentEvents(
+function parseServerSentEvents(
 	response: Response,
 ): Observable<ServerSentEvent> {
 	if (!response) {
@@ -285,4 +288,98 @@ function fromReadableStream<T>(stream: ReadableStream<T>): Observable<T> {
 			reader.cancel();
 		};
 	});
+}
+
+/**
+ * Creates an Observable that streams SSE event data strings from an HTTP endpoint.
+ *
+ * Handles fetch lifecycle (AbortController), SSE parsing, and optional stream
+ * termination via a done predicate — the common plumbing shared by all
+ * streaming model APIs (OpenAI, Anthropic, etc.).
+ *
+ * @param httpClient - The HTTP client to use for the request.
+ * @param input - The request URL or Request object (same as fetch first arg).
+ * @param init - Request options (same as fetch second arg) plus an optional
+ *               `donePredicate` string that terminates the stream when matched,
+ *               and an optional `errorHandler` for handling response errors.
+ * @returns An Observable where each emission is the raw `data` field of one SSE event.
+ *
+ * @example
+ * ```ts
+ * sseStream(httpClient, 'https://api.openai.com/v1/chat/completions', {
+ *   method: 'POST',
+ *   headers,
+ *   body: JSON.stringify(request),
+ *   donePredicate: '[DONE]',
+ *   errorHandler: myErrorHandler,
+ * }).pipe(
+ *   map((data) => JSON.parse(data) as ChatCompletionChunk),
+ * );
+ * ```
+ */
+export function sseStream(
+	httpClient: HttpClient,
+	input: RequestInfo | URL,
+	init?: RequestInit & {
+		donePredicate?: string;
+		errorHandler?: ResponseErrorHandler;
+	},
+): Observable<string> {
+	const { donePredicate, errorHandler, ...fetchInit } = init ?? {};
+
+	const source = new Observable<Response>((subscriber) => {
+		const abortController = new AbortController();
+		let fetchResolved = false;
+
+		httpClient
+			.fetch(input, {
+				...fetchInit,
+				signal: abortController.signal,
+			})
+			.then(async (response) => {
+				if (!response.body) {
+					throw new Error("Response body is null");
+				}
+
+				if (errorHandler?.hasError(response)) {
+					await errorHandler.handleError(response);
+					throw new Error(
+						`SSE stream error: ${response.status} handled by error handler`,
+					);
+				}
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					throw new Error(
+						`SSE stream error: ${response.status} - ${errorText}`,
+					);
+				}
+
+				fetchResolved = true;
+				subscriber.next(response);
+				subscriber.complete();
+			})
+			.catch((error) => {
+				if ((error as Error).name !== "AbortError") {
+					subscriber.error(error);
+				}
+			});
+
+		return () => {
+			if (!fetchResolved) {
+				abortController.abort();
+			}
+		};
+	});
+
+	let pipeline = source.pipe(
+		switchMap((response) => parseServerSentEvents(response)),
+		map((event) => event.data),
+	);
+
+	if (donePredicate) {
+		pipeline = pipeline.pipe(takeWhile((line) => line !== donePredicate));
+	}
+
+	return pipeline;
 }

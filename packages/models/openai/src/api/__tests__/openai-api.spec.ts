@@ -5,18 +5,15 @@ import { firstValueFrom } from "rxjs";
 import { toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
 import { OpenAiApi } from "../openai-api";
-import type {
-	ChatCompletion,
-	ChatCompletionMessage,
-	ChatCompletionRequest,
-	EmbeddingList,
-	EmbeddingRequest,
-	MediaContent,
-} from "../openai-api.types";
 import {
 	AudioResponseFormat,
+	type ChatCompletionMessage,
+	type ChatCompletionRequest,
 	ChatModel,
+	type EmbeddingRequest,
 	InputAudioFormat,
+	type MediaContent,
+	OutputModality,
 	Role,
 	ServiceTier,
 	Voice,
@@ -39,10 +36,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			temperature: 0.8,
 			stream: false,
 		};
-		const response = await openAiApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+		const { body } = await openAiApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 	});
 
@@ -64,7 +59,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 		expect(chunks).not.toBeNull();
 	});
 
-	it("validate reasoning tokens", async () => {
+	it("validate reasoning tokens", { timeout: 60_000 }, async () => {
 		const userMessage: ChatCompletionMessage = {
 			content:
 				"Are there an infinite number of prime numbers such that n mod 4 == 3? Think through the steps and respond.",
@@ -76,10 +71,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			stream: false,
 			reasoning_effort: "high",
 		};
-		const response = await openAiApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+		const { body } = await openAiApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 
 		const completionTokenDetails = body.usage?.completion_tokens_details;
@@ -92,20 +85,15 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			input: "Hello world",
 			model: "text-embedding-ada-002",
 		};
-		const response = await openAiApi.embeddings(embeddingRequest);
-		const body = (await response.json()) as EmbeddingList;
+		const { body } = await openAiApi.embeddings(embeddingRequest);
 
-		expect(response).not.toBeNull();
+		expect(body).not.toBeNull();
 		expect(body.data).toHaveLength(1);
 		expect(body.data[0].embedding).toHaveLength(1536);
 	});
 
 	it("input audio", async () => {
-		// Path relative to workspace root
-		const audioFilePath = join(
-			process.cwd(),
-			"models/spring-ai-openai/src/test/resources/speech/speech1.mp3",
-		);
+		const audioFilePath = join(__dirname, "speech1.mp3");
 		const audioData = readFileSync(audioFilePath);
 		const content: MediaContent[] = [
 			{
@@ -130,12 +118,10 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			temperature: 0.0,
 			stream: false,
 		};
-		const response = await openAiApi.chatCompletionEntity(
+		const { body } = await openAiApi.chatCompletionEntity(
 			chatCompletionRequest,
 		);
-		const body = (await response.json()) as ChatCompletion;
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 
 		expect(body.usage?.prompt_tokens_details?.audio_tokens).toBeGreaterThan(0);
@@ -161,14 +147,13 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			messages: [chatCompletionMessage],
 			model: ChatModel.GPT_4_O_AUDIO_PREVIEW,
 			audio: audioParameters,
+			modalities: [OutputModality.AUDIO, OutputModality.TEXT],
 			stream: false,
 		};
-		const response = await openAiApi.chatCompletionEntity(
+		const { body } = await openAiApi.chatCompletionEntity(
 			chatCompletionRequest,
 		);
-		const body = (await response.json()) as ChatCompletion;
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 
 		expect(body.usage?.prompt_tokens_details?.audio_tokens).toBe(0);
@@ -194,6 +179,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			messages: [chatCompletionMessage],
 			model: ChatModel.GPT_4_O_AUDIO_PREVIEW,
 			audio: audioParameters,
+			modalities: [OutputModality.AUDIO, OutputModality.TEXT],
 			stream: true,
 		};
 
@@ -207,30 +193,32 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 		ChatModel.GPT_5_CHAT_LATEST,
 		ChatModel.GPT_5_MINI,
 		ChatModel.GPT_5_NANO,
-	])("chat completion entity with new models: %s", async (modelName) => {
-		const chatCompletionMessage: ChatCompletionMessage = {
-			content: "Hello world",
-			role: Role.USER,
-		};
-		const request: ChatCompletionRequest = {
-			messages: [chatCompletionMessage],
-			model: modelName,
-			temperature: 1.0,
-			stream: false,
-		};
-		const response = await openAiApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+	])(
+		"chat completion entity with new models: %s",
+		{ timeout: 30_000 },
+		async (modelName) => {
+			const chatCompletionMessage: ChatCompletionMessage = {
+				content: "Hello world",
+				role: Role.USER,
+			};
+			const request: ChatCompletionRequest = {
+				messages: [chatCompletionMessage],
+				model: modelName,
+				temperature: 1.0,
+				stream: false,
+			};
+			const { body } = await openAiApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
-		expect(body).not.toBeNull();
-		expect(body.choices.length).toBeGreaterThan(0);
-		const messageContent =
-			typeof body.choices[0].message.content === "string"
-				? body.choices[0].message.content
-				: "";
-		expect(messageContent.length).toBeGreaterThan(0);
-		expect(body.model.toLowerCase()).toContain(modelName.toLowerCase());
-	});
+			expect(body).not.toBeNull();
+			expect(body.choices.length).toBeGreaterThan(0);
+			const messageContent =
+				typeof body.choices[0].message.content === "string"
+					? body.choices[0].message.content
+					: "";
+			expect(messageContent.length).toBeGreaterThan(0);
+			expect(body.model.toLowerCase()).toContain(modelName.toLowerCase());
+		},
+	);
 
 	it.each([
 		ChatModel.GPT_5_NANO,
@@ -249,10 +237,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			verbosity: "low",
 		};
 
-		const response = await openAiApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+		const { body } = await openAiApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 		expect(body.choices.length).toBeGreaterThan(0);
 		const messageContent =
@@ -298,10 +284,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			stream: false,
 		};
 
-		const response = await openAiApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+		const { body } = await openAiApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 		expect(body.choices.length).toBeGreaterThan(0);
 		const messageContent =
@@ -330,10 +314,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			temperature: 1.0,
 		};
 
-		const response = await openAiApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+		const { body } = await openAiApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 		expect(body.service_tier?.toLowerCase()).toContain(
 			serviceTier.toLowerCase(),
@@ -341,7 +323,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 	});
 
 	it("user agent header is sent in chat completion requests", async () => {
-		let _mockServer: Server | null = null;
 		let recordedRequest: IncomingMessage | null = null;
 
 		const serverPromise = new Promise<Server>((resolve) => {
@@ -376,7 +357,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			});
 
 			server.listen(0, () => {
-				_mockServer = server;
 				resolve(server);
 			});
 		});
@@ -405,15 +385,13 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 			temperature: 0.8,
 			stream: false,
 		};
-		const response = await testApi.chatCompletionEntity(request);
-		const body = (await response.json()) as ChatCompletion;
+		const { body } = await testApi.chatCompletionEntity(request);
 
-		expect(response).not.toBeNull();
 		expect(body).not.toBeNull();
 
 		expect(recordedRequest).not.toBeNull();
-		const userAgentHeader =
-			recordedRequest?.headers[OpenAiApi.HTTP_USER_AGENT_HEADER.toLowerCase()];
+		const userAgentHeader = (recordedRequest as unknown as IncomingMessage)
+			.headers[OpenAiApi.HTTP_USER_AGENT_HEADER.toLowerCase()];
 		expect(userAgentHeader).toBe(OpenAiApi.SPRING_AI_USER_AGENT);
 
 		await new Promise<void>((resolve) => {

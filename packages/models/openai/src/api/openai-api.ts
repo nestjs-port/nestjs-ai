@@ -1,14 +1,20 @@
 import assert from "node:assert/strict";
-import type { HttpClient, ResponseErrorHandler } from "@nestjs-ai/commons";
-import { FetchHttpClient, parseServerSentEvents } from "@nestjs-ai/commons";
+import type {
+	HttpClient,
+	ResponseEntity,
+	ResponseErrorHandler,
+} from "@nestjs-ai/commons";
+import { FetchHttpClient, sseStream } from "@nestjs-ai/commons";
 import type { ApiKey } from "@nestjs-ai/model";
 import { NoopApiKey, SimpleApiKey } from "@nestjs-ai/model";
-import { from, Observable } from "rxjs";
-import { map, mergeMap, scan, takeWhile } from "rxjs/operators";
+import { from, type Observable } from "rxjs";
+import { map, mergeMap, scan } from "rxjs/operators";
 import { OpenAiApiConstants } from "./common";
 import type {
+	ChatCompletion,
 	ChatCompletionChunk,
 	ChatCompletionRequest,
+	EmbeddingList,
 	EmbeddingRequest,
 	MediaContent,
 } from "./openai-api.types";
@@ -121,7 +127,7 @@ export class OpenAiApi {
 	async chatCompletionEntity(
 		chatRequest: ChatCompletionRequest,
 		additionalHeaders: Headers = new Headers(),
-	): Promise<Response> {
+	): Promise<ResponseEntity<ChatCompletion>> {
 		assert(chatRequest != null, "The request body can not be null.");
 		assert(
 			!chatRequest.stream,
@@ -139,7 +145,11 @@ export class OpenAiApi {
 
 		await this.handleResponseError(response);
 
-		return response;
+		return {
+			body: (await response.json()) as ChatCompletion,
+			status: response.status,
+			headers: response.headers,
+		};
 	}
 
 	/**
@@ -158,41 +168,22 @@ export class OpenAiApi {
 			"Request must set the stream property to true.",
 		);
 
-		return new Observable<string>((subscriber) => {
-			const abortController = new AbortController();
-			const headers = this.buildHeaders(additionalHeaders);
-			const url = `${this._baseUrl}${this._completionsPath}`;
+		const init: RequestInit & {
+			donePredicate?: string;
+			errorHandler?: ResponseErrorHandler;
+		} = {
+			method: "POST",
+			headers: this.buildHeaders(additionalHeaders),
+			body: JSON.stringify(chatRequest),
+			donePredicate: OpenAiApi.SSE_DONE_PREDICATE,
+			errorHandler: this._responseErrorHandler,
+		};
 
-			this._httpClient
-				.fetch(url, {
-					method: "POST",
-					headers,
-					body: JSON.stringify(chatRequest),
-					signal: abortController.signal,
-				})
-				.then((response) => {
-					if (!response.body) {
-						throw new Error("Response body is null");
-					}
-					parseServerSentEvents(response).subscribe({
-						next: (event) => subscriber.next(event.data),
-						error: (error) => subscriber.error(error),
-						complete: () => subscriber.complete(),
-					});
-				})
-				.catch((error) => {
-					if ((error as Error).name !== "AbortError") {
-						subscriber.error(error);
-					}
-				});
-
-			return () => {
-				abortController.abort();
-			};
-		}).pipe(
-			// cancels the stream after the "[DONE]" is received (exclusive: doesn't emit [DONE]).
-			takeWhile((line) => line !== OpenAiApi.SSE_DONE_PREDICATE),
-			// Parse JSON to ChatCompletionChunk
+		return sseStream(
+			this._httpClient,
+			`${this._baseUrl}${this._completionsPath}`,
+			init,
+		).pipe(
 			map((content) => JSON.parse(content) as ChatCompletionChunk),
 			// Group chunks belonging to the same function call into windows.
 			// Tool call chunks are buffered until finish, non-tool chunks emit immediately.
@@ -208,25 +199,19 @@ export class OpenAiApi {
 					const isBuffering = acc.buffer.length > 0;
 
 					if (isToolCall && !isFinish) {
-						// Start buffering tool call chunks
 						return { buffer: [chunk], ready: [] };
 					}
 					if (isFinish && isBuffering) {
-						// Complete the buffer and emit as a window
 						return { buffer: [], ready: [[...acc.buffer, chunk]] };
 					}
 					if (isBuffering) {
-						// Continue buffering tool call chunks
 						return { buffer: [...acc.buffer, chunk], ready: [] };
 					}
-					// Non-tool chunk: emit immediately as single-item window
 					return { buffer: [], ready: [[chunk]] };
 				},
 				{ buffer: [], ready: [] },
 			),
-			// Emit ready windows
 			mergeMap(({ ready }) => from(ready)),
-			// Merge each window into a single chunk
 			map((window) =>
 				window.reduce(
 					(prev, curr) => this._chunkMerger.merge(prev, curr),
@@ -241,7 +226,9 @@ export class OpenAiApi {
 	 * @param embeddingRequest - The embedding request.
 	 * @returns Fetch Response object containing the embedding list.
 	 */
-	async embeddings(embeddingRequest: EmbeddingRequest): Promise<Response> {
+	async embeddings(
+		embeddingRequest: EmbeddingRequest,
+	): Promise<ResponseEntity<EmbeddingList>> {
 		assert(embeddingRequest != null, "The request body can not be null.");
 		assert(embeddingRequest.input != null, "The input can not be null.");
 
@@ -267,7 +254,11 @@ export class OpenAiApi {
 
 		await this.handleResponseError(response);
 
-		return response;
+		return {
+			body: (await response.json()) as EmbeddingList,
+			status: response.status,
+			headers: response.headers,
+		};
 	}
 
 	private buildHeaders(additionalHeaders: Headers): Headers {

@@ -12,4 +12,3 @@ export { EmptyUsage } from "./empty-usage";
 export { PromptFilterMetadata, PromptMetadata } from "./prompt-metadata";
 export type { RateLimit } from "./rate-limit";
 export { Usage } from "./usage";
-export { UsageCalculator } from "./usage-calculator";

@@ -14,4 +14,4 @@ export {
 export type { ResultMetadata } from "./result-metadata.interface";
 export { SimpleApiKey } from "./simple-api-key";
 export type { StreamingModel } from "./streaming-model.interface";
-export type { StructuredOutputChatOptions } from "./tool";
+export * from "./tool";

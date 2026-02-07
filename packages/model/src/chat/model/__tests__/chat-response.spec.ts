@@ -1,8 +1,11 @@
+import { firstValueFrom, of } from "rxjs";
+import { toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages";
-import { ChatGenerationMetadata } from "../../metadata";
+import { AssistantMessage, type ToolCall } from "../../messages";
+import { ChatGenerationMetadata, ChatResponseMetadata } from "../../metadata";
 import { ChatResponse } from "../chat-response";
 import { Generation } from "../generation";
+import { MessageAggregator } from "../message-aggregator";
 
 describe("ChatResponse", () => {
 	it("when tool calls are present then return true", () => {
@@ -126,5 +129,69 @@ describe("ChatResponse", () => {
 			])
 			.build();
 		expect(chatResponse.hasToolCalls()).toBe(true);
+	});
+
+	it("message aggregator should correctly aggregate tool calls from stream", async () => {
+		const aggregator = new MessageAggregator();
+
+		const chunk1 = new ChatResponse({
+			generations: [
+				new Generation({
+					assistantMessage: new AssistantMessage({
+						content: "Thinking about the weather... ",
+						media: [],
+					}),
+				}),
+			],
+		});
+
+		const weatherToolCall: ToolCall = {
+			id: "tool-id-123",
+			type: "function",
+			name: "getCurrentWeather",
+			arguments: '{"location": "Seoul"}',
+		};
+
+		const metadataWithToolCall = ChatResponseMetadata.builder()
+			.keyValue("toolCalls", [weatherToolCall])
+			.build();
+
+		const chunk2 = new ChatResponse({
+			generations: [
+				new Generation({
+					assistantMessage: new AssistantMessage({
+						content: "",
+						media: [],
+					}),
+				}),
+			],
+			chatResponseMetadata: metadataWithToolCall,
+		});
+
+		const streamingResponse = of(chunk1, chunk2);
+
+		let aggregatedResponse: ChatResponse | null = null;
+
+		await firstValueFrom(
+			aggregator
+				.aggregate(streamingResponse, (response) => {
+					aggregatedResponse = response;
+				})
+				.pipe(toArray()),
+		);
+
+		expect(aggregatedResponse).not.toBeNull();
+
+		const finalAssistantMessage = aggregatedResponse?.result?.output;
+
+		expect(finalAssistantMessage).not.toBeNull();
+		expect(finalAssistantMessage.text).toBe("Thinking about the weather... ");
+		expect(finalAssistantMessage.hasToolCalls()).toBe(true);
+		expect(finalAssistantMessage.toolCalls).toHaveLength(1);
+
+		const resultToolCall = finalAssistantMessage.toolCalls[0];
+		expect(resultToolCall.id).toBe("tool-id-123");
+		expect(resultToolCall.name).toBe("getCurrentWeather");
+		expect(resultToolCall.arguments).toBe('{"location": "Seoul"}');
 	});
 });

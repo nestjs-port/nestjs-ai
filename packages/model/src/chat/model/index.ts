@@ -11,5 +11,6 @@ export {
 	type GenerationProps,
 } from "./generation";
 
+export { MessageAggregator } from "./message-aggregator";
 export { StreamingChatModel } from "./streaming-chat-model";
 export { ToolContext } from "./tool-context";

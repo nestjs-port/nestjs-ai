@@ -27,6 +27,6 @@ export namespace ToolCallingManager {
 	 * Create a default {@link ToolCallingManager} builder.
 	 */
 	export function builder() {
-		return DefaultToolCallingManager.builder();
+		return new DefaultToolCallingManager();
 	}
 }

@@ -67,6 +67,31 @@ importers:
         specifier: ^7.0.0
         version: 7.8.2
 
+  packages/models/google-genai:
+    dependencies:
+      '@google/generative-ai':
+        specifier: ^0.21.0
+        version: 0.21.0
+      rxjs:
+        specifier: ^7.0.0
+        version: 7.8.2
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../model
+      '@types/node':
+        specifier: ^25.0.9
+        version: 25.0.9
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.16(@types/node@25.0.9)(yaml@2.8.2)
+
   packages/models/openai:
     devDependencies:
       '@nestjs-ai/commons':
@@ -87,15 +112,6 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@25.0.9)(yaml@2.8.2)
-
-  packages/models/openai:
-    devDependencies:
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../../commons
-      '@nestjs-ai/model':
-        specifier: workspace:*
-        version: link:../../model
 
 packages:
 
@@ -310,6 +326,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@google/generative-ai@0.21.0':
+    resolution: {integrity: sha512-7XhUbtnlkSEZK15kN3t+tzIMxsbKm/dSkKBFalj+20NvPKe1kBY7mR2P7vuijEn+f06z5+A8bVGKO0v39cr6Wg==}
+    engines: {node: '>=18.0.0'}
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
@@ -1142,6 +1162,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.2':
     optional: true
+
+  '@google/generative-ai@0.21.0': {}
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 

@@ -252,7 +252,112 @@ export enum MessageType {
 
 **Note:** Always assign string values to enums for JSON serialization compatibility.
 
-## 6. Interface with Static Methods (Namespace Pattern)
+## 6. Interface with Static Methods or Default Methods → Abstract Class
+
+**Rule:** If a Java interface has `static` methods or `default` methods, convert it to an `abstract class` in TypeScript, since TypeScript interfaces cannot contain implementations.
+
+### 6a. Interface with Static Methods Only
+
+**Java:**
+```java
+public interface ToolExecutionResult {
+    String FINISH_REASON = "returnDirect";
+    String METADATA_TOOL_ID = "toolId";
+    
+    List<Message> conversationHistory();
+    boolean returnDirect();
+
+    static DefaultToolExecutionResult.Builder builder() {
+        return DefaultToolExecutionResult.builder();
+    }
+
+    static List<Generation> buildGenerations(ToolExecutionResult result) {
+        // implementation
+    }
+}
+```
+
+**TypeScript:**
+```typescript
+export abstract class ToolExecutionResult {
+    static readonly FINISH_REASON = "returnDirect" as const;
+    static readonly METADATA_TOOL_ID = "toolId" as const;
+    
+    readonly FINISH_REASON: "returnDirect" = "returnDirect";
+    readonly METADATA_TOOL_ID: "toolId" = "toolId";
+
+    abstract conversationHistory(): Message[];
+    abstract returnDirect(): boolean;
+
+    static builder() {
+        return DefaultToolExecutionResult.builder();
+    }
+
+    static buildGenerations(result: ToolExecutionResult): Generation[] {
+        // implementation
+    }
+}
+```
+
+**Key differences:**
+- Convert interface to `abstract class`
+- Static constants become `static readonly` properties
+- Also provide instance properties with same values (for compatibility)
+- Static methods become `static` methods on the abstract class
+- Abstract methods remain `abstract`
+
+### 6b. Interface with Default Methods
+
+**Java:**
+```java
+public interface Message {
+    String getText();
+    
+    default boolean isEmpty() {
+        return getText() == null || getText().isEmpty();
+    }
+}
+```
+
+**TypeScript:**
+```typescript
+export abstract class Message {
+    abstract get text(): string;
+
+    isEmpty(): boolean {
+        return !this.text || this.text.length === 0;
+    }
+}
+```
+
+**Key differences:**
+- Convert interface to `abstract class`
+- `default` methods become regular methods (not abstract)
+- Abstract methods remain `abstract`
+
+### 6c. Simple Interface (No Static/Default Methods) - Keep as Interface
+
+**Java:**
+```java
+public interface ToolDefinition {
+    String name();
+    String description();
+}
+```
+
+**TypeScript:**
+```typescript
+export interface ToolDefinition {
+    readonly name: string;
+    readonly description: string;
+}
+```
+
+**Note:** If the interface has no static or default methods, keep it as an interface.
+
+## 7. Interface with Static Methods (Legacy Namespace Pattern - Deprecated)
+
+**Note:** This pattern is deprecated. Use abstract class pattern (Section 6a) instead.
 
 **Java:**
 ```java
@@ -266,7 +371,7 @@ public interface ToolDefinition {
 }
 ```
 
-**TypeScript:**
+**TypeScript (Legacy - Not Recommended):**
 ```typescript
 export interface ToolDefinition {
     readonly name: string;
@@ -280,7 +385,9 @@ export namespace ToolDefinition {
 }
 ```
 
-## 7. toString Implementation
+**Prefer:** Convert to abstract class (see Section 6a) instead of using namespace pattern.
+
+## 8. toString Implementation
 
 **Java:**
 ```java

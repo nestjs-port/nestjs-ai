@@ -59,3 +59,25 @@ export interface ChatOptions extends ModelOptions {
 	 */
 	copy(): ChatOptions;
 }
+
+export namespace ChatOptions {
+	export interface Builder {
+		model(model: string | null): Builder;
+
+		frequencyPenalty(frequencyPenalty: number | null): Builder;
+
+		maxTokens(maxTokens: number | null): Builder;
+
+		presencePenalty(presencePenalty: number | null): Builder;
+
+		stopSequences(stopSequences: string[] | null): Builder;
+
+		temperature(temperature: number | null): Builder;
+
+		topK(topK: number | null): Builder;
+
+		topP(topP: number | null): Builder;
+
+		build(): ChatOptions;
+	}
+}

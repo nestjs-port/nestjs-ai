@@ -107,7 +107,15 @@ For detailed patterns and examples, see:
 - Replace `new HashMap<>(map)` with spread operator `{ ...metadata }`
 - Replace `new ArrayList<>(list)` with spread operator `[...list]`
 
-### 6. toString
+### 6. Interfaces with Static/Default Methods
+- Java interface with `static` methods or `default` methods → TypeScript `abstract class`
+- Static constants → `static readonly` properties (also provide instance properties for compatibility)
+- Static methods → `static` methods on abstract class
+- Default methods → regular methods (not abstract)
+- Abstract methods remain `abstract`
+- Simple interfaces (no static/default methods) remain as `interface`
+
+### 7. toString
 - `toString()` → `[Symbol.toPrimitive](): string`
 
 ## Import/Export Patterns
@@ -193,6 +201,7 @@ Migration Checklist:
 - [ ] Props interface defined (if class has constructor params)
 - [ ] Fields prefixed with _ and marked readonly
 - [ ] Getters use `get` keyword (not `getXxx()` methods)
+- [ ] Interface with static/default methods → abstract class
 - [ ] Static methods converted
 - [ ] Builder pattern converted (Props or Builder class)
 - [ ] toString → [Symbol.toPrimitive]

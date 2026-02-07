@@ -17,18 +17,16 @@
 		"test": "vitest"
 	},
 	"peerDependencies": {
-		"@nestjs-ai/commons": "workspace:*",
-		"@nestjs-ai/model": "workspace:*",
+		"@nestjs-ai/commons": "*",
+		"@nestjs-ai/model": "*",
 		"rxjs": "^7.0.0"
 	},
 	"dependencies": {
-		"@google/generative-ai": "^0.21.0"
+		"@google/genai": "^1.40.0"
 	},
 	"devDependencies": {
 		"@nestjs-ai/commons": "workspace:*",
 		"@nestjs-ai/model": "workspace:*",
-		"@types/node": "^25.0.9",
-		"typescript": "^5.9.3",
-		"vitest": "^4.0.16"
+		"rxjs": "^7.0.0"
 	}
 }

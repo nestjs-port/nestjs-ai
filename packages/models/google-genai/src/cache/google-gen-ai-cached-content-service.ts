@@ -44,15 +44,9 @@ export class CachedContentPage {
 }
 
 export class GoogleGenAiCachedContentService {
-	private static _logger: Logger | null = null;
-	private static get logger(): Logger {
-		if (!GoogleGenAiCachedContentService._logger) {
-			GoogleGenAiCachedContentService._logger = LoggerFactory.getLogger(
-				GoogleGenAiCachedContentService.name,
-			);
-		}
-		return GoogleGenAiCachedContentService._logger;
-	}
+	private readonly logger: Logger = LoggerFactory.getLogger(
+		GoogleGenAiCachedContentService.name,
+	);
 	private readonly _caches: Caches;
 
 	constructor(genAiClient: GoogleGenAI) {
@@ -91,15 +85,12 @@ export class GoogleGenAiCachedContentService {
 				model: request.model,
 				config,
 			});
-			GoogleGenAiCachedContentService.logger.debug(
+			this.logger.debug(
 				`Created cached content: ${cachedContent.name ?? "unknown"}`,
 			);
 			return GoogleGenAiCachedContent.from(cachedContent);
 		} catch (e) {
-			GoogleGenAiCachedContentService.logger.error(
-				"Failed to create cached content",
-				e,
-			);
+			this.logger.error("Failed to create cached content", e);
 			throw new CachedContentException(
 				"Failed to create cached content",
 				e instanceof Error ? e : undefined,
@@ -112,15 +103,10 @@ export class GoogleGenAiCachedContentService {
 
 		try {
 			const cachedContent = await this._caches.get({ name });
-			GoogleGenAiCachedContentService.logger.debug(
-				`Retrieved cached content: ${name}`,
-			);
+			this.logger.debug(`Retrieved cached content: ${name}`);
 			return GoogleGenAiCachedContent.from(cachedContent);
 		} catch (e) {
-			GoogleGenAiCachedContentService.logger.error(
-				`Failed to get cached content: ${name}`,
-				e,
-			);
+			this.logger.error(`Failed to get cached content: ${name}`, e);
 			return null;
 		}
 	}
@@ -146,15 +132,10 @@ export class GoogleGenAiCachedContentService {
 				name,
 				config,
 			});
-			GoogleGenAiCachedContentService.logger.debug(
-				`Updated cached content: ${name}`,
-			);
+			this.logger.debug(`Updated cached content: ${name}`);
 			return GoogleGenAiCachedContent.from(cachedContent);
 		} catch (e) {
-			GoogleGenAiCachedContentService.logger.error(
-				`Failed to update cached content: ${name}`,
-				e,
-			);
+			this.logger.error(`Failed to update cached content: ${name}`, e);
 			throw new CachedContentException(
 				`Failed to update cached content: ${name}`,
 				e instanceof Error ? e : undefined,
@@ -167,15 +148,10 @@ export class GoogleGenAiCachedContentService {
 
 		try {
 			await this._caches.delete({ name });
-			GoogleGenAiCachedContentService.logger.debug(
-				`Deleted cached content: ${name}`,
-			);
+			this.logger.debug(`Deleted cached content: ${name}`);
 			return true;
 		} catch (e) {
-			GoogleGenAiCachedContentService.logger.error(
-				`Failed to delete cached content: ${name}`,
-				e,
-			);
+			this.logger.error(`Failed to delete cached content: ${name}`, e);
 			return false;
 		}
 	}
@@ -211,16 +187,11 @@ export class GoogleGenAiCachedContentService {
 			// Note: Pager doesn't expose page tokens directly, so we can't support
 			// pagination
 			// in the same way. This is a limitation of the SDK.
-			GoogleGenAiCachedContentService.logger.debug(
-				`Listed ${contents.length} cached content items`,
-			);
+			this.logger.debug(`Listed ${contents.length} cached content items`);
 
 			return new CachedContentPage(contents, null);
 		} catch (e) {
-			GoogleGenAiCachedContentService.logger.error(
-				"Failed to list cached content",
-				e,
-			);
+			this.logger.error("Failed to list cached content", e);
 			throw new CachedContentException(
 				"Failed to list cached content",
 				e instanceof Error ? e : undefined,
@@ -284,9 +255,7 @@ export class GoogleGenAiCachedContentService {
 			if (content.expired) {
 				if (await this.delete(content.name!)) {
 					removed++;
-					GoogleGenAiCachedContentService.logger.info(
-						`Removed expired cached content: ${content.name}`,
-					);
+					this.logger.info(`Removed expired cached content: ${content.name}`);
 				}
 			}
 		}

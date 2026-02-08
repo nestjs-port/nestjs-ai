@@ -37,7 +37,7 @@ export interface DefaultToolCallingManagerProps {
 }
 
 export class DefaultToolCallingManager implements ToolCallingManager {
-	private static readonly _logger: Logger = LoggerFactory.getLogger(
+	private readonly logger: Logger = LoggerFactory.getLogger(
 		DefaultToolCallingManager.name,
 	);
 
@@ -79,7 +79,7 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 			}
 			const toolCallback = this._toolCallbackResolver.resolve(toolName);
 			if (toolCallback == null) {
-				DefaultToolCallingManager._logger.warn(
+				this.logger.warn(
 					POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING.replace("%s", toolName),
 				);
 				throw new Error(`No ToolCallback found for tool name: ${toolName}`);
@@ -186,16 +186,14 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 		let returnDirect: boolean | null = null;
 
 		for (const toolCall of assistantMessage.toolCalls) {
-			DefaultToolCallingManager._logger.debug(
-				`Executing tool call: ${toolCall.name}`,
-			);
+			this.logger.debug(`Executing tool call: ${toolCall.name}`);
 
 			const toolName = toolCall.name;
 			let toolInputArguments = toolCall.arguments;
 
 			// Handle the possible null parameter situation in streaming mode.
 			if (!toolInputArguments || toolInputArguments.trim() === "") {
-				DefaultToolCallingManager._logger.warn(
+				this.logger.warn(
 					`Tool call arguments are null or empty for tool: ${toolName}. Using empty JSON object as default.`,
 				);
 				toolInputArguments = "{}";
@@ -206,7 +204,7 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 				this._toolCallbackResolver.resolve(toolName);
 
 			if (toolCallback == null) {
-				DefaultToolCallingManager._logger.warn(
+				this.logger.warn(
 					POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING.replace("%s", toolName),
 				);
 				throw new Error(`No ToolCallback found for tool name: ${toolName}`);

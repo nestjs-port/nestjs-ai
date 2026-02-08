@@ -19,15 +19,9 @@ import { Generation } from "./generation";
  * single AssistantMessage. Job is performed in parallel to the chat response processing.
  */
 export class MessageAggregator {
-	private static _logger: Logger | null = null;
-	private static get logger(): Logger {
-		if (!MessageAggregator._logger) {
-			MessageAggregator._logger = LoggerFactory.getLogger(
-				MessageAggregator.name,
-			);
-		}
-		return MessageAggregator._logger;
-	}
+	private readonly logger: Logger = LoggerFactory.getLogger(
+		MessageAggregator.name,
+	);
 
 	aggregate(
 		fluxChatResponse: Observable<ChatResponse>,
@@ -164,7 +158,7 @@ export class MessageAggregator {
 				}),
 				tap({
 					error: (e) => {
-						MessageAggregator.logger.error("Aggregation Error", e);
+						this.logger.error("Aggregation Error", e);
 					},
 				}),
 			);

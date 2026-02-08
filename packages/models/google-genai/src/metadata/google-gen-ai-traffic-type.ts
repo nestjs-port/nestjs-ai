@@ -1,3 +1,5 @@
+import type { TrafficType } from "@google/genai";
+
 /**
  * Represents the traffic type for Google GenAI requests, indicating whether a request
  * consumes Pay-As-You-Go or Provisioned Throughput quota.
@@ -24,9 +26,7 @@ export enum GoogleGenAiTrafficType {
  * @param value - The string value to convert
  * @returns The corresponding GoogleGenAiTrafficType
  */
-export function trafficTypeFrom(
-	value: string | null | undefined,
-): GoogleGenAiTrafficType {
+export function trafficTypeFrom(value?: TrafficType): GoogleGenAiTrafficType {
 	if (!value) {
 		return GoogleGenAiTrafficType.UNKNOWN;
 	}
@@ -41,6 +41,10 @@ export function trafficTypeFrom(
 		case "TRAFFIC_TYPE_UNSPECIFIED":
 			return GoogleGenAiTrafficType.UNKNOWN;
 		default:
-			return GoogleGenAiTrafficType.UNKNOWN;
+			return (
+				Object.values(GoogleGenAiTrafficType).find(
+					(type) => type === typeStr,
+				) ?? GoogleGenAiTrafficType.UNKNOWN
+			);
 	}
 }

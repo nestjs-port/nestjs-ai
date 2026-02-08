@@ -1,9 +1,13 @@
+import type {
+	GenerateContentResponseUsageMetadata,
+	ModalityTokenCount,
+} from "@google/genai";
 import { DefaultUsage } from "@nestjs-ai/model";
-import { GoogleGenAiModalityTokenCount } from "./google-genai-modality-token-count";
+import { GoogleGenAiModalityTokenCount } from "./google-gen-ai-modality-token-count";
 import {
 	type GoogleGenAiTrafficType,
 	trafficTypeFrom,
-} from "./google-genai-traffic-type";
+} from "./google-gen-ai-traffic-type";
 
 /**
  * Props for creating a GoogleGenAiUsage instance.
@@ -75,44 +79,20 @@ export interface GoogleGenAiUsageProps {
  * Includes thinking tokens, cached content, tool-use tokens, and modality breakdowns.
  */
 export class GoogleGenAiUsage extends DefaultUsage {
-	/**
-	 * The number of tokens used for thinking.
-	 */
 	readonly thoughtsTokenCount?: number;
 
-	/**
-	 * The number of tokens used for cached content.
-	 */
 	readonly cachedContentTokenCount?: number;
 
-	/**
-	 * The number of tokens used for tool-use prompt.
-	 */
 	readonly toolUsePromptTokenCount?: number;
 
-	/**
-	 * Detailed token counts per modality for the prompt.
-	 */
 	readonly promptTokensDetails?: GoogleGenAiModalityTokenCount[];
 
-	/**
-	 * Detailed token counts per modality for the candidates.
-	 */
 	readonly candidatesTokensDetails?: GoogleGenAiModalityTokenCount[];
 
-	/**
-	 * Detailed token counts per modality for the cache.
-	 */
 	readonly cacheTokensDetails?: GoogleGenAiModalityTokenCount[];
 
-	/**
-	 * Detailed token counts per modality for the tool-use prompt.
-	 */
 	readonly toolUsePromptTokensDetails?: GoogleGenAiModalityTokenCount[];
 
-	/**
-	 * The traffic type for the request.
-	 */
 	readonly trafficType?: GoogleGenAiTrafficType;
 
 	constructor(props: GoogleGenAiUsageProps) {
@@ -132,8 +112,22 @@ export class GoogleGenAiUsage extends DefaultUsage {
 		this.trafficType = props.trafficType;
 	}
 
+	override toJSON() {
+		return {
+			...super.toJSON(),
+			thoughtsTokenCount: this.thoughtsTokenCount,
+			cachedContentTokenCount: this.cachedContentTokenCount,
+			toolUsePromptTokenCount: this.toolUsePromptTokenCount,
+			promptTokensDetails: this.promptTokensDetails,
+			candidatesTokensDetails: this.candidatesTokensDetails,
+			cacheTokensDetails: this.cacheTokensDetails,
+			toolUsePromptTokensDetails: this.toolUsePromptTokensDetails,
+			trafficType: this.trafficType,
+		};
+	}
+
 	static from(
-		usageMetadata: Record<string, unknown> | null | undefined,
+		usageMetadata?: GenerateContentResponseUsageMetadata,
 	): GoogleGenAiUsage {
 		if (!usageMetadata) {
 			return new GoogleGenAiUsage({
@@ -171,7 +165,7 @@ export class GoogleGenAiUsage extends DefaultUsage {
 		);
 
 		const trafficType = usageMetadata.trafficType
-			? trafficTypeFrom(usageMetadata.trafficType as string)
+			? trafficTypeFrom(usageMetadata.trafficType)
 			: undefined;
 
 		return new GoogleGenAiUsage({
@@ -189,16 +183,12 @@ export class GoogleGenAiUsage extends DefaultUsage {
 			nativeUsage: usageMetadata,
 		});
 	}
-
-	override toString(): string {
-		return `GoogleGenAiUsage{promptTokens=${this.promptTokens}, completionTokens=${this.completionTokens}, totalTokens=${this.totalTokens}, thoughtsTokenCount=${this.thoughtsTokenCount}, cachedContentTokenCount=${this.cachedContentTokenCount}, toolUsePromptTokenCount=${this.toolUsePromptTokenCount}, trafficType=${this.trafficType}}`;
-	}
 }
 
 function convertModalityDetails(
-	modalityTokens: unknown,
+	modalityTokens?: ModalityTokenCount[],
 ): GoogleGenAiModalityTokenCount[] | undefined {
-	if (!modalityTokens || !Array.isArray(modalityTokens)) {
+	if (!modalityTokens) {
 		return undefined;
 	}
 

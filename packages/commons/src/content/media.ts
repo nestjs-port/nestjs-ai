@@ -123,7 +123,7 @@ export class Media {
 
 	private readonly _mimeType: string;
 
-	private readonly _data: string | Uint8Array;
+	private readonly _data: unknown;
 
 	private readonly _name: string;
 
@@ -161,20 +161,20 @@ export class Media {
 	 * Get the media data object.
 	 * @returns a URI string or a Uint8Array
 	 */
-	get data(): string | Uint8Array {
+	get data(): unknown {
 		return this._data;
 	}
 
 	/**
 	 * Get the media data as a byte array.
 	 * @returns the media data as a byte array
-	 * @throws Error if the media data is not a Uint8Array
+	 * @throws Error if the media data is not a Buffer
 	 */
-	get dataAsByteArray(): Uint8Array {
-		if (this._data instanceof Uint8Array) {
+	get dataAsByteArray(): Buffer {
+		if (Buffer.isBuffer(this._data)) {
 			return this._data;
 		}
-		throw new Error("Media data is not a byte array");
+		throw new Error("Media data is not a buffer");
 	}
 
 	/**

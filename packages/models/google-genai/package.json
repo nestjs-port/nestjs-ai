@@ -19,6 +19,7 @@
 	"peerDependencies": {
 		"@nestjs-ai/commons": "*",
 		"@nestjs-ai/model": "*",
+		"@nestjs-ai/retry": "*",
 		"rxjs": "^7.0.0"
 	},
 	"dependencies": {
@@ -27,6 +28,7 @@
 	"devDependencies": {
 		"@nestjs-ai/commons": "workspace:*",
 		"@nestjs-ai/model": "workspace:*",
+		"@nestjs-ai/retry": "workspace:*",
 		"rxjs": "^7.0.0"
 	}
 }

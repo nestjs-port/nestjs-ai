@@ -11,15 +11,9 @@ import type { ToolExecutionExceptionProcessor } from "./tool-execution-exception
 export class DefaultToolExecutionExceptionProcessor
 	implements ToolExecutionExceptionProcessor
 {
-	private static _logger: Logger | null = null;
-	private static get logger(): Logger {
-		if (!DefaultToolExecutionExceptionProcessor._logger) {
-			DefaultToolExecutionExceptionProcessor._logger = LoggerFactory.getLogger(
-				DefaultToolExecutionExceptionProcessor.name,
-			);
-		}
-		return DefaultToolExecutionExceptionProcessor._logger;
-	}
+	private readonly logger: Logger = LoggerFactory.getLogger(
+		DefaultToolExecutionExceptionProcessor.name,
+	);
 
 	private readonly _alwaysThrow: boolean;
 	private readonly _rethrownExceptions: readonly (new (
@@ -65,7 +59,7 @@ export class DefaultToolExecutionExceptionProcessor
 			const causeName = cause?.constructor?.name;
 			message = `Exception occurred in tool: ${exception.toolDefinition.name} (${causeName})`;
 		}
-		DefaultToolExecutionExceptionProcessor.logger.debug(
+		this.logger.debug(
 			`Exception thrown by tool: ${exception.toolDefinition.name}. Message: ${message}`,
 			exception,
 		);

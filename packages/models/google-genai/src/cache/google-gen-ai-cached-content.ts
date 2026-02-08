@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { type Milliseconds, ms } from "@nestjs-ai/commons";
-import {
+import type {
 	CachedContent,
 	CachedContentUsageMetadata,
 	Content,
 } from "@google/genai";
+import { type Milliseconds, ms } from "@nestjs-ai/commons";
 
 export interface GoogleGenAiCachedContentProps {
 	name?: string;
@@ -23,13 +23,13 @@ export class GoogleGenAiCachedContent {
 	private readonly _name?: string;
 	private readonly _model?: string;
 	private readonly _displayName?: string;
-	private readonly _systemInstruction?: unknown;
-	private readonly _contents?: unknown[];
+	private readonly _systemInstruction?: Content;
+	private readonly _contents?: Content[];
 	private readonly _createTime?: string;
 	private readonly _updateTime?: string;
 	private readonly _expireTime?: string;
 	private readonly _ttl?: Milliseconds;
-	private readonly _usageMetadata?: unknown;
+	private readonly _usageMetadata?: CachedContentUsageMetadata;
 
 	constructor(props: GoogleGenAiCachedContentProps) {
 		assert(props.model, "Model must not be empty");
@@ -79,11 +79,11 @@ export class GoogleGenAiCachedContent {
 		return this._displayName;
 	}
 
-	get systemInstruction(): unknown | undefined {
+	get systemInstruction(): Content | undefined {
 		return this._systemInstruction;
 	}
 
-	get contents(): unknown[] | undefined {
+	get contents(): Content[] | undefined {
 		return this._contents;
 	}
 
@@ -103,7 +103,7 @@ export class GoogleGenAiCachedContent {
 		return this._ttl;
 	}
 
-	get usageMetadata(): unknown | undefined {
+	get usageMetadata(): CachedContentUsageMetadata | undefined {
 		return this._usageMetadata;
 	}
 
@@ -118,8 +118,7 @@ export class GoogleGenAiCachedContent {
 		if (!this._expireTime) {
 			return null;
 		}
-		const remaining =
-			new Date(this._expireTime).getTime() - new Date().getTime();
+		const remaining = new Date(this._expireTime).getTime() - Date.now();
 		return remaining < 0 ? ms(0) : ms(remaining);
 	}
 }

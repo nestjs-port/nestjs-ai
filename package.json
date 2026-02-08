@@ -6,7 +6,7 @@
 	"description": "NestJS AI Monorepo",
 	"scripts": {
 		"build": "pnpm -r build",
-		"dev": "pnpm -r --parallel dev",
+		"typecheck": "pnpm -r --parallel typecheck",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",

@@ -182,16 +182,18 @@ describe("ChatResponse", () => {
 
 		expect(aggregatedResponse).not.toBeNull();
 
-		const finalAssistantMessage = aggregatedResponse?.result?.output;
+		const finalAssistantMessage = (
+			aggregatedResponse as unknown as ChatResponse
+		).result?.output;
 
 		expect(finalAssistantMessage).not.toBeNull();
-		expect(finalAssistantMessage.text).toBe("Thinking about the weather... ");
-		expect(finalAssistantMessage.hasToolCalls()).toBe(true);
-		expect(finalAssistantMessage.toolCalls).toHaveLength(1);
+		expect(finalAssistantMessage?.text).toBe("Thinking about the weather... ");
+		expect(finalAssistantMessage?.hasToolCalls()).toBe(true);
+		expect(finalAssistantMessage?.toolCalls).toHaveLength(1);
 
-		const resultToolCall = finalAssistantMessage.toolCalls[0];
-		expect(resultToolCall.id).toBe("tool-id-123");
-		expect(resultToolCall.name).toBe("getCurrentWeather");
-		expect(resultToolCall.arguments).toBe('{"location": "Seoul"}');
+		const resultToolCall = finalAssistantMessage?.toolCalls[0];
+		expect(resultToolCall?.id).toBe("tool-id-123");
+		expect(resultToolCall?.name).toBe("getCurrentWeather");
+		expect(resultToolCall?.arguments).toBe('{"location": "Seoul"}');
 	});
 });

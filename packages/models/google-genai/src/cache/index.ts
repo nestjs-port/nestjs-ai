@@ -1,14 +1,14 @@
+export type { CachedContentRequestProps } from "./cached-content-request";
 export {
 	CachedContentRequest,
 	CachedContentRequestBuilder,
 } from "./cached-content-request";
-export type { CachedContentRequestProps } from "./cached-content-request";
-export { CachedContentUpdateRequest } from "./cached-content-update-request";
 export type { CachedContentUpdateRequestProps } from "./cached-content-update-request";
-export { GoogleGenAiCachedContent } from "./google-genai-cached-content";
-export type { GoogleGenAiCachedContentProps } from "./google-genai-cached-content";
+export { CachedContentUpdateRequest } from "./cached-content-update-request";
+export type { GoogleGenAiCachedContentProps } from "./google-gen-ai-cached-content";
+export { GoogleGenAiCachedContent } from "./google-gen-ai-cached-content";
 export {
-	GoogleGenAiCachedContentService,
 	CachedContentException,
 	CachedContentPage,
-} from "./google-genai-cached-content-service";
+	GoogleGenAiCachedContentService,
+} from "./google-gen-ai-cached-content-service";

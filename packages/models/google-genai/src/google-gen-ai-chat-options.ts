@@ -3,8 +3,10 @@ import type {
 	ToolCallback,
 	ToolCallingChatOptions,
 } from "@nestjs-ai/model";
-import type { GoogleGenAiSafetySetting } from "./common";
-import { GoogleGenAiThinkingLevel } from "./common";
+import type {
+	GoogleGenAiSafetySetting,
+	GoogleGenAiThinkingLevel,
+} from "./common";
 
 export class GoogleGenAiChatOptions
 	implements ToolCallingChatOptions, StructuredOutputChatOptions

@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
-import type { Logger, Milliseconds } from "@nestjs-ai/commons";
-import { LoggerFactory, ms } from "@nestjs-ai/commons";
 import type {
 	Caches,
 	CreateCachedContentConfig,
 	GoogleGenAI,
 	UpdateCachedContentConfig,
 } from "@google/genai";
+import type { Logger, Milliseconds } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-ai/commons";
 import type { CachedContentRequest } from "./cached-content-request";
 import { CachedContentUpdateRequest } from "./cached-content-update-request";
-import { GoogleGenAiCachedContent } from "./google-genai-cached-content";
+import { GoogleGenAiCachedContent } from "./google-gen-ai-cached-content";
 
 export class CachedContentException extends Error {
 	constructor(message: string, cause?: Error) {
@@ -53,13 +53,10 @@ export class GoogleGenAiCachedContentService {
 		}
 		return GoogleGenAiCachedContentService._logger;
 	}
-
-	private readonly _genAiClient: GoogleGenAI;
 	private readonly _caches: Caches;
 
 	constructor(genAiClient: GoogleGenAI) {
 		assert(genAiClient, "GenAI client must not be null");
-		this._genAiClient = genAiClient;
 		this._caches = genAiClient.caches;
 	}
 

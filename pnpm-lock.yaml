@@ -94,6 +94,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-ai/retry':
+        specifier: workspace:*
+        version: link:../../retry
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2

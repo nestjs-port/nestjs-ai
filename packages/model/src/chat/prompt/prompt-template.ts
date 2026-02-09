@@ -177,7 +177,7 @@ export class PromptTemplate
 		return new Prompt(this.render(modelOrOptions as Record<string, unknown>));
 	}
 
-	private isChatOptions(obj: unknown): obj is ChatOptions {
+	protected isChatOptions(obj: unknown): obj is ChatOptions {
 		if (obj == null || typeof obj !== "object") {
 			return false;
 		}
@@ -197,13 +197,13 @@ export class PromptTemplate
 }
 
 export class PromptTemplateBuilder {
-	private _template: string | null = null;
+	protected _template: string | null = null;
 
-	private _resource: Buffer | null = null;
+	protected _resource: Buffer | null = null;
 
-	private _variables: Record<string, unknown> = {};
+	protected _variables: Record<string, unknown> = {};
 
-	private _renderer: TemplateRenderer = DEFAULT_TEMPLATE_RENDERER;
+	protected _renderer: TemplateRenderer = DEFAULT_TEMPLATE_RENDERER;
 
 	template(template: string): PromptTemplateBuilder {
 		assert(

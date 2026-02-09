@@ -60,6 +60,9 @@ importers:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
+      '@nestjs-ai/template-st':
+        specifier: workspace:*
+        version: link:../template-st
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2

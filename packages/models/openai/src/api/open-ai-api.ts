@@ -17,9 +17,9 @@ import type {
 	EmbeddingList,
 	EmbeddingRequest,
 	MediaContent,
-} from "./openai-api.types";
-import { ChatModel, EmbeddingModel } from "./openai-api.types";
-import { OpenAiStreamFunctionCallingHelper } from "./openai-stream-function-calling-helper";
+} from "./open-ai-api.types";
+import { ChatModel, EmbeddingModel } from "./open-ai-api.types";
+import { OpenAiStreamFunctionCallingHelper } from "./open-ai-stream-function-calling-helper";
 
 /**
  * Props for creating an OpenAiApi instance.

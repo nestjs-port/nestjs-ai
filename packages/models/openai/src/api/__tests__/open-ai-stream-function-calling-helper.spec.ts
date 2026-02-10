@@ -5,9 +5,9 @@ import type {
 	ChunkChoice,
 	ToolCall,
 	Usage,
-} from "../openai-api.types";
-import { ChatCompletionFinishReason, Role } from "../openai-api.types";
-import { OpenAiStreamFunctionCallingHelper } from "../openai-stream-function-calling-helper";
+} from "../open-ai-api.types";
+import { ChatCompletionFinishReason, Role } from "../open-ai-api.types";
+import { OpenAiStreamFunctionCallingHelper } from "../open-ai-stream-function-calling-helper";
 
 /**
  * Unit tests for {@link OpenAiStreamFunctionCallingHelper}.

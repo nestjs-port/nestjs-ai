@@ -6,4 +6,4 @@
 
 export * from "./api";
 export * from "./metadata";
-export * from "./openai-chat-options";
+export * from "./open-ai-chat-options";

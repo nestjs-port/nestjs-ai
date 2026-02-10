@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { firstValueFrom } from "rxjs";
 import { toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
-import { OpenAiApi } from "../openai-api";
+import { OpenAiApi } from "../open-ai-api";
 import {
 	AudioResponseFormat,
 	type ChatCompletionMessage,
@@ -17,7 +17,7 @@ import {
 	Role,
 	ServiceTier,
 	Voice,
-} from "../openai-api.types";
+} from "../open-ai-api.types";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

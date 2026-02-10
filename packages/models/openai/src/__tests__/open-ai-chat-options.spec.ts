@@ -9,7 +9,7 @@ import {
 	Voice,
 	type WebSearchOptions,
 } from "../api";
-import { OpenAiChatOptions } from "../openai-chat-options";
+import { OpenAiChatOptions } from "../open-ai-chat-options";
 
 describe("OpenAiChatOptions", () => {
 	it("test builder with all fields", () => {

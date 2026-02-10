@@ -6,11 +6,11 @@ import type {
 	Choice,
 	ChunkChoice,
 	ToolCall,
-} from "./openai-api.types";
+} from "./open-ai-api.types";
 import {
 	ChatCompletionFinishReason as FinishReasonEnum,
 	Role as RoleEnum,
-} from "./openai-api.types";
+} from "./open-ai-api.types";
 
 /**
  * Helper class to support Streaming function calling.

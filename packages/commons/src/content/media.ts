@@ -43,6 +43,20 @@ export enum MediaFormat {
 	/** Public constant mime type for {@code video/3gpp}. */
 	VIDEO_THREE_GP = "video/3gpp",
 
+	// Audio formats
+	/** Public constant mime type for {@code audio/mp3}. */
+	AUDIO_MP3 = "audio/mp3",
+	/** Public constant mime type for {@code audio/wav}. */
+	AUDIO_WAV = "audio/wav",
+	/** Public constant mime type for {@code audio/mpeg}. */
+	AUDIO_MPEG = "audio/mpeg",
+	/** Public constant mime type for {@code audio/ogg}. */
+	AUDIO_OGG = "audio/ogg",
+	/** Public constant mime type for {@code audio/flac}. */
+	AUDIO_FLAC = "audio/flac",
+	/** Public constant mime type for {@code audio/webm}. */
+	AUDIO_WEBM = "audio/webm",
+
 	// Image formats
 	/** Public constant mime type for {@code image/png}. */
 	IMAGE_PNG = "image/png",
@@ -55,17 +69,23 @@ export enum MediaFormat {
 }
 
 /**
+ * A MIME type string. Accepts {@link MediaFormat} enum values with IDE autocomplete,
+ * as well as arbitrary MIME type strings.
+ */
+export type MimeType = MediaFormat | (string & {});
+
+/**
  * Options for creating a Media instance.
  */
 export interface MediaOptionsProps {
 	/**
 	 * The media MIME type.
 	 */
-	mimeType: string;
+	mimeType: MimeType;
 	/**
 	 * The media data as binary array or string.
 	 */
-	data: string | Uint8Array;
+	data: unknown;
 	/**
 	 * The media id, usually defined when the model returns a reference to
 	 * media it has been passed.
@@ -121,7 +141,7 @@ export class Media {
 	 */
 	private readonly _id: string | null;
 
-	private readonly _mimeType: string;
+	private readonly _mimeType: MimeType;
 
 	private readonly _data: unknown;
 
@@ -153,7 +173,7 @@ export class Media {
 	 * Get the media MIME type.
 	 * @returns the media MIME type
 	 */
-	get mimeType(): string {
+	get mimeType(): MimeType {
 		return this._mimeType;
 	}
 

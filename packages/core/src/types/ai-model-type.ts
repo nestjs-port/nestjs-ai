@@ -4,13 +4,13 @@ import type {
 	ModelResponse,
 	ModelResult,
 } from "@nestjs-ai/model";
-import type { OpenAiChatOptions } from "./openai-chat-options";
+import type { OpenAiParentProperties } from "./open-ai-parent-properties";
 
 export type ChatModelType =
 	| "gemini"
 	| {
 			type: "openai";
-			options?: OpenAiChatOptions;
+			options?: OpenAiParentProperties;
 	  }
 	| Model<ModelRequest<unknown>, ModelResponse<ModelResult<unknown>>>
 	| (() => Model<ModelRequest<unknown>, ModelResponse<ModelResult<unknown>>>);

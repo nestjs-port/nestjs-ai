@@ -5,6 +5,8 @@
  * Represents the full configuration available under `spring.ai.openai.*`
  */
 
+import type { OpenAiChatOptions } from "./open-ai-chat-options";
+
 // ============================================================
 // Parent Properties (spring.ai.openai)
 // ============================================================
@@ -40,126 +42,6 @@ export interface OpenAiConnectionProperties extends OpenAiParentProperties {
 // Chat Properties (spring.ai.openai.chat)
 // ============================================================
 
-export type ResponseFormatType = "text" | "json_object" | "json_schema";
-
-export interface JsonSchema {
-	name?: string;
-	schema?: Record<string, unknown>;
-	strict?: boolean;
-}
-
-export interface ResponseFormat {
-	type?: ResponseFormatType;
-	jsonSchema?: JsonSchema;
-}
-
-export interface StreamOptions {
-	includeUsage?: boolean;
-}
-
-export type AudioVoice =
-	| "alloy"
-	| "ash"
-	| "ballad"
-	| "coral"
-	| "echo"
-	| "fable"
-	| "onyx"
-	| "nova"
-	| "sage"
-	| "shimmer";
-
-export type AudioResponseFormat = "mp3" | "flac" | "opus" | "pcm16" | "wav";
-
-export interface AudioParameters {
-	voice?: AudioVoice;
-	format?: AudioResponseFormat;
-}
-
-export type SearchContextSize = "low" | "medium" | "high";
-
-export interface ApproximateLocation {
-	city?: string;
-	country?: string;
-	region?: string;
-	timezone?: string;
-}
-
-export interface UserLocation {
-	type?: string;
-	approximate?: ApproximateLocation;
-}
-
-export interface WebSearchOptions {
-	searchContextSize?: SearchContextSize;
-	userLocation?: UserLocation;
-}
-
-export interface FunctionDefinition {
-	description?: string;
-	name?: string;
-	parameters?: Record<string, unknown>;
-	strict?: boolean;
-}
-
-export interface FunctionTool {
-	type?: "function";
-	function?: FunctionDefinition;
-}
-
-export type ToolChoice =
-	| "none"
-	| "auto"
-	| {
-			type: "function";
-			function: { name: string };
-	  };
-
-export type ServiceTier = "auto" | "scale";
-
-export type ReasoningEffort = "low" | "medium" | "high";
-
-export type Verbosity = "low" | "medium" | "high";
-
-/**
- * OpenAI Chat Options.
- *
- * Converted from OpenAiChatOptions.java
- */
-export interface OpenAiChatOptions {
-	model?: string;
-	frequencyPenalty?: number;
-	logitBias?: Record<string, number>;
-	logprobs?: boolean;
-	topLogprobs?: number;
-	maxTokens?: number;
-	maxCompletionTokens?: number;
-	n?: number;
-	outputModalities?: string[];
-	outputAudio?: AudioParameters;
-	presencePenalty?: number;
-	responseFormat?: ResponseFormat;
-	streamOptions?: StreamOptions;
-	seed?: number;
-	stop?: string[];
-	temperature?: number;
-	topP?: number;
-	tools?: FunctionTool[];
-	toolChoice?: ToolChoice;
-	user?: string;
-	parallelToolCalls?: boolean;
-	store?: boolean;
-	metadata?: Record<string, string>;
-	reasoningEffort?: ReasoningEffort;
-	verbosity?: Verbosity;
-	webSearchOptions?: WebSearchOptions;
-	serviceTier?: ServiceTier;
-	promptCacheKey?: string;
-	safetyIdentifier?: string;
-	httpHeaders?: Record<string, string>;
-	extraBody?: Record<string, unknown>;
-}
-
 /**
  * OpenAI Chat properties.
  *
@@ -168,7 +50,7 @@ export interface OpenAiChatOptions {
  */
 export interface OpenAiChatProperties extends OpenAiParentProperties {
 	completionsPath?: string;
-	options?: OpenAiChatOptions;
+	options?: Partial<OpenAiChatOptions>;
 }
 
 // ============================================================

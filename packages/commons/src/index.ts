@@ -1,4 +1,5 @@
 export * from "./content";
+export * from "./factory";
 export * from "./logging";
 export * from "./observation";
 export * from "./retry";

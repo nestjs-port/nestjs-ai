@@ -1,7 +1,6 @@
-import type { HttpClient } from "@nestjs-ai/commons";
-import type { ChatModelType } from "../types";
+import type { ChatModelFactory, HttpClient } from "@nestjs-ai/commons";
 
 export interface NestAIModuleOptions {
-	chatModel?: ChatModelType;
+	chatModel?: ChatModelFactory;
 	httpClient?: HttpClient;
 }

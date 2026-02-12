@@ -1,9 +1,13 @@
-import type { DynamicModule, Provider } from "@nestjs/common";
+import type {
+	DynamicModule,
+	InjectionToken,
+	ModuleMetadata,
+	Provider,
+} from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import { FetchHttpClient, LoggerFactory } from "@nestjs-ai/commons";
-import { CHAT_MODEL_TOKEN, HTTP_CLIENT_TOKEN } from "../constants";
+import { HTTP_CLIENT_TOKEN } from "../constants";
 import { NestLoggerFactory } from "../logging";
-import { createChatModel } from "./create-chat-model";
 import type { NestAIModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
@@ -11,7 +15,7 @@ import type { NestAIModuleOptions } from "./nest-ai-module.options";
 export class NestAIModule {
 	static forRoot(options: NestAIModuleOptions = {}): DynamicModule {
 		const providers: Provider[] = [];
-		const exports: symbol[] = [];
+		const exports: ModuleMetadata["exports"] = [];
 
 		providers.push({
 			provide: HTTP_CLIENT_TOKEN,
@@ -20,11 +24,14 @@ export class NestAIModule {
 		exports.push(HTTP_CLIENT_TOKEN);
 
 		if (options.chatModel) {
-			providers.push({
-				provide: CHAT_MODEL_TOKEN,
-				useValue: createChatModel(options.chatModel),
-			});
-			exports.push(CHAT_MODEL_TOKEN);
+			for (const { token, useFactory, inject } of options.chatModel.providers) {
+				providers.push({
+					provide: token as InjectionToken,
+					useFactory,
+					inject: (inject ?? []) as InjectionToken[],
+				});
+				exports.push(token as InjectionToken);
+			}
 		}
 
 		LoggerFactory.bind(new NestLoggerFactory());

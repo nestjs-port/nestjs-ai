@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { CHAT_MODEL_TOKEN } from "../constants";
+import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 
 /**
  * Decorator that injects the chat model instance.

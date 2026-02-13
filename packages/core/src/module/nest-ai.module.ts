@@ -5,8 +5,11 @@ import type {
 	Provider,
 } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import { FetchHttpClient, LoggerFactory } from "@nestjs-ai/commons";
-import { HTTP_CLIENT_TOKEN } from "../constants";
+import {
+	FetchHttpClient,
+	HTTP_CLIENT_TOKEN,
+	LoggerFactory,
+} from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
 import type { NestAIModuleOptions } from "./nest-ai-module.options";
 

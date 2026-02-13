@@ -2,10 +2,75 @@ import type { Logger } from "./logger.interface";
 import type { ILoggerFactory } from "./logger-factory.interface";
 
 /**
+ * Module-level reference to the bound factory, accessible by DelegatingLogger.
+ */
+let boundFactory: ILoggerFactory | null = null;
+
+/**
+ * A logger that delegates to the real logger once the factory is bound.
+ */
+class DelegatingLogger implements Logger {
+	private _delegate?: Logger;
+
+	constructor(readonly name: string) {}
+
+	private get delegate(): Logger | undefined {
+		if (!this._delegate && boundFactory) {
+			this._delegate = boundFactory.getLogger(this.name);
+		}
+		return this._delegate;
+	}
+
+	trace(message: string, ...args: unknown[]): void {
+		this.delegate?.trace(message, ...args);
+	}
+
+	debug(message: string, ...args: unknown[]): void {
+		this.delegate?.debug(message, ...args);
+	}
+
+	info(message: string, ...args: unknown[]): void {
+		this.delegate?.info(message, ...args);
+	}
+
+	warn(message: string, ...args: unknown[]): void {
+		this.delegate?.warn(message, ...args);
+	}
+
+	error(message: string, ...args: unknown[]): void {
+		this.delegate?.error(message, ...args);
+	}
+
+	isTraceEnabled(): boolean {
+		return this.delegate?.isTraceEnabled() ?? false;
+	}
+
+	isDebugEnabled(): boolean {
+		return this.delegate?.isDebugEnabled() ?? false;
+	}
+
+	isInfoEnabled(): boolean {
+		return this.delegate?.isInfoEnabled() ?? false;
+	}
+
+	isWarnEnabled(): boolean {
+		return this.delegate?.isWarnEnabled() ?? false;
+	}
+
+	isErrorEnabled(): boolean {
+		return this.delegate?.isErrorEnabled() ?? false;
+	}
+}
+
+/**
  * The LoggerFactory is a utility class producing Loggers for various logging APIs.
  *
  * This class is similar to SLF4J's LoggerFactory. It serves as a static facade
  * that delegates to the bound ILoggerFactory implementation.
+ *
+ * Before {@link bind} is called, loggers returned by {@link getLogger} are
+ * no-op. Once a factory is bound, they automatically resolve to the real
+ * logger on the next call. This allows safe usage during static initialization.
  *
  * @example
  * ```typescript
@@ -21,8 +86,6 @@ import type { ILoggerFactory } from "./logger-factory.interface";
  * ```
  */
 export class LoggerFactory {
-	private static factory: ILoggerFactory | null = null;
-
 	/**
 	 * Private constructor to prevent instantiation.
 	 */
@@ -37,22 +100,20 @@ export class LoggerFactory {
 	 * @param factory - The ILoggerFactory implementation to bind
 	 */
 	static bind(factory: ILoggerFactory): void {
-		LoggerFactory.factory = factory;
+		boundFactory = factory;
 	}
 
 	/**
 	 * Return a logger named according to the name parameter.
 	 *
+	 * If no factory has been bound yet, the returned logger is no-op until
+	 * {@link bind} is called, after which it automatically delegates to the
+	 * real logger.
+	 *
 	 * @param name - The name of the logger
 	 * @returns A Logger instance
-	 * @throws Error if no ILoggerFactory has been bound
 	 */
 	static getLogger(name: string): Logger {
-		if (!LoggerFactory.factory) {
-			throw new Error(
-				"LoggerFactory not bound. Call LoggerFactory.bind() with an ILoggerFactory implementation first.",
-			);
-		}
-		return LoggerFactory.factory.getLogger(name);
+		return new DelegatingLogger(name);
 	}
 }

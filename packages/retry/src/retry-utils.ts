@@ -1,5 +1,4 @@
 import {
-	type Logger,
 	LoggerFactory,
 	ms,
 	type ResponseErrorHandler,
@@ -26,14 +25,7 @@ export class RetryUtils {
 
 	private static readonly SHORT_INITIAL_INTERVAL = ms(100);
 
-	private static _logger: Logger | null = null;
-
-	private static get logger() {
-		if (RetryUtils._logger === null) {
-			RetryUtils._logger = LoggerFactory.getLogger(RetryUtils.name);
-		}
-		return RetryUtils._logger;
-	}
+	private static readonly logger = LoggerFactory.getLogger(RetryUtils.name);
 
 	private constructor() {
 		// Prevent instantiation - utility class

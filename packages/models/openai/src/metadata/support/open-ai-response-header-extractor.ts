@@ -1,4 +1,4 @@
-import type { Logger, Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-ai/commons";
 import { LoggerFactory, ms } from "@nestjs-ai/commons";
 import type { RateLimit } from "@nestjs-ai/model";
 import { OpenAiRateLimit } from "../open-ai-rate-limit";
@@ -8,15 +8,9 @@ import { OpenAiApiResponseHeaders } from "./open-ai-api-response-headers";
  * Utility used to extract known HTTP response headers for the OpenAI API.
  */
 export class OpenAiResponseHeaderExtractor {
-	private static _logger: Logger | null = null;
-	private static get logger(): Logger {
-		if (!OpenAiResponseHeaderExtractor._logger) {
-			OpenAiResponseHeaderExtractor._logger = LoggerFactory.getLogger(
-				OpenAiResponseHeaderExtractor.name,
-			);
-		}
-		return OpenAiResponseHeaderExtractor._logger;
-	}
+	private static readonly logger = LoggerFactory.getLogger(
+		OpenAiResponseHeaderExtractor.name,
+	);
 
 	private constructor() {
 		// Prevent instantiation

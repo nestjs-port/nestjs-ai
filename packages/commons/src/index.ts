@@ -4,6 +4,7 @@ export * from "./converter";
 export * from "./factory";
 export * from "./logging";
 export * from "./observation";
+export * from "./ordered.interface";
 export * from "./retry";
 export * from "./template";
 export * from "./temporal";

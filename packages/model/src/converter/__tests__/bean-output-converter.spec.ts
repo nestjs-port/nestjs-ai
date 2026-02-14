@@ -30,10 +30,8 @@ describe("BeanOutputConverter", () => {
 		});
 
 		it("converts array payload", () => {
-			const converter = new BeanOutputConverter(TestClass);
-			const result = converter.convert(
-				'[{ "someString": "some value" }]',
-			) as unknown as TestClass[];
+			const converter = new BeanOutputConverter<TestClass[]>(TestClass);
+			const result = converter.convert('[{ "someString": "some value" }]');
 			expect(Array.isArray(result)).toBe(true);
 			expect(result).toHaveLength(1);
 			expect(result[0]?.someString).toBe("some value");

@@ -1,7 +1,4 @@
-export {
-	BeanOutputConverter,
-	type BeanOutputConverterProps,
-} from "./bean-output-converter";
+export { BeanOutputConverter } from "./bean-output-converter";
 export {
 	CompositeResponseTextCleaner,
 	type CompositeResponseTextCleanerBuilder,

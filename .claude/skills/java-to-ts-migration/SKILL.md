@@ -1,35 +1,35 @@
 ---
 name: java-to-ts-migration
-description: Migrate Spring AI Java files to NestJS AI TypeScript. Use when converting Java classes/interfaces from spring-ai to TypeScript in nestjs-ai, maintaining package structure and patterns.
-argument-hint: <path-to-java-file>
+description: Migrate Spring AI Java source or test files into equivalent NestJS AI TypeScript files while preserving behavior and module structure. Use when asked to convert specific Java classes, interfaces, enums, or JUnit tests from `spring-ai` to `nestjs-ai`, especially single-file migrations that assume dependent TypeScript files already exist.
 ---
 
-# Java to TypeScript Migration Guide
+# Java To TypeScript Migration
 
-This skill guides the migration of Java files from `spring-ai` to TypeScript in `nestjs-ai`.
+Migrate Java files from `spring-ai` to TypeScript in `nestjs-ai`.
+Convert only requested files unless explicitly told to perform a batch migration.
 
-## Usage
+## Workflow
 
-**Single File Migration Mode:**
-- Migrate ONLY the specified Java file to TypeScript
-- Do NOT migrate other files, even if they are related or referenced
-- If the file depends on types/classes from other files that don't exist yet in TypeScript:
-  - **Assume they already exist** and import them as if they were available
-  - Use the expected TypeScript path based on the directory mapping below
-  - Do NOT create stub files or placeholder implementations
-- Focus solely on converting the given file's content
+1. Confirm migration scope.
+Convert only the explicitly requested file.
+If the file references missing TypeScript dependencies, assume they already exist and import by expected path.
+Do not create stub files unless the user asks.
 
-**Example:**
-```
-/java-to-ts-migration spring-ai-model/src/main/java/org/springframework/ai/chat/messages/UserMessage.java
-```
-This will migrate only `UserMessage.java`, assuming any dependencies like `AbstractMessage`, `Message` interface, etc. already exist.
+2. Map source path to target path.
+Use the mapping table below to choose target package and output location.
+Use kebab-case file names in TypeScript.
 
-## Additional Resources
+3. Convert implementation semantics.
+Preserve behavior and API intent, not Java syntax.
+Apply the conversion rules in this file, then pull detailed examples from `reference/code-patterns.md` when needed.
 
-For detailed patterns and examples, see:
-- [Code Patterns](reference/code-patterns.md) - Interface, class, builder, enum conversions
-- [Test Migration](reference/test-migration.md) - JUnit to Vitest conversion
+4. Convert tests when the input is a test file.
+Use `reference/test-migration.md` for JUnit-to-Vitest mapping and naming constraints.
+Do not add new tests that did not exist in Java.
+
+5. Export surface updates.
+If the migrated file is part of public module surface, update the closest `index.ts` barrel export.
+Keep export style consistent with neighboring files.
 
 ## Directory Structure Mapping
 
@@ -56,9 +56,9 @@ For detailed patterns and examples, see:
 | `FooBar.java` (interface) | `foo-bar.interface.ts` or `foo-bar.ts`|
 | `FooBarTests.java`        | `__tests__/foo-bar.spec.ts`           |
 
-## Type Conversion Quick Reference
+## Conversion Rules
 
-### Primitive Types
+### Type Mapping
 
 | Java                      | TypeScript                            |
 |---------------------------|---------------------------------------|
@@ -86,37 +86,16 @@ For detailed patterns and examples, see:
 | `Mono<T>`                 | `Promise<T>`                          |
 | `Resource`                | Remove (Spring-specific)              |
 
-## Key Conversion Rules
+### Structure And API Rules
 
-### 1. Getters
-- `getXxx()` methods → `get xxx(): Type` getters
-
-### 2. Fields
-- Prefix protected/private fields with `_` underscore
-- Use `readonly` for immutable fields
-- `public static final` → `static readonly`
-
-### 3. Constructors
-- Create `{ClassName}Props` interface for constructor parameters
-- Use object destructuring with defaults
-
-### 4. Assertions
-- Replace `Assert.notNull()` with `assert()` from `node:assert/strict`
-
-### 5. Collections
-- Replace `new HashMap<>(map)` with spread operator `{ ...metadata }`
-- Replace `new ArrayList<>(list)` with spread operator `[...list]`
-
-### 6. Interfaces with Static/Default Methods
-- Java interface with `static` methods or `default` methods → TypeScript `abstract class`
-- Static constants → `static readonly` properties (also provide instance properties for compatibility)
-- Static methods → `static` methods on abstract class
-- Default methods → regular methods (not abstract)
-- Abstract methods remain `abstract`
-- Simple interfaces (no static/default methods) remain as `interface`
-
-### 7. toString
-- `toString()` → `[Symbol.toPrimitive](): string`
+1. Convert `getXxx()` methods to TypeScript getters (`get xxx(): Type`).
+2. Prefix protected/private fields with `_` and add `readonly` where immutability is intended.
+3. Convert `public static final` constants to `static readonly`.
+4. Prefer `{ClassName}Props` constructor interfaces with object options over overloaded Java constructors.
+5. Replace `Assert.notNull(...)` with `assert(...)` from `node:assert/strict`.
+6. Replace Java copy constructors (`new HashMap<>(x)`, `new ArrayList<>(x)`) with spread copies.
+7. Convert Java interfaces with `static` or `default` methods into TypeScript `abstract class`; keep plain interfaces as `interface`.
+8. Convert `toString()` to `[Symbol.toPrimitive](): string` when string coercion behavior is part of public API.
 
 ## Import/Export Patterns
 
@@ -143,72 +122,27 @@ import { AbstractMessage } from "./abstract-message";
 import type { Message } from "./message.interface";
 ```
 
-## Migration Workflow
-
-### Step 1: Identify Source Files
-```bash
-# Find the Java source file
-ls spring-ai-model/src/main/java/org/springframework/ai/chat/messages/
-
-# Find corresponding test file
-ls spring-ai-model/src/test/java/org/springframework/ai/chat/messages/
-```
-
-### Step 2: Create Target Files
-```bash
-# Create TypeScript file in corresponding location
-touch nestjs-ai/packages/model/src/chat/messages/new-message.ts
-
-# Create test file
-touch nestjs-ai/packages/model/src/chat/messages/__tests__/new-message.spec.ts
-```
-
-### Step 3: Convert Code
-1. Convert imports (Java packages → TypeScript imports)
-2. Convert class/interface declaration
-3. Convert fields (apply `_` prefix, `readonly`)
-4. Convert constructor (use Props interface pattern)
-5. Convert methods (getters use `get` keyword)
-6. Convert static methods (use `static` or namespace pattern)
-7. Add `[Symbol.toPrimitive]` if `toString` exists
-
-### Step 4: Update Index
-Add exports to `index.ts`:
-```typescript
-export { NewMessage, type NewMessageProps } from "./new-message";
-```
-
-### Step 5: Convert Tests
-1. Change `@Test` methods to `it()` blocks
-2. Wrap in `describe()` block
-3. Convert AssertJ assertions to Vitest expectations
-4. Run tests: `npm test`
-
 ## Comments Handling
 
-**Do NOT migrate:**
-- Javadoc comments (class, method, field documentation)
-- License header comments
+Do not migrate Javadoc or license headers.
+Preserve meaningful inline implementation comments inside method/function bodies.
 
-**DO migrate:**
-- Comments inside method bodies (implementation comments)
+## Reference Files
+
+- Use `reference/code-patterns.md` for concrete class/interface/builder conversions.
+- Use `reference/test-migration.md` for JUnit-to-Vitest rules, especially naming and structure constraints.
 
 ## Checklist
 
 ```
 Migration Checklist:
-- [ ] File created with kebab-case name
-- [ ] Props interface defined (if class has constructor params)
-- [ ] Fields prefixed with _ and marked readonly
-- [ ] Getters use `get` keyword (not `getXxx()` methods)
-- [ ] Interface with static/default methods → abstract class
-- [ ] Static methods converted
-- [ ] Builder pattern converted (Props or Builder class)
-- [ ] toString → [Symbol.toPrimitive]
-- [ ] Javadoc and license comments NOT migrated
-- [ ] Comments inside method bodies preserved
-- [ ] Imports use correct package paths
-- [ ] Exported in index.ts
-- [ ] Tests migrated to __tests__/*.spec.ts
-- [ ] All tests pass
+- [ ] Convert only requested file(s)
+- [ ] Map to correct `nestjs-ai` package path
+- [ ] Apply kebab-case file naming
+- [ ] Preserve behavior and public API intent
+- [ ] Apply getter/field/constructor conversion rules
+- [ ] Keep imports and barrel exports consistent
+- [ ] Omit Javadoc and license headers
+- [ ] Preserve meaningful inline implementation comments
+- [ ] For tests, keep case names/structure aligned with source JUnit tests
 ```

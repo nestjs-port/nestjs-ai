@@ -27,6 +27,18 @@ importers:
         specifier: ^4.0.16
         version: 4.0.16(@types/node@25.0.9)(yaml@2.8.2)
 
+  packages/client-chat:
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../model
+      rxjs:
+        specifier: ^7.0.0
+        version: 7.8.2
+
   packages/commons:
     dependencies:
       uuid:

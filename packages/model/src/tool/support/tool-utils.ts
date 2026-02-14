@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import assert from "node:assert/strict";
-import { type Logger, LoggerFactory, ParsingUtils } from "@nestjs-ai/commons";
+import { LoggerFactory, ParsingUtils } from "@nestjs-ai/commons";
 import {
 	TOOL_METADATA_KEY,
 	type ToolAnnotationMetadata,
@@ -20,13 +20,7 @@ export abstract class ToolUtils {
 	 */
 	private static readonly RECOMMENDED_NAME_PATTERN = /^[a-zA-Z0-9_.-]+$/;
 
-	private static _logger: Logger | null = null;
-	private static get logger(): Logger {
-		if (!ToolUtils._logger) {
-			ToolUtils._logger = LoggerFactory.getLogger(ToolUtils.name);
-		}
-		return ToolUtils._logger;
-	}
+	private static readonly logger = LoggerFactory.getLogger(ToolUtils.name);
 
 	private constructor() {
 		// Utility class - prevent instantiation

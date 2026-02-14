@@ -57,10 +57,31 @@ export class ThinkingTagCleanerBuilder {
 			this._patterns = [];
 			this._useDefaultPatterns = true;
 		}
-		this._patterns.push(
-			typeof pattern === "string" ? new RegExp(pattern, "gi") : pattern,
-		);
+		this._patterns.push(this.normalizePattern(pattern));
 		return this;
+	}
+
+	private normalizePattern(pattern: string | RegExp): RegExp {
+		if (pattern instanceof RegExp) {
+			const flags = pattern.flags.includes("g")
+				? pattern.flags
+				: `${pattern.flags}g`;
+			return new RegExp(pattern.source, flags);
+		}
+
+		let source = pattern;
+		const flags = new Set<string>(["g", "i"]);
+		const inlineFlags = source.match(/^\(\?([a-zA-Z]+)\)/);
+		if (inlineFlags?.[1]) {
+			source = source.slice(inlineFlags[0].length);
+			for (const flag of inlineFlags[1].toLowerCase()) {
+				if (flag === "i" || flag === "m" || flag === "s" || flag === "u") {
+					flags.add(flag);
+				}
+			}
+		}
+
+		return new RegExp(source, [...flags].join(""));
 	}
 
 	build(): ThinkingTagCleaner {

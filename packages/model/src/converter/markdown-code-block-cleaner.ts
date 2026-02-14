@@ -9,11 +9,14 @@ export class MarkdownCodeBlockCleaner implements ResponseTextCleaner {
 		let result = text.trim();
 
 		if (result.startsWith("```") && result.endsWith("```")) {
-			const lines = result.split("\n", 2);
-			if (lines[0]?.trim().toLowerCase().startsWith("```")) {
-				const firstLine = lines[0].trim();
+			const firstNewline = result.indexOf("\n");
+			const firstLine =
+				firstNewline >= 0
+					? result.slice(0, firstNewline).trim()
+					: result.trim();
+			if (firstLine.toLowerCase().startsWith("```")) {
 				if (firstLine.length > 3) {
-					result = lines.length > 1 ? lines[1] : "";
+					result = firstNewline >= 0 ? result.slice(firstNewline + 1) : "";
 				} else {
 					result = result.substring(3);
 				}

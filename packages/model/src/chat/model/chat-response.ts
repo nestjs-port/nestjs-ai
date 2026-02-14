@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import type { ModelResponse } from "../../model";
-import type { ToolCall } from "../messages";
 import { ChatResponseMetadata } from "../metadata";
 import type { Generation } from "./generation";
 
@@ -54,18 +53,6 @@ export class ChatResponse implements ModelResponse<Generation> {
 		return this._chatResponseMetadata;
 	}
 
-	getResult(): Generation | null {
-		return this.result;
-	}
-
-	getResults(): Generation[] {
-		return this.results;
-	}
-
-	getMetadata(): ChatResponseMetadata {
-		return this.metadata;
-	}
-
 	/**
 	 * Whether the model has requested the execution of a tool.
 	 */
@@ -74,10 +61,6 @@ export class ChatResponse implements ModelResponse<Generation> {
 			return false;
 		}
 		return this._generations.some((gen) => gen.output.hasToolCalls());
-	}
-
-	getToolCalls(): ToolCall[] {
-		return this._generations.flatMap((gen) => gen.output.toolCalls);
 	}
 
 	/**

@@ -21,20 +21,20 @@ export class SimpleObservationScope implements ObservationScope {
 	) {
 		this._observation = observation;
 		this._registry = registry;
-		this._previousObservationScope = registry.getCurrentObservationScope();
-		registry.setCurrentObservationScope(this);
+		this._previousObservationScope = registry.currentObservationScope;
+		registry.currentObservationScope = this;
 	}
 
-	getCurrentObservation(): Observation<ObservationContext> {
+	get currentObservation(): Observation<ObservationContext> {
 		return this._observation;
 	}
 
-	getPreviousObservationScope(): ObservationScope | null {
+	get previousObservationScope(): ObservationScope | null {
 		return this._previousObservationScope;
 	}
 
 	close(): void {
 		this._observation.notifyOnScopeClosed();
-		this._registry.setCurrentObservationScope(this._previousObservationScope);
+		this._registry.currentObservationScope = this._previousObservationScope;
 	}
 }

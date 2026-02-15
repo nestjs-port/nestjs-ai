@@ -2,6 +2,7 @@ import type { Observation } from "./observation";
 import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";
 import type { ObservationRegistry } from "./observation-registry.interface";
+import { SimpleObservation } from "./simple-observation";
 
 /**
  * Documents an observation including its name and conventions.
@@ -39,14 +40,14 @@ export abstract class ObservationDocumentation {
 	/**
 	 * Returns the technical name for the observation.
 	 */
-	getName(): string | null {
+	get name(): string | null {
 		return this._name;
 	}
 
 	/**
 	 * Returns the contextual name for the observation.
 	 */
-	getContextualName(): string | null {
+	get contextualName(): string | null {
 		return this._contextualName;
 	}
 
@@ -65,10 +66,21 @@ export abstract class ObservationDocumentation {
 		contextSupplier: () => CTX,
 		registry: ObservationRegistry,
 	): Observation<CTX> {
-		return registry.observation(
+		const observation = SimpleObservation.createNotStarted(
 			customConvention,
 			defaultConvention,
 			contextSupplier,
+			registry,
 		);
+
+		if (this.name !== null) {
+			observation.context.name = this.name ?? "";
+		}
+
+		if (this.contextualName !== null) {
+			observation.contextualName(this.contextualName);
+		}
+
+		return observation;
 	}
 }

@@ -9,12 +9,12 @@ export interface ObservationScope {
 	/**
 	 * Returns the observation associated with this scope.
 	 */
-	getCurrentObservation(): Observation<ObservationContext>;
+	readonly currentObservation: Observation<ObservationContext>;
 
 	/**
 	 * Returns the previous observation scope (for stack-based nesting).
 	 */
-	getPreviousObservationScope(): ObservationScope | null;
+	readonly previousObservationScope: ObservationScope | null;
 
 	/**
 	 * Closes this scope, restoring the previous scope as current.

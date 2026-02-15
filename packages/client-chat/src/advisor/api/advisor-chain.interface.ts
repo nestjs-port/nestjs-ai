@@ -4,4 +4,5 @@
  *
  * Observation support is intentionally excluded for now.
  */
-export type AdvisorChain = Record<string, never>;
+// biome-ignore lint/suspicious/noEmptyInterface: Marker interface migrated from Spring AI.
+export interface AdvisorChain {}

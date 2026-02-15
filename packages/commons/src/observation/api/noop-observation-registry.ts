@@ -3,6 +3,7 @@ import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";
 import type { ObservationHandler } from "./observation-handler.interface";
 import type { ObservationRegistry } from "./observation-registry.interface";
+import type { ObservationScope } from "./observation-scope.interface";
 
 /**
  * No-op implementation of ObservationRegistry.
@@ -19,7 +20,7 @@ export class NoopObservationRegistry implements ObservationRegistry {
 		contextSupplier: () => CTX,
 	): Observation<CTX> {
 		const context = contextSupplier();
-		return new Observation(context, defaultConvention, []);
+		return new Observation(context, defaultConvention, [], this);
 	}
 
 	addHandler(_handler: ObservationHandler<ObservationContext>): void {
@@ -28,5 +29,17 @@ export class NoopObservationRegistry implements ObservationRegistry {
 
 	isNoop(): boolean {
 		return true;
+	}
+
+	getCurrentObservationScope(): ObservationScope | null {
+		return null;
+	}
+
+	setCurrentObservationScope(_scope: ObservationScope | null): void {
+		// no-op
+	}
+
+	getCurrentObservation(): Observation<ObservationContext> | null {
+		return null;
 	}
 }

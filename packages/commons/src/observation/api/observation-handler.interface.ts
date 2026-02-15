@@ -16,6 +16,16 @@ export interface ObservationHandler<CTX extends ObservationContext> {
 	onStart?(context: CTX): void;
 
 	/**
+	 * Called when a scope is opened for the observation.
+	 */
+	onScopeOpened?(context: CTX): void;
+
+	/**
+	 * Called when a scope is closed for the observation.
+	 */
+	onScopeClosed?(context: CTX): void;
+
+	/**
 	 * Called when an error occurs during the observation.
 	 */
 	onError?(context: CTX): void;

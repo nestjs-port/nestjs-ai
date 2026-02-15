@@ -2,6 +2,7 @@ import type { Observation } from "./observation";
 import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";
 import type { ObservationHandler } from "./observation-handler.interface";
+import type { ObservationScope } from "./observation-scope.interface";
 
 /**
  * Registry that creates observations and manages handlers.
@@ -31,4 +32,19 @@ export interface ObservationRegistry {
 	 * Whether this registry is a no-op implementation.
 	 */
 	isNoop(): boolean;
+
+	/**
+	 * Returns the current observation scope, or null if none is active.
+	 */
+	getCurrentObservationScope(): ObservationScope | null;
+
+	/**
+	 * Sets the current observation scope.
+	 */
+	setCurrentObservationScope(scope: ObservationScope | null): void;
+
+	/**
+	 * Returns the current observation from the current scope, or null if none.
+	 */
+	getCurrentObservation(): Observation<ObservationContext> | null;
 }

@@ -3,5 +3,8 @@ export { NoopObservationRegistry } from "./noop-observation-registry";
 export { Observation } from "./observation";
 export { ObservationContext } from "./observation-context";
 export type { ObservationConvention } from "./observation-convention.interface";
+export { ObservationDocumentation } from "./observation-documentation.interface";
 export type { ObservationHandler } from "./observation-handler.interface";
 export type { ObservationRegistry } from "./observation-registry.interface";
+export type { ObservationScope } from "./observation-scope.interface";
+export { SimpleObservationScope } from "./simple-observation-scope";

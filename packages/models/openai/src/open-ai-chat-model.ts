@@ -7,7 +7,6 @@ import {
 	NoopObservationRegistry,
 	type ObservationRegistry,
 	type RetryTemplate,
-	withObservationScope,
 } from "@nestjs-ai/commons";
 import type { RateLimit, ToolDefinition } from "@nestjs-ai/model";
 import {
@@ -39,7 +38,7 @@ import {
 } from "@nestjs-ai/model";
 import { RetryUtils } from "@nestjs-ai/retry";
 import { defer, from, type Observable, switchMap } from "rxjs";
-import { bufferCount, finalize, map, tap } from "rxjs/operators";
+import { bufferCount, map } from "rxjs/operators";
 import { InputAudioFormat, OpenAiApi, OpenAiApiConstants } from "./api";
 import {
 	type ToolCall as ApiToolCall,
@@ -381,32 +380,10 @@ export class OpenAiChatModel extends ChatModel {
 				() => observationContext,
 				this._observationRegistry,
 			);
-			observation.start();
-			const scope = observation.openScope();
-
-			const observedFlux = flux.pipe(
-				tap({
-					error: (error) => {
-						observation.error(
-							error instanceof Error ? error : new Error(String(error)),
-						);
-					},
-				}),
-				finalize(() => {
-					scope.close();
-					observation.stop();
-				}),
-			);
-
-			const aggregatedFlux = new MessageAggregator().aggregate(
-				observedFlux,
-				(chatResponse) => {
+			return observation.observeStream(() =>
+				new MessageAggregator().aggregate(flux, (chatResponse) => {
 					observationContext.response = chatResponse;
-				},
-			);
-
-			return aggregatedFlux.pipe(
-				withObservationScope(this._observationRegistry, scope),
+				}),
 			);
 		});
 	}

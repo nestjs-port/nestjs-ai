@@ -10,6 +10,5 @@ export { ObservationDocumentation } from "./observation-documentation";
 export type { ObservationHandler } from "./observation-handler.interface";
 export type { ObservationRegistry } from "./observation-registry.interface";
 export type { ObservationScope } from "./observation-scope.interface";
-export { withObservationScope } from "./rxjs-observation";
 export { SimpleObservation } from "./simple-observation";
 export { SimpleObservationScope } from "./simple-observation-scope";

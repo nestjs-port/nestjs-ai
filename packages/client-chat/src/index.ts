@@ -1,5 +1,6 @@
 export * from "./advisor";
 export { ChatClientAttributes } from "./chat-client-attributes";
+export { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
 export {
 	ChatClientRequest,
 	ChatClientRequestBuilder,

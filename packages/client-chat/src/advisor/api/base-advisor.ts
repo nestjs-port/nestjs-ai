@@ -14,7 +14,7 @@ import {
 import type { ChatClientRequest } from "../../chat-client-request";
 import type { ChatClientResponse } from "../../chat-client-response";
 import { AdvisorUtils } from "../advisor-utils";
-import type { AdvisorChain } from "./advisor-chain.interface";
+import type { AdvisorChain } from "./advisor-chain";
 import type { CallAdvisor } from "./call-advisor.interface";
 import type { CallAdvisorChain } from "./call-advisor-chain.interface";
 import type { StreamAdvisor } from "./stream-advisor.interface";
@@ -28,7 +28,7 @@ export abstract class BaseAdvisor implements CallAdvisor, StreamAdvisor {
 	adviseCall(
 		chatClientRequest: ChatClientRequest,
 		callAdvisorChain: CallAdvisorChain,
-	): ChatClientResponse {
+	): Promise<ChatClientResponse> {
 		assert(chatClientRequest != null, "chatClientRequest cannot be null");
 		assert(callAdvisorChain != null, "callAdvisorChain cannot be null");
 
@@ -36,10 +36,11 @@ export abstract class BaseAdvisor implements CallAdvisor, StreamAdvisor {
 			chatClientRequest,
 			callAdvisorChain,
 		);
-		const chatClientResponse = callAdvisorChain.nextCall(
-			processedChatClientRequest,
-		);
-		return this.after(chatClientResponse, callAdvisorChain);
+		return callAdvisorChain
+			.nextCall(processedChatClientRequest)
+			.then((chatClientResponse) =>
+				this.after(chatClientResponse, callAdvisorChain),
+			);
 	}
 
 	adviseStream(

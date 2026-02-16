@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import type { Message } from "../../chat";
-import { ToolExecutionResult } from "./tool-execution-result.interface";
+import { ToolExecutionResult } from "./tool-execution-result";
 
 export interface DefaultToolExecutionResultProps {
 	conversationHistory: Message[];

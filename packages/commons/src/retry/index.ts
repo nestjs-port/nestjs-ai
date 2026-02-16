@@ -5,7 +5,7 @@ export * from "./fixed-back-off";
 export * from "./retry-exception";
 export * from "./retry-listener.interface";
 export * from "./retry-operations.interface";
-export * from "./retry-policy.interface";
+export * from "./retry-policy";
 export * from "./retry-state";
 export * from "./retry-template";
 export * from "./retryable.interface";

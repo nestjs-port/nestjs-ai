@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RetryException } from "../retry-exception";
 import type { RetryListener } from "../retry-listener.interface";
-import type { RetryPolicy } from "../retry-policy.interface";
+import type { RetryPolicy } from "../retry-policy";
 import type { RetryState } from "../retry-state";
 import type { Retryable } from "../retryable.interface";
 import { CompositeRetryListener } from "../support/composite-retry-listener";

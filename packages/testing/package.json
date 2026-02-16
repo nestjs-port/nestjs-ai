@@ -21,7 +21,6 @@
 		"@nestjs-ai/commons": "*"
 	},
 	"devDependencies": {
-		"@nestjs-ai/commons": "workspace:*",
-		"vitest": "^4.0.0"
+		"@nestjs-ai/commons": "workspace:*"
 	}
 }

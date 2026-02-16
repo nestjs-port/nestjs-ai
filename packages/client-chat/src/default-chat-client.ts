@@ -26,10 +26,12 @@ import type {
 	Advisor,
 	AdvisorObservationConvention,
 	BaseAdvisorChain,
-	CallAdvisor,
-	StreamAdvisor,
 } from "./advisor";
-import { DefaultAroundAdvisorChain } from "./advisor";
+import {
+	ChatModelCallAdvisor,
+	ChatModelStreamAdvisor,
+	DefaultAroundAdvisorChain,
+} from "./advisor";
 import { ChatClient } from "./chat-client";
 import { ChatClientAttributes } from "./chat-client-attributes";
 import { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
@@ -391,7 +393,7 @@ export namespace DefaultChatClient {
 						...args: any[]
 				  ) => T)
 				| StructuredOutputConverter<T>,
-			options?: { isArray?: boolean },
+			_options?: { isArray?: boolean },
 		): Promise<
 			ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>
 		> {
@@ -400,23 +402,14 @@ export namespace DefaultChatClient {
 					typeOrConverter as unknown as new (
 						...args: any[]
 					) => any,
-				) as unknown as StructuredOutputConverter<T>;
-				return (await this.doResponseEntity(
-					converter,
-					options?.isArray === true,
-				)) as
-					| ResponseEntity<ChatResponse, T>
-					| ResponseEntity<ChatResponse, T[]>;
+				);
+				return await this.doResponseEntity(converter);
 			}
-			return (await this.doResponseEntity(
-				typeOrConverter,
-				options?.isArray === true,
-			)) as ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>;
+			return await this.doResponseEntity(typeOrConverter);
 		}
 
 		private async doResponseEntity<T>(
 			outputConverter: StructuredOutputConverter<T>,
-			_isArray: boolean,
 		): Promise<ResponseEntity<ChatResponse, T>> {
 			assert(outputConverter, "structuredOutputConverter cannot be null");
 			const chatClientRequest = this.withOutputConverterContext(
@@ -453,22 +446,20 @@ export namespace DefaultChatClient {
 						...args: any[]
 				  ) => T)
 				| StructuredOutputConverter<T>,
-			options?: { isArray?: boolean },
 		): Promise<T | T[] | null> {
 			if (typeof typeOrConverter === "function") {
 				const converter = new BeanOutputConverter(
 					typeOrConverter as unknown as new (
 						...args: any[]
 					) => any,
-				) as unknown as StructuredOutputConverter<T>;
-				return this.doEntity(converter, options?.isArray === true);
+				);
+				return this.doEntity(converter);
 			}
-			return this.doEntity(typeOrConverter, options?.isArray === true);
+			return this.doEntity(typeOrConverter);
 		}
 
 		private async doEntity<T>(
 			outputConverter: StructuredOutputConverter<T>,
-			_isArray: boolean,
 		): Promise<T | null> {
 			assert(outputConverter, "structuredOutputConverter cannot be null");
 			const chatClientRequest = this.withOutputConverterContext(
@@ -603,11 +594,9 @@ export namespace DefaultChatClient {
 				this._observationRegistry,
 			);
 
-			const chatClientResponse = (
-				observation as unknown as {
-					observeStream<T>(streamFactory: () => Observable<T>): Observable<T>;
-				}
-			).observeStream(() => this._advisorChain.nextStream(chatClientRequest));
+			const chatClientResponse = observation.observeStream(() =>
+				this._advisorChain.nextStream(chatClientRequest),
+			);
 
 			return CHAT_CLIENT_MESSAGE_AGGREGATOR.aggregateChatClientResponse(
 				chatClientResponse,
@@ -1195,55 +1184,6 @@ export namespace DefaultChatClient {
 				"toolNames" in options &&
 				"toolContext" in options
 			);
-		}
-	}
-
-	class ChatModelCallAdvisor implements CallAdvisor {
-		constructor(private readonly chatModel: ChatModel) {}
-
-		get name(): string {
-			return "ChatModelCallAdvisor";
-		}
-
-		get order(): number {
-			return Number.MAX_SAFE_INTEGER - 100;
-		}
-
-		async adviseCall(
-			chatClientRequest: ChatClientRequest,
-		): Promise<ChatClientResponse> {
-			const response = await this.chatModel.call(chatClientRequest.prompt);
-			return ChatClientResponse.builder()
-				.chatResponse(response)
-				.context(new Map(chatClientRequest.context))
-				.build();
-		}
-	}
-
-	class ChatModelStreamAdvisor implements StreamAdvisor {
-		constructor(private readonly chatModel: ChatModel) {}
-
-		get name(): string {
-			return "ChatModelStreamAdvisor";
-		}
-
-		get order(): number {
-			return Number.MAX_SAFE_INTEGER - 90;
-		}
-
-		adviseStream(
-			chatClientRequest: ChatClientRequest,
-		): Observable<ChatClientResponse> {
-			return this.chatModel
-				.stream(chatClientRequest.prompt)
-				.pipe(
-					map((chatResponse) =>
-						ChatClientResponse.builder()
-							.chatResponse(chatResponse)
-							.context(new Map(chatClientRequest.context))
-							.build(),
-					),
-				);
 		}
 	}
 }

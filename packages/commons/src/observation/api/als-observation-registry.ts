@@ -37,4 +37,8 @@ export class AlsObservationRegistry implements ObservationRegistry {
 		const scope = this.currentObservationScope;
 		return scope?.currentObservation ?? null;
 	}
+
+	runInScope<T>(scope: ObservationScope | null, fn: () => T): T {
+		return this.scopeStorage.run(scope, fn);
+	}
 }

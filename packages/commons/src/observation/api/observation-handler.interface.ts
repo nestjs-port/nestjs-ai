@@ -31,6 +31,11 @@ export interface ObservationHandler<CTX extends ObservationContext> {
 	onError?(context: CTX): void;
 
 	/**
+	 * Wraps the observed callback so handlers can propagate their own execution context.
+	 */
+	runInScope?<T>(context: CTX, fn: () => Promise<T>): Promise<T>;
+
+	/**
 	 * Called when the observation is stopped.
 	 */
 	onStop?(context: CTX): void;

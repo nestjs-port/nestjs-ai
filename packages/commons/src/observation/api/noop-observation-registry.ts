@@ -35,4 +35,8 @@ export class NoopObservationRegistry implements ObservationRegistry {
 	get currentObservation(): Observation<ObservationContext> | null {
 		return null;
 	}
+
+	runInScope<T>(_scope: ObservationScope | null, fn: () => T): T {
+		return fn();
+	}
 }

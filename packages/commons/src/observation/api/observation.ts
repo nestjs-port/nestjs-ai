@@ -43,8 +43,15 @@ export abstract class Observation<CTX extends ObservationContext> {
 	async observe<T>(fn: () => Promise<T>): Promise<T> {
 		this.start();
 		const scope = this.openScope();
+		const wrapped = this._handlers.reduceRight(
+			(next, handler) =>
+				handler.runInScope
+					? () => handler.runInScope?.(this._context, next)
+					: next,
+			fn,
+		);
 		try {
-			return await fn();
+			return await this._registry.runInScope(scope, wrapped);
 		} catch (err) {
 			this.error(err instanceof Error ? err : new Error(String(err)));
 			throw err;

@@ -46,7 +46,7 @@ export abstract class Observation<CTX extends ObservationContext> {
 		const wrapped = this._handlers.reduceRight(
 			(next, handler) =>
 				handler.runInScope
-					? () => handler.runInScope?.(this._context, next)
+					? () => handler.runInScope!(this._context, next)
 					: next,
 			fn,
 		);

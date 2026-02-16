@@ -1,0 +1,272 @@
+import assert from "node:assert/strict";
+import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import { ClassConstructor, plainToInstance } from "class-transformer";
+import { targetConstructorToSchema } from "class-validator-jsonschema";
+import type { ToolContext } from "../../chat";
+import { DefaultToolDefinition, type ToolDefinition } from "../definition";
+import {
+	DefaultToolCallResultConverter,
+	type ToolCallResultConverter,
+	ToolExecutionException,
+} from "../execution";
+import { ToolMetadata } from "../metadata";
+import { ToolUtils } from "../support";
+import { ToolCallback } from "../tool-callback";
+
+export type ToolBiFunction<I, O> = (input: I, context: ToolContext | null) => O;
+export type ToolFunction<I, O> = (input: I) => O;
+export type ToolSupplier<O> = () => O;
+export type ToolConsumer<I> = (input: I) => void;
+
+export type FunctionToolInputType<T> = new (...args: never[]) => T;
+
+/**
+ * Runtime input type used by {@link FunctionToolCallbackBuilder} for schema hints.
+ */
+/**
+ * A {@link ToolCallback} implementation to invoke functions as tools.
+ */
+export class FunctionToolCallback<I, O> extends ToolCallback {
+	private static readonly DEFAULT_RESULT_CONVERTER: ToolCallResultConverter =
+		new DefaultToolCallResultConverter();
+
+	private static readonly DEFAULT_TOOL_METADATA: ToolMetadata =
+		ToolMetadata.create({});
+
+	private readonly _logger: Logger = LoggerFactory.getLogger(
+		FunctionToolCallback.name,
+	);
+	private readonly _toolDefinition: ToolDefinition;
+	private readonly _toolMetadata: ToolMetadata;
+	private readonly _toolInputType: FunctionToolInputType<I> | null;
+	private readonly _toolFunction: ToolBiFunction<I, O>;
+	private readonly _toolCallResultConverter: ToolCallResultConverter;
+
+	constructor(props: FunctionToolCallbackProps<I, O>) {
+		super();
+		assert(props.toolDefinition, "toolDefinition cannot be null");
+		assert(props.toolInputType, "toolInputType cannot be null");
+		assert(props.toolFunction, "toolFunction cannot be null");
+
+		this._toolDefinition = props.toolDefinition;
+		this._toolMetadata =
+			props.toolMetadata ?? FunctionToolCallback.DEFAULT_TOOL_METADATA;
+		this._toolInputType = props.toolInputType;
+		this._toolFunction = props.toolFunction;
+		this._toolCallResultConverter =
+			props.toolCallResultConverter ??
+			FunctionToolCallback.DEFAULT_RESULT_CONVERTER;
+	}
+
+	override get toolDefinition(): ToolDefinition {
+		return this._toolDefinition;
+	}
+
+	override get toolMetadata(): ToolMetadata {
+		return this._toolMetadata;
+	}
+
+	override call(toolInput: string): string {
+		return this.callTool(toolInput, null);
+	}
+
+	override callTool(
+		toolInput: string,
+		toolContext: ToolContext | null,
+	): string {
+		assert(
+			toolInput && toolInput.trim() !== "",
+			"toolInput cannot be null or empty",
+		);
+
+		this._logger.debug(
+			`Starting execution of tool: ${this._toolDefinition.name}`,
+		);
+
+		const request = this.parseToolInput(toolInput);
+		const response = this.callMethod(request, toolContext);
+
+		this._logger.debug(
+			`Successful execution of tool: ${this._toolDefinition.name}`,
+		);
+
+		return this._toolCallResultConverter.convert(response, null);
+	}
+
+	private parseToolInput(toolInput: string): I {
+		const plain = JSON.parse(toolInput);
+
+		if (!this._toolInputType) {
+			return plain;
+		}
+
+		return plainToInstance(
+			this._toolInputType as ClassConstructor<never>,
+			plain,
+		) as I;
+	}
+
+	private callMethod(request: I, toolContext: ToolContext | null): O {
+		try {
+			return this._toolFunction(request, toolContext);
+		} catch (ex) {
+			if (ex instanceof ToolExecutionException) {
+				throw ex;
+			}
+			if (ex instanceof Error) {
+				throw new ToolExecutionException(this._toolDefinition, ex);
+			}
+			throw new ToolExecutionException(
+				this._toolDefinition,
+				new Error(String(ex)),
+			);
+		}
+	}
+
+	static builder<I, O>(
+		name: string,
+		functionOrSupplierOrConsumer: ToolBiFunction<I, O>,
+	): FunctionToolCallbackBuilder<I, O>;
+	static builder<I, O>(
+		name: string,
+		functionOrSupplierOrConsumer: ToolFunction<I, O>,
+	): FunctionToolCallbackBuilder<I, O>;
+	static builder<O>(
+		name: string,
+		functionOrSupplierOrConsumer: ToolSupplier<O>,
+	): FunctionToolCallbackBuilder<void, O>;
+	static builder<I>(
+		name: string,
+		functionOrSupplierOrConsumer: ToolConsumer<I>,
+	): FunctionToolCallbackBuilder<I, void>;
+	static builder<I, O>(
+		name: string,
+		functionOrSupplierOrConsumer:
+			| ToolBiFunction<I, O>
+			| ToolFunction<I, O>
+			| ToolSupplier<O>
+			| ToolConsumer<I>,
+	): FunctionToolCallbackBuilder<I, O> | FunctionToolCallbackBuilder<void, O> {
+		assert(functionOrSupplierOrConsumer, "function cannot be null");
+
+		if (functionOrSupplierOrConsumer.length === 0) {
+			const supplier = functionOrSupplierOrConsumer as ToolSupplier<O>;
+			return new FunctionToolCallbackBuilder<void, O>(
+				name,
+				(_request, _context) => supplier(),
+			);
+		}
+
+		if (functionOrSupplierOrConsumer.length === 1) {
+			const functionOrConsumer = functionOrSupplierOrConsumer as
+				| ToolFunction<I, O>
+				| ToolConsumer<I>;
+			return new FunctionToolCallbackBuilder<I, O>(
+				name,
+				(request, _context) => functionOrConsumer(request) as O,
+			);
+		}
+
+		return new FunctionToolCallbackBuilder<I, O>(
+			name,
+			functionOrSupplierOrConsumer as ToolBiFunction<I, O>,
+		);
+	}
+}
+
+export interface FunctionToolCallbackProps<I, O> {
+	toolDefinition: ToolDefinition;
+	toolMetadata?: ToolMetadata | null;
+	toolInputType: FunctionToolInputType<I>;
+	toolFunction: ToolBiFunction<I, O>;
+	toolCallResultConverter?: ToolCallResultConverter | null;
+}
+
+export class FunctionToolCallbackBuilder<I, O> {
+	private readonly _name: string;
+	private _description: string | null = null;
+	private _inputSchema: string | null = null;
+	private _inputType: FunctionToolInputType<I> | null = null;
+	private _toolMetadata: ToolMetadata | null = null;
+	private readonly _toolFunction: ToolBiFunction<I, O>;
+	private _toolCallResultConverter: ToolCallResultConverter | null = null;
+
+	constructor(name: string, toolFunction: ToolBiFunction<I, O>) {
+		assert(name && name.trim() !== "", "name cannot be null or empty");
+		assert(toolFunction, "toolFunction cannot be null");
+		this._name = name;
+		this._toolFunction = toolFunction;
+	}
+
+	description(description: string): this {
+		this._description = description;
+		return this;
+	}
+
+	inputSchema(inputSchema: string): this {
+		this._inputSchema = inputSchema;
+		return this;
+	}
+
+	inputType(inputType: FunctionToolInputType<I>): this {
+		this._inputType = inputType;
+		return this;
+	}
+
+	toolMetadata(toolMetadata: ToolMetadata): this {
+		this._toolMetadata = toolMetadata;
+		return this;
+	}
+
+	toolCallResultConverter(
+		toolCallResultConverter: ToolCallResultConverter,
+	): this {
+		this._toolCallResultConverter = toolCallResultConverter;
+		return this;
+	}
+
+	build(): FunctionToolCallback<I, O> {
+		assert(this._inputType, "inputType cannot be null");
+
+		const description =
+			this._description && this._description.trim() !== ""
+				? this._description
+				: ToolUtils.getToolDescriptionFromName(this._name);
+
+		const inputSchema =
+			this._inputSchema && this._inputSchema.trim() !== ""
+				? this._inputSchema
+				: FunctionToolCallbackBuilder.generateSchemaForType(this._inputType);
+
+		const toolDefinition = DefaultToolDefinition.builder()
+			.name(this._name)
+			.description(description)
+			.inputSchema(inputSchema)
+			.build();
+
+		return new FunctionToolCallback<I, O>({
+			toolDefinition,
+			toolMetadata: this._toolMetadata,
+			toolInputType: this._inputType,
+			toolFunction: this._toolFunction,
+			toolCallResultConverter: this._toolCallResultConverter,
+		});
+	}
+
+	private static generateSchemaForType<T>(
+		inputType: FunctionToolInputType<T>,
+	): string {
+		if (typeof inputType === "function") {
+			try {
+				const schema = targetConstructorToSchema(
+					inputType as FunctionToolInputType<T>,
+				);
+				return JSON.stringify(schema);
+			} catch {
+				return "{}";
+			}
+		}
+
+		return "{}";
+	}
+}

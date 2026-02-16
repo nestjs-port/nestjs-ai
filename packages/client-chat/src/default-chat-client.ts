@@ -136,13 +136,22 @@ export namespace DefaultChatClient {
 			second?: Media | URL | Buffer,
 			...rest: Media[]
 		): ChatClient.PromptUserSpec {
+			if (first === undefined && second === undefined && rest.length === 0) {
+				return this;
+			}
+
 			if (typeof first === "string") {
 				assert(second, "resource cannot be null");
 				this._media.push(new Media({ mimeType: first, data: second }));
 				return this;
 			}
 
-			const allMedia = [first, ...(second ? [second as Media] : []), ...rest];
+			const hasSecondArgument = second !== undefined || rest.length > 0;
+			const allMedia = [
+				first,
+				...(hasSecondArgument ? [second as Media] : []),
+				...rest,
+			];
 			assert(
 				allMedia.every((item) => item != null),
 				"media cannot contain null elements",
@@ -377,31 +386,25 @@ export namespace DefaultChatClient {
 		}
 
 		responseEntity<T>(
-			type: abstract new (...args: any[]) => T,
+			type: ChatClient.Type<T>,
 			options: { isArray: true },
 		): Promise<ResponseEntity<ChatResponse, T[]>>;
 		responseEntity<T>(
-			type: abstract new (...args: any[]) => T,
-			options?: { isArray?: boolean },
+			type: ChatClient.Type<T>,
+			options?: ChatClient.EntityOptions,
 		): Promise<ResponseEntity<ChatResponse, T>>;
 		responseEntity<T>(
 			structuredOutputConverter: StructuredOutputConverter<T>,
 		): Promise<ResponseEntity<ChatResponse, T>>;
 		async responseEntity<T>(
-			typeOrConverter:
-				| (abstract new (
-						...args: any[]
-				  ) => T)
-				| StructuredOutputConverter<T>,
-			_options?: { isArray?: boolean },
+			typeOrConverter: ChatClient.Type<T> | StructuredOutputConverter<T>,
+			_options?: ChatClient.EntityOptions,
 		): Promise<
 			ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>
 		> {
 			if (typeof typeOrConverter === "function") {
 				const converter = new BeanOutputConverter(
-					typeOrConverter as unknown as new (
-						...args: any[]
-					) => any,
+					typeOrConverter as unknown as ChatClient.Type<never>,
 				);
 				return await this.doResponseEntity(converter);
 			}
@@ -430,28 +433,22 @@ export namespace DefaultChatClient {
 		}
 
 		entity<T>(
-			type: abstract new (...args: any[]) => T,
+			type: ChatClient.Type<T>,
 			options: { isArray: true },
 		): Promise<T[] | null>;
 		entity<T>(
 			structuredOutputConverter: StructuredOutputConverter<T>,
 		): Promise<T | null>;
 		entity<T>(
-			type: abstract new (...args: any[]) => T,
-			options?: { isArray?: boolean },
+			type: ChatClient.Type<T>,
+			options?: ChatClient.EntityOptions,
 		): Promise<T | null>;
 		async entity<T>(
-			typeOrConverter:
-				| (abstract new (
-						...args: any[]
-				  ) => T)
-				| StructuredOutputConverter<T>,
+			typeOrConverter: ChatClient.Type<T> | StructuredOutputConverter<T>,
 		): Promise<T | T[] | null> {
 			if (typeof typeOrConverter === "function") {
 				const converter = new BeanOutputConverter(
-					typeOrConverter as unknown as new (
-						...args: any[]
-					) => any,
+					typeOrConverter as unknown as ChatClient.Type<never>,
 				);
 				return this.doEntity(converter);
 			}

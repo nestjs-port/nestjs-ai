@@ -88,8 +88,8 @@ export namespace ChatClient {
 		);
 	}
 
-	type Type<T> = abstract new (...args: never[]) => T;
-	type EntityOptions = {
+	export type Type<T> = new (...args: never[]) => T;
+	export type EntityOptions = {
 		readonly isArray?: boolean;
 	};
 

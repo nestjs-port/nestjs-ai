@@ -41,7 +41,7 @@ import {
 	ChatClientObservationDocumentation,
 	DefaultChatClientObservationConvention,
 } from "./observation";
-import type { ResponseEntity } from "./response-entity";
+import { ResponseEntity } from "./response-entity";
 
 const DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION: ChatClientObservationConvention =
 	new DefaultChatClientObservationConvention();
@@ -71,10 +71,6 @@ function mapToRecord(map: Map<string, unknown>): Record<string, unknown> {
 		record[key] = value;
 	}
 	return record;
-}
-
-function recordToMap(record: Record<string, unknown>): Map<string, unknown> {
-	return new Map<string, unknown>(Object.entries(record));
 }
 
 export class DefaultChatClient implements ChatClient {
@@ -218,15 +214,15 @@ export namespace DefaultChatClient {
 		}
 
 		get paramsValue(): Map<string, unknown> {
-			return new Map(this._params);
+			return this._params;
 		}
 
 		get mediaValue(): Media[] {
-			return [...this._media];
+			return this._media;
 		}
 
 		get metadataValue(): Map<string, unknown> {
-			return new Map(this._metadata);
+			return this._metadata;
 		}
 	}
 
@@ -300,11 +296,11 @@ export namespace DefaultChatClient {
 		}
 
 		get paramsValue(): Map<string, unknown> {
-			return new Map(this._params);
+			return this._params;
 		}
 
 		get metadataValue(): Map<string, unknown> {
-			return new Map(this._metadata);
+			return this._metadata;
 		}
 	}
 
@@ -348,11 +344,11 @@ export namespace DefaultChatClient {
 		}
 
 		get advisorsValue(): Advisor[] {
-			return [...this._advisors];
+			return this._advisors;
 		}
 
 		get paramsValue(): Map<string, unknown> {
-			return new Map(this._params);
+			return this._params;
 		}
 	}
 
@@ -381,73 +377,84 @@ export namespace DefaultChatClient {
 		responseEntity<T>(
 			type: abstract new (...args: any[]) => T,
 			options: { isArray: true },
-		): ResponseEntity<ChatResponse, T[]>;
+		): Promise<ResponseEntity<ChatResponse, T[]>>;
 		responseEntity<T>(
 			type: abstract new (...args: any[]) => T,
 			options?: { isArray?: boolean },
-		): ResponseEntity<ChatResponse, T>;
+		): Promise<ResponseEntity<ChatResponse, T>>;
 		responseEntity<T>(
 			structuredOutputConverter: StructuredOutputConverter<T>,
-		): ResponseEntity<ChatResponse, T>;
-		responseEntity<T>(
+		): Promise<ResponseEntity<ChatResponse, T>>;
+		async responseEntity<T>(
 			typeOrConverter:
 				| (abstract new (
 						...args: any[]
 				  ) => T)
 				| StructuredOutputConverter<T>,
 			options?: { isArray?: boolean },
-		): ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]> {
+		): Promise<
+			ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>
+		> {
 			if (typeof typeOrConverter === "function") {
 				const converter = new BeanOutputConverter(
 					typeOrConverter as unknown as new (
 						...args: any[]
 					) => any,
 				) as unknown as StructuredOutputConverter<T>;
-				return this.doResponseEntity(converter, options?.isArray === true) as
+				return (await this.doResponseEntity(
+					converter,
+					options?.isArray === true,
+				)) as
 					| ResponseEntity<ChatResponse, T>
 					| ResponseEntity<ChatResponse, T[]>;
 			}
-			return this.doResponseEntity(
+			return (await this.doResponseEntity(
 				typeOrConverter,
 				options?.isArray === true,
-			) as ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>;
+			)) as ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>;
 		}
 
-		private doResponseEntity<T>(
+		private async doResponseEntity<T>(
 			outputConverter: StructuredOutputConverter<T>,
 			_isArray: boolean,
-		): ResponseEntity<ChatResponse, T> {
+		): Promise<ResponseEntity<ChatResponse, T>> {
 			assert(outputConverter, "structuredOutputConverter cannot be null");
-			const context = this._request.context;
-			context.set(
-				ChatClientAttributes.OUTPUT_FORMAT.key,
-				outputConverter.format,
+			const chatClientRequest = this.withOutputConverterContext(
+				this._request,
+				outputConverter,
+				true,
 			);
-			this._request.mutate().context(context).build();
-			throw new Error(
-				"DefaultCallResponseSpec synchronous execution is not implemented yet in TypeScript migration",
-			);
+			const chatResponse = (
+				await this.doGetObservableChatClientResponse(chatClientRequest)
+			).chatResponse;
+			const responseContent =
+				DefaultCallResponseSpec.getContentFromChatResponse(chatResponse);
+			if (responseContent == null) {
+				return new ResponseEntity<ChatResponse, T>(chatResponse, null);
+			}
+			const entity = outputConverter.convert(responseContent);
+			return new ResponseEntity<ChatResponse, T>(chatResponse, entity);
 		}
 
 		entity<T>(
 			type: abstract new (...args: any[]) => T,
 			options: { isArray: true },
-		): T[] | null;
+		): Promise<T[] | null>;
 		entity<T>(
 			structuredOutputConverter: StructuredOutputConverter<T>,
-		): T | null;
+		): Promise<T | null>;
 		entity<T>(
 			type: abstract new (...args: any[]) => T,
 			options?: { isArray?: boolean },
-		): T | null;
-		entity<T>(
+		): Promise<T | null>;
+		async entity<T>(
 			typeOrConverter:
 				| (abstract new (
 						...args: any[]
 				  ) => T)
 				| StructuredOutputConverter<T>,
 			options?: { isArray?: boolean },
-		): T | T[] | null {
+		): Promise<T | T[] | null> {
 			if (typeof typeOrConverter === "function") {
 				const converter = new BeanOutputConverter(
 					typeOrConverter as unknown as new (
@@ -459,40 +466,94 @@ export namespace DefaultChatClient {
 			return this.doEntity(typeOrConverter, options?.isArray === true);
 		}
 
-		private doEntity<T>(
+		private async doEntity<T>(
 			outputConverter: StructuredOutputConverter<T>,
 			_isArray: boolean,
-		): T | null {
+		): Promise<T | null> {
 			assert(outputConverter, "structuredOutputConverter cannot be null");
-			const context = this._request.context;
-			if (hasText(outputConverter.format)) {
+			const chatClientRequest = this.withOutputConverterContext(
+				this._request,
+				outputConverter,
+				false,
+			);
+			const chatResponse = (
+				await this.doGetObservableChatClientResponse(chatClientRequest)
+			).chatResponse;
+			const stringResponse =
+				DefaultCallResponseSpec.getContentFromChatResponse(chatResponse);
+			if (stringResponse == null) {
+				return null;
+			}
+			return outputConverter.convert(stringResponse);
+		}
+
+		private withOutputConverterContext<T>(
+			chatClientRequest: ChatClientRequest,
+			outputConverter: StructuredOutputConverter<T>,
+			forceOutputFormat: boolean,
+		): ChatClientRequest {
+			const context = chatClientRequest.context;
+			if (forceOutputFormat || hasText(outputConverter.format)) {
 				context.set(
 					ChatClientAttributes.OUTPUT_FORMAT.key,
 					outputConverter.format,
 				);
-				this._request.mutate().context(context).build();
 			}
-			throw new Error(
-				"DefaultCallResponseSpec synchronous execution is not implemented yet in TypeScript migration",
-			);
+
+			if (
+				context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key) &&
+				outputConverter instanceof BeanOutputConverter
+			) {
+				context.set(
+					ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key,
+					outputConverter.jsonSchema,
+				);
+			}
+
+			return chatClientRequest.mutate().context(context).build();
 		}
 
-		chatClientResponse(): ChatClientResponse {
-			throw new Error(
-				"DefaultCallResponseSpec synchronous execution is not implemented yet in TypeScript migration",
+		private async doGetObservableChatClientResponse(
+			chatClientRequest: ChatClientRequest,
+		): Promise<ChatClientResponse> {
+			const outputFormat = chatClientRequest.context.get(
+				ChatClientAttributes.OUTPUT_FORMAT.key,
 			);
+			const observationContext = ChatClientObservationContext.builder()
+				.request(chatClientRequest)
+				.advisors(this._advisorChain.callAdvisors)
+				.stream(false)
+				.format(typeof outputFormat === "string" ? outputFormat : null)
+				.build();
+
+			const observation = new ChatClientObservationDocumentation().observation(
+				this._observationConvention,
+				DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION,
+				() => observationContext,
+				this._observationRegistry,
+			);
+
+			const chatClientResponse = await observation.observe(async () => {
+				const response = await this._advisorChain.nextCall(chatClientRequest);
+				observationContext.response = response;
+				return response;
+			});
+
+			return chatClientResponse ?? ChatClientResponse.builder().build();
 		}
 
-		chatResponse(): ChatResponse | null {
-			throw new Error(
-				"DefaultCallResponseSpec synchronous execution is not implemented yet in TypeScript migration",
-			);
+		async chatClientResponse(): Promise<ChatClientResponse> {
+			return this.doGetObservableChatClientResponse(this._request);
 		}
 
-		content(): string | null {
-			throw new Error(
-				"DefaultCallResponseSpec synchronous execution is not implemented yet in TypeScript migration",
-			);
+		async chatResponse(): Promise<ChatResponse | null> {
+			return (await this.doGetObservableChatClientResponse(this._request))
+				.chatResponse;
+		}
+
+		async content(): Promise<string | null> {
+			const chatResponse = await this.chatResponse();
+			return DefaultCallResponseSpec.getContentFromChatResponse(chatResponse);
 		}
 
 		static getContentFromChatResponse(
@@ -1186,6 +1247,3 @@ export namespace DefaultChatClient {
 		}
 	}
 }
-
-export interface DefaultChatClientRequestSpec
-	extends DefaultChatClient.DefaultChatClientRequestSpec {}

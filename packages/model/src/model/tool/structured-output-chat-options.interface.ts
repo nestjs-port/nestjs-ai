@@ -5,7 +5,7 @@ import type { ChatOptions } from "../../chat";
  * to set and get the output JSON schema.
  */
 export interface StructuredOutputChatOptions extends ChatOptions {
-	get outputSchema(): string;
+  get outputSchema(): string;
 
-	set outputSchema(outputSchema: string);
+  set outputSchema(outputSchema: string);
 }

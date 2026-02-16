@@ -7,10 +7,10 @@
  * @typeParam T - The type of the response body.
  */
 export interface ResponseEntity<T> {
-	/** The parsed response body. */
-	body: T;
-	/** The HTTP status code. */
-	status: number;
-	/** The response headers. */
-	headers: Headers;
+  /** The parsed response body. */
+  body: T;
+  /** The HTTP status code. */
+  status: number;
+  /** The response headers. */
+  headers: Headers;
 }

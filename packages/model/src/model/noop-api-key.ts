@@ -5,7 +5,7 @@ import type { ApiKey } from "./api-key.interface";
  * headers should be set.
  */
 export class NoopApiKey implements ApiKey {
-	get value(): string {
-		return "";
-	}
+  get value(): string {
+    return "";
+  }
 }

@@ -10,15 +10,15 @@ import type { ModelOptions } from "./model-options.interface";
  * @typeParam T - the type of instructions or input required by the AI model
  */
 export interface ModelRequest<T> {
-	/**
-	 * Retrieves the instructions or input required by the AI model.
-	 * @returns the instructions or input required by the AI model
-	 */
-	get instructions(): T;
+  /**
+   * Retrieves the instructions or input required by the AI model.
+   * @returns the instructions or input required by the AI model
+   */
+  get instructions(): T;
 
-	/**
-	 * Retrieves the customizable options for AI model interactions.
-	 * @returns the customizable options for AI model interactions
-	 */
-	get options(): ModelOptions | null;
+  /**
+   * Retrieves the customizable options for AI model interactions.
+   * @returns the customizable options for AI model interactions
+   */
+  get options(): ModelOptions | null;
 }

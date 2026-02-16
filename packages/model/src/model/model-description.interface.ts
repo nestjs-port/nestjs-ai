@@ -3,21 +3,21 @@
  * name, description, and version.
  */
 export interface ModelDescription {
-	/**
-	 * Returns the name of the model.
-	 * @returns the name of the model
-	 */
-	get name(): string;
+  /**
+   * Returns the name of the model.
+   * @returns the name of the model
+   */
+  get name(): string;
 
-	/**
-	 * Returns the description of the model.
-	 * @returns the description of the model
-	 */
-	get description(): string;
+  /**
+   * Returns the description of the model.
+   * @returns the description of the model
+   */
+  get description(): string;
 
-	/**
-	 * Returns the version of the model.
-	 * @returns the version of the model
-	 */
-	get version(): string;
+  /**
+   * Returns the version of the model.
+   * @returns the version of the model
+   */
+  get version(): string;
 }

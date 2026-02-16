@@ -8,25 +8,25 @@ import type { ToolExecutionResult } from "./tool-execution-result";
  * Service responsible for managing the tool calling process for a chat model.
  */
 export interface ToolCallingManager {
-	/**
-	 * Resolve the tool definitions from the model's tool calling options.
-	 */
-	resolveToolDefinitions(chatOptions: ToolCallingChatOptions): ToolDefinition[];
+  /**
+   * Resolve the tool definitions from the model's tool calling options.
+   */
+  resolveToolDefinitions(chatOptions: ToolCallingChatOptions): ToolDefinition[];
 
-	/**
-	 * Execute the tool calls requested by the model.
-	 */
-	executeToolCalls(
-		prompt: Prompt,
-		chatResponse: ChatResponse,
-	): ToolExecutionResult;
+  /**
+   * Execute the tool calls requested by the model.
+   */
+  executeToolCalls(
+    prompt: Prompt,
+    chatResponse: ChatResponse,
+  ): ToolExecutionResult;
 }
 
 export namespace ToolCallingManager {
-	/**
-	 * Create a default {@link ToolCallingManager} builder.
-	 */
-	export function builder() {
-		return new DefaultToolCallingManager();
-	}
+  /**
+   * Create a default {@link ToolCallingManager} builder.
+   */
+  export function builder() {
+    return new DefaultToolCallingManager();
+  }
 }

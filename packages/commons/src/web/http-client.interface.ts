@@ -24,11 +24,11 @@
  * ```
  */
 export interface HttpClient {
-	/**
-	 * Fetches a resource from the network.
-	 * @param input - The resource URL or Request object
-	 * @param init - Optional request configuration
-	 * @returns A Promise that resolves to the Response
-	 */
-	fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+  /**
+   * Fetches a resource from the network.
+   * @param input - The resource URL or Request object
+   * @param init - Optional request configuration
+   * @returns A Promise that resolves to the Response
+   */
+  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }

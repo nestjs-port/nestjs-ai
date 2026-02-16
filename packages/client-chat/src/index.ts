@@ -3,12 +3,12 @@ export { ChatClient } from "./chat-client";
 export { ChatClientAttributes } from "./chat-client-attributes";
 export { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
 export {
-	ChatClientRequest,
-	ChatClientRequestBuilder,
+  ChatClientRequest,
+  ChatClientRequestBuilder,
 } from "./chat-client-request";
 export {
-	ChatClientResponse,
-	ChatClientResponseBuilder,
+  ChatClientResponse,
+  ChatClientResponseBuilder,
 } from "./chat-client-response";
 export { DefaultChatClient } from "./default-chat-client";
 export { DefaultChatClientBuilder } from "./default-chat-client-builder";

@@ -6,110 +6,110 @@ import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
 import type { ChatClientRequest } from "../chat-client-request";
 import type { ChatClientResponse } from "../chat-client-response";
 import type {
-	CallAdvisor,
-	CallAdvisorChain,
-	StreamAdvisor,
-	StreamAdvisorChain,
+  CallAdvisor,
+  CallAdvisorChain,
+  StreamAdvisor,
+  StreamAdvisorChain,
 } from "./api";
 
 export interface SimpleLoggerAdvisorProps {
-	requestToString?:
-		| ((chatClientRequest: ChatClientRequest | null) => string)
-		| null;
-	responseToString?: ((chatResponse: ChatResponse | null) => string) | null;
-	order?: number;
+  requestToString?:
+    | ((chatClientRequest: ChatClientRequest | null) => string)
+    | null;
+  responseToString?: ((chatResponse: ChatResponse | null) => string) | null;
+  order?: number;
 }
 
 export class SimpleLoggerAdvisor implements CallAdvisor, StreamAdvisor {
-	static readonly DEFAULT_REQUEST_TO_STRING = (
-		chatClientRequest: ChatClientRequest | null,
-	): string => SimpleLoggerAdvisor.toPrettyJson(chatClientRequest);
+  static readonly DEFAULT_REQUEST_TO_STRING = (
+    chatClientRequest: ChatClientRequest | null,
+  ): string => SimpleLoggerAdvisor.toPrettyJson(chatClientRequest);
 
-	static readonly DEFAULT_RESPONSE_TO_STRING = (
-		chatResponse: ChatResponse | null,
-	): string => SimpleLoggerAdvisor.toPrettyJson(chatResponse);
+  static readonly DEFAULT_RESPONSE_TO_STRING = (
+    chatResponse: ChatResponse | null,
+  ): string => SimpleLoggerAdvisor.toPrettyJson(chatResponse);
 
-	private readonly _logger: Logger = LoggerFactory.getLogger(
-		SimpleLoggerAdvisor.name,
-	);
+  private readonly _logger: Logger = LoggerFactory.getLogger(
+    SimpleLoggerAdvisor.name,
+  );
 
-	private static readonly chatClientMessageAggregator =
-		new ChatClientMessageAggregator();
+  private static readonly chatClientMessageAggregator =
+    new ChatClientMessageAggregator();
 
-	private readonly _requestToString: (
-		chatClientRequest: ChatClientRequest | null,
-	) => string;
-	private readonly _responseToString: (
-		chatResponse: ChatResponse | null,
-	) => string;
-	private readonly _order: number;
+  private readonly _requestToString: (
+    chatClientRequest: ChatClientRequest | null,
+  ) => string;
+  private readonly _responseToString: (
+    chatResponse: ChatResponse | null,
+  ) => string;
+  private readonly _order: number;
 
-	constructor();
-	constructor(order: number);
-	constructor(props: SimpleLoggerAdvisorProps);
-	constructor(orderOrProps: number | SimpleLoggerAdvisorProps = 0) {
-		const props =
-			typeof orderOrProps === "number"
-				? ({ order: orderOrProps } satisfies SimpleLoggerAdvisorProps)
-				: orderOrProps;
+  constructor();
+  constructor(order: number);
+  constructor(props: SimpleLoggerAdvisorProps);
+  constructor(orderOrProps: number | SimpleLoggerAdvisorProps = 0) {
+    const props =
+      typeof orderOrProps === "number"
+        ? ({ order: orderOrProps } satisfies SimpleLoggerAdvisorProps)
+        : orderOrProps;
 
-		this._requestToString =
-			props.requestToString ?? SimpleLoggerAdvisor.DEFAULT_REQUEST_TO_STRING;
-		this._responseToString =
-			props.responseToString ?? SimpleLoggerAdvisor.DEFAULT_RESPONSE_TO_STRING;
-		this._order = props.order ?? 0;
-	}
+    this._requestToString =
+      props.requestToString ?? SimpleLoggerAdvisor.DEFAULT_REQUEST_TO_STRING;
+    this._responseToString =
+      props.responseToString ?? SimpleLoggerAdvisor.DEFAULT_RESPONSE_TO_STRING;
+    this._order = props.order ?? 0;
+  }
 
-	async adviseCall(
-		chatClientRequest: ChatClientRequest,
-		callAdvisorChain: CallAdvisorChain,
-	): Promise<ChatClientResponse> {
-		this.logRequest(chatClientRequest);
-		const chatClientResponse =
-			await callAdvisorChain.nextCall(chatClientRequest);
-		this.logResponse(chatClientResponse);
-		return chatClientResponse;
-	}
+  async adviseCall(
+    chatClientRequest: ChatClientRequest,
+    callAdvisorChain: CallAdvisorChain,
+  ): Promise<ChatClientResponse> {
+    this.logRequest(chatClientRequest);
+    const chatClientResponse =
+      await callAdvisorChain.nextCall(chatClientRequest);
+    this.logResponse(chatClientResponse);
+    return chatClientResponse;
+  }
 
-	adviseStream(
-		chatClientRequest: ChatClientRequest,
-		streamAdvisorChain: StreamAdvisorChain,
-	): Observable<ChatClientResponse> {
-		this.logRequest(chatClientRequest);
-		const chatClientResponses =
-			streamAdvisorChain.nextStream(chatClientRequest);
-		return SimpleLoggerAdvisor.chatClientMessageAggregator.aggregateChatClientResponse(
-			chatClientResponses,
-			(chatClientResponse) => this.logResponse(chatClientResponse),
-		);
-	}
+  adviseStream(
+    chatClientRequest: ChatClientRequest,
+    streamAdvisorChain: StreamAdvisorChain,
+  ): Observable<ChatClientResponse> {
+    this.logRequest(chatClientRequest);
+    const chatClientResponses =
+      streamAdvisorChain.nextStream(chatClientRequest);
+    return SimpleLoggerAdvisor.chatClientMessageAggregator.aggregateChatClientResponse(
+      chatClientResponses,
+      (chatClientResponse) => this.logResponse(chatClientResponse),
+    );
+  }
 
-	protected logRequest(request: ChatClientRequest): void {
-		this._logger.debug(`request: ${this._requestToString(request)}`);
-	}
+  protected logRequest(request: ChatClientRequest): void {
+    this._logger.debug(`request: ${this._requestToString(request)}`);
+  }
 
-	protected logResponse(chatClientResponse: ChatClientResponse): void {
-		this._logger.debug(
-			`response: ${this._responseToString(chatClientResponse.chatResponse)}`,
-		);
-	}
+  protected logResponse(chatClientResponse: ChatClientResponse): void {
+    this._logger.debug(
+      `response: ${this._responseToString(chatClientResponse.chatResponse)}`,
+    );
+  }
 
-	get name(): string {
-		return this.constructor.name;
-	}
+  get name(): string {
+    return this.constructor.name;
+  }
 
-	get order(): number {
-		return this._order;
-	}
+  get order(): number {
+    return this._order;
+  }
 
-	private static toPrettyJson(value: unknown): string {
-		if (value == null) {
-			return "null";
-		}
-		try {
-			return JSON.stringify(value, null, 2);
-		} catch {
-			return String(value);
-		}
-	}
+  private static toPrettyJson(value: unknown): string {
+    if (value == null) {
+      return "null";
+    }
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
 }

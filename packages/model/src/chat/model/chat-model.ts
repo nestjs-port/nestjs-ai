@@ -6,40 +6,40 @@ import type { ChatResponse } from "./chat-response";
 import { StreamingChatModel } from "./streaming-chat-model";
 
 export abstract class ChatModel
-	extends StreamingChatModel
-	implements Model<Prompt, ChatResponse>
+  extends StreamingChatModel
+  implements Model<Prompt, ChatResponse>
 {
-	async callString(message: string): Promise<string | null> {
-		const prompt = new Prompt(message);
-		const response = await this.call(prompt);
-		const generation = response.result;
+  async callString(message: string): Promise<string | null> {
+    const prompt = new Prompt(message);
+    const response = await this.call(prompt);
+    const generation = response.result;
 
-		if (!generation) {
-			return "";
-		}
+    if (!generation) {
+      return "";
+    }
 
-		return generation?.output.text;
-	}
+    return generation?.output.text;
+  }
 
-	async callMessages(...messages: Message[]): Promise<string | null> {
-		const prompt = new Prompt(messages);
-		const response = await this.call(prompt);
-		const generation = response.result;
+  async callMessages(...messages: Message[]): Promise<string | null> {
+    const prompt = new Prompt(messages);
+    const response = await this.call(prompt);
+    const generation = response.result;
 
-		if (!generation) {
-			return "";
-		}
+    if (!generation) {
+      return "";
+    }
 
-		return generation?.output.text;
-	}
+    return generation?.output.text;
+  }
 
-	abstract call(prompt: Prompt): Promise<ChatResponse>;
+  abstract call(prompt: Prompt): Promise<ChatResponse>;
 
-	get defaultOptions(): ChatOptions {
-		return new DefaultChatOptions();
-	}
+  get defaultOptions(): ChatOptions {
+    return new DefaultChatOptions();
+  }
 
-	override stream(_prompt: Prompt): Observable<ChatResponse> {
-		throw new Error("streaming is not supported");
-	}
+  override stream(_prompt: Prompt): Observable<ChatResponse> {
+    throw new Error("streaming is not supported");
+  }
 }

@@ -8,257 +8,257 @@ import type { ObservationHandler } from "../observation-handler.interface";
 import { SimpleObservation } from "../simple-observation";
 
 class TestConvention implements ObservationConvention<ObservationContext> {
-	getName(): string {
-		return "test.observation";
-	}
+  getName(): string {
+    return "test.observation";
+  }
 
-	getContextualName(_context: ObservationContext): string {
-		return "test contextual";
-	}
+  getContextualName(_context: ObservationContext): string {
+    return "test contextual";
+  }
 
-	supportsContext(context: ObservationContext): context is ObservationContext {
-		return context instanceof ObservationContext;
-	}
+  supportsContext(context: ObservationContext): context is ObservationContext {
+    return context instanceof ObservationContext;
+  }
 
-	getLowCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-		return [KeyValue.of("low", "1")];
-	}
+  getLowCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
+    return [KeyValue.of("low", "1")];
+  }
 
-	getHighCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-		return [KeyValue.of("high", "2")];
-	}
+  getHighCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
+    return [KeyValue.of("high", "2")];
+  }
 }
 
 function createObservation(
-	registry: AlsObservationRegistry,
-	context: ObservationContext = new ObservationContext(),
+  registry: AlsObservationRegistry,
+  context: ObservationContext = new ObservationContext(),
 ) {
-	return SimpleObservation.createNotStarted(
-		null,
-		new TestConvention(),
-		() => context,
-		registry,
-	);
+  return SimpleObservation.createNotStarted(
+    null,
+    new TestConvention(),
+    () => context,
+    registry,
+  );
 }
 
 describe("Observation", () => {
-	it("should populate convention values on start and stop", () => {
-		const registry = new AlsObservationRegistry();
-		const context = new ObservationContext();
-		const observation = createObservation(registry, context);
+  it("should populate convention values on start and stop", () => {
+    const registry = new AlsObservationRegistry();
+    const context = new ObservationContext();
+    const observation = createObservation(registry, context);
 
-		observation.start();
-		expect(context.name).toBe("test.observation");
-		expect(context.contextualName).toBe("test contextual");
-		expect(context.lowCardinalityKeyValues.get("low")).toBe("1");
+    observation.start();
+    expect(context.name).toBe("test.observation");
+    expect(context.contextualName).toBe("test contextual");
+    expect(context.lowCardinalityKeyValues.get("low")).toBe("1");
 
-		observation.stop();
-		expect(context.highCardinalityKeyValues.get("high")).toBe("2");
-	});
+    observation.stop();
+    expect(context.highCardinalityKeyValues.get("high")).toBe("2");
+  });
 
-	it("should call lifecycle handlers and restore scope on observe", async () => {
-		const registry = new AlsObservationRegistry();
-		const calls: string[] = [];
+  it("should call lifecycle handlers and restore scope on observe", async () => {
+    const registry = new AlsObservationRegistry();
+    const calls: string[] = [];
 
-		const handler: ObservationHandler<ObservationContext> = {
-			supportsContext(context): context is ObservationContext {
-				return context instanceof ObservationContext;
-			},
-			onStart() {
-				calls.push("start");
-			},
-			onScopeOpened() {
-				calls.push("scope-opened");
-			},
-			onScopeClosed() {
-				calls.push("scope-closed");
-			},
-			onStop() {
-				calls.push("stop");
-			},
-		};
+    const handler: ObservationHandler<ObservationContext> = {
+      supportsContext(context): context is ObservationContext {
+        return context instanceof ObservationContext;
+      },
+      onStart() {
+        calls.push("start");
+      },
+      onScopeOpened() {
+        calls.push("scope-opened");
+      },
+      onScopeClosed() {
+        calls.push("scope-closed");
+      },
+      onStop() {
+        calls.push("stop");
+      },
+    };
 
-		registry.addHandler(handler);
-		const observation = createObservation(registry);
+    registry.addHandler(handler);
+    const observation = createObservation(registry);
 
-		await observation.observe(async () => {
-			expect(registry.currentObservation).toBe(observation);
-			await Promise.resolve();
-			expect(registry.currentObservation).toBe(observation);
-		});
+    await observation.observe(async () => {
+      expect(registry.currentObservation).toBe(observation);
+      await Promise.resolve();
+      expect(registry.currentObservation).toBe(observation);
+    });
 
-		expect(calls).toEqual(["start", "scope-opened", "scope-closed", "stop"]);
-	});
+    expect(calls).toEqual(["start", "scope-opened", "scope-closed", "stop"]);
+  });
 
-	it("should call error handler when observe callback throws", async () => {
-		const registry = new AlsObservationRegistry();
-		const calls: string[] = [];
+  it("should call error handler when observe callback throws", async () => {
+    const registry = new AlsObservationRegistry();
+    const calls: string[] = [];
 
-		const handler: ObservationHandler<ObservationContext> = {
-			supportsContext(context): context is ObservationContext {
-				return context instanceof ObservationContext;
-			},
-			onStart() {
-				calls.push("start");
-			},
-			onError() {
-				calls.push("error");
-			},
-			onScopeClosed() {
-				calls.push("scope-closed");
-			},
-			onStop() {
-				calls.push("stop");
-			},
-		};
+    const handler: ObservationHandler<ObservationContext> = {
+      supportsContext(context): context is ObservationContext {
+        return context instanceof ObservationContext;
+      },
+      onStart() {
+        calls.push("start");
+      },
+      onError() {
+        calls.push("error");
+      },
+      onScopeClosed() {
+        calls.push("scope-closed");
+      },
+      onStop() {
+        calls.push("stop");
+      },
+    };
 
-		registry.addHandler(handler);
-		const observation = createObservation(registry);
+    registry.addHandler(handler);
+    const observation = createObservation(registry);
 
-		await expect(
-			observation.observe(async () => {
-				throw new Error("boom");
-			}),
-		).rejects.toThrow("boom");
+    await expect(
+      observation.observe(async () => {
+        throw new Error("boom");
+      }),
+    ).rejects.toThrow("boom");
 
-		expect(calls).toEqual(["start", "error", "scope-closed", "stop"]);
-		expect(observation.context.error?.message).toBe("boom");
-	});
+    expect(calls).toEqual(["start", "error", "scope-closed", "stop"]);
+    expect(observation.context.error?.message).toBe("boom");
+  });
 
-	it("should execute observation callback through handler runInScope", async () => {
-		const registry = new AlsObservationRegistry();
-		const calls: string[] = [];
+  it("should execute observation callback through handler runInScope", async () => {
+    const registry = new AlsObservationRegistry();
+    const calls: string[] = [];
 
-		const handler: ObservationHandler<ObservationContext> = {
-			supportsContext(context): context is ObservationContext {
-				return context instanceof ObservationContext;
-			},
-			async runInScope(_context, fn) {
-				calls.push("run-scope-enter");
-				try {
-					return await fn();
-				} finally {
-					calls.push("run-scope-exit");
-				}
-			},
-		};
+    const handler: ObservationHandler<ObservationContext> = {
+      supportsContext(context): context is ObservationContext {
+        return context instanceof ObservationContext;
+      },
+      async runInScope(_context, fn) {
+        calls.push("run-scope-enter");
+        try {
+          return await fn();
+        } finally {
+          calls.push("run-scope-exit");
+        }
+      },
+    };
 
-		registry.addHandler(handler);
-		const observation = createObservation(registry);
+    registry.addHandler(handler);
+    const observation = createObservation(registry);
 
-		await observation.observe(async () => {
-			calls.push("callback");
-		});
+    await observation.observe(async () => {
+      calls.push("callback");
+    });
 
-		expect(calls).toEqual(["run-scope-enter", "callback", "run-scope-exit"]);
-	});
+    expect(calls).toEqual(["run-scope-enter", "callback", "run-scope-exit"]);
+  });
 
-	it("should call lifecycle handlers and restore scope on observeStream", async () => {
-		const registry = new AlsObservationRegistry();
-		const calls: string[] = [];
+  it("should call lifecycle handlers and restore scope on observeStream", async () => {
+    const registry = new AlsObservationRegistry();
+    const calls: string[] = [];
 
-		const handler: ObservationHandler<ObservationContext> = {
-			supportsContext(context): context is ObservationContext {
-				return context instanceof ObservationContext;
-			},
-			onStart() {
-				calls.push("start");
-			},
-			onScopeOpened() {
-				calls.push("scope-opened");
-			},
-			onScopeClosed() {
-				calls.push("scope-closed");
-			},
-			onStop() {
-				calls.push("stop");
-			},
-		};
+    const handler: ObservationHandler<ObservationContext> = {
+      supportsContext(context): context is ObservationContext {
+        return context instanceof ObservationContext;
+      },
+      onStart() {
+        calls.push("start");
+      },
+      onScopeOpened() {
+        calls.push("scope-opened");
+      },
+      onScopeClosed() {
+        calls.push("scope-closed");
+      },
+      onStop() {
+        calls.push("stop");
+      },
+    };
 
-		registry.addHandler(handler);
-		const observation = createObservation(registry);
+    registry.addHandler(handler);
+    const observation = createObservation(registry);
 
-		const actual = await firstValueFrom(
-			observation.observeStream(() =>
-				of(1).pipe(map(() => registry.currentObservation)),
-			),
-		);
+    const actual = await firstValueFrom(
+      observation.observeStream(() =>
+        of(1).pipe(map(() => registry.currentObservation)),
+      ),
+    );
 
-		expect(actual).toBe(observation);
-		expect(calls).toEqual(["start", "scope-opened", "scope-closed", "stop"]);
-	});
+    expect(actual).toBe(observation);
+    expect(calls).toEqual(["start", "scope-opened", "scope-closed", "stop"]);
+  });
 
-	it("should call error handler when observeStream source errors", async () => {
-		const registry = new AlsObservationRegistry();
-		const calls: string[] = [];
+  it("should call error handler when observeStream source errors", async () => {
+    const registry = new AlsObservationRegistry();
+    const calls: string[] = [];
 
-		const handler: ObservationHandler<ObservationContext> = {
-			supportsContext(context): context is ObservationContext {
-				return context instanceof ObservationContext;
-			},
-			onStart() {
-				calls.push("start");
-			},
-			onError() {
-				calls.push("error");
-			},
-			onScopeClosed() {
-				calls.push("scope-closed");
-			},
-			onStop() {
-				calls.push("stop");
-			},
-		};
+    const handler: ObservationHandler<ObservationContext> = {
+      supportsContext(context): context is ObservationContext {
+        return context instanceof ObservationContext;
+      },
+      onStart() {
+        calls.push("start");
+      },
+      onError() {
+        calls.push("error");
+      },
+      onScopeClosed() {
+        calls.push("scope-closed");
+      },
+      onStop() {
+        calls.push("stop");
+      },
+    };
 
-		registry.addHandler(handler);
-		const observation = createObservation(registry);
+    registry.addHandler(handler);
+    const observation = createObservation(registry);
 
-		await expect(
-			firstValueFrom(
-				observation.observeStream(() =>
-					throwError(() => new Error("stream boom")),
-				),
-			),
-		).rejects.toThrow("stream boom");
+    await expect(
+      firstValueFrom(
+        observation.observeStream(() =>
+          throwError(() => new Error("stream boom")),
+        ),
+      ),
+    ).rejects.toThrow("stream boom");
 
-		expect(calls).toEqual(["start", "error", "scope-closed", "stop"]);
-		expect(observation.context.error?.message).toBe("stream boom");
-	});
+    expect(calls).toEqual(["start", "error", "scope-closed", "stop"]);
+    expect(observation.context.error?.message).toBe("stream boom");
+  });
 
-	it("should restore parent observation scope after observeStream subscription", async () => {
-		const registry = new AlsObservationRegistry();
-		const parent = createObservation(registry);
-		const child = createObservation(registry);
+  it("should restore parent observation scope after observeStream subscription", async () => {
+    const registry = new AlsObservationRegistry();
+    const parent = createObservation(registry);
+    const child = createObservation(registry);
 
-		parent.start();
-		const parentScope = parent.openScope();
-		expect(registry.currentObservation).toBe(parent);
+    parent.start();
+    const parentScope = parent.openScope();
+    expect(registry.currentObservation).toBe(parent);
 
-		await firstValueFrom(child.observeStream(() => of(1)));
-		expect(registry.currentObservation).toBe(parent);
+    await firstValueFrom(child.observeStream(() => of(1)));
+    expect(registry.currentObservation).toBe(parent);
 
-		parentScope.close();
-		parent.stop();
-		expect(registry.currentObservation).toBeNull();
-	});
+    parentScope.close();
+    parent.stop();
+    expect(registry.currentObservation).toBeNull();
+  });
 
-	it("should restore parent observation scope when nested", () => {
-		const registry = new AlsObservationRegistry();
-		const parent = createObservation(registry);
-		const child = createObservation(registry);
+  it("should restore parent observation scope when nested", () => {
+    const registry = new AlsObservationRegistry();
+    const parent = createObservation(registry);
+    const child = createObservation(registry);
 
-		parent.start();
-		const parentScope = parent.openScope();
-		expect(registry.currentObservation).toBe(parent);
+    parent.start();
+    const parentScope = parent.openScope();
+    expect(registry.currentObservation).toBe(parent);
 
-		child.start();
-		const childScope = child.openScope();
-		expect(registry.currentObservation).toBe(child);
+    child.start();
+    const childScope = child.openScope();
+    expect(registry.currentObservation).toBe(child);
 
-		childScope.close();
-		expect(registry.currentObservation).toBe(parent);
+    childScope.close();
+    expect(registry.currentObservation).toBe(parent);
 
-		parentScope.close();
-		expect(registry.currentObservation).toBeNull();
-	});
+    parentScope.close();
+    expect(registry.currentObservation).toBeNull();
+  });
 });

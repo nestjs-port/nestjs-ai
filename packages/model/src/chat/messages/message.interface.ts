@@ -7,9 +7,9 @@ import type { MessageType } from "./message-type";
  * types.
  */
 export interface Message extends Content {
-	/**
-	 * Get the message type.
-	 * @returns the message type
-	 */
-	get messageType(): MessageType;
+  /**
+   * Get the message type.
+   * @returns the message type
+   */
+  get messageType(): MessageType;
 }

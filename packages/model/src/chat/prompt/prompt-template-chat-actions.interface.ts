@@ -1,7 +1,7 @@
 import type { Message } from "../messages";
 
 export interface PromptTemplateChatActions {
-	createMessages(): Message[];
+  createMessages(): Message[];
 
-	createMessages(model: Record<string, unknown>): Message[];
+  createMessages(model: Record<string, unknown>): Message[];
 }

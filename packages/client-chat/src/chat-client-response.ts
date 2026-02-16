@@ -2,72 +2,72 @@ import assert from "node:assert/strict";
 import type { ChatResponse } from "@nestjs-ai/model";
 
 export class ChatClientResponse {
-	private readonly _chatResponse: ChatResponse | null;
-	private readonly _context: Map<string, unknown>;
+  private readonly _chatResponse: ChatResponse | null;
+  private readonly _context: Map<string, unknown>;
 
-	constructor(
-		chatResponse: ChatResponse | null,
-		context: Map<string, unknown> = new Map(),
-	) {
-		assert(context, "context cannot be null");
+  constructor(
+    chatResponse: ChatResponse | null,
+    context: Map<string, unknown> = new Map(),
+  ) {
+    assert(context, "context cannot be null");
 
-		for (const key of context.keys()) {
-			assert(key != null, "context keys cannot be null");
-		}
+    for (const key of context.keys()) {
+      assert(key != null, "context keys cannot be null");
+    }
 
-		this._chatResponse = chatResponse;
-		this._context = new Map(context);
-	}
+    this._chatResponse = chatResponse;
+    this._context = new Map(context);
+  }
 
-	get chatResponse(): ChatResponse | null {
-		return this._chatResponse;
-	}
+  get chatResponse(): ChatResponse | null {
+    return this._chatResponse;
+  }
 
-	get context(): Map<string, unknown> {
-		return new Map(this._context);
-	}
+  get context(): Map<string, unknown> {
+    return new Map(this._context);
+  }
 
-	copy(): ChatClientResponse {
-		return new ChatClientResponse(this._chatResponse, new Map(this._context));
-	}
+  copy(): ChatClientResponse {
+    return new ChatClientResponse(this._chatResponse, new Map(this._context));
+  }
 
-	mutate(): ChatClientResponseBuilder {
-		return new ChatClientResponseBuilder()
-			.chatResponse(this._chatResponse)
-			.context(new Map(this._context));
-	}
+  mutate(): ChatClientResponseBuilder {
+    return new ChatClientResponseBuilder()
+      .chatResponse(this._chatResponse)
+      .context(new Map(this._context));
+  }
 
-	static builder(): ChatClientResponseBuilder {
-		return new ChatClientResponseBuilder();
-	}
+  static builder(): ChatClientResponseBuilder {
+    return new ChatClientResponseBuilder();
+  }
 }
 
 export class ChatClientResponseBuilder {
-	private _chatResponse: ChatResponse | null = null;
-	private readonly _context = new Map<string, unknown>();
+  private _chatResponse: ChatResponse | null = null;
+  private readonly _context = new Map<string, unknown>();
 
-	chatResponse(chatResponse: ChatResponse | null): this {
-		this._chatResponse = chatResponse;
-		return this;
-	}
+  chatResponse(chatResponse: ChatResponse | null): this {
+    this._chatResponse = chatResponse;
+    return this;
+  }
 
-	context(context: Map<string, unknown>): this;
-	context(key: string, value: unknown): this;
-	context(contextOrKey: Map<string, unknown> | string, value?: unknown): this {
-		if (typeof contextOrKey === "string") {
-			assert(contextOrKey, "key cannot be null");
-			this._context.set(contextOrKey, value ?? null);
-			return this;
-		}
+  context(context: Map<string, unknown>): this;
+  context(key: string, value: unknown): this;
+  context(contextOrKey: Map<string, unknown> | string, value?: unknown): this {
+    if (typeof contextOrKey === "string") {
+      assert(contextOrKey, "key cannot be null");
+      this._context.set(contextOrKey, value ?? null);
+      return this;
+    }
 
-		assert(contextOrKey, "context cannot be null");
-		for (const [key, contextValue] of contextOrKey.entries()) {
-			this._context.set(key, contextValue);
-		}
-		return this;
-	}
+    assert(contextOrKey, "context cannot be null");
+    for (const [key, contextValue] of contextOrKey.entries()) {
+      this._context.set(key, contextValue);
+    }
+    return this;
+  }
 
-	build(): ChatClientResponse {
-		return new ChatClientResponse(this._chatResponse, new Map(this._context));
-	}
+  build(): ChatClientResponse {
+    return new ChatClientResponse(this._chatResponse, new Map(this._context));
+  }
 }

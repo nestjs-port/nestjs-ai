@@ -1,14 +1,14 @@
 export { ChatModel } from "./chat-model";
 
 export {
-	ChatResponse,
-	ChatResponseBuilder,
-	type ChatResponseProps,
+  ChatResponse,
+  ChatResponseBuilder,
+  type ChatResponseProps,
 } from "./chat-response";
 
 export {
-	Generation,
-	type GenerationProps,
+  Generation,
+  type GenerationProps,
 } from "./generation";
 
 export { MessageAggregator } from "./message-aggregator";

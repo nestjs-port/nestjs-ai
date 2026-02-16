@@ -8,7 +8,7 @@ declare const MillisecondsBrand: unique symbol;
  * Provides type safety to distinguish milliseconds from plain numbers.
  */
 export type Milliseconds = number & {
-	readonly [MillisecondsBrand]: typeof MillisecondsBrand;
+  readonly [MillisecondsBrand]: typeof MillisecondsBrand;
 };
 
 /**
@@ -17,5 +17,5 @@ export type Milliseconds = number & {
  * @returns The value as a Milliseconds branded type
  */
 export function ms(value: number): Milliseconds {
-	return value as Milliseconds;
+  return value as Milliseconds;
 }

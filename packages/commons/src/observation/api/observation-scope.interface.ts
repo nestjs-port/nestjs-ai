@@ -6,18 +6,18 @@ import type { ObservationContext } from "./observation-context";
  * Represents a scope within which an observation is current.
  */
 export interface ObservationScope {
-	/**
-	 * Returns the observation associated with this scope.
-	 */
-	readonly currentObservation: Observation<ObservationContext>;
+  /**
+   * Returns the observation associated with this scope.
+   */
+  readonly currentObservation: Observation<ObservationContext>;
 
-	/**
-	 * Returns the previous observation scope (for stack-based nesting).
-	 */
-	readonly previousObservationScope: ObservationScope | null;
+  /**
+   * Returns the previous observation scope (for stack-based nesting).
+   */
+  readonly previousObservationScope: ObservationScope | null;
 
-	/**
-	 * Closes this scope, restoring the previous scope as current.
-	 */
-	close(): void;
+  /**
+   * Closes this scope, restoring the previous scope as current.
+   */
+  close(): void;
 }

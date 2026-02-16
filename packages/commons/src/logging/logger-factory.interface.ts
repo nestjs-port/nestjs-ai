@@ -16,11 +16,11 @@ import type { Logger } from "./logger.interface";
  * ```
  */
 export interface ILoggerFactory {
-	/**
-	 * Return a logger named according to the name parameter.
-	 *
-	 * @param name - The name of the logger
-	 * @returns A Logger instance
-	 */
-	getLogger(name: string): Logger;
+  /**
+   * Return a logger named according to the name parameter.
+   *
+   * @param name - The name of the logger
+   * @returns A Logger instance
+   */
+  getLogger(name: string): Logger;
 }

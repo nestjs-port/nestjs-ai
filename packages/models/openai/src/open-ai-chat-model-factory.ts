@@ -3,7 +3,13 @@ import {
 	type ChatModelFactory,
 	HTTP_CLIENT_TOKEN,
 	type HttpClient,
+	OBSERVATION_REGISTRY_TOKEN,
+	type ObservationRegistry,
 } from "@nestjs-ai/commons";
+import {
+	ChatModelObservationConvention,
+	ToolExecutionEligibilityPredicate,
+} from "@nestjs-ai/model";
 import { OpenAiApi } from "./api";
 import { OpenAiChatModel } from "./open-ai-chat-model";
 import { OpenAiChatOptions } from "./open-ai-chat-options";
@@ -25,7 +31,12 @@ export function openAiChatModelFactory(
 			},
 			{
 				token: CHAT_MODEL_TOKEN,
-				useFactory: (api: OpenAiApi) => {
+				useFactory: (
+					api: OpenAiApi,
+					observationRegistry?: ObservationRegistry,
+					observationConvention?: ChatModelObservationConvention,
+					toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
+				) => {
 					const defaultOptions = properties.options
 						? new OpenAiChatOptions(properties.options)
 						: undefined;
@@ -33,9 +44,17 @@ export function openAiChatModelFactory(
 					return new OpenAiChatModel({
 						openAiApi: api,
 						defaultOptions,
+						observationRegistry,
+						observationConvention,
+						toolExecutionEligibilityPredicate,
 					});
 				},
-				inject: [OpenAiApi],
+				inject: [
+					OpenAiApi,
+					{ token: OBSERVATION_REGISTRY_TOKEN, optional: true },
+					{ token: ChatModelObservationConvention, optional: true },
+					{ token: ToolExecutionEligibilityPredicate, optional: true },
+				],
 			},
 		],
 	};

@@ -1,1 +1,5 @@
-export { CHAT_MODEL_TOKEN, HTTP_CLIENT_TOKEN } from "./tokens";
+export {
+	CHAT_MODEL_TOKEN,
+	HTTP_CLIENT_TOKEN,
+	OBSERVATION_REGISTRY_TOKEN,
+} from "./tokens";

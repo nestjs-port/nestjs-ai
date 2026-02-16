@@ -4,51 +4,29 @@ import type { ObservationConvention } from "./observation-convention.interface";
 import type { ObservationRegistry } from "./observation-registry.interface";
 import { SimpleObservation } from "./simple-observation";
 
-/**
- * Documents an observation including its name and conventions.
- * Corresponds to Micrometer's ObservationDocumentation.
- *
- * Subclasses define static instances to emulate Java's enum pattern:
- *
- * @example
- * ```typescript
- * class ChatModelObservationDocumentation extends ObservationDocumentation {
- *   static readonly CHAT_MODEL_OPERATION = new ChatModelObservationDocumentation("gen_ai.chat", null);
- *
- *   constructor(name: string | null, contextualName: string | null) {
- *     super(name, contextualName);
- *   }
- * }
- *
- * ChatModelObservationDocumentation.CHAT_MODEL_OPERATION
- *   .observation(customConvention, defaultConvention, () => ctx, registry)
- *   .observe(async () => { ... });
- * ```
- */
+type ObservationConventionConstructor<
+	CTX extends ObservationContext = ObservationContext,
+> = abstract new (
+	...args: never[]
+) => ObservationConvention<CTX>;
+
 export abstract class ObservationDocumentation {
-	private readonly _name: string | null;
-	private readonly _contextualName: string | null;
-
-	protected constructor(
-		name: string | null,
-		contextualName: string | null = null,
-	) {
-		this._name = name;
-		this._contextualName = contextualName;
-	}
-
 	/**
 	 * Returns the technical name for the observation.
 	 */
 	get name(): string | null {
-		return this._name;
+		return null;
 	}
 
 	/**
 	 * Returns the contextual name for the observation.
 	 */
 	get contextualName(): string | null {
-		return this._contextualName;
+		return null;
+	}
+
+	get defaultConvention(): ObservationConventionConstructor | null {
+		return null;
 	}
 
 	/**
@@ -66,6 +44,31 @@ export abstract class ObservationDocumentation {
 		contextSupplier: () => CTX,
 		registry: ObservationRegistry,
 	): Observation<CTX> {
+		const documentedDefaultConvention = this.defaultConvention;
+		if (documentedDefaultConvention === null) {
+			throw new Error(
+				"You've decided to use convention based naming yet this observation [" +
+					this.constructor.name +
+					"] has not defined any default convention",
+			);
+		}
+
+		const defaultConventionType =
+			(defaultConvention as { constructor?: { name?: string } }).constructor
+				?.name ?? typeof defaultConvention;
+
+		if (!(defaultConvention instanceof documentedDefaultConvention)) {
+			throw new TypeError(
+				"Observation [" +
+					this.constructor.name +
+					"] defined default convention to be of type [" +
+					documentedDefaultConvention.name +
+					"] but you have provided an incompatible one of type [" +
+					defaultConventionType +
+					"]",
+			);
+		}
+
 		const observation = SimpleObservation.createNotStarted(
 			customConvention,
 			defaultConvention,
@@ -73,11 +76,11 @@ export abstract class ObservationDocumentation {
 			registry,
 		);
 
-		if (this.name !== null) {
-			observation.context.name = this.name ?? "";
+		if (this.name != null) {
+			observation.context.name = this.name;
 		}
 
-		if (this.contextualName !== null) {
+		if (this.contextualName != null) {
 			observation.contextualName(this.contextualName);
 		}
 

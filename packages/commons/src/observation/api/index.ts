@@ -1,5 +1,6 @@
 export { AlsObservationRegistry } from "./als-observation-registry";
 export { KeyValue } from "./key-value";
+export { KeyValues } from "./key-values";
 export { MeterObservationHandler } from "./meter-observation-handler";
 export { NoopObservationRegistry } from "./noop-observation-registry";
 export { Observation } from "./observation";

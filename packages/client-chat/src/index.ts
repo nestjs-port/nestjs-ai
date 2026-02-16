@@ -9,4 +9,5 @@ export {
 	ChatClientResponse,
 	ChatClientResponseBuilder,
 } from "./chat-client-response";
+export * from "./observation";
 export { ResponseEntity } from "./response-entity";

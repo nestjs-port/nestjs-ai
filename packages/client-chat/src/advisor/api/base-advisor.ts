@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import {
 	asyncScheduler,
 	catchError,
-	map,
 	mergeMap,
 	type Observable,
 	observeOn,
@@ -25,22 +24,21 @@ export abstract class BaseAdvisor implements CallAdvisor, StreamAdvisor {
 
 	abstract get order(): number;
 
-	adviseCall(
+	async adviseCall(
 		chatClientRequest: ChatClientRequest,
 		callAdvisorChain: CallAdvisorChain,
 	): Promise<ChatClientResponse> {
 		assert(chatClientRequest != null, "chatClientRequest cannot be null");
 		assert(callAdvisorChain != null, "callAdvisorChain cannot be null");
 
-		const processedChatClientRequest = this.before(
+		const processedChatClientRequest = await this.before(
 			chatClientRequest,
 			callAdvisorChain,
 		);
-		return callAdvisorChain
-			.nextCall(processedChatClientRequest)
-			.then((chatClientResponse) =>
-				this.after(chatClientResponse, callAdvisorChain),
-			);
+		const chatClientResponse = await callAdvisorChain.nextCall(
+			processedChatClientRequest,
+		);
+		return await this.after(chatClientResponse, callAdvisorChain);
 	}
 
 	adviseStream(
@@ -53,12 +51,12 @@ export abstract class BaseAdvisor implements CallAdvisor, StreamAdvisor {
 
 		return of(chatClientRequest).pipe(
 			observeOn(this.scheduler),
-			map((request) => this.before(request, streamAdvisorChain)),
+			mergeMap((request) => this.before(request, streamAdvisorChain)),
 			mergeMap((request) => streamAdvisorChain.nextStream(request)),
-			map((response) =>
+			mergeMap((response) =>
 				AdvisorUtils.onFinishReason()(response)
 					? this.after(response, streamAdvisorChain)
-					: response,
+					: Promise.resolve(response),
 			),
 			catchError((error: unknown) =>
 				throwError(
@@ -75,12 +73,12 @@ export abstract class BaseAdvisor implements CallAdvisor, StreamAdvisor {
 	abstract before(
 		chatClientRequest: ChatClientRequest,
 		advisorChain: AdvisorChain,
-	): ChatClientRequest;
+	): Promise<ChatClientRequest>;
 
 	abstract after(
 		chatClientResponse: ChatClientResponse,
 		advisorChain: AdvisorChain,
-	): ChatClientResponse;
+	): Promise<ChatClientResponse>;
 
 	get scheduler(): SchedulerLike {
 		return BaseAdvisor.DEFAULT_SCHEDULER;

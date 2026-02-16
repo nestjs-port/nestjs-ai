@@ -5,15 +5,20 @@ import { defer, throwError } from "rxjs";
 
 import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
 import type { ChatClientRequest } from "../chat-client-request";
-import type { Advisor } from "./api/advisor.interface";
-import { BaseAdvisorChain } from "./api/base-advisor-chain";
-import type { CallAdvisor } from "./api/call-advisor.interface";
-import type { CallAdvisorChain } from "./api/call-advisor-chain.interface";
-import type { StreamAdvisor } from "./api/stream-advisor.interface";
-import { AdvisorObservationContext } from "./observation/advisor-observation-context";
-import type { AdvisorObservationConvention } from "./observation/advisor-observation-convention";
-import { AdvisorObservationDocumentation } from "./observation/advisor-observation-documentation";
-import { DefaultAdvisorObservationConvention } from "./observation/default-advisor-observation-convention";
+import type { ChatClientResponse } from "../chat-client-response";
+import type {
+	Advisor,
+	CallAdvisor,
+	CallAdvisorChain,
+	StreamAdvisor,
+} from "./api";
+import { BaseAdvisorChain } from "./api";
+import {
+	AdvisorObservationContext,
+	type AdvisorObservationConvention,
+	AdvisorObservationDocumentation,
+	DefaultAdvisorObservationConvention,
+} from "./observation";
 
 export interface DefaultAroundAdvisorChainProps {
 	observationRegistry: ObservationRegistry;

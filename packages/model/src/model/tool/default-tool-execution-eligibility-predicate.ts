@@ -1,15 +1,13 @@
 import type { ChatOptions, ChatResponse } from "../../chat";
 import { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
-import type { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate.interface";
+import { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate";
 
 /**
  * Default implementation of {@link ToolExecutionEligibilityPredicate} that checks whether
  * tool execution is enabled in the prompt options and if the chat response contains tool
  * calls.
  */
-export class DefaultToolExecutionEligibilityPredicate
-	implements ToolExecutionEligibilityPredicate
-{
+export class DefaultToolExecutionEligibilityPredicate extends ToolExecutionEligibilityPredicate {
 	test(promptOptions: ChatOptions, chatResponse: ChatResponse): boolean {
 		return (
 			ToolCallingChatOptions.isInternalToolExecutionEnabled(promptOptions) &&
@@ -18,7 +16,7 @@ export class DefaultToolExecutionEligibilityPredicate
 		);
 	}
 
-	isToolExecutionRequired(
+	override isToolExecutionRequired(
 		promptOptions: ChatOptions,
 		chatResponse: ChatResponse,
 	): boolean {

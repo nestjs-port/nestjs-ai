@@ -1,10 +1,10 @@
 import type { ChatOptions, ChatResponse } from "../../chat";
 
 /**
- * Interface for determining when tool execution should be performed based on model
+ * Base contract for determining when tool execution should be performed based on model
  * responses.
  */
-export interface ToolExecutionEligibilityPredicate {
+export abstract class ToolExecutionEligibilityPredicate {
 	/**
 	 * Determines if tool execution should be performed based on the prompt options and
 	 * chat response.
@@ -12,7 +12,7 @@ export interface ToolExecutionEligibilityPredicate {
 	 * @param chatResponse The response from the chat model
 	 * @returns true if tool execution should be performed, false otherwise
 	 */
-	isToolExecutionRequired(
+	abstract isToolExecutionRequired(
 		promptOptions: ChatOptions,
 		chatResponse: ChatResponse,
 	): boolean;

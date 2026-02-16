@@ -16,58 +16,58 @@
  * ```
  */
 export interface Logger {
-	/**
-	 * The name of this logger instance.
-	 */
-	readonly name: string;
+  /**
+   * The name of this logger instance.
+   */
+  readonly name: string;
 
-	/**
-	 * Log a message at TRACE level.
-	 */
-	trace(message: string, ...args: unknown[]): void;
+  /**
+   * Log a message at TRACE level.
+   */
+  trace(message: string, ...args: unknown[]): void;
 
-	/**
-	 * Log a message at DEBUG level.
-	 */
-	debug(message: string, ...args: unknown[]): void;
+  /**
+   * Log a message at DEBUG level.
+   */
+  debug(message: string, ...args: unknown[]): void;
 
-	/**
-	 * Log a message at INFO level.
-	 */
-	info(message: string, ...args: unknown[]): void;
+  /**
+   * Log a message at INFO level.
+   */
+  info(message: string, ...args: unknown[]): void;
 
-	/**
-	 * Log a message at WARN level.
-	 */
-	warn(message: string, ...args: unknown[]): void;
+  /**
+   * Log a message at WARN level.
+   */
+  warn(message: string, ...args: unknown[]): void;
 
-	/**
-	 * Log a message at ERROR level.
-	 */
-	error(message: string, ...args: unknown[]): void;
+  /**
+   * Log a message at ERROR level.
+   */
+  error(message: string, ...args: unknown[]): void;
 
-	/**
-	 * Check if TRACE level is enabled.
-	 */
-	isTraceEnabled(): boolean;
+  /**
+   * Check if TRACE level is enabled.
+   */
+  isTraceEnabled(): boolean;
 
-	/**
-	 * Check if DEBUG level is enabled.
-	 */
-	isDebugEnabled(): boolean;
+  /**
+   * Check if DEBUG level is enabled.
+   */
+  isDebugEnabled(): boolean;
 
-	/**
-	 * Check if INFO level is enabled.
-	 */
-	isInfoEnabled(): boolean;
+  /**
+   * Check if INFO level is enabled.
+   */
+  isInfoEnabled(): boolean;
 
-	/**
-	 * Check if WARN level is enabled.
-	 */
-	isWarnEnabled(): boolean;
+  /**
+   * Check if WARN level is enabled.
+   */
+  isWarnEnabled(): boolean;
 
-	/**
-	 * Check if ERROR level is enabled.
-	 */
-	isErrorEnabled(): boolean;
+  /**
+   * Check if ERROR level is enabled.
+   */
+  isErrorEnabled(): boolean;
 }

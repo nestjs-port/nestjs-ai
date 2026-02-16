@@ -6,9 +6,9 @@ import type { AdvisorChain } from "./advisor-chain";
 import type { StreamAdvisor } from "./stream-advisor.interface";
 
 export interface StreamAdvisorChain extends AdvisorChain {
-	nextStream(
-		chatClientRequest: ChatClientRequest,
-	): Observable<ChatClientResponse>;
+  nextStream(
+    chatClientRequest: ChatClientRequest,
+  ): Observable<ChatClientResponse>;
 
-	get streamAdvisors(): StreamAdvisor[];
+  get streamAdvisors(): StreamAdvisor[];
 }

@@ -1,28 +1,28 @@
 {
-	"name": "@nestjs-ai/commons",
-	"version": "0.0.0",
-	"private": true,
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js"
-		}
-	},
-	"scripts": {
-		"build": "pnpm clean && tsc -p tsconfig.build.json",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist",
-		"test": "vitest run"
-	},
-	"dependencies": {
-		"uuid": "^13.0.0"
-	},
-	"devDependencies": {
-		"rxjs": "^7.0.0"
-	},
-	"peerDependencies": {
-		"rxjs": "^7.0.0"
-	}
+  "name": "@nestjs-ai/commons",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "rxjs": "^7.0.0"
+  },
+  "peerDependencies": {
+    "rxjs": "^7.0.0"
+  }
 }

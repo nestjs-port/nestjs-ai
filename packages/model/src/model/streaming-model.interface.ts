@@ -14,13 +14,13 @@ import type { ModelResult } from "./model-result.interface";
  * @typeParam TResChunk - the generic type of a single item in the streaming response from the AI model
  */
 export interface StreamingModel<
-	TReq extends ModelRequest<unknown>,
-	TResChunk extends ModelResponse<ModelResult<unknown>>,
+  TReq extends ModelRequest<unknown>,
+  TResChunk extends ModelResponse<ModelResult<unknown>>,
 > {
-	/**
-	 * Executes a method call to the AI model.
-	 * @param request - the request object to be sent to the AI model
-	 * @returns the streaming response from the AI model
-	 */
-	stream(request: TReq): Observable<TResChunk>;
+  /**
+   * Executes a method call to the AI model.
+   * @param request - the request object to be sent to the AI model
+   * @returns the streaming response from the AI model
+   */
+  stream(request: TReq): Observable<TResChunk>;
 }

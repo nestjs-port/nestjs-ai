@@ -6,9 +6,9 @@ import type { ToolExecutionException } from "./tool-execution-exception";
  * exception to be handled by the caller.
  */
 export interface ToolExecutionExceptionProcessor {
-	/**
-	 * Convert an exception thrown by a tool to a String that can be sent back to the AI
-	 * model or throw an exception to be handled by the caller.
-	 */
-	process(exception: ToolExecutionException): string;
+  /**
+   * Convert an exception thrown by a tool to a String that can be sent back to the AI
+   * model or throw an exception to be handled by the caller.
+   */
+  process(exception: ToolExecutionException): string;
 }

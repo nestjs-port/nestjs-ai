@@ -2,8 +2,8 @@ import { AbstractMessage } from "./abstract-message";
 import { MessageType } from "./message-type";
 
 export interface SystemMessageProps {
-	content?: string | null;
-	properties?: Record<string, unknown>;
+  content?: string | null;
+  properties?: Record<string, unknown>;
 }
 
 /**
@@ -14,32 +14,32 @@ export interface SystemMessageProps {
  * to behave like a certain character or to provide answers in a specific format.
  */
 export class SystemMessage extends AbstractMessage {
-	constructor(options: SystemMessageProps = {}) {
-		super(
-			MessageType.SYSTEM,
-			options.content ?? null,
-			options.properties ?? {},
-		);
-	}
+  constructor(options: SystemMessageProps = {}) {
+    super(
+      MessageType.SYSTEM,
+      options.content ?? null,
+      options.properties ?? {},
+    );
+  }
 
-	/**
-	 * Create a SystemMessage with text content.
-	 */
-	static of(textContent: string): SystemMessage {
-		return new SystemMessage({ content: textContent });
-	}
+  /**
+   * Create a SystemMessage with text content.
+   */
+  static of(textContent: string): SystemMessage {
+    return new SystemMessage({ content: textContent });
+  }
 
-	/**
-	 * Create a copy of this message.
-	 */
-	copy(): SystemMessage {
-		return new SystemMessage({
-			content: this.text,
-			properties: { ...this.metadata },
-		});
-	}
+  /**
+   * Create a copy of this message.
+   */
+  copy(): SystemMessage {
+    return new SystemMessage({
+      content: this.text,
+      properties: { ...this.metadata },
+    });
+  }
 
-	[Symbol.toPrimitive](): string {
-		return `SystemMessage{textContent='${this.text}', messageType=${this.messageType}, metadata=${JSON.stringify(this.metadata)}}`;
-	}
+  [Symbol.toPrimitive](): string {
+    return `SystemMessage{textContent='${this.text}', messageType=${this.messageType}, metadata=${JSON.stringify(this.metadata)}}`;
+  }
 }

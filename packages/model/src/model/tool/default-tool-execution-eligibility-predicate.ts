@@ -8,18 +8,18 @@ import { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-
  * calls.
  */
 export class DefaultToolExecutionEligibilityPredicate extends ToolExecutionEligibilityPredicate {
-	test(promptOptions: ChatOptions, chatResponse: ChatResponse): boolean {
-		return (
-			ToolCallingChatOptions.isInternalToolExecutionEnabled(promptOptions) &&
-			chatResponse != null &&
-			chatResponse.hasToolCalls()
-		);
-	}
+  test(promptOptions: ChatOptions, chatResponse: ChatResponse): boolean {
+    return (
+      ToolCallingChatOptions.isInternalToolExecutionEnabled(promptOptions) &&
+      chatResponse != null &&
+      chatResponse.hasToolCalls()
+    );
+  }
 
-	override isToolExecutionRequired(
-		promptOptions: ChatOptions,
-		chatResponse: ChatResponse,
-	): boolean {
-		return this.test(promptOptions, chatResponse);
-	}
+  override isToolExecutionRequired(
+    promptOptions: ChatOptions,
+    chatResponse: ChatResponse,
+  ): boolean {
+    return this.test(promptOptions, chatResponse);
+  }
 }

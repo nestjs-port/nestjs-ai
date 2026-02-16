@@ -13,38 +13,38 @@ import type { Message } from "../messages";
  * The context map can contain any information that is relevant to the tool execution.
  */
 export class ToolContext {
-	/**
-	 * The key for the running, tool call history stored in the context map.
-	 */
-	static readonly TOOL_CALL_HISTORY = "TOOL_CALL_HISTORY";
+  /**
+   * The key for the running, tool call history stored in the context map.
+   */
+  static readonly TOOL_CALL_HISTORY = "TOOL_CALL_HISTORY";
 
-	private readonly _context: Readonly<Record<string, unknown>>;
+  private readonly _context: Readonly<Record<string, unknown>>;
 
-	/**
-	 * Constructs a new ToolContext with the given context map.
-	 * @param context A map containing the tool context information. This map is wrapped
-	 * in an unmodifiable view to prevent changes.
-	 */
-	constructor(context: Record<string, unknown>) {
-		this._context = Object.freeze({ ...context });
-	}
+  /**
+   * Constructs a new ToolContext with the given context map.
+   * @param context A map containing the tool context information. This map is wrapped
+   * in an unmodifiable view to prevent changes.
+   */
+  constructor(context: Record<string, unknown>) {
+    this._context = Object.freeze({ ...context });
+  }
 
-	/**
-	 * Returns the immutable context map.
-	 * @returns An unmodifiable view of the context map.
-	 */
-	get context(): Readonly<Record<string, unknown>> {
-		return this._context;
-	}
+  /**
+   * Returns the immutable context map.
+   * @returns An unmodifiable view of the context map.
+   */
+  get context(): Readonly<Record<string, unknown>> {
+    return this._context;
+  }
 
-	/**
-	 * Returns the tool call history from the context map.
-	 * @returns The tool call history. TODO: review whether we still need this or
-	 * ToolCallingManager solves the original issue
-	 */
-	get toolCallHistory(): Message[] | undefined {
-		return this._context[ToolContext.TOOL_CALL_HISTORY] as
-			| Message[]
-			| undefined;
-	}
+  /**
+   * Returns the tool call history from the context map.
+   * @returns The tool call history. TODO: review whether we still need this or
+   * ToolCallingManager solves the original issue
+   */
+  get toolCallHistory(): Message[] | undefined {
+    return this._context[ToolContext.TOOL_CALL_HISTORY] as
+      | Message[]
+      | undefined;
+  }
 }

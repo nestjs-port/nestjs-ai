@@ -1,6 +1,6 @@
 import {
-	NoopObservationRegistry,
-	type ObservationRegistry,
+  NoopObservationRegistry,
+  type ObservationRegistry,
 } from "@nestjs-ai/commons";
 
 /**
@@ -8,7 +8,7 @@ import {
  * request.
  */
 export abstract class AdvisorChain {
-	get observationRegistry(): ObservationRegistry {
-		return NoopObservationRegistry.INSTANCE;
-	}
+  get observationRegistry(): ObservationRegistry {
+    return NoopObservationRegistry.INSTANCE;
+  }
 }

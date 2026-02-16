@@ -18,10 +18,10 @@ import type { OpenAiChatOptions } from "./open-ai-chat-options";
  * Converted from OpenAiParentProperties.java
  */
 export interface OpenAiParentProperties {
-	apiKey?: string;
-	baseUrl?: string;
-	projectId?: string;
-	organizationId?: string;
+  apiKey?: string;
+  baseUrl?: string;
+  projectId?: string;
+  organizationId?: string;
 }
 
 // ============================================================
@@ -35,7 +35,7 @@ export interface OpenAiParentProperties {
  * @ConfigurationProperties prefix: spring.ai.openai
  */
 export interface OpenAiConnectionProperties extends OpenAiParentProperties {
-	// Inherits apiKey, baseUrl (default: https://api.openai.com), projectId, organizationId
+  // Inherits apiKey, baseUrl (default: https://api.openai.com), projectId, organizationId
 }
 
 // ============================================================
@@ -49,8 +49,8 @@ export interface OpenAiConnectionProperties extends OpenAiParentProperties {
  * @ConfigurationProperties prefix: spring.ai.openai.chat
  */
 export interface OpenAiChatProperties extends OpenAiParentProperties {
-	completionsPath?: string;
-	options?: Partial<OpenAiChatOptions>;
+  completionsPath?: string;
+  options?: Partial<OpenAiChatOptions>;
 }
 
 // ============================================================
@@ -65,10 +65,10 @@ export type MetadataMode = "EMBED" | "INFERENCE" | "NONE" | "ALL";
  * Converted from OpenAiEmbeddingOptions.java
  */
 export interface OpenAiEmbeddingOptions {
-	model?: string;
-	encodingFormat?: string;
-	dimensions?: number;
-	user?: string;
+  model?: string;
+  encodingFormat?: string;
+  dimensions?: number;
+  user?: string;
 }
 
 /**
@@ -78,9 +78,9 @@ export interface OpenAiEmbeddingOptions {
  * @ConfigurationProperties prefix: spring.ai.openai.embedding
  */
 export interface OpenAiEmbeddingProperties extends OpenAiParentProperties {
-	metadataMode?: MetadataMode;
-	embeddingsPath?: string;
-	options?: OpenAiEmbeddingOptions;
+  metadataMode?: MetadataMode;
+  embeddingsPath?: string;
+  options?: OpenAiEmbeddingOptions;
 }
 
 // ============================================================
@@ -93,15 +93,15 @@ export interface OpenAiEmbeddingProperties extends OpenAiParentProperties {
  * Converted from OpenAiImageOptions.java
  */
 export interface OpenAiImageOptions {
-	n?: number;
-	model?: string;
-	width?: number;
-	height?: number;
-	quality?: string;
-	responseFormat?: string;
-	size?: string;
-	style?: string;
-	user?: string;
+  n?: number;
+  model?: string;
+  width?: number;
+  height?: number;
+  quality?: string;
+  responseFormat?: string;
+  size?: string;
+  style?: string;
+  user?: string;
 }
 
 /**
@@ -111,8 +111,8 @@ export interface OpenAiImageOptions {
  * @ConfigurationProperties prefix: spring.ai.openai.image
  */
 export interface OpenAiImageProperties extends OpenAiParentProperties {
-	imagesPath?: string;
-	options?: OpenAiImageOptions;
+  imagesPath?: string;
+  options?: OpenAiImageOptions;
 }
 
 // ============================================================
@@ -120,12 +120,12 @@ export interface OpenAiImageProperties extends OpenAiParentProperties {
 // ============================================================
 
 export type SpeechAudioResponseFormat =
-	| "mp3"
-	| "opus"
-	| "aac"
-	| "flac"
-	| "wav"
-	| "pcm";
+  | "mp3"
+  | "opus"
+  | "aac"
+  | "flac"
+  | "wav"
+  | "pcm";
 
 /**
  * OpenAI Audio Speech Options.
@@ -133,11 +133,11 @@ export type SpeechAudioResponseFormat =
  * Converted from OpenAiAudioSpeechOptions.java
  */
 export interface OpenAiAudioSpeechOptions {
-	model?: string;
-	input?: string;
-	voice?: string;
-	responseFormat?: SpeechAudioResponseFormat;
-	speed?: number;
+  model?: string;
+  input?: string;
+  voice?: string;
+  responseFormat?: SpeechAudioResponseFormat;
+  speed?: number;
 }
 
 /**
@@ -147,8 +147,8 @@ export interface OpenAiAudioSpeechOptions {
  * @ConfigurationProperties prefix: spring.ai.openai.audio.speech
  */
 export interface OpenAiAudioSpeechProperties extends OpenAiParentProperties {
-	speechPath?: string;
-	options?: OpenAiAudioSpeechOptions;
+  speechPath?: string;
+  options?: OpenAiAudioSpeechOptions;
 }
 
 // ============================================================
@@ -156,11 +156,11 @@ export interface OpenAiAudioSpeechProperties extends OpenAiParentProperties {
 // ============================================================
 
 export type TranscriptResponseFormat =
-	| "json"
-	| "text"
-	| "srt"
-	| "verbose_json"
-	| "vtt";
+  | "json"
+  | "text"
+  | "srt"
+  | "verbose_json"
+  | "vtt";
 
 export type GranularityType = "word" | "segment";
 
@@ -170,12 +170,12 @@ export type GranularityType = "word" | "segment";
  * Converted from OpenAiAudioTranscriptionOptions.java
  */
 export interface OpenAiAudioTranscriptionOptions {
-	model?: string;
-	responseFormat?: TranscriptResponseFormat;
-	prompt?: string;
-	language?: string;
-	temperature?: number;
-	granularityType?: GranularityType;
+  model?: string;
+  responseFormat?: TranscriptResponseFormat;
+  prompt?: string;
+  language?: string;
+  temperature?: number;
+  granularityType?: GranularityType;
 }
 
 /**
@@ -185,9 +185,9 @@ export interface OpenAiAudioTranscriptionOptions {
  * @ConfigurationProperties prefix: spring.ai.openai.audio.transcription
  */
 export interface OpenAiAudioTranscriptionProperties
-	extends OpenAiParentProperties {
-	transcriptionPath?: string;
-	options?: OpenAiAudioTranscriptionOptions;
+  extends OpenAiParentProperties {
+  transcriptionPath?: string;
+  options?: OpenAiAudioTranscriptionOptions;
 }
 
 // ============================================================
@@ -200,7 +200,7 @@ export interface OpenAiAudioTranscriptionProperties
  * Converted from OpenAiModerationOptions.java
  */
 export interface OpenAiModerationOptions {
-	model?: string;
+  model?: string;
 }
 
 /**
@@ -210,8 +210,8 @@ export interface OpenAiModerationOptions {
  * @ConfigurationProperties prefix: spring.ai.openai.moderation
  */
 export interface OpenAiModerationProperties extends OpenAiParentProperties {
-	moderationPath?: string;
-	options?: OpenAiModerationOptions;
+  moderationPath?: string;
+  options?: OpenAiModerationOptions;
 }
 
 // ============================================================
@@ -236,12 +236,12 @@ export interface OpenAiModerationProperties extends OpenAiParentProperties {
  * ```
  */
 export interface OpenAiProperties extends OpenAiConnectionProperties {
-	chat?: OpenAiChatProperties;
-	embedding?: OpenAiEmbeddingProperties;
-	image?: OpenAiImageProperties;
-	audio?: {
-		speech?: OpenAiAudioSpeechProperties;
-		transcription?: OpenAiAudioTranscriptionProperties;
-	};
-	moderation?: OpenAiModerationProperties;
+  chat?: OpenAiChatProperties;
+  embedding?: OpenAiEmbeddingProperties;
+  image?: OpenAiImageProperties;
+  audio?: {
+    speech?: OpenAiAudioSpeechProperties;
+    transcription?: OpenAiAudioTranscriptionProperties;
+  };
+  moderation?: OpenAiModerationProperties;
 }

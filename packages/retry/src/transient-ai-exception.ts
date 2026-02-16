@@ -4,26 +4,26 @@
  * without any intervention.
  */
 export class TransientAiException extends Error {
-	/**
-	 * Constructor with message.
-	 * @param message the exception message
-	 */
-	constructor(message: string);
+  /**
+   * Constructor with message.
+   * @param message the exception message
+   */
+  constructor(message: string);
 
-	/**
-	 * Constructor with message and cause.
-	 * @param message the exception message
-	 * @param cause the exception cause
-	 */
-	constructor(message: string, cause: Error | undefined);
+  /**
+   * Constructor with message and cause.
+   * @param message the exception message
+   * @param cause the exception cause
+   */
+  constructor(message: string, cause: Error | undefined);
 
-	constructor(message: string, cause?: Error) {
-		super(message, cause ? { cause } : undefined);
-		this.name = "TransientAiException";
+  constructor(message: string, cause?: Error) {
+    super(message, cause ? { cause } : undefined);
+    this.name = "TransientAiException";
 
-		// Maintains proper stack trace for where our error was thrown (only available on V8)
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, TransientAiException);
-		}
-	}
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TransientAiException);
+    }
+  }
 }

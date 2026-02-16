@@ -4,9 +4,9 @@ import type { AdvisorChain } from "./advisor-chain";
 import type { CallAdvisor } from "./call-advisor.interface";
 
 export interface CallAdvisorChain extends AdvisorChain {
-	nextCall(chatClientRequest: ChatClientRequest): Promise<ChatClientResponse>;
+  nextCall(chatClientRequest: ChatClientRequest): Promise<ChatClientResponse>;
 
-	get callAdvisors(): CallAdvisor[];
+  get callAdvisors(): CallAdvisor[];
 
-	copy(after: CallAdvisor): CallAdvisorChain;
+  copy(after: CallAdvisor): CallAdvisorChain;
 }

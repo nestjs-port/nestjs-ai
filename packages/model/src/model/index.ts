@@ -9,8 +9,8 @@ export type { ModelResult } from "./model-result.interface";
 export { NoopApiKey } from "./noop-api-key";
 export * from "./observation";
 export {
-	AbstractResponseMetadata,
-	type ResponseMetadata,
+  AbstractResponseMetadata,
+  type ResponseMetadata,
 } from "./response-metadata.interface";
 export type { ResultMetadata } from "./result-metadata.interface";
 export { SimpleApiKey } from "./simple-api-key";

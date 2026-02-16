@@ -10,6 +10,6 @@ export type { PromptTemplateChatActions } from "./prompt-template-chat-actions.i
 export type { PromptTemplateMessageActions } from "./prompt-template-message-actions.interface";
 export type { PromptTemplateStringActions } from "./prompt-template-string-actions.interface";
 export {
-	SystemPromptTemplate,
-	SystemPromptTemplateBuilder,
+  SystemPromptTemplate,
+  SystemPromptTemplateBuilder,
 } from "./system-prompt-template";

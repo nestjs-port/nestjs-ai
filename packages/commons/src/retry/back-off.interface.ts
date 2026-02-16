@@ -28,11 +28,11 @@ import type { Milliseconds } from "../temporal";
  * @see ExponentialBackOff
  */
 export interface BackOff {
-	/**
-	 * Start a new back off execution.
-	 * @return a fresh {@link BackOffExecution} ready to be used
-	 */
-	start(): BackOffExecution;
+  /**
+   * Start a new back off execution.
+   * @return a fresh {@link BackOffExecution} ready to be used
+   */
+  start(): BackOffExecution;
 }
 
 /**
@@ -42,16 +42,16 @@ export interface BackOff {
  * @see BackOff
  */
 export abstract class BackOffExecution {
-	/**
-	 * Return value of {@link #nextBackOff()} which indicates that the operation
-	 * should not be retried.
-	 */
-	static STOP = -1 as Milliseconds;
+  /**
+   * Return value of {@link #nextBackOff()} which indicates that the operation
+   * should not be retried.
+   */
+  static STOP = -1 as Milliseconds;
 
-	/**
-	 * Return the number of milliseconds to wait before retrying the operation
-	 * or {@link #STOP} ({@value #STOP}) to indicate that no further attempt
-	 * should be made for the operation.
-	 */
-	abstract nextBackOff(): Milliseconds;
+  /**
+   * Return the number of milliseconds to wait before retrying the operation
+   * or {@link #STOP} ({@value #STOP}) to indicate that no further attempt
+   * should be made for the operation.
+   */
+  abstract nextBackOff(): Milliseconds;
 }

@@ -3,143 +3,143 @@ import type { CachedContentRequest } from "../cached-content-request";
 import { CachedContentUpdateRequest } from "../cached-content-update-request";
 import { GoogleGenAiCachedContent } from "../google-gen-ai-cached-content";
 import {
-	CachedContentException,
-	CachedContentPage,
+  CachedContentException,
+  CachedContentPage,
 } from "../google-gen-ai-cached-content-service";
 
 export class TestGoogleGenAiCachedContentService {
-	private readonly _cache = new Map<string, GoogleGenAiCachedContent>();
-	private _nextId = 1;
+  private readonly _cache = new Map<string, GoogleGenAiCachedContent>();
+  private _nextId = 1;
 
-	create(request: CachedContentRequest): GoogleGenAiCachedContent {
-		const name = `cachedContent/${this._nextId++}`;
-		const cached = new GoogleGenAiCachedContent({
-			name,
-			model: request.model,
-			displayName: request.displayName,
-			ttl: request.ttl,
-			expireTime: request.expireTime?.toISOString(),
-			contents: request.contents,
-			systemInstruction: request.systemInstruction,
-			createTime: new Date().toISOString(),
-		});
+  create(request: CachedContentRequest): GoogleGenAiCachedContent {
+    const name = `cachedContent/${this._nextId++}`;
+    const cached = new GoogleGenAiCachedContent({
+      name,
+      model: request.model,
+      displayName: request.displayName,
+      ttl: request.ttl,
+      expireTime: request.expireTime?.toISOString(),
+      contents: request.contents,
+      systemInstruction: request.systemInstruction,
+      createTime: new Date().toISOString(),
+    });
 
-		this._cache.set(name, cached);
-		return cached;
-	}
+    this._cache.set(name, cached);
+    return cached;
+  }
 
-	get(name: string): GoogleGenAiCachedContent | undefined {
-		return this._cache.get(name);
-	}
+  get(name: string): GoogleGenAiCachedContent | undefined {
+    return this._cache.get(name);
+  }
 
-	update(
-		name: string,
-		request: CachedContentUpdateRequest,
-	): GoogleGenAiCachedContent {
-		const existing = this._cache.get(name);
-		if (!existing) {
-			throw new CachedContentException(`Cached content not found: ${name}`);
-		}
+  update(
+    name: string,
+    request: CachedContentUpdateRequest,
+  ): GoogleGenAiCachedContent {
+    const existing = this._cache.get(name);
+    if (!existing) {
+      throw new CachedContentException(`Cached content not found: ${name}`);
+    }
 
-		const updated = new GoogleGenAiCachedContent({
-			name,
-			model: existing.model,
-			displayName: existing.displayName,
-			ttl: request.ttl ?? existing.ttl,
-			expireTime: request.expireTime?.toISOString() ?? existing.expireTime,
-			contents: existing.contents,
-			systemInstruction: existing.systemInstruction,
-			createTime: existing.createTime,
-			updateTime: new Date().toISOString(),
-		});
+    const updated = new GoogleGenAiCachedContent({
+      name,
+      model: existing.model,
+      displayName: existing.displayName,
+      ttl: request.ttl ?? existing.ttl,
+      expireTime: request.expireTime?.toISOString() ?? existing.expireTime,
+      contents: existing.contents,
+      systemInstruction: existing.systemInstruction,
+      createTime: existing.createTime,
+      updateTime: new Date().toISOString(),
+    });
 
-		this._cache.set(name, updated);
-		return updated;
-	}
+    this._cache.set(name, updated);
+    return updated;
+  }
 
-	delete(name: string): boolean {
-		return this._cache.delete(name);
-	}
+  delete(name: string): boolean {
+    return this._cache.delete(name);
+  }
 
-	list(_pageSize?: number, _pageToken?: string): CachedContentPage {
-		const contents = [...this._cache.values()];
-		return new CachedContentPage(contents, null);
-	}
+  list(_pageSize?: number, _pageToken?: string): CachedContentPage {
+    const contents = [...this._cache.values()];
+    return new CachedContentPage(contents, null);
+  }
 
-	listAll(): GoogleGenAiCachedContent[] {
-		return [...this._cache.values()];
-	}
+  listAll(): GoogleGenAiCachedContent[] {
+    return [...this._cache.values()];
+  }
 
-	async createAsync(
-		request: CachedContentRequest,
-	): Promise<GoogleGenAiCachedContent> {
-		return this.create(request);
-	}
+  async createAsync(
+    request: CachedContentRequest,
+  ): Promise<GoogleGenAiCachedContent> {
+    return this.create(request);
+  }
 
-	async getAsync(name: string): Promise<GoogleGenAiCachedContent | undefined> {
-		return this.get(name);
-	}
+  async getAsync(name: string): Promise<GoogleGenAiCachedContent | undefined> {
+    return this.get(name);
+  }
 
-	async updateAsync(
-		name: string,
-		request: CachedContentUpdateRequest,
-	): Promise<GoogleGenAiCachedContent> {
-		return this.update(name, request);
-	}
+  async updateAsync(
+    name: string,
+    request: CachedContentUpdateRequest,
+  ): Promise<GoogleGenAiCachedContent> {
+    return this.update(name, request);
+  }
 
-	async deleteAsync(name: string): Promise<boolean> {
-		return this.delete(name);
-	}
+  async deleteAsync(name: string): Promise<boolean> {
+    return this.delete(name);
+  }
 
-	extendTtl(
-		name: string,
-		additionalTtlMs: Milliseconds,
-	): GoogleGenAiCachedContent {
-		const existing = this.get(name);
-		if (!existing) {
-			throw new CachedContentException(`Cached content not found: ${name}`);
-		}
+  extendTtl(
+    name: string,
+    additionalTtlMs: Milliseconds,
+  ): GoogleGenAiCachedContent {
+    const existing = this.get(name);
+    if (!existing) {
+      throw new CachedContentException(`Cached content not found: ${name}`);
+    }
 
-		const baseTime = existing.expireTime
-			? new Date(existing.expireTime).getTime()
-			: Date.now();
-		const newExpireTime = new Date(baseTime + additionalTtlMs);
+    const baseTime = existing.expireTime
+      ? new Date(existing.expireTime).getTime()
+      : Date.now();
+    const newExpireTime = new Date(baseTime + additionalTtlMs);
 
-		return this.update(
-			name,
-			new CachedContentUpdateRequest({ expireTime: newExpireTime }),
-		);
-	}
+    return this.update(
+      name,
+      new CachedContentUpdateRequest({ expireTime: newExpireTime }),
+    );
+  }
 
-	refreshExpiration(
-		name: string,
-		maxTtl: Milliseconds,
-	): GoogleGenAiCachedContent {
-		return this.update(name, new CachedContentUpdateRequest({ ttl: maxTtl }));
-	}
+  refreshExpiration(
+    name: string,
+    maxTtl: Milliseconds,
+  ): GoogleGenAiCachedContent {
+    return this.update(name, new CachedContentUpdateRequest({ ttl: maxTtl }));
+  }
 
-	cleanupExpired(): number {
-		const toRemove: string[] = [];
-		for (const [key, value] of this._cache) {
-			if (value.expired) {
-				toRemove.push(key);
-			}
-		}
-		for (const key of toRemove) {
-			this._cache.delete(key);
-		}
-		return toRemove.length;
-	}
+  cleanupExpired(): number {
+    const toRemove: string[] = [];
+    for (const [key, value] of this._cache) {
+      if (value.expired) {
+        toRemove.push(key);
+      }
+    }
+    for (const key of toRemove) {
+      this._cache.delete(key);
+    }
+    return toRemove.length;
+  }
 
-	clearAll(): void {
-		this._cache.clear();
-	}
+  clearAll(): void {
+    this._cache.clear();
+  }
 
-	contains(name: string): boolean {
-		return this._cache.has(name);
-	}
+  contains(name: string): boolean {
+    return this._cache.has(name);
+  }
 
-	get size(): number {
-		return this._cache.size;
-	}
+  get size(): number {
+    return this._cache.size;
+  }
 }

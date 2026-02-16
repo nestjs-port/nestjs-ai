@@ -9,20 +9,20 @@ import type { StreamAdvisor } from "./stream-advisor.interface";
 import type { StreamAdvisorChain } from "./stream-advisor-chain.interface";
 
 export abstract class BaseAdvisorChain
-	extends AdvisorChain
-	implements CallAdvisorChain, StreamAdvisorChain
+  extends AdvisorChain
+  implements CallAdvisorChain, StreamAdvisorChain
 {
-	abstract nextCall(
-		chatClientRequest: ChatClientRequest,
-	): Promise<ChatClientResponse>;
+  abstract nextCall(
+    chatClientRequest: ChatClientRequest,
+  ): Promise<ChatClientResponse>;
 
-	abstract get callAdvisors(): CallAdvisor[];
+  abstract get callAdvisors(): CallAdvisor[];
 
-	abstract copy(after: CallAdvisor): CallAdvisorChain;
+  abstract copy(after: CallAdvisor): CallAdvisorChain;
 
-	abstract nextStream(
-		chatClientRequest: ChatClientRequest,
-	): Observable<ChatClientResponse>;
+  abstract nextStream(
+    chatClientRequest: ChatClientRequest,
+  ): Observable<ChatClientResponse>;
 
-	abstract get streamAdvisors(): StreamAdvisor[];
+  abstract get streamAdvisors(): StreamAdvisor[];
 }

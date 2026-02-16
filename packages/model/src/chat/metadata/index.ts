@@ -1,8 +1,8 @@
 export {
-	ChatGenerationMetadata,
-	type ChatGenerationMetadataBuilder,
-	DefaultChatGenerationMetadata,
-	type DefaultChatGenerationMetadataProps,
+  ChatGenerationMetadata,
+  type ChatGenerationMetadataBuilder,
+  DefaultChatGenerationMetadata,
+  type DefaultChatGenerationMetadataProps,
 } from "./chat-generation-metadata.interface";
 export { ChatResponseMetadata } from "./chat-response-metadata";
 export { DefaultChatGenerationMetadataBuilder } from "./default-chat-generation-metadata-builder";

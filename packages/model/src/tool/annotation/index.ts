@@ -1,4 +1,4 @@
 export {
-	Tool,
-	type ToolAnnotationMetadata,
+  Tool,
+  type ToolAnnotationMetadata,
 } from "./tool.decorator";

@@ -13,13 +13,13 @@ import type { ModelResult } from "./model-result.interface";
  * @typeParam TRes - the generic type of the response from the AI model
  */
 export interface Model<
-	TReq extends ModelRequest<unknown>,
-	TRes extends ModelResponse<ModelResult<unknown>>,
+  TReq extends ModelRequest<unknown>,
+  TRes extends ModelResponse<ModelResult<unknown>>,
 > {
-	/**
-	 * Executes a method call to the AI model.
-	 * @param request - the request object to be sent to the AI model
-	 * @returns the response from the AI model
-	 */
-	call(request: TReq): Promise<TRes>;
+  /**
+   * Executes a method call to the AI model.
+   * @param request - the request object to be sent to the AI model
+   * @returns the response from the AI model
+   */
+  call(request: TReq): Promise<TRes>;
 }

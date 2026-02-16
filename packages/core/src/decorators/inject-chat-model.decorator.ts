@@ -5,4 +5,4 @@ import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
  * Decorator that injects the chat model instance.
  */
 export const InjectChatModel = (): ParameterDecorator =>
-	Inject(CHAT_MODEL_TOKEN);
+  Inject(CHAT_MODEL_TOKEN);

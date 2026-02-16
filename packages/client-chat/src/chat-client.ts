@@ -128,25 +128,25 @@ export namespace ChatClient {
 	}
 
 	export interface CallResponseSpec {
-		entity<T>(type: Type<T>, options: { isArray: true }): T[] | null;
-		entity<T>(type: Type<T>, options?: EntityOptions): T | null;
+		entity<T>(type: Type<T>, options: { isArray: true }): Promise<T[] | null>;
+		entity<T>(type: Type<T>, options?: EntityOptions): Promise<T | null>;
 		entity<T>(
 			structuredOutputConverter: StructuredOutputConverter<T>,
-		): T | null;
-		chatClientResponse(): ChatClientResponse;
-		chatResponse(): ChatResponse | null;
-		content(): string | null;
+		): Promise<T | null>;
+		chatClientResponse(): Promise<ChatClientResponse>;
+		chatResponse(): Promise<ChatResponse | null>;
+		content(): Promise<string | null>;
 		responseEntity<T>(
 			type: Type<T>,
 			options: { isArray: true },
-		): ResponseEntity<ChatResponse, T[]>;
+		): Promise<ResponseEntity<ChatResponse, T[]>>;
 		responseEntity<T>(
 			type: Type<T>,
 			options?: EntityOptions,
-		): ResponseEntity<ChatResponse, T>;
+		): Promise<ResponseEntity<ChatResponse, T>>;
 		responseEntity<T>(
 			structuredOutputConverter: StructuredOutputConverter<T>,
-		): ResponseEntity<ChatResponse, T>;
+		): Promise<ResponseEntity<ChatResponse, T>>;
 	}
 
 	export interface StreamResponseSpec {

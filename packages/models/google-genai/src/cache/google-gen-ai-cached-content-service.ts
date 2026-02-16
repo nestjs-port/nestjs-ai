@@ -39,7 +39,7 @@ export class CachedContentPage {
 	}
 
 	get hasNextPage(): boolean {
-		return this._nextPageToken !== null;
+		return this._nextPageToken != null;
 	}
 }
 

@@ -77,7 +77,7 @@ export class ChatResponse implements ModelResponse<Generation> {
 		const finishReasonSet = new Set(finishReasons);
 		return this._generations.some((gen) => {
 			const reason = gen.metadata.finishReason;
-			return reason !== null && finishReasonSet.has(reason);
+			return reason != null && finishReasonSet.has(reason);
 		});
 	}
 
@@ -128,7 +128,7 @@ export class ChatResponseBuilder {
 	}
 
 	build(): ChatResponse {
-		assert(this._generations !== null, "'generations' must not be null");
+		assert(this._generations != null, "'generations' must not be null");
 		return new ChatResponse({
 			generations: this._generations,
 			chatResponseMetadata: this._chatResponseMetadataBuilder.build(),

@@ -101,9 +101,9 @@ export class OpenAiStreamFunctionCallingHelper {
 		current: ChatCompletionMessage,
 	): ChatCompletionMessage {
 		const content =
-			current.content !== null
+			current.content != null
 				? current.content
-				: previous.content !== null
+				: previous.content != null
 					? previous.content
 					: "";
 
@@ -144,7 +144,7 @@ export class OpenAiStreamFunctionCallingHelper {
 			}
 			const currentToolCall = current.tool_calls[0];
 			if (currentToolCall.id && currentToolCall.id.length > 0) {
-				if (lastPreviousToolCall !== null) {
+				if (lastPreviousToolCall != null) {
 					toolCalls.push(lastPreviousToolCall);
 				}
 				toolCalls.push(currentToolCall);
@@ -154,7 +154,7 @@ export class OpenAiStreamFunctionCallingHelper {
 				);
 			}
 		} else {
-			if (lastPreviousToolCall !== null) {
+			if (lastPreviousToolCall != null) {
 				toolCalls.push(lastPreviousToolCall);
 			}
 		}

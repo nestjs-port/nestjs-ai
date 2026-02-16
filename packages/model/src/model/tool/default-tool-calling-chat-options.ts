@@ -180,7 +180,7 @@ export class DefaultToolCallingChatOptionsBuilder
 	): this {
 		if (typeof keyOrContext === "string") {
 			assert(keyOrContext, "key cannot be null");
-			assert(value !== undefined && value !== null, "value cannot be null");
+			assert(value != null, "value cannot be null");
 			const updatedContext = { ...this._options.toolContext };
 			updatedContext[keyOrContext] = value;
 			this._options.toolContext = updatedContext;

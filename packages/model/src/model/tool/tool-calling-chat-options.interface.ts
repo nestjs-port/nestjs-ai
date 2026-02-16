@@ -68,9 +68,7 @@ export namespace ToolCallingChatOptions {
 			const toolCallingChatOptions = chatOptions as ToolCallingChatOptions;
 			const enabled = toolCallingChatOptions.internalToolExecutionEnabled;
 			internalToolExecutionEnabled =
-				enabled !== null && enabled !== undefined
-					? enabled
-					: DEFAULT_TOOL_EXECUTION_ENABLED;
+				enabled != null ? enabled : DEFAULT_TOOL_EXECUTION_ENABLED;
 		} else {
 			internalToolExecutionEnabled = DEFAULT_TOOL_EXECUTION_ENABLED;
 		}
@@ -107,12 +105,12 @@ export namespace ToolCallingChatOptions {
 	): Record<string, unknown> {
 		assert(runtimeToolContext, "runtimeToolContext cannot be null");
 		assert(
-			Object.keys(runtimeToolContext).every((key) => key !== null),
+			Object.keys(runtimeToolContext).every((key) => key != null),
 			"runtimeToolContext keys cannot be null",
 		);
 		assert(defaultToolContext, "defaultToolContext cannot be null");
 		assert(
-			Object.keys(defaultToolContext).every((key) => key !== null),
+			Object.keys(defaultToolContext).every((key) => key != null),
 			"defaultToolContext keys cannot be null",
 		);
 		const mergedToolContext = { ...defaultToolContext };

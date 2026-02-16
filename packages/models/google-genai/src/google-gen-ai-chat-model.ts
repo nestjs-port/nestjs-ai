@@ -21,15 +21,22 @@ import {
 	type Logger,
 	LoggerFactory,
 	type Media,
+	NoopObservationRegistry,
+	type ObservationRegistry,
 	type RetryTemplate,
+	withObservationScope,
 } from "@nestjs-ai/commons";
 import {
 	AssistantMessage,
 	ChatGenerationMetadata,
 	ChatModel,
+	ChatModelObservationContext,
+	type ChatModelObservationConvention,
+	ChatModelObservationDocumentation,
 	type ChatOptions,
 	ChatResponse,
 	ChatResponseMetadata,
+	DefaultChatModelObservationConvention,
 	DefaultToolExecutionEligibilityPredicate,
 	DefaultUsage,
 	Generation,
@@ -47,9 +54,11 @@ import {
 	type UserMessage,
 } from "@nestjs-ai/model";
 import { RetryUtils } from "@nestjs-ai/retry";
-import { from, Observable, switchMap } from "rxjs";
+import { defer, from, Observable, switchMap } from "rxjs";
+import { finalize, tap } from "rxjs/operators";
 import { GoogleGenAiCachedContentService } from "./cache";
 import {
+	GoogleGenAiConstants,
 	type GoogleGenAiSafetySetting,
 	GoogleGenAiThinkingLevel,
 	HarmBlockThreshold,
@@ -76,9 +85,14 @@ export interface GoogleGenAiChatModelProps {
 	toolCallingManager?: ToolCallingManager;
 	toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate;
 	retryTemplate?: RetryTemplate;
+	observationRegistry?: ObservationRegistry;
+	observationConvention?: ChatModelObservationConvention;
 }
 
 export class GoogleGenAiChatModel extends ChatModel {
+	private static readonly DEFAULT_OBSERVATION_CONVENTION =
+		new DefaultChatModelObservationConvention();
+
 	private logger: Logger = LoggerFactory.getLogger(GoogleGenAiChatModel.name);
 
 	private readonly _genAiClient: GoogleGenAI;
@@ -87,6 +101,8 @@ export class GoogleGenAiChatModel extends ChatModel {
 	private readonly _cachedContentService: GoogleGenAiCachedContentService | null;
 	private readonly _toolCallingManager: ToolCallingManager;
 	private readonly _toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate;
+	private readonly _observationRegistry: ObservationRegistry;
+	private readonly _observationConvention: ChatModelObservationConvention;
 
 	constructor(props: GoogleGenAiChatModelProps) {
 		super();
@@ -110,6 +126,11 @@ export class GoogleGenAiChatModel extends ChatModel {
 		this._toolExecutionEligibilityPredicate =
 			props.toolExecutionEligibilityPredicate ??
 			new DefaultToolExecutionEligibilityPredicate();
+		this._observationRegistry =
+			props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
+		this._observationConvention =
+			props.observationConvention ??
+			GoogleGenAiChatModel.DEFAULT_OBSERVATION_CONVENTION;
 
 		// Initialize cached content service
 		this._cachedContentService = props.genAiClient?.caches
@@ -134,30 +155,51 @@ export class GoogleGenAiChatModel extends ChatModel {
 		prompt: Prompt,
 		previousChatResponse: ChatResponse | null,
 	): Promise<ChatResponse> {
-		const response = await RetryUtils.execute(this._retryTemplate, async () => {
-			const geminiRequest = this.createGeminiRequest(prompt);
-			const generateContentResponse =
-				await this.getContentResponse(geminiRequest);
+		const observationContext = new ChatModelObservationContext(
+			prompt,
+			GoogleGenAiConstants.PROVIDER_NAME,
+		);
+		const observation = new ChatModelObservationDocumentation().observation(
+			this._observationConvention,
+			GoogleGenAiChatModel.DEFAULT_OBSERVATION_CONVENTION,
+			() => observationContext,
+			this._observationRegistry,
+		);
 
-			const generations = (generateContentResponse.candidates ?? []).flatMap(
-				(candidate) => this.responseCandidateToGeneration(candidate),
+		const response = await observation.observe(async () => {
+			const chatResponse = await RetryUtils.execute(
+				this._retryTemplate,
+				async () => {
+					const geminiRequest = this.createGeminiRequest(prompt);
+					const generateContentResponse =
+						await this.getContentResponse(geminiRequest);
+
+					const generations = (
+						generateContentResponse.candidates ?? []
+					).flatMap((candidate) =>
+						this.responseCandidateToGeneration(candidate),
+					);
+
+					const usageMetadata = generateContentResponse.usageMetadata;
+					const options = prompt.options as GoogleGenAiChatOptions;
+					const currentUsage = this.getDefaultUsage(usageMetadata, options);
+					const cumulativeUsage = UsageCalculator.getCumulativeUsage(
+						currentUsage,
+						previousChatResponse,
+					);
+
+					return new ChatResponse({
+						generations,
+						chatResponseMetadata: this.toChatResponseMetadata(
+							cumulativeUsage,
+							generateContentResponse.modelVersion ?? "",
+						),
+					});
+				},
 			);
 
-			const usageMetadata = generateContentResponse.usageMetadata;
-			const options = prompt.options as GoogleGenAiChatOptions;
-			const currentUsage = this.getDefaultUsage(usageMetadata, options);
-			const cumulativeUsage = UsageCalculator.getCumulativeUsage(
-				currentUsage,
-				previousChatResponse,
-			);
-
-			return new ChatResponse({
-				generations,
-				chatResponseMetadata: this.toChatResponseMetadata(
-					cumulativeUsage,
-					generateContentResponse.modelVersion ?? "",
-				),
-			});
+			observationContext.response = chatResponse;
+			return chatResponse;
 		});
 
 		if (
@@ -263,85 +305,121 @@ export class GoogleGenAiChatModel extends ChatModel {
 		prompt: Prompt,
 		previousChatResponse: ChatResponse | null,
 	): Observable<ChatResponse> {
-		const request = this.createGeminiRequest(prompt);
+		return defer(() => {
+			const request = this.createGeminiRequest(prompt);
 
-		const responseStreamPromise =
-			this._genAiClient.models.generateContentStream({
-				model: request.modelName,
-				contents: request.contents,
-				config: request.config,
+			const responseStreamPromise =
+				this._genAiClient.models.generateContentStream({
+					model: request.modelName,
+					contents: request.contents,
+					config: request.config,
+				});
+
+			const chatResponseFlux = new Observable<ChatResponse>((subscriber) => {
+				(async () => {
+					try {
+						const responseStream = await responseStreamPromise;
+						for await (const response of responseStream) {
+							const generations = (response.candidates ?? []).flatMap(
+								(candidate) => this.responseCandidateToGeneration(candidate),
+							);
+
+							const usageMetadata = response.usageMetadata;
+							const options = prompt.options as GoogleGenAiChatOptions;
+							const currentUsage = this.getDefaultUsage(usageMetadata, options);
+							const cumulativeUsage = UsageCalculator.getCumulativeUsage(
+								currentUsage,
+								previousChatResponse,
+							);
+
+							const chatResponse = new ChatResponse({
+								generations,
+								chatResponseMetadata: this.toChatResponseMetadata(
+									cumulativeUsage,
+									response.modelVersion ?? "",
+								),
+							});
+							subscriber.next(chatResponse);
+						}
+						subscriber.complete();
+					} catch (e) {
+						subscriber.error(
+							new Error("Failed to generate content", { cause: e }),
+						);
+					}
+				})();
 			});
 
-		const chatResponseFlux = new Observable<ChatResponse>((subscriber) => {
-			(async () => {
-				try {
-					const responseStream = await responseStreamPromise;
-					for await (const response of responseStream) {
-						const generations = (response.candidates ?? []).flatMap(
-							(candidate) => this.responseCandidateToGeneration(candidate),
-						);
-
-						const usageMetadata = response.usageMetadata;
-						const options = prompt.options as GoogleGenAiChatOptions;
-						const currentUsage = this.getDefaultUsage(usageMetadata, options);
-						const cumulativeUsage = UsageCalculator.getCumulativeUsage(
-							currentUsage,
-							previousChatResponse,
-						);
-
-						const chatResponse = new ChatResponse({
-							generations,
-							chatResponseMetadata: this.toChatResponseMetadata(
-								cumulativeUsage,
-								response.modelVersion ?? "",
-							),
-						});
-						subscriber.next(chatResponse);
-					}
-					subscriber.complete();
-				} catch (e) {
-					subscriber.error(
-						new Error("Failed to generate content", { cause: e }),
-					);
-				}
-			})();
-		});
-
-		const flux = chatResponseFlux.pipe(
-			switchMap((response) => {
-				if (
-					this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
-						prompt.options as ChatOptions,
-						response,
-					)
-				) {
-					const toolExecutionResult = this._toolCallingManager.executeToolCalls(
-						prompt,
-						response,
-					);
-					if (toolExecutionResult.returnDirect()) {
-						return from([
-							ChatResponse.builder()
-								.from(response)
-								.generations(
-									ToolExecutionResult.buildGenerations(toolExecutionResult),
-								)
-								.build(),
-						]);
-					}
-					return this.internalStream(
-						new Prompt(
-							toolExecutionResult.conversationHistory(),
+			const flux = chatResponseFlux.pipe(
+				switchMap((response) => {
+					if (
+						this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
 							prompt.options as ChatOptions,
-						),
-						response,
-					);
-				}
-				return from([response]);
-			}),
-		);
+							response,
+						)
+					) {
+						const toolExecutionResult =
+							this._toolCallingManager.executeToolCalls(prompt, response);
+						if (toolExecutionResult.returnDirect()) {
+							return from([
+								ChatResponse.builder()
+									.from(response)
+									.generations(
+										ToolExecutionResult.buildGenerations(toolExecutionResult),
+									)
+									.build(),
+							]);
+						}
+						return this.internalStream(
+							new Prompt(
+								toolExecutionResult.conversationHistory(),
+								prompt.options as ChatOptions,
+							),
+							response,
+						);
+					}
+					return from([response]);
+				}),
+			);
 
-		return new MessageAggregator().aggregate(flux, () => {});
+			const observationContext = new ChatModelObservationContext(
+				prompt,
+				GoogleGenAiConstants.PROVIDER_NAME,
+			);
+			const observation = new ChatModelObservationDocumentation().observation(
+				this._observationConvention,
+				GoogleGenAiChatModel.DEFAULT_OBSERVATION_CONVENTION,
+				() => observationContext,
+				this._observationRegistry,
+			);
+			observation.start();
+			const scope = observation.openScope();
+
+			const observedFlux = flux.pipe(
+				tap({
+					error: (error) => {
+						observation.error(
+							error instanceof Error ? error : new Error(String(error)),
+						);
+					},
+				}),
+				finalize(() => {
+					scope.close();
+					observation.stop();
+				}),
+			);
+
+			const aggregatedFlux = new MessageAggregator().aggregate(
+				observedFlux,
+				(chatResponse) => {
+					observationContext.response = chatResponse;
+				},
+			);
+
+			return aggregatedFlux.pipe(
+				withObservationScope(this._observationRegistry, scope),
+			);
+		});
 	}
 
 	private responseCandidateToGeneration(candidate: Candidate): Generation[] {

@@ -5,3 +5,4 @@ export * from "./metadata";
 export * from "./resolution";
 export * from "./support";
 export * from "./tool-callback";
+export * from "./tool-callback-provider";

@@ -7,6 +7,7 @@ export default defineConfig({
 			"@nestjs-ai/commons": path.resolve(__dirname, "packages/commons/src"),
 			"@nestjs-ai/model": path.resolve(__dirname, "packages/model/src"),
 			"@nestjs-ai/retry": path.resolve(__dirname, "packages/retry/src"),
+			"@nestjs-ai/testing": path.resolve(__dirname, "packages/testing/src"),
 			"@nestjs-ai/template-st": path.resolve(
 				__dirname,
 				"packages/template-st/src",

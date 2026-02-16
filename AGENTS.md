@@ -13,8 +13,7 @@
 - Typecheck all: `pnpm typecheck`
 - Lint all: `pnpm lint`
 - Auto-fix lint/format: `pnpm lint:fix && pnpm format`
-- Test all (workspace Vitest): `pnpm test`
-- Test via Turbo graph: `pnpm test:packages`
+- Test all (Turbo graph): `pnpm test`
 - Clean all artifacts: `pnpm clean`
 
 ## Universal Conventions

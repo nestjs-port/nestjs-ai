@@ -14,8 +14,7 @@
 		"build": "pnpm clean && tsc -p tsconfig.build.json",
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf dist",
-		"test": "vitest run",
-		"test:watch": "vitest"
+		"test": "vitest run"
 	},
 	"peerDependencies": {
 		"@nestjs-ai/commons": "*"

@@ -7,3 +7,4 @@ export {
 	DefaultAroundAdvisorChainBuilder,
 } from "./default-around-advisor-chain";
 export * from "./observation";
+export { SimpleLoggerAdvisor } from "./simple-logger-advisor";

@@ -124,6 +124,34 @@ describe("Observation", () => {
 		expect(observation.context.error?.message).toBe("boom");
 	});
 
+	it("should execute observation callback through handler runInScope", async () => {
+		const registry = new AlsObservationRegistry();
+		const calls: string[] = [];
+
+		const handler: ObservationHandler<ObservationContext> = {
+			supportsContext(context): context is ObservationContext {
+				return context instanceof ObservationContext;
+			},
+			async runInScope(_context, fn) {
+				calls.push("run-scope-enter");
+				try {
+					return await fn();
+				} finally {
+					calls.push("run-scope-exit");
+				}
+			},
+		};
+
+		registry.addHandler(handler);
+		const observation = createObservation(registry);
+
+		await observation.observe(async () => {
+			calls.push("callback");
+		});
+
+		expect(calls).toEqual(["run-scope-enter", "callback", "run-scope-exit"]);
+	});
+
 	it("should restore parent observation scope when nested", () => {
 		const registry = new AlsObservationRegistry();
 		const parent = createObservation(registry);

@@ -95,4 +95,22 @@ describe("AlsObservationRegistry", () => {
 		scope.close();
 		observation.stop();
 	});
+
+	it("should run callback with provided scope across async boundaries", async () => {
+		const registry = new AlsObservationRegistry();
+		const observation = createObservation(registry).start();
+		const scope = observation.openScope();
+		scope.close();
+
+		expect(registry.currentObservationScope).toBeNull();
+
+		await registry.runInScope(scope, async () => {
+			expect(registry.currentObservation).toBe(observation);
+			await Promise.resolve();
+			expect(registry.currentObservation).toBe(observation);
+		});
+
+		expect(registry.currentObservationScope).toBeNull();
+		observation.stop();
+	});
 });

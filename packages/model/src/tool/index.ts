@@ -1,6 +1,7 @@
 export * from "./annotation";
 export * from "./definition";
 export * from "./execution";
+export * from "./function";
 export * from "./metadata";
 export * from "./resolution";
 export * from "./support";

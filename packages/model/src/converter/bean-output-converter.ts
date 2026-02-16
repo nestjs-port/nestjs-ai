@@ -12,20 +12,18 @@ import type { StructuredOutputConverter } from "./structured-output-converter";
 import { ThinkingTagCleaner } from "./thinking-tag-cleaner";
 import { WhitespaceCleaner } from "./whitespace-cleaner";
 
+type Type<T> = new (...args: never[]) => T;
 type ElementType<T> = T extends (infer U)[] ? U : T;
 
 export class BeanOutputConverter<T> implements StructuredOutputConverter<T> {
 	private readonly logger: Logger = LoggerFactory.getLogger(
 		BeanOutputConverter.name,
 	);
-	private readonly _type: ClassConstructor<ElementType<T>>;
+	private readonly _type: Type<ElementType<T>>;
 	private readonly _textCleaner: ResponseTextCleaner;
 	private _jsonSchema: string;
 
-	constructor(
-		type: ClassConstructor<ElementType<T>>,
-		textCleaner?: ResponseTextCleaner,
-	) {
+	constructor(type: Type<ElementType<T>>, textCleaner?: ResponseTextCleaner) {
 		assert(type, "Type cannot be null");
 		this._type = type;
 		this._textCleaner =
@@ -60,7 +58,10 @@ export class BeanOutputConverter<T> implements StructuredOutputConverter<T> {
 		try {
 			const cleaned = this._textCleaner.clean(source);
 			const parsed = JSON.parse(cleaned ?? "");
-			return plainToInstance(this._type, parsed) as T;
+			return plainToInstance(
+				this._type as unknown as ClassConstructor<T>,
+				parsed,
+			) as T;
 		} catch (error) {
 			this.logger.error(
 				`Could not parse the given text to the desired target type: "${source}" into ${this._type.name}`,

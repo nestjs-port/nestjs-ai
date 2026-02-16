@@ -20,6 +20,7 @@ import {
 	type ToolCallingChatOptions,
 	UserMessage,
 } from "@nestjs-ai/model";
+import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { Observable } from "rxjs";
 import { filter, map } from "rxjs";
 import type {
@@ -44,36 +45,6 @@ import {
 	DefaultChatClientObservationConvention,
 } from "./observation";
 import { ResponseEntity } from "./response-entity";
-
-const DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION: ChatClientObservationConvention =
-	new DefaultChatClientObservationConvention();
-
-const DEFAULT_TEMPLATE_RENDERER: TemplateRenderer = {
-	apply(template: string): string {
-		return template;
-	},
-};
-
-const CHAT_CLIENT_MESSAGE_AGGREGATOR = new ChatClientMessageAggregator();
-
-function hasText(value: string | null | undefined): value is string {
-	return value != null && value.trim().length > 0;
-}
-
-function readBufferText(
-	text: Buffer,
-	charset: BufferEncoding | undefined,
-): string {
-	return text.toString(charset ?? "utf-8");
-}
-
-function mapToRecord(map: Map<string, unknown>): Record<string, unknown> {
-	const record: Record<string, unknown> = {};
-	for (const [key, value] of map.entries()) {
-		record[key] = value;
-	}
-	return record;
-}
 
 export class DefaultChatClient implements ChatClient {
 	private readonly _defaultChatClientRequest: DefaultChatClient.DefaultChatClientRequestSpec;
@@ -122,6 +93,13 @@ export class DefaultChatClient implements ChatClient {
 }
 
 export namespace DefaultChatClient {
+	const DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION: ChatClientObservationConvention =
+		new DefaultChatClientObservationConvention();
+
+	const DEFAULT_TEMPLATE_RENDERER: TemplateRenderer = new StTemplateRenderer();
+
+	const CHAT_CLIENT_MESSAGE_AGGREGATOR = new ChatClientMessageAggregator();
+
 	export class DefaultPromptUserSpec implements ChatClient.PromptUserSpec {
 		private readonly _params = new Map<string, unknown>();
 		private readonly _metadata = new Map<string, unknown>();
@@ -1183,4 +1161,23 @@ export namespace DefaultChatClient {
 			);
 		}
 	}
+}
+
+function hasText(value: string | null | undefined): value is string {
+	return value != null && value.trim().length > 0;
+}
+
+function readBufferText(
+	text: Buffer,
+	charset: BufferEncoding | undefined,
+): string {
+	return text.toString(charset ?? "utf-8");
+}
+
+function mapToRecord(map: Map<string, unknown>): Record<string, unknown> {
+	const record: Record<string, unknown> = {};
+	for (const [key, value] of map.entries()) {
+		record[key] = value;
+	}
+	return record;
 }

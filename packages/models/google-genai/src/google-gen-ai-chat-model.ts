@@ -24,7 +24,6 @@ import {
 	NoopObservationRegistry,
 	type ObservationRegistry,
 	type RetryTemplate,
-	withObservationScope,
 } from "@nestjs-ai/commons";
 import {
 	AssistantMessage,
@@ -55,7 +54,6 @@ import {
 } from "@nestjs-ai/model";
 import { RetryUtils } from "@nestjs-ai/retry";
 import { defer, from, Observable, switchMap } from "rxjs";
-import { finalize, tap } from "rxjs/operators";
 import { GoogleGenAiCachedContentService } from "./cache";
 import {
 	GoogleGenAiConstants,
@@ -392,32 +390,10 @@ export class GoogleGenAiChatModel extends ChatModel {
 				() => observationContext,
 				this._observationRegistry,
 			);
-			observation.start();
-			const scope = observation.openScope();
-
-			const observedFlux = flux.pipe(
-				tap({
-					error: (error) => {
-						observation.error(
-							error instanceof Error ? error : new Error(String(error)),
-						);
-					},
-				}),
-				finalize(() => {
-					scope.close();
-					observation.stop();
-				}),
-			);
-
-			const aggregatedFlux = new MessageAggregator().aggregate(
-				observedFlux,
-				(chatResponse) => {
+			return observation.observeStream(() =>
+				new MessageAggregator().aggregate(flux, (chatResponse) => {
 					observationContext.response = chatResponse;
-				},
-			);
-
-			return aggregatedFlux.pipe(
-				withObservationScope(this._observationRegistry, scope),
+				}),
 			);
 		});
 	}

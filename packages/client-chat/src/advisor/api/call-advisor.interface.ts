@@ -7,5 +7,5 @@ export interface CallAdvisor extends Advisor {
 	adviseCall(
 		chatClientRequest: ChatClientRequest,
 		callAdvisorChain: CallAdvisorChain,
-	): ChatClientResponse;
+	): Promise<ChatClientResponse>;
 }

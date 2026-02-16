@@ -1,3 +1,4 @@
+import { defer, finalize, Observable, tap } from "rxjs";
 import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";
 import type { ObservationHandler } from "./observation-handler.interface";
@@ -46,7 +47,10 @@ export abstract class Observation<CTX extends ObservationContext> {
 		const wrapped = this._handlers.reduceRight(
 			(next, handler) =>
 				handler.runInScope
-					? () => handler.runInScope!(this._context, next)
+					? () => {
+							// biome-ignore lint/style/noNonNullAssertion: guarded by truthy check above
+							return handler.runInScope!(this._context, next);
+						}
 					: next,
 			fn,
 		);
@@ -59,5 +63,47 @@ export abstract class Observation<CTX extends ObservationContext> {
 			scope.close();
 			this.stop();
 		}
+	}
+
+	/**
+	 * Convenience method for RxJS streams:
+	 * start → open scope → subscribe in scope → close scope → stop (with error handling).
+	 */
+	observeStream<T>(streamFactory: () => Observable<T>): Observable<T> {
+		return defer(() => {
+			this.start();
+			const scope = this.openScope();
+
+			return defer(() => streamFactory()).pipe(
+				this.withObservationScope(scope),
+				tap({
+					error: (error: unknown) => {
+						this.error(
+							error instanceof Error ? error : new Error(String(error)),
+						);
+					},
+				}),
+				finalize(() => {
+					scope.close();
+					this.stop();
+				}),
+			);
+		});
+	}
+
+	private withObservationScope<T>(
+		scope: ObservationScope | null,
+	): (source: Observable<T>) => Observable<T> {
+		return (source: Observable<T>) =>
+			new Observable<T>((subscriber) => {
+				try {
+					return this._registry.runInScope(scope, () =>
+						source.subscribe(subscriber),
+					);
+				} catch (error) {
+					subscriber.error(error);
+					return;
+				}
+			});
 	}
 }

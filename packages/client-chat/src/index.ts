@@ -1,4 +1,5 @@
 export * from "./advisor";
+export { ChatClient } from "./chat-client";
 export { ChatClientAttributes } from "./chat-client-attributes";
 export { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
 export {
@@ -9,5 +10,7 @@ export {
 	ChatClientResponse,
 	ChatClientResponseBuilder,
 } from "./chat-client-response";
+export { DefaultChatClient } from "./default-chat-client";
+export { DefaultChatClientBuilder } from "./default-chat-client-builder";
 export * from "./observation";
 export { ResponseEntity } from "./response-entity";

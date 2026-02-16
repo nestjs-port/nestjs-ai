@@ -13,7 +13,8 @@
 	"scripts": {
 		"build": "pnpm clean && tsc -p tsconfig.build.json",
 		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"class-validator-jsonschema": "^5.1.0"

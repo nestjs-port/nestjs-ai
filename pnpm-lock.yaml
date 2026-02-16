@@ -35,6 +35,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
+      '@nestjs-ai/template-st':
+        specifier: workspace:*
+        version: link:../template-st
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2

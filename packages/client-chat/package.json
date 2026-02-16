@@ -18,11 +18,13 @@
 	"peerDependencies": {
 		"@nestjs-ai/commons": "*",
 		"@nestjs-ai/model": "*",
+		"@nestjs-ai/template-st": "*",
 		"rxjs": "^7.0.0"
 	},
 	"devDependencies": {
 		"@nestjs-ai/commons": "workspace:*",
 		"@nestjs-ai/model": "workspace:*",
+		"@nestjs-ai/template-st": "workspace:*",
 		"rxjs": "^7.0.0"
 	}
 }

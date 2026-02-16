@@ -4,16 +4,23 @@ import {
 	LoggerFactory,
 	type Media,
 	MediaFormat,
+	NoopObservationRegistry,
+	type ObservationRegistry,
 	type RetryTemplate,
+	withObservationScope,
 } from "@nestjs-ai/commons";
 import type { RateLimit, ToolDefinition } from "@nestjs-ai/model";
 import {
 	AssistantMessage,
 	ChatGenerationMetadata,
 	ChatModel,
+	ChatModelObservationContext,
+	type ChatModelObservationConvention,
+	ChatModelObservationDocumentation,
 	type ChatOptions,
 	ChatResponse,
 	ChatResponseMetadata,
+	DefaultChatModelObservationConvention,
 	DefaultToolExecutionEligibilityPredicate,
 	DefaultUsage,
 	EmptyUsage,
@@ -31,9 +38,9 @@ import {
 	type UserMessage,
 } from "@nestjs-ai/model";
 import { RetryUtils } from "@nestjs-ai/retry";
-import { from, type Observable, switchMap } from "rxjs";
-import { map } from "rxjs/operators";
-import { InputAudioFormat, OpenAiApi } from "./api";
+import { defer, from, type Observable, switchMap } from "rxjs";
+import { bufferCount, finalize, map, tap } from "rxjs/operators";
+import { InputAudioFormat, OpenAiApi, OpenAiApiConstants } from "./api";
 import {
 	type ToolCall as ApiToolCall,
 	type Usage as ApiUsage,
@@ -60,9 +67,14 @@ export interface OpenAiChatModelProps {
 	toolCallingManager?: ToolCallingManager;
 	toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate;
 	retryTemplate?: RetryTemplate;
+	observationRegistry?: ObservationRegistry;
+	observationConvention?: ChatModelObservationConvention;
 }
 
 export class OpenAiChatModel extends ChatModel {
+	private static readonly DEFAULT_OBSERVATION_CONVENTION =
+		new DefaultChatModelObservationConvention();
+
 	private readonly logger: Logger = LoggerFactory.getLogger(
 		OpenAiChatModel.name,
 	);
@@ -72,6 +84,8 @@ export class OpenAiChatModel extends ChatModel {
 	private readonly _retryTemplate: RetryTemplate;
 	private readonly _toolCallingManager: ToolCallingManager;
 	private readonly _toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate;
+	private readonly _observationRegistry: ObservationRegistry;
+	private readonly _observationConvention: ChatModelObservationConvention;
 
 	constructor(props: OpenAiChatModelProps) {
 		super();
@@ -91,6 +105,11 @@ export class OpenAiChatModel extends ChatModel {
 			new DefaultToolExecutionEligibilityPredicate();
 		this._retryTemplate =
 			props.retryTemplate ?? RetryUtils.DEFAULT_RETRY_TEMPLATE;
+		this._observationRegistry =
+			props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
+		this._observationConvention =
+			props.observationConvention ??
+			OpenAiChatModel.DEFAULT_OBSERVATION_CONVENTION;
 	}
 
 	override async call(prompt: Prompt): Promise<ChatResponse> {
@@ -105,60 +124,82 @@ export class OpenAiChatModel extends ChatModel {
 		previousChatResponse: ChatResponse | null,
 	): Promise<ChatResponse> {
 		const request = this.createRequest(prompt, false);
+		const observationContext = new ChatModelObservationContext(
+			prompt,
+			OpenAiApiConstants.PROVIDER_NAME,
+		);
 
-		const response = await RetryUtils.execute(this._retryTemplate, async () => {
-			const completionEntity = await this._openAiApi.chatCompletionEntity(
-				request,
-				this.getAdditionalHttpHeaders(prompt),
+		const observation = new ChatModelObservationDocumentation().observation(
+			this._observationConvention,
+			OpenAiChatModel.DEFAULT_OBSERVATION_CONVENTION,
+			() => observationContext,
+			this._observationRegistry,
+		);
+
+		const response = await observation.observe(async () => {
+			const chatResponse = await RetryUtils.execute(
+				this._retryTemplate,
+				async () => {
+					const completionEntity = await this._openAiApi.chatCompletionEntity(
+						request,
+						this.getAdditionalHttpHeaders(prompt),
+					);
+
+					const chatCompletion = completionEntity.body;
+
+					if (!chatCompletion) {
+						this.logger.warn(
+							`No chat completion returned for prompt: ${prompt}`,
+						);
+						return new ChatResponse({ generations: [] });
+					}
+
+					const choices = chatCompletion.choices;
+					if (!choices) {
+						this.logger.warn(`No choices returned for prompt: ${prompt}`);
+						return new ChatResponse({ generations: [] });
+					}
+
+					const generations = choices.map((choice) => {
+						const metadata: Record<string, unknown> = {
+							id: chatCompletion.id ?? "",
+							role: choice.message.role ?? "",
+							index: choice.index ?? 0,
+							finishReason: this.getFinishReasonString(choice.finish_reason),
+							refusal: choice.message.refusal ?? "",
+							annotations: choice.message.annotations ?? [],
+						};
+						return this.buildGeneration(choice, metadata, request);
+					});
+
+					const rateLimit =
+						OpenAiResponseHeaderExtractor.extractAiResponseHeaders(
+							completionEntity.headers,
+						);
+
+					// Current usage
+					const usage = chatCompletion.usage;
+					const currentChatResponseUsage = usage
+						? this.getDefaultUsage(usage)
+						: new EmptyUsage();
+					const accumulatedUsage = UsageCalculator.getCumulativeUsage(
+						currentChatResponseUsage,
+						previousChatResponse,
+					);
+
+					return new ChatResponse({
+						generations,
+						chatResponseMetadata: this.fromChatCompletion(
+							chatCompletion,
+							rateLimit,
+							accumulatedUsage,
+						),
+					});
+				},
 			);
 
-			const chatCompletion = completionEntity.body;
-
-			if (!chatCompletion) {
-				this.logger.warn(`No chat completion returned for prompt: ${prompt}`);
-				return new ChatResponse({ generations: [] });
-			}
-
-			const choices = chatCompletion.choices;
-			if (!choices) {
-				this.logger.warn(`No choices returned for prompt: ${prompt}`);
-				return new ChatResponse({ generations: [] });
-			}
-
-			const generations = choices.map((choice) => {
-				const metadata: Record<string, unknown> = {
-					id: chatCompletion.id ?? "",
-					role: choice.message.role ?? "",
-					index: choice.index ?? 0,
-					finishReason: this.getFinishReasonString(choice.finish_reason),
-					refusal: choice.message.refusal ?? "",
-					annotations: choice.message.annotations ?? [],
-				};
-				return this.buildGeneration(choice, metadata, request);
-			});
-
-			const rateLimit = OpenAiResponseHeaderExtractor.extractAiResponseHeaders(
-				completionEntity.headers,
-			);
-
-			// Current usage
-			const usage = chatCompletion.usage;
-			const currentChatResponseUsage = usage
-				? this.getDefaultUsage(usage)
-				: new EmptyUsage();
-			const accumulatedUsage = UsageCalculator.getCumulativeUsage(
-				currentChatResponseUsage,
-				previousChatResponse,
-			);
-
-			return new ChatResponse({
-				generations,
-				chatResponseMetadata: this.fromChatCompletion(
-					chatCompletion,
-					rateLimit,
-					accumulatedUsage,
-				),
-			});
+			observationContext.response = chatResponse;
+			return chatResponse;
 		});
 
 		if (
@@ -201,109 +242,173 @@ export class OpenAiChatModel extends ChatModel {
 		prompt: Prompt,
 		previousChatResponse: ChatResponse | null,
 	): Observable<ChatResponse> {
-		const request = this.createRequest(prompt, true);
+		return defer(() => {
+			const request = this.createRequest(prompt, true);
 
-		if (request.modalities?.includes(OutputModality.AUDIO)) {
-			throw new Error("Audio output is not supported for streaming requests.");
-		}
+			if (request.modalities?.includes(OutputModality.AUDIO)) {
+				throw new Error(
+					"Audio output is not supported for streaming requests.",
+				);
+			}
 
-		if (request.audio) {
-			throw new Error(
-				"Audio parameters are not supported for streaming requests.",
+			if (request.audio) {
+				throw new Error(
+					"Audio parameters are not supported for streaming requests.",
+				);
+			}
+
+			const completionChunks$ = this._openAiApi.chatCompletionStream(
+				request,
+				this.getAdditionalHttpHeaders(prompt),
 			);
-		}
 
-		const completionChunks$ = this._openAiApi.chatCompletionStream(
-			request,
-			this.getAdditionalHttpHeaders(prompt),
-		);
+			// For chunked responses, only the first chunk contains the choice role.
+			// The rest of the chunks with same ID share the same role.
+			const roleMap = new Map<string, string>();
 
-		// For chunked responses, only the first chunk contains the choice role.
-		// The rest of the chunks with same ID share the same role.
-		const roleMap = new Map<string, string>();
+			const chatResponse$ = completionChunks$.pipe(
+				map((chunk) => this.chunkToChatCompletion(chunk)),
+				map((chatCompletion) => {
+					try {
+						// If an id is not provided, set to "NO_ID" (for compatible APIs).
+						const id = chatCompletion.id ?? "NO_ID";
 
-		const chatResponse$ = completionChunks$.pipe(
-			map((chunk) => this.chunkToChatCompletion(chunk)),
-			map((chatCompletion) => {
-				try {
-					// If an id is not provided, set to "NO_ID" (for compatible APIs).
-					const id = chatCompletion.id ?? "NO_ID";
+						const generations = chatCompletion.choices.map((choice) => {
+							if (choice.message.role) {
+								roleMap.set(id, choice.message.role);
+							}
+							const metadata: Record<string, unknown> = {
+								id,
+								role: roleMap.get(id) ?? "",
+								index: choice.index ?? 0,
+								finishReason: this.getFinishReasonString(choice.finish_reason),
+								refusal: choice.message.refusal ?? "",
+								annotations: choice.message.annotations ?? [],
+								reasoningContent: choice.message.reasoning_content ?? "",
+							};
+							return this.buildGeneration(choice, metadata, request);
+						});
 
-					const generations = chatCompletion.choices.map((choice) => {
-						if (choice.message.role) {
-							roleMap.set(id, choice.message.role);
-						}
-						const metadata: Record<string, unknown> = {
-							id,
-							role: roleMap.get(id) ?? "",
-							index: choice.index ?? 0,
-							finishReason: this.getFinishReasonString(choice.finish_reason),
-							refusal: choice.message.refusal ?? "",
-							annotations: choice.message.annotations ?? [],
-							reasoningContent: choice.message.reasoning_content ?? "",
-						};
-						return this.buildGeneration(choice, metadata, request);
-					});
-
-					const usage = chatCompletion.usage;
-					const currentChatResponseUsage = usage
-						? this.getDefaultUsage(usage)
-						: new EmptyUsage();
-					const accumulatedUsage = UsageCalculator.getCumulativeUsage(
-						currentChatResponseUsage,
-						previousChatResponse,
-					);
-					return new ChatResponse({
-						generations,
-						chatResponseMetadata: this.fromChatCompletion(
-							chatCompletion,
-							null,
-							accumulatedUsage,
-						),
-					});
-				} catch (e) {
-					this.logger.error("Error processing chat completion", e);
-					return new ChatResponse({ generations: [] });
-				}
-			}),
-		);
-
-		const flux = chatResponse$.pipe(
-			switchMap((response) => {
-				if (
-					this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
-						prompt.options as ChatOptions,
-						response,
-					)
-				) {
-					const toolExecutionResult = this._toolCallingManager.executeToolCalls(
-						prompt,
-						response,
-					);
-					if (toolExecutionResult.returnDirect()) {
-						return from([
-							ChatResponse.builder()
-								.from(response)
-								.generations(
-									ToolExecutionResult.buildGenerations(toolExecutionResult),
-								)
-								.build(),
-						]);
+						const usage = chatCompletion.usage;
+						const currentChatResponseUsage = usage
+							? this.getDefaultUsage(usage)
+							: new EmptyUsage();
+						const accumulatedUsage = UsageCalculator.getCumulativeUsage(
+							currentChatResponseUsage,
+							previousChatResponse,
+						);
+						return new ChatResponse({
+							generations,
+							chatResponseMetadata: this.fromChatCompletion(
+								chatCompletion,
+								null,
+								accumulatedUsage,
+							),
+						});
+					} catch (e) {
+						this.logger.error("Error processing chat completion", e);
+						return new ChatResponse({ generations: [] });
 					}
-					// Send the tool execution result back to the model.
-					return this.internalStream(
-						new Prompt(
-							toolExecutionResult.conversationHistory(),
-							prompt.options as ChatOptions,
-						),
-						response,
-					);
-				}
-				return from([response]);
-			}),
-		);
+				}),
+			);
 
-		return new MessageAggregator().aggregate(flux, () => {});
+			const chatResponseWithUsage$ = chatResponse$.pipe(
+				// When in stream mode and include_usage is enabled, OpenAI sends usage
+				// only on the final chunk. Copy that usage to the previous chunk so it
+				// can be accumulated consistently.
+				bufferCount(2, 1),
+				map((bufferList) => {
+					const firstResponse = bufferList[0];
+					if (request.stream_options?.include_usage === true) {
+						if (bufferList.length === 2) {
+							const secondResponse = bufferList[1];
+							const usage = secondResponse?.metadata?.usage;
+							if (usage && !UsageCalculator.isEmpty(usage)) {
+								return new ChatResponse({
+									generations: firstResponse.results,
+									chatResponseMetadata: this.fromResponseMetadata(
+										firstResponse.metadata,
+										usage,
+									),
+								});
+							}
+						}
+					}
+					return firstResponse;
+				}),
+			);
+
+			const flux = chatResponseWithUsage$.pipe(
+				switchMap((response) => {
+					if (
+						this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
+							prompt.options as ChatOptions,
+							response,
+						)
+					) {
+						const toolExecutionResult =
+							this._toolCallingManager.executeToolCalls(prompt, response);
+						if (toolExecutionResult.returnDirect()) {
+							return from([
+								ChatResponse.builder()
+									.from(response)
+									.generations(
+										ToolExecutionResult.buildGenerations(toolExecutionResult),
+									)
+									.build(),
+							]);
+						}
+						// Send the tool execution result back to the model.
+						return this.internalStream(
+							new Prompt(
+								toolExecutionResult.conversationHistory(),
+								prompt.options as ChatOptions,
+							),
+							response,
+						);
+					}
+					return from([response]);
+				}),
+			);
+
+			const observationContext = new ChatModelObservationContext(
+				prompt,
+				OpenAiApiConstants.PROVIDER_NAME,
+			);
+			const observation = new ChatModelObservationDocumentation().observation(
+				this._observationConvention,
+				OpenAiChatModel.DEFAULT_OBSERVATION_CONVENTION,
+				() => observationContext,
+				this._observationRegistry,
+			);
+			observation.start();
+			const scope = observation.openScope();
+
+			const observedFlux = flux.pipe(
+				tap({
+					error: (error) => {
+						observation.error(
+							error instanceof Error ? error : new Error(String(error)),
+						);
+					},
+				}),
+				finalize(() => {
+					scope.close();
+					observation.stop();
+				}),
+			);
+
+			const aggregatedFlux = new MessageAggregator().aggregate(
+				observedFlux,
+				(chatResponse) => {
+					observationContext.response = chatResponse;
+				},
+			);
+
+			return aggregatedFlux.pipe(
+				withObservationScope(this._observationRegistry, scope),
+			);
+		});
 	}
 
 	private getAdditionalHttpHeaders(prompt: Prompt): Headers {
@@ -408,6 +513,22 @@ export class OpenAiChatModel extends ChatModel {
 			.keyValue("system-fingerprint", result.system_fingerprint ?? "");
 		if (rateLimit) {
 			builder.rateLimit(rateLimit);
+		}
+		return builder.build();
+	}
+
+	private fromResponseMetadata(
+		metadata: ChatResponseMetadata,
+		usage: Usage,
+	): ChatResponseMetadata {
+		const builder = ChatResponseMetadata.builder()
+			.id(metadata.id)
+			.model(metadata.model)
+			.rateLimit(metadata.rateLimit)
+			.usage(usage)
+			.promptMetadata(metadata.promptMetadata);
+		for (const [key, value] of metadata.entries()) {
+			builder.keyValue(key, value);
 		}
 		return builder.build();
 	}

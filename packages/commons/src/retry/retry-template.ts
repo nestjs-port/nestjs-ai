@@ -4,7 +4,7 @@ import { LoggerFactory } from "../logging";
 import { BackOffExecution } from "./back-off.interface";
 import { RetryException } from "./retry-exception";
 import type { RetryListener } from "./retry-listener.interface";
-import { RetryPolicy } from "./retry-policy.interface";
+import { RetryPolicy } from "./retry-policy";
 import { RetryState } from "./retry-state";
 import type { Retryable } from "./retryable.interface";
 

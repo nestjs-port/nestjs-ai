@@ -15,4 +15,4 @@ export type { StructuredOutputChatOptions } from "./structured-output-chat-optio
 export { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
 export { ToolCallingManager } from "./tool-calling-manager.interface";
 export { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate";
-export { ToolExecutionResult } from "./tool-execution-result.interface";
+export { ToolExecutionResult } from "./tool-execution-result";

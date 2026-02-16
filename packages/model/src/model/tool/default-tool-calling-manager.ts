@@ -21,7 +21,7 @@ import {
 import { DefaultToolExecutionResult } from "./default-tool-execution-result";
 import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
 import type { ToolCallingManager } from "./tool-calling-manager.interface";
-import type { ToolExecutionResult } from "./tool-execution-result.interface";
+import type { ToolExecutionResult } from "./tool-execution-result";
 
 const POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING =
 	"LLM may have adapted the tool name '%s', especially if the name was truncated due to length limits. If this is the case, you can customize the prefixing and processing logic using McpToolNamePrefixGenerator";

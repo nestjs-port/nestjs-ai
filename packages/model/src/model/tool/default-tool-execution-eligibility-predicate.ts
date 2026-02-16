@@ -13,7 +13,7 @@ export class DefaultToolExecutionEligibilityPredicate
 	test(promptOptions: ChatOptions, chatResponse: ChatResponse): boolean {
 		return (
 			ToolCallingChatOptions.isInternalToolExecutionEnabled(promptOptions) &&
-			chatResponse !== null &&
+			chatResponse != null &&
 			chatResponse.hasToolCalls()
 		);
 	}

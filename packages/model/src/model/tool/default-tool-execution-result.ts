@@ -18,7 +18,7 @@ export class DefaultToolExecutionResult extends ToolExecutionResult {
 		super();
 		assert(props.conversationHistory, "conversationHistory cannot be null");
 		assert(
-			props.conversationHistory.every((msg) => msg !== null),
+			props.conversationHistory.every((msg) => msg != null),
 			"conversationHistory cannot contain null elements",
 		);
 		this._conversationHistory = props.conversationHistory;

@@ -12,7 +12,7 @@ export class ChatClientResponse {
 		assert(context, "context cannot be null");
 
 		for (const key of context.keys()) {
-			assert(key !== null, "context keys cannot be null");
+			assert(key != null, "context keys cannot be null");
 		}
 
 		this._chatResponse = chatResponse;

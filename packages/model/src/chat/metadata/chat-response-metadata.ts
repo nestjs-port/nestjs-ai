@@ -118,7 +118,7 @@ export class ChatResponseMetadata
 			if (key === null) {
 				throw new Error("Key must not be null");
 			}
-			if (value !== null && value !== undefined) {
+			if (value != null) {
 				this.#chatResponseMetadata.map.set(key, value);
 			} else {
 				ChatResponseMetadata.logger.debug(`Ignore null value for key [${key}]`);

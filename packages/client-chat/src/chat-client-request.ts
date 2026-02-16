@@ -10,7 +10,7 @@ export class ChatClientRequest {
 		assert(context, "context cannot be null");
 
 		for (const key of context.keys()) {
-			assert(key !== null, "context keys cannot be null");
+			assert(key != null, "context keys cannot be null");
 		}
 
 		this._prompt = prompt;
@@ -67,7 +67,7 @@ export class ChatClientRequestBuilder {
 	}
 
 	build(): ChatClientRequest {
-		assert(this._prompt !== null, "prompt cannot be null");
+		assert(this._prompt != null, "prompt cannot be null");
 		return new ChatClientRequest(this._prompt, new Map(this._context));
 	}
 }

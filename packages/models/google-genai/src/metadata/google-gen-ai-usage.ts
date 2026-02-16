@@ -194,5 +194,5 @@ function convertModalityDetails(
 
 	return modalityTokens
 		.map((token) => GoogleGenAiModalityTokenCount.from(token))
-		.filter((t): t is GoogleGenAiModalityTokenCount => t !== null);
+		.filter((t): t is GoogleGenAiModalityTokenCount => t != null);
 }

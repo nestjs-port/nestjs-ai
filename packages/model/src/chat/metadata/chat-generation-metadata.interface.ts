@@ -164,8 +164,8 @@ export class DefaultChatGenerationMetadata extends ChatGenerationMetadata {
 	 */
 	constructor(props: DefaultChatGenerationMetadataProps = {}) {
 		super();
-		assert(props.metadata !== null, "Metadata must not be null");
-		assert(props.contentFilters !== null, "Content filters must not be null");
+		assert(props.metadata != null, "Metadata must not be null");
+		assert(props.contentFilters != null, "Content filters must not be null");
 		this._metadata = { ...(props.metadata ?? {}) };
 		this._finishReason = props.finishReason ?? null;
 		this._contentFilters = [...(props.contentFilters ?? [])];
@@ -181,7 +181,7 @@ export class DefaultChatGenerationMetadata extends ChatGenerationMetadata {
 
 	getOrDefault<T>(key: string, defaultValue: T): T {
 		const value = this.get<T>(key);
-		return value !== null ? value : defaultValue;
+		return value != null ? value : defaultValue;
 	}
 
 	get entrySet(): Array<[string, unknown]> {

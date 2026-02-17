@@ -1,1 +1,1 @@
-export * from "./duration";
+export { type Milliseconds, ms } from "./duration";

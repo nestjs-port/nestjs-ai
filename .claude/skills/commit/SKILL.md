@@ -119,16 +119,20 @@ test: add chat-model tests matching Java implementation
 When committing changes, follow these steps:
 
 1. **Check git status**: Run `git status` to see what files are staged or modified
-2. **Stage changes if needed**: If user wants to commit unstaged changes, run `git add <files>` or `git add .`
-3. **Analyze changes**: Review `git diff --staged` for staged changes or `git diff` for unstaged changes
-4. **Determine type**: Classify as feat/fix/refactor/test/docs/chore based on changes
-5. **Identify scope**: Check if changes are package-specific (model/core/commons/openai)
-6. **Generate commit message**: Create message following the format above
-7. **Execute commit**: Run `git commit -m "subject" -m "body"` with the generated message
+2. **Analyze all changes first**: Review `git diff` (or `git diff --staged`) and understand the full change set before staging
+3. **Split by logical units when meaningful**: Group changes by cohesive intent (feature/fix/refactor/test/docs) and create multiple commits when the change set can be separated cleanly
+4. **Use a single commit when split is not meaningful**: If changes are tightly coupled or too small to separate, commit them together
+5. **Stage changes for each unit**: Use `git add <files>` (or `git add -p`) per logical unit
+6. **Determine type**: Classify as feat/fix/refactor/test/docs/chore based on each unit
+7. **Identify scope**: Check if changes are package-specific (model/core/commons/openai)
+8. **Generate commit message**: Create message following the format above
+9. **Execute commit**: Run `git commit -m "subject" -m "body"` with the generated message
 
 ### Important Notes
 
 - **Always check git status first** before committing
+- **Always assess whether changes should be split into multiple commits** before staging everything
+- **Prefer multiple small commits for independent logical units**, but use one commit if there is no clear split
 - **Ask for confirmation** if there are unstaged changes - ask if user wants to stage them
 - **Use `git commit -m` for subject and `-m` for body** (multiple `-m` flags create multi-line commit)
 - **If no changes are staged**, ask user if they want to stage all changes or specific files

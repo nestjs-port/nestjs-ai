@@ -14,11 +14,11 @@ import type {
   Message,
   OutputTypeTarget,
   Prompt,
+  SchemaOutput,
   StructuredOutputConverter,
   ToolCallback,
 } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
-import type { z } from "zod";
 import type { Advisor, AdvisorObservationConvention } from "./advisor";
 import type { ChatClientResponse } from "./chat-client-response";
 import { DefaultChatClientBuilder } from "./default-chat-client-builder";
@@ -131,7 +131,7 @@ export namespace ChatClient {
     entity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: Type<OutputTypeTarget<TSchema>>,
-    ): Promise<z.infer<TSchema> | null>;
+    ): Promise<SchemaOutput<TSchema> | null>;
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
@@ -141,7 +141,7 @@ export namespace ChatClient {
     responseEntity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: Type<OutputTypeTarget<TSchema>>,
-    ): Promise<ResponseEntity<ChatResponse, z.infer<TSchema>>>;
+    ): Promise<ResponseEntity<ChatResponse, SchemaOutput<TSchema>>>;
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;

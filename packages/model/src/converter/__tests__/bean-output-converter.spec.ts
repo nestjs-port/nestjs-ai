@@ -12,6 +12,16 @@ class TestBean {
 }
 
 describe("BeanOutputConverter", () => {
+  const TestJsonSchema = {
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    type: "object",
+    properties: {
+      someString: { type: "string" },
+    },
+    required: ["someString"],
+    additionalProperties: false,
+  } as const;
+
   describe("convert", () => {
     it("converts zod schema type", () => {
       const converter = new BeanOutputConverter({ schema: TestSchema });
@@ -69,6 +79,12 @@ describe("BeanOutputConverter", () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toBeInstanceOf(TestBean);
       expect(result[0]?.someString).toBe("some value");
+    });
+
+    it("converts json schema literal type", () => {
+      const converter = new BeanOutputConverter({ schema: TestJsonSchema });
+      const result = converter.convert('{ "someString": "some value" }');
+      expect(result.someString).toBe("some value");
     });
 
     it("fails when schema validation fails", () => {
@@ -195,6 +211,32 @@ Used by some models
       });
       expect(converter.jsonSchema).toContain('"type": "array"');
       expect((converter.jsonSchemaMap as { type?: string }).type).toBe("array");
+    });
+
+    it("supports root array json schema literal", () => {
+      const converter = new BeanOutputConverter({
+        schema: {
+          $schema: "https://json-schema.org/draft/2020-12/schema",
+          type: "array",
+          items: TestJsonSchema,
+        },
+      });
+      expect(converter.jsonSchema).toContain('"$schema"');
+      expect((converter.jsonSchemaMap as { type?: string }).type).toBe("array");
+    });
+
+    it("sets default $schema when json schema literal misses it", () => {
+      const converter = new BeanOutputConverter({
+        schema: {
+          type: "object",
+          properties: { someString: { type: "string" } },
+          required: ["someString"],
+        },
+      });
+
+      expect((converter.jsonSchemaMap as { $schema?: string }).$schema).toBe(
+        "https://json-schema.org/draft/2020-12/schema",
+      );
     });
   });
 });

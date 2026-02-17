@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { EOL } from "node:os";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
 import { type ClassConstructor, plainToInstance } from "class-transformer";
+import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 import { z } from "zod";
 import {
   CompositeResponseTextCleaner,
@@ -13,11 +14,24 @@ import type { StructuredOutputConverter } from "./structured-output-converter";
 import { ThinkingTagCleaner } from "./thinking-tag-cleaner";
 import { WhitespaceCleaner } from "./whitespace-cleaner";
 
-type JsonObjectSchema = z.ZodObject<z.ZodRawShape>;
-type JsonObjectArraySchema = z.ZodArray<JsonObjectSchema>;
-export type JsonOrJsonArraySchema = JsonObjectSchema | JsonObjectArraySchema;
+type ZodJsonObjectSchema = z.ZodObject<z.ZodRawShape>;
+type ZodJsonObjectArraySchema = z.ZodArray<ZodJsonObjectSchema>;
+type ZodJsonOrJsonArraySchema = ZodJsonObjectSchema | ZodJsonObjectArraySchema;
+
+const DEFAULT_JSON_SCHEMA_DRAFT =
+  "https://json-schema.org/draft/2020-12/schema";
+
+export type JsonOrJsonArraySchema = ZodJsonOrJsonArraySchema | JSONSchema;
+export type SchemaOutput<TSchema extends JsonOrJsonArraySchema> =
+  TSchema extends ZodJsonOrJsonArraySchema
+    ? z.infer<TSchema>
+    : TSchema extends JSONSchema
+      ? FromSchema<TSchema>
+      : never;
 export type OutputTypeTarget<TSchema extends JsonOrJsonArraySchema> =
-  z.infer<TSchema> extends Array<infer TItem> ? TItem : z.infer<TSchema>;
+  SchemaOutput<TSchema> extends Array<infer TItem>
+    ? TItem
+    : SchemaOutput<TSchema>;
 
 export interface BeanOutputConverterProps<
   TSchema extends JsonOrJsonArraySchema,
@@ -28,7 +42,7 @@ export interface BeanOutputConverterProps<
 }
 
 export class BeanOutputConverter<TSchema extends JsonOrJsonArraySchema>
-  implements StructuredOutputConverter<z.infer<TSchema>>
+  implements StructuredOutputConverter<SchemaOutput<TSchema>>
 {
   private readonly logger: Logger = LoggerFactory.getLogger(
     BeanOutputConverter.name,
@@ -62,24 +76,33 @@ export class BeanOutputConverter<TSchema extends JsonOrJsonArraySchema>
   }
 
   private generateSchema(): void {
-    const jsonNode = z.toJSONSchema(this._schema);
+    const jsonNode = BeanOutputConverter.isZodSchema(this._schema)
+      ? z.toJSONSchema(this._schema)
+      : BeanOutputConverter.withDefaultSchemaDraft(
+          structuredClone(this._schema as Record<string, unknown>),
+        );
     this.postProcessSchema(jsonNode);
     this._jsonSchema = JSON.stringify(jsonNode, null, 2).replace(/\n/g, EOL);
   }
 
   protected postProcessSchema(_jsonNode: Record<string, unknown>): void {}
 
-  convert(source: string): z.infer<TSchema> {
+  convert(source: string): SchemaOutput<TSchema> {
     try {
       const cleaned = this._textCleaner.clean(source);
       const parsed = JSON.parse(cleaned ?? "");
-      const validated = this._schema.parse(parsed);
+      const validated = BeanOutputConverter.isZodSchema(this._schema)
+        ? this._schema.parse(parsed)
+        : parsed;
 
       if (!this._outputType) {
-        return validated as z.infer<TSchema>;
+        return validated as SchemaOutput<TSchema>;
       }
 
-      return plainToInstance(this._outputType, validated) as z.infer<TSchema>;
+      return plainToInstance(
+        this._outputType,
+        validated,
+      ) as SchemaOutput<TSchema>;
     } catch (error) {
       this.logger.error(
         `Could not parse the given text to the desired target schema: "${source}"`,
@@ -113,5 +136,29 @@ Here is the JSON Schema instance your output must adhere to:
         cause: error,
       });
     }
+  }
+
+  private static isZodSchema(
+    schema: JsonOrJsonArraySchema,
+  ): schema is ZodJsonOrJsonArraySchema {
+    if (schema instanceof z.ZodType) {
+      return true;
+    }
+
+    return (
+      typeof schema === "object" &&
+      schema !== null &&
+      "parse" in schema &&
+      typeof schema.parse === "function"
+    );
+  }
+
+  private static withDefaultSchemaDraft(
+    schema: Record<string, unknown>,
+  ): Record<string, unknown> {
+    if (!("$schema" in schema)) {
+      schema.$schema = DEFAULT_JSON_SCHEMA_DRAFT;
+    }
+    return schema;
   }
 }

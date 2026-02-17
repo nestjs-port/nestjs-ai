@@ -111,6 +111,7 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
       return this;
     }
     assert(textOrConsumer, "text cannot be null");
+    assert(charset !== null, "charset cannot be null");
     const resolvedCharset: BufferEncoding = charset ?? "utf-8";
     this.defaultRequest.user(textOrConsumer.toString(resolvedCharset));
     return this;
@@ -138,6 +139,7 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
       return this;
     }
     assert(textOrConsumer, "text cannot be null");
+    assert(charset !== null, "charset cannot be null");
     const resolvedCharset: BufferEncoding = charset ?? "utf-8";
     this.defaultRequest.system(textOrConsumer.toString(resolvedCharset));
     return this;

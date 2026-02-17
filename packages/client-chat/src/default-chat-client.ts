@@ -11,7 +11,9 @@ import {
   type ChatModel,
   type ChatOptions,
   type ChatResponse,
+  type JsonOrJsonArraySchema,
   type Message,
+  type OutputTypeTarget,
   Prompt,
   type StructuredOutputConverter,
   type ToolCallback,
@@ -94,8 +96,6 @@ export class DefaultChatClient implements ChatClient {
 }
 
 export namespace DefaultChatClient {
-  type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
-
   const DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION: ChatClientObservationConvention =
     new DefaultChatClientObservationConvention();
 
@@ -378,15 +378,17 @@ export namespace DefaultChatClient {
       this._observationConvention = observationConvention;
     }
 
-    responseEntity<TSchema extends ZodObjectSchema>(
+    responseEntity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
-      outputType?: ChatClient.Type<z.infer<TSchema>>,
+      outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
     ): Promise<ResponseEntity<ChatResponse, z.infer<TSchema>>>;
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;
     async responseEntity(
-      schemaOrConverter: ZodObjectSchema | StructuredOutputConverter<unknown>,
+      schemaOrConverter:
+        | JsonOrJsonArraySchema
+        | StructuredOutputConverter<unknown>,
       outputType?: ChatClient.Type<unknown>,
     ): Promise<ResponseEntity<ChatResponse, unknown>> {
       if (this.isStructuredOutputConverter(schemaOrConverter)) {
@@ -420,15 +422,17 @@ export namespace DefaultChatClient {
       return new ResponseEntity<ChatResponse, T>(chatResponse, entity);
     }
 
-    entity<TSchema extends ZodObjectSchema>(
+    entity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
-      outputType?: ChatClient.Type<z.infer<TSchema>>,
+      outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
     ): Promise<z.infer<TSchema> | null>;
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
     async entity(
-      schemaOrConverter: ZodObjectSchema | StructuredOutputConverter<unknown>,
+      schemaOrConverter:
+        | JsonOrJsonArraySchema
+        | StructuredOutputConverter<unknown>,
       outputType?: ChatClient.Type<unknown>,
     ): Promise<unknown | null> {
       if (this.isStructuredOutputConverter(schemaOrConverter)) {
@@ -443,7 +447,7 @@ export namespace DefaultChatClient {
     }
 
     private isStructuredOutputConverter(
-      value: ZodObjectSchema | StructuredOutputConverter<unknown>,
+      value: JsonOrJsonArraySchema | StructuredOutputConverter<unknown>,
     ): value is StructuredOutputConverter<unknown> {
       return (
         typeof value === "object" &&

@@ -16,12 +16,8 @@
     "clean": "rm -rf dist",
     "test": "vitest run"
   },
-  "dependencies": {
-    "class-validator-jsonschema": "^5.1.0"
-  },
   "peerDependencies": {
     "class-transformer": "^0.4.0 || ^0.5.0",
-    "class-validator": "^0.14.0",
     "zod": "^4.0.0",
     "rxjs": "^7.0.0",
     "@nestjs-ai/commons": "*",
@@ -30,7 +26,6 @@
   },
   "devDependencies": {
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.3",
     "zod": "4.3.6",
     "rxjs": "^7.0.0",
     "@nestjs-ai/commons": "workspace:*",

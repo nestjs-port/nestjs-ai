@@ -80,10 +80,6 @@ importers:
         version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))
 
   packages/model:
-    dependencies:
-      class-validator-jsonschema:
-        specifier: ^5.1.0
-        version: 5.1.0(class-transformer@0.5.1)(class-validator@0.14.3)
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -94,9 +90,6 @@ importers:
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
-      class-validator:
-        specifier: ^0.14.3
-        version: 0.14.3
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -803,12 +796,6 @@ packages:
   class-transformer@0.5.1:
     resolution: {integrity: sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==}
 
-  class-validator-jsonschema@5.1.0:
-    resolution: {integrity: sha512-FFOeqLR+Ng+iGoapZksAYwNFMSxTqQaFt32UHFrIDwa8bk72mWMWH5U/LEpvhnQh5ZD1sWZFbh3oTNBcFtt+4A==}
-    peerDependencies:
-      class-transformer: ^0.4.0 || ^0.5.0
-      class-validator: ^0.14.0
-
   class-validator@0.14.3:
     resolution: {integrity: sha512-rXXekcjofVN1LTOSw+u4u9WXVEUvNBVjORW154q/IdmYWy1nMbOU9aNtZB0t8m+FJQ9q91jlr2f9CwwUFdFMRA==}
 
@@ -1039,12 +1026,6 @@ packages:
     resolution: {integrity: sha512-v5xlu8eHD1+6r8EHTg6hfmO97LN8ugKtiXcy5e6oN72iD2r6u0RPfLl6fxM+7Wnh2ZRq15o0russMst44WauPA==}
     engines: {node: '>=13.2.0'}
 
-  lodash.groupby@4.6.0:
-    resolution: {integrity: sha512-5dcWxm23+VAoz+awKmBaiBvzox8+RqMgFhi7UvX9DHZr2HdxHXM/Wrf8cfKpsW37RNrvtPn6hSwNqurSILbmJw==}
-
-  lodash.merge@4.6.2:
-    resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
   log-update@6.1.0:
     resolution: {integrity: sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w==}
     engines: {node: '>=18'}
@@ -1112,9 +1093,6 @@ packages:
   onetime@7.0.0:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
-
-  openapi3-ts@3.2.0:
-    resolution: {integrity: sha512-/ykNWRV5Qs0Nwq7Pc0nJ78fgILvOT/60OxEmB3v7yQ8a8Bwcm43D4diaYazG/KBn6czA+52XYy931WFLMCUeSg==}
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
@@ -1848,7 +1826,8 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/validator@13.15.10': {}
+  '@types/validator@13.15.10':
+    optional: true
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -1983,21 +1962,12 @@ snapshots:
 
   class-transformer@0.5.1: {}
 
-  class-validator-jsonschema@5.1.0(class-transformer@0.5.1)(class-validator@0.14.3):
-    dependencies:
-      class-transformer: 0.5.1
-      class-validator: 0.14.3
-      lodash.groupby: 4.6.0
-      lodash.merge: 4.6.2
-      openapi3-ts: 3.2.0
-      reflect-metadata: 0.2.2
-      tslib: 2.8.1
-
   class-validator@0.14.3:
     dependencies:
       '@types/validator': 13.15.10
       libphonenumber-js: 1.12.36
       validator: 13.15.26
+    optional: true
 
   cli-cursor@5.0.0:
     dependencies:
@@ -2226,7 +2196,8 @@ snapshots:
       jwa: 2.0.1
       safe-buffer: 5.2.1
 
-  libphonenumber-js@1.12.36: {}
+  libphonenumber-js@1.12.36:
+    optional: true
 
   lint-staged@16.2.7:
     dependencies:
@@ -2248,10 +2219,6 @@ snapshots:
       wrap-ansi: 9.0.2
 
   load-esm@1.0.3: {}
-
-  lodash.groupby@4.6.0: {}
-
-  lodash.merge@4.6.2: {}
 
   log-update@6.1.0:
     dependencies:
@@ -2312,10 +2279,6 @@ snapshots:
   onetime@7.0.0:
     dependencies:
       mimic-function: 5.0.1
-
-  openapi3-ts@3.2.0:
-    dependencies:
-      yaml: 2.8.2
 
   package-json-from-dist@1.0.1: {}
 
@@ -2556,7 +2519,8 @@ snapshots:
 
   uuid@13.0.0: {}
 
-  validator@13.15.26: {}
+  validator@13.15.26:
+    optional: true
 
   vite-node@3.2.4(@types/node@25.0.9)(yaml@2.8.2):
     dependencies:

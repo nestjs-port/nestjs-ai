@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import { ClassConstructor, plainToInstance } from "class-transformer";
+import { type ClassConstructor, plainToInstance } from "class-transformer";
 import { z } from "zod";
 import {
   CompositeResponseTextCleaner,
@@ -12,15 +12,21 @@ import type { StructuredOutputConverter } from "./structured-output-converter";
 import { ThinkingTagCleaner } from "./thinking-tag-cleaner";
 import { WhitespaceCleaner } from "./whitespace-cleaner";
 
-type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
+type JsonObjectSchema = z.ZodObject<z.ZodRawShape>;
+type JsonObjectArraySchema = z.ZodArray<JsonObjectSchema>;
+export type JsonOrJsonArraySchema = JsonObjectSchema | JsonObjectArraySchema;
+export type OutputTypeTarget<TSchema extends JsonOrJsonArraySchema> =
+  z.infer<TSchema> extends Array<infer TItem> ? TItem : z.infer<TSchema>;
 
-export interface BeanOutputConverterProps<TSchema extends ZodObjectSchema> {
+export interface BeanOutputConverterProps<
+  TSchema extends JsonOrJsonArraySchema,
+> {
   schema: TSchema;
   textCleaner?: ResponseTextCleaner;
-  outputType?: ClassConstructor<z.infer<TSchema>>;
+  outputType?: ClassConstructor<OutputTypeTarget<TSchema>>;
 }
 
-export class BeanOutputConverter<TSchema extends ZodObjectSchema>
+export class BeanOutputConverter<TSchema extends JsonOrJsonArraySchema>
   implements StructuredOutputConverter<z.infer<TSchema>>
 {
   private readonly logger: Logger = LoggerFactory.getLogger(
@@ -28,7 +34,9 @@ export class BeanOutputConverter<TSchema extends ZodObjectSchema>
   );
   private readonly _schema: TSchema;
   private readonly _textCleaner: ResponseTextCleaner;
-  private readonly _outputType: ClassConstructor<z.infer<TSchema>> | null;
+  private readonly _outputType: ClassConstructor<
+    OutputTypeTarget<TSchema>
+  > | null;
   private _jsonSchema: string;
 
   constructor(props: BeanOutputConverterProps<TSchema>) {
@@ -67,10 +75,10 @@ export class BeanOutputConverter<TSchema extends ZodObjectSchema>
       const validated = this._schema.parse(parsed);
 
       if (!this._outputType) {
-        return validated;
+        return validated as z.infer<TSchema>;
       }
 
-      return plainToInstance(this._outputType, validated);
+      return plainToInstance(this._outputType, validated) as z.infer<TSchema>;
     } catch (error) {
       this.logger.error(
         `Could not parse the given text to the desired target schema: "${source}"`,

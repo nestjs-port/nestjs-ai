@@ -20,3 +20,7 @@ export {
   type SafeGuardAdvisorProps,
 } from "./safe-guard-advisor";
 export { SimpleLoggerAdvisor } from "./simple-logger-advisor";
+export {
+  StructuredOutputValidationAdvisor,
+  type StructuredOutputValidationAdvisorProps,
+} from "./structured-output-validation-advisor";

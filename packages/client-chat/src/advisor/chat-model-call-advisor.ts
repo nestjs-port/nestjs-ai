@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { EOL } from "node:os";
 import { LOWEST_PRECEDENCE, StringUtils } from "@nestjs-ai/commons";
 import type { ChatModel, StructuredOutputChatOptions } from "@nestjs-ai/model";
 import { UserMessage } from "@nestjs-ai/model";
@@ -97,7 +98,7 @@ export class ChatModelCallAdvisor implements CallAdvisor {
   ): UserMessage {
     const text = userMessage.text ?? "";
     const appendedText = StringUtils.hasText(outputFormat)
-      ? `${text}\n${outputFormat}`
+      ? `${text}${EOL}${outputFormat}`
       : text;
 
     return new UserMessage({

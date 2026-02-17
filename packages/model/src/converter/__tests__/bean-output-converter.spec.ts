@@ -1,3 +1,4 @@
+import { EOL } from "node:os";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { BeanOutputConverter } from "../bean-output-converter";
@@ -180,9 +181,12 @@ Used by some models
     it("normalizes line endings", () => {
       const converter = new BeanOutputConverter({ schema: TestSchema });
       const formatOutput = converter.format;
-      expect(formatOutput).toContain("\n");
-      expect(formatOutput).not.toContain("\r\n");
-      expect(formatOutput).not.toContain("\r");
+      expect(formatOutput).toContain(EOL);
+
+      if (EOL === "\n") {
+        expect(formatOutput).not.toContain("\r\n");
+        expect(formatOutput).not.toContain("\r");
+      }
     });
 
     it("supports root array json schema", () => {

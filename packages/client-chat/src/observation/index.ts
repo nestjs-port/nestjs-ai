@@ -1,3 +1,4 @@
+export { ChatClientCompletionObservationHandler } from "./chat-client-completion-observation-handler";
 export {
   ChatClientObservationContext,
   ChatClientObservationContextBuilder,

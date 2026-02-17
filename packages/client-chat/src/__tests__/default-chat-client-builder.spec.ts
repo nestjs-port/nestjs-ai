@@ -81,11 +81,31 @@ describe("DefaultChatClientBuilder", () => {
     ).toThrow("text cannot be null");
   });
 
+  it("when user charset is null with resource then throws", () => {
+    const builder = new DefaultChatClientBuilder(createChatModel());
+    expect(() =>
+      builder.defaultUser(
+        Buffer.from("question"),
+        null as unknown as BufferEncoding,
+      ),
+    ).toThrow("charset cannot be null");
+  });
+
   it("when system resource is null then throws", () => {
     const builder = new DefaultChatClientBuilder(createChatModel());
     expect(() =>
       builder.defaultSystem(null as unknown as Buffer, "utf-8"),
     ).toThrow("text cannot be null");
+  });
+
+  it("when system charset is null with resource then throws", () => {
+    const builder = new DefaultChatClientBuilder(createChatModel());
+    expect(() =>
+      builder.defaultSystem(
+        Buffer.from("instructions"),
+        null as unknown as BufferEncoding,
+      ),
+    ).toThrow("charset cannot be null");
   });
 
   it("when template renderer is null then throws", () => {

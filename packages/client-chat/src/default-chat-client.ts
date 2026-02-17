@@ -1171,6 +1171,7 @@ function readBufferText(
   text: Buffer,
   charset: BufferEncoding | undefined,
 ): string {
+  assert(charset !== null, "charset cannot be null");
   return text.toString(charset ?? "utf-8");
 }
 

@@ -15,13 +15,13 @@ import {
   type Message,
   type OutputTypeTarget,
   Prompt,
+  type SchemaOutput,
   type StructuredOutputConverter,
   type ToolCallback,
 } from "@nestjs-ai/model";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { Observable } from "rxjs";
 import { filter, map } from "rxjs";
-import type { z } from "zod";
 import type {
   Advisor,
   AdvisorObservationConvention,
@@ -37,6 +37,7 @@ import { ChatClientAttributes } from "./chat-client-attributes";
 import { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
 import type { ChatClientRequest } from "./chat-client-request";
 import { ChatClientResponse } from "./chat-client-response";
+import type { DefaultChatClientBuilder } from "./default-chat-client-builder";
 import { DefaultChatClientUtils } from "./default-chat-client-utils";
 import {
   ChatClientObservationContext,
@@ -381,7 +382,7 @@ export namespace DefaultChatClient {
     responseEntity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
-    ): Promise<ResponseEntity<ChatResponse, z.infer<TSchema>>>;
+    ): Promise<ResponseEntity<ChatResponse, SchemaOutput<TSchema>>>;
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;
@@ -396,7 +397,7 @@ export namespace DefaultChatClient {
       }
       const converter = new BeanOutputConverter({
         schema: schemaOrConverter,
-        outputType: outputType as never,
+        outputType: outputType,
       });
       return await this.doResponseEntity(converter);
     }
@@ -425,7 +426,7 @@ export namespace DefaultChatClient {
     entity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
-    ): Promise<z.infer<TSchema> | null>;
+    ): Promise<SchemaOutput<TSchema> | null>;
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
@@ -441,7 +442,7 @@ export namespace DefaultChatClient {
 
       const converter = new BeanOutputConverter({
         schema: schemaOrConverter,
-        outputType: outputType as never,
+        outputType: outputType,
       });
       return this.doEntity(converter);
     }
@@ -873,9 +874,7 @@ export namespace DefaultChatClient {
         builder.defaultOptions(this._chatOptions);
       }
 
-      (
-        builder as unknown as { addMessages: (messages: Message[]) => void }
-      ).addMessages(this._messages);
+      (builder as DefaultChatClientBuilder).addMessages(this._messages);
       return builder;
     }
 

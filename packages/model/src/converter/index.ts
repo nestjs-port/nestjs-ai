@@ -1,6 +1,7 @@
 export type {
   JsonOrJsonArraySchema,
   OutputTypeTarget,
+  SchemaOutput,
 } from "./bean-output-converter";
 export { BeanOutputConverter } from "./bean-output-converter";
 export {

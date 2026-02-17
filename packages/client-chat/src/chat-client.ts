@@ -16,6 +16,7 @@ import type {
   ToolCallback,
 } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
+import type { z } from "zod";
 import type { Advisor, AdvisorObservationConvention } from "./advisor";
 import type { ChatClientResponse } from "./chat-client-response";
 import { DefaultChatClientBuilder } from "./default-chat-client-builder";
@@ -33,6 +34,8 @@ export interface ChatClient {
 }
 
 export namespace ChatClient {
+  type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
+
   export function create(chatModel: ChatModel): ChatClient;
 
   export function create(
@@ -128,22 +131,20 @@ export namespace ChatClient {
   }
 
   export interface CallResponseSpec {
-    entity<T>(type: Type<T>, options: { isArray: true }): Promise<T[] | null>;
-    entity<T>(type: Type<T>, options?: EntityOptions): Promise<T | null>;
+    entity<TSchema extends ZodObjectSchema>(
+      schema: TSchema,
+      outputType?: Type<z.infer<TSchema>>,
+    ): Promise<z.infer<TSchema> | null>;
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
     chatClientResponse(): Promise<ChatClientResponse>;
     chatResponse(): Promise<ChatResponse | null>;
     content(): Promise<string | null>;
-    responseEntity<T>(
-      type: Type<T>,
-      options: { isArray: true },
-    ): Promise<ResponseEntity<ChatResponse, T[]>>;
-    responseEntity<T>(
-      type: Type<T>,
-      options?: EntityOptions,
-    ): Promise<ResponseEntity<ChatResponse, T>>;
+    responseEntity<TSchema extends ZodObjectSchema>(
+      schema: TSchema,
+      outputType?: Type<z.infer<TSchema>>,
+    ): Promise<ResponseEntity<ChatResponse, z.infer<TSchema>>>;
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;

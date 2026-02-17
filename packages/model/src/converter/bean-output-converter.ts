@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import { type ClassConstructor, plainToInstance } from "class-transformer";
-import { targetConstructorToSchema } from "class-validator-jsonschema";
+import { ClassConstructor, plainToInstance } from "class-transformer";
+import { z } from "zod";
 import {
   CompositeResponseTextCleaner,
   type CompositeResponseTextCleanerBuilder,
@@ -12,22 +12,31 @@ import type { StructuredOutputConverter } from "./structured-output-converter";
 import { ThinkingTagCleaner } from "./thinking-tag-cleaner";
 import { WhitespaceCleaner } from "./whitespace-cleaner";
 
-type Type<T> = new (...args: never[]) => T;
-type ElementType<T> = T extends (infer U)[] ? U : T;
+type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
 
-export class BeanOutputConverter<T> implements StructuredOutputConverter<T> {
+export interface BeanOutputConverterProps<TSchema extends ZodObjectSchema> {
+  schema: TSchema;
+  textCleaner?: ResponseTextCleaner;
+  outputType?: ClassConstructor<z.infer<TSchema>>;
+}
+
+export class BeanOutputConverter<TSchema extends ZodObjectSchema>
+  implements StructuredOutputConverter<z.infer<TSchema>>
+{
   private readonly logger: Logger = LoggerFactory.getLogger(
     BeanOutputConverter.name,
   );
-  private readonly _type: Type<ElementType<T>>;
+  private readonly _schema: TSchema;
   private readonly _textCleaner: ResponseTextCleaner;
+  private readonly _outputType: ClassConstructor<z.infer<TSchema>> | null;
   private _jsonSchema: string;
 
-  constructor(type: Type<ElementType<T>>, textCleaner?: ResponseTextCleaner) {
-    assert(type, "Type cannot be null");
-    this._type = type;
+  constructor(props: BeanOutputConverterProps<TSchema>) {
+    assert(props.schema, "Schema cannot be null");
+    this._schema = props.schema;
     this._textCleaner =
-      textCleaner ?? BeanOutputConverter.createDefaultTextCleaner();
+      props.textCleaner ?? BeanOutputConverter.createDefaultTextCleaner();
+    this._outputType = props.outputType ?? null;
     this._jsonSchema = "";
     this.generateSchema();
   }
@@ -44,31 +53,31 @@ export class BeanOutputConverter<T> implements StructuredOutputConverter<T> {
   }
 
   private generateSchema(): void {
-    const jsonNode = targetConstructorToSchema(this._type) as Record<
-      string,
-      unknown
-    >;
+    const jsonNode = z.toJSONSchema(this._schema);
     this.postProcessSchema(jsonNode);
     this._jsonSchema = JSON.stringify(jsonNode, null, 2);
   }
 
   protected postProcessSchema(_jsonNode: Record<string, unknown>): void {}
 
-  convert(source: string): T {
+  convert(source: string): z.infer<TSchema> {
     try {
       const cleaned = this._textCleaner.clean(source);
       const parsed = JSON.parse(cleaned ?? "");
-      return plainToInstance(
-        this._type as unknown as ClassConstructor<T>,
-        parsed,
-      ) as T;
+      const validated = this._schema.parse(parsed);
+
+      if (!this._outputType) {
+        return validated;
+      }
+
+      return plainToInstance(this._outputType, validated);
     } catch (error) {
       this.logger.error(
-        `Could not parse the given text to the desired target type: "${source}" into ${this._type.name}`,
+        `Could not parse the given text to the desired target schema: "${source}"`,
         error,
       );
       throw new Error(
-        `Could not parse the given text to the desired target type: "${source}" into ${this._type.name}`,
+        `Could not parse the given text to the desired target schema: "${source}"`,
         { cause: error },
       );
     }

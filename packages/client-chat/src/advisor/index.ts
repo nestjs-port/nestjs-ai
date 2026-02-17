@@ -11,4 +11,16 @@ export {
   type MessageChatMemoryAdvisorProps,
 } from "./message-chat-memory-advisor";
 export * from "./observation";
+export {
+  PromptChatMemoryAdvisor,
+  type PromptChatMemoryAdvisorProps,
+} from "./prompt-chat-memory-advisor";
+export {
+  SafeGuardAdvisor,
+  type SafeGuardAdvisorProps,
+} from "./safe-guard-advisor";
 export { SimpleLoggerAdvisor } from "./simple-logger-advisor";
+export {
+  StructuredOutputValidationAdvisor,
+  StructuredOutputValidationAdvisorBuilder,
+} from "./structured-output-validation-advisor";

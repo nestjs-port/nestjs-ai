@@ -35,7 +35,9 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
   );
   private readonly _toolDefinition: ToolDefinition;
   private readonly _toolMetadata: ToolMetadata;
-  private readonly _toolInputType: z.ZodTypeAny | null;
+  private readonly _toolInputType:
+    | (I extends void ? z.ZodTypeAny : z.ZodType<I>)
+    | null;
   private readonly _toolFunction: ToolBiFunction<I, O>;
   private readonly _toolCallResultConverter: ToolCallResultConverter;
 
@@ -171,7 +173,7 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
 export interface FunctionToolCallbackProps<I, O> {
   toolDefinition: ToolDefinition;
   toolMetadata?: ToolMetadata | null;
-  toolInputType: z.ZodTypeAny;
+  toolInputType: I extends void ? z.ZodTypeAny : z.ZodType<I>;
   toolFunction: ToolBiFunction<I, O>;
   toolCallResultConverter?: ToolCallResultConverter | null;
 }
@@ -180,7 +182,8 @@ export class FunctionToolCallbackBuilder<I, O> {
   private readonly _name: string;
   private _description: string | null = null;
   private _inputSchema: string | null = null;
-  private _inputType: z.ZodTypeAny | null = null;
+  private _inputType: (I extends void ? z.ZodTypeAny : z.ZodType<I>) | null =
+    null;
   private _toolMetadata: ToolMetadata | null = null;
   private readonly _toolFunction: ToolBiFunction<I, O>;
   private _toolCallResultConverter: ToolCallResultConverter | null = null;
@@ -202,7 +205,7 @@ export class FunctionToolCallbackBuilder<I, O> {
     return this;
   }
 
-  inputType(inputType: z.ZodTypeAny): this {
+  inputType(inputType: I extends void ? z.ZodTypeAny : z.ZodType<I>): this {
     this._inputType = inputType;
     return this;
   }

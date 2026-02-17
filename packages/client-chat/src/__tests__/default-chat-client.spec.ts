@@ -44,6 +44,9 @@ class InputType {
 const PersonSchema = z.object({
   name: z.string(),
 });
+const InputTypeSchema = z.object({
+  input: z.string(),
+});
 
 function asRequestSpec(
   spec: ChatClient.ChatClientRequestSpec,
@@ -1600,7 +1603,7 @@ describe("DefaultChatClient", () => {
             (_input: InputType) => "hello",
           )
             .description("description")
-            .inputType(InputType)
+            .inputType(InputTypeSchema)
             .build(),
         ),
       ).toThrow("name cannot be null or empty");
@@ -1614,7 +1617,7 @@ describe("DefaultChatClient", () => {
         chatClient.prompt().toolCallbacks(
           FunctionToolCallback.builder("", (_input: InputType) => "hello")
             .description("description")
-            .inputType(InputType)
+            .inputType(InputTypeSchema)
             .build(),
         ),
       ).toThrow("name cannot be null or empty");
@@ -1627,7 +1630,7 @@ describe("DefaultChatClient", () => {
       const spec = asRequestSpec(
         chatClient.prompt().toolCallbacks(
           FunctionToolCallback.builder("name", (_input: InputType) => "hello")
-            .inputType(InputType)
+            .inputType(InputTypeSchema)
             .description("description")
             .build(),
         ),
@@ -1650,7 +1653,7 @@ describe("DefaultChatClient", () => {
             (_input: InputType, _ctx) => "hello",
           )
             .description("description")
-            .inputType(InputType)
+            .inputType(InputTypeSchema)
             .build(),
         ),
       ).toThrow("name cannot be null or empty");
@@ -1664,7 +1667,7 @@ describe("DefaultChatClient", () => {
         chatClient.prompt().toolCallbacks(
           FunctionToolCallback.builder("", (_input: InputType, _ctx) => "hello")
             .description("description")
-            .inputType(InputType)
+            .inputType(InputTypeSchema)
             .build(),
         ),
       ).toThrow("name cannot be null or empty");
@@ -1681,7 +1684,7 @@ describe("DefaultChatClient", () => {
             (_input: InputType, _ctx) => "hello",
           )
             .description("description")
-            .inputType(InputType)
+            .inputType(InputTypeSchema)
             .build(),
         ),
       );

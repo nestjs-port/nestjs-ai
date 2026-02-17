@@ -10,7 +10,9 @@ import type {
   ChatModel,
   ChatOptions,
   ChatResponse,
+  JsonOrJsonArraySchema,
   Message,
+  OutputTypeTarget,
   Prompt,
   StructuredOutputConverter,
   ToolCallback,
@@ -34,8 +36,6 @@ export interface ChatClient {
 }
 
 export namespace ChatClient {
-  type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
-
   export function create(chatModel: ChatModel): ChatClient;
 
   export function create(
@@ -92,9 +92,6 @@ export namespace ChatClient {
   }
 
   export type Type<T> = new (...args: never[]) => T;
-  export type EntityOptions = {
-    readonly isArray?: boolean;
-  };
 
   export interface ToolCallbackProvider {
     readonly toolCallbacks: ToolCallback[];
@@ -131,9 +128,9 @@ export namespace ChatClient {
   }
 
   export interface CallResponseSpec {
-    entity<TSchema extends ZodObjectSchema>(
+    entity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
-      outputType?: Type<z.infer<TSchema>>,
+      outputType?: Type<OutputTypeTarget<TSchema>>,
     ): Promise<z.infer<TSchema> | null>;
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
@@ -141,9 +138,9 @@ export namespace ChatClient {
     chatClientResponse(): Promise<ChatClientResponse>;
     chatResponse(): Promise<ChatResponse | null>;
     content(): Promise<string | null>;
-    responseEntity<TSchema extends ZodObjectSchema>(
+    responseEntity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
-      outputType?: Type<z.infer<TSchema>>,
+      outputType?: Type<OutputTypeTarget<TSchema>>,
     ): Promise<ResponseEntity<ChatResponse, z.infer<TSchema>>>;
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,

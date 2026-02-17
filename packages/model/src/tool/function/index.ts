@@ -2,7 +2,6 @@ export {
   FunctionToolCallback,
   FunctionToolCallbackBuilder,
   type FunctionToolCallbackProps,
-  type FunctionToolInputType,
   type ToolBiFunction,
   type ToolConsumer,
   type ToolFunction,

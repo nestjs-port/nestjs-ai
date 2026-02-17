@@ -1,3 +1,7 @@
+export type {
+  JsonOrJsonArraySchema,
+  OutputTypeTarget,
+} from "./bean-output-converter";
 export { BeanOutputConverter } from "./bean-output-converter";
 export {
   CompositeResponseTextCleaner,

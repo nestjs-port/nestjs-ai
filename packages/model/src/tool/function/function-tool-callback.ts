@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import { ClassConstructor, plainToInstance } from "class-transformer";
-import { targetConstructorToSchema } from "class-validator-jsonschema";
+import { z } from "zod";
 import type { ToolContext } from "../../chat";
 import { DefaultToolDefinition, type ToolDefinition } from "../definition";
 import {
@@ -17,8 +16,6 @@ export type ToolBiFunction<I, O> = (input: I, context: ToolContext | null) => O;
 export type ToolFunction<I, O> = (input: I) => O;
 export type ToolSupplier<O> = () => O;
 export type ToolConsumer<I> = (input: I) => void;
-
-export type FunctionToolInputType<T> = new (...args: never[]) => T;
 
 /**
  * Runtime input type used by {@link FunctionToolCallbackBuilder} for schema hints.
@@ -38,7 +35,7 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
   );
   private readonly _toolDefinition: ToolDefinition;
   private readonly _toolMetadata: ToolMetadata;
-  private readonly _toolInputType: FunctionToolInputType<I> | null;
+  private readonly _toolInputType: z.ZodTypeAny | null;
   private readonly _toolFunction: ToolBiFunction<I, O>;
   private readonly _toolCallResultConverter: ToolCallResultConverter;
 
@@ -100,10 +97,7 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
       return plain;
     }
 
-    return plainToInstance(
-      this._toolInputType as ClassConstructor<never>,
-      plain,
-    ) as I;
+    return this._toolInputType.parse(plain) as I;
   }
 
   private callMethod(request: I, toolContext: ToolContext | null): O {
@@ -177,7 +171,7 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
 export interface FunctionToolCallbackProps<I, O> {
   toolDefinition: ToolDefinition;
   toolMetadata?: ToolMetadata | null;
-  toolInputType: FunctionToolInputType<I>;
+  toolInputType: z.ZodTypeAny;
   toolFunction: ToolBiFunction<I, O>;
   toolCallResultConverter?: ToolCallResultConverter | null;
 }
@@ -186,7 +180,7 @@ export class FunctionToolCallbackBuilder<I, O> {
   private readonly _name: string;
   private _description: string | null = null;
   private _inputSchema: string | null = null;
-  private _inputType: FunctionToolInputType<I> | null = null;
+  private _inputType: z.ZodTypeAny | null = null;
   private _toolMetadata: ToolMetadata | null = null;
   private readonly _toolFunction: ToolBiFunction<I, O>;
   private _toolCallResultConverter: ToolCallResultConverter | null = null;
@@ -208,7 +202,7 @@ export class FunctionToolCallbackBuilder<I, O> {
     return this;
   }
 
-  inputType(inputType: FunctionToolInputType<I>): this {
+  inputType(inputType: z.ZodTypeAny): this {
     this._inputType = inputType;
     return this;
   }
@@ -253,20 +247,12 @@ export class FunctionToolCallbackBuilder<I, O> {
     });
   }
 
-  private static generateSchemaForType<T>(
-    inputType: FunctionToolInputType<T>,
-  ): string {
-    if (typeof inputType === "function") {
-      try {
-        const schema = targetConstructorToSchema(
-          inputType as FunctionToolInputType<T>,
-        );
-        return JSON.stringify(schema);
-      } catch {
-        return "{}";
-      }
+  private static generateSchemaForType<T>(inputType: z.ZodType<T>): string {
+    try {
+      const schema = z.toJSONSchema(inputType);
+      return JSON.stringify(schema);
+    } catch {
+      return "{}";
     }
-
-    return "{}";
   }
 }

@@ -58,6 +58,18 @@ describe("BeanOutputConverter", () => {
       expect(result.items[0]?.someString).toBe("some value");
     });
 
+    it("converts root array schema", () => {
+      const converter = new BeanOutputConverter({
+        schema: z.array(TestSchema),
+        outputType: TestBean,
+      });
+      const result = converter.convert('[{ "someString": "some value" }]');
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(TestBean);
+      expect(result[0]?.someString).toBe("some value");
+    });
+
     it("fails when schema validation fails", () => {
       const converter = new BeanOutputConverter({ schema: TestSchema });
       const input = '{ "someString": 123 }';
@@ -171,6 +183,14 @@ Used by some models
       expect(formatOutput).toContain("\n");
       expect(formatOutput).not.toContain("\r\n");
       expect(formatOutput).not.toContain("\r");
+    });
+
+    it("supports root array json schema", () => {
+      const converter = new BeanOutputConverter({
+        schema: z.array(TestSchema),
+      });
+      expect(converter.jsonSchema).toContain('"type": "array"');
+      expect((converter.jsonSchemaMap as { type?: string }).type).toBe("array");
     });
   });
 });

@@ -4,6 +4,7 @@ import {
   KeyValue,
   KeyValues,
   SpringAiKind,
+  StringUtils,
 } from "@nestjs-ai/commons";
 import type { ToolCallingChatOptions } from "@nestjs-ai/model";
 import type { ChatClientObservationContext } from "./chat-client-observation-context";
@@ -103,7 +104,7 @@ export class DefaultChatClientObservationConvention extends ChatClientObservatio
     const conversationId = context.request.context.get(
       "chat_memory_conversation_id",
     );
-    if (!this.hasText(conversationId)) {
+    if (!StringUtils.hasText(conversationId)) {
       return keyValues;
     }
 
@@ -135,10 +136,6 @@ export class DefaultChatClientObservationConvention extends ChatClientObservatio
       "spring.ai.chat.client.tool.names",
       this.formatQuotedArray(toolNames.sort()),
     );
-  }
-
-  protected hasText(value: unknown): value is string {
-    return typeof value === "string" && value.trim().length > 0;
   }
 
   protected formatQuotedArray(values: Iterable<string>): string {

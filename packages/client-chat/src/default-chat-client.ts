@@ -3,6 +3,7 @@ import {
   Media,
   type MimeType,
   type ObservationRegistry,
+  StringUtils,
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
 import {
@@ -63,7 +64,10 @@ export class DefaultChatClient implements ChatClient {
     }
 
     if (typeof contentOrPrompt === "string") {
-      assert(hasText(contentOrPrompt), "content cannot be null or empty");
+      assert(
+        StringUtils.hasText(contentOrPrompt),
+        "content cannot be null or empty",
+      );
       return this.prompt(new Prompt(contentOrPrompt));
     }
 
@@ -142,7 +146,10 @@ export namespace DefaultChatClient {
       charset?: BufferEncoding,
     ): ChatClient.PromptUserSpec {
       if (typeof textOrBuffer === "string") {
-        assert(hasText(textOrBuffer), "text cannot be null or empty");
+        assert(
+          StringUtils.hasText(textOrBuffer),
+          "text cannot be null or empty",
+        );
         this._text = textOrBuffer;
         return this;
       }
@@ -153,7 +160,7 @@ export namespace DefaultChatClient {
     }
 
     param(k: string, v: unknown): ChatClient.PromptUserSpec {
-      assert(hasText(k), "key cannot be null or empty");
+      assert(StringUtils.hasText(k), "key cannot be null or empty");
       assert(v != null, "value cannot be null");
       this._params.set(k, v);
       return this;
@@ -176,7 +183,10 @@ export namespace DefaultChatClient {
       value?: unknown,
     ): ChatClient.PromptUserSpec {
       if (typeof metadataOrKey === "string") {
-        assert(hasText(metadataOrKey), "metadata key cannot be null or empty");
+        assert(
+          StringUtils.hasText(metadataOrKey),
+          "metadata key cannot be null or empty",
+        );
         assert(value != null, "metadata value cannot be null");
         this._metadata.set(metadataOrKey, value);
         return this;
@@ -224,7 +234,10 @@ export namespace DefaultChatClient {
       charset?: BufferEncoding,
     ): ChatClient.PromptSystemSpec {
       if (typeof textOrBuffer === "string") {
-        assert(hasText(textOrBuffer), "text cannot be null or empty");
+        assert(
+          StringUtils.hasText(textOrBuffer),
+          "text cannot be null or empty",
+        );
         this._text = textOrBuffer;
         return this;
       }
@@ -235,7 +248,7 @@ export namespace DefaultChatClient {
     }
 
     param(k: string, v: unknown): ChatClient.PromptSystemSpec {
-      assert(hasText(k), "key cannot be null or empty");
+      assert(StringUtils.hasText(k), "key cannot be null or empty");
       assert(v != null, "value cannot be null");
       this._params.set(k, v);
       return this;
@@ -258,7 +271,10 @@ export namespace DefaultChatClient {
       value?: unknown,
     ): ChatClient.PromptSystemSpec {
       if (typeof metadataOrKey === "string") {
-        assert(hasText(metadataOrKey), "metadata key cannot be null or empty");
+        assert(
+          StringUtils.hasText(metadataOrKey),
+          "metadata key cannot be null or empty",
+        );
         assert(value != null, "metadata value cannot be null");
         this._metadata.set(metadataOrKey, value);
         return this;
@@ -294,7 +310,7 @@ export namespace DefaultChatClient {
     private readonly _params = new Map<string, unknown>();
 
     param(k: string, v: unknown): ChatClient.AdvisorSpec {
-      assert(hasText(k), "key cannot be null or empty");
+      assert(StringUtils.hasText(k), "key cannot be null or empty");
       assert(v != null, "value cannot be null");
       this._params.set(k, v);
       return this;
@@ -455,7 +471,7 @@ export namespace DefaultChatClient {
       forceOutputFormat: boolean,
     ): ChatClientRequest {
       const context = chatClientRequest.context;
-      if (forceOutputFormat || hasText(outputConverter.format)) {
+      if (forceOutputFormat || StringUtils.hasText(outputConverter.format)) {
         context.set(
           ChatClientAttributes.OUTPUT_FORMAT.key,
           outputConverter.format,
@@ -820,7 +836,7 @@ export namespace DefaultChatClient {
         );
       }
 
-      if (hasText(this._userText)) {
+      if (StringUtils.hasText(this._userText)) {
         const text = this._userText;
         builder.defaultUser((u) =>
           u
@@ -831,7 +847,7 @@ export namespace DefaultChatClient {
         );
       }
 
-      if (hasText(this._systemText)) {
+      if (StringUtils.hasText(this._systemText)) {
         const text = this._systemText;
         builder.defaultSystem((s) =>
           s
@@ -1012,7 +1028,7 @@ export namespace DefaultChatClient {
       if (typeof textOrConsumerOrResource === "function") {
         const systemSpec = new DefaultPromptSystemSpec();
         textOrConsumerOrResource(systemSpec);
-        this._systemText = hasText(systemSpec.textValue)
+        this._systemText = StringUtils.hasText(systemSpec.textValue)
           ? systemSpec.textValue
           : this._systemText;
         for (const [key, value] of systemSpec.paramsValue.entries()) {
@@ -1026,7 +1042,7 @@ export namespace DefaultChatClient {
 
       if (typeof textOrConsumerOrResource === "string") {
         assert(
-          hasText(textOrConsumerOrResource),
+          StringUtils.hasText(textOrConsumerOrResource),
           "text cannot be null or empty",
         );
         this._systemText = textOrConsumerOrResource;
@@ -1057,7 +1073,7 @@ export namespace DefaultChatClient {
       if (typeof textOrConsumerOrResource === "function") {
         const userSpec = new DefaultPromptUserSpec();
         textOrConsumerOrResource(userSpec);
-        this._userText = hasText(userSpec.textValue)
+        this._userText = StringUtils.hasText(userSpec.textValue)
           ? userSpec.textValue
           : this._userText;
         for (const [key, value] of userSpec.paramsValue.entries()) {
@@ -1072,7 +1088,7 @@ export namespace DefaultChatClient {
 
       if (typeof textOrConsumerOrResource === "string") {
         assert(
-          hasText(textOrConsumerOrResource),
+          StringUtils.hasText(textOrConsumerOrResource),
           "text cannot be null or empty",
         );
         this._userText = textOrConsumerOrResource;
@@ -1122,10 +1138,6 @@ export namespace DefaultChatClient {
         .build();
     }
   }
-}
-
-function hasText(value: string | null | undefined): value is string {
-  return value != null && value.trim().length > 0;
 }
 
 function readBufferText(

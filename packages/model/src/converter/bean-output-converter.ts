@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { EOL } from "node:os";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
 import { type ClassConstructor, plainToInstance } from "class-transformer";
 import { z } from "zod";
@@ -63,7 +64,7 @@ export class BeanOutputConverter<TSchema extends JsonOrJsonArraySchema>
   private generateSchema(): void {
     const jsonNode = z.toJSONSchema(this._schema);
     this.postProcessSchema(jsonNode);
-    this._jsonSchema = JSON.stringify(jsonNode, null, 2);
+    this._jsonSchema = JSON.stringify(jsonNode, null, 2).replace(/\n/g, EOL);
   }
 
   protected postProcessSchema(_jsonNode: Record<string, unknown>): void {}

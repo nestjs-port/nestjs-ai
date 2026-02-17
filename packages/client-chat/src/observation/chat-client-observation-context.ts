@@ -4,6 +4,7 @@ import {
   AiOperationType,
   AiProvider,
   ObservationContext,
+  StringUtils,
 } from "@nestjs-ai/commons";
 import type { Advisor } from "../advisor";
 import { ChatClientAttributes } from "../chat-client-attributes";
@@ -104,7 +105,7 @@ export class ChatClientObservationContextBuilder {
     assert(this._chatClientRequest, "chatClientRequest cannot be null");
 
     let chatClientRequest = this._chatClientRequest;
-    if (this.hasText(this._format)) {
+    if (StringUtils.hasText(this._format)) {
       const context = chatClientRequest.context;
       context.set(ChatClientAttributes.OUTPUT_FORMAT.key, this._format);
       chatClientRequest = chatClientRequest.mutate().context(context).build();
@@ -115,9 +116,5 @@ export class ChatClientObservationContextBuilder {
       this._advisors,
       this._isStream,
     );
-  }
-
-  private hasText(value: string | null | undefined): value is string {
-    return value != null && value.trim().length > 0;
   }
 }

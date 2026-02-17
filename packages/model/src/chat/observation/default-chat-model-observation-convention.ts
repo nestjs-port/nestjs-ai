@@ -2,6 +2,7 @@ import {
   AiObservationAttributes,
   KeyValue,
   KeyValues,
+  StringUtils,
 } from "@nestjs-ai/commons";
 import type { ToolCallingChatOptions } from "../../model";
 import type { ChatOptions } from "../prompt";
@@ -27,7 +28,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
 
   override getContextualName(context: ChatModelObservationContext): string {
     const options = context.request.options as ChatOptions | null;
-    if (options != null && this.hasText(options.model)) {
+    if (options != null && StringUtils.hasText(options.model)) {
       return `${context.operationMetadata.operationType} ${options.model}`;
     }
     return context.operationMetadata.operationType;
@@ -60,7 +61,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
 
   protected requestModel(context: ChatModelObservationContext): KeyValue {
     const options = context.request.options as ChatOptions | null;
-    if (options != null && this.hasText(options.model)) {
+    if (options != null && StringUtils.hasText(options.model)) {
       return KeyValue.of(
         AiObservationAttributes.REQUEST_MODEL.value,
         options.model,
@@ -71,7 +72,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
 
   protected responseModel(context: ChatModelObservationContext): KeyValue {
     const model = context.response?.metadata?.model;
-    if (this.hasText(model)) {
+    if (StringUtils.hasText(model)) {
       return KeyValue.of(AiObservationAttributes.RESPONSE_MODEL.value, model);
     }
     return DefaultChatModelObservationConvention.RESPONSE_MODEL_NONE;
@@ -237,7 +238,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
       const finishReasons = response.results
         .map((generation) => generation.metadata.finishReason)
         .filter((finishReason): finishReason is string =>
-          this.hasText(finishReason),
+          StringUtils.hasText(finishReason),
         );
 
       if (finishReasons.length === 0) {
@@ -257,7 +258,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     context: ChatModelObservationContext,
   ): KeyValues {
     const id = context.response?.metadata?.id;
-    if (this.hasText(id)) {
+    if (StringUtils.hasText(id)) {
       return keyValues.and(AiObservationAttributes.RESPONSE_ID.value, id);
     }
     return keyValues;
@@ -303,10 +304,6 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
       );
     }
     return keyValues;
-  }
-
-  protected hasText(value: string | null | undefined): value is string {
-    return value != null && value.trim().length > 0;
   }
 
   protected formatQuotedArray(values: Iterable<string>): string {

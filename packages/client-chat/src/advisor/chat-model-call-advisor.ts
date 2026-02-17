@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { LOWEST_PRECEDENCE } from "@nestjs-ai/commons";
+import { LOWEST_PRECEDENCE, StringUtils } from "@nestjs-ai/commons";
 import type { ChatModel, StructuredOutputChatOptions } from "@nestjs-ai/model";
 import { UserMessage } from "@nestjs-ai/model";
 
@@ -7,10 +7,6 @@ import { ChatClientAttributes } from "../chat-client-attributes";
 import { ChatClientRequest } from "../chat-client-request";
 import { ChatClientResponse } from "../chat-client-response";
 import type { CallAdvisor, CallAdvisorChain } from "./api";
-
-function hasText(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
-}
 
 function isStructuredOutputChatOptions(
   chatOptions: unknown,
@@ -66,7 +62,10 @@ export class ChatModelCallAdvisor implements CallAdvisor {
       ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key,
     );
 
-    if (!hasText(outputFormat) && !hasText(outputSchema)) {
+    if (
+      !StringUtils.hasText(outputFormat) &&
+      !StringUtils.hasText(outputSchema)
+    ) {
       return chatClientRequest;
     }
 
@@ -74,7 +73,7 @@ export class ChatModelCallAdvisor implements CallAdvisor {
       chatClientRequest.context.has(
         ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key,
       ) &&
-      hasText(outputSchema) &&
+      StringUtils.hasText(outputSchema) &&
       isStructuredOutputChatOptions(chatClientRequest.prompt.options)
     ) {
       chatClientRequest.prompt.options.outputSchema = outputSchema;
@@ -97,7 +96,7 @@ export class ChatModelCallAdvisor implements CallAdvisor {
     outputFormat: unknown,
   ): UserMessage {
     const text = userMessage.text ?? "";
-    const appendedText = hasText(outputFormat)
+    const appendedText = StringUtils.hasText(outputFormat)
       ? `${text}\n${outputFormat}`
       : text;
 

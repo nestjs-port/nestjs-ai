@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { StringUtils } from "@nestjs-ai/commons";
 import {
   type ChatOptions,
   DefaultChatOptions,
@@ -30,7 +31,7 @@ export abstract class DefaultChatClientUtils {
 
     // System Text => First in the list
     let processedSystemText = inputRequest.systemText;
-    if (DefaultChatClientUtils.hasText(processedSystemText)) {
+    if (StringUtils.hasText(processedSystemText)) {
       if (inputRequest.systemParams.size > 0) {
         processedSystemText = PromptTemplate.builder()
           .template(processedSystemText)
@@ -58,7 +59,7 @@ export abstract class DefaultChatClientUtils {
 
     // User Text => Last in the list
     let processedUserText = inputRequest.userText;
-    if (DefaultChatClientUtils.hasText(processedUserText)) {
+    if (StringUtils.hasText(processedUserText)) {
       if (inputRequest.userParams.size > 0) {
         processedUserText = PromptTemplate.builder()
           .template(processedUserText)
@@ -175,10 +176,6 @@ export abstract class DefaultChatClientUtils {
       "toolNames" in options &&
       "toolContext" in options
     );
-  }
-
-  private static hasText(value: string | null | undefined): value is string {
-    return value != null && value.trim().length > 0;
   }
 
   private static mapToRecord(

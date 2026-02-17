@@ -43,7 +43,7 @@ class InputType {
 function asRequestSpec(
   spec: ChatClient.ChatClientRequestSpec,
 ): DefaultChatClient.DefaultChatClientRequestSpec {
-  return spec as DefaultChatClient.DefaultChatClientRequestSpec;
+  return spec as unknown as DefaultChatClient.DefaultChatClientRequestSpec;
 }
 
 function requestData(spec: DefaultChatClient.DefaultChatClientRequestSpec) {

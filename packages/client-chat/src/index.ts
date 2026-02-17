@@ -12,5 +12,6 @@ export {
 } from "./chat-client-response";
 export { DefaultChatClient } from "./default-chat-client";
 export { DefaultChatClientBuilder } from "./default-chat-client-builder";
+export { DefaultChatClientUtils } from "./default-chat-client-utils";
 export * from "./observation";
 export { ResponseEntity } from "./response-entity";

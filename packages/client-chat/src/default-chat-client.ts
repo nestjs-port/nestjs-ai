@@ -10,15 +10,10 @@ import {
   type ChatModel,
   type ChatOptions,
   type ChatResponse,
-  DefaultToolCallingChatOptions,
   type Message,
   Prompt,
-  PromptTemplate,
   type StructuredOutputConverter,
-  SystemMessage,
   type ToolCallback,
-  type ToolCallingChatOptions,
-  UserMessage,
 } from "@nestjs-ai/model";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { Observable } from "rxjs";
@@ -36,8 +31,9 @@ import {
 import { ChatClient } from "./chat-client";
 import { ChatClientAttributes } from "./chat-client-attributes";
 import { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
-import { ChatClientRequest } from "./chat-client-request";
+import type { ChatClientRequest } from "./chat-client-request";
 import { ChatClientResponse } from "./chat-client-response";
+import { DefaultChatClientUtils } from "./default-chat-client-utils";
 import {
   ChatClientObservationContext,
   type ChatClientObservationConvention,
@@ -739,6 +735,70 @@ export namespace DefaultChatClient {
       this._advisorObservationConvention = advisorObservationConvention ?? null;
     }
 
+    get userText(): string | null {
+      return this._userText;
+    }
+
+    get userParams(): Map<string, unknown> {
+      return this._userParams;
+    }
+
+    get userMetadata(): Map<string, unknown> {
+      return this._userMetadata;
+    }
+
+    get systemText(): string | null {
+      return this._systemText;
+    }
+
+    get systemParams(): Map<string, unknown> {
+      return this._systemParams;
+    }
+
+    get systemMetadata(): Map<string, unknown> {
+      return this._systemMetadata;
+    }
+
+    get chatOptions(): ChatOptions | null {
+      return this._chatOptions;
+    }
+
+    getAdvisors(): Advisor[] {
+      return this._advisors;
+    }
+
+    get advisorParams(): Map<string, unknown> {
+      return this._advisorParams;
+    }
+
+    getMessages(): Message[] {
+      return this._messages;
+    }
+
+    get media(): Media[] {
+      return this._media;
+    }
+
+    getToolNames(): string[] {
+      return this._toolNames;
+    }
+
+    getToolCallbacks(): ToolCallback[] {
+      return this._toolCallbacks;
+    }
+
+    get toolCallbackProviders(): ChatClient.ToolCallbackProvider[] {
+      return this._toolCallbackProviders;
+    }
+
+    getToolContext(): Map<string, unknown> {
+      return this._toolContext;
+    }
+
+    getTemplateRenderer(): TemplateRenderer {
+      return this._templateRenderer;
+    }
+
     mutate(): ChatClient.Builder {
       const builder = ChatClient.builder(
         this._chatModel,
@@ -1035,7 +1095,7 @@ export namespace DefaultChatClient {
     call(): ChatClient.CallResponseSpec {
       const advisorChain = this.buildAdvisorChain();
       return new DefaultCallResponseSpec(
-        this.toChatClientRequest(),
+        DefaultChatClientUtils.toChatClientRequest(this),
         advisorChain,
         this._observationRegistry,
         this._chatClientObservationConvention,
@@ -1045,7 +1105,7 @@ export namespace DefaultChatClient {
     stream(): ChatClient.StreamResponseSpec {
       const advisorChain = this.buildAdvisorChain();
       return new DefaultStreamResponseSpec(
-        this.toChatClientRequest(),
+        DefaultChatClientUtils.toChatClientRequest(this),
         advisorChain,
         this._observationRegistry,
         this._chatClientObservationConvention,
@@ -1061,105 +1121,6 @@ export namespace DefaultChatClient {
         .pushAll(this._advisors)
         .build();
     }
-
-    private toChatClientRequest(): ChatClientRequest {
-      const processedMessages: Message[] = [];
-
-      let processedSystemText = this._systemText;
-      if (hasText(processedSystemText)) {
-        if (this._systemParams.size > 0) {
-          processedSystemText = PromptTemplate.builder()
-            .template(processedSystemText)
-            .variables(mapToRecord(this._systemParams))
-            .renderer(this._templateRenderer)
-            .build()
-            .render();
-        }
-        processedMessages.push(
-          new SystemMessage({
-            content: processedSystemText,
-            properties: mapToRecord(this._systemMetadata),
-          }),
-        );
-      }
-
-      if (this._messages.length > 0) {
-        processedMessages.push(...this._messages);
-      }
-
-      let processedUserText = this._userText;
-      if (hasText(processedUserText)) {
-        if (this._userParams.size > 0) {
-          processedUserText = PromptTemplate.builder()
-            .template(processedUserText)
-            .variables(mapToRecord(this._userParams))
-            .renderer(this._templateRenderer)
-            .build()
-            .render();
-        }
-        processedMessages.push(
-          new UserMessage({
-            content: processedUserText,
-            media: [...this._media],
-            properties: mapToRecord(this._userMetadata),
-          }),
-        );
-      }
-
-      let processedChatOptions = this._chatOptions;
-      if (
-        this._toolNames.length > 0 ||
-        this._toolCallbacks.length > 0 ||
-        this._toolCallbackProviders.length > 0 ||
-        this._toolContext.size > 0
-      ) {
-        if (processedChatOptions == null) {
-          processedChatOptions = new DefaultToolCallingChatOptions();
-        }
-      }
-
-      if (
-        processedChatOptions &&
-        this.isToolCallingChatOptions(processedChatOptions)
-      ) {
-        if (this._toolNames.length > 0) {
-          processedChatOptions.toolNames = new Set(this._toolNames);
-        }
-
-        const allToolCallbacks = [...this._toolCallbacks];
-        for (const provider of this._toolCallbackProviders) {
-          allToolCallbacks.push(...provider.toolCallbacks);
-        }
-
-        if (allToolCallbacks.length > 0) {
-          processedChatOptions.toolCallbacks = [...allToolCallbacks];
-        }
-
-        if (this._toolContext.size > 0) {
-          processedChatOptions.toolContext = mapToRecord(this._toolContext);
-        }
-      }
-
-      const promptBuilder = Prompt.builder().messages(processedMessages);
-      if (processedChatOptions != null) {
-        promptBuilder.chatOptions(processedChatOptions);
-      }
-
-      return ChatClientRequest.builder()
-        .prompt(promptBuilder.build())
-        .context(new Map(this._advisorParams))
-        .build();
-    }
-
-    private isToolCallingChatOptions(
-      options: ChatOptions,
-    ): options is ToolCallingChatOptions {
-      return (
-        "toolCallbacks" in options &&
-        "toolNames" in options &&
-        "toolContext" in options
-      );
-    }
   }
 }
 
@@ -1173,12 +1134,4 @@ function readBufferText(
 ): string {
   assert(charset !== null, "charset cannot be null");
   return text.toString(charset ?? "utf-8");
-}
-
-function mapToRecord(map: Map<string, unknown>): Record<string, unknown> {
-  const record: Record<string, unknown> = {};
-  for (const [key, value] of map.entries()) {
-    record[key] = value;
-  }
-  return record;
 }

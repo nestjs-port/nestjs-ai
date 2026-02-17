@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { ModelOptions, ModelRequest } from "../../model";
+import type { ModelRequest } from "../../model";
 import {
   AssistantMessage,
   type Message,
@@ -99,7 +99,7 @@ export class Prompt implements ModelRequest<Message[]> {
    * Get the chat options.
    * @returns The {@link ChatOptions} or null if not set.
    */
-  get options(): ModelOptions | null {
+  get options(): ChatOptions | null {
     return this.chatOptions;
   }
 

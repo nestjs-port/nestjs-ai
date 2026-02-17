@@ -24,3 +24,7 @@ export {
   StructuredOutputValidationAdvisor,
   type StructuredOutputValidationAdvisorProps,
 } from "./structured-output-validation-advisor";
+export {
+  ToolCallAdvisor,
+  type ToolCallAdvisorProps,
+} from "./tool-call-advisor";

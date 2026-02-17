@@ -132,10 +132,11 @@ When committing changes, follow these steps:
 
 - **Always check git status first** before committing
 - **Always assess whether changes should be split into multiple commits** before staging everything
-- **Prefer multiple small commits for independent logical units**, but use one commit if there is no clear split
-- **Ask for confirmation** if there are unstaged changes - ask if user wants to stage them
+- **Default behavior**: If the user says "commit" without a file scope, treat all current repository changes (staged, unstaged, and untracked) as commit candidates
+- **Do not force a single commit for all candidates**: Split into multiple commits when logical units are separable; use one commit only when split is not meaningful
+- **Only ask for scope confirmation** when the user explicitly indicates a partial commit, file-specific commit, or when the target repository is ambiguous
 - **Use `git commit -m` for subject and `-m` for body** (multiple `-m` flags create multi-line commit)
-- **If no changes are staged**, ask user if they want to stage all changes or specific files
+- **If no changes are staged**, stage all changes by default (`git add -A`) and then split/stage per logical unit as needed, unless the user asked for a partial commit
 - **Never force push** or perform destructive git operations without explicit user request
 
 ## Special Cases

@@ -6,7 +6,7 @@ import {
   SpringAiKind,
   StringUtils,
 } from "@nestjs-ai/commons";
-import type { ToolCallingChatOptions } from "@nestjs-ai/model";
+import { ChatMemory, type ToolCallingChatOptions } from "@nestjs-ai/model";
 import type { ChatClientObservationContext } from "./chat-client-observation-context";
 import { ChatClientObservationConvention } from "./chat-client-observation-convention";
 
@@ -102,7 +102,7 @@ export class DefaultChatClientObservationConvention extends ChatClientObservatio
     }
 
     const conversationId = context.request.context.get(
-      "chat_memory_conversation_id",
+      ChatMemory.CONVERSATION_ID,
     );
     if (!StringUtils.hasText(conversationId)) {
       return keyValues;

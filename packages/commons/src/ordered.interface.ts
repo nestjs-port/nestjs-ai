@@ -1,7 +1,7 @@
 /**
  * `Ordered` can be implemented by objects that should be orderable, for example in a collection.
  *
- * The actual {@link getOrder} value can be interpreted as prioritization:
+ * The actual {@link order} value can be interpreted as prioritization:
  * the first object (with the lowest order value) has the highest priority.
  *
  * Higher values are interpreted as lower priority. Same order values result in

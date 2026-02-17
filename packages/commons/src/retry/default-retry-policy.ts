@@ -1,7 +1,7 @@
 import type { Milliseconds } from "../temporal";
 import type { BackOff } from "./back-off.interface";
 import { RetryPolicy } from "./retry-policy";
-import { ExceptionTypeFilter } from "./support/exception-type-filter";
+import { ExceptionTypeFilter } from "./support";
 
 /**
  * Default {@link RetryPolicy} created by {@link RetryPolicyBuilder}.

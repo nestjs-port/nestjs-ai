@@ -122,6 +122,9 @@ importers:
 
   packages/models/openai:
     devDependencies:
+      '@nestjs-ai/client-chat':
+        specifier: workspace:*
+        version: link:../../client-chat
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../commons

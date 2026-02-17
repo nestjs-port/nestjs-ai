@@ -5,6 +5,7 @@ import {
   SpringAiKind,
 } from "@nestjs-ai/commons";
 import {
+  ChatMemory,
   DefaultToolCallingChatOptions,
   DefaultToolDefinition,
   Prompt,
@@ -107,7 +108,7 @@ describe("DefaultChatClientObservationConvention", () => {
       .build();
     const request = ChatClientRequest.builder()
       .prompt(new Prompt("Hello", options))
-      .context("chat_memory_conversation_id", "007")
+      .context(ChatMemory.CONVERSATION_ID, "007")
       .build();
     const context = ChatClientObservationContext.builder()
       .request(request)

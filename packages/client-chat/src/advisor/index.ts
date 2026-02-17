@@ -6,5 +6,9 @@ export {
   DefaultAroundAdvisorChain,
   DefaultAroundAdvisorChainBuilder,
 } from "./default-around-advisor-chain";
+export {
+  MessageChatMemoryAdvisor,
+  type MessageChatMemoryAdvisorProps,
+} from "./message-chat-memory-advisor";
 export * from "./observation";
 export { SimpleLoggerAdvisor } from "./simple-logger-advisor";

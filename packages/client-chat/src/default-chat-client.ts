@@ -19,6 +19,7 @@ import {
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { Observable } from "rxjs";
 import { filter, map } from "rxjs";
+import type { z } from "zod";
 import type {
   Advisor,
   AdvisorObservationConvention,
@@ -93,6 +94,8 @@ export class DefaultChatClient implements ChatClient {
 }
 
 export namespace DefaultChatClient {
+  type ZodObjectSchema = z.ZodObject<z.ZodRawShape>;
+
   const DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION: ChatClientObservationConvention =
     new DefaultChatClientObservationConvention();
 
@@ -375,30 +378,25 @@ export namespace DefaultChatClient {
       this._observationConvention = observationConvention;
     }
 
-    responseEntity<T>(
-      type: ChatClient.Type<T>,
-      options: { isArray: true },
-    ): Promise<ResponseEntity<ChatResponse, T[]>>;
-    responseEntity<T>(
-      type: ChatClient.Type<T>,
-      options?: ChatClient.EntityOptions,
-    ): Promise<ResponseEntity<ChatResponse, T>>;
+    responseEntity<TSchema extends ZodObjectSchema>(
+      schema: TSchema,
+      outputType?: ChatClient.Type<z.infer<TSchema>>,
+    ): Promise<ResponseEntity<ChatResponse, z.infer<TSchema>>>;
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;
-    async responseEntity<T>(
-      typeOrConverter: ChatClient.Type<T> | StructuredOutputConverter<T>,
-      _options?: ChatClient.EntityOptions,
-    ): Promise<
-      ResponseEntity<ChatResponse, T> | ResponseEntity<ChatResponse, T[]>
-    > {
-      if (typeof typeOrConverter === "function") {
-        const converter = new BeanOutputConverter(
-          typeOrConverter as unknown as ChatClient.Type<never>,
-        );
-        return await this.doResponseEntity(converter);
+    async responseEntity(
+      schemaOrConverter: ZodObjectSchema | StructuredOutputConverter<unknown>,
+      outputType?: ChatClient.Type<unknown>,
+    ): Promise<ResponseEntity<ChatResponse, unknown>> {
+      if (this.isStructuredOutputConverter(schemaOrConverter)) {
+        return await this.doResponseEntity(schemaOrConverter);
       }
-      return await this.doResponseEntity(typeOrConverter);
+      const converter = new BeanOutputConverter({
+        schema: schemaOrConverter,
+        outputType: outputType as never,
+      });
+      return await this.doResponseEntity(converter);
     }
 
     private async doResponseEntity<T>(
@@ -422,27 +420,37 @@ export namespace DefaultChatClient {
       return new ResponseEntity<ChatResponse, T>(chatResponse, entity);
     }
 
-    entity<T>(
-      type: ChatClient.Type<T>,
-      options: { isArray: true },
-    ): Promise<T[] | null>;
+    entity<TSchema extends ZodObjectSchema>(
+      schema: TSchema,
+      outputType?: ChatClient.Type<z.infer<TSchema>>,
+    ): Promise<z.infer<TSchema> | null>;
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
-    entity<T>(
-      type: ChatClient.Type<T>,
-      options?: ChatClient.EntityOptions,
-    ): Promise<T | null>;
-    async entity<T>(
-      typeOrConverter: ChatClient.Type<T> | StructuredOutputConverter<T>,
-    ): Promise<T | T[] | null> {
-      if (typeof typeOrConverter === "function") {
-        const converter = new BeanOutputConverter(
-          typeOrConverter as unknown as ChatClient.Type<never>,
-        );
-        return this.doEntity(converter);
+    async entity(
+      schemaOrConverter: ZodObjectSchema | StructuredOutputConverter<unknown>,
+      outputType?: ChatClient.Type<unknown>,
+    ): Promise<unknown | null> {
+      if (this.isStructuredOutputConverter(schemaOrConverter)) {
+        return this.doEntity(schemaOrConverter);
       }
-      return this.doEntity(typeOrConverter);
+
+      const converter = new BeanOutputConverter({
+        schema: schemaOrConverter,
+        outputType: outputType as never,
+      });
+      return this.doEntity(converter);
+    }
+
+    private isStructuredOutputConverter(
+      value: ZodObjectSchema | StructuredOutputConverter<unknown>,
+    ): value is StructuredOutputConverter<unknown> {
+      return (
+        typeof value === "object" &&
+        value !== null &&
+        "convert" in value &&
+        typeof value.convert === "function"
+      );
     }
 
     private async doEntity<T>(

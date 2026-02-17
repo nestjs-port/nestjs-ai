@@ -47,6 +47,9 @@ importers:
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2
+      zod:
+        specifier: 4.3.6
+        version: 4.3.6
 
   packages/commons:
     dependencies:
@@ -100,6 +103,9 @@ importers:
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2
+      zod:
+        specifier: 4.3.6
+        version: 4.3.6
 
   packages/models/google-genai:
     dependencies:
@@ -1508,6 +1514,9 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@biomejs/biome@2.3.10':
@@ -2694,3 +2703,5 @@ snapshots:
   ws@8.19.0: {}
 
   yaml@2.8.2: {}
+
+  zod@4.3.6: {}

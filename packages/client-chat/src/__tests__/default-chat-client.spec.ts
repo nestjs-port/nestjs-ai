@@ -24,6 +24,7 @@ import {
 import { TestObservationRegistry } from "@nestjs-ai/testing";
 import { defaultIfEmpty, lastValueFrom, type Observable, of } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 
 import type { Advisor, BaseAdvisorChain } from "../advisor";
 import { SimpleLoggerAdvisor } from "../advisor";
@@ -39,6 +40,10 @@ class Person {
 class InputType {
   input = "";
 }
+
+const PersonSchema = z.object({
+  name: z.string(),
+});
 
 function asRequestSpec(
   spec: ChatClient.ChatClientRequestSpec,
@@ -998,7 +1003,7 @@ describe("DefaultChatClient", () => {
         asRequestSpec(chatClient.prompt("my question"))
           .call()
           .responseEntity(null as unknown as ListOutputConverter),
-      ).rejects.toThrow("structuredOutputConverter cannot be null");
+      ).rejects.toThrow("Schema cannot be null");
     });
 
     it("when response entity with converter and chat response content null", async () => {
@@ -1034,8 +1039,8 @@ describe("DefaultChatClient", () => {
       await expect(
         asRequestSpec(chatClient.prompt("my question"))
           .call()
-          .responseEntity(null as unknown as ChatClient.Type<string>),
-      ).rejects.toThrow("structuredOutputConverter cannot be null");
+          .responseEntity(null as unknown as z.ZodObject<z.ZodRawShape>),
+      ).rejects.toThrow("Schema cannot be null");
     });
 
     it("when response entity with type", async () => {
@@ -1047,7 +1052,7 @@ describe("DefaultChatClient", () => {
         chatClient.prompt("my question"),
       )
         .call()
-        .responseEntity(Person);
+        .responseEntity(PersonSchema, Person);
       expect(responseEntity.response).not.toBeNull();
       expect(responseEntity.entity).not.toBeNull();
       expect(responseEntity.entity?.name).toBe("James Bond");
@@ -1061,7 +1066,7 @@ describe("DefaultChatClient", () => {
         asRequestSpec(chatClient.prompt("my question"))
           .call()
           .entity(null as unknown as ListOutputConverter),
-      ).rejects.toThrow("structuredOutputConverter cannot be null");
+      ).rejects.toThrow("Schema cannot be null");
     });
 
     it("when entity with converter and chat response content null", async () => {
@@ -1091,8 +1096,8 @@ describe("DefaultChatClient", () => {
       await expect(
         asRequestSpec(chatClient.prompt("my question"))
           .call()
-          .entity(null as unknown as ChatClient.Type<string>),
-      ).rejects.toThrow("structuredOutputConverter cannot be null");
+          .entity(null as unknown as z.ZodObject<z.ZodRawShape>),
+      ).rejects.toThrow("Schema cannot be null");
     });
 
     it("when entity with type and chat response content null", async () => {
@@ -1100,7 +1105,7 @@ describe("DefaultChatClient", () => {
       const chatClient = new DefaultChatClientBuilder(chatModel).build();
       const entity = await asRequestSpec(chatClient.prompt("my question"))
         .call()
-        .entity(String);
+        .entity(PersonSchema);
       expect(entity).toBeNull();
     });
 
@@ -1111,7 +1116,7 @@ describe("DefaultChatClient", () => {
       const chatClient = new DefaultChatClientBuilder(chatModel).build();
       const entity = await asRequestSpec(chatClient.prompt("my question"))
         .call()
-        .entity(Person);
+        .entity(PersonSchema, Person);
       expect(entity).not.toBeNull();
       expect((entity as Person).name).toBe("James Bond");
     });

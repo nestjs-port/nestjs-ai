@@ -1126,7 +1126,7 @@ describe("DefaultChatClient", () => {
 
     it("when entity schema type is invalid then fails at compile time", () => {
       const entity =
-        undefined as unknown as ChatClient.CallResponseSpec["entity"];
+        (() => {}) as unknown as ChatClient.CallResponseSpec["entity"];
 
       // @ts-expect-error schema must be a JSON Schema object, not a raw JSON array
       entity([]);

@@ -81,7 +81,7 @@ export function googleGenAiChatModelFactory(
 
   return {
     providers,
-  };
+  } as ChatModelFactory;
 }
 
 function buildClient(properties: GoogleGenAiConnectionProperties): GoogleGenAI {

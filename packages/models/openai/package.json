@@ -27,6 +27,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/retry": "workspace:*",
+    "@nestjs-ai/testing": "workspace:*",
     "rxjs": "^7.0.0"
   }
 }

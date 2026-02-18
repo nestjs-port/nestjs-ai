@@ -239,4 +239,32 @@ Used by some models
       );
     });
   });
+
+  describe("type constraints", () => {
+    it("rejects invalid schema types at compile time", () => {
+      // @ts-expect-error schema must be a JSON Schema object, not a raw JSON array
+      new BeanOutputConverter({ schema: [] });
+
+      // @ts-expect-error non-JSON zod schema is not supported
+      new BeanOutputConverter({ schema: z.string() });
+
+      // @ts-expect-error zod array items must be JSON object schemas
+      new BeanOutputConverter({ schema: z.array(z.string()) });
+
+      new BeanOutputConverter({
+        schema: {
+          // @ts-expect-error invalid JSON Schema type literal
+          type: "not-a-valid-json-schema-type",
+        },
+      });
+
+      new BeanOutputConverter({
+        schema: {
+          type: "object",
+          // @ts-expect-error invalid JSON Schema required keyword
+          required: "someString",
+        },
+      });
+    });
+  });
 });

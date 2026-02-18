@@ -1,9 +1,4 @@
-import type {
-  DynamicModule,
-  InjectionToken,
-  ModuleMetadata,
-  Provider,
-} from "@nestjs/common";
+import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import {
   type ChatClientConfiguration,
@@ -11,6 +6,7 @@ import {
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
+  type ObservationConfiguration,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
 import type { NestAIModuleOptions } from "./nest-ai-module.options";
@@ -38,6 +34,11 @@ export class NestAIModule {
       exports,
       options.chatClient,
     );
+    NestAIModule.registerConfigurationProviders(
+      providers,
+      exports,
+      options.observation,
+    );
 
     LoggerFactory.bind(new NestLoggerFactory());
 
@@ -52,7 +53,10 @@ export class NestAIModule {
   private static registerConfigurationProviders(
     providers: Provider[],
     exports: InjectionToken[],
-    configuration?: ChatModelConfiguration | ChatClientConfiguration,
+    configuration?:
+      | ChatModelConfiguration
+      | ChatClientConfiguration
+      | ObservationConfiguration,
   ): void {
     if (configuration == null) {
       return;

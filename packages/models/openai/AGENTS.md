@@ -13,7 +13,7 @@
 
 ## API Patterns
 - Model implementation: `packages/models/openai/src/open-ai-chat-model.ts`
-- Factory wiring: `packages/models/openai/src/open-ai-chat-model-factory.ts`
+- Factory wiring: `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts`
 - API client layer: `packages/models/openai/src/api/open-ai-api.ts`
 - DTO/types mapping: `packages/models/openai/src/api/open-ai-api.types.ts`
 - Constants: `packages/models/openai/src/api/common/open-ai-api-constants.ts`
@@ -22,7 +22,7 @@
 ## Patterns & Conventions
 - DO: translate provider payloads in `src/api/` before domain mapping.
 - DO: keep retry + observation logic inside `open-ai-chat-model.ts`.
-- DO: keep factory dependency injection in `open-ai-chat-model-factory.ts`.
+- DO: keep factory dependency injection in `autoconfigure/open-ai-chat-model-auto-configuration.ts`.
 - DO: keep response header parsing in `src/metadata/support/`.
 - DO: keep binary fixtures test-only (example: `packages/models/openai/src/api/__tests__/speech1.mp3`).
 - DON'T: leak raw API DTOs from `packages/models/openai/src/api/open-ai-api.types.ts` into top-level exports in `packages/models/openai/src/index.ts`.
@@ -31,7 +31,7 @@
 ## Key Files
 - Entry barrel: `packages/models/openai/src/index.ts`
 - Chat model: `packages/models/openai/src/open-ai-chat-model.ts`
-- Factory: `packages/models/openai/src/open-ai-chat-model-factory.ts`
+- Factory: `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts`
 - API client: `packages/models/openai/src/api/open-ai-api.ts`
 - Header extractor: `packages/models/openai/src/metadata/support/open-ai-response-header-extractor.ts`
 

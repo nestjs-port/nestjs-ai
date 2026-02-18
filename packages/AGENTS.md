@@ -14,7 +14,7 @@
 ## Patterns & Conventions
 - DO: keep public exports in package barrel files like `packages/model/src/index.ts` and `packages/commons/src/index.ts`.
 - DO: colocate tests in `__tests__` folders, e.g. `packages/client-chat/src/__tests__/default-chat-client-builder.spec.ts`.
-- DO: use package-level factory/builder entry points, e.g. `packages/models/openai/src/open-ai-chat-model-factory.ts`.
+- DO: use package-level factory/builder entry points, e.g. `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts`.
 - DO: keep cross-cutting tokens/constants in shared packages (`packages/commons/src/constant/tokens.ts`).
 - DON'T: edit generated outputs in `packages/*/dist/**` (example: `packages/model/dist/index.js`).
 - DON'T: place production source inside test-only folders like `packages/models/google-genai/src/cache/__tests__/`.

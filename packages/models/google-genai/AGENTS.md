@@ -13,7 +13,7 @@
 
 ## API Patterns
 - Model implementation: `packages/models/google-genai/src/google-gen-ai-chat-model.ts`
-- Factory wiring: `packages/models/google-genai/src/google-gen-ai-chat-model-factory.ts`
+- Factory wiring: `packages/models/google-genai/src/autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`
 - Cache service: `packages/models/google-genai/src/cache/google-gen-ai-cached-content-service.ts`
 - Schema conversion: `packages/models/google-genai/src/schema/json-schema-converter.ts`
 - Tool-calling adapter: `packages/models/google-genai/src/schema/google-genai-tool-calling-manager.ts`
@@ -23,7 +23,7 @@
 - DO: keep provider enums/constants under `packages/models/google-genai/src/common/`.
 - DO: keep cache request/response contracts in `packages/models/google-genai/src/cache/`.
 - DO: convert schema/tool wiring in `packages/models/google-genai/src/schema/`.
-- DO: keep factory client-mode split (API key vs Vertex) in `google-gen-ai-chat-model-factory.ts`.
+- DO: keep factory client-mode split (API key vs Vertex) in `autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`.
 - DO: isolate test helpers in `packages/models/google-genai/src/cache/__tests__/test-google-gen-ai-cached-content-service.ts`.
 - DON'T: move test helper `packages/models/google-genai/src/cache/__tests__/test-google-gen-ai-cached-content-service.ts` into production root like `packages/models/google-genai/src/cache/google-gen-ai-cached-content-service.ts`.
 - DON'T: edit generated output under `packages/models/google-genai/dist/**`.
@@ -31,7 +31,7 @@
 ## Key Files
 - Entry barrel: `packages/models/google-genai/src/index.ts`
 - Chat model: `packages/models/google-genai/src/google-gen-ai-chat-model.ts`
-- Factory: `packages/models/google-genai/src/google-gen-ai-chat-model-factory.ts`
+- Factory: `packages/models/google-genai/src/autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`
 - Cache service: `packages/models/google-genai/src/cache/google-gen-ai-cached-content-service.ts`
 - Tool schema manager: `packages/models/google-genai/src/schema/google-genai-tool-calling-manager.ts`
 

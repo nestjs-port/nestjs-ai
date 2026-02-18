@@ -1,5 +1,5 @@
 import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
-import { Module } from "@nestjs/common";
+import { Module, Scope } from "@nestjs/common";
 import {
   type ChatClientConfiguration,
   type ChatModelConfiguration,
@@ -62,13 +62,32 @@ export class NestAIModule {
       return;
     }
 
-    for (const { token, useFactory, inject } of configuration.providers) {
+    for (const provider of configuration.providers) {
+      const scope =
+        "scope" in provider
+          ? NestAIModule.toProviderScope(provider.scope)
+          : undefined;
+
       providers.push({
-        provide: token as InjectionToken,
-        useFactory,
-        inject: (inject ?? []) as InjectionToken[],
+        provide: provider.token as InjectionToken,
+        useFactory: provider.useFactory,
+        inject: (provider.inject ?? []) as InjectionToken[],
+        scope,
       });
-      exports.push(token as InjectionToken);
+      exports.push(provider.token as InjectionToken);
+    }
+  }
+
+  private static toProviderScope(scope: unknown): Scope | undefined {
+    switch (scope) {
+      case "DEFAULT":
+        return Scope.DEFAULT;
+      case "TRANSIENT":
+        return Scope.TRANSIENT;
+      case "REQUEST":
+        return Scope.REQUEST;
+      default:
+        return undefined;
     }
   }
 }

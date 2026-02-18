@@ -1,10 +1,8 @@
+import type { ProviderConfiguration } from "./provider-configuration.type";
+
 declare const OBSERVATION_CONFIGURATION_BRAND: unique symbol;
 
 export interface ObservationConfiguration {
-  providers: {
-    token: unknown;
-    useFactory: (...args: never[]) => unknown;
-    inject?: unknown[];
-  }[];
+  providers: ProviderConfiguration[];
   readonly [OBSERVATION_CONFIGURATION_BRAND]: true;
 }

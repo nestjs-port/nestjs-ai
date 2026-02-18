@@ -8,8 +8,6 @@ import type { IdGenerator } from "./id";
 import { RandomIdGenerator } from "./id";
 import { MetadataMode } from "./metadata-mode";
 
-export { MetadataMode } from "./metadata-mode";
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === "object" && !Array.isArray(value);
 }

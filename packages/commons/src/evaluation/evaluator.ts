@@ -5,7 +5,9 @@ import type { EvaluationRequest } from "./evaluation-request";
 import type { EvaluationResponse } from "./evaluation-response";
 
 export abstract class Evaluator {
-  abstract evaluate(evaluationRequest: EvaluationRequest): EvaluationResponse;
+  abstract evaluate(
+    evaluationRequest: EvaluationRequest,
+  ): Promise<EvaluationResponse>;
 
   protected doGetSupportingData(evaluationRequest: EvaluationRequest): string {
     return evaluationRequest.dataList

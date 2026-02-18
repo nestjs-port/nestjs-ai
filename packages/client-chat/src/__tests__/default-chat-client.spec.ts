@@ -1123,6 +1123,33 @@ describe("DefaultChatClient", () => {
       expect(entity).not.toBeNull();
       expect((entity as Person).name).toBe("James Bond");
     });
+
+    it("when entity schema type is invalid then fails at compile time", () => {
+      const entity =
+        undefined as unknown as ChatClient.CallResponseSpec["entity"];
+
+      // @ts-expect-error schema must be a JSON Schema object, not a raw JSON array
+      entity([]);
+
+      // @ts-expect-error non-JSON zod schema is not supported
+      entity(z.string());
+
+      // @ts-expect-error zod array items must be JSON object schemas
+      entity(z.array(z.string()));
+
+      entity({
+        // @ts-expect-error invalid JSON Schema type literal
+        type: "not-a-valid-json-schema-type",
+      });
+
+      // @ts-expect-error invalid JSON Schema required keyword
+      entity({
+        type: "object",
+        required: "name",
+      });
+
+      expect(true).toBe(true);
+    });
   });
 
   describe("DefaultStreamResponseSpec", () => {

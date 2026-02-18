@@ -4,7 +4,7 @@ import {
   EvaluationResponse,
   Evaluator,
 } from "@nestjs-ai/commons";
-import type { ChatClient } from "../../chat-client";
+import type { ChatClient } from "../chat-client";
 
 export interface FactCheckingEvaluatorProps {
   chatClientBuilder: ChatClient.Builder;

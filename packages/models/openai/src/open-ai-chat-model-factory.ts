@@ -57,7 +57,7 @@ export function openAiChatModelFactory(
         ],
       },
     ],
-  };
+  } as ChatModelFactory;
 }
 
 function buildApi(

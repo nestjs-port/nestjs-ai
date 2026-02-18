@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { Media, MediaFormat } from "../../content";
 import type { ContentFormatter } from "../content-formatter.interface";
-import { Document, MetadataMode } from "../document";
+import { Document } from "../document";
 import type { IdGenerator } from "../id";
+import { MetadataMode } from "../metadata-mode";
 
 function getMedia(): Media {
   return new Media({

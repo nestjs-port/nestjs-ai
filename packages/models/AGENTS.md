@@ -12,20 +12,20 @@
 
 ## Patterns & Conventions
 - DO: keep OpenAI API translation under `packages/models/openai/src/api/`.
-- DO: keep factory entry points in `packages/models/openai/src/open-ai-chat-model-factory.ts` and `packages/models/google-genai/src/google-gen-ai-chat-model-factory.ts`.
+- DO: keep factory entry points in `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts` and `packages/models/google-genai/src/autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`.
 - DO: keep metadata extraction in `packages/models/openai/src/metadata/` and `packages/models/google-genai/src/metadata/`.
 - DO: preserve shared `ChatModel` contract usage as seen in `packages/models/openai/src/open-ai-chat-model.ts` and `packages/models/google-genai/src/google-gen-ai-chat-model.ts`.
 - DON'T: mix OpenAI DTOs from `packages/models/openai/src/api/open-ai-api.types.ts` into Google provider files like `packages/models/google-genai/src/google-gen-ai-chat-model.ts`.
 - DON'T: edit generated artifacts in `packages/models/*/dist/**`.
 
 ## Key Files
-- OpenAI factory: `packages/models/openai/src/open-ai-chat-model-factory.ts`
+- OpenAI factory: `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts`
 - OpenAI model: `packages/models/openai/src/open-ai-chat-model.ts`
-- Google factory: `packages/models/google-genai/src/google-gen-ai-chat-model-factory.ts`
+- Google factory: `packages/models/google-genai/src/autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`
 - Google model: `packages/models/google-genai/src/google-gen-ai-chat-model.ts`
 
 ## JIT Index Hints
-- Find provider factories: `rg -n "chat-model-factory|ChatModelFactory" packages/models/*/src`
+- Find provider factories: `rg -n "chat-model-auto-configuration|ChatModelFactory" packages/models/*/src`
 - Find provider options: `rg -n "ChatOptions|Properties" packages/models/*/src`
 - Find tool-calling integration: `rg -n "ToolCalling|tool" packages/models/*/src`
 - Find tests: `find packages/models -path "*/__tests__/*.spec.ts"`

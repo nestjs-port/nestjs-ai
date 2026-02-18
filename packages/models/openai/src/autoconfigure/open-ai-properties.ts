@@ -5,7 +5,7 @@
  * Represents the full configuration available under `spring.ai.openai.*`
  */
 
-import type { OpenAiChatOptions } from "./open-ai-chat-options";
+import type { OpenAiChatOptions } from "../open-ai-chat-options";
 
 // ============================================================
 // Parent Properties (spring.ai.openai)

@@ -22,7 +22,7 @@
 - Entry barrel: `packages/core/src/index.ts`
 - Main module: `packages/core/src/module/nest-ai.module.ts`
 - Module options: `packages/core/src/module/nest-ai-module.options.ts`
-- Inject decorator: `packages/core/src/decorators/inject-chat-model.decorator.ts`
+- Inject decorator: `packages/core/src/decorators/inject-tokens.decorator.ts`
 - Nest logger bridge: `packages/core/src/logging/nest-logger-factory.ts`
 
 ## JIT Index Hints

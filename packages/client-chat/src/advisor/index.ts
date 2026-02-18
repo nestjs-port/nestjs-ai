@@ -6,6 +6,7 @@ export {
   DefaultAroundAdvisorChain,
   DefaultAroundAdvisorChainBuilder,
 } from "./default-around-advisor-chain";
+export { LastMaxTokenSizeContentPurger } from "./last-max-token-size-content-purger";
 export {
   MessageChatMemoryAdvisor,
   type MessageChatMemoryAdvisorProps,

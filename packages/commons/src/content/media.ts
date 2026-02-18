@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 /**
  * Common media formats.
@@ -166,7 +166,7 @@ export class Media {
 
   private static generateDefaultName(mimeType: string): string {
     const subtype = mimeType.split("/")[1] || "unknown";
-    return `${Media.NAME_PREFIX}${subtype}-${uuidv4()}`;
+    return `${Media.NAME_PREFIX}${subtype}-${randomUUID()}`;
   }
 
   /**

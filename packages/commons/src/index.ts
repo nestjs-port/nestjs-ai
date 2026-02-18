@@ -1,6 +1,8 @@
 export * from "./constant";
 export * from "./content";
 export * from "./converter";
+export * from "./document";
+export * from "./evaluation";
 export * from "./factory";
 export * from "./logging";
 export * from "./observation";
@@ -8,5 +10,6 @@ export * from "./ordered.interface";
 export * from "./retry";
 export * from "./template";
 export * from "./temporal";
+export * from "./tokenizer";
 export * from "./util";
 export * from "./web";

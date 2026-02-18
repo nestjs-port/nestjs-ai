@@ -6,6 +6,8 @@ import type {
 } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import {
+  type ChatClientConfiguration,
+  type ChatModelConfiguration,
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
@@ -18,7 +20,7 @@ import type { NestAIModuleOptions } from "./nest-ai-module.options";
 export class NestAIModule {
   static forRoot(options: NestAIModuleOptions = {}): DynamicModule {
     const providers: Provider[] = [];
-    const exports: ModuleMetadata["exports"] = [];
+    const exports: InjectionToken[] = [];
 
     providers.push({
       provide: HTTP_CLIENT_TOKEN,
@@ -26,16 +28,16 @@ export class NestAIModule {
     });
     exports.push(HTTP_CLIENT_TOKEN);
 
-    if (options.chatModel) {
-      for (const { token, useFactory, inject } of options.chatModel.providers) {
-        providers.push({
-          provide: token as InjectionToken,
-          useFactory,
-          inject: (inject ?? []) as InjectionToken[],
-        });
-        exports.push(token as InjectionToken);
-      }
-    }
+    NestAIModule.registerConfigurationProviders(
+      providers,
+      exports,
+      options.chatModel,
+    );
+    NestAIModule.registerConfigurationProviders(
+      providers,
+      exports,
+      options.chatClient,
+    );
 
     LoggerFactory.bind(new NestLoggerFactory());
 
@@ -43,7 +45,26 @@ export class NestAIModule {
       module: NestAIModule,
       providers,
       exports,
-      global: true,
+      global: options.global ?? true,
     };
+  }
+
+  private static registerConfigurationProviders(
+    providers: Provider[],
+    exports: InjectionToken[],
+    configuration?: ChatModelConfiguration | ChatClientConfiguration,
+  ): void {
+    if (configuration == null) {
+      return;
+    }
+
+    for (const { token, useFactory, inject } of configuration.providers) {
+      providers.push({
+        provide: token as InjectionToken,
+        useFactory,
+        inject: (inject ?? []) as InjectionToken[],
+      });
+      exports.push(token as InjectionToken);
+    }
   }
 }

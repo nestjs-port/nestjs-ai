@@ -81,6 +81,7 @@ function createChatClientBuilderProviders(): ChatClientConfiguration["providers"
         { token: ChatClientObservationConvention, optional: true },
         { token: AdvisorObservationConvention, optional: true },
       ],
+      scope: "TRANSIENT",
     },
   ];
 }

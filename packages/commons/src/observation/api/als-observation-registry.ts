@@ -10,8 +10,9 @@ import type { ObservationScope } from "./observation-scope.interface";
  */
 export class AlsObservationRegistry implements ObservationRegistry {
   private readonly _handlers: ObservationHandler<ObservationContext>[] = [];
-  private readonly scopeStorage =
-    new AsyncLocalStorage<ObservationScope | null>();
+  private readonly scopeStorage = new AsyncLocalStorage<{
+    scope: ObservationScope | null;
+  }>();
 
   get handlers(): readonly ObservationHandler<ObservationContext>[] {
     return this._handlers;
@@ -26,11 +27,15 @@ export class AlsObservationRegistry implements ObservationRegistry {
   }
 
   get currentObservationScope(): ObservationScope | null {
-    return this.scopeStorage.getStore() ?? null;
+    return this.scopeStorage.getStore()?.scope ?? null;
   }
 
   set currentObservationScope(scope: ObservationScope | null) {
-    this.scopeStorage.enterWith(scope);
+    const store = this.scopeStorage.getStore();
+    if (!store) {
+      return;
+    }
+    store.scope = scope;
   }
 
   get currentObservation(): Observation<ObservationContext> | null {
@@ -38,7 +43,10 @@ export class AlsObservationRegistry implements ObservationRegistry {
     return scope?.currentObservation ?? null;
   }
 
-  runInScope<T>(scope: ObservationScope | null, fn: () => T): T {
-    return this.scopeStorage.run(scope, fn);
+  runInScope<T>(initialScope: ObservationScope, fn: () => T): T {
+    if (this.currentObservationScope != null) {
+      return fn();
+    }
+    return this.scopeStorage.run({ scope: initialScope }, fn);
   }
 }

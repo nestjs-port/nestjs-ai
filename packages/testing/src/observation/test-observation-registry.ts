@@ -66,8 +66,8 @@ export class TestObservationRegistry implements ObservationRegistry {
     return this.delegate.currentObservation;
   }
 
-  runInScope<T>(scope: ObservationScope | null, fn: () => T): T {
-    return this.delegate.runInScope(scope, fn);
+  runInScope<T>(initialScope: ObservationScope, fn: () => T): T {
+    return this.delegate.runInScope(initialScope, fn);
   }
 
   get contexts(): readonly TestObservationContext[] {

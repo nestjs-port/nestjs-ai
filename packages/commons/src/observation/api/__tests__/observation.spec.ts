@@ -5,6 +5,7 @@ import { KeyValue } from "../key-value";
 import { ObservationContext } from "../observation-context";
 import type { ObservationConvention } from "../observation-convention.interface";
 import type { ObservationHandler } from "../observation-handler.interface";
+import type { ObservationScope } from "../observation-scope.interface";
 import { SimpleObservation } from "../simple-observation";
 
 class TestConvention implements ObservationConvention<ObservationContext> {
@@ -39,6 +40,16 @@ function createObservation(
     () => context,
     registry,
   );
+}
+
+function createDummyScope(
+  previousObservationScope: ObservationScope | null = null,
+): ObservationScope {
+  return {
+    currentObservation: null as never,
+    previousObservationScope,
+    close() {},
+  };
 }
 
 describe("Observation", () => {
@@ -230,35 +241,46 @@ describe("Observation", () => {
     const parent = createObservation(registry);
     const child = createObservation(registry);
 
-    parent.start();
-    const parentScope = parent.openScope();
-    expect(registry.currentObservation).toBe(parent);
+    await registry.runInScope(createDummyScope(), async () => {
+      parent.start();
+      const parentScope = parent.openScope();
+      expect(registry.currentObservation).toBe(parent);
 
-    await firstValueFrom(child.observeStream(() => of(1)));
-    expect(registry.currentObservation).toBe(parent);
+      await firstValueFrom(child.observeStream(() => of(1)));
+      expect(registry.currentObservation).toBe(parent);
 
-    parentScope.close();
-    parent.stop();
-    expect(registry.currentObservation).toBeNull();
+      parentScope.close();
+      parent.stop();
+      expect(registry.currentObservation).toBeNull();
+    });
   });
 
-  it("should restore parent observation scope when nested", () => {
+  it("should restore parent observation scope when nested", async () => {
     const registry = new AlsObservationRegistry();
     const parent = createObservation(registry);
     const child = createObservation(registry);
 
-    parent.start();
-    const parentScope = parent.openScope();
-    expect(registry.currentObservation).toBe(parent);
+    const initialScope = createDummyScope();
+    await registry.runInScope(initialScope, async () => {
+      await parent.observe(async () => {
+        expect(registry.currentObservation).toBe(parent);
+        const parentScope = registry.currentObservationScope;
 
-    child.start();
-    const childScope = child.openScope();
-    expect(registry.currentObservation).toBe(child);
+        await child.observe(async () => {
+          expect(registry.currentObservation).toBe(child);
+          expect(registry.currentObservationScope).not.toBe(parentScope);
+          expect(
+            registry.currentObservationScope?.previousObservationScope,
+          ).toBe(parentScope);
+        });
 
-    childScope.close();
-    expect(registry.currentObservation).toBe(parent);
-
-    parentScope.close();
-    expect(registry.currentObservation).toBeNull();
+        expect(registry.currentObservation).toBe(parent);
+        expect(registry.currentObservationScope).toBe(parentScope);
+        expect(registry.currentObservationScope?.previousObservationScope).toBe(
+          initialScope,
+        );
+      });
+      expect(registry.currentObservation).toBeNull();
+    });
   });
 });

@@ -2,7 +2,6 @@ import {
   AiObservationAttributes,
   AiOperationType,
   AiProvider,
-  type ObservationScope,
 } from "@nestjs-ai/commons";
 import {
   type ChatResponseMetadata,

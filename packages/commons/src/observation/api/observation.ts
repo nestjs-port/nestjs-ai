@@ -92,7 +92,7 @@ export abstract class Observation<CTX extends ObservationContext> {
   }
 
   private withObservationScope<T>(
-    scope: ObservationScope | null,
+    scope: ObservationScope,
   ): (source: Observable<T>) => Observable<T> {
     return (source: Observable<T>) =>
       new Observable<T>((subscriber) => {

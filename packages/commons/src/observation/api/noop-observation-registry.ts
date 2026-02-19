@@ -36,7 +36,7 @@ export class NoopObservationRegistry implements ObservationRegistry {
     return null;
   }
 
-  runInScope<T>(_scope: ObservationScope | null, fn: () => T): T {
+  runInScope<T>(_initialScope: ObservationScope, fn: () => T): T {
     return fn();
   }
 }

@@ -4,6 +4,7 @@ import type { KeyValue } from "../key-value";
 import { ObservationContext } from "../observation-context";
 import type { ObservationConvention } from "../observation-convention.interface";
 import type { ObservationHandler } from "../observation-handler.interface";
+import type { ObservationScope } from "../observation-scope.interface";
 import { SimpleObservation } from "../simple-observation";
 
 class TestConvention implements ObservationConvention<ObservationContext> {
@@ -38,6 +39,16 @@ function createObservation(registry: AlsObservationRegistry) {
 }
 
 describe("AlsObservationRegistry", () => {
+  function createDummyScope(
+    previousObservationScope: ObservationScope | null = null,
+  ): ObservationScope {
+    return {
+      currentObservation: null as never,
+      previousObservationScope,
+      close() {},
+    };
+  }
+
   it("should be non-noop with empty handlers and null current observation", () => {
     const registry = new AlsObservationRegistry();
 
@@ -70,30 +81,37 @@ describe("AlsObservationRegistry", () => {
   it("opening and closing scope should set and clear current observation", () => {
     const registry = new AlsObservationRegistry();
     const observation = createObservation(registry).start();
+    const initialScope = createDummyScope();
 
-    const scope = observation.openScope();
-    expect(registry.currentObservation).toBe(observation);
-    expect(registry.currentObservationScope).toBe(scope);
+    registry.runInScope(initialScope, () => {
+      const scope = observation.openScope();
+      expect(registry.currentObservation).toBe(observation);
+      expect(registry.currentObservationScope).toBe(scope);
 
-    scope.close();
-    observation.stop();
+      scope.close();
+      observation.stop();
 
-    expect(registry.currentObservation).toBeNull();
+      expect(registry.currentObservation).toBeNull();
+      expect(registry.currentObservationScope).toBe(initialScope);
+    });
+
     expect(registry.currentObservationScope).toBeNull();
   });
 
   it("should keep current scope in async flow via als", async () => {
     const registry = new AlsObservationRegistry();
     const observation = createObservation(registry).start();
-    const scope = observation.openScope();
+    await registry.runInScope(createDummyScope(), async () => {
+      const scope = observation.openScope();
 
-    await Promise.resolve();
+      await Promise.resolve();
 
-    expect(registry.currentObservation).toBe(observation);
-    expect(registry.currentObservationScope).toBe(scope);
+      expect(registry.currentObservation).toBe(observation);
+      expect(registry.currentObservationScope).toBe(scope);
 
-    scope.close();
-    observation.stop();
+      scope.close();
+      observation.stop();
+    });
   });
 
   it("should run callback with provided scope across async boundaries", async () => {
@@ -112,5 +130,42 @@ describe("AlsObservationRegistry", () => {
 
     expect(registry.currentObservationScope).toBeNull();
     observation.stop();
+  });
+
+  it("should keep and restore current observation across nested runInScope calls", async () => {
+    const registry = new AlsObservationRegistry();
+    const outerObservation = createObservation(registry);
+
+    const outerScope = outerObservation.openScope();
+    await registry.runInScope(outerScope, async () => {
+      expect(registry.currentObservationScope).toBe(outerScope);
+      expect(
+        registry.currentObservationScope?.previousObservationScope,
+      ).toBeNull();
+
+      const innerObservation = createObservation(registry);
+      const innerScope = innerObservation.openScope();
+      await registry.runInScope(innerScope, async () => {
+        expect(registry.currentObservationScope).toBe(innerScope);
+        expect(registry.currentObservationScope?.previousObservationScope).toBe(
+          outerScope,
+        );
+        await Promise.resolve();
+        expect(registry.currentObservationScope).toBe(innerScope);
+        expect(registry.currentObservationScope?.previousObservationScope).toBe(
+          outerScope,
+        );
+      });
+      innerScope.close();
+      innerObservation.stop();
+
+      expect(registry.currentObservationScope).toBe(outerScope);
+      expect(
+        registry.currentObservationScope?.previousObservationScope,
+      ).toBeNull();
+    });
+    outerScope.close();
+
+    outerObservation.stop();
   });
 });

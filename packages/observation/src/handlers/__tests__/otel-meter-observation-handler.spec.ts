@@ -1,4 +1,4 @@
-import { ObservationContext } from "@nestjs-ai/commons";
+import { KeyValue, ObservationContext } from "@nestjs-ai/commons";
 import type {
   Attributes,
   Histogram,
@@ -65,8 +65,8 @@ describe("OtelMeterObservationHandler", () => {
     const handler = new OtelMeterObservationHandler(meter as unknown as Meter);
     const context = new ObservationContext();
     context.name = "test.observation";
-    context.addLowCardinalityKeyValue("low", "1");
-    context.addHighCardinalityKeyValue("high", "2");
+    context.addLowCardinalityKeyValue(KeyValue.of("low", "1"));
+    context.addHighCardinalityKeyValue(KeyValue.of("high", "2"));
 
     handler.onStart(context);
     handler.onStop(context);
@@ -96,8 +96,8 @@ describe("OtelMeterObservationHandler", () => {
     const handler = new OtelMeterObservationHandler(meter as unknown as Meter);
     const context = new ObservationContext();
     context.name = "test.observation";
-    context.addLowCardinalityKeyValue("low", "1");
-    context.addHighCardinalityKeyValue("high", "2");
+    context.addLowCardinalityKeyValue(KeyValue.of("low", "1"));
+    context.addHighCardinalityKeyValue(KeyValue.of("high", "2"));
 
     handler.onStart(context);
     context.error = new SocketTimeoutException("simulated");
@@ -130,8 +130,8 @@ describe("OtelMeterObservationHandler", () => {
     );
     const context = new ObservationContext();
     context.name = "test.observation";
-    context.addLowCardinalityKeyValue("low", "1");
-    context.addHighCardinalityKeyValue("high", "2");
+    context.addLowCardinalityKeyValue(KeyValue.of("low", "1"));
+    context.addHighCardinalityKeyValue(KeyValue.of("high", "2"));
 
     handler.onStart(context);
     handler.onStop(context);

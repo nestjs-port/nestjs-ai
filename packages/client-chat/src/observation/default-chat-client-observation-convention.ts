@@ -33,14 +33,14 @@ export class DefaultChatClientObservationConvention extends ChatClientObservatio
 
   override getLowCardinalityKeyValues(
     context: ChatClientObservationContext,
-  ): KeyValue[] {
+  ): KeyValues {
     assert(context, "context cannot be null");
     return KeyValues.of(
       this.aiOperationType(context),
       this.aiProvider(context),
       this.springAiKind(),
       this.stream(context),
-    ).toArray();
+    );
   }
 
   protected aiOperationType(context: ChatClientObservationContext): KeyValue {
@@ -70,13 +70,13 @@ export class DefaultChatClientObservationConvention extends ChatClientObservatio
 
   override getHighCardinalityKeyValues(
     context: ChatClientObservationContext,
-  ): KeyValue[] {
+  ): KeyValues {
     assert(context, "context cannot be null");
     let keyValues = KeyValues.empty();
     keyValues = this.advisors(keyValues, context);
     keyValues = this.conversationId(keyValues, context);
     keyValues = this.tools(keyValues, context);
-    return keyValues.toArray();
+    return keyValues;
   }
 
   protected advisors(

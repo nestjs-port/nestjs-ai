@@ -56,7 +56,9 @@ describe("DefaultAdvisorObservationConvention", () => {
     );
 
     expect(
-      observationConvention.getLowCardinalityKeyValues(observationContext),
+      observationConvention
+        .getLowCardinalityKeyValues(observationContext)
+        .toArray(),
     ).toEqual(
       expect.arrayContaining([
         KeyValue.of(
@@ -81,7 +83,9 @@ describe("DefaultAdvisorObservationConvention", () => {
     );
 
     expect(
-      observationConvention.getHighCardinalityKeyValues(observationContext),
+      observationConvention
+        .getHighCardinalityKeyValues(observationContext)
+        .toArray(),
     ).toContainEqual(KeyValue.of("spring.ai.advisor.order", "678"));
   });
 });

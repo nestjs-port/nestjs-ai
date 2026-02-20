@@ -1,4 +1,4 @@
-import { ObservationContext } from "@nestjs-ai/commons";
+import { KeyValue, ObservationContext } from "@nestjs-ai/commons";
 import {
   type Context,
   type ContextManager,
@@ -38,8 +38,8 @@ describe("OtelTracingObservationHandler", () => {
     const context = new ObservationContext();
     context.name = "ai.chat";
     context.contextualName = "chat gpt-4o";
-    context.addLowCardinalityKeyValue("model", "gpt-4o");
-    context.addHighCardinalityKeyValue("prompt.size", "123");
+    context.addLowCardinalityKeyValue(KeyValue.of("model", "gpt-4o"));
+    context.addHighCardinalityKeyValue(KeyValue.of("prompt.size", "123"));
 
     handler.onStart(context);
     handler.onStop(context);

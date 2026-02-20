@@ -37,6 +37,32 @@ export class KeyValues implements Iterable<KeyValue> {
     return [...this._values];
   }
 
+  get(key: string): string | undefined {
+    for (let i = this._values.length - 1; i >= 0; i--) {
+      const keyValue = this._values[i];
+      if (keyValue.key === key) {
+        return keyValue.value;
+      }
+    }
+    return undefined;
+  }
+
+  has(key: string): boolean {
+    return this.get(key) !== undefined;
+  }
+
+  *keys(): IterableIterator<string> {
+    const seen = new Set<string>();
+    for (let i = this._values.length - 1; i >= 0; i--) {
+      const key = this._values[i].key;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      yield key;
+    }
+  }
+
   [Symbol.iterator](): Iterator<KeyValue> {
     return this._values[Symbol.iterator]();
   }

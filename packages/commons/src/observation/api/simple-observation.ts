@@ -100,16 +100,11 @@ export class SimpleObservation<
   }
 
   private addConventionKeyValues(): void {
-    for (const kv of this._convention.getLowCardinalityKeyValues(
-      this._context,
-    )) {
-      this._context.addLowCardinalityKeyValue(kv.key, kv.value);
-    }
-
-    for (const kv of this._convention.getHighCardinalityKeyValues(
-      this._context,
-    )) {
-      this._context.addHighCardinalityKeyValue(kv.key, kv.value);
-    }
+    this._context.addLowCardinalityKeyValues(
+      this._convention.getLowCardinalityKeyValues(this._context),
+    );
+    this._context.addHighCardinalityKeyValues(
+      this._convention.getHighCardinalityKeyValues(this._context),
+    );
   }
 }

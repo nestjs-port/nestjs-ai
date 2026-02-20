@@ -4,6 +4,7 @@ import {
   AiOperationType,
   AiProvider,
   KeyValue,
+  KeyValues,
   ParsingUtils,
   SpringAiKind,
 } from "@nestjs-ai/commons";
@@ -34,14 +35,14 @@ export class DefaultAdvisorObservationConvention extends AdvisorObservationConve
 
   override getLowCardinalityKeyValues(
     context: AdvisorObservationContext,
-  ): KeyValue[] {
+  ): KeyValues {
     assert(context, "context cannot be null");
-    return [
+    return KeyValues.of(
       this.aiOperationType(context),
       this.aiProvider(context),
       this.springAiKind(),
       this.advisorName(context),
-    ];
+    );
   }
 
   protected aiOperationType(_context: AdvisorObservationContext): KeyValue {
@@ -68,9 +69,9 @@ export class DefaultAdvisorObservationConvention extends AdvisorObservationConve
 
   override getHighCardinalityKeyValues(
     context: AdvisorObservationContext,
-  ): KeyValue[] {
+  ): KeyValues {
     assert(context, "context cannot be null");
-    return [this.advisorOrder(context)];
+    return KeyValues.of(this.advisorOrder(context));
   }
 
   protected advisorOrder(context: AdvisorObservationContext): KeyValue {

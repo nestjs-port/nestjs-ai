@@ -1,5 +1,6 @@
 import {
   KeyValue,
+  KeyValues,
   ObservationContext,
   type ObservationConvention,
   SimpleObservation,
@@ -11,7 +12,7 @@ import {
 } from "../test-observation-registry";
 
 class TestConvention implements ObservationConvention<ObservationContext> {
-  constructor(private readonly lowCardinality: KeyValue[] = []) {}
+  constructor(private readonly lowCardinality: KeyValues = KeyValues.empty()) {}
 
   getName(): string {
     return "test.observation";
@@ -25,12 +26,12 @@ class TestConvention implements ObservationConvention<ObservationContext> {
     return context instanceof ObservationContext;
   }
 
-  getLowCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
+  getLowCardinalityKeyValues(_context: ObservationContext): KeyValues {
     return this.lowCardinality;
   }
 
-  getHighCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-    return [];
+  getHighCardinalityKeyValues(_context: ObservationContext): KeyValues {
+    return KeyValues.empty();
   }
 }
 
@@ -40,7 +41,7 @@ function createObservation(
 ) {
   return SimpleObservation.createNotStarted(
     null,
-    new TestConvention(lowCardinality),
+    new TestConvention(KeyValues.of(...lowCardinality)),
     () => new ObservationContext(),
     registry,
   );

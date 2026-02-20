@@ -1,5 +1,5 @@
 import type {
-  KeyValue,
+  KeyValues,
   ObservationContext,
   ObservationConvention,
 } from "@nestjs-ai/commons";
@@ -21,9 +21,9 @@ export abstract class ChatModelObservationConvention
 
   abstract getLowCardinalityKeyValues(
     context: ChatModelObservationContext,
-  ): KeyValue[];
+  ): KeyValues;
 
   abstract getHighCardinalityKeyValues(
     context: ChatModelObservationContext,
-  ): KeyValue[];
+  ): KeyValues;
 }

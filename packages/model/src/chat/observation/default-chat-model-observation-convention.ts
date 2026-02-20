@@ -36,13 +36,13 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
 
   override getLowCardinalityKeyValues(
     context: ChatModelObservationContext,
-  ): KeyValue[] {
+  ): KeyValues {
     return KeyValues.of(
       this.aiOperationType(context),
       this.aiProvider(context),
       this.requestModel(context),
       this.responseModel(context),
-    ).toArray();
+    );
   }
 
   protected aiOperationType(context: ChatModelObservationContext): KeyValue {
@@ -80,7 +80,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
 
   override getHighCardinalityKeyValues(
     context: ChatModelObservationContext,
-  ): KeyValue[] {
+  ): KeyValues {
     let keyValues = KeyValues.empty();
     // Request
     keyValues = this.requestFrequencyPenalty(keyValues, context);
@@ -97,7 +97,7 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues = this.usageInputTokens(keyValues, context);
     keyValues = this.usageOutputTokens(keyValues, context);
     keyValues = this.usageTotalTokens(keyValues, context);
-    return keyValues.toArray();
+    return keyValues;
   }
 
   // Request

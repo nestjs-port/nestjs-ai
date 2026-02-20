@@ -82,7 +82,9 @@ describe("DefaultChatClientObservationConvention", () => {
       .stream(true)
       .build();
 
-    const keyValues = observationConvention.getLowCardinalityKeyValues(context);
+    const keyValues = observationConvention
+      .getLowCardinalityKeyValues(context)
+      .toArray();
 
     expect(keyValues).toContainEqual(
       KeyValue.of("spring.ai.kind", SpringAiKind.CHAT_CLIENT.value),
@@ -116,8 +118,9 @@ describe("DefaultChatClientObservationConvention", () => {
       .stream(true)
       .build();
 
-    const keyValues =
-      observationConvention.getHighCardinalityKeyValues(context);
+    const keyValues = observationConvention
+      .getHighCardinalityKeyValues(context)
+      .toArray();
 
     expect(keyValues).toContainEqual(
       KeyValue.of("spring.ai.chat.client.advisors", '["advisor1", "advisor2"]'),

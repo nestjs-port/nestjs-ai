@@ -73,8 +73,9 @@ describe("DefaultChatModelObservationConvention", () => {
       "superprovider",
     );
 
-    const keyValues =
-      observationConvention.getLowCardinalityKeyValues(observationContext);
+    const keyValues = observationConvention
+      .getLowCardinalityKeyValues(observationContext)
+      .toArray();
 
     expect(keyValues).toContainEqual(
       KeyValue.of(AiObservationAttributes.AI_OPERATION_TYPE.value, "chat"),
@@ -131,10 +132,12 @@ describe("DefaultChatModelObservationConvention", () => {
         .build(),
     });
 
-    const lowCardinalityKeyValues =
-      observationConvention.getLowCardinalityKeyValues(observationContext);
-    const highCardinalityKeyValues =
-      observationConvention.getHighCardinalityKeyValues(observationContext);
+    const lowCardinalityKeyValues = observationConvention
+      .getLowCardinalityKeyValues(observationContext)
+      .toArray();
+    const highCardinalityKeyValues = observationConvention
+      .getHighCardinalityKeyValues(observationContext)
+      .toArray();
 
     expect(lowCardinalityKeyValues).toContainEqual(
       KeyValue.of(AiObservationAttributes.RESPONSE_MODEL.value, "mistral-42"),
@@ -192,10 +195,12 @@ describe("DefaultChatModelObservationConvention", () => {
       "superprovider",
     );
 
-    const lowCardinalityKeyValues =
-      observationConvention.getLowCardinalityKeyValues(observationContext);
+    const lowCardinalityKeyValues = observationConvention
+      .getLowCardinalityKeyValues(observationContext)
+      .toArray();
     const highCardinalityKeys = observationConvention
       .getHighCardinalityKeyValues(observationContext)
+      .toArray()
       .map((keyValue) => keyValue.key);
 
     expect(lowCardinalityKeyValues).toContainEqual(
@@ -271,6 +276,7 @@ describe("DefaultChatModelObservationConvention", () => {
 
     const highCardinalityKeys = observationConvention
       .getHighCardinalityKeyValues(observationContext)
+      .toArray()
       .map((keyValue) => keyValue.key);
 
     expect(highCardinalityKeys).not.toContain(
@@ -303,6 +309,7 @@ describe("DefaultChatModelObservationConvention", () => {
     const toolNamesKeyValue =
       observationConvention
         .getHighCardinalityKeyValues(observationContext)
+        .toArray()
         .find(
           (keyValue) =>
             keyValue.key === AiObservationAttributes.REQUEST_TOOL_NAMES.value,

@@ -1,4 +1,4 @@
-import { type KeyValue, ObservationContext } from "@nestjs-ai/commons";
+import { KeyValues, ObservationContext } from "@nestjs-ai/commons";
 import { Prompt } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
@@ -17,14 +17,14 @@ class TestChatClientObservationConvention extends ChatClientObservationConventio
 
   override getLowCardinalityKeyValues(
     _context: ChatClientObservationContext,
-  ): KeyValue[] {
-    return [];
+  ): KeyValues {
+    return KeyValues.empty();
   }
 
   override getHighCardinalityKeyValues(
     _context: ChatClientObservationContext,
-  ): KeyValue[] {
-    return [];
+  ): KeyValues {
+    return KeyValues.empty();
   }
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AlsObservationRegistry } from "../als-observation-registry";
-import type { KeyValue } from "../key-value";
+import { KeyValues } from "../key-values";
 import { ObservationContext } from "../observation-context";
 import type { ObservationConvention } from "../observation-convention.interface";
 import type { ObservationHandler } from "../observation-handler.interface";
@@ -20,12 +20,12 @@ class TestConvention implements ObservationConvention<ObservationContext> {
     return context instanceof ObservationContext;
   }
 
-  getLowCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-    return [];
+  getLowCardinalityKeyValues(_context: ObservationContext): KeyValues {
+    return KeyValues.empty();
   }
 
-  getHighCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-    return [];
+  getHighCardinalityKeyValues(_context: ObservationContext): KeyValues {
+    return KeyValues.empty();
   }
 }
 

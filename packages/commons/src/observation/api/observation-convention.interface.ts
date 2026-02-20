@@ -1,4 +1,4 @@
-import type { KeyValue } from "./key-value";
+import type { KeyValues } from "./key-values";
 import type { ObservationContext } from "./observation-context";
 
 /**
@@ -24,10 +24,10 @@ export interface ObservationConvention<CTX extends ObservationContext> {
   /**
    * Returns low-cardinality key-value pairs (used for metrics dimensions).
    */
-  getLowCardinalityKeyValues(context: CTX): KeyValue[];
+  getLowCardinalityKeyValues(context: CTX): KeyValues;
 
   /**
    * Returns high-cardinality key-value pairs (used for tracing attributes).
    */
-  getHighCardinalityKeyValues(context: CTX): KeyValue[];
+  getHighCardinalityKeyValues(context: CTX): KeyValues;
 }

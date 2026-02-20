@@ -79,8 +79,8 @@ export class OtelMeterObservationHandler extends MeterObservationHandler<Observa
 
   private createTags(context: ObservationContext): MeterAttributes {
     const attributes: MeterAttributes = {};
-    for (const [key, value] of context.lowCardinalityKeyValues) {
-      attributes[key] = value;
+    for (const keyValue of context.lowCardinalityKeyValues) {
+      attributes[keyValue.key] = keyValue.value;
     }
 
     return attributes;

@@ -2,6 +2,7 @@ import { firstValueFrom, map, of, throwError } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { AlsObservationRegistry } from "../als-observation-registry";
 import { KeyValue } from "../key-value";
+import { KeyValues } from "../key-values";
 import { ObservationContext } from "../observation-context";
 import type { ObservationConvention } from "../observation-convention.interface";
 import type { ObservationHandler } from "../observation-handler.interface";
@@ -21,12 +22,12 @@ class TestConvention implements ObservationConvention<ObservationContext> {
     return context instanceof ObservationContext;
   }
 
-  getLowCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-    return [KeyValue.of("low", "1")];
+  getLowCardinalityKeyValues(_context: ObservationContext): KeyValues {
+    return KeyValues.of(KeyValue.of("low", "1"));
   }
 
-  getHighCardinalityKeyValues(_context: ObservationContext): KeyValue[] {
-    return [KeyValue.of("high", "2")];
+  getHighCardinalityKeyValues(_context: ObservationContext): KeyValues {
+    return KeyValues.of(KeyValue.of("high", "2"));
   }
 }
 

@@ -67,12 +67,12 @@ export class OtelTracingObservationHandler
       span.updateName(spanName);
     }
 
-    for (const [key, value] of context.lowCardinalityKeyValues) {
-      span.setAttribute(key, value);
+    for (const keyValue of context.lowCardinalityKeyValues) {
+      span.setAttribute(keyValue.key, keyValue.value);
     }
 
-    for (const [key, value] of context.highCardinalityKeyValues) {
-      span.setAttribute(key, value);
+    for (const keyValue of context.highCardinalityKeyValues) {
+      span.setAttribute(keyValue.key, keyValue.value);
     }
 
     if (context.error && !this.errorMarked.has(context)) {

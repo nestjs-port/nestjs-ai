@@ -62,8 +62,10 @@ describe("Observation", () => {
     expect(context.name).toBe("test.observation");
     expect(context.contextualName).toBe("test contextual");
     expect(context.lowCardinalityKeyValues.get("low")).toBe("1");
+    expect(context.highCardinalityKeyValues.get("high")).toBe("2");
 
     observation.stop();
+    expect(context.lowCardinalityKeyValues.get("low")).toBe("1");
     expect(context.highCardinalityKeyValues.get("high")).toBe("2");
   });
 

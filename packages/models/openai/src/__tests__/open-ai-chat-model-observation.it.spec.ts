@@ -28,11 +28,11 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelObservationIT", () => {
     const openAiApi = OpenAiApi.builder()
       .apiKey(OPENAI_API_KEY ?? "")
       .build();
-    chatModel = new OpenAiChatModel({
-      openAiApi,
-      defaultOptions: new OpenAiChatOptions(),
-      observationRegistry,
-    });
+    chatModel = OpenAiChatModel.builder()
+      .openAiApi(openAiApi)
+      .defaultOptions(new OpenAiChatOptions())
+      .observationRegistry(observationRegistry)
+      .build();
 
     observationRegistry.clear();
   });

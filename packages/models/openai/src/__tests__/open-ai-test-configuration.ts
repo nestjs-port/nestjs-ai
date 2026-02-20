@@ -10,12 +10,14 @@ export class OpenAiTestConfiguration {
     const apiKey = process.env.OPENAI_API_KEY ?? "";
 
     this._openAiApi = OpenAiApi.builder().apiKey(apiKey).build();
-    this._chatModel = new OpenAiChatModel({
-      openAiApi: this._openAiApi,
-      defaultOptions: new OpenAiChatOptions({
-        model: ChatModel.GPT_4_O_MINI,
-      }),
-    });
+    this._chatModel = OpenAiChatModel.builder()
+      .openAiApi(this._openAiApi)
+      .defaultOptions(
+        new OpenAiChatOptions({
+          model: ChatModel.GPT_4_O_MINI,
+        }),
+      )
+      .build();
   }
 
   get openAiApi(): OpenAiApi {

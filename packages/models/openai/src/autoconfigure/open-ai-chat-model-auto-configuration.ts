@@ -78,17 +78,26 @@ function createOpenAiChatModel(
   observationConvention?: ChatModelObservationConvention,
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
 ): OpenAiChatModel {
-  const defaultOptions = properties.options
-    ? new OpenAiChatOptions(properties.options)
-    : undefined;
+  const builder = OpenAiChatModel.builder().openAiApi(openAiApi);
 
-  return new OpenAiChatModel({
-    openAiApi,
-    defaultOptions,
-    observationRegistry,
-    observationConvention,
-    toolExecutionEligibilityPredicate,
-  });
+  if (properties.options) {
+    builder.defaultOptions(new OpenAiChatOptions(properties.options));
+  }
+  if (observationRegistry) {
+    builder.observationRegistry(observationRegistry);
+  }
+  if (toolExecutionEligibilityPredicate) {
+    builder.toolExecutionEligibilityPredicate(
+      toolExecutionEligibilityPredicate,
+    );
+  }
+
+  const model = builder.build();
+  if (observationConvention) {
+    model.setObservationConvention(observationConvention);
+  }
+
+  return model;
 }
 
 function createOpenAiApi(

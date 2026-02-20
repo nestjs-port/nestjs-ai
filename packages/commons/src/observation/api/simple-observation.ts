@@ -56,11 +56,7 @@ export class SimpleObservation<
       this._context,
     );
 
-    for (const kv of this._convention.getLowCardinalityKeyValues(
-      this._context,
-    )) {
-      this._context.addLowCardinalityKeyValue(kv.key, kv.value);
-    }
+    this.addConventionKeyValues();
 
     for (const handler of this._handlers) {
       handler.onStart?.(this._context);
@@ -84,11 +80,7 @@ export class SimpleObservation<
   }
 
   stop(): void {
-    for (const kv of this._convention.getHighCardinalityKeyValues(
-      this._context,
-    )) {
-      this._context.addHighCardinalityKeyValue(kv.key, kv.value);
-    }
+    this.addConventionKeyValues();
 
     for (let i = this._handlers.length - 1; i >= 0; i--) {
       this._handlers[i].onStop?.(this._context);
@@ -104,6 +96,20 @@ export class SimpleObservation<
   notifyOnScopeClosed(): void {
     for (let i = this._handlers.length - 1; i >= 0; i--) {
       this._handlers[i].onScopeClosed?.(this._context);
+    }
+  }
+
+  private addConventionKeyValues(): void {
+    for (const kv of this._convention.getLowCardinalityKeyValues(
+      this._context,
+    )) {
+      this._context.addLowCardinalityKeyValue(kv.key, kv.value);
+    }
+
+    for (const kv of this._convention.getHighCardinalityKeyValues(
+      this._context,
+    )) {
+      this._context.addHighCardinalityKeyValue(kv.key, kv.value);
     }
   }
 }

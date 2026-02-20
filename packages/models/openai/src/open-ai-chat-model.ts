@@ -62,12 +62,11 @@ import { OpenAiChatOptions } from "./open-ai-chat-options";
 
 export interface OpenAiChatModelProps {
   openAiApi: OpenAiApi;
-  defaultOptions?: OpenAiChatOptions;
-  toolCallingManager?: ToolCallingManager;
-  toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate;
-  retryTemplate?: RetryTemplate;
-  observationRegistry?: ObservationRegistry;
-  observationConvention?: ChatModelObservationConvention;
+  defaultOptions: OpenAiChatOptions;
+  toolCallingManager: ToolCallingManager;
+  toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate;
+  retryTemplate: RetryTemplate;
+  observationRegistry: ObservationRegistry;
 }
 
 export class OpenAiChatModel extends ChatModel {
@@ -84,31 +83,55 @@ export class OpenAiChatModel extends ChatModel {
   private readonly _toolCallingManager: ToolCallingManager;
   private readonly _toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate;
   private readonly _observationRegistry: ObservationRegistry;
-  private readonly _observationConvention: ChatModelObservationConvention;
+  private _observationConvention: ChatModelObservationConvention =
+    OpenAiChatModel.DEFAULT_OBSERVATION_CONVENTION;
 
   constructor(props: OpenAiChatModelProps) {
     super();
     assert(props.openAiApi, "openAiApi cannot be null");
+    assert(props.defaultOptions, "defaultOptions cannot be null");
+    assert(props.toolCallingManager, "toolCallingManager cannot be null");
+    assert(props.retryTemplate, "retryTemplate cannot be null");
+    assert(props.observationRegistry, "observationRegistry cannot be null");
+    assert(
+      props.toolExecutionEligibilityPredicate,
+      "toolExecutionEligibilityPredicate cannot be null",
+    );
 
     this._openAiApi = props.openAiApi;
-    this._defaultOptions =
-      props.defaultOptions ??
-      new OpenAiChatOptions({
-        model: OpenAiApi.DEFAULT_CHAT_MODEL,
-        temperature: 0.7,
-      });
-    this._toolCallingManager =
-      props.toolCallingManager ?? ToolCallingManager.builder();
+    this._defaultOptions = props.defaultOptions;
+    this._toolCallingManager = props.toolCallingManager;
     this._toolExecutionEligibilityPredicate =
-      props.toolExecutionEligibilityPredicate ??
-      new DefaultToolExecutionEligibilityPredicate();
-    this._retryTemplate =
-      props.retryTemplate ?? RetryUtils.DEFAULT_RETRY_TEMPLATE;
-    this._observationRegistry =
-      props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
-    this._observationConvention =
-      props.observationConvention ??
-      OpenAiChatModel.DEFAULT_OBSERVATION_CONVENTION;
+      props.toolExecutionEligibilityPredicate;
+    this._retryTemplate = props.retryTemplate;
+    this._observationRegistry = props.observationRegistry;
+  }
+
+  static builder(): OpenAiChatModelBuilder {
+    return new OpenAiChatModelBuilder();
+  }
+
+  mutate(): OpenAiChatModelBuilder {
+    return new OpenAiChatModelBuilder({
+      openAiApi: this._openAiApi,
+      defaultOptions: this._defaultOptions,
+      toolCallingManager: this._toolCallingManager,
+      toolExecutionEligibilityPredicate:
+        this._toolExecutionEligibilityPredicate,
+      retryTemplate: this._retryTemplate,
+      observationRegistry: this._observationRegistry,
+    });
+  }
+
+  clone(): OpenAiChatModel {
+    return this.mutate().build();
+  }
+
+  setObservationConvention(
+    observationConvention: ChatModelObservationConvention,
+  ): void {
+    assert(observationConvention, "observationConvention cannot be null");
+    this._observationConvention = observationConvention;
   }
 
   override async call(prompt: Prompt): Promise<ChatResponse> {
@@ -900,6 +923,90 @@ export class OpenAiChatModel extends ChatModel {
       serviceTier: runtime.serviceTier ?? defaults.serviceTier,
       promptCacheKey: runtime.promptCacheKey ?? defaults.promptCacheKey,
       safetyIdentifier: runtime.safetyIdentifier ?? defaults.safetyIdentifier,
+    });
+  }
+}
+
+interface OpenAiChatModelBuilderCopyProps {
+  openAiApi: OpenAiApi;
+  defaultOptions: OpenAiChatOptions;
+  toolCallingManager: ToolCallingManager;
+  toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate;
+  retryTemplate: RetryTemplate;
+  observationRegistry: ObservationRegistry;
+}
+
+export class OpenAiChatModelBuilder {
+  private static readonly DEFAULT_TOOL_CALLING_MANAGER =
+    ToolCallingManager.builder();
+
+  private _openAiApi?: OpenAiApi;
+  private _defaultOptions = new OpenAiChatOptions({
+    model: OpenAiApi.DEFAULT_CHAT_MODEL,
+    temperature: 0.7,
+  });
+  private _toolCallingManager?: ToolCallingManager;
+  private _toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate =
+    new DefaultToolExecutionEligibilityPredicate();
+  private _retryTemplate: RetryTemplate = RetryUtils.DEFAULT_RETRY_TEMPLATE;
+  private _observationRegistry: ObservationRegistry =
+    NoopObservationRegistry.INSTANCE;
+
+  constructor(copyProps?: OpenAiChatModelBuilderCopyProps) {
+    if (copyProps) {
+      this._openAiApi = copyProps.openAiApi;
+      this._defaultOptions = copyProps.defaultOptions;
+      this._toolCallingManager = copyProps.toolCallingManager;
+      this._toolExecutionEligibilityPredicate =
+        copyProps.toolExecutionEligibilityPredicate;
+      this._retryTemplate = copyProps.retryTemplate;
+      this._observationRegistry = copyProps.observationRegistry;
+    }
+  }
+
+  openAiApi(openAiApi: OpenAiApi): this {
+    this._openAiApi = openAiApi;
+    return this;
+  }
+
+  defaultOptions(defaultOptions: OpenAiChatOptions): this {
+    this._defaultOptions = defaultOptions;
+    return this;
+  }
+
+  toolCallingManager(toolCallingManager: ToolCallingManager): this {
+    this._toolCallingManager = toolCallingManager;
+    return this;
+  }
+
+  toolExecutionEligibilityPredicate(
+    toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate,
+  ): this {
+    this._toolExecutionEligibilityPredicate = toolExecutionEligibilityPredicate;
+    return this;
+  }
+
+  retryTemplate(retryTemplate: RetryTemplate): this {
+    this._retryTemplate = retryTemplate;
+    return this;
+  }
+
+  observationRegistry(observationRegistry: ObservationRegistry): this {
+    this._observationRegistry = observationRegistry;
+    return this;
+  }
+
+  build(): OpenAiChatModel {
+    return new OpenAiChatModel({
+      openAiApi: this._openAiApi as OpenAiApi,
+      defaultOptions: this._defaultOptions,
+      toolCallingManager:
+        this._toolCallingManager ??
+        OpenAiChatModelBuilder.DEFAULT_TOOL_CALLING_MANAGER,
+      toolExecutionEligibilityPredicate:
+        this._toolExecutionEligibilityPredicate,
+      retryTemplate: this._retryTemplate,
+      observationRegistry: this._observationRegistry,
     });
   }
 }

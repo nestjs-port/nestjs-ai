@@ -34,7 +34,7 @@ export class NestAiModule {
       exports,
       options.chatClient,
     );
-    NestAIModule.registerConfigurationProviders(
+    NestAiModule.registerConfigurationProviders(
       providers,
       exports,
       options.observation,
@@ -65,7 +65,7 @@ export class NestAiModule {
     for (const provider of configuration.providers) {
       const scope =
         "scope" in provider
-          ? NestAIModule.toProviderScope(provider.scope)
+          ? NestAiModule.toProviderScope(provider.scope)
           : undefined;
 
       providers.push({

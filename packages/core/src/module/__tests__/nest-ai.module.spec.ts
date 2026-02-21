@@ -1,5 +1,5 @@
 import type { ChatClientConfiguration } from "@nestjs-ai/commons";
-import { HTTP_CLIENT_TOKEN } from "@nestjs-ai/commons";
+import { HTTP_CLIENT_TOKEN, ObservationHandlers } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { NestAiModule } from "../nest-ai.module";
 
@@ -27,6 +27,23 @@ describe("NestAIModule", () => {
         "useValue" in httpClientProvider,
     ).toBe(true);
     expect(exportsList).toContain(HTTP_CLIENT_TOKEN);
+  });
+
+  it("registers observation handlers provider and export", () => {
+    const dynamicModule = NestAiModule.forRoot();
+    const providers = dynamicModule.providers ?? [];
+    const exportsList = dynamicModule.exports ?? [];
+
+    const observationHandlersProvider = providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "provide" in provider &&
+        provider.provide === ObservationHandlers,
+    );
+
+    expect(observationHandlersProvider).toBeDefined();
+    expect(exportsList).toContain(ObservationHandlers);
   });
 
   it("registers chat client providers and exports", () => {

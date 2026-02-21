@@ -1,3 +1,4 @@
+export * from "./autoconfigure";
 export * from "./chat";
 export * from "./converter";
 export * from "./model";

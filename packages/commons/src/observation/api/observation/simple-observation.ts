@@ -1,4 +1,4 @@
-import type { ObservationRegistry } from "../registry/observation-registry.interface";
+import type { ObservationRegistry } from "../registry";
 import { Observation } from "./observation";
 import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";

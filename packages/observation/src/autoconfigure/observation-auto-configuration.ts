@@ -4,8 +4,7 @@ import {
   type MeterRegistry,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationConfiguration,
-  type ObservationContext,
-  type ObservationHandler,
+  ObservationHandlers,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
@@ -14,6 +13,7 @@ import {
 } from "../handlers";
 import { OtelMeterRegistry } from "../otel-meter-registry";
 import type { ObservationConfigurationProperties } from "./observation-configuration-properties";
+import { ObservationProviderPostProcessor } from "./observation-provider-post-processor";
 
 /**
  * Creates an observation configuration that wires ALS-based registry and OTel handlers.
@@ -24,7 +24,8 @@ export function configureObservation(
   return {
     providers: [
       ...createMeterRegistryProviders(properties),
-      ...createObservationRegistryProviders(properties),
+      ...createObservationHandlerProviders(properties),
+      ...createObservationRegistryProviders(),
     ],
   } as ObservationConfiguration;
 }
@@ -51,14 +52,45 @@ function createMeterRegistryProviders(
   ];
 }
 
-function createObservationRegistryProviders(
+function createObservationHandlerProviders(
   properties: ObservationConfigurationProperties,
 ): ObservationConfiguration["providers"] {
   return [
     {
+      token: ObservationProviderPostProcessor,
+      useFactory: (
+        observationRegistry: ObservationRegistry,
+        observationHandlers: ObservationHandlers,
+      ) => {
+        if (properties.tracer) {
+          observationHandlers.addHandler(
+            new OtelTracingObservationHandler(properties.tracer),
+          );
+        }
+        if (properties.meter) {
+          observationHandlers.addHandler(
+            new OtelMeterObservationHandler(
+              properties.meter,
+              ...(properties.ignoredMeters ?? []),
+            ),
+          );
+        }
+
+        return new ObservationProviderPostProcessor(
+          observationRegistry,
+          observationHandlers,
+        );
+      },
+      inject: [OBSERVATION_REGISTRY_TOKEN, ObservationHandlers],
+    },
+  ];
+}
+
+function createObservationRegistryProviders(): ObservationConfiguration["providers"] {
+  return [
+    {
       token: AlsObservationRegistry,
-      useFactory: () =>
-        createObservationRegistryWithHandlers(createHandlers(properties)),
+      useFactory: () => new AlsObservationRegistry(),
       inject: [],
     },
     {
@@ -68,32 +100,4 @@ function createObservationRegistryProviders(
       inject: [AlsObservationRegistry],
     },
   ];
-}
-
-function createHandlers(
-  properties: ObservationConfigurationProperties,
-): ObservationHandler<ObservationContext>[] {
-  const handlers: ObservationHandler<ObservationContext>[] = [];
-  if (properties.tracer) {
-    handlers.push(new OtelTracingObservationHandler(properties.tracer));
-  }
-  if (properties.meter) {
-    handlers.push(
-      new OtelMeterObservationHandler(
-        properties.meter,
-        ...(properties.ignoredMeters ?? []),
-      ),
-    );
-  }
-  return handlers;
-}
-
-function createObservationRegistryWithHandlers(
-  handlers: ObservationHandler<ObservationContext>[],
-): AlsObservationRegistry {
-  const registry = new AlsObservationRegistry();
-  for (const handler of handlers) {
-    registry.addHandler(handler);
-  }
-  return registry;
 }

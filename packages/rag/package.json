@@ -1,0 +1,28 @@
+{
+  "name": "@nestjs-ai/rag",
+  "version": "0.0.0",
+  "description": "Retrieval Augmented Generation (RAG) support for NestJS AI",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/client-chat": "*",
+    "@nestjs-ai/model": "*"
+  },
+  "devDependencies": {
+    "@nestjs-ai/client-chat": "workspace:*",
+    "@nestjs-ai/model": "workspace:*"
+  }
+}

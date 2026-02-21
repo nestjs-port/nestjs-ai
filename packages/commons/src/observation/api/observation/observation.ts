@@ -1,5 +1,5 @@
 import { defer, finalize, Observable, tap } from "rxjs";
-import type { ObservationRegistry } from "../registry/observation-registry.interface";
+import type { ObservationRegistry } from "../registry";
 import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";
 import type { ObservationHandler } from "./observation-handler.interface";

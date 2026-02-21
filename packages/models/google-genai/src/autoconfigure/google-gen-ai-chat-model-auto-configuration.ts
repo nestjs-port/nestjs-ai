@@ -8,6 +8,7 @@ import {
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
+  createChatModelObservationHandlerProviders,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import { GoogleGenAiCachedContentService } from "../cache";
@@ -27,6 +28,7 @@ export function configureGoogleGenAiChatModel(
 ): ChatModelConfiguration {
   return {
     providers: [
+      ...createChatModelObservationHandlerProviders(),
       ...createGoogleGenAiProviders(properties),
       ...createGoogleGenAiChatModelProviders(properties),
       ...createCachedContentProviders(properties),

@@ -1,2 +1,3 @@
 export { configureObservation } from "./observation-auto-configuration";
 export type { ObservationConfigurationProperties } from "./observation-configuration-properties";
+export { ObservationProviderPostProcessor } from "./observation-provider-post-processor";

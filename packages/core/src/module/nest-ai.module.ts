@@ -7,6 +7,7 @@ import {
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
   type ObservationConfiguration,
+  ObservationHandlers,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
 import type { NestAiModuleOptions } from "./nest-ai-module.options";
@@ -23,6 +24,11 @@ export class NestAiModule {
       useValue: options.httpClient ?? new FetchHttpClient(),
     });
     exports.push(HTTP_CLIENT_TOKEN);
+    providers.push({
+      provide: ObservationHandlers,
+      useValue: new ObservationHandlers(),
+    });
+    exports.push(ObservationHandlers);
 
     NestAiModule.registerConfigurationProviders(
       providers,

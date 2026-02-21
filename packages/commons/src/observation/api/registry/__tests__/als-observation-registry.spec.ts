@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { KeyValues } from "../../key-values";
+import type {
+  ObservationConvention,
+  ObservationHandler,
+  ObservationScope,
+} from "../../observation";
+import { ObservationContext, SimpleObservation } from "../../observation";
 import { AlsObservationRegistry } from "../als-observation-registry";
-import { KeyValues } from "../key-values";
-import { ObservationContext } from "../observation-context";
-import type { ObservationConvention } from "../observation-convention.interface";
-import type { ObservationHandler } from "../observation-handler.interface";
-import type { ObservationScope } from "../observation-scope.interface";
-import { SimpleObservation } from "../simple-observation";
 
 class TestConvention implements ObservationConvention<ObservationContext> {
   getName(): string {

@@ -1,5 +1,5 @@
-import { KeyValue } from "./key-value";
-import { KeyValues } from "./key-values";
+import type { KeyValue } from "../key-value";
+import { KeyValues } from "../key-values";
 
 /**
  * Context object that carries information throughout the observation lifecycle.

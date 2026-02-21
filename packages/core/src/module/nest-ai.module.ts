@@ -9,12 +9,12 @@ import {
   type ObservationConfiguration,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
-import type { NestAIModuleOptions } from "./nest-ai-module.options";
+import type { NestAiModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
 // biome-ignore lint/complexity/noStaticOnlyClass: NestJS modules use static methods for configuration
-export class NestAIModule {
-  static forRoot(options: NestAIModuleOptions = {}): DynamicModule {
+export class NestAiModule {
+  static forRoot(options: NestAiModuleOptions = {}): DynamicModule {
     const providers: Provider[] = [];
     const exports: InjectionToken[] = [];
 
@@ -24,12 +24,12 @@ export class NestAIModule {
     });
     exports.push(HTTP_CLIENT_TOKEN);
 
-    NestAIModule.registerConfigurationProviders(
+    NestAiModule.registerConfigurationProviders(
       providers,
       exports,
       options.chatModel,
     );
-    NestAIModule.registerConfigurationProviders(
+    NestAiModule.registerConfigurationProviders(
       providers,
       exports,
       options.chatClient,
@@ -43,7 +43,7 @@ export class NestAIModule {
     LoggerFactory.bind(new NestLoggerFactory());
 
     return {
-      module: NestAIModule,
+      module: NestAiModule,
       providers,
       exports,
       global: options.global ?? true,

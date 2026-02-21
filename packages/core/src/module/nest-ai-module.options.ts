@@ -5,7 +5,7 @@ import type {
   ObservationConfiguration,
 } from "@nestjs-ai/commons";
 
-export interface NestAIModuleOptions {
+export interface NestAiModuleOptions {
   chatClient?: ChatClientConfiguration;
   chatModel?: ChatModelConfiguration;
   observation?: ObservationConfiguration;

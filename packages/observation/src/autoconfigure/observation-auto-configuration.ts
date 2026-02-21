@@ -1,5 +1,7 @@
 import {
   AlsObservationRegistry,
+  METER_REGISTRY_TOKEN,
+  type MeterRegistry,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationConfiguration,
   type ObservationContext,
@@ -10,6 +12,7 @@ import {
   OtelMeterObservationHandler,
   OtelTracingObservationHandler,
 } from "../handlers";
+import { OtelMeterRegistry } from "../otel-meter-registry";
 import type { ObservationConfigurationProperties } from "./observation-configuration-properties";
 
 /**
@@ -19,8 +22,33 @@ export function configureObservation(
   properties: ObservationConfigurationProperties,
 ): ObservationConfiguration {
   return {
-    providers: [...createObservationRegistryProviders(properties)],
+    providers: [
+      ...createMeterRegistryProviders(properties),
+      ...createObservationRegistryProviders(properties),
+    ],
   } as ObservationConfiguration;
+}
+
+function createMeterRegistryProviders(
+  properties: ObservationConfigurationProperties,
+): ObservationConfiguration["providers"] {
+  const { meter } = properties;
+  if (!meter) {
+    return [];
+  }
+
+  return [
+    {
+      token: OtelMeterRegistry,
+      useFactory: () => new OtelMeterRegistry(meter),
+      inject: [],
+    },
+    {
+      token: METER_REGISTRY_TOKEN,
+      useFactory: (registry: OtelMeterRegistry) => registry as MeterRegistry,
+      inject: [OtelMeterRegistry],
+    },
+  ];
 }
 
 function createObservationRegistryProviders(

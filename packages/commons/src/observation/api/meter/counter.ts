@@ -20,18 +20,18 @@ export interface Counter {
  * Provides Counter.Builder similar to Micrometer's Counter.builder().
  */
 export namespace Counter {
+  /**
+   * Create a new Builder for the given metric name.
+   */
+  export function builder(name: string): Builder {
+    return new Builder(name);
+  }
+
   export class Builder {
     private readonly _tags: Tag[] = [];
     private _description?: string;
 
     constructor(private readonly _name: string) {}
-
-    /**
-     * Create a new Builder for the given metric name.
-     */
-    static builder(name: string): Builder {
-      return new Builder(name);
-    }
 
     /**
      * Add a single tag.

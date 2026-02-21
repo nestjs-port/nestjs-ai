@@ -7,7 +7,7 @@ import {
   type ObservationContext,
   Tag,
 } from "@nestjs-ai/commons";
-import type { Usage } from "../../chat/metadata/usage";
+import type { Usage } from "../../chat";
 
 /**
  * Generate metrics about the model usage in the context of an AI operation.
@@ -24,7 +24,7 @@ export class ModelUsageMetricsGenerator {
     meterRegistry: MeterRegistry,
   ): void {
     if (usage.promptTokens != null) {
-      Counter.Builder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
+      Counter.builder(AiObservationMetricNames.TOKEN_USAGE.value)
         .tag(
           AiObservationMetricAttributes.TOKEN_TYPE.value,
           AiTokenType.INPUT.value,
@@ -36,7 +36,7 @@ export class ModelUsageMetricsGenerator {
     }
 
     if (usage.completionTokens != null) {
-      Counter.Builder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
+      Counter.builder(AiObservationMetricNames.TOKEN_USAGE.value)
         .tag(
           AiObservationMetricAttributes.TOKEN_TYPE.value,
           AiTokenType.OUTPUT.value,
@@ -48,7 +48,7 @@ export class ModelUsageMetricsGenerator {
     }
 
     if (usage.totalTokens != null) {
-      Counter.Builder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
+      Counter.builder(AiObservationMetricNames.TOKEN_USAGE.value)
         .tag(
           AiObservationMetricAttributes.TOKEN_TYPE.value,
           AiTokenType.TOTAL.value,

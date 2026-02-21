@@ -1,4 +1,5 @@
-import type { Tag } from "./tag";
+import type { Counter } from "./counter";
+import type { MeterId } from "./meter-id";
 
 /**
  * Interface for a registry that creates and manages meters.
@@ -6,25 +7,10 @@ import type { Tag } from "./tag";
  */
 export interface MeterRegistry {
   /**
-   * Create or retrieve a counter with the given name, tags, and optional description.
+   * Create or retrieve a counter for the given meter id.
    *
-   * @param name - the metric name
-   * @param tags - the tags to associate with the counter
-   * @param description - optional description of the counter
+   * @param id - immutable meter identifier
    * @returns the counter
    */
-  counter(name: string, tags: Tag[], description?: string): Counter;
-}
-
-/**
- * A counter metric that can be incremented.
- * Corresponds to Micrometer's Counter.
- */
-export interface Counter {
-  /**
-   * Increment the counter by the given amount.
-   *
-   * @param amount - the amount to increment
-   */
-  increment(amount: number): void;
+  counter(id: MeterId): Counter;
 }

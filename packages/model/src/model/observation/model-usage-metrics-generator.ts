@@ -2,7 +2,7 @@ import {
   AiObservationMetricAttributes,
   AiObservationMetricNames,
   AiTokenType,
-  CounterBuilder,
+  Counter,
   type MeterRegistry,
   type ObservationContext,
   Tag,
@@ -24,7 +24,7 @@ export class ModelUsageMetricsGenerator {
     meterRegistry: MeterRegistry,
   ): void {
     if (usage.promptTokens != null) {
-      CounterBuilder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
+      Counter.Builder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
         .tag(
           AiObservationMetricAttributes.TOKEN_TYPE.value,
           AiTokenType.INPUT.value,
@@ -36,7 +36,7 @@ export class ModelUsageMetricsGenerator {
     }
 
     if (usage.completionTokens != null) {
-      CounterBuilder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
+      Counter.Builder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
         .tag(
           AiObservationMetricAttributes.TOKEN_TYPE.value,
           AiTokenType.OUTPUT.value,
@@ -48,7 +48,7 @@ export class ModelUsageMetricsGenerator {
     }
 
     if (usage.totalTokens != null) {
-      CounterBuilder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
+      Counter.Builder.builder(AiObservationMetricNames.TOKEN_USAGE.value)
         .tag(
           AiObservationMetricAttributes.TOKEN_TYPE.value,
           AiTokenType.TOTAL.value,

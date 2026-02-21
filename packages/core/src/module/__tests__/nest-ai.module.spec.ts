@@ -1,15 +1,15 @@
 import type { ChatClientConfiguration } from "@nestjs-ai/commons";
 import { HTTP_CLIENT_TOKEN } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { NestAIModule } from "../nest-ai.module";
+import { NestAiModule } from "../nest-ai.module";
 
 describe("NestAIModule", () => {
   it("registers default HTTP client provider in forRoot", () => {
-    const dynamicModule = NestAIModule.forRoot();
+    const dynamicModule = NestAiModule.forRoot();
     const providers = dynamicModule.providers ?? [];
     const exportsList = dynamicModule.exports ?? [];
 
-    expect(dynamicModule.module).toBe(NestAIModule);
+    expect(dynamicModule.module).toBe(NestAiModule);
     expect(dynamicModule.global).toBe(true);
 
     const httpClientProvider = providers.find(
@@ -31,7 +31,7 @@ describe("NestAIModule", () => {
 
   it("registers chat client providers and exports", () => {
     const CHAT_CLIENT_TOKEN = Symbol("CHAT_CLIENT_TOKEN");
-    const dynamicModule = NestAIModule.forRoot({
+    const dynamicModule = NestAiModule.forRoot({
       chatClient: {
         providers: [
           {
@@ -57,7 +57,7 @@ describe("NestAIModule", () => {
   });
 
   it("uses module global option when provided", () => {
-    const dynamicModule = NestAIModule.forRoot({ global: false });
+    const dynamicModule = NestAiModule.forRoot({ global: false });
     expect(dynamicModule.global).toBe(false);
   });
 });

@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import type { Observation } from "./observation";
-import type { ObservationContext } from "./observation-context";
-import type { ObservationHandler } from "./observation-handler.interface";
+import type { Observation } from "../observation/observation";
+import type { ObservationContext } from "../observation/observation-context";
+import type { ObservationHandler } from "../observation/observation-handler.interface";
+import type { ObservationScope } from "../observation/observation-scope.interface";
 import type { ObservationRegistry } from "./observation-registry.interface";
-import type { ObservationScope } from "./observation-scope.interface";
 
 /**
  * Observation registry backed by AsyncLocalStorage.

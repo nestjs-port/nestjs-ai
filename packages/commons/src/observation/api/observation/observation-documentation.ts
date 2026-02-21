@@ -1,7 +1,7 @@
+import type { ObservationRegistry } from "../registry/observation-registry.interface";
 import type { Observation } from "./observation";
 import type { ObservationContext } from "./observation-context";
 import type { ObservationConvention } from "./observation-convention.interface";
-import type { ObservationRegistry } from "./observation-registry.interface";
 import { SimpleObservation } from "./simple-observation";
 
 type ObservationConventionConstructor<

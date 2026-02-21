@@ -1,5 +1,5 @@
-import type { ObservationContext } from "./observation-context";
-import type { ObservationHandler } from "./observation-handler.interface";
+import type { ObservationContext } from "../observation/observation-context";
+import type { ObservationHandler } from "../observation/observation-handler.interface";
 
 /**
  * Marker base class for meter handlers.

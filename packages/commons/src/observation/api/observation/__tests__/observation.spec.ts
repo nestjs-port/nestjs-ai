@@ -1,8 +1,8 @@
 import { firstValueFrom, map, of, throwError } from "rxjs";
 import { describe, expect, it } from "vitest";
-import { AlsObservationRegistry } from "../als-observation-registry";
-import { KeyValue } from "../key-value";
-import { KeyValues } from "../key-values";
+import { KeyValue } from "../../key-value";
+import { KeyValues } from "../../key-values";
+import { AlsObservationRegistry } from "../../registry";
 import { ObservationContext } from "../observation-context";
 import type { ObservationConvention } from "../observation-convention.interface";
 import type { ObservationHandler } from "../observation-handler.interface";

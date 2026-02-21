@@ -1,1 +1,1 @@
-export {};
+export { PromptAssert } from "./prompt-assert";

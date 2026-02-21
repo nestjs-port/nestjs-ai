@@ -4,6 +4,7 @@ import {
   AiTokenType,
   type Counter,
   KeyValue,
+  type MeterId,
   type MeterRegistry,
   ObservationContext,
   type Tag,
@@ -37,8 +38,8 @@ class SimpleCounter implements Counter {
 class SimpleMeterRegistry implements MeterRegistry {
   private readonly counters: SimpleCounter[] = [];
 
-  counter(name: string, tags: Tag[], description?: string): Counter {
-    const c = new SimpleCounter(name, tags, description);
+  counter(id: MeterId): Counter {
+    const c = new SimpleCounter(id.name, [...id.tags], id.description);
     this.counters.push(c);
     return c;
   }

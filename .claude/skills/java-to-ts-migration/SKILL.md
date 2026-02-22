@@ -26,6 +26,9 @@ Apply the conversion rules in this file, then pull detailed examples from `refer
 4. Convert tests when the input is a test file.
 Use `reference/test-migration.md` for JUnit-to-Vitest mapping and naming constraints.
 Do not add new tests that did not exist in Java.
+Copy Java test-method inline comments verbatim into the matching TypeScript `it()` block.
+Preserve comment wording and relative placement.
+For multi-line inline comments, preserve line splitting and order.
 
 5. Export surface updates.
 If the migrated file is part of public module surface, update the closest `index.ts` barrel export.
@@ -126,6 +129,8 @@ import type { Message } from "./message.interface";
 
 Do not migrate Javadoc or license headers.
 Preserve meaningful inline implementation comments inside method/function bodies.
+For test files, comments inside Java test methods MUST be copied verbatim into the corresponding TypeScript test body.
+Do not paraphrase, summarize, or omit Java method-body comments.
 
 ## Reference Files
 
@@ -145,4 +150,6 @@ Migration Checklist:
 - [ ] Omit Javadoc and license headers
 - [ ] Preserve meaningful inline implementation comments
 - [ ] For tests, keep case names/structure aligned with source JUnit tests
+- [ ] Test-method inline comments copied verbatim and kept in matching locations
+- [ ] No Java method-body comment was paraphrased or omitted
 ```

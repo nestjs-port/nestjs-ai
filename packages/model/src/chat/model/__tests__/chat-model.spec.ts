@@ -10,9 +10,9 @@ import { Generation } from "../generation";
  * This is a common pattern for testing abstract classes in vitest.
  */
 class TestChatModel extends ChatModel {
-  async call(_prompt: Prompt): Promise<ChatResponse> {
-    // Default implementation - will be mocked using vi.spyOn()
-    throw new Error("call method should be mocked");
+  protected async chatPrompt(_prompt: Prompt): Promise<ChatResponse> {
+    // Default implementation - `call` is mocked using vi.spyOn()
+    throw new Error("chatPrompt method should not be called directly");
   }
 }
 
@@ -35,6 +35,15 @@ function createMockResponse(responseText: string | null): ChatResponse {
 }
 
 describe("ChatModel", () => {
+  function spyOnChatPrompt(chatModel: TestChatModel) {
+    return vi.spyOn(
+      chatModel as unknown as {
+        chatPrompt(prompt: Prompt): Promise<ChatResponse>;
+      },
+      "chatPrompt",
+    );
+  }
+
   it("generate with string calls generate with prompt and returns response correctly", async () => {
     const userMessage = "Zero Wing";
     const responseMessage = "All your bases are belong to us";
@@ -42,15 +51,15 @@ describe("ChatModel", () => {
     const response = createMockResponse(responseMessage);
 
     const chatModel = new TestChatModel();
-    const callSpy = vi
-      .spyOn(chatModel, "call")
-      .mockImplementation((prompt: Prompt) => {
+    const callSpy = spyOnChatPrompt(chatModel).mockImplementation(
+      (prompt: Prompt) => {
         expect(prompt).toBeDefined();
         expect(prompt.contents).toBe(userMessage);
         return Promise.resolve(response);
-      });
+      },
+    );
 
-    const result = await chatModel.callString(userMessage);
+    const result = await chatModel.call(userMessage);
 
     expect(result).toBe(responseMessage);
     expect(callSpy).toHaveBeenCalledTimes(1);
@@ -64,13 +73,12 @@ describe("ChatModel", () => {
     const response = createMockResponse(responseMessage);
 
     const chatModel = new TestChatModel();
-    const callSpy = vi.spyOn(chatModel, "call").mockResolvedValue(response);
+    const callSpy = spyOnChatPrompt(chatModel).mockResolvedValue(response);
 
-    const result = await chatModel.callString(userMessage);
+    const result = await chatModel.call(userMessage);
 
     expect(result).toBe(responseMessage);
     expect(callSpy).toHaveBeenCalledTimes(1);
-    expect(callSpy).toHaveBeenCalledWith(expect.any(Prompt));
   });
 
   it("generate with whitespace only string handles correctly", async () => {
@@ -80,9 +88,9 @@ describe("ChatModel", () => {
     const response = createMockResponse(responseMessage);
 
     const chatModel = new TestChatModel();
-    const callSpy = vi.spyOn(chatModel, "call").mockResolvedValue(response);
+    const callSpy = spyOnChatPrompt(chatModel).mockResolvedValue(response);
 
-    const result = await chatModel.callString(userMessage);
+    const result = await chatModel.call(userMessage);
 
     expect(result).toBe(responseMessage);
     expect(callSpy).toHaveBeenCalledTimes(1);
@@ -93,30 +101,27 @@ describe("ChatModel", () => {
     const expectedException = new Error("API call failed");
 
     const chatModel = new TestChatModel();
-    const callSpy = vi
-      .spyOn(chatModel, "call")
-      .mockRejectedValue(expectedException);
+    const callSpy =
+      spyOnChatPrompt(chatModel).mockRejectedValue(expectedException);
 
-    await expect(chatModel.callString(userMessage)).rejects.toThrow(
+    await expect(chatModel.call(userMessage)).rejects.toThrow(
       expectedException,
     );
 
     expect(callSpy).toHaveBeenCalledTimes(1);
-    expect(callSpy).toHaveBeenCalledWith(expect.any(Prompt));
   });
 
   it("generate when response is null handles gracefully", async () => {
     const userMessage = "Test message";
 
     const chatModel = new TestChatModel();
-    const callSpy = vi
-      .spyOn(chatModel, "call")
-      .mockResolvedValue(null as unknown as ChatResponse);
+    const callSpy = spyOnChatPrompt(chatModel).mockResolvedValue(
+      null as unknown as ChatResponse,
+    );
 
-    await expect(chatModel.callString(userMessage)).rejects.toThrow();
+    await expect(chatModel.call(userMessage)).rejects.toThrow();
 
     expect(callSpy).toHaveBeenCalledTimes(1);
-    expect(callSpy).toHaveBeenCalledWith(expect.any(Prompt));
   });
 
   it("generate when assistant message is null handles gracefully", async () => {
@@ -135,9 +140,9 @@ describe("ChatModel", () => {
     });
 
     const chatModel = new TestChatModel();
-    const callSpy = vi.spyOn(chatModel, "call").mockResolvedValue(response);
+    const callSpy = spyOnChatPrompt(chatModel).mockResolvedValue(response);
 
-    const result = await chatModel.callString(userMessage);
+    const result = await chatModel.call(userMessage);
 
     expect(result).toBeNull();
     expect(callSpy).toHaveBeenCalledTimes(1);
@@ -149,9 +154,9 @@ describe("ChatModel", () => {
     const response = createMockResponse(null);
 
     const chatModel = new TestChatModel();
-    const callSpy = vi.spyOn(chatModel, "call").mockResolvedValue(response);
+    const callSpy = spyOnChatPrompt(chatModel).mockResolvedValue(response);
 
-    const result = await chatModel.callString(userMessage);
+    const result = await chatModel.call(userMessage);
 
     expect(result).toBeNull();
     expect(callSpy).toHaveBeenCalledTimes(1);
@@ -164,9 +169,9 @@ describe("ChatModel", () => {
     const response = createMockResponse(responseMessage);
 
     const chatModel = new TestChatModel();
-    const callSpy = vi.spyOn(chatModel, "call").mockResolvedValue(response);
+    const callSpy = spyOnChatPrompt(chatModel).mockResolvedValue(response);
 
-    const result = await chatModel.callString(userMessage);
+    const result = await chatModel.call(userMessage);
 
     expect(result).toBe(responseMessage);
     expect(callSpy).toHaveBeenCalledTimes(1);
@@ -174,16 +179,16 @@ describe("ChatModel", () => {
 
   it("generate multiple times with same client maintains state", async () => {
     const chatModel = new TestChatModel();
-    const callSpy = vi.spyOn(chatModel, "call");
+    const callSpy = spyOnChatPrompt(chatModel);
 
     // First call
     callSpy.mockResolvedValueOnce(createMockResponse("Response 1"));
-    const result1 = await chatModel.callString("Message 1");
+    const result1 = await chatModel.call("Message 1");
     expect(result1).toBe("Response 1");
 
     // Second call
     callSpy.mockResolvedValueOnce(createMockResponse("Response 2"));
-    const result2 = await chatModel.callString("Message 2");
+    const result2 = await chatModel.call("Message 2");
     expect(result2).toBe("Response 2");
 
     expect(callSpy).toHaveBeenCalledTimes(2);

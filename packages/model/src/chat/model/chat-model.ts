@@ -39,7 +39,7 @@ export abstract class ChatModel
     return new DefaultChatOptions();
   }
 
-  override stream(_prompt: Prompt): Observable<ChatResponse> {
+  protected override streamPrompt(_prompt: Prompt): Observable<ChatResponse> {
     throw new Error("streaming is not supported");
   }
 }

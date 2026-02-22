@@ -18,6 +18,12 @@
     "test": "vitest run",
     "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 resources/Filters.g4"
   },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*"
+  },
   "dependencies": {
     "antlr4ng": "^3.0.16"
   }

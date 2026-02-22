@@ -13,10 +13,12 @@ import { ChatClient } from "../../chat-client";
 import { SimpleLoggerAdvisor } from "../simple-logger-advisor";
 
 class TestChatModel extends ChatModel {
-  readonly callMock = vi.fn(async (prompt: Prompt): Promise<ChatResponse> => {
-    this.lastCallPrompt = prompt;
-    return createChatResponse("Your answer is ZXY");
-  });
+  readonly chatPromptMock = vi.fn(
+    async (prompt: Prompt): Promise<ChatResponse> => {
+      this.lastCallPrompt = prompt;
+      return createChatResponse("Your answer is ZXY");
+    },
+  );
 
   readonly streamMock = vi.fn((prompt: Prompt) => {
     this.lastStreamPrompt = prompt;
@@ -26,8 +28,8 @@ class TestChatModel extends ChatModel {
   lastCallPrompt: Prompt | null = null;
   lastStreamPrompt: Prompt | null = null;
 
-  override async call(prompt: Prompt): Promise<ChatResponse> {
-    return this.callMock(prompt);
+  protected override async chatPrompt(prompt: Prompt): Promise<ChatResponse> {
+    return this.chatPromptMock(prompt);
   }
 
   override stream(prompt: Prompt) {

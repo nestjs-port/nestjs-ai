@@ -134,7 +134,7 @@ export class OpenAiChatModel extends ChatModel {
     this._observationConvention = observationConvention;
   }
 
-  override async call(prompt: Prompt): Promise<ChatResponse> {
+  protected async chatPrompt(prompt: Prompt): Promise<ChatResponse> {
     // Before moving any further, build the final request Prompt,
     // merging runtime and default options.
     const requestPrompt = this.buildRequestPrompt(prompt);

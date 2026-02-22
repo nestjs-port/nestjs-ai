@@ -386,20 +386,3 @@ export namespace ToolDefinition {
 ```
 
 **Prefer:** Convert to abstract class (see Section 6a) instead of using namespace pattern.
-
-## 8. toString Implementation
-
-**Java:**
-```java
-@Override
-public String toString() {
-    return "UserMessage{" + "content='" + getText() + "'}";
-}
-```
-
-**TypeScript:**
-```typescript
-[Symbol.toPrimitive](): string {
-    return `UserMessage{content='${this.text}'}`;
-}
-```

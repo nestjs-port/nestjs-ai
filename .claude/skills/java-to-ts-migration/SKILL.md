@@ -98,7 +98,6 @@ Keep export style consistent with neighboring files.
 5. Replace `Assert.notNull(...)` with `assert(...)` from `node:assert/strict`.
 6. Replace Java copy constructors (`new HashMap<>(x)`, `new ArrayList<>(x)`) with spread copies.
 7. Convert Java interfaces with `static` or `default` methods into TypeScript `abstract class`; keep plain interfaces as `interface`.
-8. Convert `toString()` to `[Symbol.toPrimitive](): string` when string coercion behavior is part of public API.
 
 ## Import/Export Patterns
 

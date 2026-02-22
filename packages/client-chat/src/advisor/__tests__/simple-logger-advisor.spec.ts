@@ -32,7 +32,7 @@ class TestChatModel extends ChatModel {
     return this.chatPromptMock(prompt);
   }
 
-  override stream(prompt: Prompt) {
+  protected override streamPrompt(prompt: Prompt) {
     return this.streamMock(prompt);
   }
 }

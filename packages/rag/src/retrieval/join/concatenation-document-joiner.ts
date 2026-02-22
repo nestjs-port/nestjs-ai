@@ -9,12 +9,9 @@ import { DocumentJoiner } from "./document-joiner";
  * by concatenating them into a single collection of documents. In case of duplicate
  * documents, the first occurrence is kept. The score of each document is kept as is. The
  * result is a list of unique documents sorted by their score in descending order.
- *
- * @author Thomas Vitale
- * @since 1.0.0
  */
 export class ConcatenationDocumentJoiner extends DocumentJoiner {
-  private static readonly logger: Logger = LoggerFactory.getLogger(
+  private readonly logger: Logger = LoggerFactory.getLogger(
     ConcatenationDocumentJoiner.name,
   );
 
@@ -27,9 +24,7 @@ export class ConcatenationDocumentJoiner extends DocumentJoiner {
       assert(value != null, "documentsForQuery cannot contain null values");
     }
 
-    ConcatenationDocumentJoiner.logger.debug(
-      "Joining documents by concatenation",
-    );
+    this.logger.debug("Joining documents by concatenation");
 
     // Flatten all documents, deduplicate by id (keep first), sort by score desc
     const seen = new Map<string, Document>();

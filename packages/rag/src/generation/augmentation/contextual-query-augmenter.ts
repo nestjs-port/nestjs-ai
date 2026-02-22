@@ -26,7 +26,7 @@ export interface ContextualQueryAugmenterProps {
  * ```
  */
 export class ContextualQueryAugmenter extends QueryAugmenter {
-  private static readonly logger: Logger = LoggerFactory.getLogger(
+  private readonly logger: Logger = LoggerFactory.getLogger(
     ContextualQueryAugmenter.name,
   );
 
@@ -98,9 +98,7 @@ Politely inform the user that you can't answer it.`,
     assert(query, "query cannot be null");
     assert(documents, "documents cannot be null");
 
-    ContextualQueryAugmenter.logger.debug(
-      "Augmenting query with contextual data",
-    );
+    this.logger.debug("Augmenting query with contextual data");
 
     if (documents.length === 0) {
       return this.augmentQueryWhenEmptyContext(query);
@@ -121,12 +119,12 @@ Politely inform the user that you can't answer it.`,
 
   private augmentQueryWhenEmptyContext(query: Query): Query {
     if (this.allowEmptyContext) {
-      ContextualQueryAugmenter.logger.debug(
+      this.logger.debug(
         "Empty context is allowed. Returning the original query.",
       );
       return query;
     }
-    ContextualQueryAugmenter.logger.debug(
+    this.logger.debug(
       "Empty context is not allowed. Returning a specific query for empty context.",
     );
     return new Query(this.emptyContextPromptTemplate.render());

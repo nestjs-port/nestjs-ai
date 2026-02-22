@@ -294,7 +294,7 @@ export class GoogleGenAiChatModel extends ChatModel {
     return new Prompt(prompt.instructions, requestOptions);
   }
 
-  override stream(prompt: Prompt): Observable<ChatResponse> {
+  protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
     return this.internalStream(requestPrompt, null);
   }

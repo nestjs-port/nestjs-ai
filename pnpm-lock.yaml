@@ -200,6 +200,10 @@ importers:
       antlr4ng:
         specifier: ^3.0.16
         version: 3.0.16
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../commons
 
 packages:
 

@@ -43,8 +43,4 @@ export class ToolResponseMessage extends AbstractMessage {
       properties: { ...this.metadata },
     });
   }
-
-  [Symbol.toPrimitive](): string {
-    return `ToolResponseMessage{responses=${JSON.stringify(this.responses)}, messageType=${this.messageType}, metadata=${JSON.stringify(this.metadata)}}`;
-  }
 }

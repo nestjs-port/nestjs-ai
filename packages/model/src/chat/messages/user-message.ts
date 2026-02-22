@@ -49,8 +49,4 @@ export class UserMessage extends AbstractMessage implements MediaContent {
       media: [...this._media],
     });
   }
-
-  [Symbol.toPrimitive](): string {
-    return `UserMessage{content='${this.text}', metadata=${JSON.stringify(this.metadata)}, messageType=${this.messageType}}`;
-  }
 }

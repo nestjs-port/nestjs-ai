@@ -1,6 +1,7 @@
 export * from "./autoconfigure";
 export * from "./chat";
 export * from "./converter";
+export * from "./embedding";
 export * from "./model";
 export * from "./support";
 export * from "./tool";

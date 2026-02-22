@@ -38,8 +38,4 @@ export class SystemMessage extends AbstractMessage {
       properties: { ...this.metadata },
     });
   }
-
-  [Symbol.toPrimitive](): string {
-    return `SystemMessage{textContent='${this.text}', messageType=${this.messageType}, metadata=${JSON.stringify(this.metadata)}}`;
-  }
 }

@@ -1,1 +1,1 @@
-export { createChatModelObservationHandlerProviders } from "./chat-model-observation-auto-configuration";
+export { createModelObservationHandlerProviders } from "./model-observation-auto-configuration";

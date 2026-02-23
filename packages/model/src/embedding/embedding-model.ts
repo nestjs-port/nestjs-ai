@@ -62,14 +62,6 @@ export abstract class EmbeddingModel
     );
   }
 
-  /**
-   * Extracts the text content from a {@link Document} to be used for embedding.
-   */
-  getEmbeddingContent(document: Document): string | null {
-    assert(document != null, "Document must not be null");
-    return document.text;
-  }
-
   private async embedTexts(texts: string[]): Promise<number[][]> {
     assert(texts != null, "Texts must not be null");
     const response = await this.call(
@@ -90,9 +82,7 @@ export abstract class EmbeddingModel
     const batches = batchingStrategy.batch(documents);
 
     for (const subBatch of batches) {
-      const texts = subBatch.map((document) =>
-        this.getEmbeddingContent(document),
-      );
+      const texts = subBatch.map((document) => document.text ?? "");
       const request = new EmbeddingRequest(
         texts.map((text) => text ?? ""),
         options,

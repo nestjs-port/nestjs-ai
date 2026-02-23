@@ -53,7 +53,7 @@ describe("FileDocumentWriter", () => {
 
   it("testBasicWrite", async () => {
     const writer = new FileDocumentWriter({ fileName: testFileName });
-    await writer.accept(testDocuments);
+    await writer.write(testDocuments);
 
     const lines = await readAllLines(testFileName);
     expect(lines[0]).toBe("");
@@ -79,7 +79,7 @@ describe("FileDocumentWriter", () => {
       metadataMode: MetadataMode.NONE,
       append: false,
     });
-    await writer.accept(testDocuments);
+    await writer.write(testDocuments);
 
     const lines = await readAllLines(testFileName);
     expect(lines[0]).toBe("");
@@ -111,7 +111,7 @@ describe("FileDocumentWriter", () => {
       metadataMode: MetadataMode.ALL,
       append: false,
     });
-    await writer.accept(testDocuments);
+    await writer.write(testDocuments);
 
     const lines = await readAllLines(testFileName);
     expect(lines[0]).toBe("");
@@ -158,7 +158,7 @@ describe("FileDocumentWriter", () => {
       metadataMode: MetadataMode.NONE,
       append: true,
     });
-    await writer.accept(testDocuments.slice(0, 2));
+    await writer.write(testDocuments.slice(0, 2));
 
     const lines = await readAllLines(testFileName);
     expect(lines[0]).toBe("Test String");

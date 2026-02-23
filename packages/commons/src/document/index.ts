@@ -5,8 +5,8 @@ export {
 } from "./default-content-formatter";
 export { Document, DocumentBuilder } from "./document";
 export { DocumentMetadata } from "./document-metadata";
-export { DocumentReader } from "./document-reader";
-export { DocumentTransformer } from "./document-transformer";
-export { DocumentWriter } from "./document-writer";
+export type { DocumentReader } from "./document-reader.interface";
+export type { DocumentTransformer } from "./document-transformer.interface";
+export type { DocumentWriter } from "./document-writer.interface";
 export * from "./id";
 export { MetadataMode } from "./metadata-mode";

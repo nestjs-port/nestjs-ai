@@ -13,3 +13,4 @@ export * from "./temporal";
 export * from "./tokenizer";
 export * from "./util";
 export * from "./web";
+export * from "./writer";

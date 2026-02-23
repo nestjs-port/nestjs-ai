@@ -1,3 +1,7 @@
+export {
+  AbstractObservationVectorStore,
+  type AbstractObservationVectorStoreProps,
+} from "./abstract-observation-vector-store";
 export { DefaultVectorStoreObservationConvention } from "./default-vector-store-observation-convention";
 export {
   VectorStoreObservationContext,

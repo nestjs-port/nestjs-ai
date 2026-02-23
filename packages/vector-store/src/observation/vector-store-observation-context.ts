@@ -63,6 +63,16 @@ export class VectorStoreObservationContext extends ObservationContext {
     this.queryRequest = queryRequest;
     this.queryResponse = queryResponse;
   }
+
+  static builder(
+    databaseSystem: string,
+    operationName: string | VectorStoreObservationContext.Operation,
+  ): VectorStoreObservationContext.Builder {
+    return new VectorStoreObservationContext.Builder(
+      databaseSystem,
+      operationName,
+    );
+  }
 }
 
 export namespace VectorStoreObservationContext {
@@ -72,5 +82,77 @@ export namespace VectorStoreObservationContext {
     static readonly QUERY = new Operation("query");
 
     private constructor(public readonly value: string) {}
+  }
+
+  export class Builder {
+    private readonly _databaseSystem: string;
+    private readonly _operationName: string;
+    private _collectionName: string | null = null;
+    private _dimensions: number | null = null;
+    private _fieldName: string | null = null;
+    private _namespace: string | null = null;
+    private _similarityMetric: string | null = null;
+    private _queryRequest: SearchRequest | null = null;
+    private _queryResponse: Document[] | null = null;
+
+    constructor(
+      databaseSystem: string,
+      operationName: string | VectorStoreObservationContext.Operation,
+    ) {
+      this._databaseSystem = databaseSystem;
+      this._operationName =
+        operationName instanceof VectorStoreObservationContext.Operation
+          ? operationName.value
+          : operationName;
+    }
+
+    collectionName(collectionName: string | null): this {
+      this._collectionName = collectionName;
+      return this;
+    }
+
+    dimensions(dimensions: number | null): this {
+      this._dimensions = dimensions;
+      return this;
+    }
+
+    fieldName(fieldName: string | null): this {
+      this._fieldName = fieldName;
+      return this;
+    }
+
+    namespace(namespace: string | null): this {
+      this._namespace = namespace;
+      return this;
+    }
+
+    queryRequest(request: SearchRequest | null): this {
+      this._queryRequest = request;
+      return this;
+    }
+
+    queryResponse(documents: Document[] | null): this {
+      this._queryResponse = documents;
+      return this;
+    }
+
+    similarityMetric(similarityMetric: string | null): this {
+      this._similarityMetric = similarityMetric;
+      return this;
+    }
+
+    build(): VectorStoreObservationContext {
+      return new VectorStoreObservationContext({
+        databaseSystem: this._databaseSystem,
+        operationName: this._operationName,
+        collectionName: this._collectionName,
+        dimensions: this._dimensions,
+        fieldName: this._fieldName,
+        namespace: this._namespace,
+        similarityMetric: this._similarityMetric,
+        queryRequest: this._queryRequest,
+        queryResponse: this._queryResponse,
+      });
+    }
   }
 }

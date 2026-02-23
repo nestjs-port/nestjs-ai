@@ -43,9 +43,12 @@ export abstract class AbstractEmbeddingModel extends EmbeddingModel {
     dummyContent: string,
   ): Promise<number> {
     if (AbstractEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.has(modelName)) {
+      // Retrieve the dimension from a pre-configured file.
       return AbstractEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.get(modelName)!;
     }
 
+    // Determine the dimensions empirically.
+    // Generate an embedding and count the dimension size;
     return (await embeddingModel.embed(dummyContent)).length;
   }
 

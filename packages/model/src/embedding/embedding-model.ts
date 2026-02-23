@@ -22,18 +22,44 @@ export abstract class EmbeddingModel
   /**
    * Embeds the given text into a vector.
    */
-  async embed(text: string): Promise<number[]> {
-    assert(text != null, "Text must not be null");
-    const response = await this.embedAll([text]);
-    return response[0];
-  }
+  async embed(text: string): Promise<number[]>;
+  async embed(document: Document): Promise<number[]>;
+  async embed(texts: string[]): Promise<number[][]>;
+  async embed(
+    documents: Document[],
+    options: EmbeddingOptions | null,
+    batchingStrategy: BatchingStrategy,
+  ): Promise<number[][]>;
+  async embed(
+    input: string | Document | string[] | Document[],
+    options?: EmbeddingOptions | null,
+    batchingStrategy?: BatchingStrategy,
+  ): Promise<number[] | number[][]> {
+    assert(input != null, "Input must not be null");
 
-  /**
-   * Embeds the given document's content into a vector.
-   */
-  async embedOne(document: Document): Promise<number[]> {
-    assert(document != null, "Document must not be null");
-    return this.embedDocument(document);
+    if (typeof input === "string") {
+      const response = await this.embedTexts([input]);
+      return response[0];
+    }
+
+    if (!Array.isArray(input)) {
+      return this.embedDocument(input);
+    }
+
+    if (input.length === 0) {
+      return [];
+    }
+
+    if (typeof input[0] === "string") {
+      return this.embedTexts(input as string[]);
+    }
+
+    assert(batchingStrategy != null, "BatchingStrategy must not be null");
+    return this.embedDocumentBatch(
+      input as Document[],
+      options ?? null,
+      batchingStrategy,
+    );
   }
 
   /**
@@ -44,10 +70,7 @@ export abstract class EmbeddingModel
     return document.text;
   }
 
-  /**
-   * Embeds a batch of texts into vectors.
-   */
-  async embedAll(texts: string[]): Promise<number[][]> {
+  private async embedTexts(texts: string[]): Promise<number[][]> {
     assert(texts != null, "Texts must not be null");
     const response = await this.call(
       new EmbeddingRequest(texts, EmbeddingOptions.builder().build()),
@@ -56,10 +79,7 @@ export abstract class EmbeddingModel
     return response.results.map((embedding) => embedding.output);
   }
 
-  /**
-   * Embeds a batch of {@link Document}s into vectors based on a {@link BatchingStrategy}.
-   */
-  async embedDocuments(
+  private async embedDocumentBatch(
     documents: Document[],
     options: EmbeddingOptions | null,
     batchingStrategy: BatchingStrategy,

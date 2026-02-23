@@ -3,7 +3,7 @@ import { createWriteStream } from "node:fs";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-import { type Document, DocumentWriter, MetadataMode } from "../document";
+import { type Document, type DocumentWriter, MetadataMode } from "../document";
 import { StringUtils } from "../util";
 
 export interface FileDocumentWriterProps {
@@ -13,7 +13,7 @@ export interface FileDocumentWriterProps {
   append?: boolean;
 }
 
-export class FileDocumentWriter extends DocumentWriter {
+export class FileDocumentWriter implements DocumentWriter {
   static readonly METADATA_START_PAGE_NUMBER = "page_number";
   static readonly METADATA_END_PAGE_NUMBER = "end_page_number";
 
@@ -28,7 +28,6 @@ export class FileDocumentWriter extends DocumentWriter {
     metadataMode = MetadataMode.NONE,
     append = false,
   }: FileDocumentWriterProps) {
-    super();
     assert(StringUtils.hasText(fileName), "File name must have a text.");
     assert(metadataMode != null, "MetadataMode must not be null.");
 
@@ -38,7 +37,7 @@ export class FileDocumentWriter extends DocumentWriter {
     this._append = append;
   }
 
-  async accept(docs: Document[]): Promise<void> {
+  async write(docs: Document[]): Promise<void> {
     try {
       const source = Readable.from(this.contentChunks(docs));
       const destination = createWriteStream(this._fileName, {

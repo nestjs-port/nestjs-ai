@@ -19,10 +19,12 @@
     "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 resources/Filters.g4"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "*"
+    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/model": "*"
   },
   "devDependencies": {
-    "@nestjs-ai/commons": "workspace:*"
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*"
   },
   "dependencies": {
     "antlr4ng": "^3.0.16"

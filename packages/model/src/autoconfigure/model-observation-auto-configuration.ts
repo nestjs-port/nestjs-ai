@@ -7,17 +7,18 @@ import {
 import {
   ChatModelCompletionObservationHandler,
   ChatModelMeterObservationHandler,
-} from "../chat/observation";
+} from "../chat";
+import { EmbeddingModelMeterObservationHandler } from "../embedding";
 
-class ChatModelObservationHandlerConfigurer {}
+class ModelObservationHandlerConfigurer {}
 
 /**
- * Creates providers that register default chat model observation handlers.
+ * Creates providers that register default model observation handlers.
  */
-export function createChatModelObservationHandlerProviders(): ProviderConfiguration[] {
+export function createModelObservationHandlerProviders(): ProviderConfiguration[] {
   return [
     {
-      token: ChatModelObservationHandlerConfigurer,
+      token: ModelObservationHandlerConfigurer,
       useFactory: (
         observationHandlers: ObservationHandlers,
         meterRegistry?: MeterRegistry,
@@ -40,7 +41,19 @@ export function createChatModelObservationHandlerProviders(): ProviderConfigurat
           )
         ) {
           observationHandlers.addHandler(
-            new ChatModelMeterObservationHandler({ meterRegistry }),
+            new ChatModelMeterObservationHandler(meterRegistry),
+          );
+        }
+
+        if (
+          meterRegistry != null &&
+          !observationHandlers.handlers.some(
+            (handler) =>
+              handler instanceof EmbeddingModelMeterObservationHandler,
+          )
+        ) {
+          observationHandlers.addHandler(
+            new EmbeddingModelMeterObservationHandler(meterRegistry),
           );
         }
 

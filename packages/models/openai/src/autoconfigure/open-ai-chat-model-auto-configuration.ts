@@ -8,7 +8,7 @@ import {
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
-  createChatModelObservationHandlerProviders,
+  createModelObservationHandlerProviders,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import { OpenAiApi } from "../api";
@@ -24,7 +24,7 @@ export function configureOpenAiChatModel(
 ): ChatModelConfiguration {
   return {
     providers: [
-      ...createChatModelObservationHandlerProviders(),
+      ...createModelObservationHandlerProviders(),
       ...createOpenAiApiProviders(properties),
       ...createOpenAiChatModelProviders(properties),
     ],

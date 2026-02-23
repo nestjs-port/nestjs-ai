@@ -18,4 +18,5 @@ export {
   ModalityType,
   ModalityUtils,
 } from "./embedding-result-metadata";
+export * from "./observation";
 export { TokenCountBatchingStrategy } from "./token-count-batching-strategy";

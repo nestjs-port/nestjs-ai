@@ -102,7 +102,7 @@ describe("ChatModelMeterObservationHandler", () => {
   ) {
     const observationRegistry = new AlsObservationRegistry();
     observationRegistry.addHandler(
-      new ChatModelMeterObservationHandler({ meterRegistry }),
+      new ChatModelMeterObservationHandler(meterRegistry),
     );
 
     const convention = new DefaultChatModelObservationConvention();

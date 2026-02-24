@@ -32,7 +32,7 @@ For multi-line inline comments, preserve line splitting and order.
 
 5. Export surface updates.
 If the migrated file is part of public module surface, update the closest `index.ts` barrel export.
-Keep export style consistent with neighboring files.
+Use explicit file exports and avoid widening public API unintentionally.
 
 ## Directory Structure Mapping
 
@@ -113,6 +113,15 @@ export type { Message } from "./message.interface";
 export { MessageType } from "./message-type";
 ```
 
+#### Barrel Export Rules (Required)
+
+1. Use `export * from "./<directory>";` only for child directories that have their own `index.ts`.
+2. For `.ts` files in the same directory as `index.ts`, always use explicit named exports:
+   - `export { Query, QueryBuilder } from "./query";`
+   - `export type { Message } from "./message.interface";`
+3. Do not use `export * from "./<file>";` for same-directory files.
+4. If migrating a file changes barrel exports, update every affected `index.ts` to satisfy rules 1-3.
+
 ### Package Imports
 
 ```typescript
@@ -146,6 +155,7 @@ Migration Checklist:
 - [ ] Preserve behavior and public API intent
 - [ ] Apply getter/field/constructor conversion rules
 - [ ] Keep imports and barrel exports consistent
+- [ ] `index.ts` uses `export *` only for directories; same-directory files use explicit exports
 - [ ] Omit Javadoc and license headers
 - [ ] Preserve meaningful inline implementation comments
 - [ ] For tests, keep case names/structure aligned with source JUnit tests

@@ -43,7 +43,7 @@ class TestDocumentRetriever extends DocumentRetriever {
 }
 
 describe("RetrievalAugmentationAdvisor", () => {
-  it("whenQueryTransformersContainNullElementsThenThrow", () => {
+  it("when query transformers contain null elements then throw", () => {
     expect(
       () =>
         new RetrievalAugmentationAdvisor({
@@ -56,7 +56,7 @@ describe("RetrievalAugmentationAdvisor", () => {
     ).toThrow("queryTransformers cannot contain null elements");
   });
 
-  it("whenDocumentRetrieverIsNullThenThrow", () => {
+  it("when document retriever is null then throw", () => {
     expect(
       () =>
         new RetrievalAugmentationAdvisor({
@@ -65,7 +65,7 @@ describe("RetrievalAugmentationAdvisor", () => {
     ).toThrow("documentRetriever cannot be null");
   });
 
-  it("theOneWithTheDocumentRetriever", async () => {
+  it("when document retriever is configured then augment prompt with context", async () => {
     // Chat Model
     const chatModel = new TestChatModel();
 

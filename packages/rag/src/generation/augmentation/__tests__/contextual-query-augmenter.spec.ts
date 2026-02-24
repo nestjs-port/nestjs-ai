@@ -1,7 +1,7 @@
 import { Document } from "@nestjs-ai/commons";
 import { PromptTemplate } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { Query } from "../../../preretrieval";
+import { Query } from "../../../query";
 import { ContextualQueryAugmenter } from "../contextual-query-augmenter";
 import type { QueryAugmenter } from "../query-augmenter";
 

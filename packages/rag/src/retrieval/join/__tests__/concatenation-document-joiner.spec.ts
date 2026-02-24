@@ -1,6 +1,6 @@
 import { Document } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { Query } from "../../../preretrieval";
+import { Query } from "../../../query";
 import { ConcatenationDocumentJoiner } from "../concatenation-document-joiner";
 import type { DocumentJoiner } from "../document-joiner";
 

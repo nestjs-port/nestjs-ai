@@ -1,5 +1,5 @@
 import type { Document } from "@nestjs-ai/commons";
-import type { Query } from "../../preretrieval";
+import type { Query } from "../../query";
 
 export abstract class DocumentRetriever {
   abstract retrieve(query: Query): Promise<Document[]>;

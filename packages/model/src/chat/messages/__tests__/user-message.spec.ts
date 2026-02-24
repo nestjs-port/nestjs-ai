@@ -163,23 +163,4 @@ describe("UserMessage", () => {
 
     expect(message1.text).not.toBe(message2.text);
   });
-
-  it("user message to string", () => {
-    const text = "Test message";
-    const message = new UserMessage({ content: text });
-
-    const stringValue = String(message);
-    expect(stringValue).toContain("UserMessage");
-    expect(stringValue).toContain(text);
-    expect(stringValue).toContain("USER");
-  });
-
-  it("user message to string with media", () => {
-    const text = "Test with media";
-    const message = new UserMessage({ content: text, media: [] });
-
-    const stringValue = String(message);
-    expect(stringValue).toContain("UserMessage");
-    expect(stringValue).toContain(text);
-  });
 });

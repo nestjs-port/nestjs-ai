@@ -4,7 +4,7 @@ import { AbstractFilterExpressionConverter } from "./abstract-filter-expression-
 const DATE_FORMAT_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
 export class SimpleVectorStoreFilterExpressionConverter extends AbstractFilterExpressionConverter {
-  protected doExpression(
+  protected override doExpression(
     expression: Filter.Expression,
     context: { value: string },
   ): void {
@@ -44,14 +44,17 @@ export class SimpleVectorStoreFilterExpressionConverter extends AbstractFilterEx
     }
   }
 
-  protected doKey(filterKey: Filter.Key, context: { value: string }): void {
+  protected override doKey(
+    filterKey: Filter.Key,
+    context: { value: string },
+  ): void {
     const identifier = this.hasOuterQuotes(filterKey.key)
       ? this.removeOuterQuotes(filterKey.key)
       : filterKey.key;
     context.value += `#metadata['${identifier}']`;
   }
 
-  protected doValue(
+  protected override doValue(
     filterValue: Filter.Value,
     context: { value: string },
   ): void {
@@ -98,7 +101,10 @@ export class SimpleVectorStoreFilterExpressionConverter extends AbstractFilterEx
     context.value += `${formattedList}.contains(${metadata})`;
   }
 
-  protected doSingleValue(value: unknown, context: { value: string }): void {
+  protected override doSingleValue(
+    value: unknown,
+    context: { value: string },
+  ): void {
     if (value instanceof Date) {
       context.value += `'${this.formatDate(value)}'`;
       return;
@@ -120,7 +126,10 @@ export class SimpleVectorStoreFilterExpressionConverter extends AbstractFilterEx
     context.value += String(value);
   }
 
-  protected doGroup(group: Filter.Group, context: { value: string }): void {
+  protected override doGroup(
+    group: Filter.Group,
+    context: { value: string },
+  ): void {
     context.value += "(";
     super.doGroup(group, context);
     context.value += ")";

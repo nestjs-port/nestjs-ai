@@ -20,11 +20,13 @@
   "peerDependencies": {
     "@nestjs-ai/commons": "*",
     "@nestjs-ai/client-chat": "*",
-    "@nestjs-ai/model": "*"
+    "@nestjs-ai/model": "*",
+    "@nestjs-ai/vector-store": "*"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/client-chat": "workspace:*",
-    "@nestjs-ai/model": "workspace:*"
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*"
   }
 }

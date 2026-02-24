@@ -16,6 +16,10 @@ export default defineConfig({
         __dirname,
         "packages/template-st/src",
       ),
+      "@nestjs-ai/vector-store": path.resolve(
+        __dirname,
+        "packages/vector-store/src",
+      ),
     },
   },
   test: {

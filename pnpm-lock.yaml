@@ -204,6 +204,9 @@ importers:
       antlr4ng:
         specifier: ^3.0.16
         version: 3.0.16
+      spel2js:
+        specifier: ^0.2.9
+        version: 0.2.9
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -1266,6 +1269,10 @@ packages:
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
+
+  spel2js@0.2.9:
+    resolution: {integrity: sha512-wquA+u9as+6cV6DBDHi2UKMEYBpI8L5kn4i2MUIDKZSv5AgDQiw00Z8nH2hxrRypuz+BGDJsfjOLAb9eiaylig==}
+    engines: {node: '>=8'}
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
@@ -2512,6 +2519,8 @@ snapshots:
       is-fullwidth-code-point: 5.1.0
 
   source-map-js@1.2.1: {}
+
+  spel2js@0.2.9: {}
 
   stackback@0.0.2: {}
 

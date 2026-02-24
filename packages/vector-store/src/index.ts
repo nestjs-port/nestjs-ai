@@ -4,6 +4,11 @@ export * from "./observation";
 export * from "./properties";
 export { SearchRequest, SearchRequestBuilder } from "./search-request";
 export {
+  EmbeddingMath,
+  SimpleVectorStore,
+  SimpleVectorStoreBuilder,
+} from "./simple-vector-store";
+export {
   SimpleVectorStoreContent,
   type SimpleVectorStoreContentProps,
 } from "./simple-vector-store-content";

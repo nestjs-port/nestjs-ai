@@ -47,6 +47,7 @@ export abstract class AbstractObservationVectorStore extends VectorStore {
   }
 
   override async add(documents: Document[]): Promise<void> {
+    assert(documents != null, "Documents list cannot be null");
     this.validateNonTextDocuments(documents);
     const observationContext = this.createObservationContextBuilder(
       VectorStoreObservationContext.Operation.ADD.value,

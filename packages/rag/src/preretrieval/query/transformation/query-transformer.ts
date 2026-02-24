@@ -1,4 +1,4 @@
-import type { Query } from "../query";
+import type { Query } from "../../../query";
 
 export abstract class QueryTransformer {
   abstract transform(query: Query): Promise<Query>;

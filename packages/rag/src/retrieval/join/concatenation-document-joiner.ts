@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import type { Document } from "@nestjs-ai/commons";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import type { Query } from "../../preretrieval";
+import type { Query } from "../../query";
 import { DocumentJoiner } from "./document-joiner";
 
 /**

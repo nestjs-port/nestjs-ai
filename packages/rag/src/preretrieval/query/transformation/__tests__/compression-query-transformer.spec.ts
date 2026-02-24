@@ -1,7 +1,7 @@
 import type { ChatClient } from "@nestjs-ai/client-chat";
 import { PromptTemplate } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import type { Query } from "../../query";
+import type { Query } from "../../../../query";
 import { CompressionQueryTransformer } from "../compression-query-transformer";
 import type { QueryTransformer } from "../query-transformer";
 

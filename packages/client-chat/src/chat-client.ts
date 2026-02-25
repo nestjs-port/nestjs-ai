@@ -128,23 +128,23 @@ export namespace ChatClient {
   }
 
   export interface CallResponseSpec {
+    entity<T>(
+      structuredOutputConverter: StructuredOutputConverter<T>,
+    ): Promise<T | null>;
     entity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: Type<OutputTypeTarget<TSchema>>,
     ): Promise<SchemaOutput<TSchema> | null>;
-    entity<T>(
-      structuredOutputConverter: StructuredOutputConverter<T>,
-    ): Promise<T | null>;
     chatClientResponse(): Promise<ChatClientResponse>;
     chatResponse(): Promise<ChatResponse | null>;
     content(): Promise<string | null>;
+    responseEntity<T>(
+      structuredOutputConverter: StructuredOutputConverter<T>,
+    ): Promise<ResponseEntity<ChatResponse, T>>;
     responseEntity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: Type<OutputTypeTarget<TSchema>>,
     ): Promise<ResponseEntity<ChatResponse, SchemaOutput<TSchema>>>;
-    responseEntity<T>(
-      structuredOutputConverter: StructuredOutputConverter<T>,
-    ): Promise<ResponseEntity<ChatResponse, T>>;
   }
 
   export interface StreamResponseSpec {

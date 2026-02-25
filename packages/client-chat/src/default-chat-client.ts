@@ -379,13 +379,13 @@ export namespace DefaultChatClient {
       this._observationConvention = observationConvention;
     }
 
+    responseEntity<T>(
+      structuredOutputConverter: StructuredOutputConverter<T>,
+    ): Promise<ResponseEntity<ChatResponse, T>>;
     responseEntity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
     ): Promise<ResponseEntity<ChatResponse, SchemaOutput<TSchema>>>;
-    responseEntity<T>(
-      structuredOutputConverter: StructuredOutputConverter<T>,
-    ): Promise<ResponseEntity<ChatResponse, T>>;
     async responseEntity(
       schemaOrConverter:
         | JsonOrJsonArraySchema
@@ -423,13 +423,13 @@ export namespace DefaultChatClient {
       return new ResponseEntity<ChatResponse, T>(chatResponse, entity);
     }
 
+    entity<T>(
+      structuredOutputConverter: StructuredOutputConverter<T>,
+    ): Promise<T | null>;
     entity<TSchema extends JsonOrJsonArraySchema>(
       schema: TSchema,
       outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
     ): Promise<SchemaOutput<TSchema> | null>;
-    entity<T>(
-      structuredOutputConverter: StructuredOutputConverter<T>,
-    ): Promise<T | null>;
     async entity(
       schemaOrConverter:
         | JsonOrJsonArraySchema

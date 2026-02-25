@@ -1,0 +1,32 @@
+{
+  "name": "@nestjs-ai/advisors-vector-store",
+  "version": "0.0.0",
+  "description": "Vector store advisors for NestJS AI",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/client-chat": "*",
+    "@nestjs-ai/model": "*",
+    "@nestjs-ai/vector-store": "*"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/client-chat": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*"
+  }
+}

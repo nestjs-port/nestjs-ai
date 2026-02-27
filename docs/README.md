@@ -18,4 +18,4 @@ pnpm docs:build
 pnpm docs:clean
 ```
 
-Generated site output is written to `docs/site`.
+Generated site output is written to `site`.

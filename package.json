@@ -11,8 +11,8 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "test": "turbo run test",
-    "docs:build": "pnpm exec antora --fetch --stacktrace --to-dir ./docs/site ./docs/antora/antora-playbook.yml",
-    "docs:clean": "rimraf docs/site",
+    "docs:build": "pnpm exec antora --fetch --stacktrace --to-dir ./site ./docs/antora/antora-playbook.yml",
+    "docs:clean": "rimraf docs/antora/site",
     "clean": "turbo run clean --force && rimraf .turbo",
     "prepare": "husky"
   },

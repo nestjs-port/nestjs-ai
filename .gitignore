@@ -143,5 +143,8 @@ vite.config.ts.timestamp-*
 .vscode/
 .turbo/
 
+# macOS Finder
+.DS_Store
+
 # Docs
 docs/antora/site

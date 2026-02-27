@@ -1,6 +1,4 @@
-export {
-  EmptyJsonMetadataGenerator,
-  type JsonMetadataGenerator,
-  JsonReader,
-  type JsonReaderProps,
-} from "./json-reader";
+export { EmptyJsonMetadataGenerator } from "./empty-json-metadata-generator";
+export type { JsonMetadataGenerator } from "./json-metadata-generator";
+export { JsonReader, type JsonReaderProps } from "./json-reader";
+export { TextReader, type TextReaderProps } from "./text-reader";

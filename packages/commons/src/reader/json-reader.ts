@@ -2,20 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import { Document, type DocumentReader } from "../document";
-
-export interface JsonMetadataGenerator {
-  generate(jsonMap: Record<string, unknown>): Record<string, unknown>;
-}
-
-export class EmptyJsonMetadataGenerator implements JsonMetadataGenerator {
-  private static readonly EMPTY_MAP: Record<string, unknown> = Object.freeze(
-    {},
-  );
-
-  generate(_jsonMap: Record<string, unknown>): Record<string, unknown> {
-    return EmptyJsonMetadataGenerator.EMPTY_MAP;
-  }
-}
+import { EmptyJsonMetadataGenerator } from "./empty-json-metadata-generator";
+import type { JsonMetadataGenerator } from "./json-metadata-generator";
 
 export interface JsonReaderProps {
   resource: string | URL | Buffer;

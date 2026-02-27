@@ -11,6 +11,8 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "test": "turbo run test",
+    "docs:build": "pnpm exec antora --fetch --stacktrace --to-dir ./docs/site ./docs/antora/antora-playbook.yml",
+    "docs:clean": "rimraf docs/site",
     "clean": "turbo run clean --force && rimraf .turbo",
     "prepare": "husky"
   },
@@ -30,7 +32,15 @@
     "*": "biome check --no-errors-on-unmatched"
   },
   "devDependencies": {
+    "@antora/cli": "3.1.14",
+    "@antora/atlas-extension": "^1.0.0-alpha.5",
+    "@antora/collector-extension": "1.0.2",
+    "@antora/site-generator": "3.1.14",
+    "@asciidoctor/tabs": "^1.0.0-beta.6",
     "@biomejs/biome": "2.3.10",
+    "@djencks/asciidoctor-mathjax": "^0.0.9",
+    "@springio/antora-extensions": "^1.14.2",
+    "@springio/asciidoctor-extensions": "^1.0.0-alpha.12",
     "@types/node": "^25.0.9",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

@@ -1,0 +1,5 @@
+name: ai
+version: true
+title: Spring AI
+nav:
+  - modules/ROOT/nav.adoc

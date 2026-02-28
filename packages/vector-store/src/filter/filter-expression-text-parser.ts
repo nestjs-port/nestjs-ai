@@ -149,21 +149,21 @@ export class FilterExpressionVisitor extends FiltersVisitor<Filter.Operand> {
     this.visitInExpression = (ctx: InExpressionContext): Filter.Operand =>
       new Filter.Expression(
         Filter.ExpressionType.IN,
-        this.visitIdentifier!(ctx.identifier()),
-        this.visitConstantArray!(ctx.constantArray()),
+        this.visit(ctx.identifier()) as Filter.Operand,
+        this.visit(ctx.constantArray()) as Filter.Operand,
       );
     this.visitNinExpression = (ctx: NinExpressionContext): Filter.Operand =>
       new Filter.Expression(
         Filter.ExpressionType.NIN,
-        this.visitIdentifier!(ctx.identifier()),
-        this.visitConstantArray!(ctx.constantArray()),
+        this.visit(ctx.identifier()) as Filter.Operand,
+        this.visit(ctx.constantArray()) as Filter.Operand,
       );
     this.visitCompareExpression = (
       ctx: CompareExpressionContext,
     ): Filter.Operand =>
       new Filter.Expression(
         this.convertCompare(ctx.compare().getText()),
-        this.visitIdentifier!(ctx.identifier()),
+        this.visit(ctx.identifier()) as Filter.Operand,
         this.visit(ctx.constant()) as Filter.Operand,
       );
     this.visitIsNullExpression = (
@@ -171,14 +171,14 @@ export class FilterExpressionVisitor extends FiltersVisitor<Filter.Operand> {
     ): Filter.Operand =>
       new Filter.Expression(
         Filter.ExpressionType.ISNULL,
-        this.visitIdentifier!(ctx.identifier()),
+        this.visit(ctx.identifier()) as Filter.Operand,
       );
     this.visitIsNotNullExpression = (
       ctx: IsNotNullExpressionContext,
     ): Filter.Operand =>
       new Filter.Expression(
         Filter.ExpressionType.ISNOTNULL,
-        this.visitIdentifier!(ctx.identifier()),
+        this.visit(ctx.identifier()) as Filter.Operand,
       );
     this.visitAndExpression = (ctx: AndExpressionContext): Filter.Operand =>
       new Filter.Expression(

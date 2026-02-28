@@ -158,14 +158,17 @@ export class FilterHelper {
     aggregateType: Filter.ExpressionType,
     expressions: Filter.Expression[],
   ): Filter.Expression {
-    if (expressions.length === 1) {
-      return expressions[0]!;
+    assert(expressions.length > 0, "expressions must not be empty");
+
+    const [head, ...tail] = expressions;
+    if (tail.length === 0) {
+      return head;
     }
 
     return new Filter.Expression(
       aggregateType,
-      expressions[0]!,
-      FilterHelper.aggregate(aggregateType, expressions.slice(1)),
+      head,
+      FilterHelper.aggregate(aggregateType, tail),
     );
   }
 }

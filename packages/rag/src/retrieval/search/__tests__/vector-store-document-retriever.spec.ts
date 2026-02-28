@@ -84,17 +84,17 @@ describe("VectorStoreDocumentRetriever", () => {
       vectorStore: mockVectorStore,
       filterExpression: () =>
         new FilterExpressionBuilder()
-          .eq("tenantId", TenantContextHolder.getTenantIdentifier())
+          .eq("tenantId", getTenantIdentifier())
           .build(),
     });
 
-    TenantContextHolder.setTenantIdentifier("tenant1");
+    setTenantIdentifier("tenant1");
     await documentRetriever.retrieve(new Query("query"));
-    TenantContextHolder.clear();
+    clearTenantIdentifier();
 
-    TenantContextHolder.setTenantIdentifier("tenant2");
+    setTenantIdentifier("tenant2");
     await documentRetriever.retrieve(new Query("query"));
-    TenantContextHolder.clear();
+    clearTenantIdentifier();
 
     expect(similaritySearch).toHaveBeenCalledTimes(2);
 
@@ -284,21 +284,19 @@ function createMockVectorStore(returnValue: Document[] = []) {
   };
 }
 
-class TenantContextHolder {
-  private static _tenantIdentifier: string | null = null;
+let tenantIdentifier: string | null = null;
 
-  static setTenantIdentifier(tenant: string): void {
-    if (tenant.trim().length === 0) {
-      throw new Error("tenant cannot be null or empty");
-    }
-    TenantContextHolder._tenantIdentifier = tenant;
+function setTenantIdentifier(tenant: string): void {
+  if (tenant.trim().length === 0) {
+    throw new Error("tenant cannot be null or empty");
   }
+  tenantIdentifier = tenant;
+}
 
-  static getTenantIdentifier(): string | null {
-    return TenantContextHolder._tenantIdentifier;
-  }
+function getTenantIdentifier(): string | null {
+  return tenantIdentifier;
+}
 
-  static clear(): void {
-    TenantContextHolder._tenantIdentifier = null;
-  }
+function clearTenantIdentifier(): void {
+  tenantIdentifier = null;
 }

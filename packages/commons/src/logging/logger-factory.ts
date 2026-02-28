@@ -76,7 +76,7 @@ class DelegatingLogger implements Logger {
  * ```typescript
  * // At application startup, bind the logger factory
  * import { LoggerFactory } from '@nestjs-ai/commons/logging';
- * import { NestLoggerFactory } from '@nestjs-ai/core';
+ * import { NestLoggerFactory } from '@nestjs-ai/platform';
  *
  * LoggerFactory.bind(new NestLoggerFactory());
  *

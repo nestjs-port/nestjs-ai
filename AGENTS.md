@@ -22,7 +22,7 @@
 - Prefer package imports (`@nestjs-ai/...`) instead of relative cross-package imports.
 - Keep tests in `__tests__` folders with `*.spec.ts` naming.
 - Commit format: conventional commits (`feat|fix|refactor|test|docs|chore(scope): subject`).
-- Scope examples: `model`, `core`, `commons`, `openai`.
+- Scope examples: `model`, `platform`, `commons`, `openai`.
 - Keep subject imperative and concise; include bullet body for non-trivial changes.
 - Open focused PRs with passing build/typecheck/tests before review.
 
@@ -38,7 +38,7 @@
 - Core model abstractions: `packages/model/` -> [see packages/model/AGENTS.md](packages/model/AGENTS.md)
 - Chat client orchestration: `packages/client-chat/` -> [see packages/client-chat/AGENTS.md](packages/client-chat/AGENTS.md)
 - Shared primitives/utilities: `packages/commons/` -> [see packages/commons/AGENTS.md](packages/commons/AGENTS.md)
-- Nest integration module: `packages/core/` -> [see packages/core/AGENTS.md](packages/core/AGENTS.md)
+- Nest integration module: `packages/platform/` -> [see packages/platform/AGENTS.md](packages/platform/AGENTS.md)
 - Retry wrapper package: `packages/retry/` -> [see packages/retry/AGENTS.md](packages/retry/AGENTS.md)
 - StringTemplate renderer: `packages/template-st/` -> [see packages/template-st/AGENTS.md](packages/template-st/AGENTS.md)
 - OpenTelemetry handlers: `packages/observation/` -> [see packages/observation/AGENTS.md](packages/observation/AGENTS.md)

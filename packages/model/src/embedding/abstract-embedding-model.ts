@@ -42,9 +42,11 @@ export abstract class AbstractEmbeddingModel extends EmbeddingModel {
     modelName: string,
     dummyContent: string,
   ): Promise<number> {
-    if (AbstractEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.has(modelName)) {
+    const knownDimension =
+      AbstractEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.get(modelName);
+    if (knownDimension != null) {
       // Retrieve the dimension from a pre-configured file.
-      return AbstractEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.get(modelName)!;
+      return knownDimension;
     }
 
     // Determine the dimensions empirically.

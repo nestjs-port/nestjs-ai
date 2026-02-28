@@ -253,9 +253,14 @@ export class GoogleGenAiCachedContentService {
 
     for (const content of allContent) {
       if (content.expired) {
-        if (await this.delete(content.name!)) {
+        const name = content.name;
+        if (!name) {
+          continue;
+        }
+
+        if (await this.delete(name)) {
           removed++;
-          this.logger.info(`Removed expired cached content: ${content.name}`);
+          this.logger.info(`Removed expired cached content: ${name}`);
         }
       }
     }

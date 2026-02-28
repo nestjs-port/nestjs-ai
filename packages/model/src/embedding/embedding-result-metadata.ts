@@ -52,6 +52,7 @@ export enum ModalityType {
   VIDEO = "VIDEO",
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: keep Java-compatible utility class API.
 export class ModalityUtils {
   /**
    * Infers the {@link ModalityType} of the source data used to generate the

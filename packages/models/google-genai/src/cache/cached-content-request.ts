@@ -126,8 +126,9 @@ export class CachedContentRequestBuilder {
   }
 
   build(): CachedContentRequest {
+    assert(this._model, "Model must not be empty");
     return new CachedContentRequest({
-      model: this._model!,
+      model: this._model,
       displayName: this._displayName,
       contents: this._contents,
       systemInstruction: this._systemInstruction,

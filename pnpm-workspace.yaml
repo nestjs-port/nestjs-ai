@@ -2,3 +2,4 @@ packages:
   - 'packages/*'
   - 'packages/models/*'
   - 'packages/advisors/*'
+  - 'packages/document-readers/*'

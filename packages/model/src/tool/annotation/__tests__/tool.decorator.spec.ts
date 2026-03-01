@@ -132,6 +132,32 @@ class AdvancedTypedToolExamples {
   invalidStreamReturn(value: string) {
     return Buffer.from(value);
   }
+
+  @Tool({
+    parameters: z.object({ city: z.string().optional() }),
+    returns: z.boolean(),
+  })
+  optionalFieldInSchema(input: { city?: string }) {
+    return Boolean(input.city);
+  }
+
+  // @ts-expect-error optional method parameter does not match required schema input
+  @Tool({
+    parameters: z.object({ city: z.string() }),
+    returns: z.boolean(),
+  })
+  optionalMethodArgWithRequiredSchema(input?: { city: string }) {
+    return Boolean(input?.city);
+  }
+
+  // @ts-expect-error required method input does not match optional schema input
+  @Tool({
+    parameters: z.object({ city: z.string().optional() }),
+    returns: z.boolean(),
+  })
+  requiredMethodArgWithOptionalSchema(input: { city: string }) {
+    return Boolean(input.city);
+  }
 }
 void AdvancedTypedToolExamples;
 

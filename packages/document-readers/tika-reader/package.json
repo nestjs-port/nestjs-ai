@@ -1,0 +1,26 @@
+{
+  "name": "@nestjs-ai/document-reader-tika",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tika-based document reader for NestJS AI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*"
+  }
+}

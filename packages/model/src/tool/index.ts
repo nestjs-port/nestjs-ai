@@ -3,6 +3,7 @@ export * from "./definition";
 export * from "./execution";
 export * from "./function";
 export * from "./metadata";
+export * from "./method";
 export * from "./resolution";
 export * from "./support";
 export * from "./tool-callback";

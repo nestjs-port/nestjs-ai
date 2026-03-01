@@ -24,15 +24,16 @@ export abstract class ToolCallback {
   /**
    * Execute tool with the given input and return the result to send back to the AI model.
    */
-  abstract call(toolInput: string): Promise<string>;
+  call(toolInput: string): Promise<string>;
 
   /**
    * Execute tool with the given input and context, and return the result to send back
    * to the AI model.
    */
-  async callTool(
+  call(toolInput: string, toolContext: ToolContext | null): Promise<string>;
+  async call(
     toolInput: string,
-    toolContext: ToolContext | null,
+    toolContext?: ToolContext | null,
   ): Promise<string> {
     if (toolContext != null && Object.keys(toolContext.context).length > 0) {
       this.logger.info(
@@ -41,6 +42,6 @@ export abstract class ToolCallback {
           `Review the ToolCallback implementation for ${this.toolDefinition.name}`,
       );
     }
-    return this.call(toolInput);
+    return toolInput;
   }
 }

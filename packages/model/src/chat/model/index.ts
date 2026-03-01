@@ -13,4 +13,4 @@ export {
 
 export { MessageAggregator } from "./message-aggregator";
 export { StreamingChatModel } from "./streaming-chat-model";
-export { ToolContext } from "./tool-context";
+export { ToolContext, ToolContextSchema } from "./tool-context";

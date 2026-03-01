@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { Message } from "../messages";
 
 /**
@@ -48,3 +49,8 @@ export class ToolContext {
       | undefined;
   }
 }
+
+/**
+ * Shared schema to validate that a value is a {@link ToolContext} instance.
+ */
+export const ToolContextSchema = z.instanceof(ToolContext);

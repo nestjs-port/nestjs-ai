@@ -1,6 +1,7 @@
 import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { ToolContext, ToolContextSchema } from "../../../chat";
 import { TOOL_METADATA_KEY, Tool, type ToolAnnotationMetadata } from "../index";
 
 class SchemaRequiredExamples {
@@ -134,6 +135,23 @@ class AdvancedTypedToolExamples {
   }
 
   @Tool({
+    parameters: z.array(z.string()),
+    returns: z.number(),
+  })
+  arrayInput(values: string[]) {
+    return values.length;
+  }
+
+  // @ts-expect-error array schema requires a single array argument, not rest arguments
+  @Tool({
+    parameters: z.array(z.string()),
+    returns: z.number(),
+  })
+  invalidArrayInput(...values: string[]) {
+    return values.length;
+  }
+
+  @Tool({
     parameters: z.object({ city: z.string().optional() }),
     returns: z.boolean(),
   })
@@ -160,6 +178,26 @@ class AdvancedTypedToolExamples {
   }
 }
 void AdvancedTypedToolExamples;
+
+class ToolContextTypedExamples {
+  @Tool({
+    parameters: ToolContextSchema,
+    returns: z.string(),
+  })
+  validToolContextInput(context: ToolContext) {
+    return JSON.stringify(context.context);
+  }
+
+  // @ts-expect-error input type must match ToolContextSchema (ToolContext instance)
+  @Tool({
+    parameters: ToolContextSchema,
+    returns: z.string(),
+  })
+  invalidToolContextInput(context: { context: Record<string, unknown> }) {
+    return JSON.stringify(context.context);
+  }
+}
+void ToolContextTypedExamples;
 
 describe("ToolDecorator", () => {
   class TestTools {
@@ -188,5 +226,32 @@ describe("ToolDecorator", () => {
     expect(
       metadata.returns?.safeParse({ temperature: 18 }).success,
     ).toBeTruthy();
+  });
+
+  it("supports ToolContextSchema in tool metadata", () => {
+    class ContextTools {
+      @Tool({
+        name: "contextEcho",
+        parameters: ToolContextSchema,
+        returns: z.string(),
+      })
+      contextEcho(context: ToolContext) {
+        return JSON.stringify(context.context);
+      }
+    }
+
+    const metadata = Reflect.getMetadata(
+      TOOL_METADATA_KEY,
+      ContextTools.prototype,
+      "contextEcho",
+    ) as ToolAnnotationMetadata;
+
+    expect(metadata.parameters).toBeDefined();
+    expect(
+      metadata.parameters?.safeParse(new ToolContext({ foo: "bar" })).success,
+    ).toBeTruthy();
+    expect(
+      metadata.parameters?.safeParse({ context: { foo: "bar" } }).success,
+    ).toBeFalsy();
   });
 });

@@ -8,7 +8,9 @@ type MaybePromise<T> = T | Promise<T>;
 type ToolMethodArgs<T> = [T] extends [undefined]
   ? []
   : T extends readonly unknown[]
-    ? [...T]
+    ? number extends T["length"]
+      ? [input: T]
+      : [...T]
     : [input: T];
 
 type IsSameTuple<

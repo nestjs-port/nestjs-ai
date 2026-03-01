@@ -1,0 +1,166 @@
+import { Readable } from "node:stream";
+import { describe, expect, it } from "vitest";
+import { z } from "zod";
+import { TOOL_METADATA_KEY, Tool, type ToolAnnotationMetadata } from "../index";
+
+class SchemaRequiredExamples {
+  @Tool()
+  noArgsAndVoidReturn() {}
+
+  // @ts-expect-error schema-less @Tool() only supports `() => void | Promise<void>`
+  @Tool()
+  hasInputWithoutSchema(_value: string) {}
+
+  // @ts-expect-error schema-less @Tool() only supports `() => void | Promise<void>`
+  @Tool()
+  hasReturnWithoutSchema() {
+    return "value";
+  }
+
+  // @ts-expect-error both parameters and returns schemas must be provided together
+  @Tool({
+    parameters: z.string(),
+  })
+  onlyParametersSchema(value: string) {
+    return value;
+  }
+
+  // @ts-expect-error both parameters and returns schemas must be provided together
+  @Tool({
+    returns: z.string(),
+  })
+  onlyReturnsSchema(_value: string) {
+    return "";
+  }
+}
+void SchemaRequiredExamples;
+
+class TypedToolExamples {
+  @Tool({
+    parameters: z.object({ city: z.string() }),
+    returns: z.object({ temperature: z.number() }),
+  })
+  valid(_input: { city: string }) {
+    return { temperature: 20 };
+  }
+
+  // @ts-expect-error input type must match the `parameters` schema type
+  @Tool({
+    parameters: z.object({ city: z.string() }),
+    returns: z.object({ temperature: z.number() }),
+  })
+  invalidInput(_input: { city: number }) {
+    return { temperature: 20 };
+  }
+
+  // @ts-expect-error return type must match the `returns` schema type
+  @Tool({
+    parameters: z.object({ city: z.string() }),
+    returns: z.object({ temperature: z.number() }),
+  })
+  invalidReturn(_input: { city: string }) {
+    return { temperature: "20" };
+  }
+}
+void TypedToolExamples;
+
+class AdvancedTypedToolExamples {
+  @Tool({
+    parameters: z.tuple([z.string(), z.number()]),
+    returns: z.boolean(),
+  })
+  multiArgs(name: string, age: number) {
+    return age > 18 && name.length > 0;
+  }
+
+  // @ts-expect-error tuple schema requires `(string, number)` method arguments
+  @Tool({
+    parameters: z.tuple([z.string(), z.number()]),
+    returns: z.boolean(),
+  })
+  invalidMultiArgs(age: number, name: string) {
+    return age > 18 && name.length > 0;
+  }
+
+  @Tool({
+    parameters: z.number(),
+    returns: z.number(),
+  })
+  primitiveInput(value: number) {
+    return value + 1;
+  }
+
+  // @ts-expect-error primitive schema requires number input
+  @Tool({
+    parameters: z.number(),
+    returns: z.number(),
+  })
+  invalidPrimitiveInput(value: string) {
+    return value.length;
+  }
+
+  @Tool({
+    parameters: z.string(),
+    returns: z.instanceof(Buffer),
+  })
+  bufferReturn(value: string) {
+    return Buffer.from(value);
+  }
+
+  // @ts-expect-error return type must be Buffer
+  @Tool({
+    parameters: z.string(),
+    returns: z.instanceof(Buffer),
+  })
+  invalidBufferReturn(value: string) {
+    return value;
+  }
+
+  @Tool({
+    parameters: z.string(),
+    returns: z.instanceof(Readable),
+  })
+  streamReturn(value: string) {
+    return Readable.from([value]);
+  }
+
+  // @ts-expect-error return type must be Readable
+  @Tool({
+    parameters: z.string(),
+    returns: z.instanceof(Readable),
+  })
+  invalidStreamReturn(value: string) {
+    return Buffer.from(value);
+  }
+}
+void AdvancedTypedToolExamples;
+
+describe("ToolDecorator", () => {
+  class TestTools {
+    @Tool({
+      name: "getWeather",
+      parameters: z.object({ city: z.string() }),
+      returns: z.object({ temperature: z.number() }),
+    })
+    getWeather(input: { city: string }) {
+      return { temperature: input.city.length };
+    }
+  }
+
+  it("stores zod parameter and return schemas in metadata", () => {
+    const metadata = Reflect.getMetadata(
+      TOOL_METADATA_KEY,
+      TestTools.prototype,
+      "getWeather",
+    ) as ToolAnnotationMetadata;
+
+    expect(metadata.parameters).toBeDefined();
+    expect(metadata.returns).toBeDefined();
+    expect(
+      metadata.parameters?.safeParse({ city: "seoul" }).success,
+    ).toBeTruthy();
+    expect(
+      metadata.returns?.safeParse({ temperature: 18 }).success,
+    ).toBeTruthy();
+  });
+});

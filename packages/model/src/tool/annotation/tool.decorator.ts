@@ -1,6 +1,31 @@
 import "reflect-metadata";
+import type { z } from "zod";
 import type { ToolCallResultConverter } from "../execution";
 import { DefaultToolCallResultConverter } from "../execution";
+
+type MaybePromise<T> = T | Promise<T>;
+type ToolMethodArgsFromSchema<P extends z.ZodTypeAny> = [z.infer<P>] extends [
+  undefined,
+]
+  ? []
+  : z.infer<P> extends readonly unknown[]
+    ? [...z.infer<P>]
+    : [input: z.infer<P>];
+type TypedToolMethodDecorator<
+  P extends z.ZodTypeAny,
+  R extends z.ZodTypeAny,
+> = <
+  T extends (...args: ToolMethodArgsFromSchema<P>) => MaybePromise<z.infer<R>>,
+>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<T>,
+) => void;
+type SchemaLessToolMethodDecorator = <T extends () => MaybePromise<void>>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<T>,
+) => void;
 
 /**
  * Metadata stored for methods decorated with @Tool
@@ -31,6 +56,28 @@ export interface ToolAnnotationMetadata {
    * The class to use to convert the tool call result to a String.
    */
   resultConverter?: new () => ToolCallResultConverter;
+  /**
+   * Zod schema used to validate tool input parameters.
+   */
+  parameters?: z.ZodTypeAny;
+  /**
+   * Zod schema used to validate tool return value.
+   */
+  returns?: z.ZodTypeAny;
+}
+
+export interface ToolSchemaAnnotationMetadata<
+  P extends z.ZodTypeAny,
+  R extends z.ZodTypeAny,
+> extends Omit<ToolAnnotationMetadata, "parameters" | "returns"> {
+  parameters: P;
+  returns: R;
+}
+
+export interface ToolSchemaLessAnnotationMetadata
+  extends Omit<ToolAnnotationMetadata, "parameters" | "returns"> {
+  parameters?: never;
+  returns?: never;
 }
 
 /**
@@ -41,7 +88,14 @@ export const TOOL_METADATA_KEY = Symbol("tool:metadata");
 /**
  * Marks a method as a tool in Spring AI.
  */
-export function Tool(options?: ToolAnnotationMetadata): MethodDecorator {
+export function Tool<P extends z.ZodTypeAny, R extends z.ZodTypeAny>(
+  options: ToolSchemaAnnotationMetadata<P, R>,
+): TypedToolMethodDecorator<P, R>;
+export function Tool(): SchemaLessToolMethodDecorator;
+export function Tool(
+  options: ToolSchemaLessAnnotationMetadata,
+): SchemaLessToolMethodDecorator;
+export function Tool(options: ToolAnnotationMetadata = {}): MethodDecorator {
   return (target: object, propertyKey: string | symbol) => {
     const metadata: ToolAnnotationMetadata = {
       name: options?.name ?? "",
@@ -49,6 +103,8 @@ export function Tool(options?: ToolAnnotationMetadata): MethodDecorator {
       returnDirect: options?.returnDirect ?? false,
       resultConverter:
         options?.resultConverter ?? DefaultToolCallResultConverter,
+      parameters: options?.parameters,
+      returns: options?.returns,
     };
 
     Reflect.defineMetadata(TOOL_METADATA_KEY, metadata, target, propertyKey);

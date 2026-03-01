@@ -4,31 +4,23 @@ import type { ToolCallResultConverter } from "../execution";
 import { DefaultToolCallResultConverter } from "../execution";
 
 type AnyZodSchema = z.ZodTypeAny;
+type AnyZodObjectSchema = z.ZodObject<z.ZodRawShape>;
 type MaybePromise<T> = T | Promise<T>;
-type ToolMethodArgs<T> = [T] extends [undefined]
-  ? []
-  : T extends readonly unknown[]
-    ? number extends T["length"]
-      ? [input: T]
-      : [...T]
-    : [input: T];
-
-type IsSameTuple<
-  A extends readonly unknown[],
-  B extends readonly unknown[],
-> = A extends B ? (B extends A ? true : false) : false;
 
 type ToolMethodSignature<
   // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
-  P extends AnyZodSchema,
+  P extends AnyZodObjectSchema,
   R extends AnyZodSchema,
-> = T extends (...args: ToolMethodArgs<z.infer<P>>) => MaybePromise<z.infer<R>>
-  ? IsSameTuple<Parameters<T>, ToolMethodArgs<z.infer<P>>> extends true
+> = T extends (input: z.infer<P>) => MaybePromise<z.infer<R>>
+  ? Parameters<T> extends [z.infer<P>]
     ? T
     : never
   : never;
-type ToolMethodDecoratorFor<P extends AnyZodSchema, R extends AnyZodSchema> = <
+type ToolMethodDecoratorFor<
+  P extends AnyZodObjectSchema,
+  R extends AnyZodSchema,
+> = <
   // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
 >(
@@ -60,7 +52,7 @@ export type ToolAnnotationMetadata = ToolBaseMetadata & {
   /**
    * Zod schema used to validate tool input parameters.
    */
-  parameters?: AnyZodSchema;
+  parameters?: AnyZodObjectSchema;
   /**
    * Zod schema used to validate tool return value.
    */
@@ -68,7 +60,7 @@ export type ToolAnnotationMetadata = ToolBaseMetadata & {
 };
 
 export interface ToolSchemaAnnotationMetadata<
-  P extends AnyZodSchema,
+  P extends AnyZodObjectSchema,
   R extends AnyZodSchema,
 > extends ToolBaseMetadata {
   parameters: P;
@@ -85,10 +77,20 @@ export interface ToolSchemaLessAnnotationMetadata extends ToolBaseMetadata {
  */
 export const TOOL_METADATA_KEY = Symbol("tool:metadata");
 
+function isFunctionSchema(schema: AnyZodSchema): boolean {
+  const def = (schema as { _zod?: { def?: { type?: unknown } } })._zod?.def;
+  return def?.type === "function";
+}
+
+function isObjectSchema(schema: AnyZodSchema): boolean {
+  const def = (schema as { _zod?: { def?: { type?: unknown } } })._zod?.def;
+  return def?.type === "object";
+}
+
 /**
  * Marks a method as a tool in Spring AI.
  */
-export function Tool<P extends AnyZodSchema, R extends AnyZodSchema>(
+export function Tool<P extends AnyZodObjectSchema, R extends AnyZodSchema>(
   options: ToolSchemaAnnotationMetadata<P, R>,
 ): ToolMethodDecoratorFor<P, R>;
 export function Tool(): SchemaLessToolDecorator;
@@ -97,6 +99,18 @@ export function Tool(
 ): SchemaLessToolDecorator;
 export function Tool(options: ToolAnnotationMetadata = {}): MethodDecorator {
   return (target: object, propertyKey: string | symbol) => {
+    if (options.parameters && !isObjectSchema(options.parameters)) {
+      throw new Error(
+        "@Tool requires parameters to be a z.object(...) schema.",
+      );
+    }
+
+    if (options.returns && isFunctionSchema(options.returns)) {
+      throw new Error(
+        "@Tool does not support z.function() as a return schema.",
+      );
+    }
+
     const metadata: ToolAnnotationMetadata = {
       name: options?.name ?? "",
       description: options?.description ?? "",

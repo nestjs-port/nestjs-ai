@@ -20,10 +20,10 @@ class SchemaRequiredExamples {
 
   // @ts-expect-error both parameters and returns schemas must be provided together
   @Tool({
-    parameters: z.string(),
+    parameters: z.object({ value: z.string() }),
   })
-  onlyParametersSchema(value: string) {
-    return value;
+  onlyParametersSchema(input: { value: string }) {
+    return input.value;
   }
 
   // @ts-expect-error both parameters and returns schemas must be provided together
@@ -67,88 +67,37 @@ void TypedToolExamples;
 
 class AdvancedTypedToolExamples {
   @Tool({
-    parameters: z.tuple([z.string(), z.number()]),
-    returns: z.boolean(),
-  })
-  multiArgs(name: string, age: number) {
-    return age > 18 && name.length > 0;
-  }
-
-  // @ts-expect-error tuple schema requires `(string, number)` method arguments
-  @Tool({
-    parameters: z.tuple([z.string(), z.number()]),
-    returns: z.boolean(),
-  })
-  invalidMultiArgs(age: number, name: string) {
-    return age > 18 && name.length > 0;
-  }
-
-  @Tool({
-    parameters: z.number(),
-    returns: z.number(),
-  })
-  primitiveInput(value: number) {
-    return value + 1;
-  }
-
-  // @ts-expect-error primitive schema requires number input
-  @Tool({
-    parameters: z.number(),
-    returns: z.number(),
-  })
-  invalidPrimitiveInput(value: string) {
-    return value.length;
-  }
-
-  @Tool({
-    parameters: z.string(),
+    parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Buffer),
   })
-  bufferReturn(value: string) {
-    return Buffer.from(value);
+  bufferReturn(input: { value: string }) {
+    return Buffer.from(input.value);
   }
 
   // @ts-expect-error return type must be Buffer
   @Tool({
-    parameters: z.string(),
+    parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Buffer),
   })
-  invalidBufferReturn(value: string) {
-    return value;
+  invalidBufferReturn(input: { value: string }) {
+    return input.value;
   }
 
   @Tool({
-    parameters: z.string(),
+    parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Readable),
   })
-  streamReturn(value: string) {
-    return Readable.from([value]);
+  streamReturn(input: { value: string }) {
+    return Readable.from([input.value]);
   }
 
   // @ts-expect-error return type must be Readable
   @Tool({
-    parameters: z.string(),
+    parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Readable),
   })
-  invalidStreamReturn(value: string) {
-    return Buffer.from(value);
-  }
-
-  @Tool({
-    parameters: z.array(z.string()),
-    returns: z.number(),
-  })
-  arrayInput(values: string[]) {
-    return values.length;
-  }
-
-  // @ts-expect-error array schema requires a single array argument, not rest arguments
-  @Tool({
-    parameters: z.array(z.string()),
-    returns: z.number(),
-  })
-  invalidArrayInput(...values: string[]) {
-    return values.length;
+  invalidStreamReturn(input: { value: string }) {
+    return Buffer.from(input.value);
   }
 
   @Tool({
@@ -181,20 +130,26 @@ void AdvancedTypedToolExamples;
 
 class ToolContextTypedExamples {
   @Tool({
-    parameters: ToolContextSchema,
+    parameters: z.object({
+      toolContext: ToolContextSchema,
+    }),
     returns: z.string(),
   })
-  validToolContextInput(context: ToolContext) {
-    return JSON.stringify(context.context);
+  validToolContextInput(input: { toolContext: ToolContext }) {
+    return JSON.stringify(input.toolContext.context);
   }
 
-  // @ts-expect-error input type must match ToolContextSchema (ToolContext instance)
+  // @ts-expect-error input type must match ToolContextSchema in object field
   @Tool({
-    parameters: ToolContextSchema,
+    parameters: z.object({
+      toolContext: ToolContextSchema,
+    }),
     returns: z.string(),
   })
-  invalidToolContextInput(context: { context: Record<string, unknown> }) {
-    return JSON.stringify(context.context);
+  invalidToolContextInput(input: {
+    toolContext: { context: Record<string, unknown> };
+  }) {
+    return JSON.stringify(input.toolContext.context);
   }
 }
 void ToolContextTypedExamples;
@@ -228,15 +183,17 @@ describe("ToolDecorator", () => {
     ).toBeTruthy();
   });
 
-  it("supports ToolContextSchema in tool metadata", () => {
+  it("supports ToolContextSchema inside object parameters", () => {
     class ContextTools {
       @Tool({
         name: "contextEcho",
-        parameters: ToolContextSchema,
+        parameters: z.object({
+          toolContext: ToolContextSchema,
+        }),
         returns: z.string(),
       })
-      contextEcho(context: ToolContext) {
-        return JSON.stringify(context.context);
+      contextEcho(input: { toolContext: ToolContext }) {
+        return JSON.stringify(input.toolContext.context);
       }
     }
 
@@ -248,10 +205,48 @@ describe("ToolDecorator", () => {
 
     expect(metadata.parameters).toBeDefined();
     expect(
-      metadata.parameters?.safeParse(new ToolContext({ foo: "bar" })).success,
+      metadata.parameters?.safeParse({
+        toolContext: new ToolContext({ foo: "bar" }),
+      }).success,
     ).toBeTruthy();
     expect(
-      metadata.parameters?.safeParse({ context: { foo: "bar" } }).success,
+      metadata.parameters?.safeParse({
+        toolContext: { context: { foo: "bar" } },
+      }).success,
     ).toBeFalsy();
+  });
+
+  it("throws when parameters schema is not z.object()", () => {
+    expect(() => {
+      class InvalidParametersSchemaTools {
+        @Tool({
+          // biome-ignore lint/suspicious/noExplicitAny: runtime validation test
+          parameters: z.string() as any,
+          returns: z.string(),
+        })
+        invalid(_value: { value: string }) {
+          return "ok";
+        }
+      }
+      return InvalidParametersSchemaTools;
+    }).toThrowError(/requires parameters to be a z\.object/i);
+  });
+
+  it("throws when returns schema is z.function()", () => {
+    expect(() => {
+      class InvalidReturnSchemaTools {
+        @Tool({
+          parameters: z.object({ value: z.string() }),
+          returns: z.function({
+            input: [z.string()],
+            output: z.string(),
+          }),
+        })
+        invalid(_value: { value: string }) {
+          return (input: string) => input;
+        }
+      }
+      return InvalidReturnSchemaTools;
+    }).toThrowError(/does not support z\.function\(\) as a return schema/i);
   });
 });

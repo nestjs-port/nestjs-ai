@@ -1,0 +1,29 @@
+{
+  "name": "@nestjs-ai/document-reader-pdf",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PDF.js document reader for NestJS AI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^5.4.624"
+  }
+}

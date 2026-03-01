@@ -257,7 +257,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -296,7 +296,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -329,7 +329,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -431,7 +431,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -465,7 +465,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -504,7 +504,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -575,7 +575,7 @@ describe("ToolCallAdvisor", () => {
       .pushAll([advisor, terminalAdvisor])
       .build();
 
-    toolCallingManager.executeToolCalls.mockReturnValue(
+    toolCallingManager.executeToolCalls.mockResolvedValue(
       new DefaultToolExecutionResult({
         conversationHistory: [
           UserMessage.of("test"),
@@ -614,7 +614,7 @@ function createToolCallingManagerMock(): {
 } & ToolCallingManager {
   return {
     executeToolCalls: vi.fn(
-      () =>
+      async () =>
         new DefaultToolExecutionResult({
           conversationHistory: [
             UserMessage.of("default"),

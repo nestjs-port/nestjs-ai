@@ -38,7 +38,7 @@ function createToolCallback(name: string): ToolCallback {
         .build();
     }
 
-    override call(_toolInput: string): string {
+    override async call(_toolInput: string): Promise<string> {
       return "";
     }
   })();

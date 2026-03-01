@@ -139,10 +139,11 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
           "redundant check that should never fail, but here to help nullability checks",
         );
 
-        const toolExecutionResult = this._toolCallingManager.executeToolCalls(
-          processedChatClientRequest.prompt,
-          chatResponse,
-        );
+        const toolExecutionResult =
+          await this._toolCallingManager.executeToolCalls(
+            processedChatClientRequest.prompt,
+            chatResponse,
+          );
 
         if (toolExecutionResult.returnDirect()) {
           // Return tool execution result directly to the application client.

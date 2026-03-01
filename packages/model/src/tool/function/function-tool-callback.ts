@@ -12,10 +12,15 @@ import { ToolMetadata } from "../metadata";
 import { ToolUtils } from "../support";
 import { ToolCallback } from "../tool-callback";
 
-export type ToolBiFunction<I, O> = (input: I, context: ToolContext | null) => O;
-export type ToolFunction<I, O> = (input: I) => O;
-export type ToolSupplier<O> = () => O;
-export type ToolConsumer<I> = (input: I) => void;
+type MaybePromise<T> = T | Promise<T>;
+
+export type ToolBiFunction<I, O> = (
+  input: I,
+  context: ToolContext | null,
+) => MaybePromise<O>;
+export type ToolFunction<I, O> = (input: I) => MaybePromise<O>;
+export type ToolSupplier<O> = () => MaybePromise<O>;
+export type ToolConsumer<I> = (input: I) => MaybePromise<void>;
 
 /**
  * Runtime input type used by {@link FunctionToolCallbackBuilder} for schema hints.
@@ -65,14 +70,14 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
     return this._toolMetadata;
   }
 
-  override call(toolInput: string): string {
+  override async call(toolInput: string): Promise<string> {
     return this.callTool(toolInput, null);
   }
 
-  override callTool(
+  override async callTool(
     toolInput: string,
     toolContext: ToolContext | null,
-  ): string {
+  ): Promise<string> {
     assert(
       toolInput && toolInput.trim() !== "",
       "toolInput cannot be null or empty",
@@ -83,7 +88,7 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
     );
 
     const request = this.parseToolInput(toolInput);
-    const response = this.callMethod(request, toolContext);
+    const response = await this.callMethod(request, toolContext);
 
     this._logger.debug(
       `Successful execution of tool: ${this._toolDefinition.name}`,
@@ -102,9 +107,12 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
     return this._toolInputType.parse(plain) as I;
   }
 
-  private callMethod(request: I, toolContext: ToolContext | null): O {
+  private async callMethod(
+    request: I,
+    toolContext: ToolContext | null,
+  ): Promise<O> {
     try {
-      return this._toolFunction(request, toolContext);
+      return await this._toolFunction(request, toolContext);
     } catch (ex) {
       if (ex instanceof ToolExecutionException) {
         throw ex;

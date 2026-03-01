@@ -90,10 +90,10 @@ export class DefaultToolCallingManager implements ToolCallingManager {
     return toolCallbacks.map((cb) => cb.toolDefinition);
   }
 
-  executeToolCalls(
+  async executeToolCalls(
     prompt: Prompt,
     chatResponse: ChatResponse,
-  ): ToolExecutionResult {
+  ): Promise<ToolExecutionResult> {
     assert(prompt, "prompt cannot be null");
     assert(chatResponse, "chatResponse cannot be null");
 
@@ -112,7 +112,7 @@ export class DefaultToolCallingManager implements ToolCallingManager {
       assistantMessage,
     );
 
-    const internalResult = this.executeToolCall(
+    const internalResult = await this.executeToolCall(
       prompt,
       assistantMessage,
       toolContext,
@@ -169,11 +169,11 @@ export class DefaultToolCallingManager implements ToolCallingManager {
     return messageHistory;
   }
 
-  private executeToolCall(
+  private async executeToolCall(
     prompt: Prompt,
     assistantMessage: AssistantMessage,
     toolContext: ToolContext,
-  ): InternalToolExecutionResult {
+  ): Promise<InternalToolExecutionResult> {
     let toolCallbacks: ToolCallback[] = [];
     const options = prompt.options;
     if (options && "toolCallbacks" in options) {
@@ -218,7 +218,10 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 
       let toolResult: string;
       try {
-        toolResult = toolCallback.callTool(toolInputArguments, toolContext);
+        toolResult = await toolCallback.callTool(
+          toolInputArguments,
+          toolContext,
+        );
       } catch (ex) {
         if (ex instanceof ToolExecutionException) {
           toolResult = this._toolExecutionExceptionProcessor.process(ex);

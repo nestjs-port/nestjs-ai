@@ -19,7 +19,7 @@ export interface ToolCallingManager {
   executeToolCalls(
     prompt: Prompt,
     chatResponse: ChatResponse,
-  ): ToolExecutionResult;
+  ): Promise<ToolExecutionResult>;
 }
 
 export namespace ToolCallingManager {

@@ -54,7 +54,7 @@ class TestFunctionTool {
 }
 
 describe("FunctionToolCallback", () => {
-  it("test consumer tool call", () => {
+  it("test consumer tool call", async () => {
     const tool = new TestFunctionTool();
     const callback = FunctionToolCallback.builder<string, void>(
       "testTool",
@@ -65,12 +65,12 @@ describe("FunctionToolCallback", () => {
       .inputType(z.string())
       .build();
 
-    callback.call('"test string param"');
+    await callback.call('"test string param"');
 
     expect(tool.calledValue).toBe("test string param");
   });
 
-  it("test bi function tool call", () => {
+  it("test bi function tool call", async () => {
     const tool = new TestFunctionTool();
     const callback = FunctionToolCallback.builder<string, string>(
       "testTool",
@@ -83,14 +83,17 @@ describe("FunctionToolCallback", () => {
 
     const toolContext = new ToolContext({ foo: "bar" });
 
-    const callResult = callback.callTool('"test string param"', toolContext);
+    const callResult = await callback.callTool(
+      '"test string param"',
+      toolContext,
+    );
 
     expect(tool.calledValue).toBe("test string param");
     expect(callResult).toBe('"return value = test string param"');
     expect(tool.calledToolContext).toBe(toolContext);
   });
 
-  it("test function tool call", () => {
+  it("test function tool call", async () => {
     const tool = new TestFunctionTool();
     const callback = FunctionToolCallback.builder<string, string>(
       "testTool",
@@ -103,13 +106,16 @@ describe("FunctionToolCallback", () => {
 
     const toolContext = new ToolContext({});
 
-    const callResult = callback.callTool('"test string param"', toolContext);
+    const callResult = await callback.callTool(
+      '"test string param"',
+      toolContext,
+    );
 
     expect(tool.calledValue).toBe("test string param");
     expect(callResult).toBe('"return value = test string param"');
   });
 
-  it("test supplier tool call", () => {
+  it("test supplier tool call", async () => {
     const tool = new TestFunctionTool();
 
     // Supplier overload ignores input at execution time, but the builder still requires a zod schema.
@@ -124,13 +130,16 @@ describe("FunctionToolCallback", () => {
 
     const toolContext = new ToolContext({});
 
-    const callResult = callback.callTool('"test string param"', toolContext);
+    const callResult = await callback.callTool(
+      '"test string param"',
+      toolContext,
+    );
 
     expect(tool.calledValue).toBe("not params");
     expect(callResult).toBe('"return value = "');
   });
 
-  it("test throw runtime exception", () => {
+  it("test throw runtime exception", async () => {
     const tool = new TestFunctionTool();
     const callback = FunctionToolCallback.builder<string, void>(
       "testTool",
@@ -143,7 +152,7 @@ describe("FunctionToolCallback", () => {
 
     let thrown: unknown;
     try {
-      callback.call('"test string param"');
+      await callback.call('"test string param"');
     } catch (error) {
       thrown = error;
     }
@@ -155,7 +164,7 @@ describe("FunctionToolCallback", () => {
     expect(exception.toolDefinition).toBe(callback.toolDefinition);
   });
 
-  it("test throw tool execution exception", () => {
+  it("test throw tool execution exception", async () => {
     const tool = new TestFunctionTool();
     const callback = FunctionToolCallback.builder<string, void>(
       "testTool",
@@ -168,7 +177,7 @@ describe("FunctionToolCallback", () => {
 
     let thrown: unknown;
     try {
-      callback.call('"test string param"');
+      await callback.call('"test string param"');
     } catch (error) {
       thrown = error;
     }
@@ -179,7 +188,7 @@ describe("FunctionToolCallback", () => {
     expect(exception.cause).toBeInstanceOf(Error);
   });
 
-  it("test empty string input", () => {
+  it("test empty string input", async () => {
     const tool = new TestFunctionTool();
     const callback = FunctionToolCallback.builder<string, void>(
       "testTool",
@@ -189,7 +198,7 @@ describe("FunctionToolCallback", () => {
       .inputType(z.string())
       .build();
 
-    callback.call('""');
+    await callback.call('""');
 
     expect(tool.calledValue).toBe("");
   });

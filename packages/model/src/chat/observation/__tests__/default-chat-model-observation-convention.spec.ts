@@ -348,7 +348,7 @@ class TestToolCallback extends ToolCallback {
     return this._toolMetadata;
   }
 
-  call(_toolInput: string): string {
+  async call(_toolInput: string): Promise<string> {
     return "Mission accomplished!";
   }
 }

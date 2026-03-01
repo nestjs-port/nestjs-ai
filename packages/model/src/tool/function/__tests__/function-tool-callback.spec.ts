@@ -83,10 +83,7 @@ describe("FunctionToolCallback", () => {
 
     const toolContext = new ToolContext({ foo: "bar" });
 
-    const callResult = await callback.callTool(
-      '"test string param"',
-      toolContext,
-    );
+    const callResult = await callback.call('"test string param"', toolContext);
 
     expect(tool.calledValue).toBe("test string param");
     expect(callResult).toBe('"return value = test string param"');
@@ -106,10 +103,7 @@ describe("FunctionToolCallback", () => {
 
     const toolContext = new ToolContext({});
 
-    const callResult = await callback.callTool(
-      '"test string param"',
-      toolContext,
-    );
+    const callResult = await callback.call('"test string param"', toolContext);
 
     expect(tool.calledValue).toBe("test string param");
     expect(callResult).toBe('"return value = test string param"');
@@ -130,10 +124,7 @@ describe("FunctionToolCallback", () => {
 
     const toolContext = new ToolContext({});
 
-    const callResult = await callback.callTool(
-      '"test string param"',
-      toolContext,
-    );
+    const callResult = await callback.call('"test string param"', toolContext);
 
     expect(tool.calledValue).toBe("not params");
     expect(callResult).toBe('"return value = "');

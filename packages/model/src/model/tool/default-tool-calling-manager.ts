@@ -218,10 +218,7 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 
       let toolResult: string;
       try {
-        toolResult = await toolCallback.callTool(
-          toolInputArguments,
-          toolContext,
-        );
+        toolResult = await toolCallback.call(toolInputArguments, toolContext);
       } catch (ex) {
         if (ex instanceof ToolExecutionException) {
           toolResult = this._toolExecutionExceptionProcessor.process(ex);

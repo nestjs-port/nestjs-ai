@@ -70,13 +70,9 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
     return this._toolMetadata;
   }
 
-  override async call(toolInput: string): Promise<string> {
-    return this.callTool(toolInput, null);
-  }
-
-  override async callTool(
+  override async call(
     toolInput: string,
-    toolContext: ToolContext | null,
+    toolContext: ToolContext | null = null,
   ): Promise<string> {
     assert(
       toolInput && toolInput.trim() !== "",

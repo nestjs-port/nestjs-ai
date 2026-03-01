@@ -59,7 +59,7 @@ class TestToolCallback extends ToolCallback {
     return this._toolMetadata;
   }
 
-  override call(_toolInput: string): string {
+  override async call(_toolInput: string): Promise<string> {
     return "Mission accomplished!";
   }
 }

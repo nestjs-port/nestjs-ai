@@ -34,14 +34,14 @@ function createMockToolCallback(
       return ToolMetadata.create({});
     }
 
-    call(toolInput: string): string {
+    async call(toolInput: string): Promise<string> {
       return callFn(toolInput);
     }
   })();
 }
 
 describe("DefaultToolCallingManager", () => {
-  it("should handle null arguments in stream mode", () => {
+  it("should handle null arguments in stream mode", async () => {
     const mockToolCallback = createMockToolCallback(
       "testTool",
       "A test tool",
@@ -79,10 +79,12 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 
-  it("should handle empty arguments in stream mode", () => {
+  it("should handle empty arguments in stream mode", async () => {
     const mockToolCallback = createMockToolCallback(
       "testTool",
       "A test tool",
@@ -120,10 +122,12 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 
-  it("should handle multiple tool calls in single response", () => {
+  it("should handle multiple tool calls in single response", async () => {
     const toolCallback1 = createMockToolCallback(
       "tool1",
       "First tool",
@@ -173,10 +177,12 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 
-  it("should handle tool call with complex json arguments", () => {
+  it("should handle tool call with complex json arguments", async () => {
     const complexToolCallback = createMockToolCallback(
       "complexTool",
       "A tool with complex JSON input",
@@ -216,10 +222,12 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 
-  it("should handle tool call with malformed json", () => {
+  it("should handle tool call with malformed json", async () => {
     const toolCallback = createMockToolCallback(
       "testTool",
       "Test tool",
@@ -256,10 +264,12 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 
-  it("should handle tool call returning null", () => {
+  it("should handle tool call returning null", async () => {
     const toolCallback = createMockToolCallback(
       "nullReturningTool",
       "Tool that returns null",
@@ -293,10 +303,12 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 
-  it("should handle multiple generations with tool calls", () => {
+  it("should handle multiple generations with tool calls", async () => {
     const toolCallback = createMockToolCallback(
       "multiGenTool",
       "Tool for multiple generations",
@@ -346,6 +358,8 @@ describe("DefaultToolCallingManager", () => {
       toolCallbackResolver: resolver,
     });
 
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).not.toThrow();
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).resolves.toBeDefined();
   });
 });

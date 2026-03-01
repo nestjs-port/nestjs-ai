@@ -41,10 +41,10 @@ export class GoogleGenAiToolCallingManager implements ToolCallingManager {
     });
   }
 
-  executeToolCalls(
+  async executeToolCalls(
     prompt: Prompt,
     chatResponse: ChatResponse,
-  ): ToolExecutionResult {
+  ): Promise<ToolExecutionResult> {
     return this._delegateToolCallingManager.executeToolCalls(
       prompt,
       chatResponse,

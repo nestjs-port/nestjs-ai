@@ -7,5 +7,8 @@ export interface ToolCallResultConverter {
    * Given an Object returned by a tool, convert it to a String compatible with the
    * given return type.
    */
-  convert(result?: unknown | null, returnType?: unknown | null): string;
+  convert(
+    result?: unknown | null,
+    returnType?: unknown | null,
+  ): Promise<string>;
 }

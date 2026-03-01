@@ -42,7 +42,7 @@ class TestToolCallback extends ToolCallback {
     return this._toolMetadata;
   }
 
-  call(_toolInput: string): string {
+  async call(_toolInput: string): Promise<string> {
     return "Mission accomplished!";
   }
 }
@@ -62,7 +62,7 @@ class FailingToolCallback extends ToolCallback {
     return this._toolDefinition;
   }
 
-  call(_toolInput: string): string {
+  async call(_toolInput: string): Promise<string> {
     throw new ToolExecutionException(
       this._toolDefinition,
       new Error("You failed this city!"),
@@ -88,14 +88,14 @@ function findToolResponseMessage(
 describe("DefaultToolCallingManagerTests", () => {
   // BUILD
 
-  it("when default arguments then return", () => {
+  it("when default arguments then return", async () => {
     const manager = new DefaultToolCallingManager();
     expect(manager).not.toBeNull();
   });
 
   // RESOLVE TOOL DEFINITIONS
 
-  it("when chat options is null then throw", () => {
+  it("when chat options is null then throw", async () => {
     const manager = new DefaultToolCallingManager();
     expect(() =>
       manager.resolveToolDefinitions(
@@ -104,7 +104,7 @@ describe("DefaultToolCallingManagerTests", () => {
     ).toThrow("chatOptions cannot be null");
   });
 
-  it("when tool callback exists then resolve", () => {
+  it("when tool callback exists then resolve", async () => {
     const toolCallback = new TestToolCallback("toolA");
     const resolver = createStaticResolver([toolCallback]);
     const manager = new DefaultToolCallingManager({
@@ -119,7 +119,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(toolDefinitions[0]).toEqual(toolCallback.toolDefinition);
   });
 
-  it("when tool callback does not exist then throw", () => {
+  it("when tool callback does not exist then throw", async () => {
     const resolver = createStaticResolver([]);
     const manager = new DefaultToolCallingManager({
       toolCallbackResolver: resolver,
@@ -134,32 +134,32 @@ describe("DefaultToolCallingManagerTests", () => {
 
   // EXECUTE TOOL CALLS
 
-  it("when prompt is null then throw", () => {
+  it("when prompt is null then throw", async () => {
     const manager = new DefaultToolCallingManager();
     const chatResponse = new ChatResponse({ generations: [] });
-    expect(() =>
+    await expect(
       manager.executeToolCalls(null as unknown as Prompt, chatResponse),
-    ).toThrow("prompt cannot be null");
+    ).rejects.toThrow("prompt cannot be null");
   });
 
-  it("when chat response is null then throw", () => {
+  it("when chat response is null then throw", async () => {
     const manager = new DefaultToolCallingManager();
     const prompt = new Prompt("test");
-    expect(() =>
+    await expect(
       manager.executeToolCalls(prompt, null as unknown as ChatResponse),
-    ).toThrow("chatResponse cannot be null");
+    ).rejects.toThrow("chatResponse cannot be null");
   });
 
-  it("when no tool call in chat response then throw", () => {
+  it("when no tool call in chat response then throw", async () => {
     const manager = new DefaultToolCallingManager();
     const prompt = new Prompt("test");
     const chatResponse = new ChatResponse({ generations: [] });
-    expect(() => manager.executeToolCalls(prompt, chatResponse)).toThrow(
-      "No tool call requested by the chat model",
-    );
+    await expect(
+      manager.executeToolCalls(prompt, chatResponse),
+    ).rejects.toThrow("No tool call requested by the chat model");
   });
 
-  it("when single tool call in chat response then execute", () => {
+  it("when single tool call in chat response then execute", async () => {
     const toolCallback = new TestToolCallback("toolA");
     const resolver = createStaticResolver([toolCallback]);
     const manager = new DefaultToolCallingManager({
@@ -194,7 +194,7 @@ describe("DefaultToolCallingManagerTests", () => {
       responseData: "Mission accomplished!",
     };
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
@@ -203,7 +203,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(toolResponseMsg?.responses).toEqual([expectedToolResponse]);
   });
 
-  it("when single tool call with return direct in chat response then execute", () => {
+  it("when single tool call with return direct in chat response then execute", async () => {
     const toolCallback = new TestToolCallback("toolA", true);
     const resolver = createStaticResolver([toolCallback]);
     const manager = new DefaultToolCallingManager({
@@ -238,7 +238,7 @@ describe("DefaultToolCallingManagerTests", () => {
       responseData: "Mission accomplished!",
     };
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
@@ -248,7 +248,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(result.returnDirect()).toBe(true);
   });
 
-  it("when multiple tool calls in chat response then execute", () => {
+  it("when multiple tool calls in chat response then execute", async () => {
     const toolCallbackA = new TestToolCallback("toolA");
     const toolCallbackB = new TestToolCallback("toolB");
     const resolver = createStaticResolver([toolCallbackA, toolCallbackB]);
@@ -289,7 +289,7 @@ describe("DefaultToolCallingManagerTests", () => {
       { id: "toolB", name: "toolB", responseData: "Mission accomplished!" },
     ];
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
@@ -298,7 +298,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(toolResponseMsg?.responses).toEqual(expectedToolResponses);
   });
 
-  it("when duplicate mixed tool calls in chat response then execute", () => {
+  it("when duplicate mixed tool calls in chat response then execute", async () => {
     const manager = new DefaultToolCallingManager();
 
     const options = DefaultToolCallingChatOptions.builder()
@@ -331,7 +331,7 @@ describe("DefaultToolCallingManagerTests", () => {
       responseData: "Mission accomplished!",
     };
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
@@ -340,7 +340,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(toolResponseMsg?.responses).toEqual([expectedToolResponse]);
   });
 
-  it("when multiple tool calls with return direct in chat response then execute", () => {
+  it("when multiple tool calls with return direct in chat response then execute", async () => {
     const toolCallbackA = new TestToolCallback("toolA", true);
     const toolCallbackB = new TestToolCallback("toolB", true);
     const resolver = createStaticResolver([toolCallbackA, toolCallbackB]);
@@ -381,7 +381,7 @@ describe("DefaultToolCallingManagerTests", () => {
       { id: "toolB", name: "toolB", responseData: "Mission accomplished!" },
     ];
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
@@ -391,7 +391,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(result.returnDirect()).toBe(true);
   });
 
-  it("when multiple tool calls with mixed return direct in chat response then execute", () => {
+  it("when multiple tool calls with mixed return direct in chat response then execute", async () => {
     const toolCallbackA = new TestToolCallback("toolA", true);
     const toolCallbackB = new TestToolCallback("toolB", false);
     const resolver = createStaticResolver([toolCallbackA, toolCallbackB]);
@@ -432,7 +432,7 @@ describe("DefaultToolCallingManagerTests", () => {
       { id: "toolB", name: "toolB", responseData: "Mission accomplished!" },
     ];
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
@@ -442,7 +442,7 @@ describe("DefaultToolCallingManagerTests", () => {
     expect(result.returnDirect()).toBe(false);
   });
 
-  it("when tool call with exception then return error", () => {
+  it("when tool call with exception then return error", async () => {
     const toolCallback = new FailingToolCallback("toolC");
     const resolver = createStaticResolver([toolCallback]);
     const manager = new DefaultToolCallingManager({
@@ -477,7 +477,7 @@ describe("DefaultToolCallingManagerTests", () => {
       responseData: "You failed this city!",
     };
 
-    const result = manager.executeToolCalls(prompt, chatResponse);
+    const result = await manager.executeToolCalls(prompt, chatResponse);
 
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),

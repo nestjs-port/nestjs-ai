@@ -206,10 +206,8 @@ export class GoogleGenAiChatModel extends ChatModel {
         response,
       )
     ) {
-      const toolExecutionResult = this._toolCallingManager.executeToolCalls(
-        prompt,
-        response,
-      );
+      const toolExecutionResult =
+        await this._toolCallingManager.executeToolCalls(prompt, response);
       if (toolExecutionResult.returnDirect()) {
         return ChatResponse.builder()
           .from(response)
@@ -356,24 +354,30 @@ export class GoogleGenAiChatModel extends ChatModel {
               response,
             )
           ) {
-            const toolExecutionResult =
-              this._toolCallingManager.executeToolCalls(prompt, response);
-            if (toolExecutionResult.returnDirect()) {
-              return from([
-                ChatResponse.builder()
-                  .from(response)
-                  .generations(
-                    ToolExecutionResult.buildGenerations(toolExecutionResult),
-                  )
-                  .build(),
-              ]);
-            }
-            return this.internalStream(
-              new Prompt(
-                toolExecutionResult.conversationHistory(),
-                prompt.options as ChatOptions,
-              ),
-              response,
+            return from(
+              this._toolCallingManager.executeToolCalls(prompt, response),
+            ).pipe(
+              switchMap((toolExecutionResult) => {
+                if (toolExecutionResult.returnDirect()) {
+                  return from([
+                    ChatResponse.builder()
+                      .from(response)
+                      .generations(
+                        ToolExecutionResult.buildGenerations(
+                          toolExecutionResult,
+                        ),
+                      )
+                      .build(),
+                  ]);
+                }
+                return this.internalStream(
+                  new Prompt(
+                    toolExecutionResult.conversationHistory(),
+                    prompt.options as ChatOptions,
+                  ),
+                  response,
+                );
+              }),
             );
           }
           return from([response]);

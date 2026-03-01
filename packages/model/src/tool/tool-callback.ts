@@ -24,13 +24,16 @@ export abstract class ToolCallback {
   /**
    * Execute tool with the given input and return the result to send back to the AI model.
    */
-  abstract call(toolInput: string): string;
+  abstract call(toolInput: string): Promise<string>;
 
   /**
    * Execute tool with the given input and context, and return the result to send back
    * to the AI model.
    */
-  callTool(toolInput: string, toolContext: ToolContext | null): string {
+  async callTool(
+    toolInput: string,
+    toolContext: ToolContext | null,
+  ): Promise<string> {
     if (toolContext != null && Object.keys(toolContext.context).length > 0) {
       this.logger.info(
         "By default the tool context is not used, " +

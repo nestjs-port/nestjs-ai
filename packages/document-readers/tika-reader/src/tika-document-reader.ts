@@ -2,29 +2,30 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 
-import { Document, type DocumentReader } from "@nestjs-ai/commons";
+import {
+  Document,
+  type DocumentReader,
+  ExtractedTextFormatter,
+} from "@nestjs-ai/commons";
 
 export type TikaResource = string | URL | Buffer;
-export interface TikaTextFormatter {
-  format(text: string): string;
-}
 
 export interface TikaDocumentReaderProps {
   resource: TikaResource;
   tikaServerUrl: string | URL;
-  textFormatter?: TikaTextFormatter;
+  textFormatter?: ExtractedTextFormatter;
 }
 
 export class TikaDocumentReader implements DocumentReader {
   static readonly METADATA_SOURCE = "source";
   private readonly _resource: TikaResource;
   private readonly _tikaServerUrl: string;
-  private readonly _textFormatter: TikaTextFormatter;
+  private readonly _textFormatter: ExtractedTextFormatter;
 
   constructor({
     resource,
     tikaServerUrl,
-    textFormatter = { format: (text: string) => text },
+    textFormatter = ExtractedTextFormatter.defaults(),
   }: TikaDocumentReaderProps) {
     assert(resource != null, "resource must not be null");
     assert(tikaServerUrl != null, "tikaServerUrl must not be null");
@@ -93,19 +94,19 @@ export class TikaDocumentReader implements DocumentReader {
     }
 
     if (resource instanceof URL) {
+      if (resource.pathname.endsWith("/")) {
+        return resource.toString();
+      }
       const resourceName = basename(resource.pathname);
       return resourceName.length > 0 ? resourceName : resource.toString();
-    }
-
-    if (resource.startsWith("classpath:/")) {
-      const classpathRelative = resource.replace("classpath:/", "");
-      const resourceName = basename(classpathRelative);
-      return resourceName.length > 0 ? resourceName : resource;
     }
 
     if (resource.startsWith("http://") || resource.startsWith("https://")) {
       try {
         const parsed = new URL(resource);
+        if (parsed.pathname.endsWith("/")) {
+          return parsed.toString();
+        }
         const resourceName = basename(parsed.pathname);
         return resourceName.length > 0 ? resourceName : parsed.toString();
       } catch {
@@ -152,11 +153,6 @@ export class TikaDocumentReader implements DocumentReader {
 
       const arrayBuffer = await response.arrayBuffer();
       return Buffer.from(arrayBuffer);
-    }
-
-    if (resource.startsWith("classpath:/")) {
-      const classpathRelative = resource.replace("classpath:/", "");
-      return readFile(resolve(__dirname, "__tests__", classpathRelative));
     }
 
     return readFile(resolve(resource));

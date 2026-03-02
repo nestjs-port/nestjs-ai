@@ -7,14 +7,10 @@ import { OpenAiApiResponseHeaders } from "./open-ai-api-response-headers";
 /**
  * Utility used to extract known HTTP response headers for the OpenAI API.
  */
-export class OpenAiResponseHeaderExtractor {
+export abstract class OpenAiResponseHeaderExtractor {
   private static readonly logger = LoggerFactory.getLogger(
     OpenAiResponseHeaderExtractor.name,
   );
-
-  private constructor() {
-    // Prevent instantiation
-  }
 
   /**
    * Extract rate limit information from HTTP response headers.

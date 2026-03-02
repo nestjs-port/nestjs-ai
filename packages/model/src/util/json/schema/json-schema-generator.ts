@@ -8,11 +8,7 @@ export enum SchemaOption {
   UPPER_CASE_TYPE_VALUES = "UPPER_CASE_TYPE_VALUES",
 }
 
-export class JsonSchemaGenerator {
-  private constructor() {
-    // Prevent instantiation
-  }
-
+export abstract class JsonSchemaGenerator {
   static generateForMethodInput(
     parameters: z.ZodObject<z.ZodRawShape> | null | undefined,
     ...schemaOptions: SchemaOption[]

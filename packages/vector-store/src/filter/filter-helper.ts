@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { Filter } from "./filter";
 import type { FilterExpressionConverter } from "./filter-expression-converter";
 
-export class FilterHelper {
+export abstract class FilterHelper {
   private static readonly TYPE_NEGATION_MAP = new Map<
     Filter.ExpressionType,
     Filter.ExpressionType
@@ -18,10 +18,6 @@ export class FilterHelper {
     [Filter.ExpressionType.IN, Filter.ExpressionType.NIN],
     [Filter.ExpressionType.NIN, Filter.ExpressionType.IN],
   ]);
-
-  private constructor() {
-    // utility class
-  }
 
   static negate(operand: Filter.Operand): Filter.Operand {
     if (operand instanceof Filter.Group) {

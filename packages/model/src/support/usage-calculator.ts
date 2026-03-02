@@ -3,11 +3,7 @@ import { type ChatResponse, DefaultUsage, type Usage } from "../chat";
 /**
  * A utility class to provide support methods handling {@link Usage}.
  */
-export class UsageCalculator {
-  private constructor() {
-    throw new Error("This is a utility class and cannot be instantiated");
-  }
-
+export abstract class UsageCalculator {
   /**
    * Accumulate usage tokens from the previous chat response to the current usage
    * tokens.

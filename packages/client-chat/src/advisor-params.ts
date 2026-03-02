@@ -7,10 +7,6 @@ import { ChatClientAttributes } from "./chat-client-attributes";
  * to the advisor context.
  */
 export abstract class AdvisorParams {
-  private constructor() {
-    // Utility class
-  }
-
   static readonly ENABLE_NATIVE_STRUCTURED_OUTPUT = (
     advisorSpec: ChatClient.AdvisorSpec,
   ): void => {

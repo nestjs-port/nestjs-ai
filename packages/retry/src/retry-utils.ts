@@ -14,7 +14,7 @@ import { TransientAiException } from "./transient-ai-exception";
  * RetryUtils is a utility class for configuring and handling retry operations.
  * It provides a default RetryTemplate and a default ResponseErrorHandler.
  */
-export class RetryUtils {
+export abstract class RetryUtils {
   private static readonly DEFAULT_MAX_ATTEMPTS = 10;
 
   private static readonly DEFAULT_INITIAL_INTERVAL = ms(2000);
@@ -26,10 +26,6 @@ export class RetryUtils {
   private static readonly SHORT_INITIAL_INTERVAL = ms(100);
 
   private static readonly logger = LoggerFactory.getLogger(RetryUtils.name);
-
-  private constructor() {
-    // Prevent instantiation - utility class
-  }
 
   /**
    * Default ResponseErrorHandler implementation.

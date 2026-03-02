@@ -85,12 +85,7 @@ class DelegatingLogger implements Logger {
  * logger.info('Hello, world!');
  * ```
  */
-export class LoggerFactory {
-  /**
-   * Private constructor to prevent instantiation.
-   */
-  private constructor() {}
-
+export abstract class LoggerFactory {
   /**
    * Bind an ILoggerFactory implementation to this LoggerFactory.
    *

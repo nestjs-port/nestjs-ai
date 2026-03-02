@@ -99,11 +99,7 @@ function convertSchema(source: JsonSchema): JsonSchema {
   return converted;
 }
 
-export class JsonSchemaConverter {
-  private constructor() {
-    // Prevent instantiation
-  }
-
+export abstract class JsonSchemaConverter {
   static fromJson(jsonString: string): JsonSchema {
     try {
       const result = JSON.parse(jsonString);

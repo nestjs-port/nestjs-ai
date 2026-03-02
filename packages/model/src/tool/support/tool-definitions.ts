@@ -17,10 +17,6 @@ export interface ToolMethodDefinition {
  * method descriptors.
  */
 export abstract class ToolDefinitions {
-  private constructor() {
-    // prevents instantiation.
-  }
-
   /**
    * Create a default {@link ToolDefinition} builder from a method descriptor.
    */
@@ -28,10 +24,8 @@ export abstract class ToolDefinitions {
     methodName,
     metadata,
   }: ToolMethodDefinition): DefaultToolDefinitionBuilder {
-    const toolName = ToolUtils.getToolName(methodName, metadata);
-
     return DefaultToolDefinition.builder()
-      .name(toolName)
+      .name(ToolUtils.getToolName(methodName, metadata))
       .description(ToolUtils.getToolDescription(methodName, metadata))
       .inputSchema(
         JsonSchemaGenerator.generateForMethodInput(metadata?.parameters),

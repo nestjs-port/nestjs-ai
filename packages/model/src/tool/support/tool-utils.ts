@@ -26,21 +26,6 @@ export abstract class ToolUtils {
     // Utility class - prevent instantiation
   }
 
-  static getToolName(target: object, propertyKey: string | symbol): string {
-    assert(target, "target cannot be null");
-    assert(propertyKey, "propertyKey cannot be null");
-
-    const tool = Reflect.getMetadata(TOOL_METADATA_KEY, target, propertyKey) as
-      | ToolAnnotationMetadata
-      | undefined;
-    const methodName =
-      typeof propertyKey === "string" ? propertyKey : String(propertyKey);
-    const toolName =
-      tool?.name && tool.name.trim() !== "" ? tool.name : methodName;
-    ToolUtils.validateToolName(toolName);
-    return toolName;
-  }
-
   static getToolDescriptionFromName(toolName: string): string {
     assert(
       toolName && toolName.trim() !== "",
@@ -49,25 +34,35 @@ export abstract class ToolUtils {
     return ParsingUtils.reConcatenateCamelCase(toolName, " ");
   }
 
-  static getToolDescription(
-    target: object,
-    propertyKey: string | symbol,
+  static getToolName(
+    methodName: string,
+    metadata?: ToolAnnotationMetadata,
   ): string {
-    assert(target, "target cannot be null");
-    assert(propertyKey, "propertyKey cannot be null");
+    assert(
+      methodName && methodName.trim() !== "",
+      "methodName cannot be null or empty",
+    );
+    const toolName =
+      metadata?.name && metadata.name.trim() !== ""
+        ? metadata.name
+        : methodName;
+    ToolUtils.validateToolName(toolName);
+    return toolName;
+  }
 
-    const tool = Reflect.getMetadata(TOOL_METADATA_KEY, target, propertyKey) as
-      | ToolAnnotationMetadata
-      | undefined;
-    const methodName =
-      typeof propertyKey === "string" ? propertyKey : String(propertyKey);
-
-    if (tool == null) {
-      return ParsingUtils.reConcatenateCamelCase(methodName, " ");
+  static getToolDescription(
+    methodName: string,
+    metadata?: ToolAnnotationMetadata,
+  ): string {
+    assert(
+      methodName && methodName.trim() !== "",
+      "methodName cannot be null or empty",
+    );
+    if (metadata == null) {
+      return ToolUtils.getToolDescriptionFromName(methodName);
     }
-
-    return tool.description && tool.description.trim() !== ""
-      ? tool.description
+    return metadata.description && metadata.description.trim() !== ""
+      ? metadata.description
       : methodName;
   }
 
@@ -143,7 +138,7 @@ export abstract class ToolUtils {
    * if the tool name contains characters that may not be compatible with some LLMs.
    * @param toolName - The tool name to validate
    */
-  private static validateToolName(toolName: string): void {
+  static validateToolName(toolName: string): void {
     assert(
       toolName && toolName.trim() !== "",
       "Tool name cannot be null or empty",

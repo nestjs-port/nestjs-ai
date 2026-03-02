@@ -204,7 +204,7 @@ export class MethodToolCallbackBuilder {
     return this;
   }
 
-  toolInputSchema(toolInputSchema: z.ZodObject<z.ZodRawShape>): this {
+  toolInputSchema(toolInputSchema: z.ZodObject<z.ZodRawShape> | null): this {
     this._toolInputSchema = toolInputSchema;
     return this;
   }

@@ -1,12 +1,9 @@
 import "reflect-metadata";
 import assert from "node:assert/strict";
-import { z } from "zod";
-import { JsonSchemaGenerator } from "../../util";
 import type { ToolAnnotationMetadata } from "../annotation";
 import { TOOL_METADATA_KEY } from "../annotation";
-import { DefaultToolDefinition } from "../definition";
 import { ToolMetadata } from "../metadata";
-import { ToolUtils } from "../support";
+import { ToolDefinitions, ToolUtils } from "../support";
 import type { ToolCallback } from "../tool-callback";
 import { ToolCallbackProvider } from "../tool-callback-provider";
 import { MethodToolCallback } from "./method-tool-callback";
@@ -71,11 +68,6 @@ export class MethodToolCallbackProvider<
     toolMethod,
     toolObject,
   }: ToolMethodDescriptor): MethodToolCallback {
-    const toolName = ToolUtils.getToolName(metadataTarget, propertyKey);
-    const toolDescription = ToolUtils.getToolDescription(
-      metadataTarget,
-      propertyKey,
-    );
     const metadata = Reflect.getMetadata(
       TOOL_METADATA_KEY,
       metadataTarget,
@@ -84,24 +76,20 @@ export class MethodToolCallbackProvider<
 
     return MethodToolCallback.builder()
       .toolDefinition(
-        DefaultToolDefinition.builder()
-          .name(toolName)
-          .description(toolDescription)
-          .inputSchema(this.toJsonSchema(metadata.parameters))
-          .build(),
+        ToolDefinitions.from({
+          methodName:
+            typeof propertyKey === "string" ? propertyKey : String(propertyKey),
+          metadata,
+        }),
       )
       .toolMetadata(ToolMetadata.from(metadataTarget, propertyKey))
       .toolMethod(toolMethod)
       .toolObject(toolObject)
-      .toolInputSchema(metadata.parameters ?? z.unknown())
+      .toolInputSchema(metadata.parameters ?? null)
       .toolCallResultConverter(
         ToolUtils.getToolCallResultConverter(metadataTarget, propertyKey),
       )
       .build();
-  }
-
-  private toJsonSchema(parameters: z.ZodTypeAny | undefined): string {
-    return JsonSchemaGenerator.generateForMethodInput(parameters);
   }
 
   private assertToolAnnotatedMethodsPresent(

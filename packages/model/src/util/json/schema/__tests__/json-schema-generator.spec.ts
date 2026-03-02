@@ -15,7 +15,10 @@ describe("JsonSchemaGenerator", () => {
   describe("generateForMethodInput", () => {
     it("generates schema for method with simple parameters", () => {
       const schema = JsonSchemaGenerator.generateForMethodInput(
-        z.tuple([z.string(), z.int()]),
+        z.object({
+          name: z.string(),
+          age: z.int(),
+        }),
       );
 
       expect(schema).toMatchInlineSnapshot(`
@@ -23,20 +26,18 @@ describe("JsonSchemaGenerator", () => {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
-            "arg0": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "name": {
               "type": "string"
             },
-            "arg1": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "age": {
               "type": "integer",
               "minimum": -9007199254740991,
               "maximum": 9007199254740991
             }
           },
           "required": [
-            "arg0",
-            "arg1"
+            "name",
+            "age"
           ],
           "additionalProperties": false
         }"
@@ -44,199 +45,373 @@ describe("JsonSchemaGenerator", () => {
     });
 
     it("generates schema for method with descriptions and optional fields", () => {
-      const schema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            username: z
-              .string()
-              .describe("The username of the customer")
-              .optional(),
-            password: z.string(),
-          }),
-        ),
-      ) as {
-        properties?: Record<string, { description?: string; type?: string }>;
-        required?: string[];
-      };
-
-      expect(schema.properties?.username?.type).toBe("string");
-      expect(schema.properties?.username?.description).toBe(
-        "The username of the customer",
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          username: z
+            .string()
+            .describe("The username of the customer")
+            .optional(),
+          password: z.string(),
+        }),
       );
-      expect(schema.properties?.password?.type).toBe("string");
-      expect(schema.required).toEqual(["password"]);
+
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "description": "The username of the customer"
+            },
+            "password": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "password"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method when parameters are required by default", () => {
-      const schema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            username: z.string(),
-            password: z.string(),
-          }),
-        ),
-      ) as { required?: string[] };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          username: z.string(),
+          password: z.string(),
+        }),
+      );
 
-      expect(schema.required).toEqual(["username", "password"]);
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username",
+            "password"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method with object parameter", () => {
-      const schema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            object: z.unknown(),
-          }),
-        ),
-      ) as {
-        properties?: Record<string, Record<string, unknown>>;
-        required?: string[];
-      };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          object: z.unknown(),
+        }),
+      );
 
-      expect(schema.properties?.object).toEqual({});
-      expect(schema.required).toEqual(["object"]);
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "object": {}
+          },
+          "required": [
+            "object"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method with nullable-like parameter", () => {
-      const schema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            username: z.string().nullable().optional(),
-            password: z.string(),
-          }),
-        ),
-      ) as { required?: string[] };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          username: z.string().nullable().optional(),
+          password: z.string(),
+        }),
+      );
 
-      expect(schema.required).toEqual(["password"]);
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "username": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "password": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "password"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method with complex parameters", () => {
-      const schema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            items: z.array(z.string()),
-            data: z.object({
-              id: z.int(),
-              name: z.string().describe("The special name"),
-            }),
-            moreData: z
-              .object({
-                id: z.int(),
-                name: z.string().describe("Even more special name"),
-              })
-              .describe("Much more data"),
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          items: z.array(z.string()),
+          data: z.object({
+            id: z.int(),
+            name: z.string().describe("The special name"),
           }),
-        ),
-      ) as {
-        properties?: Record<string, Record<string, unknown>>;
-        required?: string[];
-      };
+          moreData: z
+            .object({
+              id: z.int(),
+              name: z.string().describe("Even more special name"),
+            })
+            .describe("Much more data"),
+        }),
+      );
 
-      expect(schema.required).toEqual(["items", "data", "moreData"]);
-      expect(schema.properties?.items?.type).toBe("array");
-      expect(schema.properties?.data?.type).toBe("object");
-      expect(schema.properties?.moreData?.description).toBe("Much more data");
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The special name"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "moreData": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Even more special name"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ],
+              "additionalProperties": false,
+              "description": "Much more data"
+            }
+          },
+          "required": [
+            "items",
+            "data",
+            "moreData"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method with time parameters", () => {
-      const schema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            duration: z.string(),
-            localDateTime: z.string(),
-            instant: z.string(),
-          }),
-        ),
-      ) as {
-        properties?: Record<string, { type?: string }>;
-        required?: string[];
-      };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          duration: z.string(),
+          localDateTime: z.string(),
+          instant: z.string(),
+        }),
+      );
 
-      expect(schema.properties?.duration?.type).toBe("string");
-      expect(schema.properties?.localDateTime?.type).toBe("string");
-      expect(schema.properties?.instant?.type).toBe("string");
-      expect(schema.required).toEqual(["duration", "localDateTime", "instant"]);
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "duration": {
+              "type": "string"
+            },
+            "localDateTime": {
+              "type": "string"
+            },
+            "instant": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "duration",
+            "localDateTime",
+            "instant"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
-    it("returns empty schema for ToolContext-only input", () => {
-      expect(
-        JsonSchemaGenerator.generateForMethodInput(ToolContextSchema),
-      ).toBe("{}");
+    it("returns empty schema for null input", () => {
+      const schema = JsonSchemaGenerator.generateForMethodInput(null);
+      expect(schema).toMatchInlineSnapshot(`"{}"`);
     });
 
-    it("generates object schema for tuple input while omitting ToolContext", () => {
-      const inputSchema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.tuple([z.string(), ToolContextSchema, z.number()]),
-        ),
-      ) as {
-        properties: Record<string, { type: string }>;
-        required: string[];
-        type: string;
-      };
+    it("removes ToolContextSchema fields from method input schema", () => {
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          name: z.string(),
+          toolContext: ToolContextSchema,
+          count: z.number(),
+        }),
+      );
 
-      expect(inputSchema.type).toBe("object");
-      expect(inputSchema.required).toEqual(["arg0", "arg1"]);
-      expect(inputSchema.properties.arg0.type).toBe("string");
-      expect(inputSchema.properties.arg1.type).toBe("number");
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "count": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "name",
+            "count"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method with additional properties disallowed by default", () => {
-      const inputSchema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            name: z.string(),
-          }),
-        ),
-      ) as { additionalProperties?: boolean };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          name: z.string(),
+        }),
+      );
 
-      expect(inputSchema.additionalProperties).toBe(false);
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("generates schema for method with additional properties allowed option", () => {
-      const inputSchema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            name: z.string(),
-          }),
-          SchemaOption.ALLOW_ADDITIONAL_PROPERTIES_BY_DEFAULT,
-        ),
-      ) as { additionalProperties?: boolean };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          name: z.string(),
+        }),
+        SchemaOption.ALLOW_ADDITIONAL_PROPERTIES_BY_DEFAULT,
+      );
 
-      expect(inputSchema.additionalProperties).toBeUndefined();
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ]
+        }"
+      `);
     });
 
     it("generates schema for method with upper-case types option", () => {
-      const inputSchema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            name: z.string(),
-            age: z.int(),
-          }),
-          SchemaOption.UPPER_CASE_TYPE_VALUES,
-        ),
-      ) as {
-        type?: string;
-        properties?: Record<string, { type?: string }>;
-      };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          name: z.string(),
+          age: z.int(),
+        }),
+        SchemaOption.UPPER_CASE_TYPE_VALUES,
+      );
 
-      expect(inputSchema.type).toBe("OBJECT");
-      expect(inputSchema.properties?.name?.type).toBe("STRING");
-      expect(inputSchema.properties?.age?.type).toBe("INTEGER");
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "OBJECT",
+          "properties": {
+            "name": {
+              "type": "STRING"
+            },
+            "age": {
+              "type": "INTEGER",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "name",
+            "age"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
 
     it("removes direct property format from generated method input schema", () => {
-      const inputSchema = JSON.parse(
-        JsonSchemaGenerator.generateForMethodInput(
-          z.object({
-            createdAt: z.string().datetime(),
-          }),
-        ),
-      ) as {
-        properties?: Record<string, { format?: string; type?: string }>;
-      };
+      const schema = JsonSchemaGenerator.generateForMethodInput(
+        z.object({
+          createdAt: z.iso.datetime(),
+        }),
+      );
 
-      expect(inputSchema.properties?.createdAt?.type).toBe("string");
-      expect(inputSchema.properties?.createdAt?.format).toBeUndefined();
+      expect(schema).toMatchInlineSnapshot(`
+        "{
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "createdAt": {
+              "type": "string",
+              "pattern": "^(?:(?:\\\\d\\\\d[2468][048]|\\\\d\\\\d[13579][26]|\\\\d\\\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\\\d|30)|(?:02)-(?:0[1-9]|1\\\\d|2[0-8])))T(?:(?:[01]\\\\d|2[0-3]):[0-5]\\\\d(?::[0-5]\\\\d(?:\\\\.\\\\d+)?)?(?:Z))$"
+            }
+          },
+          "required": [
+            "createdAt"
+          ],
+          "additionalProperties": false
+        }"
+      `);
     });
   });
 

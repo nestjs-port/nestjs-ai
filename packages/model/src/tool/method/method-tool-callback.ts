@@ -16,7 +16,7 @@ export interface MethodToolCallbackProps {
   toolMetadata?: ToolMetadata | null;
   toolMethod: (...args: never[]) => unknown | Promise<unknown>;
   toolObject?: object | null;
-  toolInputSchema?: z.ZodTypeAny | null;
+  toolInputSchema?: z.ZodObject<z.ZodRawShape> | null;
   toolCallResultConverter?: ToolCallResultConverter | null;
 }
 
@@ -36,7 +36,7 @@ export class MethodToolCallback extends ToolCallback {
     ...args: never[]
   ) => unknown | Promise<unknown>;
   private readonly _toolObject: object | null;
-  private readonly _toolInputSchema: z.ZodTypeAny | null;
+  private readonly _toolInputSchema: z.ZodObject<z.ZodRawShape> | null;
   private readonly _toolCallResultConverter: ToolCallResultConverter;
 
   constructor(props: MethodToolCallbackProps) {
@@ -93,98 +93,54 @@ export class MethodToolCallback extends ToolCallback {
     try {
       const plain = JSON.parse(toolInput) as unknown;
       if (!this._toolInputSchema) {
-        return this.toArguments(plain);
+        return [];
       }
-
-      if (this._toolInputSchema === ToolContextSchema) {
-        this.assertNonEmptyToolContext(toolContext);
-        return [toolContext];
-      }
-
-      let input = plain;
-      const contextIndexes = this.findToolContextTupleIndexes(
-        this._toolInputSchema,
-      );
-      if (contextIndexes.length > 0) {
-        assert(Array.isArray(input), "Tool input must be a JSON array");
-        this.assertNonEmptyToolContext(toolContext);
-
-        const tupleInput = [...input];
-        for (const index of contextIndexes) {
-          tupleInput[index] = toolContext;
-        }
-        input = tupleInput;
-      }
-
-      const parsed = this._toolInputSchema.parse(input);
-      return this.toArguments(parsed, this._toolInputSchema);
+      const preparedInput = this.injectToolContextFields(plain, toolContext);
+      const parsed = this._toolInputSchema.parse(preparedInput);
+      return [parsed];
     } catch (ex) {
       this._logger.warn("Conversion from JSON failed", ex as Error);
       throw this.wrapToolExecutionException(ex);
     }
   }
 
-  private toArguments(
-    request: unknown,
-    schema: z.ZodTypeAny | null = null,
-  ): unknown[] {
-    if (schema && this.isTupleSchema(schema)) {
-      assert(Array.isArray(request), "Tool input must be a JSON array");
-      return [...request];
+  private injectToolContextFields(
+    input: unknown,
+    toolContext: ToolContext | null,
+  ): unknown {
+    if (!this._toolInputSchema || input == null || typeof input !== "object") {
+      return input;
     }
 
-    if (schema) {
-      if (request === undefined) {
-        return [];
+    const shape = this.getObjectShape(this._toolInputSchema);
+    if (!shape) {
+      return input;
+    }
+
+    const source = input as Record<string, unknown>;
+    const next = { ...source };
+    for (const [field, schema] of Object.entries(shape)) {
+      if (schema !== ToolContextSchema) {
+        continue;
       }
-      return [request];
-    }
 
-    if (Array.isArray(request)) {
-      return [...request];
-    }
-
-    if (request === undefined) {
-      return [];
-    }
-
-    return [request];
-  }
-
-  private isTupleSchema(schema: z.ZodTypeAny): boolean {
-    const def = this.getSchemaDef(schema);
-    return def?.type === "tuple";
-  }
-
-  private findToolContextTupleIndexes(schema: z.ZodTypeAny): number[] {
-    const tupleDef = this.getSchemaDef(schema);
-    if (tupleDef?.type !== "tuple" || !Array.isArray(tupleDef.items)) {
-      return [];
-    }
-
-    const indexes: number[] = [];
-    for (let index = 0; index < tupleDef.items.length; index += 1) {
-      if (tupleDef.items[index] === ToolContextSchema) {
-        indexes.push(index);
+      if (toolContext != null) {
+        next[field] = toolContext;
       }
     }
-    return indexes;
+
+    return next;
   }
 
-  private getSchemaDef(
-    schema: z.ZodTypeAny,
-  ): { type?: unknown; items?: unknown } | null {
-    const def = (
-      schema as { _zod?: { def?: { type?: unknown; items?: unknown } } }
-    )._zod?.def;
-    return def ?? null;
-  }
-
-  private assertNonEmptyToolContext(toolContext: ToolContext | null): void {
-    assert(
-      toolContext != null && Object.keys(toolContext.context).length > 0,
-      "ToolContext is required by the method as an argument",
-    );
+  private getObjectShape(
+    schema: z.ZodObject<z.ZodRawShape>,
+  ): Record<string, z.ZodTypeAny> | null {
+    const shape = (
+      schema as unknown as {
+        _zod?: { def?: { shape?: Record<string, z.ZodTypeAny> } };
+      }
+    )._zod?.def?.shape;
+    return shape ?? null;
   }
 
   private async callMethod(methodArguments: unknown[]): Promise<unknown> {
@@ -223,7 +179,7 @@ export class MethodToolCallbackBuilder {
     | ((...args: never[]) => unknown | Promise<unknown>)
     | null = null;
   private _toolObject: object | null = null;
-  private _toolInputSchema: z.ZodTypeAny | null = null;
+  private _toolInputSchema: z.ZodObject<z.ZodRawShape> | null = null;
   private _toolCallResultConverter: ToolCallResultConverter | null = null;
 
   toolDefinition(toolDefinition: ToolDefinition): this {
@@ -248,7 +204,7 @@ export class MethodToolCallbackBuilder {
     return this;
   }
 
-  toolInputSchema(toolInputSchema: z.ZodTypeAny): this {
+  toolInputSchema(toolInputSchema: z.ZodObject<z.ZodRawShape>): this {
     this._toolInputSchema = toolInputSchema;
     return this;
   }

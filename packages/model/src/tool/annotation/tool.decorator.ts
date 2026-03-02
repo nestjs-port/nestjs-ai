@@ -6,17 +6,19 @@ import { DefaultToolCallResultConverter } from "../execution";
 type AnyZodSchema = z.ZodTypeAny;
 type AnyZodObjectSchema = z.ZodObject<z.ZodRawShape>;
 type MaybePromise<T> = T | Promise<T>;
-
-type ToolMethodSignature<
+type ExactToolMethodSignature<
   // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
-  P extends AnyZodObjectSchema,
-  R extends AnyZodSchema,
-> = T extends (input: z.infer<P>) => MaybePromise<z.infer<R>>
-  ? Parameters<T> extends [z.infer<P>]
-    ? T
+  I,
+  O,
+> = T extends (input: I) => MaybePromise<O>
+  ? Parameters<T> extends [I]
+    ? [I] extends Parameters<T>
+      ? T
+      : never
     : never
   : never;
+
 type ToolMethodDecoratorFor<
   P extends AnyZodObjectSchema,
   R extends AnyZodSchema,
@@ -26,7 +28,9 @@ type ToolMethodDecoratorFor<
 >(
   target: object,
   propertyKey: string | symbol,
-  descriptor: TypedPropertyDescriptor<ToolMethodSignature<T, P, R>>,
+  descriptor: TypedPropertyDescriptor<
+    ExactToolMethodSignature<T, z.infer<P>, z.infer<R>>
+  >,
 ) => void;
 type SchemaLessToolDecorator = <
   // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.

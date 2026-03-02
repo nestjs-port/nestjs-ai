@@ -14,25 +14,18 @@ export class JsonSchemaGenerator {
   }
 
   static generateForMethodInput(
-    parameters: z.ZodTypeAny | undefined,
+    parameters: z.ZodObject<z.ZodRawShape> | null | undefined,
     ...schemaOptions: SchemaOption[]
   ): string {
-    if (!parameters || parameters === ToolContextSchema) {
+    if (!parameters) {
       return "{}";
-    }
-
-    const tupleItems = JsonSchemaGenerator.getTupleItems(parameters);
-    if (tupleItems) {
-      return JsonSchemaGenerator.generateObjectSchemaForTupleInput(
-        tupleItems,
-        schemaOptions,
-      );
     }
 
     try {
       const jsonSchema: JsonSchemaNode = z.toJSONSchema(parameters, {
         unrepresentable: "any",
       });
+      JsonSchemaGenerator.removeToolContextProperties(parameters, jsonSchema);
       JsonSchemaGenerator.removeFormatFromDirectObjectProperties(jsonSchema);
       JsonSchemaGenerator.processSchemaOptions(schemaOptions, jsonSchema);
       return JSON.stringify(jsonSchema, null, 2);
@@ -94,46 +87,6 @@ export class JsonSchemaGenerator {
     }
   }
 
-  private static generateObjectSchemaForTupleInput(
-    tupleItems: z.ZodTypeAny[],
-    schemaOptions: SchemaOption[],
-  ): string {
-    const nonContextItems = tupleItems.filter(
-      (item) => item !== ToolContextSchema,
-    );
-    if (nonContextItems.length === 0) {
-      return "{}";
-    }
-
-    try {
-      const properties: Record<string, JsonSchemaNode> = {};
-      const required: string[] = [];
-      nonContextItems.forEach((item, index) => {
-        const argName = `arg${index}`;
-        const itemSchema = z.toJSONSchema(item, {
-          unrepresentable: "any",
-        }) as JsonSchemaNode;
-        if ("format" in itemSchema) {
-          delete itemSchema.format;
-        }
-        properties[argName] = itemSchema;
-        required.push(argName);
-      });
-
-      const jsonSchema = {
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        properties,
-        required,
-      } as unknown as JsonSchemaNode;
-
-      JsonSchemaGenerator.processSchemaOptions(schemaOptions, jsonSchema);
-      return JSON.stringify(jsonSchema, null, 2);
-    } catch {
-      return "{}";
-    }
-  }
-
   private static removeFormatFromDirectObjectProperties(
     schema: JsonSchemaNode,
   ): void {
@@ -153,13 +106,43 @@ export class JsonSchemaGenerator {
     }
   }
 
-  private static getTupleItems(schema: z.ZodTypeAny): z.ZodTypeAny[] | null {
-    const def = (
-      schema as { _zod?: { def?: { type?: unknown; items?: unknown } } }
-    )._zod?.def;
-    if (def?.type !== "tuple" || !Array.isArray(def.items)) {
-      return null;
+  private static removeToolContextProperties(
+    parameters: z.ZodObject<z.ZodRawShape>,
+    schema: JsonSchemaNode,
+  ): void {
+    if (schema.type !== "object" || !schema.properties) {
+      return;
     }
-    return def.items as z.ZodTypeAny[];
+
+    const shape = JsonSchemaGenerator.getObjectShape(parameters);
+    if (!shape) {
+      return;
+    }
+
+    const properties = schema.properties as Record<string, JsonSchemaNode>;
+    const toolContextKeys = Object.entries(shape)
+      .filter(([, fieldSchema]) => fieldSchema === ToolContextSchema)
+      .map(([field]) => field);
+
+    for (const key of toolContextKeys) {
+      delete properties[key];
+    }
+
+    if (Array.isArray(schema.required)) {
+      schema.required = schema.required.filter(
+        (key) => !toolContextKeys.includes(key),
+      );
+    }
+  }
+
+  private static getObjectShape(
+    schema: z.ZodObject<z.ZodRawShape>,
+  ): Record<string, z.ZodTypeAny> | null {
+    const shape = (
+      schema as unknown as {
+        _zod?: { def?: { shape?: Record<string, z.ZodTypeAny> } };
+      }
+    )._zod?.def?.shape;
+    return shape ?? null;
   }
 }

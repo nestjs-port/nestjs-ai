@@ -7,35 +7,30 @@ import { MethodToolCallback } from "../method-tool-callback";
 class TestGenericClass {
   static readonly STATIC_PREFIX = "STATIC";
 
-  processStringList(strings: string[]): string {
+  processStringList(input: { strings: string[] }): string {
+    const { strings } = input;
     return `${strings.length} strings processed: [${strings.join(", ")}]`;
   }
 
-  processStringIntMap(map: Record<string, number>): string {
+  processStringIntMap(input: { map: Record<string, number> }): string {
+    const { map } = input;
     return `${Object.keys(map).length} entries processed: ${formatMap(map)}`;
   }
 
-  processListOfMaps(listOfMaps: Record<string, number>[]): string {
+  processListOfMaps(input: { listOfMaps: Record<string, number>[] }): string {
+    const { listOfMaps } = input;
     return `${listOfMaps.length} maps processed: [${listOfMaps
       .map((map) => formatMap(map))
       .join(", ")}]`;
   }
 
-  processStringListInToolContext(toolContext: ToolContext): string {
-    const context = toolContext.context;
+  processStringListInToolContext(input: { toolContext: ToolContext }): string {
+    const context = input.toolContext.context;
     return `${Object.keys(context).length} entries processed ${formatMap(context)}`;
   }
 
-  processMultiArgsWithToolContext(
-    name: string,
-    toolContext: ToolContext,
-    count: number,
-  ): string {
-    return `${name}:${count}:${formatMap(toolContext.context)}`;
-  }
-
-  static processStaticListWithThis(strings: string[]): string {
-    return `${TestGenericClass.STATIC_PREFIX}:${strings.join("|")}`;
+  static processStaticListWithThis(input: { strings: string[] }): string {
+    return `${TestGenericClass.STATIC_PREFIX}:${input.strings.join("|")}`;
   }
 }
 
@@ -62,12 +57,12 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processStringList)
       .toolObject(testObject)
-      .toolInputSchema(z.array(z.string()))
+      .toolInputSchema(z.object({ strings: z.array(z.string()) }))
       .build();
 
     // Create a JSON input with a list of strings
     const toolInput = `
-      ["one", "two", "three"]
+      {"strings": ["one", "two", "three"]}
     `;
 
     // Call the tool
@@ -93,12 +88,12 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processStringIntMap)
       .toolObject(testObject)
-      .toolInputSchema(z.record(z.string(), z.number()))
+      .toolInputSchema(z.object({ map: z.record(z.string(), z.number()) }))
       .build();
 
     // Create a JSON input with a map of string to integer
     const toolInput = `
-      {"one": 1, "two": 2, "three": 3}
+      {"map": {"one": 1, "two": 2, "three": 3}}
     `;
 
     // Call the tool
@@ -126,15 +121,21 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processListOfMaps)
       .toolObject(testObject)
-      .toolInputSchema(z.array(z.record(z.string(), z.number())))
+      .toolInputSchema(
+        z.object({
+          listOfMaps: z.array(z.record(z.string(), z.number())),
+        }),
+      )
       .build();
 
     // Create a JSON input with a list of maps
     const toolInput = `
-      [
-        {"a": 1, "b": 2},
-        {"c": 3, "d": 4}
-      ]
+      {
+        "listOfMaps": [
+          {"a": 1, "b": 2},
+          {"c": 3, "d": 4}
+        ]
+      }
     `;
 
     // Call the tool
@@ -147,7 +148,7 @@ describe("MethodToolCallbackGenericTypes", () => {
   });
 
   it("test tool context type", async () => {
-    // Create a test object with a method that takes a List<Map<String, Integer>>
+    // Create a test object with a method that takes context in object input
     const testObject = new TestGenericClass();
 
     // Create a tool definition
@@ -162,48 +163,55 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processStringListInToolContext)
       .toolObject(testObject)
-      .toolInputSchema(ToolContextSchema)
+      .toolInputSchema(
+        z.object({
+          toolContext: ToolContextSchema,
+        }),
+      )
       .build();
 
-    // Create an empty JSON input
+    // Create a JSON input without tool context.
+    // Tool context is provided via the runtime argument.
     const toolInput = `
       {}
     `;
 
-    // Create a toolContext
-    const toolContext = new ToolContext({ foo: "bar" });
-
     // Call the tool
-    const result = await callback.call(toolInput, toolContext);
+    const result = await callback.call(
+      toolInput,
+      new ToolContext({ foo: "bar" }),
+    );
 
     // Verify the result
     expect(JSON.parse(result)).toBe("1 entries processed {foo=bar}");
   });
 
-  it("test multiple args with tool context in tuple", async () => {
+  it("prefers runtime tool context over input toolContext field", async () => {
     const testObject = new TestGenericClass();
 
     const toolDefinition = DefaultToolDefinition.builder()
-      .name("processMultiArgsWithToolContext")
-      .description("Process tuple args with tool context")
+      .name("processToolContext")
+      .description("Process tool context")
       .inputSchema("{}")
       .build();
 
     const callback = MethodToolCallback.builder()
       .toolDefinition(toolDefinition)
-      .toolMethod(testObject.processMultiArgsWithToolContext)
+      .toolMethod(testObject.processStringListInToolContext)
       .toolObject(testObject)
-      .toolInputSchema(z.tuple([z.string(), ToolContextSchema, z.number()]))
+      .toolInputSchema(
+        z.object({
+          toolContext: ToolContextSchema,
+        }),
+      )
       .build();
 
-    const toolInput = `
-      ["alpha", null, 7]
-    `;
-    const toolContext = new ToolContext({ foo: "bar", env: "dev" });
+    const result = await callback.call(
+      '{"toolContext":{"foo":"input","env":"input"}}',
+      new ToolContext({ foo: "runtime" }),
+    );
 
-    const result = await callback.call(toolInput, toolContext);
-
-    expect(JSON.parse(result)).toBe("alpha:7:{foo=bar, env=dev}");
+    expect(JSON.parse(result)).toBe("1 entries processed {foo=runtime}");
   });
 
   it("test static method using this", async () => {
@@ -217,10 +225,10 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(TestGenericClass.processStaticListWithThis)
       .toolObject(TestGenericClass)
-      .toolInputSchema(z.array(z.string()))
+      .toolInputSchema(z.object({ strings: z.array(z.string()) }))
       .build();
 
-    const result = await callback.call('["one", "two"]');
+    const result = await callback.call('{"strings":["one", "two"]}');
 
     expect(JSON.parse(result)).toBe("STATIC:one|two");
   });

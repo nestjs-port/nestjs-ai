@@ -11,24 +11,27 @@ class TestFunctionTool {
 
   calledToolContext: ToolContext | null = null;
 
-  stringConsumer(): (input: string) => void {
+  stringConsumer(): (input: { value: string }) => void {
     return (input) => {
-      this.calledValue = input;
+      this.calledValue = input.value;
     };
   }
 
-  stringBiFunction(): (input: string, context: ToolContext | null) => string {
+  stringBiFunction(): (
+    input: { value: string },
+    context: ToolContext | null,
+  ) => string {
     return (input, context) => {
-      this.calledValue = input;
+      this.calledValue = input.value;
       this.calledToolContext = context;
-      return `return value = ${input}`;
+      return `return value = ${input.value}`;
     };
   }
 
-  stringFunction(): (input: string) => string {
+  stringFunction(): (input: { value: string }) => string {
     return (input) => {
-      this.calledValue = input;
-      return `return value = ${input}`;
+      this.calledValue = input.value;
+      return `return value = ${input.value}`;
     };
   }
 
@@ -37,13 +40,13 @@ class TestFunctionTool {
     return () => "return value = ";
   }
 
-  throwRuntimeException(): (input: string) => void {
+  throwRuntimeException(): (input: { value: string }) => void {
     return (_input) => {
       throw new Error("test exception");
     };
   }
 
-  throwToolExecutionException(): (input: string) => void {
+  throwToolExecutionException(): (input: { value: string }) => void {
     return (_input) => {
       throw new ToolExecutionException(
         new DefaultToolDefinition("test", "test", "{}"),
@@ -56,34 +59,37 @@ class TestFunctionTool {
 describe("FunctionToolCallback", () => {
   it("test consumer tool call", async () => {
     const tool = new TestFunctionTool();
-    const callback = FunctionToolCallback.builder<string, void>(
+    const callback = FunctionToolCallback.builder<{ value: string }, void>(
       "testTool",
       tool.stringConsumer(),
     )
       .toolMetadata(ToolMetadata.create({ returnDirect: true }))
       .description("test description")
-      .inputType(z.string())
+      .inputType(z.object({ value: z.string() }))
       .build();
 
-    await callback.call('"test string param"');
+    await callback.call('{"value":"test string param"}');
 
     expect(tool.calledValue).toBe("test string param");
   });
 
   it("test bi function tool call", async () => {
     const tool = new TestFunctionTool();
-    const callback = FunctionToolCallback.builder<string, string>(
+    const callback = FunctionToolCallback.builder<{ value: string }, string>(
       "testTool",
       tool.stringBiFunction(),
     )
       .toolMetadata(ToolMetadata.create({ returnDirect: true }))
       .description("test description")
-      .inputType(z.string())
+      .inputType(z.object({ value: z.string() }))
       .build();
 
     const toolContext = new ToolContext({ foo: "bar" });
 
-    const callResult = await callback.call('"test string param"', toolContext);
+    const callResult = await callback.call(
+      '{"value":"test string param"}',
+      toolContext,
+    );
 
     expect(tool.calledValue).toBe("test string param");
     expect(callResult).toBe('"return value = test string param"');
@@ -92,18 +98,21 @@ describe("FunctionToolCallback", () => {
 
   it("test function tool call", async () => {
     const tool = new TestFunctionTool();
-    const callback = FunctionToolCallback.builder<string, string>(
+    const callback = FunctionToolCallback.builder<{ value: string }, string>(
       "testTool",
       tool.stringFunction(),
     )
       .toolMetadata(ToolMetadata.create({ returnDirect: true }))
       .description("test description")
-      .inputType(z.string())
+      .inputType(z.object({ value: z.string() }))
       .build();
 
     const toolContext = new ToolContext({});
 
-    const callResult = await callback.call('"test string param"', toolContext);
+    const callResult = await callback.call(
+      '{"value":"test string param"}',
+      toolContext,
+    );
 
     expect(tool.calledValue).toBe("test string param");
     expect(callResult).toBe('"return value = test string param"');
@@ -113,18 +122,18 @@ describe("FunctionToolCallback", () => {
     const tool = new TestFunctionTool();
 
     // Supplier overload ignores input at execution time, but the builder still requires a zod schema.
-    const callback = FunctionToolCallback.builder<void, string>(
-      "testTool",
-      tool.stringSupplier(),
-    )
+    const callback = FunctionToolCallback.builder<
+      Record<string, never>,
+      string
+    >("testTool", tool.stringSupplier())
       .toolMetadata(ToolMetadata.create({ returnDirect: true }))
       .description("test description")
-      .inputType(z.string())
+      .inputType(z.object({}))
       .build();
 
     const toolContext = new ToolContext({});
 
-    const callResult = await callback.call('"test string param"', toolContext);
+    const callResult = await callback.call("{}", toolContext);
 
     expect(tool.calledValue).toBe("not params");
     expect(callResult).toBe('"return value = "');
@@ -132,18 +141,18 @@ describe("FunctionToolCallback", () => {
 
   it("test throw runtime exception", async () => {
     const tool = new TestFunctionTool();
-    const callback = FunctionToolCallback.builder<string, void>(
+    const callback = FunctionToolCallback.builder<{ value: string }, void>(
       "testTool",
       tool.throwRuntimeException(),
     )
       .toolMetadata(ToolMetadata.create({ returnDirect: true }))
       .description("test description")
-      .inputType(z.string())
+      .inputType(z.object({ value: z.string() }))
       .build();
 
     let thrown: unknown;
     try {
-      await callback.call('"test string param"');
+      await callback.call('{"value":"test string param"}');
     } catch (error) {
       thrown = error;
     }
@@ -157,18 +166,18 @@ describe("FunctionToolCallback", () => {
 
   it("test throw tool execution exception", async () => {
     const tool = new TestFunctionTool();
-    const callback = FunctionToolCallback.builder<string, void>(
+    const callback = FunctionToolCallback.builder<{ value: string }, void>(
       "testTool",
       tool.throwToolExecutionException(),
     )
       .toolMetadata(ToolMetadata.create({ returnDirect: true }))
       .description("test description")
-      .inputType(z.string())
+      .inputType(z.object({ value: z.string() }))
       .build();
 
     let thrown: unknown;
     try {
-      await callback.call('"test string param"');
+      await callback.call('{"value":"test string param"}');
     } catch (error) {
       thrown = error;
     }
@@ -181,15 +190,15 @@ describe("FunctionToolCallback", () => {
 
   it("test empty string input", async () => {
     const tool = new TestFunctionTool();
-    const callback = FunctionToolCallback.builder<string, void>(
+    const callback = FunctionToolCallback.builder<{ value: string }, void>(
       "testTool",
       tool.stringConsumer(),
     )
       .description("test empty string")
-      .inputType(z.string())
+      .inputType(z.object({ value: z.string() }))
       .build();
 
-    await callback.call('""');
+    await callback.call('{"value":""}');
 
     expect(tool.calledValue).toBe("");
   });

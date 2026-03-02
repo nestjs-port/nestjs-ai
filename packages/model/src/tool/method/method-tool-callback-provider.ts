@@ -5,14 +5,14 @@ import { TOOL_METADATA_KEY } from "../annotation";
 import { ToolMetadata } from "../metadata";
 import { ToolDefinitions, ToolUtils } from "../support";
 import type { ToolCallback } from "../tool-callback";
-import { ToolCallbackProvider } from "../tool-callback-provider";
+import type { ToolCallbackProvider } from "../tool-callback-provider";
 import { MethodToolCallback } from "./method-tool-callback";
 
 interface ToolMethodDescriptor {
   metadataTarget: object;
   propertyKey: string | symbol;
   toolMethod: (...args: never[]) => unknown | Promise<unknown>;
-  toolObject: object;
+  toolObject: ToolObjectInstance;
 }
 
 export type ToolObjectInstance<T extends object = object> = T extends (
@@ -29,13 +29,10 @@ export type ToolObjectInstance<T extends object = object> = T extends (
  * A {@link ToolCallbackProvider} that builds {@link ToolCallback} instances from
  * {@link Tool}-annotated methods.
  */
-export class MethodToolCallbackProvider<
-  T extends object = object,
-> extends ToolCallbackProvider {
-  private readonly _toolObjects: ToolObjectInstance<T>[];
+export class MethodToolCallbackProvider implements ToolCallbackProvider {
+  private readonly _toolObjects: ToolObjectInstance[];
 
-  constructor(toolObjects: ToolObjectInstance<T>[]) {
-    super();
+  constructor(toolObjects: ToolObjectInstance[]) {
     assert(toolObjects, "toolObjects cannot be null");
     assert(
       toolObjects.every((toolObject) => toolObject != null),
@@ -51,7 +48,7 @@ export class MethodToolCallbackProvider<
     this.validateToolCallbacks(this.toolCallbacks);
   }
 
-  override get toolCallbacks(): ToolCallback[] {
+  get toolCallbacks(): ToolCallback[] {
     const callbacks = this._toolObjects.flatMap((toolObject) =>
       this.findToolMethods(toolObject).map((toolMethodDescriptor) =>
         this.toMethodToolCallback(toolMethodDescriptor),
@@ -82,7 +79,9 @@ export class MethodToolCallbackProvider<
           metadata,
         }),
       )
-      .toolMetadata(ToolMetadata.from(metadataTarget, propertyKey))
+      .toolMetadata(
+        ToolMetadata.create({ returnDirect: metadata.returnDirect }),
+      )
       .toolMethod(toolMethod)
       .toolObject(toolObject)
       .toolInputSchema(metadata.parameters ?? null)
@@ -93,7 +92,7 @@ export class MethodToolCallbackProvider<
   }
 
   private assertToolAnnotatedMethodsPresent(
-    toolObjects: ToolObjectInstance<T>[],
+    toolObjects: ToolObjectInstance[],
   ): void {
     for (const toolObject of toolObjects) {
       if (this.findToolMethods(toolObject).length === 0) {
@@ -107,7 +106,7 @@ export class MethodToolCallbackProvider<
   }
 
   private findToolMethods(
-    toolObject: ToolObjectInstance<T>,
+    toolObject: ToolObjectInstance,
   ): ToolMethodDescriptor[] {
     return [
       ...this.findInstanceToolMethods(toolObject),
@@ -116,7 +115,7 @@ export class MethodToolCallbackProvider<
   }
 
   private findInstanceToolMethods(
-    toolObject: ToolObjectInstance<T>,
+    toolObject: ToolObjectInstance,
   ): ToolMethodDescriptor[] {
     const prototype = Object.getPrototypeOf(toolObject);
     if (!prototype || prototype === Object.prototype) {
@@ -127,7 +126,7 @@ export class MethodToolCallbackProvider<
   }
 
   private findStaticToolMethods(
-    toolObject: ToolObjectInstance<T>,
+    toolObject: ToolObjectInstance,
   ): ToolMethodDescriptor[] {
     const constructorTarget = (toolObject as { constructor?: object })
       .constructor;
@@ -182,7 +181,7 @@ export class MethodToolCallbackProvider<
     }
   }
 
-  private describeToolObject(toolObject: ToolObjectInstance<T>): string {
+  private describeToolObject(toolObject: ToolObjectInstance): string {
     const constructorName = (toolObject as { constructor?: { name?: string } })
       .constructor?.name;
     return constructorName && constructorName.length > 0

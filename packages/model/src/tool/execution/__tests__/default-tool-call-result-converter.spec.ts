@@ -1,5 +1,6 @@
 import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { DefaultToolCallResultConverter } from "../default-tool-call-result-converter";
 
 /**
@@ -10,22 +11,33 @@ describe("DefaultToolCallResultConverter", () => {
 
   it("convert with null return type should return", async () => {
     const result = await converter.convert(null, null);
+    expect(result).toBe("null");
+  });
+
+  it("convert void return type should return done json", async () => {
+    const result = await converter.convert(null, z.void());
     expect(result).toBe('"Done"');
   });
 
   it("convert string return type should return json", async () => {
-    const result = await converter.convert("test", String);
+    const result = await converter.convert("test", z.string());
     expect(result).toBe('"test"');
   });
 
   it("convert null return value should return null json", async () => {
-    const result = await converter.convert(null, String);
-    expect(result).toBe('"Done"');
+    const result = await converter.convert(null, z.string());
+    expect(result).toBe("null");
   });
 
   it("convert object return type should return json", async () => {
     const testObject = new TestObject("test", 42);
-    const result = await converter.convert(testObject, TestObject);
+    const result = await converter.convert(
+      testObject,
+      z.object({
+        name: z.string(),
+        value: z.number(),
+      }),
+    );
 
     // Helper function to normalize whitespace for comparison
     const normalizeWhitespace = (str: string): string => {
@@ -39,7 +51,7 @@ describe("DefaultToolCallResultConverter", () => {
 
   it("convert collection return type should return json", async () => {
     const testList = ["one", "two", "three"];
-    const result = await converter.convert(testList, Array);
+    const result = await converter.convert(testList, z.array(z.string()));
     expect(result).toBe('["one","two","three"]');
   });
 
@@ -48,7 +60,10 @@ describe("DefaultToolCallResultConverter", () => {
       ["one", 1],
       ["two", 2],
     ]);
-    const result = await converter.convert(testMap, Map);
+    const result = await converter.convert(
+      testMap,
+      z.record(z.string(), z.number()),
+    );
 
     // Helper function to normalize whitespace for comparison
     const normalizeWhitespace = (str: string): string => {
@@ -60,9 +75,9 @@ describe("DefaultToolCallResultConverter", () => {
     expect(normalizedResult).toContain('"two":2');
   });
 
-  it("convert buffer should return base64 image payload", async () => {
+  it("convert image should return base64 image", async () => {
     const buffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]);
-    const result = await converter.convert(buffer, Buffer);
+    const result = await converter.convert(buffer, z.unknown());
     const parsed = JSON.parse(result) as { mimeType: string; data: string };
 
     expect(parsed.mimeType).toBe("image/png");
@@ -73,7 +88,7 @@ describe("DefaultToolCallResultConverter", () => {
     const chunk1 = Buffer.from([0x89, 0x50, 0x4e]);
     const chunk2 = Buffer.from([0x47, 0x0d, 0x0a]);
     const stream = Readable.from([chunk1, chunk2]);
-    const result = await converter.convert(stream, Readable);
+    const result = await converter.convert(stream, z.unknown());
     const parsed = JSON.parse(result) as { mimeType: string; data: string };
 
     expect(parsed.mimeType).toBe("image/png");
@@ -83,14 +98,21 @@ describe("DefaultToolCallResultConverter", () => {
   });
 
   it("convert empty collections should return empty json", async () => {
-    expect(await converter.convert([], Array)).toBe("[]");
-    expect(await converter.convert(new Map(), Map)).toBe("{}");
-    expect(await converter.convert([], Array)).toBe("[]");
+    expect(await converter.convert([], z.array(z.string()))).toBe("[]");
+    expect(
+      await converter.convert(new Map(), z.record(z.string(), z.number())),
+    ).toBe("{}");
+    expect(await converter.convert([] as string[], z.array(z.string()))).toBe(
+      "[]",
+    );
   });
 
   it("convert record return type should return json", async () => {
     const record: TestRecord = { name: "recordName", value: 1 };
-    const result = await converter.convert(record, Object);
+    const result = await converter.convert(
+      record,
+      z.object({ name: z.string(), value: z.number() }),
+    );
 
     // Helper function to normalize whitespace for comparison
     const normalizeWhitespace = (str: string): string => {
@@ -105,7 +127,7 @@ describe("DefaultToolCallResultConverter", () => {
   it("convert special characters in strings should escape json", async () => {
     const specialChars =
       'Test with "quotes", newlines\n, tabs\t, and backslashes\\';
-    const result = await converter.convert(specialChars, String);
+    const result = await converter.convert(specialChars, z.string());
 
     // Should properly escape JSON special characters
     expect(result).toContain('\\"quotes\\"');

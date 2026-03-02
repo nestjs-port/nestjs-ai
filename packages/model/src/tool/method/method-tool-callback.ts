@@ -17,6 +17,7 @@ export interface MethodToolCallbackProps {
   toolMethod: (...args: never[]) => unknown | Promise<unknown>;
   toolObject?: object | null;
   toolInputSchema?: z.ZodObject<z.ZodRawShape> | null;
+  toolResultSchema?: z.ZodTypeAny | null;
   toolCallResultConverter?: ToolCallResultConverter | null;
 }
 
@@ -37,6 +38,7 @@ export class MethodToolCallback extends ToolCallback {
   ) => unknown | Promise<unknown>;
   private readonly _toolObject: object | null;
   private readonly _toolInputSchema: z.ZodObject<z.ZodRawShape> | null;
+  private readonly _toolResultSchema: z.ZodTypeAny | null;
   private readonly _toolCallResultConverter: ToolCallResultConverter;
 
   constructor(props: MethodToolCallbackProps) {
@@ -50,6 +52,7 @@ export class MethodToolCallback extends ToolCallback {
     this._toolMethod = props.toolMethod;
     this._toolObject = props.toolObject ?? null;
     this._toolInputSchema = props.toolInputSchema ?? null;
+    this._toolResultSchema = props.toolResultSchema ?? null;
     this._toolCallResultConverter =
       props.toolCallResultConverter ??
       MethodToolCallback.DEFAULT_RESULT_CONVERTER;
@@ -83,7 +86,10 @@ export class MethodToolCallback extends ToolCallback {
       `Successful execution of tool: ${this._toolDefinition.name}`,
     );
 
-    return this._toolCallResultConverter.convert(result, null);
+    return this._toolCallResultConverter.convert(
+      result,
+      this._toolResultSchema,
+    );
   }
 
   private resolveMethodArguments(
@@ -180,6 +186,7 @@ export class MethodToolCallbackBuilder {
     | null = null;
   private _toolObject: object | null = null;
   private _toolInputSchema: z.ZodObject<z.ZodRawShape> | null = null;
+  private _toolResultSchema: z.ZodTypeAny | null = null;
   private _toolCallResultConverter: ToolCallResultConverter | null = null;
 
   toolDefinition(toolDefinition: ToolDefinition): this {
@@ -209,6 +216,11 @@ export class MethodToolCallbackBuilder {
     return this;
   }
 
+  toolResultSchema(toolResultSchema: z.ZodTypeAny | null): this {
+    this._toolResultSchema = toolResultSchema;
+    return this;
+  }
+
   toolCallResultConverter(
     toolCallResultConverter: ToolCallResultConverter,
   ): this {
@@ -226,6 +238,7 @@ export class MethodToolCallbackBuilder {
       toolMethod: this._toolMethod,
       toolObject: this._toolObject,
       toolInputSchema: this._toolInputSchema,
+      toolResultSchema: this._toolResultSchema,
       toolCallResultConverter: this._toolCallResultConverter,
     });
   }

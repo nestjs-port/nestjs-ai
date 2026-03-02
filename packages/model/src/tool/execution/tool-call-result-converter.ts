@@ -1,3 +1,5 @@
+import type { z } from "zod";
+
 /**
  * A functional interface to convert tool call results to a String that can be sent back
  * to the AI model.
@@ -9,6 +11,6 @@ export interface ToolCallResultConverter {
    */
   convert(
     result?: unknown | null,
-    returnType?: unknown | null,
+    returnType?: z.ZodTypeAny | null,
   ): Promise<string>;
 }

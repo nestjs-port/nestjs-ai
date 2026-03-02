@@ -15,10 +15,6 @@ import { ChatClientRequest } from "./chat-client-request";
 import type { DefaultChatClient } from "./default-chat-client";
 
 export abstract class DefaultChatClientUtils {
-  private constructor() {
-    // Utility class
-  }
-
   static toChatClientRequest(
     inputRequest: DefaultChatClient.DefaultChatClientRequestSpec,
   ): ChatClientRequest {

@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
 import type { PromptTemplate } from "@nestjs-ai/model";
 
-export class PromptAssert {
-  private constructor() {
-    // Utility class
-  }
-
+export abstract class PromptAssert {
   static templateHasRequiredPlaceholders(
     promptTemplate: PromptTemplate,
     ...placeholders: string[]

@@ -1,4 +1,4 @@
-export class SpringAIVectorStoreTypes {
+export abstract class SpringAIVectorStoreTypes {
   static readonly VECTOR_STORE_PREFIX = "spring.ai.vectorstore";
   static readonly TYPE = `${SpringAIVectorStoreTypes.VECTOR_STORE_PREFIX}.type`;
 
@@ -24,8 +24,4 @@ export class SpringAIVectorStoreTypes {
   static readonly WEAVIATE = "weaviate";
   static readonly BEDROCK_KNOWLEDGE_BASE = "bedrock-knowledge-base";
   static readonly S3 = "S3";
-
-  private constructor() {
-    // Avoid instantiation
-  }
 }

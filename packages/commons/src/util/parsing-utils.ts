@@ -17,10 +17,6 @@ export abstract class ParsingUtils {
     return ParsingUtils.split(source, false);
   }
 
-  private constructor() {
-    // util class
-  }
-
   /**
    * Splits up the given camel-case string and returns the parts in lower case.
    * @param source must not be null.

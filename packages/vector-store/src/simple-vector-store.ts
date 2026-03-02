@@ -186,11 +186,7 @@ export class SimpleVectorStore extends AbstractObservationVectorStore {
   }
 }
 
-export class EmbeddingMath {
-  private constructor() {
-    throw new Error("This is a utility class and cannot be instantiated");
-  }
-
+export abstract class EmbeddingMath {
   static cosineSimilarity(vectorX: number[], vectorY: number[]): number {
     if (vectorX == null || vectorY == null) {
       throw new Error("Vectors must not be null");

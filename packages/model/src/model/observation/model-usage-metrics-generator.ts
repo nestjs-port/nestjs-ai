@@ -12,11 +12,9 @@ import type { Usage } from "../../chat";
 /**
  * Generate metrics about the model usage in the context of an AI operation.
  */
-export class ModelUsageMetricsGenerator {
+export abstract class ModelUsageMetricsGenerator {
   private static readonly DESCRIPTION =
     "Measures number of input and output tokens used";
-
-  private constructor() {}
 
   static generate(
     usage: Usage,

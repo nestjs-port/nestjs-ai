@@ -13,7 +13,6 @@ import { NestLoggerFactory } from "../logging";
 import type { NestAiModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
-// biome-ignore lint/complexity/noStaticOnlyClass: NestJS modules use static methods for configuration
 export class NestAiModule {
   static forRoot(options: NestAiModuleOptions = {}): DynamicModule {
     const providers: Provider[] = [];

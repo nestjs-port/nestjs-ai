@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ToolContext, ToolContextSchema } from "../../../chat";
 import { TOOL_METADATA_KEY, Tool, type ToolAnnotationMetadata } from "../index";
 
-class SchemaRequiredExamples {
+class ToolOverloadExamples {
   @Tool()
   noArgsAndVoidReturn() {}
 
@@ -18,23 +18,36 @@ class SchemaRequiredExamples {
     return "value";
   }
 
-  // @ts-expect-error both parameters and returns schemas must be provided together
   @Tool({
     parameters: z.object({ value: z.string() }),
   })
   onlyParametersSchema(input: { value: string }) {
-    return input.value;
+    void input.value;
   }
 
-  // @ts-expect-error both parameters and returns schemas must be provided together
+  @Tool({
+    parameters: z.object({ value: z.string() }),
+  })
+  async onlyParametersSchemaAsync(input: { value: string }) {
+    void input.value;
+  }
+
   @Tool({
     returns: z.string(),
   })
-  onlyReturnsSchema(_value: string) {
-    return "";
+  onlyReturnsSchema() {
+    return "value";
+  }
+
+  // @ts-expect-error returns-only @Tool({ returns }) requires a zero-argument method
+  @Tool({
+    returns: z.string(),
+  })
+  onlyReturnsSchemaWithInput(_value: string) {
+    return "value";
   }
 }
-void SchemaRequiredExamples;
+void ToolOverloadExamples;
 
 class TypedToolExamples {
   @Tool({

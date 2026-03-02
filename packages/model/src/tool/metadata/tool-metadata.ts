@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import { ToolUtils } from "../support";
+import { DefaultToolMetadata } from "./default-tool-metadata";
 
 /**
  * Props for creating a {@link ToolMetadata} instance.
@@ -14,35 +13,21 @@ export interface ToolMetadataProps {
 /**
  * Metadata about a tool specification and execution.
  */
-export abstract class ToolMetadata {
+export interface ToolMetadata {
   /**
    * Whether the tool result should be returned directly or passed back to the model.
    */
-  returnDirect(): boolean {
-    return false;
-  }
+  readonly returnDirect: boolean;
+}
 
+/**
+ * Static methods for ToolMetadata.
+ */
+export namespace ToolMetadata {
   /**
-   * Create a default {@link ToolMetadata} builder.
+   * Create a default {@link ToolMetadata} instance.
    */
-  static create(props: ToolMetadataProps = {}): ToolMetadata {
-    const returnDirect = props.returnDirect ?? false;
-    return new (class extends ToolMetadata {
-      override returnDirect(): boolean {
-        return returnDirect;
-      }
-    })();
-  }
-
-  /**
-   * Create a default {@link ToolMetadata} instance from a method.
-   */
-  static from(target: object, propertyKey: string | symbol): ToolMetadata {
-    assert(target, "target cannot be null");
-    assert(propertyKey, "propertyKey cannot be null");
-
-    return ToolMetadata.create({
-      returnDirect: ToolUtils.getToolReturnDirect(target, propertyKey),
-    });
+  export function create(props: ToolMetadataProps = {}): ToolMetadata {
+    return new DefaultToolMetadata(props.returnDirect ?? false);
   }
 }

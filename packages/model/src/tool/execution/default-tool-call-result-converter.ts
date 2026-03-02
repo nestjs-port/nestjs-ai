@@ -1,4 +1,5 @@
 import { Readable } from "node:stream";
+import type { z } from "zod";
 import type { ToolCallResultConverter } from "./tool-call-result-converter";
 
 /**
@@ -7,11 +8,9 @@ import type { ToolCallResultConverter } from "./tool-call-result-converter";
 export class DefaultToolCallResultConverter implements ToolCallResultConverter {
   async convert(
     result?: unknown | null,
-    _returnType?: unknown | null,
+    returnType?: z.ZodTypeAny | null,
   ): Promise<string> {
-    // Note: In Node.js, it's difficult to properly determine returnType at runtime,
-    // so we only use result for conversion instead of returnType.
-    if (result == null) {
+    if (this.isConventionalDoneReturnType(returnType)) {
       return JSON.stringify("Done");
     }
 
@@ -40,7 +39,21 @@ export class DefaultToolCallResultConverter implements ToolCallResultConverter {
       });
     }
 
-    return JSON.stringify(result);
+    const json = JSON.stringify(result);
+    return json === undefined ? "null" : json;
+  }
+
+  private isConventionalDoneReturnType(
+    returnType?: z.ZodTypeAny | null,
+  ): boolean {
+    if (!returnType) {
+      return false;
+    }
+
+    const schemaType = (returnType as { _zod?: { def?: { type?: unknown } } })
+      ._zod?.def?.type;
+
+    return schemaType === "void" || schemaType === "undefined";
   }
 
   private async readStreamAsBase64(stream: Readable): Promise<string> {

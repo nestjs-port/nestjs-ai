@@ -211,9 +211,9 @@ export class DefaultToolCallingManager implements ToolCallingManager {
       }
 
       if (returnDirect === null) {
-        returnDirect = toolCallback.toolMetadata.returnDirect();
+        returnDirect = toolCallback.toolMetadata.returnDirect;
       } else {
-        returnDirect = returnDirect && toolCallback.toolMetadata.returnDirect();
+        returnDirect = returnDirect && toolCallback.toolMetadata.returnDirect;
       }
 
       let toolResult: string;

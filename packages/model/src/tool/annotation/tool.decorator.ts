@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import type { z } from "zod";
+import { z } from "zod";
 import type { ToolCallResultConverter } from "../execution";
 import { DefaultToolCallResultConverter } from "../execution";
 
@@ -32,6 +32,29 @@ type ToolMethodDecoratorFor<
     ExactToolMethodSignature<T, z.infer<P>, z.infer<R>>
   >,
 ) => void;
+
+type InputOnlyToolDecoratorFor<P extends AnyZodObjectSchema> = <
+  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
+  T extends (...args: any[]) => any,
+>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactToolMethodSignature<T, z.infer<P>, void>
+  >,
+) => void;
+
+type ReturnsOnlyToolDecoratorFor<R extends AnyZodSchema> = <
+  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
+  T extends (...args: any[]) => any,
+>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    T extends () => MaybePromise<z.infer<R>> ? T : never
+  >,
+) => void;
+
 type SchemaLessToolDecorator = <
   // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
@@ -71,6 +94,18 @@ export interface ToolSchemaAnnotationMetadata<
   returns: R;
 }
 
+export interface ToolInputOnlyAnnotationMetadata<P extends AnyZodObjectSchema>
+  extends ToolBaseMetadata {
+  parameters: P;
+  returns?: never;
+}
+
+export interface ToolReturnsOnlyAnnotationMetadata<R extends AnyZodSchema>
+  extends ToolBaseMetadata {
+  parameters?: never;
+  returns: R;
+}
+
 export interface ToolSchemaLessAnnotationMetadata extends ToolBaseMetadata {
   parameters?: never;
   returns?: never;
@@ -97,6 +132,12 @@ function isObjectSchema(schema: AnyZodSchema): boolean {
 export function Tool<P extends AnyZodObjectSchema, R extends AnyZodSchema>(
   options: ToolSchemaAnnotationMetadata<P, R>,
 ): ToolMethodDecoratorFor<P, R>;
+export function Tool<P extends AnyZodObjectSchema>(
+  options: ToolInputOnlyAnnotationMetadata<P>,
+): InputOnlyToolDecoratorFor<P>;
+export function Tool<R extends AnyZodSchema>(
+  options: ToolReturnsOnlyAnnotationMetadata<R>,
+): ReturnsOnlyToolDecoratorFor<R>;
 export function Tool(): SchemaLessToolDecorator;
 export function Tool(
   options: ToolSchemaLessAnnotationMetadata,
@@ -122,7 +163,7 @@ export function Tool(options: ToolAnnotationMetadata = {}): MethodDecorator {
       resultConverter:
         options?.resultConverter ?? DefaultToolCallResultConverter,
       parameters: options?.parameters,
-      returns: options?.returns,
+      returns: options?.returns ?? z.void(),
     };
 
     Reflect.defineMetadata(TOOL_METADATA_KEY, metadata, target, propertyKey);

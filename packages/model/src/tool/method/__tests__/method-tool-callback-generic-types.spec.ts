@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { ToolContext, ToolContextSchema } from "../../../chat";
 import { DefaultToolDefinition } from "../../definition";
+import type { ToolCallResultConverter } from "../../execution";
 import { MethodToolCallback } from "../method-tool-callback";
 
 class TestGenericClass {
@@ -41,6 +42,41 @@ function formatMap(map: Record<string, unknown>): string {
 }
 
 describe("MethodToolCallbackGenericTypes", () => {
+  it("passes tool result schema to converter", async () => {
+    const seen: { returnType: unknown | null } = { returnType: null };
+    const converter: ToolCallResultConverter = {
+      async convert(result?: unknown | null, returnType?: unknown | null) {
+        seen.returnType = returnType ?? null;
+        return JSON.stringify(result);
+      },
+    };
+
+    const toolDefinition = DefaultToolDefinition.builder()
+      .name("withResultSchema")
+      .description("with result schema")
+      .inputSchema("{}")
+      .build();
+
+    const callback = MethodToolCallback.builder()
+      .toolDefinition(toolDefinition)
+      .toolMethod(() => "ok")
+      .toolInputSchema(z.object({}))
+      .toolResultSchema(z.string())
+      .toolCallResultConverter(converter)
+      .build();
+
+    const result = await callback.call("{}");
+
+    expect(JSON.parse(result)).toBe("ok");
+    expect(
+      (
+        seen.returnType as {
+          _zod?: { def?: { type?: unknown } };
+        }
+      )?._zod?.def?.type,
+    ).toBe("string");
+  });
+
   it("test generic list type", async () => {
     // Create a test object with a method that takes a List<String>
     const testObject = new TestGenericClass();

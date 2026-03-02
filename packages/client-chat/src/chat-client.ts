@@ -17,6 +17,7 @@ import type {
   SchemaOutput,
   StructuredOutputConverter,
   ToolCallback,
+  ToolObjectInstance,
 } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
 import type { Advisor, AdvisorObservationConvention } from "./advisor";
@@ -164,7 +165,7 @@ export namespace ChatClient {
     messages(messages: Message[]): ChatClientRequestSpec;
     options<T extends ChatOptions>(options: T): ChatClientRequestSpec;
     toolNames(...toolNames: string[]): ChatClientRequestSpec;
-    tools(...toolObjects: unknown[]): ChatClientRequestSpec;
+    tools(...toolObjects: ToolObjectInstance[]): ChatClientRequestSpec;
     toolCallbacks(...toolCallbacks: ToolCallback[]): ChatClientRequestSpec;
     toolCallbacks(toolCallbacks: ToolCallback[]): ChatClientRequestSpec;
     toolCallbacks(

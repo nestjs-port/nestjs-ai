@@ -18,6 +18,8 @@ import {
   type SchemaOutput,
   type StructuredOutputConverter,
   type ToolCallback,
+  ToolCallbacks,
+  type ToolObjectInstance,
 } from "@nestjs-ai/model";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { Observable } from "rxjs";
@@ -994,15 +996,16 @@ export namespace DefaultChatClient {
       return this;
     }
 
-    tools(...toolObjects: unknown[]): ChatClient.ChatClientRequestSpec {
+    tools(
+      ...toolObjects: ToolObjectInstance[]
+    ): ChatClient.ChatClientRequestSpec {
       assert(toolObjects, "toolObjects cannot be null");
       assert(
         toolObjects.every((toolObject) => toolObject != null),
         "toolObjects cannot contain null elements",
       );
-      throw new Error(
-        "tools(Object...) migration requires ToolCallbacks.from support",
-      );
+      this._toolCallbacks.push(...ToolCallbacks.from(toolObjects));
+      return this;
     }
 
     toolContext(

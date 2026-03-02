@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import { z } from "zod";
+import type { z } from "zod";
 import type { ToolContext } from "../../chat";
 import { DefaultToolDefinition, type ToolDefinition } from "../definition";
 import {
@@ -13,14 +13,20 @@ import { ToolUtils } from "../support";
 import { ToolCallback } from "../tool-callback";
 
 type MaybePromise<T> = T | Promise<T>;
+type ToolInputObject = Record<string, unknown>;
+type ToolInputSchema = z.ZodObject<z.ZodRawShape>;
 
-export type ToolBiFunction<I, O> = (
+export type ToolBiFunction<I extends ToolInputObject, O> = (
   input: I,
   context: ToolContext | null,
 ) => MaybePromise<O>;
-export type ToolFunction<I, O> = (input: I) => MaybePromise<O>;
+export type ToolFunction<I extends ToolInputObject, O> = (
+  input: I,
+) => MaybePromise<O>;
 export type ToolSupplier<O> = () => MaybePromise<O>;
-export type ToolConsumer<I> = (input: I) => MaybePromise<void>;
+export type ToolConsumer<I extends ToolInputObject> = (
+  input: I,
+) => MaybePromise<void>;
 
 /**
  * Runtime input type used by {@link FunctionToolCallbackBuilder} for schema hints.
@@ -28,7 +34,10 @@ export type ToolConsumer<I> = (input: I) => MaybePromise<void>;
 /**
  * A {@link ToolCallback} implementation to invoke functions as tools.
  */
-export class FunctionToolCallback<I, O> extends ToolCallback {
+export class FunctionToolCallback<
+  I extends ToolInputObject,
+  O,
+> extends ToolCallback {
   private static readonly DEFAULT_RESULT_CONVERTER: ToolCallResultConverter =
     new DefaultToolCallResultConverter();
 
@@ -40,9 +49,7 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
   );
   private readonly _toolDefinition: ToolDefinition;
   private readonly _toolMetadata: ToolMetadata;
-  private readonly _toolInputType:
-    | (I extends void ? z.ZodTypeAny : z.ZodType<I>)
-    | null;
+  private readonly _toolInputType: ToolInputSchema;
   private readonly _toolFunction: ToolBiFunction<I, O>;
   private readonly _toolCallResultConverter: ToolCallResultConverter;
 
@@ -95,11 +102,6 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
 
   private parseToolInput(toolInput: string): I {
     const plain = JSON.parse(toolInput);
-
-    if (!this._toolInputType) {
-      return plain;
-    }
-
     return this._toolInputType.parse(plain) as I;
   }
 
@@ -123,35 +125,37 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
     }
   }
 
-  static builder<I, O>(
+  static builder<I extends ToolInputObject, O>(
     name: string,
     functionOrSupplierOrConsumer: ToolBiFunction<I, O>,
   ): FunctionToolCallbackBuilder<I, O>;
-  static builder<I, O>(
+  static builder<I extends ToolInputObject, O>(
     name: string,
     functionOrSupplierOrConsumer: ToolFunction<I, O>,
   ): FunctionToolCallbackBuilder<I, O>;
   static builder<O>(
     name: string,
     functionOrSupplierOrConsumer: ToolSupplier<O>,
-  ): FunctionToolCallbackBuilder<void, O>;
-  static builder<I>(
+  ): FunctionToolCallbackBuilder<Record<string, never>, O>;
+  static builder<I extends ToolInputObject>(
     name: string,
     functionOrSupplierOrConsumer: ToolConsumer<I>,
   ): FunctionToolCallbackBuilder<I, void>;
-  static builder<I, O>(
+  static builder<I extends ToolInputObject, O>(
     name: string,
     functionOrSupplierOrConsumer:
       | ToolBiFunction<I, O>
       | ToolFunction<I, O>
       | ToolSupplier<O>
       | ToolConsumer<I>,
-  ): FunctionToolCallbackBuilder<I, O> | FunctionToolCallbackBuilder<void, O> {
+  ):
+    | FunctionToolCallbackBuilder<I, O>
+    | FunctionToolCallbackBuilder<Record<string, never>, O> {
     assert(functionOrSupplierOrConsumer, "function cannot be null");
 
     if (functionOrSupplierOrConsumer.length === 0) {
       const supplier = functionOrSupplierOrConsumer as ToolSupplier<O>;
-      return new FunctionToolCallbackBuilder<void, O>(
+      return new FunctionToolCallbackBuilder<Record<string, never>, O>(
         name,
         (_request, _context) => supplier(),
       );
@@ -174,20 +178,19 @@ export class FunctionToolCallback<I, O> extends ToolCallback {
   }
 }
 
-export interface FunctionToolCallbackProps<I, O> {
+export interface FunctionToolCallbackProps<I extends ToolInputObject, O> {
   toolDefinition: ToolDefinition;
   toolMetadata?: ToolMetadata | null;
-  toolInputType: I extends void ? z.ZodTypeAny : z.ZodType<I>;
+  toolInputType: ToolInputSchema;
   toolFunction: ToolBiFunction<I, O>;
   toolCallResultConverter?: ToolCallResultConverter | null;
 }
 
-export class FunctionToolCallbackBuilder<I, O> {
+export class FunctionToolCallbackBuilder<I extends ToolInputObject, O> {
   private readonly _name: string;
   private _description: string | null = null;
   private _inputSchema: string | null = null;
-  private _inputType: (I extends void ? z.ZodTypeAny : z.ZodType<I>) | null =
-    null;
+  private _inputType: ToolInputSchema | null = null;
   private _toolMetadata: ToolMetadata | null = null;
   private readonly _toolFunction: ToolBiFunction<I, O>;
   private _toolCallResultConverter: ToolCallResultConverter | null = null;
@@ -209,7 +212,7 @@ export class FunctionToolCallbackBuilder<I, O> {
     return this;
   }
 
-  inputType(inputType: I extends void ? z.ZodTypeAny : z.ZodType<I>): this {
+  inputType(inputType: ToolInputSchema): this {
     this._inputType = inputType;
     return this;
   }
@@ -254,9 +257,9 @@ export class FunctionToolCallbackBuilder<I, O> {
     });
   }
 
-  private static generateSchemaForType<T>(inputType: z.ZodType<T>): string {
+  private static generateSchemaForType(inputType: ToolInputSchema): string {
     try {
-      const schema = z.toJSONSchema(inputType);
+      const schema = inputType.toJSONSchema();
       return JSON.stringify(schema);
     } catch {
       return "{}";

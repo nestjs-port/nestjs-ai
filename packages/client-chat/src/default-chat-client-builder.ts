@@ -6,6 +6,7 @@ import type {
   ChatOptions,
   Message,
   ToolCallback,
+  ToolObjectInstance,
 } from "@nestjs-ai/model";
 import type { Advisor, AdvisorObservationConvention } from "./advisor";
 import type { ChatClient } from "./chat-client";
@@ -166,7 +167,7 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
     return this;
   }
 
-  defaultTools(...toolObjects: unknown[]): ChatClient.Builder {
+  defaultTools(...toolObjects: ToolObjectInstance[]): ChatClient.Builder {
     this.defaultRequest.tools(...toolObjects);
     return this;
   }

@@ -5,6 +5,7 @@ import { KeyValues } from "../../key-values";
 import { AlsObservationRegistry } from "../../registry";
 import { ObservationContext } from "../observation-context";
 import type { ObservationConvention } from "../observation-convention.interface";
+import type { ObservationFilter } from "../observation-filter.interface";
 import type { ObservationHandler } from "../observation-handler.interface";
 import type { ObservationScope } from "../observation-scope.interface";
 import { SimpleObservation } from "../simple-observation";
@@ -68,6 +69,50 @@ describe("Observation", () => {
     observation.stop();
     expect(context.lowCardinalityKeyValues.get("low")).toBe("1");
     expect(context.highCardinalityKeyValues.get("high")).toBe("2");
+  });
+
+  it("should apply registered filters before onStop handlers", () => {
+    const registry = new AlsObservationRegistry();
+    const originalContext = new ObservationContext();
+    const filteredContext = new ObservationContext();
+    filteredContext.name = "filtered";
+    const applied: string[] = [];
+    let stopContext = {} as ObservationContext;
+
+    const filter1: ObservationFilter = {
+      map(context) {
+        applied.push(`f1:${context.name}`);
+        filteredContext.contextualName = "from-filter-1";
+        return filteredContext;
+      },
+    };
+    const filter2: ObservationFilter = {
+      map(context) {
+        applied.push(`f2:${context.name}`);
+        context.contextualName = "from-filter-2";
+        return context;
+      },
+    };
+    const handler: ObservationHandler<ObservationContext> = {
+      supportsContext(context): context is ObservationContext {
+        return context instanceof ObservationContext;
+      },
+      onStop(context) {
+        stopContext = context;
+      },
+    };
+
+    registry.addFilter(filter1);
+    registry.addFilter(filter2);
+    registry.addHandler(handler);
+
+    const observation = createObservation(registry, originalContext);
+    observation.start();
+    observation.stop();
+
+    expect(applied).toEqual(["f1:test.observation", "f2:filtered"]);
+    expect(stopContext).toBe(filteredContext);
+    expect(stopContext?.contextualName).toBe("from-filter-2");
   });
 
   it("should call lifecycle handlers and restore scope on observe", async () => {

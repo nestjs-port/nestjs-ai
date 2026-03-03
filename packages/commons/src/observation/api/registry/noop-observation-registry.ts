@@ -1,6 +1,7 @@
 import type {
   Observation,
   ObservationContext,
+  ObservationFilter,
   ObservationHandler,
   ObservationScope,
 } from "../observation";
@@ -18,7 +19,15 @@ export class NoopObservationRegistry implements ObservationRegistry {
     return [];
   }
 
+  get filters(): readonly ObservationFilter[] {
+    return [];
+  }
+
   addHandler(_handler: ObservationHandler<ObservationContext>): void {
+    // no-op
+  }
+
+  addFilter(_filter: ObservationFilter): void {
     // no-op
   }
 

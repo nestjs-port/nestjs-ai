@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type {
   Observation,
   ObservationContext,
+  ObservationFilter,
   ObservationHandler,
   ObservationScope,
 } from "../observation";
@@ -12,6 +13,7 @@ import type { ObservationRegistry } from "./observation-registry.interface";
  */
 export class AlsObservationRegistry implements ObservationRegistry {
   private readonly _handlers: ObservationHandler<ObservationContext>[] = [];
+  private readonly _filters: ObservationFilter[] = [];
   private readonly scopeStorage = new AsyncLocalStorage<{
     scope: ObservationScope | null;
   }>();
@@ -20,8 +22,16 @@ export class AlsObservationRegistry implements ObservationRegistry {
     return this._handlers;
   }
 
+  get filters(): readonly ObservationFilter[] {
+    return this._filters;
+  }
+
   addHandler(handler: ObservationHandler<ObservationContext>): void {
     this._handlers.push(handler);
+  }
+
+  addFilter(filter: ObservationFilter): void {
+    this._filters.push(filter);
   }
 
   isNoop(): boolean {

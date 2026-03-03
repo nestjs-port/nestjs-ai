@@ -5,6 +5,7 @@ import {
   type ChatModelConfiguration,
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
+  type Logger,
   LoggerFactory,
   type ObservationConfiguration,
   ObservationHandlers,
@@ -16,25 +17,41 @@ import type { NestAiModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
 export class NestAiModule {
+  private static readonly logger: Logger = LoggerFactory.getLogger(
+    NestAiModule.name,
+  );
+
   static forRoot(options: NestAiModuleOptions = {}): DynamicModule {
     const providers: Provider[] = [];
     const exports: InjectionToken[] = [];
 
-    providers.push({
-      provide: HTTP_CLIENT_TOKEN,
-      useValue: options.httpClient ?? new FetchHttpClient(),
-    });
-    exports.push(HTTP_CLIENT_TOKEN);
-    providers.push({
-      provide: ObservationHandlers,
-      useValue: new ObservationHandlers(),
-    });
-    exports.push(ObservationHandlers);
-    providers.push({
-      provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
-      useClass: NestProviderInstanceExplorer,
-    });
-    exports.push(PROVIDER_INSTANCE_EXPLORER_TOKEN);
+    NestAiModule.addProviderIfMissing(
+      providers,
+      exports,
+      {
+        provide: HTTP_CLIENT_TOKEN,
+        useValue: options.httpClient ?? new FetchHttpClient(),
+      },
+      HTTP_CLIENT_TOKEN,
+    );
+    NestAiModule.addProviderIfMissing(
+      providers,
+      exports,
+      {
+        provide: ObservationHandlers,
+        useValue: new ObservationHandlers(),
+      },
+      ObservationHandlers,
+    );
+    NestAiModule.addProviderIfMissing(
+      providers,
+      exports,
+      {
+        provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+        useClass: NestProviderInstanceExplorer,
+      },
+      PROVIDER_INSTANCE_EXPLORER_TOKEN,
+    );
 
     NestAiModule.registerConfigurationProviders(
       providers,
@@ -80,14 +97,50 @@ export class NestAiModule {
           ? NestAiModule.toProviderScope(provider.scope)
           : undefined;
 
-      providers.push({
-        provide: provider.token as InjectionToken,
-        useFactory: provider.useFactory,
-        inject: (provider.inject ?? []) as InjectionToken[],
-        scope,
-      });
-      exports.push(provider.token as InjectionToken);
+      const token = provider.token as InjectionToken;
+      NestAiModule.addProviderIfMissing(
+        providers,
+        exports,
+        {
+          provide: token,
+          useFactory: provider.useFactory,
+          inject: (provider.inject ?? []) as InjectionToken[],
+          scope,
+        },
+        token,
+      );
     }
+  }
+
+  private static addProviderIfMissing(
+    providers: Provider[],
+    exports: InjectionToken[],
+    provider: Provider,
+    token: InjectionToken,
+  ): void {
+    if (NestAiModule.hasProviderToken(providers, token)) {
+      NestAiModule.logger.warn(
+        `Provider token already registered. Skipping duplicate provider registration: ${String(token)}`,
+      );
+      return;
+    }
+    providers.push(provider);
+    exports.push(token);
+  }
+
+  private static hasProviderToken(
+    providers: Provider[],
+    token: InjectionToken,
+  ): boolean {
+    return providers.some((provider) => {
+      if (typeof provider === "function") {
+        return provider === token;
+      }
+      if (typeof provider !== "object" || provider == null) {
+        return false;
+      }
+      return "provide" in provider && provider.provide === token;
+    });
   }
 
   private static toProviderScope(scope: unknown): Scope | undefined {

@@ -82,8 +82,13 @@ export class SimpleObservation<
   stop(): void {
     this.addConventionKeyValues();
 
+    let modifiedContext: ObservationContext = this._context;
+    for (const filter of this._registry.filters) {
+      modifiedContext = filter.map(modifiedContext);
+    }
+
     for (let i = this._handlers.length - 1; i >= 0; i--) {
-      this._handlers[i].onStop?.(this._context);
+      this._handlers[i].onStop?.(modifiedContext as CTX);
     }
   }
 

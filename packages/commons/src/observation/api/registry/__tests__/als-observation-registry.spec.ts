@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { KeyValues } from "../../key-values";
 import type {
   ObservationConvention,
+  ObservationFilter,
   ObservationHandler,
   ObservationScope,
 } from "../../observation";
@@ -55,6 +56,7 @@ describe("AlsObservationRegistry", () => {
 
     expect(registry.isNoop()).toBe(false);
     expect(registry.handlers).toHaveLength(0);
+    expect(registry.filters).toHaveLength(0);
     expect(registry.currentObservationScope).toBeNull();
     expect(registry.currentObservation).toBeNull();
   });
@@ -77,6 +79,18 @@ describe("AlsObservationRegistry", () => {
     registry.addHandler(handler2);
 
     expect(registry.handlers).toEqual([handler1, handler2]);
+  });
+
+  it("should add filters to registry in order", () => {
+    const registry = new AlsObservationRegistry();
+
+    const filter1: ObservationFilter = { map: (context) => context };
+    const filter2: ObservationFilter = { map: (context) => context };
+
+    registry.addFilter(filter1);
+    registry.addFilter(filter2);
+
+    expect(registry.filters).toEqual([filter1, filter2]);
   });
 
   it("opening and closing scope should set and clear current observation", () => {

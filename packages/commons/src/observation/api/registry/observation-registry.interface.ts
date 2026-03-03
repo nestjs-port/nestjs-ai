@@ -1,6 +1,7 @@
 import type {
   Observation,
   ObservationContext,
+  ObservationFilter,
   ObservationHandler,
   ObservationScope,
 } from "../observation";
@@ -14,11 +15,17 @@ export interface ObservationRegistry {
    * Returns currently registered handlers.
    */
   readonly handlers: readonly ObservationHandler<ObservationContext>[];
+  readonly filters: readonly ObservationFilter[];
 
   /**
    * Register a handler to receive observation lifecycle callbacks.
    */
   addHandler(handler: ObservationHandler<ObservationContext>): void;
+
+  /**
+   * Register a filter to mutate observation context before stop handlers run.
+   */
+  addFilter(filter: ObservationFilter): void;
 
   /**
    * Whether this registry is a no-op implementation.

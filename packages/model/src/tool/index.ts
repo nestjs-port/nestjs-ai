@@ -4,6 +4,7 @@ export * from "./execution";
 export * from "./function";
 export * from "./metadata";
 export * from "./method";
+export * from "./observation";
 export * from "./resolution";
 export { StaticToolCallbackProvider } from "./static-tool-callback-provider";
 export * from "./support";

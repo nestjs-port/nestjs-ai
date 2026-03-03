@@ -7,6 +7,7 @@ export * from "./evaluation";
 export * from "./logging";
 export * from "./observation";
 export * from "./ordered.interface";
+export * from "./provider";
 export * from "./reader";
 export * from "./retry";
 export * from "./template";

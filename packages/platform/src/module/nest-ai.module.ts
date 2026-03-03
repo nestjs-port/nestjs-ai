@@ -8,8 +8,10 @@ import {
   LoggerFactory,
   type ObservationConfiguration,
   ObservationHandlers,
+  PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
+import { NestProviderInstanceExplorer } from "../provider";
 import type { NestAiModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
@@ -28,6 +30,11 @@ export class NestAiModule {
       useValue: new ObservationHandlers(),
     });
     exports.push(ObservationHandlers);
+    providers.push({
+      provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+      useClass: NestProviderInstanceExplorer,
+    });
+    exports.push(PROVIDER_INSTANCE_EXPLORER_TOKEN);
 
     NestAiModule.registerConfigurationProviders(
       providers,

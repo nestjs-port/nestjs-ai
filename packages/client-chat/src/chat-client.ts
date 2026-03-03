@@ -211,7 +211,7 @@ export namespace ChatClient {
     ): Builder;
     defaultTemplateRenderer(templateRenderer: TemplateRenderer): Builder;
     defaultToolNames(...toolNames: string[]): Builder;
-    defaultTools(...toolObjects: unknown[]): Builder;
+    defaultTools(...toolObjects: ToolObjectInstance[]): Builder;
     defaultToolCallbacks(...toolCallbacks: ToolCallback[]): Builder;
     defaultToolCallbacks(toolCallbacks: ToolCallback[]): Builder;
     defaultToolCallbacks(

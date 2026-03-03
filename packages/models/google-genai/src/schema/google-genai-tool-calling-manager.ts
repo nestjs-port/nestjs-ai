@@ -10,6 +10,10 @@ import type {
 import { DefaultToolDefinition, JsonSchemaGenerator } from "@nestjs-ai/model";
 import { JsonSchemaConverter } from "./json-schema-converter";
 
+type JsonSchemaNodeArg = Parameters<
+  typeof JsonSchemaGenerator.convertTypeValuesToUpperCase
+>[0];
+
 export class GoogleGenAiToolCallingManager implements ToolCallingManager {
   private readonly _delegateToolCallingManager: ToolCallingManager;
 
@@ -31,7 +35,9 @@ export class GoogleGenAiToolCallingManager implements ToolCallingManager {
       const jsonSchema = JSON.parse(td.inputSchema);
       const openApiSchema =
         JsonSchemaConverter.convertToOpenApiSchema(jsonSchema);
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(openApiSchema);
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(
+        openApiSchema as JsonSchemaNodeArg,
+      );
 
       return DefaultToolDefinition.builder()
         .name(td.name)

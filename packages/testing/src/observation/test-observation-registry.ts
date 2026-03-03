@@ -2,6 +2,7 @@ import {
   AlsObservationRegistry,
   type Observation,
   type ObservationContext,
+  type ObservationFilter,
   type ObservationHandler,
   type ObservationRegistry,
   type ObservationScope,
@@ -46,8 +47,16 @@ export class TestObservationRegistry implements ObservationRegistry {
     return this.delegate.handlers;
   }
 
+  get filters() {
+    return this.delegate.filters;
+  }
+
   addHandler(handler: ObservationHandler<ObservationContext>): void {
     this.delegate.addHandler(handler);
+  }
+
+  addFilter(filter: ObservationFilter): void {
+    this.delegate.addFilter(filter);
   }
 
   isNoop(): boolean {

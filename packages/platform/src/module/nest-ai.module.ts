@@ -5,7 +5,6 @@ import {
   type ChatModelConfiguration,
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
-  type Logger,
   LoggerFactory,
   type ObservationConfiguration,
   ObservationHandlers,
@@ -17,13 +16,11 @@ import type { NestAiModuleOptions } from "./nest-ai-module.options";
 
 @Module({})
 export class NestAiModule {
-  private static readonly logger: Logger = LoggerFactory.getLogger(
-    NestAiModule.name,
-  );
-
   static forRoot(options: NestAiModuleOptions = {}): DynamicModule {
     const providers: Provider[] = [];
     const exports: InjectionToken[] = [];
+
+    NestAiModule.registerUserProviders(providers, exports, options.providers);
 
     NestAiModule.addProviderIfMissing(
       providers,
@@ -112,6 +109,39 @@ export class NestAiModule {
     }
   }
 
+  private static registerUserProviders(
+    providers: Provider[],
+    exports: InjectionToken[],
+    userProviders: Provider[] | undefined,
+  ): void {
+    if (userProviders == null) {
+      return;
+    }
+
+    for (const provider of userProviders) {
+      const token = NestAiModule.resolveProviderToken(provider);
+      if (token == null) {
+        continue;
+      }
+      NestAiModule.addProviderIfMissing(providers, exports, provider, token);
+    }
+  }
+
+  private static resolveProviderToken(
+    provider: Provider,
+  ): InjectionToken | null {
+    if (typeof provider === "function") {
+      return provider as InjectionToken;
+    }
+    if (typeof provider !== "object" || provider == null) {
+      return null;
+    }
+    if (!("provide" in provider)) {
+      return null;
+    }
+    return provider.provide as InjectionToken;
+  }
+
   private static addProviderIfMissing(
     providers: Provider[],
     exports: InjectionToken[],
@@ -119,9 +149,6 @@ export class NestAiModule {
     token: InjectionToken,
   ): void {
     if (NestAiModule.hasProviderToken(providers, token)) {
-      NestAiModule.logger.warn(
-        `Provider token already registered. Skipping duplicate provider registration: ${String(token)}`,
-      );
       return;
     }
     providers.push(provider);

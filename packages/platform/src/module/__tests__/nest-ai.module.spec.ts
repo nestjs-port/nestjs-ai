@@ -6,7 +6,6 @@ import {
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { NestProviderInstanceExplorer } from "../../provider";
 import { NestAiModule } from "../nest-ai.module";
 
 describe("NestAIModule", () => {
@@ -84,6 +83,36 @@ describe("NestAIModule", () => {
     expect(dynamicModule.global).toBe(false);
   });
 
+  it("uses user provider when same token is provided in forRoot options", () => {
+    const customHttpClient = { name: "custom-http-client" };
+    const dynamicModule = NestAiModule.forRoot({
+      providers: [
+        {
+          provide: HTTP_CLIENT_TOKEN,
+          useValue: customHttpClient,
+        },
+      ],
+    });
+
+    const providers = dynamicModule.providers ?? [];
+    const httpClientProviders = providers.filter(
+      (provider) =>
+        typeof provider === "object" &&
+        provider != null &&
+        "provide" in provider &&
+        provider.provide === HTTP_CLIENT_TOKEN,
+    );
+
+    expect(httpClientProviders).toHaveLength(1);
+    expect(
+      typeof httpClientProviders[0] === "object" &&
+        httpClientProviders[0] != null &&
+        "useValue" in httpClientProviders[0]
+        ? httpClientProviders[0].useValue
+        : undefined,
+    ).toBe(customHttpClient);
+  });
+
   it("keeps first provider when duplicate token is configured", () => {
     const dynamicModule = NestAiModule.forRoot({
       observation: {
@@ -108,17 +137,33 @@ describe("NestAIModule", () => {
     expect(duplicateProviders).toHaveLength(1);
   });
 
-  it("treats class shorthand providers as duplicate tokens", () => {
-    const hasProviderToken = Reflect.get(NestAiModule, "hasProviderToken") as (
-      providers: unknown[],
-      token: unknown,
-    ) => boolean;
+  it("detects duplicate token from user class shorthand providers", () => {
+    class CustomProvider {}
 
-    const duplicated = hasProviderToken(
-      [NestProviderInstanceExplorer],
-      NestProviderInstanceExplorer,
-    );
+    const dynamicModule = NestAiModule.forRoot({
+      providers: [CustomProvider],
+      observation: {
+        providers: [
+          {
+            token: CustomProvider,
+            useFactory: () => "override",
+          },
+        ],
+      } as unknown as ObservationConfiguration,
+    });
 
-    expect(duplicated).toBe(true);
+    const providers = dynamicModule.providers ?? [];
+    const customProviders = providers.filter((provider) => {
+      if (typeof provider === "function") {
+        return provider === CustomProvider;
+      }
+      if (typeof provider !== "object" || provider == null) {
+        return false;
+      }
+      return "provide" in provider && provider.provide === CustomProvider;
+    });
+
+    expect(customProviders).toHaveLength(1);
+    expect(customProviders[0]).toBe(CustomProvider);
   });
 });

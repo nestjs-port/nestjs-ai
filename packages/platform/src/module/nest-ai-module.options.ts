@@ -1,3 +1,4 @@
+import type { Provider } from "@nestjs/common";
 import type {
   ChatClientConfiguration,
   ChatModelConfiguration,
@@ -10,5 +11,6 @@ export interface NestAiModuleOptions {
   chatModel?: ChatModelConfiguration;
   observation?: ObservationConfiguration;
   httpClient?: HttpClient;
+  providers?: Provider[];
   global?: boolean;
 }

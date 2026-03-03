@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import {
+  type Logger,
+  LoggerFactory,
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatResponse,
@@ -10,10 +15,14 @@ import {
   ToolResponseMessage,
 } from "../../chat";
 import {
+  DefaultToolCallingObservationConvention,
   DefaultToolExecutionExceptionProcessor,
   DelegatingToolCallbackResolver,
   type ToolCallback,
   type ToolCallbackResolver,
+  ToolCallingObservationContext,
+  type ToolCallingObservationConvention,
+  ToolCallingObservationDocumentation,
   type ToolDefinition,
   ToolExecutionException,
   type ToolExecutionExceptionProcessor,
@@ -23,15 +32,14 @@ import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interfa
 import type { ToolCallingManager } from "./tool-calling-manager.interface";
 import type { ToolExecutionResult } from "./tool-execution-result";
 
-const POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING =
-  "LLM may have adapted the tool name '%s', especially if the name was truncated due to length limits. If this is the case, you can customize the prefixing and processing logic using McpToolNamePrefixGenerator";
-
 interface InternalToolExecutionResult {
   toolResponseMessage: ToolResponseMessage;
   returnDirect: boolean;
 }
 
 export interface DefaultToolCallingManagerProps {
+  observationRegistry?: ObservationRegistry;
+  observationConvention?: ToolCallingObservationConvention;
   toolCallbackResolver?: ToolCallbackResolver;
   toolExecutionExceptionProcessor?: ToolExecutionExceptionProcessor;
 }
@@ -41,6 +49,15 @@ export class DefaultToolCallingManager implements ToolCallingManager {
     DefaultToolCallingManager.name,
   );
 
+  private static readonly POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING =
+    "LLM may have adapted the tool name '%s', especially if the name was truncated due to length limits. If this is the case, you can customize the prefixing and processing logic using McpToolNamePrefixGenerator";
+
+  private static readonly DEFAULT_OBSERVATION_REGISTRY: ObservationRegistry =
+    NoopObservationRegistry.INSTANCE;
+
+  private static readonly DEFAULT_OBSERVATION_CONVENTION: ToolCallingObservationConvention =
+    new DefaultToolCallingObservationConvention();
+
   private static readonly DEFAULT_TOOL_CALLBACK_RESOLVER: ToolCallbackResolver =
     new DelegatingToolCallbackResolver([]);
 
@@ -49,8 +66,16 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 
   private readonly _toolCallbackResolver: ToolCallbackResolver;
   private readonly _toolExecutionExceptionProcessor: ToolExecutionExceptionProcessor;
+  private readonly _observationRegistry: ObservationRegistry;
+  private readonly _observationConvention: ToolCallingObservationConvention;
 
   constructor(props: DefaultToolCallingManagerProps = {}) {
+    this._observationRegistry =
+      props.observationRegistry ??
+      DefaultToolCallingManager.DEFAULT_OBSERVATION_REGISTRY;
+    this._observationConvention =
+      props.observationConvention ??
+      DefaultToolCallingManager.DEFAULT_OBSERVATION_CONVENTION;
     this._toolCallbackResolver =
       props.toolCallbackResolver ??
       DefaultToolCallingManager.DEFAULT_TOOL_CALLBACK_RESOLVER;
@@ -80,7 +105,10 @@ export class DefaultToolCallingManager implements ToolCallingManager {
       const toolCallback = this._toolCallbackResolver.resolve(toolName);
       if (toolCallback == null) {
         this.logger.warn(
-          POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING.replace("%s", toolName),
+          DefaultToolCallingManager.POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING.replace(
+            "%s",
+            toolName,
+          ),
         );
         throw new Error(`No ToolCallback found for tool name: ${toolName}`);
       }
@@ -205,7 +233,10 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 
       if (toolCallback == null) {
         this.logger.warn(
-          POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING.replace("%s", toolName),
+          DefaultToolCallingManager.POSSIBLE_LLM_TOOL_NAME_CHANGE_WARNING.replace(
+            "%s",
+            toolName,
+          ),
         );
         throw new Error(`No ToolCallback found for tool name: ${toolName}`);
       }
@@ -216,16 +247,33 @@ export class DefaultToolCallingManager implements ToolCallingManager {
         returnDirect = returnDirect && toolCallback.toolMetadata.returnDirect;
       }
 
-      let toolResult: string;
-      try {
-        toolResult = await toolCallback.call(toolInputArguments, toolContext);
-      } catch (ex) {
-        if (ex instanceof ToolExecutionException) {
-          toolResult = this._toolExecutionExceptionProcessor.process(ex);
-        } else {
-          throw ex;
-        }
-      }
+      const observationContext = new ToolCallingObservationContext({
+        toolDefinition: toolCallback.toolDefinition,
+        toolMetadata: toolCallback.toolMetadata,
+        toolCallArguments: toolInputArguments,
+      });
+
+      const toolResult = await new ToolCallingObservationDocumentation()
+        .observation(
+          this._observationConvention,
+          DefaultToolCallingManager.DEFAULT_OBSERVATION_CONVENTION,
+          () => observationContext,
+          this._observationRegistry,
+        )
+        .observe(async () => {
+          let result: string;
+          try {
+            result = await toolCallback.call(toolInputArguments, toolContext);
+          } catch (ex) {
+            if (ex instanceof ToolExecutionException) {
+              result = this._toolExecutionExceptionProcessor.process(ex);
+            } else {
+              throw ex;
+            }
+          }
+          observationContext.toolCallResult = result;
+          return result;
+        });
 
       toolResponses.push({
         id: toolCall.id,

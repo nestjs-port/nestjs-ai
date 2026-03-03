@@ -1,6 +1,12 @@
 import type { ChatClientConfiguration } from "@nestjs-ai/commons";
-import { HTTP_CLIENT_TOKEN, ObservationHandlers } from "@nestjs-ai/commons";
+import {
+  HTTP_CLIENT_TOKEN,
+  type ObservationConfiguration,
+  ObservationHandlers,
+  PROVIDER_INSTANCE_EXPLORER_TOKEN,
+} from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
+import { NestProviderInstanceExplorer } from "../../provider";
 import { NestAiModule } from "../nest-ai.module";
 
 describe("NestAIModule", () => {
@@ -76,5 +82,43 @@ describe("NestAIModule", () => {
   it("uses module global option when provided", () => {
     const dynamicModule = NestAiModule.forRoot({ global: false });
     expect(dynamicModule.global).toBe(false);
+  });
+
+  it("keeps first provider when duplicate token is configured", () => {
+    const dynamicModule = NestAiModule.forRoot({
+      observation: {
+        providers: [
+          {
+            token: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+            useFactory: () => "override",
+          },
+        ],
+      } as unknown as ObservationConfiguration,
+    });
+
+    const providers = dynamicModule.providers ?? [];
+    const duplicateProviders = providers.filter(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "provide" in provider &&
+        provider.provide === PROVIDER_INSTANCE_EXPLORER_TOKEN,
+    );
+
+    expect(duplicateProviders).toHaveLength(1);
+  });
+
+  it("treats class shorthand providers as duplicate tokens", () => {
+    const hasProviderToken = Reflect.get(NestAiModule, "hasProviderToken") as (
+      providers: unknown[],
+      token: unknown,
+    ) => boolean;
+
+    const duplicated = hasProviderToken(
+      [NestProviderInstanceExplorer],
+      NestProviderInstanceExplorer,
+    );
+
+    expect(duplicated).toBe(true);
   });
 });

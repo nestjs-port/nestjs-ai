@@ -37,9 +37,9 @@ class Person {
   name = "";
 }
 
-class InputType {
-  input = "";
-}
+type InputType = {
+  input: string;
+};
 
 const PersonSchema = z.object({
   name: z.string(),

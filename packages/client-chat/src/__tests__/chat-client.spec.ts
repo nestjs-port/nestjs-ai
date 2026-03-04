@@ -22,7 +22,11 @@ import { z } from "zod";
 
 import { ChatClient } from "../chat-client";
 
-const mockFunction = (s: string) => s;
+const ToolInputSchema = z.object({
+  input: z.string(),
+});
+
+const mockFunction = ({ input }: z.infer<typeof ToolInputSchema>) => input;
 const tabbyCatResource = readFileSync(resolve(__dirname, "./tabby-cat.png"));
 
 describe("ChatClient", () => {
@@ -230,7 +234,7 @@ describe("ChatClient", () => {
       .defaultToolCallbacks(
         FunctionToolCallback.builder("fun3", mockFunction)
           .description("fun3description")
-          .inputType(z.string())
+          .inputType(ToolInputSchema)
           .build(),
       )
       .defaultUser((u) =>
@@ -397,7 +401,7 @@ describe("ChatClient", () => {
       .defaultToolCallbacks(
         FunctionToolCallback.builder("fun3", mockFunction)
           .description("fun3description")
-          .inputType(z.string())
+          .inputType(ToolInputSchema)
           .build(),
       )
       .defaultUser((u) =>

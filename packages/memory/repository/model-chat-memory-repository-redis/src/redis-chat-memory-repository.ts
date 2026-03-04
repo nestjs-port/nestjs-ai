@@ -17,43 +17,11 @@ import type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
 } from "./advanced-redis-chat-memory-repository";
-
-const DEFAULT_INDEX_NAME = "chat_memory_idx";
-const DEFAULT_KEY_PREFIX = "chat:memory:";
-const DEFAULT_MAX_CONVERSATION_IDS = 10;
-const DEFAULT_MAX_MESSAGES_PER_CONVERSATION = 100;
-
-export type RedisChatMemoryMetadataFieldType = "text" | "numeric" | "tag";
-
-export interface RedisChatMemoryMetadataField {
-  name: string;
-  type?: RedisChatMemoryMetadataFieldType;
-}
-
-export interface RedisChatMemoryRepositoryProps {
-  redisUrl?: string;
-  client?: ReturnType<typeof createClient>;
-  indexName?: string;
-  keyPrefix?: string;
-  initializeSchema?: boolean;
-  timeToLiveSeconds?: number;
-  maxConversationIds?: number;
-  maxMessagesPerConversation?: number;
-  metadataFields?: RedisChatMemoryMetadataField[];
-}
-
-interface RedisChatMemoryRepositoryConfig {
-  redisUrl: string | null;
-  client: ReturnType<typeof createClient>;
-  indexName: string;
-  keyPrefix: string;
-  initializeSchema: boolean;
-  timeToLiveSeconds: number;
-  maxConversationIds: number;
-  maxMessagesPerConversation: number;
-  metadataFields: RedisChatMemoryMetadataField[];
-  ownsClient: boolean;
-}
+import {
+  type RedisChatMemoryConfig,
+  RedisChatMemoryConfigBuilder,
+  type RedisChatMemoryMetadataField,
+} from "./redis-chat-memory-config";
 
 interface StoredMessageDocument {
   content: string;
@@ -77,33 +45,16 @@ interface StoredMedia {
 export class RedisChatMemoryRepository
   implements AdvancedRedisChatMemoryRepository
 {
-  private readonly _config: RedisChatMemoryRepositoryConfig;
+  private readonly _config: RedisChatMemoryConfig;
+  private readonly _client: ReturnType<typeof createClient>;
+  private readonly _ownsClient: boolean;
   private _readyPromise: Promise<void> | null = null;
 
-  constructor(props: RedisChatMemoryRepositoryProps = {}) {
-    const hasClient = props.client !== undefined;
-    const redisUrl = props.redisUrl ?? null;
-    const client =
-      props.client ??
-      createClient(redisUrl ? { url: redisUrl } : undefined).on("error", () => {
-        // No-op to avoid unhandled "error" event crashes when caller does not attach listeners.
-      });
-
-    this._config = {
-      redisUrl,
-      client,
-      indexName: props.indexName ?? DEFAULT_INDEX_NAME,
-      keyPrefix: props.keyPrefix ?? DEFAULT_KEY_PREFIX,
-      initializeSchema: props.initializeSchema ?? true,
-      timeToLiveSeconds: props.timeToLiveSeconds ?? -1,
-      maxConversationIds:
-        props.maxConversationIds ?? DEFAULT_MAX_CONVERSATION_IDS,
-      maxMessagesPerConversation:
-        props.maxMessagesPerConversation ??
-        DEFAULT_MAX_MESSAGES_PER_CONVERSATION,
-      metadataFields: props.metadataFields ?? [],
-      ownsClient: !hasClient,
-    };
+  constructor(config: RedisChatMemoryConfig, ownsClient = false) {
+    assert(config, "config must not be null");
+    this._config = config;
+    this._client = config.client;
+    this._ownsClient = ownsClient;
   }
 
   static builder(): RedisChatMemoryRepositoryBuilder {
@@ -111,14 +62,14 @@ export class RedisChatMemoryRepository
   }
 
   async disconnect(): Promise<void> {
-    if (this._config.ownsClient && this._config.client.isOpen) {
-      await this._config.client.quit();
+    if (this._ownsClient && this._client.isOpen) {
+      await this._client.quit();
     }
   }
 
   async findConversationIds(): Promise<string[]> {
     await this.ensureReady();
-    const rawResult = await this._config.client.ft.search(
+    const rawResult = await this._client.ft.search(
       this._config.indexName,
       "*",
       {
@@ -178,7 +129,7 @@ export class RedisChatMemoryRepository
       return;
     }
 
-    const multi = this._config.client.multi();
+    const multi = this._client.multi();
     for (const key of keys) {
       multi.del(key);
     }
@@ -199,7 +150,7 @@ export class RedisChatMemoryRepository
       timestamp,
     );
 
-    await this._config.client.json.set(key, "$", toRedisJson(document));
+    await this._client.json.set(key, "$", toRedisJson(document));
     await this.applyTtl(key);
   }
 
@@ -309,8 +260,8 @@ export class RedisChatMemoryRepository
   }
 
   private async initialize(): Promise<void> {
-    if (!this._config.client.isOpen) {
-      await this._config.client.connect();
+    if (!this._client.isOpen) {
+      await this._client.connect();
     }
 
     if (!this._config.initializeSchema) {
@@ -345,7 +296,7 @@ export class RedisChatMemoryRepository
     }
 
     try {
-      await this._config.client.ft.create(this._config.indexName, schema, {
+      await this._client.ft.create(this._config.indexName, schema, {
         ON: "JSON",
         PREFIX: [this._config.keyPrefix],
       });
@@ -364,20 +315,16 @@ export class RedisChatMemoryRepository
     const baseTimestamp = Date.now();
 
     try {
-      const setResult = await this._config.client.set(
-        counterKey,
-        `${baseTimestamp}`,
-        {
-          NX: true,
-        },
-      );
+      const setResult = await this._client.set(counterKey, `${baseTimestamp}`, {
+        NX: true,
+      });
 
       if (setResult === "OK") {
         await this.applyTtl(counterKey);
         return baseTimestamp;
       }
 
-      const next = await this._config.client.incr(counterKey);
+      const next = await this._client.incr(counterKey);
       await this.applyTtl(counterKey);
       return Number(next);
     } catch {
@@ -419,7 +366,7 @@ export class RedisChatMemoryRepository
     query: string,
     limit: number,
   ): Promise<string[]> {
-    const rawResult = await this._config.client.ft.search(
+    const rawResult = await this._client.ft.search(
       this._config.indexName,
       query,
       {
@@ -435,7 +382,7 @@ export class RedisChatMemoryRepository
     limit: number,
   ): Promise<MessageWithConversation[]> {
     await this.ensureReady();
-    const rawResult = await this._config.client.ft.search(
+    const rawResult = await this._client.ft.search(
       this._config.indexName,
       query,
       {
@@ -518,61 +465,76 @@ export class RedisChatMemoryRepository
 
   private async applyTtl(key: string): Promise<void> {
     if (this._config.timeToLiveSeconds >= 0) {
-      await this._config.client.expire(key, this._config.timeToLiveSeconds);
+      await this._client.expire(key, this._config.timeToLiveSeconds);
     }
   }
 }
 
 export class RedisChatMemoryRepositoryBuilder {
-  private _props: RedisChatMemoryRepositoryProps = {};
+  private readonly _configBuilder = new RedisChatMemoryConfigBuilder();
+  private _redisUrl: string | null = null;
+  private _client: ReturnType<typeof createClient> | null = null;
 
   redisUrl(redisUrl: string): this {
-    this._props.redisUrl = redisUrl;
+    this._redisUrl = redisUrl;
     return this;
   }
 
-  client(client: ReturnType<typeof createClient>): this {
-    this._props.client = client;
+  client(redisClient: ReturnType<typeof createClient>): this {
+    this._client = redisClient;
+    this._configBuilder.redisClient(redisClient);
     return this;
   }
 
   indexName(indexName: string): this {
-    this._props.indexName = indexName;
+    this._configBuilder.indexName(indexName);
     return this;
   }
 
   keyPrefix(keyPrefix: string): this {
-    this._props.keyPrefix = keyPrefix;
+    this._configBuilder.keyPrefix(keyPrefix);
     return this;
   }
 
   initializeSchema(initializeSchema: boolean): this {
-    this._props.initializeSchema = initializeSchema;
+    this._configBuilder.initializeSchema(initializeSchema);
     return this;
   }
 
   ttlSeconds(timeToLiveSeconds: number): this {
-    this._props.timeToLiveSeconds = timeToLiveSeconds;
+    this._configBuilder.timeToLive(timeToLiveSeconds);
     return this;
   }
 
   maxConversationIds(maxConversationIds: number): this {
-    this._props.maxConversationIds = maxConversationIds;
+    this._configBuilder.maxConversationIds(maxConversationIds);
     return this;
   }
 
   maxMessagesPerConversation(maxMessagesPerConversation: number): this {
-    this._props.maxMessagesPerConversation = maxMessagesPerConversation;
+    this._configBuilder.maxMessagesPerConversation(maxMessagesPerConversation);
     return this;
   }
 
   metadataFields(metadataFields: RedisChatMemoryMetadataField[]): this {
-    this._props.metadataFields = [...metadataFields];
+    this._configBuilder.metadataFields(metadataFields);
     return this;
   }
 
   build(): RedisChatMemoryRepository {
-    return new RedisChatMemoryRepository(this._props);
+    let ownsClient = false;
+    if (!this._client) {
+      this._client = createClient(
+        this._redisUrl ? { url: this._redisUrl } : undefined,
+      ).on("error", () => {
+        // No-op to avoid unhandled "error" event crashes when caller does not attach listeners.
+      });
+      this._configBuilder.redisClient(this._client);
+      ownsClient = true;
+    }
+
+    const config = this._configBuilder.build();
+    return new RedisChatMemoryRepository(config, ownsClient);
   }
 }
 

@@ -133,7 +133,7 @@ export class RedisChatMemoryConfigBuilder {
   }
 
   timeToLive(ttlSeconds: number | null): this {
-    if (ttlSeconds !== null && ttlSeconds !== undefined) {
+    if (ttlSeconds != null) {
       this._timeToLiveSecondsValue = Math.trunc(ttlSeconds);
     }
     return this;

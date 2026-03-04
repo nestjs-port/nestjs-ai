@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { Media } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
+  type ChatMemoryRepository,
   type Message,
   MessageType,
   SystemMessage,
@@ -43,7 +44,7 @@ interface StoredMedia {
 }
 
 export class RedisChatMemoryRepository
-  implements AdvancedRedisChatMemoryRepository
+  implements AdvancedRedisChatMemoryRepository, ChatMemoryRepository
 {
   private readonly _config: RedisChatMemoryConfig;
   private readonly _client: ReturnType<typeof createClient>;

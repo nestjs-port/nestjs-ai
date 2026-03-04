@@ -32,7 +32,10 @@ export class MessageWindowChatMemory extends ChatMemory {
     this._maxMessages = maxMessages;
   }
 
-  protected addMessages(conversationId: string, messages: Message[]): void {
+  protected addMessages(
+    conversationId: string,
+    messages: Message[],
+  ): Promise<void> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",
@@ -43,13 +46,15 @@ export class MessageWindowChatMemory extends ChatMemory {
       "messages cannot contain null elements",
     );
 
-    const memoryMessages =
-      this._chatMemoryRepository.findByConversationId(conversationId);
-    const processedMessages = this.process(memoryMessages, messages);
-    this._chatMemoryRepository.saveAll(conversationId, processedMessages);
+    return this._chatMemoryRepository
+      .findByConversationId(conversationId)
+      .then((memoryMessages) => this.process(memoryMessages, messages))
+      .then((processedMessages) =>
+        this._chatMemoryRepository.saveAll(conversationId, processedMessages),
+      );
   }
 
-  get(conversationId: string): Message[] {
+  get(conversationId: string): Promise<Message[]> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",
@@ -57,12 +62,12 @@ export class MessageWindowChatMemory extends ChatMemory {
     return this._chatMemoryRepository.findByConversationId(conversationId);
   }
 
-  clear(conversationId: string): void {
+  clear(conversationId: string): Promise<void> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",
     );
-    this._chatMemoryRepository.deleteByConversationId(conversationId);
+    return this._chatMemoryRepository.deleteByConversationId(conversationId);
   }
 
   private process(

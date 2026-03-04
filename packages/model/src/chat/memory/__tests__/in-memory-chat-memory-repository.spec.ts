@@ -39,7 +39,7 @@ describe("InMemoryChatMemoryRepository", () => {
     ]);
   });
 
-  it("save messages and find multiple messages in conversation", () => {
+  it("save messages and find multiple messages in conversation", async () => {
     const chatMemoryRepository = new InMemoryChatMemoryRepository();
     const conversationId = randomUUID();
     const messages: Message[] = [
@@ -51,7 +51,7 @@ describe("InMemoryChatMemoryRepository", () => {
 
     expect(
       summarizeMessages(
-        chatMemoryRepository.findByConversationId(conversationId),
+        await chatMemoryRepository.findByConversationId(conversationId),
       ),
     ).toEqual(summarizeMessages(messages));
 
@@ -62,7 +62,7 @@ describe("InMemoryChatMemoryRepository", () => {
     );
   });
 
-  it("save messages and find single message in conversation", () => {
+  it("save messages and find single message in conversation", async () => {
     const chatMemoryRepository = new InMemoryChatMemoryRepository();
     const conversationId = randomUUID();
     const message: Message = new UserMessage({ content: "Hello" });
@@ -72,7 +72,7 @@ describe("InMemoryChatMemoryRepository", () => {
 
     expect(
       summarizeMessages(
-        chatMemoryRepository.findByConversationId(conversationId),
+        await chatMemoryRepository.findByConversationId(conversationId),
       ),
     ).toEqual(summarizeMessages([message]));
 
@@ -92,7 +92,7 @@ describe("InMemoryChatMemoryRepository", () => {
     );
   });
 
-  it("subsequent save overwrites previous version", () => {
+  it("subsequent save overwrites previous version", async () => {
     const chatMemoryRepository = new InMemoryChatMemoryRepository();
     const conversationId = randomUUID();
     const firstMessages: Message[] = [new UserMessage({ content: "Hello" })];
@@ -105,7 +105,7 @@ describe("InMemoryChatMemoryRepository", () => {
 
     expect(
       summarizeMessages(
-        chatMemoryRepository.findByConversationId(conversationId),
+        await chatMemoryRepository.findByConversationId(conversationId),
       ),
     ).toEqual(summarizeMessages(secondMessages));
   });

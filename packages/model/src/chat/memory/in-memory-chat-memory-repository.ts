@@ -6,11 +6,11 @@ import type { ChatMemoryRepository } from "./chat-memory-repository";
 export class InMemoryChatMemoryRepository implements ChatMemoryRepository {
   private readonly _chatMemoryStore = new Map<string, Message[]>();
 
-  findConversationIds(): string[] {
+  async findConversationIds(): Promise<string[]> {
     return [...this._chatMemoryStore.keys()];
   }
 
-  findByConversationId(conversationId: string): Message[] {
+  async findByConversationId(conversationId: string): Promise<Message[]> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",
@@ -19,7 +19,7 @@ export class InMemoryChatMemoryRepository implements ChatMemoryRepository {
     return messages != null ? [...messages] : [];
   }
 
-  saveAll(conversationId: string, messages: Message[]): void {
+  async saveAll(conversationId: string, messages: Message[]): Promise<void> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",
@@ -31,7 +31,7 @@ export class InMemoryChatMemoryRepository implements ChatMemoryRepository {
     this._chatMemoryStore.set(conversationId, messages);
   }
 
-  deleteByConversationId(conversationId: string): void {
+  async deleteByConversationId(conversationId: string): Promise<void> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",

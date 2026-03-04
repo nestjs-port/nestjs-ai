@@ -13,9 +13,12 @@ export abstract class ChatMemory {
    */
   static readonly CONVERSATION_ID = "chat_memory_conversation_id";
 
-  add(conversationId: string, message: Message): void;
-  add(conversationId: string, messages: Message[]): void;
-  add(conversationId: string, messageOrMessages: Message | Message[]): void {
+  add(conversationId: string, message: Message): Promise<void>;
+  add(conversationId: string, messages: Message[]): Promise<void>;
+  add(
+    conversationId: string,
+    messageOrMessages: Message | Message[],
+  ): Promise<void> {
     assert(
       StringUtils.hasText(conversationId),
       "conversationId cannot be null or empty",
@@ -26,7 +29,7 @@ export abstract class ChatMemory {
       ? [...messageOrMessages]
       : [messageOrMessages];
 
-    this.addMessages(conversationId, messages);
+    return this.addMessages(conversationId, messages);
   }
 
   /**
@@ -35,15 +38,15 @@ export abstract class ChatMemory {
   protected abstract addMessages(
     conversationId: string,
     messages: Message[],
-  ): void;
+  ): Promise<void>;
 
   /**
    * Get the messages in the chat memory for the specified conversation.
    */
-  abstract get(conversationId: string): Message[];
+  abstract get(conversationId: string): Promise<Message[]>;
 
   /**
    * Clear the chat memory for the specified conversation.
    */
-  abstract clear(conversationId: string): void;
+  abstract clear(conversationId: string): Promise<void>;
 }

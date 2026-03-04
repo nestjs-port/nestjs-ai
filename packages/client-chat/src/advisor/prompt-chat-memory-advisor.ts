@@ -87,7 +87,7 @@ MEMORY:
       this._defaultConversationId,
     );
 
-    const memoryMessages = this._chatMemory.get(conversationId);
+    const memoryMessages = await this._chatMemory.get(conversationId);
     this._logger.debug(
       "[PromptChatMemoryAdvisor.before] Memory before processing for conversationId={}: {}",
       conversationId,
@@ -117,7 +117,7 @@ MEMORY:
 
     const userMessage =
       processedChatClientRequest.prompt.lastUserOrToolResponseMessage;
-    this._chatMemory.add(conversationId, userMessage);
+    await this._chatMemory.add(conversationId, userMessage);
 
     return processedChatClientRequest;
   }
@@ -137,7 +137,7 @@ MEMORY:
         this._defaultConversationId,
       );
 
-      this._chatMemory.add(conversationId, assistantMessages);
+      await this._chatMemory.add(conversationId, assistantMessages);
 
       if (this._logger.isDebugEnabled()) {
         this._logger.debug(
@@ -145,7 +145,7 @@ MEMORY:
           conversationId,
           assistantMessages,
         );
-        const memoryMessages = this._chatMemory.get(conversationId);
+        const memoryMessages = await this._chatMemory.get(conversationId);
         this._logger.debug(
           "[PromptChatMemoryAdvisor.after] Memory after ASSISTANT add for conversationId={}: {}",
           conversationId,

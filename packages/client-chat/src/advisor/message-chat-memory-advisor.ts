@@ -61,7 +61,7 @@ export class MessageChatMemoryAdvisor extends BaseChatMemoryAdvisor {
       this._defaultConversationId,
     );
 
-    const memoryMessages = this._chatMemory.get(conversationId);
+    const memoryMessages = await this._chatMemory.get(conversationId);
     const processedMessages = [
       ...memoryMessages,
       ...chatClientRequest.prompt.instructions,
@@ -86,7 +86,7 @@ export class MessageChatMemoryAdvisor extends BaseChatMemoryAdvisor {
 
     const userMessage =
       processedChatClientRequest.prompt.lastUserOrToolResponseMessage;
-    this._chatMemory.add(conversationId, userMessage);
+    await this._chatMemory.add(conversationId, userMessage);
 
     return processedChatClientRequest;
   }
@@ -102,7 +102,7 @@ export class MessageChatMemoryAdvisor extends BaseChatMemoryAdvisor {
       );
     }
 
-    this._chatMemory.add(
+    await this._chatMemory.add(
       this.getConversationId(
         chatClientResponse.context,
         this._defaultConversationId,

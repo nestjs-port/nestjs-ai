@@ -1,14 +1,8 @@
-import type { Message, MessageType } from "@nestjs-ai/model";
-
-export interface AsyncChatMemoryRepository {
-  findConversationIds(): Promise<string[]>;
-
-  findByConversationId(conversationId: string): Promise<Message[]>;
-
-  saveAll(conversationId: string, messages: Message[]): Promise<void>;
-
-  deleteByConversationId(conversationId: string): Promise<void>;
-}
+import type {
+  ChatMemoryRepository,
+  Message,
+  MessageType,
+} from "@nestjs-ai/model";
 
 /**
  * Wrapper type for returning messages with their conversation context.
@@ -23,7 +17,7 @@ export interface MessageWithConversation {
  * Redis-specific extension of ChatMemoryRepository with advanced query capabilities.
  */
 export interface AdvancedRedisChatMemoryRepository
-  extends AsyncChatMemoryRepository {
+  extends ChatMemoryRepository {
   findByContent(
     contentPattern: string,
     limit: number,

@@ -36,7 +36,7 @@ describe("MessageWindowChatMemory", () => {
     ).toThrow("maxMessages must be greater than 0");
   });
 
-  it("handle multiple messages in conversation", () => {
+  it("handle multiple messages in conversation", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -48,16 +48,16 @@ describe("MessageWindowChatMemory", () => {
 
     chatMemory.add(conversationId, messages);
 
-    expect(summarizeMessages(chatMemory.get(conversationId))).toEqual(
+    expect(summarizeMessages(await chatMemory.get(conversationId))).toEqual(
       summarizeMessages(messages),
     );
 
     chatMemory.clear(conversationId);
 
-    expect(chatMemory.get(conversationId)).toEqual([]);
+    expect(await chatMemory.get(conversationId)).toEqual([]);
   });
 
-  it("handle single message in conversation", () => {
+  it("handle single message in conversation", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -66,13 +66,13 @@ describe("MessageWindowChatMemory", () => {
 
     chatMemory.add(conversationId, message);
 
-    expect(summarizeMessages(chatMemory.get(conversationId))).toEqual(
+    expect(summarizeMessages(await chatMemory.get(conversationId))).toEqual(
       summarizeMessages([message]),
     );
 
     chatMemory.clear(conversationId);
 
-    expect(chatMemory.get(conversationId)).toEqual([]);
+    expect(await chatMemory.get(conversationId)).toEqual([]);
   });
 
   it("null conversation id not allowed", () => {
@@ -157,7 +157,7 @@ describe("MessageWindowChatMemory", () => {
     ).toThrow("messages cannot contain null elements");
   });
 
-  it("custom max messages", () => {
+  it("custom max messages", async () => {
     const conversationId = randomUUID();
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
@@ -173,12 +173,12 @@ describe("MessageWindowChatMemory", () => {
     ];
 
     customChatMemory.add(conversationId, messages);
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(2);
   });
 
-  it("no eviction when messages within limit", () => {
+  it("no eviction when messages within limit", async () => {
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
       maxMessages: 3,
@@ -193,7 +193,7 @@ describe("MessageWindowChatMemory", () => {
       new UserMessage({ content: "How are you?" }),
     ]);
 
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(3);
     expect(summarizeMessages(result)).toEqual(
@@ -205,7 +205,7 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("eviction when messages exceed limit", () => {
+  it("eviction when messages exceed limit", async () => {
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
       maxMessages: 2,
@@ -221,7 +221,7 @@ describe("MessageWindowChatMemory", () => {
       new AssistantMessage({ content: "Response 2" }),
     ]);
 
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(2);
     expect(summarizeMessages(result)).toEqual(
@@ -232,7 +232,7 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("system message is preserved during eviction", () => {
+  it("system message is preserved during eviction", async () => {
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
       maxMessages: 3,
@@ -249,7 +249,7 @@ describe("MessageWindowChatMemory", () => {
       new AssistantMessage({ content: "Response 2" }),
     ]);
 
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(3);
     expect(summarizeMessages(result)).toEqual(
@@ -261,7 +261,7 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("multiple system messages are preserved during eviction", () => {
+  it("multiple system messages are preserved during eviction", async () => {
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
       maxMessages: 3,
@@ -279,7 +279,7 @@ describe("MessageWindowChatMemory", () => {
       new AssistantMessage({ content: "Response 2" }),
     ]);
 
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(3);
     expect(summarizeMessages(result)).toEqual(
@@ -291,18 +291,18 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("empty message list", () => {
+  it("empty message list", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
     const conversationId = randomUUID();
 
-    const result = chatMemory.get(conversationId);
+    const result = await chatMemory.get(conversationId);
 
     expect(result).toEqual([]);
   });
 
-  it("old system messages are removed when new one added", () => {
+  it("old system messages are removed when new one added", async () => {
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
       maxMessages: 2,
@@ -317,7 +317,7 @@ describe("MessageWindowChatMemory", () => {
       new SystemMessage({ content: "System instruction 3" }),
     ]);
 
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(1);
     expect(summarizeMessages(result)).toEqual(
@@ -327,7 +327,7 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("mixed messages with limit equal to system message count", () => {
+  it("mixed messages with limit equal to system message count", async () => {
     const customChatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
       maxMessages: 2,
@@ -343,7 +343,7 @@ describe("MessageWindowChatMemory", () => {
       new AssistantMessage({ content: "Response 1" }),
     ]);
 
-    const result = customChatMemory.get(conversationId);
+    const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(2);
     expect(summarizeMessages(result)).toEqual(

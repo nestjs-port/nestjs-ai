@@ -48,28 +48,26 @@ export class RedisChatMemoryRepository
 {
   private readonly _config: RedisChatMemoryConfig;
   private readonly _client: ReturnType<typeof createClient>;
-  private readonly _ownsClient: boolean;
-  private _readyPromise: Promise<void> | null = null;
 
-  constructor(config: RedisChatMemoryConfig, ownsClient = false) {
+  private constructor(config: RedisChatMemoryConfig) {
     assert(config, "config must not be null");
     this._config = config;
     this._client = config.client;
-    this._ownsClient = ownsClient;
   }
 
   static builder(): RedisChatMemoryRepositoryBuilder {
     return new RedisChatMemoryRepositoryBuilder();
   }
 
-  async disconnect(): Promise<void> {
-    if (this._ownsClient && this._client.isOpen) {
-      await this._client.quit();
-    }
+  static async create(
+    config: RedisChatMemoryConfig,
+  ): Promise<RedisChatMemoryRepository> {
+    const repository = new RedisChatMemoryRepository(config);
+    await repository.initialize();
+    return repository;
   }
 
   async findConversationIds(): Promise<string[]> {
-    await this.ensureReady();
     const rawResult = await this._client.ft.search(
       this._config.indexName,
       "*",
@@ -97,7 +95,6 @@ export class RedisChatMemoryRepository
 
   async findByConversationId(conversationId: string): Promise<Message[]> {
     assert(conversationId, "conversationId cannot be null or empty");
-    await this.ensureReady();
 
     const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
     const result = await this.executeSearch(
@@ -112,7 +109,6 @@ export class RedisChatMemoryRepository
     assert(conversationId, "conversationId cannot be null or empty");
     assert(messages, "messages cannot be null");
 
-    await this.ensureReady();
     await this.deleteByConversationId(conversationId);
 
     for (const message of messages) {
@@ -122,7 +118,6 @@ export class RedisChatMemoryRepository
 
   async deleteByConversationId(conversationId: string): Promise<void> {
     assert(conversationId, "conversationId cannot be null or empty");
-    await this.ensureReady();
 
     const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
     const keys = await this.findKeysForQuery(query, 5000);
@@ -140,7 +135,6 @@ export class RedisChatMemoryRepository
   async add(conversationId: string, message: Message): Promise<void> {
     assert(conversationId, "conversationId cannot be null or empty");
     assert(message, "message cannot be null");
-    await this.ensureReady();
 
     const timestamp =
       await this.getNextTimestampForConversation(conversationId);
@@ -158,7 +152,6 @@ export class RedisChatMemoryRepository
   async addAll(conversationId: string, messages: Message[]): Promise<void> {
     assert(conversationId, "conversationId cannot be null or empty");
     assert(messages, "messages cannot be null");
-    await this.ensureReady();
 
     for (const message of messages) {
       await this.add(conversationId, message);
@@ -253,13 +246,6 @@ export class RedisChatMemoryRepository
     return this.executeSearch(query, limit);
   }
 
-  private async ensureReady(): Promise<void> {
-    if (!this._readyPromise) {
-      this._readyPromise = this.initialize();
-    }
-    return this._readyPromise;
-  }
-
   private async initialize(): Promise<void> {
     if (!this._client.isOpen) {
       await this._client.connect();
@@ -269,44 +255,77 @@ export class RedisChatMemoryRepository
       return;
     }
 
-    const schema: RediSearchSchema = {
-      "$.content": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "content" },
-      "$.type": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "type" },
-      "$.conversation_id": {
-        type: SCHEMA_FIELD_TYPE.TAG,
-        AS: "conversation_id",
-      },
-      "$.timestamp": { type: SCHEMA_FIELD_TYPE.NUMERIC, AS: "timestamp" },
-    };
+    await this.initializeSchema();
+  }
 
-    if (this._config.metadataFields.length > 0) {
-      for (const field of this._config.metadataFields) {
-        const type = (field.type ?? "text").toUpperCase();
-        schema[`$.metadata.${field.name}`] = {
-          type:
-            type === "NUMERIC"
-              ? SCHEMA_FIELD_TYPE.NUMERIC
-              : type === "TAG"
-                ? SCHEMA_FIELD_TYPE.TAG
-                : SCHEMA_FIELD_TYPE.TEXT,
-          AS: `metadata_${field.name}`,
+  private async initializeSchema(): Promise<void> {
+    try {
+      const existingIndexes = await this.listIndexes();
+      if (existingIndexes.includes(this._config.indexName)) {
+        return;
+      }
+
+      const schema: RediSearchSchema = {
+        "$.content": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "content" },
+        "$.type": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "type" },
+        "$.conversation_id": {
+          type: SCHEMA_FIELD_TYPE.TAG,
+          AS: "conversation_id",
+        },
+        "$.timestamp": { type: SCHEMA_FIELD_TYPE.NUMERIC, AS: "timestamp" },
+      };
+
+      if (this._config.metadataFields.length > 0) {
+        for (const field of this._config.metadataFields) {
+          const type = (field.type ?? "text").toUpperCase();
+          schema[`$.metadata.${field.name}`] = {
+            type:
+              type === "NUMERIC"
+                ? SCHEMA_FIELD_TYPE.NUMERIC
+                : type === "TAG"
+                  ? SCHEMA_FIELD_TYPE.TAG
+                  : SCHEMA_FIELD_TYPE.TEXT,
+            AS: `metadata_${field.name}`,
+          };
+        }
+      } else {
+        schema["$.metadata.*"] = {
+          type: SCHEMA_FIELD_TYPE.TEXT,
+          AS: "metadata",
         };
       }
-    } else {
-      schema["$.metadata"] = { type: SCHEMA_FIELD_TYPE.TEXT, AS: "metadata" };
+
+      const response = await this._client.ft.create(
+        this._config.indexName,
+        schema,
+        {
+          ON: "JSON",
+          PREFIX: [this._config.keyPrefix],
+        },
+      );
+
+      if (response !== "OK") {
+        throw new Error(`Failed to create index: ${String(response)}`);
+      }
+    } catch (error) {
+      throw new Error("Could not initialize Redis schema", {
+        cause: error,
+      });
+    }
+  }
+
+  private async listIndexes(): Promise<string[]> {
+    const response = await this._client.sendCommand(["FT._LIST"]);
+
+    if (!Array.isArray(response)) {
+      return [];
     }
 
-    try {
-      await this._client.ft.create(this._config.indexName, schema, {
-        ON: "JSON",
-        PREFIX: [this._config.keyPrefix],
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (!message.toLowerCase().includes("index already exists")) {
-        throw error;
-      }
-    }
+    return response
+      .map((entry) =>
+        typeof entry === "string" ? entry : Buffer.from(entry).toString(),
+      )
+      .filter((entry) => entry.length > 0);
   }
 
   private async getNextTimestampForConversation(
@@ -382,7 +401,6 @@ export class RedisChatMemoryRepository
     query: string,
     limit: number,
   ): Promise<MessageWithConversation[]> {
-    await this.ensureReady();
     const rawResult = await this._client.ft.search(
       this._config.indexName,
       query,
@@ -522,8 +540,7 @@ export class RedisChatMemoryRepositoryBuilder {
     return this;
   }
 
-  build(): RedisChatMemoryRepository {
-    let ownsClient = false;
+  async build(): Promise<RedisChatMemoryRepository> {
     if (!this._client) {
       this._client = createClient(
         this._redisUrl ? { url: this._redisUrl } : undefined,
@@ -531,11 +548,10 @@ export class RedisChatMemoryRepositoryBuilder {
         // No-op to avoid unhandled "error" event crashes when caller does not attach listeners.
       });
       this._configBuilder.redisClient(this._client);
-      ownsClient = true;
     }
 
     const config = this._configBuilder.build();
-    return new RedisChatMemoryRepository(config, ownsClient);
+    return RedisChatMemoryRepository.create(config);
   }
 }
 

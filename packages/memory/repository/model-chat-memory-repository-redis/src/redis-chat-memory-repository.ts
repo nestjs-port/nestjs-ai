@@ -579,6 +579,11 @@ function parseSearchDocumentValue(
     return root as Record<string, unknown>;
   }
 
+  // node-redis v5 already unwraps the $ path, so value is the document itself
+  if (value.$ === undefined && Object.keys(value).length > 0) {
+    return value;
+  }
+
   return null;
 }
 

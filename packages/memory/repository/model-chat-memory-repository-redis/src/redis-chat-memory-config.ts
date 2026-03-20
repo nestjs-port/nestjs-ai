@@ -17,7 +17,7 @@ export class RedisChatMemoryConfig {
   private readonly _indexName: string;
   private readonly _keyPrefix: string;
   private readonly _timeToLiveSeconds: number;
-  private readonly _initializeSchema: boolean;
+  private readonly _isInitializeSchema: boolean;
   private readonly _maxConversationIds: number;
   private readonly _maxMessagesPerConversation: number;
   private readonly _metadataFields: RedisChatMemoryMetadataField[];
@@ -31,7 +31,7 @@ export class RedisChatMemoryConfig {
     this._indexName = builder.indexNameValue;
     this._keyPrefix = builder.keyPrefixValue;
     this._timeToLiveSeconds = builder.timeToLiveSecondsValue;
-    this._initializeSchema = builder.initializeSchemaValue;
+    this._isInitializeSchema = builder.initializeSchemaValue;
     this._maxConversationIds = builder.maxConversationIdsValue;
     this._maxMessagesPerConversation = builder.maxMessagesPerConversationValue;
     this._metadataFields = [...builder.metadataFieldsValue];
@@ -57,8 +57,8 @@ export class RedisChatMemoryConfig {
     return this._timeToLiveSeconds;
   }
 
-  get initializeSchema(): boolean {
-    return this._initializeSchema;
+  get isInitializeSchema(): boolean {
+    return this._isInitializeSchema;
   }
 
   get maxConversationIds(): number {

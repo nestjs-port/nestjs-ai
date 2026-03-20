@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
-import { type Logger, LoggerFactory, Media } from "@nestjs-ai/commons";
+import {
+  type Logger,
+  LoggerFactory,
+  Media,
+  type MediaContent,
+} from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -11,7 +16,6 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
-import type { RedisJSON } from "@redis/json";
 import {
   type RediSearchSchema,
   SCHEMA_FIELD_TYPE,
@@ -33,7 +37,7 @@ interface StoredMessageDocument {
   type: string;
   conversation_id: string;
   timestamp: number;
-  metadata: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   toolCalls?: ToolCall[];
   toolResponses?: ToolResponse[];
   media?: StoredMedia[];
@@ -87,15 +91,25 @@ export class RedisChatMemoryRepository
     assert(conversationId, "conversationId cannot be null or empty");
     assert(messageOrMessages, "message cannot be null");
 
-    const messages = Array.isArray(messageOrMessages)
-      ? messageOrMessages
-      : [messageOrMessages];
+    if (Array.isArray(messageOrMessages)) {
+      if (messageOrMessages.length === 0) {
+        return;
+      }
 
-    // Add each message with its own sequential timestamp.
-    for (const message of messages) {
-      assert(message, "message cannot be null");
-      await this.addSingle(conversationId, message);
+      // Get the next available timestamp for the first message.
+      let timestamp =
+        await this.getNextTimestampForConversation(conversationId);
+
+      // Add each message while incrementing timestamp locally.
+      for (const message of messageOrMessages) {
+        assert(message, "message cannot be null");
+        await this.addSingle(conversationId, message, timestamp);
+        timestamp += 1;
+      }
+      return;
     }
+
+    await this.addSingle(conversationId, messageOrMessages);
   }
 
   async get(conversationId: string, lastN?: number): Promise<Message[]> {
@@ -483,15 +497,16 @@ export class RedisChatMemoryRepository
   private async addSingle(
     conversationId: string,
     message: Message,
+    timestamp?: number,
   ): Promise<void> {
-    // Get the next available timestamp for this conversation.
-    const timestamp =
-      await this.getNextTimestampForConversation(conversationId);
-    const key = this.createKey(conversationId, timestamp);
+    // Get the next available timestamp for this conversation when not provided.
+    const resolvedTimestamp =
+      timestamp ?? (await this.getNextTimestampForConversation(conversationId));
+    const key = this.createKey(conversationId, resolvedTimestamp);
     const document = this.createMessageDocument(
       conversationId,
       message,
-      timestamp,
+      resolvedTimestamp,
     );
 
     if (this.logger.isDebugEnabled()) {
@@ -503,9 +518,10 @@ export class RedisChatMemoryRepository
       );
     }
 
-    // Persist JSON document and apply key TTL.
-    await this._client.json.set(key, "$", toRedisJson(document));
-    if (this._config.timeToLiveSeconds >= 0) {
+    const json = JSON.stringify(document);
+    await this._client.json.set(key, "$", JSON.parse(json));
+
+    if (this._config.timeToLiveSeconds !== -1) {
       await this._client.expire(key, this._config.timeToLiveSeconds);
     }
   }
@@ -515,29 +531,78 @@ export class RedisChatMemoryRepository
     message: Message,
     timestamp: number,
   ): StoredMessageDocument {
-    const type = message.messageType.toString();
-    // Store metadata/properties.
-    const base: StoredMessageDocument = {
-      conversation_id: conversationId,
+    const document: StoredMessageDocument = {
+      type: message.messageType.toString(),
       content: message.text ?? "",
-      type,
+      conversation_id: conversationId,
       timestamp,
-      metadata: normalizeObject(message.metadata),
     };
 
-    // Handle tool calls for AssistantMessage.
-    if (message instanceof AssistantMessage) {
-      base.toolCalls = [...message.toolCalls];
-      base.media = message.media.map(serializeMedia);
-    } else if (message instanceof UserMessage) {
-      // Handle media content for UserMessage.
-      base.media = message.media.map(serializeMedia);
-    } else if (message instanceof ToolResponseMessage) {
-      // Handle tool responses for ToolResponseMessage.
-      base.toolResponses = [...message.responses];
+    // Store metadata/properties.
+    if (message.metadata && Object.keys(message.metadata).length > 0) {
+      document.metadata = message.metadata as Record<string, unknown>;
     }
 
-    return base;
+    // Handle tool calls for AssistantMessage.
+    if (message instanceof AssistantMessage && message.toolCalls.length > 0) {
+      document.toolCalls = [...message.toolCalls];
+    }
+
+    // Handle tool responses for ToolResponseMessage.
+    if (message instanceof ToolResponseMessage) {
+      document.toolResponses = [...message.responses];
+    }
+
+    // Handle media content.
+    if (
+      RedisChatMemoryRepository.isMediaContent(message) &&
+      message.media.length > 0
+    ) {
+      const mediaList: StoredMedia[] = [];
+
+      for (const mediaItem of message.media) {
+        const mediaMap: StoredMedia = {
+          mimeType: mediaItem.mimeType,
+          data: "",
+        };
+
+        // Store ID and name if present.
+        if (mediaItem.id != null) {
+          mediaMap.id = mediaItem.id;
+        }
+        if (mediaItem.name != null) {
+          mediaMap.name = mediaItem.name;
+        }
+
+        // Handle data based on its type.
+        const data = mediaItem.data;
+        if (data != null) {
+          if (data instanceof URL || typeof data === "string") {
+            // Store URI/URL as string
+            mediaMap.data = data.toString();
+          } else if (Buffer.isBuffer(data) || data instanceof Uint8Array) {
+            // Encode byte array as Base64 string
+            mediaMap.data = Buffer.from(data).toString("base64");
+            // Add a marker to indicate this is Base64-encoded
+            mediaMap.dataType = "base64";
+          } else {
+            // For other types, store as string
+            mediaMap.data = String(data);
+          }
+        }
+
+        mediaList.push(mediaMap);
+      }
+
+      document.media = mediaList;
+    }
+
+    return document;
+  }
+
+  private static isMediaContent(message: unknown): message is MediaContent {
+    const candidate = message as { media?: unknown };
+    return Array.isArray(candidate.media);
   }
 
   private async findKeysForQuery(
@@ -831,30 +896,8 @@ function parseMedia(value: unknown): Media[] {
   return media;
 }
 
-function serializeMedia(media: Media): StoredMedia {
-  const data = media.data;
-  if (Buffer.isBuffer(data) || data instanceof Uint8Array) {
-    // Encode byte array as Base64 and mark its data type.
-    return {
-      id: media.id,
-      name: media.name,
-      mimeType: media.mimeType,
-      data: Buffer.from(data).toString("base64"),
-      dataType: "base64",
-    };
-  }
-
-  // Store URI/string/other JSON-friendly values as-is after normalization.
-  return {
-    id: media.id,
-    name: media.name,
-    mimeType: media.mimeType,
-    data: normalizeValue(data),
-  };
-}
-
 function escapeKey(value: string): string {
-  return value.replaceAll(":", "_");
+  return value.replaceAll(":", "\\:");
 }
 
 function escapeTagValue(value: string): string {
@@ -867,10 +910,6 @@ function escapeTextQuery(value: string): string {
     .split(/\s+/)
     .map((token) => token.replaceAll(/([-@{}[\]|!()~"':;,.<>/?+=\\])/g, "\\$1"))
     .join(" ");
-}
-
-function toRedisJson(value: unknown): RedisJSON {
-  return normalizeValue(value) as RedisJSON;
 }
 
 function normalizeObject(value: unknown): Record<string, unknown> {

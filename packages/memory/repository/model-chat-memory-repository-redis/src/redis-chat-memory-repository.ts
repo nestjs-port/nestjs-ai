@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { Media } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory, Media } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -12,8 +12,12 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import type { RedisJSON } from "@redis/json";
-import type { RediSearchSchema, SearchReply } from "@redis/search";
-import { createClient, SCHEMA_FIELD_TYPE } from "redis";
+import {
+  type RediSearchSchema,
+  SCHEMA_FIELD_TYPE,
+  type SearchReply,
+} from "@redis/search";
+import { createClient } from "redis";
 import type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
@@ -46,6 +50,9 @@ interface StoredMedia {
 export class RedisChatMemoryRepository
   implements AdvancedRedisChatMemoryRepository, ChatMemoryRepository
 {
+  private readonly logger: Logger = LoggerFactory.getLogger(
+    RedisChatMemoryRepository.name,
+  );
   private readonly _config: RedisChatMemoryConfig;
   private readonly _client: ReturnType<typeof createClient>;
 
@@ -63,11 +70,85 @@ export class RedisChatMemoryRepository
     config: RedisChatMemoryConfig,
   ): Promise<RedisChatMemoryRepository> {
     const repository = new RedisChatMemoryRepository(config);
-    await repository.initialize();
+
+    if (config.isInitializeSchema) {
+      await repository.initialize();
+    }
+
     return repository;
   }
 
+  async add(conversationId: string, message: Message): Promise<void>;
+  async add(conversationId: string, messages: Message[]): Promise<void>;
+  async add(
+    conversationId: string,
+    messageOrMessages: Message | Message[],
+  ): Promise<void> {
+    assert(conversationId, "conversationId cannot be null or empty");
+    assert(messageOrMessages, "message cannot be null");
+
+    const messages = Array.isArray(messageOrMessages)
+      ? messageOrMessages
+      : [messageOrMessages];
+
+    // Add each message with its own sequential timestamp.
+    for (const message of messages) {
+      assert(message, "message cannot be null");
+      await this.addSingle(conversationId, message);
+    }
+  }
+
+  async get(conversationId: string, lastN?: number): Promise<Message[]> {
+    assert(conversationId, "conversationId cannot be null or empty");
+    const limit = lastN ?? this._config.maxMessagesPerConversation;
+    assert(limit > 0, "lastN must be greater than 0");
+
+    // Build a tag field query for conversation_id.
+    const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
+    const result = await this.executeSearch(query, limit);
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        "Returning {} messages for conversation {}",
+        result.length,
+        conversationId,
+      );
+    }
+    return result.map((entry) => entry.message);
+  }
+
+  async clear(conversationId: string): Promise<void> {
+    assert(conversationId, "conversationId cannot be null or empty");
+
+    // Build a tag field query for conversation_id.
+    const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
+    const keys = await this.findKeysForQuery(query, 5000);
+    if (keys.length === 0) {
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug(
+          "No messages to clear for conversation {}",
+          conversationId,
+        );
+      }
+      return;
+    }
+
+    const multi = this._client.multi();
+    for (const key of keys) {
+      multi.del(key);
+    }
+    await multi.exec();
+
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        "Cleared {} messages for conversation {}",
+        keys.length,
+        conversationId,
+      );
+    }
+  }
+
   async findConversationIds(): Promise<string[]> {
+    // Fetch conversation ids ordered by latest timestamp and deduplicate client-side.
     const rawResult = await this._client.ft.search(
       this._config.indexName,
       "*",
@@ -90,12 +171,21 @@ export class RedisChatMemoryRepository
       }
     }
 
-    return [...ids];
+    const conversationIds = [...ids];
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        "Found {} conversation ids (max {})",
+        conversationIds.length,
+        this._config.maxConversationIds,
+      );
+    }
+    return conversationIds;
   }
 
   async findByConversationId(conversationId: string): Promise<Message[]> {
     assert(conversationId, "conversationId cannot be null or empty");
 
+    // Reuse the configured max messages limit for conversation lookups.
     const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
     const result = await this.executeSearch(
       query,
@@ -109,53 +199,18 @@ export class RedisChatMemoryRepository
     assert(conversationId, "conversationId cannot be null or empty");
     assert(messages, "messages cannot be null");
 
+    // First clear any existing messages for this conversation.
     await this.deleteByConversationId(conversationId);
 
+    // Then add all the new messages.
     for (const message of messages) {
       await this.add(conversationId, message);
     }
   }
 
   async deleteByConversationId(conversationId: string): Promise<void> {
-    assert(conversationId, "conversationId cannot be null or empty");
-
-    const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
-    const keys = await this.findKeysForQuery(query, 5000);
-    if (keys.length === 0) {
-      return;
-    }
-
-    const multi = this._client.multi();
-    for (const key of keys) {
-      multi.del(key);
-    }
-    await multi.exec();
-  }
-
-  async add(conversationId: string, message: Message): Promise<void> {
-    assert(conversationId, "conversationId cannot be null or empty");
-    assert(message, "message cannot be null");
-
-    const timestamp =
-      await this.getNextTimestampForConversation(conversationId);
-    const key = this.createKey(conversationId, timestamp);
-    const document = this.createMessageDocument(
-      conversationId,
-      message,
-      timestamp,
-    );
-
-    await this._client.json.set(key, "$", toRedisJson(document));
-    await this.applyTtl(key);
-  }
-
-  async addAll(conversationId: string, messages: Message[]): Promise<void> {
-    assert(conversationId, "conversationId cannot be null or empty");
-    assert(messages, "messages cannot be null");
-
-    for (const message of messages) {
-      await this.add(conversationId, message);
-    }
+    // Reuse existing clear method.
+    await this.clear(conversationId);
   }
 
   async findByContent(
@@ -165,6 +220,7 @@ export class RedisChatMemoryRepository
     assert(contentPattern, "contentPattern cannot be null or empty");
     assert(limit > 0, "limit must be greater than 0");
 
+    // Create a text field query. Keep token escaping for RediSearch syntax safety.
     const query = `@content:${escapeTextQuery(contentPattern)}`;
     return this.executeSearch(query, limit);
   }
@@ -176,6 +232,7 @@ export class RedisChatMemoryRepository
     assert(messageType, "messageType cannot be null");
     assert(limit > 0, "limit must be greater than 0");
 
+    // Create a text field query by message type.
     const query = `@type:${messageType.toString()}`;
     return this.executeSearch(query, limit);
   }
@@ -194,7 +251,9 @@ export class RedisChatMemoryRepository
       "toTime must be >= fromTime",
     );
 
+    // Build numeric range query for timestamp.
     const range = `@timestamp:[${fromTime.getTime()} ${toTime.getTime()}]`;
+    // If conversationId is provided, add it as a tag filter.
     const query =
       conversationId && conversationId.length > 0
         ? `${range} @conversation_id:{${escapeTagValue(conversationId)}}`
@@ -215,22 +274,28 @@ export class RedisChatMemoryRepository
     );
     assert(limit > 0, "limit must be greater than 0");
 
+    // Check if this metadata field was explicitly defined in the schema.
     const metadataField = this._config.metadataFields.find(
       (field) => field.name === metadataKey,
     );
 
     let query: string;
     if (!metadataField) {
+      // Field not explicitly indexed. Search in general metadata field.
       const searchPattern = `${metadataKey} ${String(metadataValue)}`;
       query = `@metadata:${escapeTextQuery(searchPattern)}`;
     } else if ((metadataField.type ?? "text") === "numeric") {
+      // Field is indexed as numeric. Use exact numeric range when possible.
       const numericValue = Number(metadataValue);
       query = Number.isFinite(numericValue)
         ? `@metadata_${metadataKey}:[${numericValue} ${numericValue}]`
-        : `@metadata:${escapeTextQuery(`${metadataKey} ${String(metadataValue)}`)}`;
+        : // Fall back to text search in general metadata.
+          `@metadata:${escapeTextQuery(`${metadataKey} ${String(metadataValue)}`)}`;
     } else if ((metadataField.type ?? "text") === "tag") {
+      // For tag fields, use tag query.
       query = `@metadata_${metadataKey}:{${escapeTagValue(String(metadataValue))}}`;
     } else {
+      // Default text metadata query.
       query = `@metadata_${metadataKey}:${escapeTextQuery(String(metadataValue))}`;
     }
 
@@ -243,6 +308,7 @@ export class RedisChatMemoryRepository
   ): Promise<MessageWithConversation[]> {
     assert(query, "query cannot be null or empty");
     assert(limit > 0, "limit must be greater than 0");
+    // The caller provides full RediSearch query syntax.
     return this.executeSearch(query, limit);
   }
 
@@ -251,7 +317,7 @@ export class RedisChatMemoryRepository
       await this._client.connect();
     }
 
-    if (!this._config.initializeSchema) {
+    if (!this._config.isInitializeSchema) {
       return;
     }
 
@@ -260,94 +326,152 @@ export class RedisChatMemoryRepository
 
   private async initializeSchema(): Promise<void> {
     try {
-      const existingIndexes = await this.listIndexes();
-      if (existingIndexes.includes(this._config.indexName)) {
+      const existingIndexes = new Set(await this._client.ft._list());
+      if (existingIndexes.has(this._config.indexName)) {
+        if (this.logger.isDebugEnabled()) {
+          this.logger.debug(
+            "Redis search index '{}' already exists",
+            this._config.indexName,
+          );
+        }
         return;
       }
 
-      const schema: RediSearchSchema = {
-        "$.content": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "content" },
-        "$.type": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "type" },
-        "$.conversation_id": {
-          type: SCHEMA_FIELD_TYPE.TAG,
-          AS: "conversation_id",
-        },
-        "$.timestamp": { type: SCHEMA_FIELD_TYPE.NUMERIC, AS: "timestamp" },
-      };
-
-      if (this._config.metadataFields.length > 0) {
-        for (const field of this._config.metadataFields) {
-          const type = (field.type ?? "text").toUpperCase();
-          schema[`$.metadata.${field.name}`] = {
-            type:
-              type === "NUMERIC"
-                ? SCHEMA_FIELD_TYPE.NUMERIC
-                : type === "TAG"
-                  ? SCHEMA_FIELD_TYPE.TAG
-                  : SCHEMA_FIELD_TYPE.TEXT,
-            AS: `metadata_${field.name}`,
-          };
-        }
-      } else {
-        schema["$.metadata.*"] = {
-          type: SCHEMA_FIELD_TYPE.TEXT,
-          AS: "metadata",
-        };
-      }
+      // Create the index with the defined schema.
+      const schema: RediSearchSchema = this.createSchema();
 
       const response = await this._client.ft.create(
         this._config.indexName,
         schema,
         {
           ON: "JSON",
-          PREFIX: [this._config.keyPrefix],
+          PREFIX: this._config.keyPrefix,
         },
       );
 
       if (response !== "OK") {
         throw new Error(`Failed to create index: ${String(response)}`);
       }
+
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug(
+          "Created Redis search index '{}' with {} schema fields",
+          this._config.indexName,
+          Object.keys(schema).length,
+        );
+      }
     } catch (error) {
+      this.logger.error("Failed to initialize Redis schema", error);
       throw new Error("Could not initialize Redis schema", {
         cause: error,
       });
     }
   }
 
-  private async listIndexes(): Promise<string[]> {
-    const response = await this._client.sendCommand(["FT._LIST"]);
+  private createSchema(): RediSearchSchema {
+    // Basic fields for all messages.
+    const schema: RediSearchSchema = {
+      "$.content": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "content" },
+      "$.type": { type: SCHEMA_FIELD_TYPE.TEXT, AS: "type" },
+      "$.conversation_id": {
+        type: SCHEMA_FIELD_TYPE.TAG,
+        AS: "conversation_id",
+      },
+      "$.timestamp": { type: SCHEMA_FIELD_TYPE.NUMERIC, AS: "timestamp" },
+    };
 
-    if (!Array.isArray(response)) {
-      return [];
+    if (this._config.metadataFields.length > 0) {
+      // User has provided a metadata schema. Use it.
+      for (const field of this._config.metadataFields) {
+        const jsonPath = `$.metadata.${field.name}`;
+        const indexedName = `metadata_${field.name}`;
+
+        // Use field type-specific indexing for metadata.
+        switch ((field.type ?? "text").toLowerCase()) {
+          case "numeric":
+            schema[jsonPath] = {
+              type: SCHEMA_FIELD_TYPE.NUMERIC,
+              AS: indexedName,
+            };
+            break;
+          case "tag":
+            schema[jsonPath] = {
+              type: SCHEMA_FIELD_TYPE.TAG,
+              AS: indexedName,
+            };
+            break;
+          default:
+            schema[jsonPath] = {
+              type: SCHEMA_FIELD_TYPE.TEXT,
+              AS: indexedName,
+            };
+            break;
+        }
+      }
+      // When specific metadata fields are defined, do not add wildcard metadata
+      // indexing to avoid non-string indexing issues.
+    } else {
+      // No schema provided. Fallback to indexing all metadata as text.
+      schema["$.metadata.*"] = {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+        AS: "metadata",
+      };
     }
 
-    return response
-      .map((entry) =>
-        typeof entry === "string" ? entry : Buffer.from(entry).toString(),
-      )
-      .filter((entry) => entry.length > 0);
+    return schema;
   }
 
   private async getNextTimestampForConversation(
     conversationId: string,
   ): Promise<number> {
-    const counterKey = `${this._config.keyPrefix}counter:${escapeKey(conversationId)}`;
-    const baseTimestamp = Date.now();
+    // Create a Redis key specifically for tracking the sequence.
+    const sequenceKey = `${this._config.keyPrefix}counter:${escapeKey(conversationId)}`;
 
     try {
-      const setResult = await this._client.set(counterKey, `${baseTimestamp}`, {
-        NX: true,
+      // Get the current time as base timestamp.
+      const baseTimestamp = Date.now();
+      // Use a Lua script for atomic operation so concurrent writers always get
+      // unique and increasing timestamps.
+      const script =
+        "local exists = redis.call('EXISTS', KEYS[1]) " +
+        "if exists == 0 then " +
+        "  redis.call('SET', KEYS[1], ARGV[1]) " +
+        "  return ARGV[1] " +
+        "end " +
+        "return redis.call('INCR', KEYS[1])";
+
+      // Execute the script atomically.
+      const result = await this._client.eval(script, {
+        keys: [sequenceKey],
+        arguments: [`${baseTimestamp}`],
       });
 
-      if (setResult === "OK") {
-        await this.applyTtl(counterKey);
-        return baseTimestamp;
+      const nextTimestamp = Number(
+        typeof result === "number" ? result : String(result),
+      );
+
+      // Set expiration on the counter key (same as the messages).
+      if (this._config.timeToLiveSeconds !== -1) {
+        await this._client.expire(sequenceKey, this._config.timeToLiveSeconds);
       }
 
-      const next = await this._client.incr(counterKey);
-      await this.applyTtl(counterKey);
-      return Number(next);
-    } catch {
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug(
+          "Generated atomic timestamp {} for conversation {}",
+          nextTimestamp,
+          conversationId,
+        );
+      }
+
+      return nextTimestamp;
+    } catch (error) {
+      // Fall back to high-resolution timestamp for uniqueness.
+      this.logger.warn(
+        "Error getting atomic timestamp for conversation {}, using fallback",
+        conversationId,
+        error,
+      );
+      // Add nanoseconds to ensure uniqueness even in fallback scenario
       return Date.now() * 1000 + Number(process.hrtime.bigint() % 1000n);
     }
   }
@@ -356,12 +480,43 @@ export class RedisChatMemoryRepository
     return `${this._config.keyPrefix}${escapeKey(conversationId)}:${timestamp}`;
   }
 
+  private async addSingle(
+    conversationId: string,
+    message: Message,
+  ): Promise<void> {
+    // Get the next available timestamp for this conversation.
+    const timestamp =
+      await this.getNextTimestampForConversation(conversationId);
+    const key = this.createKey(conversationId, timestamp);
+    const document = this.createMessageDocument(
+      conversationId,
+      message,
+      timestamp,
+    );
+
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        "Storing message with key: {}, type: {}, content: {}",
+        key,
+        message.messageType,
+        message.text,
+      );
+    }
+
+    // Persist JSON document and apply key TTL.
+    await this._client.json.set(key, "$", toRedisJson(document));
+    if (this._config.timeToLiveSeconds >= 0) {
+      await this._client.expire(key, this._config.timeToLiveSeconds);
+    }
+  }
+
   private createMessageDocument(
     conversationId: string,
     message: Message,
     timestamp: number,
   ): StoredMessageDocument {
     const type = message.messageType.toString();
+    // Store metadata/properties.
     const base: StoredMessageDocument = {
       conversation_id: conversationId,
       content: message.text ?? "",
@@ -370,12 +525,15 @@ export class RedisChatMemoryRepository
       metadata: normalizeObject(message.metadata),
     };
 
+    // Handle tool calls for AssistantMessage.
     if (message instanceof AssistantMessage) {
       base.toolCalls = [...message.toolCalls];
       base.media = message.media.map(serializeMedia);
     } else if (message instanceof UserMessage) {
+      // Handle media content for UserMessage.
       base.media = message.media.map(serializeMedia);
     } else if (message instanceof ToolResponseMessage) {
+      // Handle tool responses for ToolResponseMessage.
       base.toolResponses = [...message.responses];
     }
 
@@ -412,24 +570,36 @@ export class RedisChatMemoryRepository
     );
     const result = asSearchReply(rawResult);
 
-    return this.processSearchResult(result);
+    const processed = this.processSearchResult(result);
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        "Executed query '{}' with limit {}, returned {} results",
+        query,
+        limit,
+        processed.length,
+      );
+    }
+    return processed;
   }
 
   private processSearchResult(result: SearchReply): MessageWithConversation[] {
     const messages: MessageWithConversation[] = [];
 
     for (const doc of result.documents) {
+      // Parse the JSON document payload.
       const json = parseSearchDocumentValue(doc.value);
       if (!json) {
         continue;
       }
 
+      // Extract conversation ID and timestamp.
       const conversationId = asString(json.conversation_id);
       const timestamp = asNumber(json.timestamp);
       if (!conversationId) {
         continue;
       }
 
+      // Convert JSON to message and collect result entry.
       messages.push({
         conversationId,
         timestamp,
@@ -443,9 +613,11 @@ export class RedisChatMemoryRepository
   private convertJsonToMessage(doc: Record<string, unknown>): Message {
     const type = asString(doc.type);
     const content = asString(doc.content);
+    // Convert metadata payload to object map if present.
     const metadata = normalizeObject(doc.metadata);
 
     if (type === MessageType.ASSISTANT.toString()) {
+      // Handle tool calls and media for AssistantMessage.
       return new AssistantMessage({
         content,
         properties: metadata,
@@ -455,6 +627,7 @@ export class RedisChatMemoryRepository
     }
 
     if (type === MessageType.USER.toString()) {
+      // Create UserMessage with metadata and media.
       return new UserMessage({
         content: content ?? "",
         properties: metadata,
@@ -470,22 +643,19 @@ export class RedisChatMemoryRepository
     }
 
     if (type === MessageType.TOOL.toString()) {
+      // Extract tool responses for ToolResponseMessage.
       return new ToolResponseMessage({
         properties: metadata,
         responses: parseToolResponses(doc.toolResponses),
       });
     }
 
+    // For unknown message types, return a generic UserMessage.
+    this.logger.warn("Unknown message type: {}", type);
     return new UserMessage({
       content: content ?? "",
       properties: metadata,
     });
-  }
-
-  private async applyTtl(key: string): Promise<void> {
-    if (this._config.timeToLiveSeconds >= 0) {
-      await this._client.expire(key, this._config.timeToLiveSeconds);
-    }
   }
 }
 
@@ -629,17 +799,21 @@ function parseMedia(value: unknown): Media[] {
       continue;
     }
     const raw = item as Record<string, unknown>;
+    // Extract required media properties.
     const mimeType = asString(raw.mimeType);
     if (!mimeType) {
       continue;
     }
 
+    // Handle data based on its type marker.
     const dataType = asString(raw.dataType);
     let data: unknown = raw.data;
     if (dataType === "base64" && typeof raw.data === "string") {
       try {
+        // Decode Base64 string to bytes.
         data = Buffer.from(raw.data, "base64");
       } catch {
+        // Preserve original data when Base64 decode fails.
         data = raw.data;
       }
     }
@@ -660,6 +834,7 @@ function parseMedia(value: unknown): Media[] {
 function serializeMedia(media: Media): StoredMedia {
   const data = media.data;
   if (Buffer.isBuffer(data) || data instanceof Uint8Array) {
+    // Encode byte array as Base64 and mark its data type.
     return {
       id: media.id,
       name: media.name,
@@ -669,6 +844,7 @@ function serializeMedia(media: Media): StoredMedia {
     };
   }
 
+  // Store URI/string/other JSON-friendly values as-is after normalization.
   return {
     id: media.id,
     name: media.name,

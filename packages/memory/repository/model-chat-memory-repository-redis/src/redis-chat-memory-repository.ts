@@ -122,9 +122,7 @@ export class RedisChatMemoryRepository
     const result = await this.executeSearch(query, limit);
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        "Returning {} messages for conversation {}",
-        result.length,
-        conversationId,
+        `Returning ${result.length} messages for conversation ${conversationId}`,
       );
     }
     return result.map((entry) => entry.message);
@@ -139,8 +137,7 @@ export class RedisChatMemoryRepository
     if (keys.length === 0) {
       if (this.logger.isDebugEnabled()) {
         this.logger.debug(
-          "No messages to clear for conversation {}",
-          conversationId,
+          `No messages to clear for conversation ${conversationId}`,
         );
       }
       return;
@@ -154,9 +151,7 @@ export class RedisChatMemoryRepository
 
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        "Cleared {} messages for conversation {}",
-        keys.length,
-        conversationId,
+        `Cleared ${keys.length} messages for conversation ${conversationId}`,
       );
     }
   }
@@ -188,9 +183,7 @@ export class RedisChatMemoryRepository
     const conversationIds = [...ids];
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        "Found {} conversation ids (max {})",
-        conversationIds.length,
-        this._config.maxConversationIds,
+        `Found ${conversationIds.length} conversation ids (max ${this._config.maxConversationIds})`,
       );
     }
     return conversationIds;
@@ -344,8 +337,7 @@ export class RedisChatMemoryRepository
       if (existingIndexes.has(this._config.indexName)) {
         if (this.logger.isDebugEnabled()) {
           this.logger.debug(
-            "Redis search index '{}' already exists",
-            this._config.indexName,
+            `Redis search index '${this._config.indexName}' already exists`,
           );
         }
         return;
@@ -369,9 +361,7 @@ export class RedisChatMemoryRepository
 
       if (this.logger.isDebugEnabled()) {
         this.logger.debug(
-          "Created Redis search index '{}' with {} schema fields",
-          this._config.indexName,
-          Object.keys(schema).length,
+          `Created Redis search index '${this._config.indexName}' with ${Object.keys(schema).length} schema fields`,
         );
       }
     } catch (error) {
@@ -471,9 +461,7 @@ export class RedisChatMemoryRepository
 
       if (this.logger.isDebugEnabled()) {
         this.logger.debug(
-          "Generated atomic timestamp {} for conversation {}",
-          nextTimestamp,
-          conversationId,
+          `Generated atomic timestamp ${nextTimestamp} for conversation ${conversationId}`,
         );
       }
 
@@ -481,8 +469,7 @@ export class RedisChatMemoryRepository
     } catch (error) {
       // Fall back to high-resolution timestamp for uniqueness.
       this.logger.warn(
-        "Error getting atomic timestamp for conversation {}, using fallback",
-        conversationId,
+        `Error getting atomic timestamp for conversation ${conversationId}, using fallback`,
         error,
       );
       // Add nanoseconds to ensure uniqueness even in fallback scenario
@@ -511,10 +498,7 @@ export class RedisChatMemoryRepository
 
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        "Storing message with key: {}, type: {}, content: {}",
-        key,
-        message.messageType,
-        message.text,
+        `Storing message with key: ${key}, type: ${message.messageType}, content: ${message.text}`,
       );
     }
 
@@ -638,10 +622,7 @@ export class RedisChatMemoryRepository
     const processed = this.processSearchResult(result);
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        "Executed query '{}' with limit {}, returned {} results",
-        query,
-        limit,
-        processed.length,
+        `Executed query '${query}' with limit ${limit}, returned ${processed.length} results`,
       );
     }
     return processed;
@@ -716,7 +697,7 @@ export class RedisChatMemoryRepository
     }
 
     // For unknown message types, return a generic UserMessage.
-    this.logger.warn("Unknown message type: {}", type);
+    this.logger.warn(`Unknown message type: ${type}`);
     return new UserMessage({
       content: content ?? "",
       properties: metadata,

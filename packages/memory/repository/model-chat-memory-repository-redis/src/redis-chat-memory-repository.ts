@@ -21,7 +21,7 @@ import {
   SCHEMA_FIELD_TYPE,
   type SearchReply,
 } from "@redis/search";
-import { createClient } from "redis";
+import { createClient, type RedisJSON } from "redis";
 import type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
@@ -502,8 +502,7 @@ export class RedisChatMemoryRepository
       );
     }
 
-    const json = JSON.stringify(document);
-    await this._client.json.set(key, "$", JSON.parse(json));
+    await this._client.json.set(key, "$", document as unknown as RedisJSON);
 
     if (this._config.timeToLiveSeconds !== -1) {
       await this._client.expire(key, this._config.timeToLiveSeconds);

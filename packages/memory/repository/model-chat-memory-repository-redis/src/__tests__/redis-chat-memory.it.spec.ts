@@ -54,7 +54,7 @@ describe("RedisChatMemoryIT", () => {
     );
 
     // Retrieve messages
-    const messages = await chatMemory.findByConversationId(conversationId);
+    const messages = await chatMemory.get(conversationId, 10);
 
     expect(messages).toHaveLength(3);
     expect(messages[0]?.text).toBe("Hello");

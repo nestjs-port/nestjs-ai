@@ -523,7 +523,11 @@ export class RedisChatMemoryRepository
 
     // Store metadata/properties.
     if (message.metadata && Object.keys(message.metadata).length > 0) {
-      document.metadata = message.metadata as Record<string, unknown>;
+      const copiedMetadata = { ...message.metadata };
+      if ("messageType" in copiedMetadata) {
+        copiedMetadata.messageType = String(copiedMetadata.messageType);
+      }
+      document.metadata = copiedMetadata;
     }
 
     // Handle tool calls for AssistantMessage.

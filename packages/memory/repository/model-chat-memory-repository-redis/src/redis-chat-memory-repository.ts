@@ -91,7 +91,7 @@ export class RedisChatMemoryRepository
     conversationId: string,
     messageOrMessages: Message | Message[],
   ): Promise<void> {
-    assert(conversationId, "conversationId cannot be null or empty");
+    assert(conversationId != null, "conversationId cannot be null");
     assert(messageOrMessages, "message cannot be null");
 
     if (Array.isArray(messageOrMessages)) {
@@ -139,7 +139,7 @@ export class RedisChatMemoryRepository
   }
 
   async get(conversationId: string, lastN?: number): Promise<Message[]> {
-    assert(conversationId, "conversationId cannot be null or empty");
+    assert(conversationId != null, "conversationId cannot be null");
     const limit = lastN ?? this._config.maxMessagesPerConversation;
     assert(limit > 0, "lastN must be greater than 0");
 
@@ -177,7 +177,7 @@ export class RedisChatMemoryRepository
   }
 
   async clear(conversationId: string): Promise<void> {
-    assert(conversationId, "conversationId cannot be null or empty");
+    assert(conversationId != null, "conversationId cannot be null");
 
     // Build a tag field query for conversation_id.
     const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;

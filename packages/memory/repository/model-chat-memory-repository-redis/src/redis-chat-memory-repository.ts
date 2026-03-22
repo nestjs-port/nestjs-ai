@@ -145,13 +145,35 @@ export class RedisChatMemoryRepository
 
     // Build a tag field query for conversation_id.
     const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
-    const result = await this.executeSearch(query, limit);
+    const rawResult = await this._client.ft.search(
+      this._config.indexName,
+      query,
+      {
+        RETURN: ["$"],
+        SORTBY: { BY: "timestamp", DIRECTION: "ASC" },
+        LIMIT: { from: 0, size: limit },
+      },
+    );
+    const result = asSearchReply(rawResult);
+    const messages: Message[] = [];
+    for (const doc of result.documents) {
+      const json = parseSearchDocumentValue(doc.value);
+      if (!json) {
+        continue;
+      }
+      const type = asString(json.type);
+      if (!isKnownMessageType(type)) {
+        this.logger.warn(`Unknown message type: ${String(type)}`);
+        continue;
+      }
+      messages.push(this.convertJsonToMessage(json));
+    }
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        `Returning ${result.length} messages for conversation ${conversationId}`,
+        `Returning ${messages.length} messages for conversation ${conversationId}`,
       );
     }
-    return result.map((entry) => entry.message);
+    return messages;
   }
 
   async clear(conversationId: string): Promise<void> {
@@ -302,20 +324,20 @@ export class RedisChatMemoryRepository
     if (!metadataField) {
       // Field not explicitly indexed. Search in general metadata field.
       const searchPattern = `${metadataKey} ${String(metadataValue)}`;
-      query = `@metadata:${escapeTextQuery(searchPattern)}`;
+      query = `@metadata:${searchPattern}`;
     } else if ((metadataField.type ?? "text") === "numeric") {
       // Field is indexed as numeric. Use exact numeric range when possible.
       const numericValue = Number(metadataValue);
       query = Number.isFinite(numericValue)
         ? `@metadata_${metadataKey}:[${numericValue} ${numericValue}]`
         : // Fall back to text search in general metadata.
-          `@metadata:${escapeTextQuery(`${metadataKey} ${String(metadataValue)}`)}`;
+          `@metadata:${metadataKey} ${String(metadataValue)}`;
     } else if ((metadataField.type ?? "text") === "tag") {
-      // For tag fields, use tag query.
-      query = `@metadata_${metadataKey}:{${escapeTagValue(String(metadataValue))}}`;
+      // For tag fields, use tag query without escaping to mirror Java behavior.
+      query = `@metadata_${metadataKey}:{${String(metadataValue)}}`;
     } else {
       // Default text metadata query.
-      query = `@metadata_${metadataKey}:${escapeTextQuery(String(metadataValue))}`;
+      query = `@metadata_${metadataKey}:${escapeTextValue(String(metadataValue))}`;
     }
 
     return this.executeSearch(query, limit);
@@ -849,6 +871,15 @@ function parseToolResponses(value: unknown): ToolResponse[] {
     }));
 }
 
+function isKnownMessageType(value: string | null): value is string {
+  return (
+    value === MessageType.ASSISTANT.toString() ||
+    value === MessageType.USER.toString() ||
+    value === MessageType.SYSTEM.toString() ||
+    value === MessageType.TOOL.toString()
+  );
+}
+
 function parseMedia(value: unknown): Media[] {
   if (!Array.isArray(value)) {
     return [];
@@ -900,12 +931,8 @@ function escapeTagValue(value: string): string {
   return value.replaceAll(/([,.<>{}[\]"':;!@#$%^&*()\-+=~/\\| ])/g, "\\$1");
 }
 
-function escapeTextQuery(value: string): string {
-  return value
-    .trim()
-    .split(/\s+/)
-    .map((token) => token.replaceAll(/([-@{}[\]|!()~"':;,.<>/?+=\\])/g, "\\$1"))
-    .join(" ");
+function escapeTextValue(value: string): string {
+  return value.replaceAll(/([,.<>{}[\]"':;!@#$%^&*()\-+=~/\\| ])/g, "\\$1");
 }
 
 function normalizeObject(value: unknown): Record<string, unknown> {

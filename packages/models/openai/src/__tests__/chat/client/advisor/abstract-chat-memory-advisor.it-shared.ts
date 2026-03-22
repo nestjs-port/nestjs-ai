@@ -163,7 +163,7 @@ export class AbstractChatMemoryAdvisorIT {
     expect(containsIgnoringCase(answer ?? "", "New York")).toBe(true);
 
     // Verify memory contains all user messages and the response.
-    let memoryMessages = chatMemory.get(conversationId);
+    let memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(4);
     expect(memoryMessages[0]?.text).toBe("My name is John.");
     expect(memoryMessages[1]?.text).toBe("I am from New York.");
@@ -183,7 +183,7 @@ export class AbstractChatMemoryAdvisorIT {
     this._assertFollowUpResponse(followUpAnswer ?? "");
 
     // Verify memory now contains all previous messages plus the follow-up and its response.
-    memoryMessages = chatMemory.get(conversationId);
+    memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(6);
     expect(memoryMessages[4]?.text).toBe("What is my name?");
   }
@@ -221,7 +221,7 @@ export class AbstractChatMemoryAdvisorIT {
     expect(containsIgnoringCase(answer ?? "", "software engineer")).toBe(true);
 
     // Verify memory contains all user messages.
-    const memoryMessages = chatMemory.get(conversationId);
+    const memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(4);
     expect(memoryMessages[0]?.text).toBe("My name is David.");
     expect(memoryMessages[1]?.text).toBe("I work as a software engineer.");
@@ -270,7 +270,7 @@ export class AbstractChatMemoryAdvisorIT {
     expect(containsIgnoringCase(answer ?? "", "Berlin")).toBe(true);
 
     // Verify memory contains the question and answer.
-    const memoryMessages = chatMemory.get(conversationId);
+    const memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(2);
     expect(memoryMessages[0]?.text).toBe(question);
   }
@@ -309,8 +309,8 @@ export class AbstractChatMemoryAdvisorIT {
       .content();
 
     // Verify memory contains separate conversations.
-    let memoryMessages1 = chatMemory.get(conversationId1);
-    let memoryMessages2 = chatMemory.get(conversationId2);
+    let memoryMessages1 = await chatMemory.get(conversationId1);
+    let memoryMessages2 = await chatMemory.get(conversationId2);
     expect(memoryMessages1).toHaveLength(2);
     expect(memoryMessages2).toHaveLength(2);
     expect(memoryMessages1[0]?.text).toBe("My name is Alice.");
@@ -341,8 +341,8 @@ export class AbstractChatMemoryAdvisorIT {
     this._assertFollowUpResponseForName(followUpAnswer2 ?? "", "Bob");
 
     // Verify memory now contains all messages for both conversations.
-    memoryMessages1 = chatMemory.get(conversationId1);
-    memoryMessages2 = chatMemory.get(conversationId2);
+    memoryMessages1 = await chatMemory.get(conversationId1);
+    memoryMessages2 = await chatMemory.get(conversationId2);
     expect(memoryMessages1).toHaveLength(4);
     expect(memoryMessages2).toHaveLength(4);
     expect(memoryMessages1[2]?.text).toBe("What is my name?");
@@ -378,7 +378,7 @@ export class AbstractChatMemoryAdvisorIT {
     }
 
     // Assert
-    let memoryMessages = chatMemory.get(conversationId);
+    let memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(6);
     expect(memoryMessages[0]?.text).toBe("My name is Charlie.");
     expect(memoryMessages[2]?.text).toBe("I am 30 years old.");
@@ -396,7 +396,7 @@ export class AbstractChatMemoryAdvisorIT {
 
     // Assert
     this._assertReactiveFollowUpResponse(followUpAnswer ?? "");
-    memoryMessages = chatMemory.get(conversationId);
+    memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(8);
     expect(memoryMessages[6]?.text).toBe(
       "What is my name and where do I live?",
@@ -431,7 +431,7 @@ export class AbstractChatMemoryAdvisorIT {
     this._assertNonExistentConversationResponse(answer ?? "");
 
     // Verify memory now contains this message.
-    const memoryMessages = chatMemory.get(conversationId);
+    const memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(2);
     expect(memoryMessages[0]?.text).toBe(question);
   }
@@ -459,7 +459,7 @@ export class AbstractChatMemoryAdvisorIT {
     expect(completeResponse.length).toBeGreaterThan(0);
 
     // Verify memory contains the initial question and the response.
-    let memoryMessages = chatMemory.get(conversationId);
+    let memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(2);
     expect(memoryMessages[0]?.text).toBe(initialQuestion);
 
@@ -475,7 +475,7 @@ export class AbstractChatMemoryAdvisorIT {
     expect(containsIgnoringCase(followUpResponse, "Seattle")).toBe(true);
 
     // Verify memory now contains all messages.
-    memoryMessages = chatMemory.get(conversationId);
+    memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(4);
     expect(memoryMessages[0]?.text).toBe(initialQuestion);
     expect(memoryMessages[2]?.text).toBe(followUpQuestion);

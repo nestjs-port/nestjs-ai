@@ -89,7 +89,7 @@ describe.skipIf(!OPENAI_API_KEY)("MessageChatMemoryAdvisorIT", () => {
     expect((answer ?? "").toLowerCase()).toContain("software engineer");
 
     // Verify memory contains all user messages.
-    const memoryMessages = chatMemory.get(conversationId);
+    const memoryMessages = await chatMemory.get(conversationId);
     expect(memoryMessages).toHaveLength(4);
     expect(memoryMessages[0]?.text).toBe("My name is David.");
     expect(memoryMessages[1]?.text).toBe("I work as a software engineer.");
@@ -141,7 +141,7 @@ describe.skipIf(!OPENAI_API_KEY)("MessageChatMemoryAdvisorIT", () => {
     // Assert - Check that the memory contains the complete content.
     expect(streamedResponses.length).toBeGreaterThan(0);
 
-    const memoryMessages = chatMemory.get(conversationId);
+    const memoryMessages = await chatMemory.get(conversationId);
 
     // Should have at least 2 messages (user + assistant).
     expect(memoryMessages.length).toBeGreaterThanOrEqual(2);

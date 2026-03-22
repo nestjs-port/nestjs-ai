@@ -17,10 +17,13 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import {
+  FT_AGGREGATE_GROUP_BY_REDUCERS,
+  FT_AGGREGATE_STEPS,
   type RediSearchSchema,
   SCHEMA_FIELD_TYPE,
   type SearchReply,
 } from "@redis/search";
+import type { AggregateReply } from "@redis/search/dist/lib/commands/AGGREGATE";
 import { createClient, type RedisJSON } from "redis";
 import type {
   AdvancedRedisChatMemoryRepository,
@@ -100,12 +103,35 @@ export class RedisChatMemoryRepository
       let timestamp =
         await this.getNextTimestampForConversation(conversationId);
 
-      // Add each message while incrementing timestamp locally.
+      // node-redis auto-pipelines commands issued in the same tick, so this
+      // Promise.all batch is sent as a Redis pipeline.
+      const operations: Promise<unknown>[] = [];
       for (const message of messageOrMessages) {
         assert(message, "message cannot be null");
-        await this.addSingle(conversationId, message, timestamp);
+        const key = this.createKey(conversationId, timestamp);
+        const document = this.createMessageDocument(
+          conversationId,
+          message,
+          timestamp,
+        );
+
+        if (this.logger.isDebugEnabled()) {
+          this.logger.debug(
+            `Storing batch message with key: ${key}, type: ${message.messageType}, content: ${message.text}`,
+          );
+        }
+
+        operations.push(
+          this._client.json.set(key, "$", document as unknown as RedisJSON),
+        );
+        if (this._config.timeToLiveSeconds !== -1) {
+          operations.push(
+            this._client.expire(key, this._config.timeToLiveSeconds),
+          );
+        }
         timestamp += 1;
       }
+      await Promise.all(operations);
       return;
     }
 
@@ -133,91 +159,76 @@ export class RedisChatMemoryRepository
 
     // Build a tag field query for conversation_id.
     const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
-    const keys = await this.findKeysForQuery(query, 5000);
+    const rawResult = await this._client.ft.search(
+      this._config.indexName,
+      query,
+    );
+    const result = asSearchReply(rawResult);
+    const keys = result.documents.map((doc) => doc.id);
     if (keys.length === 0) {
-      if (this.logger.isDebugEnabled()) {
-        this.logger.debug(
-          `No messages to clear for conversation ${conversationId}`,
-        );
-      }
       return;
     }
 
-    const multi = this._client.multi();
-    for (const key of keys) {
-      multi.del(key);
-    }
-    await multi.exec();
-
-    if (this.logger.isDebugEnabled()) {
-      this.logger.debug(
-        `Cleared ${keys.length} messages for conversation ${conversationId}`,
-      );
-    }
+    // node-redis auto-pipelines commands issued in the same tick, so this
+    // Promise.all batch is sent as a Redis pipeline.
+    await Promise.all(keys.map((key) => this._client.del(key)));
   }
 
   async findConversationIds(): Promise<string[]> {
-    // Fetch conversation ids ordered by latest timestamp and deduplicate client-side.
-    const rawResult = await this._client.ft.search(
-      this._config.indexName,
-      "*",
-      {
-        RETURN: ["conversation_id"],
-        SORTBY: { BY: "timestamp", DIRECTION: "DESC" },
-        LIMIT: { from: 0, size: 5000 },
-      },
+    const aggregateReply = asAggregateReply(
+      await this._client.ft.aggregate(this._config.indexName, "*", {
+        STEPS: [
+          {
+            type: FT_AGGREGATE_STEPS.GROUPBY,
+            properties: ["@conversation_id"],
+            REDUCE: {
+              type: FT_AGGREGATE_GROUP_BY_REDUCERS.COUNT,
+              AS: "count",
+            },
+          },
+          {
+            type: FT_AGGREGATE_STEPS.LIMIT,
+            from: 0,
+            size: this._config.maxConversationIds,
+          },
+        ],
+      }),
     );
-    const result = asSearchReply(rawResult);
-
-    const ids = new Set<string>();
-    for (const document of result.documents) {
-      const raw = (document.value as Record<string, unknown>).conversation_id;
-      if (typeof raw === "string" && raw.length > 0) {
-        ids.add(raw);
-      }
-      if (ids.size >= this._config.maxConversationIds) {
-        break;
-      }
-    }
-
-    const conversationIds = [...ids];
     if (this.logger.isDebugEnabled()) {
       this.logger.debug(
-        `Found ${conversationIds.length} conversation ids (max ${this._config.maxConversationIds})`,
+        `Found ${aggregateReply.results.length} conversation ids using Redis aggregation`,
       );
     }
-    return conversationIds;
+    return aggregateReply.results
+      .map((row) =>
+        asString((row as unknown as Record<string, unknown>).conversation_id),
+      )
+      .filter(
+        (conversationId): conversationId is string =>
+          typeof conversationId === "string" && conversationId.length > 0,
+      );
   }
 
   async findByConversationId(conversationId: string): Promise<Message[]> {
-    assert(conversationId, "conversationId cannot be null or empty");
-
-    // Reuse the configured max messages limit for conversation lookups.
-    const query = `@conversation_id:{${escapeTagValue(conversationId)}}`;
-    const result = await this.executeSearch(
-      query,
-      this._config.maxMessagesPerConversation,
-    );
-
-    return result.map((entry) => entry.message);
+    // Reuse existing get method with the configured limit
+    return this.get(conversationId, this._config.maxMessagesPerConversation);
   }
 
   async saveAll(conversationId: string, messages: Message[]): Promise<void> {
-    assert(conversationId, "conversationId cannot be null or empty");
-    assert(messages, "messages cannot be null");
+    // First clear any existing messages for this conversation
+    await this.clear(conversationId);
 
-    // First clear any existing messages for this conversation.
-    await this.deleteByConversationId(conversationId);
-
-    // Then add all the new messages.
-    for (const message of messages) {
-      await this.add(conversationId, message);
-    }
+    // Then add all the new messages
+    await this.add(conversationId, messages);
   }
 
   async deleteByConversationId(conversationId: string): Promise<void> {
     // Reuse existing clear method.
     await this.clear(conversationId);
+  }
+
+  get indexName() {
+    return this._config.indexName;
   }
 
   async findByContent(
@@ -227,8 +238,9 @@ export class RedisChatMemoryRepository
     assert(contentPattern, "contentPattern cannot be null or empty");
     assert(limit > 0, "limit must be greater than 0");
 
-    // Create a text field query. Keep token escaping for RediSearch syntax safety.
-    const query = `@content:${escapeTextQuery(contentPattern)}`;
+    // Note: We don't escape the contentPattern here because Redis full-text search
+    // should handle the special characters appropriately in text fields
+    const query = `@content:${contentPattern}`;
     return this.executeSearch(query, limit);
   }
 
@@ -592,43 +604,33 @@ export class RedisChatMemoryRepository
     return Array.isArray(candidate.media);
   }
 
-  private async findKeysForQuery(
-    query: string,
-    limit: number,
-  ): Promise<string[]> {
-    const rawResult = await this._client.ft.search(
-      this._config.indexName,
-      query,
-      {
-        LIMIT: { from: 0, size: limit },
-      },
-    );
-    const result = asSearchReply(rawResult);
-    return result.documents.map((doc) => doc.id);
-  }
-
   private async executeSearch(
     query: string,
     limit: number,
   ): Promise<MessageWithConversation[]> {
-    const rawResult = await this._client.ft.search(
-      this._config.indexName,
-      query,
-      {
-        RETURN: ["$"],
-        SORTBY: { BY: "timestamp", DIRECTION: "ASC" },
-        LIMIT: { from: 0, size: limit },
-      },
-    );
-    const result = asSearchReply(rawResult);
-
-    const processed = this.processSearchResult(result);
-    if (this.logger.isDebugEnabled()) {
-      this.logger.debug(
-        `Executed query '${query}' with limit ${limit}, returned ${processed.length} results`,
+    try {
+      const rawResult = await this._client.ft.search(
+        this._config.indexName,
+        query,
+        {
+          RETURN: ["$"],
+          SORTBY: { BY: "timestamp", DIRECTION: "ASC" },
+          LIMIT: { from: 0, size: limit },
+        },
       );
+      const result = asSearchReply(rawResult);
+
+      const processed = this.processSearchResult(result);
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug(
+          `Executed query '${query}' with limit ${limit}, returned ${processed.length} results`,
+        );
+      }
+      return processed;
+    } catch (error) {
+      this.logger.error(`Error executing query '${query}'`, error);
+      return [];
     }
-    return processed;
   }
 
   private processSearchResult(result: SearchReply): MessageWithConversation[] {
@@ -656,9 +658,19 @@ export class RedisChatMemoryRepository
       });
     }
 
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(`Search returned ${messages.length} messages`);
+    }
+
     return messages;
   }
 
+  /**
+   * Converts a JSON object to a Message instance. This is a helper method for the
+   * advanced query operations to convert Redis JSON documents back to Message objects.
+   * @param doc The JSON object representing a message
+   * @return A Message object of the appropriate type
+   */
   private convertJsonToMessage(doc: Record<string, unknown>): Message {
     const type = asString(doc.type);
     const content = asString(doc.content);
@@ -981,5 +993,22 @@ function asSearchReply(value: unknown): SearchReply {
   return {
     total: 0,
     documents: [],
+  };
+}
+
+function asAggregateReply(value: unknown): AggregateReply {
+  if (
+    value &&
+    typeof value === "object" &&
+    "total" in value &&
+    "results" in value &&
+    Array.isArray((value as Record<string, unknown>).results)
+  ) {
+    return value as AggregateReply;
+  }
+
+  return {
+    total: 0,
+    results: [],
   };
 }

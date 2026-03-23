@@ -1,7 +1,8 @@
 import { SCHEMA_FIELD_TYPE } from "@redis/search";
 
+export const RedisMetadataFieldType = SCHEMA_FIELD_TYPE;
 export type RedisMetadataFieldType =
-  (typeof SCHEMA_FIELD_TYPE)[keyof typeof SCHEMA_FIELD_TYPE];
+  (typeof RedisMetadataFieldType)[keyof typeof RedisMetadataFieldType];
 
 export class RedisMetadataField {
   private constructor(

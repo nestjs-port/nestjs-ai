@@ -329,6 +329,28 @@ importers:
         specifier: workspace:*
         version: link:../model
 
+  packages/vector-stores/redis-store:
+    dependencies:
+      '@redis/json':
+        specifier: ^5.11.0
+        version: 5.11.0(@redis/client@5.11.0)
+      '@redis/search':
+        specifier: ^5.11.0
+        version: 5.11.0(@redis/client@5.11.0)
+      redis:
+        specifier: ^5.11.0
+        version: 5.11.0
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../model
+      '@nestjs-ai/vector-store':
+        specifier: workspace:*
+        version: link:../../vector-store
+
 packages:
 
   '@antora/asciidoc-loader@3.1.14':

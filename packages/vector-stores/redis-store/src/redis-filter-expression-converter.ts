@@ -34,7 +34,7 @@ class NumericBoundary {
     readonly exclusive: boolean,
   ) {}
 
-  toString(): string {
+  [Symbol.toPrimitive](): string {
     if (this === NumericBoundary.NEGATIVE_INFINITY) {
       return NumericBoundary.MINUS_INFINITY;
     }
@@ -72,14 +72,6 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
     context.value += ")";
   }
 
-  protected override doNot(
-    expression: Filter.Expression,
-    context: { value: string },
-  ): void {
-    context.value += "-";
-    this.convertOperandToContext(expression.left, context);
-  }
-
   protected override doKey(
     filterKey: Filter.Key,
     context: { value: string },
@@ -111,7 +103,8 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
         this.doBinaryOperation(" | ", expression, context);
         break;
       case Filter.ExpressionType.NOT:
-        this.doNot(expression, context);
+        context.value += "-";
+        this.convertOperandToContext(expression.left, context);
         break;
       default:
         this.doField(expression, context);

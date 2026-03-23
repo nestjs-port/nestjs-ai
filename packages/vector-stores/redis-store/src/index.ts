@@ -1,7 +1,10 @@
+export { RedisFilterExpressionConverter } from "./redis-filter-expression-converter";
 export {
-  RedisDistanceMetric,
   RedisMetadataField,
   RedisMetadataFieldType,
+} from "./redis-metadata-field";
+export {
+  RedisDistanceMetric,
   RedisTextScorer,
   RedisVectorAlgorithm,
   RedisVectorStore,

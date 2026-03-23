@@ -14,6 +14,8 @@ import {
 } from "@nestjs-ai/vector-store";
 import type { RedisClientType } from "redis";
 
+import type { RedisMetadataField } from "./redis-metadata-field";
+
 export enum RedisVectorAlgorithm {
   FLAT = "FLAT",
   HNSW = "HNSW",
@@ -31,31 +33,6 @@ export enum RedisTextScorer {
   BM25STD = "BM25STD",
   DISMAX = "DISMAX",
   DOCSCORE = "DOCSCORE",
-}
-
-export enum RedisMetadataFieldType {
-  TEXT = "TEXT",
-  TAG = "TAG",
-  NUMERIC = "NUMERIC",
-}
-
-export class RedisMetadataField {
-  private constructor(
-    public readonly name: string,
-    public readonly fieldType: RedisMetadataFieldType,
-  ) {}
-
-  static text(name: string): RedisMetadataField {
-    return new RedisMetadataField(name, RedisMetadataFieldType.TEXT);
-  }
-
-  static numeric(name: string): RedisMetadataField {
-    return new RedisMetadataField(name, RedisMetadataFieldType.NUMERIC);
-  }
-
-  static tag(name: string): RedisMetadataField {
-    return new RedisMetadataField(name, RedisMetadataFieldType.TAG);
-  }
 }
 
 export class RedisVectorStore extends AbstractObservationVectorStore {

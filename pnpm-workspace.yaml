@@ -1,5 +1,6 @@
 packages:
   - 'packages/*'
+  - 'packages/vector-stores/*'
   - 'packages/memory/repository/*'
   - 'packages/models/*'
   - 'packages/advisors/*'

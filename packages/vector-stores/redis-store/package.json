@@ -1,0 +1,35 @@
+{
+  "name": "@nestjs-ai/vector-store-redis",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Redis vector store for NestJS AI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/model": "*",
+    "@nestjs-ai/vector-store": "*"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*"
+  },
+  "dependencies": {
+    "@redis/json": "^5.11.0",
+    "@redis/search": "^5.11.0",
+    "redis": "^5.11.0"
+  }
+}

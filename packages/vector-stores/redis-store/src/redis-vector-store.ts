@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import type { OnModuleInit } from "@nestjs/common";
 import {
   Document,
   DocumentMetadata,
@@ -50,7 +51,10 @@ export enum RedisTextScorer {
   DOCSCORE = "DOCSCORE",
 }
 
-export class RedisVectorStore extends AbstractObservationVectorStore {
+export class RedisVectorStore
+  extends AbstractObservationVectorStore
+  implements OnModuleInit
+{
   static readonly DEFAULT_INDEX_NAME = "spring-ai-index";
   static readonly DEFAULT_CONTENT_FIELD_NAME = "content";
   static readonly DEFAULT_EMBEDDING_FIELD_NAME = "embedding";
@@ -79,7 +83,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   private readonly _filterExpressionConverter: RedisFilterExpressionConverter;
 
   private _schemaInitialized = false;
-  private _schemaInitializationPromise: Promise<void> | null = null;
 
   constructor(builder: RedisVectorStoreBuilder) {
     super({
@@ -130,6 +133,32 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     return this._redisClient as T;
   }
 
+  async onModuleInit(): Promise<void> {
+    if (!this._initializeSchema || this._schemaInitialized) {
+      return;
+    }
+
+    const existingIndexes = new Set(await this._redisClient.ft._list());
+    if (existingIndexes.has(this._indexName)) {
+      this._schemaInitialized = true;
+      return;
+    }
+
+    const schema = await this.createSchema();
+    const response = await this._redisClient.ft.create(
+      this._indexName,
+      schema,
+      {
+        ON: "JSON",
+        PREFIX: this._prefix,
+      },
+    );
+    if (response !== "OK") {
+      throw new Error(`Could not create index: ${String(response)}`);
+    }
+    this._schemaInitialized = true;
+  }
+
   async count(): Promise<number>;
   async count(filterExpression: string): Promise<number>;
   async count(filterExpression: Filter.Expression): Promise<number>;
@@ -168,7 +197,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     filterExpression?: string | null,
   ): Promise<Document[]> {
     assert(query != null, "Query must not be null");
-    await this.ensureSchemaInitialized();
 
     let radius: number;
     let resolvedFilter: string | null = null;
@@ -258,7 +286,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     assert(query != null, "Query must not be null");
     assert(textField != null, "Text field must not be null");
     assert(limit > 0, "Limit must be greater than zero");
-    await this.ensureSchemaInitialized();
     this.validateTextField(textField);
 
     const escapedQuery = this.escapeSpecialCharacters(query);
@@ -311,7 +338,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   protected override async doAdd(documents: Document[]): Promise<void> {
-    await this.ensureSchemaInitialized();
     const embeddings = (await this._embeddingModel.embed(
       documents,
       EmbeddingOptions.builder().build(),
@@ -343,7 +369,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   protected override async doDelete(idList: string[]): Promise<void> {
-    await this.ensureSchemaInitialized();
     await Promise.all(
       idList.map((id) => this._redisClient.json.del(this.key(id))),
     );
@@ -353,7 +378,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     filterExpression: Filter.Expression,
   ): Promise<void> {
     assert(filterExpression != null, "Filter expression must not be null");
-    await this.ensureSchemaInitialized();
 
     const filterString =
       this._filterExpressionConverter.convertExpression(filterExpression);
@@ -389,7 +413,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   protected override async doSimilaritySearch(
     request: SearchRequest,
   ): Promise<Document[]> {
-    await this.ensureSchemaInitialized();
     assert(
       request.topK > 0,
       "The number of documents to be returned must be greater than zero",
@@ -461,7 +484,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   private async executeCountQuery(filterExpression: string): Promise<number> {
-    await this.ensureSchemaInitialized();
     const rawResult = await this._redisClient.ft.search(
       this._indexName,
       filterExpression,
@@ -541,44 +563,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       return "*";
     }
     return `(${this._filterExpressionConverter.convertExpression(request.filterExpression)})`;
-  }
-
-  private async ensureSchemaInitialized(): Promise<void> {
-    if (!this._initializeSchema || this._schemaInitialized) {
-      return;
-    }
-    if (this._schemaInitializationPromise != null) {
-      await this._schemaInitializationPromise;
-      return;
-    }
-
-    this._schemaInitializationPromise = (async () => {
-      const existingIndexes = new Set(await this._redisClient.ft._list());
-      if (existingIndexes.has(this._indexName)) {
-        this._schemaInitialized = true;
-        return;
-      }
-
-      const schema = await this.createSchema();
-      const response = await this._redisClient.ft.create(
-        this._indexName,
-        schema,
-        {
-          ON: "JSON",
-          PREFIX: this._prefix,
-        },
-      );
-      if (response !== "OK") {
-        throw new Error(`Could not create index: ${String(response)}`);
-      }
-      this._schemaInitialized = true;
-    })();
-
-    try {
-      await this._schemaInitializationPromise;
-    } finally {
-      this._schemaInitializationPromise = null;
-    }
   }
 
   private async createSchema(): Promise<RediSearchSchema> {

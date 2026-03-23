@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import type { OnModuleInit } from "@nestjs/common";
 import {
   Document,
   DocumentMetadata,
@@ -51,10 +50,7 @@ export enum RedisTextScorer {
   DOCSCORE = "DOCSCORE",
 }
 
-export class RedisVectorStore
-  extends AbstractObservationVectorStore
-  implements OnModuleInit
-{
+export class RedisVectorStore extends AbstractObservationVectorStore {
   static readonly DEFAULT_INDEX_NAME = "spring-ai-index";
   static readonly DEFAULT_CONTENT_FIELD_NAME = "content";
   static readonly DEFAULT_EMBEDDING_FIELD_NAME = "embedding";

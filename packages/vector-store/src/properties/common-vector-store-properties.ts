@@ -1,7 +1,7 @@
 export class CommonVectorStoreProperties {
   private _initializeSchema = false;
 
-  get initializeSchema(): boolean {
+  get isInitializeSchema(): boolean {
     return this._initializeSchema;
   }
 

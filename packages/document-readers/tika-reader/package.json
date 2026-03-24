@@ -22,6 +22,6 @@
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
-    "testcontainers": "^11.12.0"
+    "testcontainers": "^11.13.0"
   }
 }

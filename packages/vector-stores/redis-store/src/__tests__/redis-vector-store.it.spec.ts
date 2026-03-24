@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { Document } from "@nestjs-ai/commons";
 import {
   DocumentMetadata,
@@ -10,21 +12,69 @@ import {
   EmbeddingResponse,
 } from "@nestjs-ai/model";
 import { Filter, SearchRequest } from "@nestjs-ai/vector-store";
+import {
+  RedisContainer,
+  type StartedRedisContainer,
+} from "@testcontainers/redis";
 import { createClient } from "redis";
-// @ts-expect-error - testcontainers is available at runtime via the workspace, but this
-// package does not declare its type dependency.
-import { GenericContainer, type StartedTestContainer } from "testcontainers";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { RedisMetadataField } from "../redis-metadata-field";
 import { RedisVectorStore } from "../redis-vector-store";
 
-const SPRING_AI_TEXT =
-  "The Spring AI project aims to streamline the development of applications that incorporate artificial intelligence functionality without unnecessary complexity. At its core, Spring AI provides abstractions that serve as the foundation for developing AI applications. These abstractions have multiple implementations, enabling easy component swapping with minimal code changes.";
-const TIME_SHELTER_TEXT =
-  "Somewhere in the Andes, they believe in this very day that the future is behind you. It comes up from behind your back, surprising and unforeseeable, while the past is always before your eyes, that which has already happened. When they talk about the past, the people of the Aymara tribe point in front of them. You walk forward facing the past, and you turn back toward the future. ― Georgi Gospodinov, Time Shelter";
-const GREAT_DEPRESSION_TEXT =
-  "The Great Depression (1929–1939) was an economic shock that affected most countries across the world. It was a period of economic depression that became evident after a major fall in stock prices in the United States.";
+const readTestData = (fileName: string): string =>
+  readFileSync(resolve(__dirname, fileName), "utf8");
+
+const createRedisVectorStoreDocuments = (): Document[] => [
+  new VectorDocument("1", readTestData("spring.ai.txt"), { meta1: "meta1" }),
+  new VectorDocument("2", readTestData("time.shelter.txt"), {}),
+  new VectorDocument("3", readTestData("great.depression.txt"), {
+    meta2: "meta2",
+  }),
+];
+
+const createRedisVectorStoreFilterDocuments = (): {
+  bgDocument: Document;
+  nlDocument: Document;
+  bgDocument2: Document;
+} => ({
+  bgDocument: new VectorDocument(
+    "The World is Big and Salvation Lurks Around the Corner",
+    { country: "BG", year: 2020 },
+  ),
+  nlDocument: new VectorDocument(
+    "The World is Big and Salvation Lurks Around the Corner",
+    { country: "NL" },
+  ),
+  bgDocument2: new VectorDocument(
+    "The World is Big and Salvation Lurks Around the Corner",
+    { country: "BG", year: 2023 },
+  ),
+});
+
+const createRedisVectorStoreUpdateDocuments = (): {
+  document: Document;
+  sameIdDocument: Document;
+} => {
+  const document = new VectorDocument("d-1", "Spring AI rocks!!", {
+    meta1: "meta1",
+  });
+
+  return {
+    document,
+    sameIdDocument: new VectorDocument(
+      document.id,
+      "The World is Big and Salvation Lurks Around the Corner",
+      { meta2: "meta2" },
+    ),
+  };
+};
+
+const createRedisVectorStoreDeleteDocuments = (): Document[] => [
+  new VectorDocument("Content 1", { type: "A", priority: 1 }),
+  new VectorDocument("Content 2", { type: "A", priority: 2 }),
+  new VectorDocument("Content 3", { type: "B", priority: 1 }),
+];
 
 type RedisClient = ReturnType<typeof createClient>;
 
@@ -69,34 +119,17 @@ class MockEmbeddingModel extends EmbeddingModel {
 }
 
 describe("RedisVectorStoreIT", () => {
-  let redisContainer: StartedTestContainer | null = null;
+  let redisContainer: StartedRedisContainer | null = null;
   let client: RedisClient | null = null;
   let vectorStore: RedisVectorStore;
 
-  const documents = [
-    VectorDocument.builder()
-      .id("1")
-      .text(SPRING_AI_TEXT)
-      .metadata({ meta1: "meta1" })
-      .build(),
-    VectorDocument.builder()
-      .id("2")
-      .text(TIME_SHELTER_TEXT)
-      .metadata({})
-      .build(),
-    VectorDocument.builder()
-      .id("3")
-      .text(GREAT_DEPRESSION_TEXT)
-      .metadata({ meta2: "meta2" })
-      .build(),
-  ];
+  const documents = createRedisVectorStoreDocuments();
 
   beforeAll(async () => {
-    redisContainer = await new GenericContainer("redis/redis-stack:latest")
-      .withExposedPorts(6379)
-      .start();
-
-    const redisUrl = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
+    redisContainer = await new RedisContainer(
+      "redis/redis-stack:latest",
+    ).start();
+    const redisUrl = redisContainer.getConnectionUrl();
     client = createClient({ url: redisUrl });
     await client.connect();
   }, 120_000);
@@ -170,18 +203,8 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("searchWithFilters", async () => {
-    const bgDocument = VectorDocument.builder()
-      .text("The World is Big and Salvation Lurks Around the Corner")
-      .metadata({ country: "BG", year: 2020 })
-      .build();
-    const nlDocument = VectorDocument.builder()
-      .text("The World is Big and Salvation Lurks Around the Corner")
-      .metadata({ country: "NL" })
-      .build();
-    const bgDocument2 = VectorDocument.builder()
-      .text("The World is Big and Salvation Lurks Around the Corner")
-      .metadata({ country: "BG", year: 2023 })
-      .build();
+    const { bgDocument, nlDocument, bgDocument2 } =
+      createRedisVectorStoreFilterDocuments();
 
     await vectorStore.add([bgDocument, nlDocument, bgDocument2]);
 
@@ -240,11 +263,8 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("documentUpdate", async () => {
-    const document = VectorDocument.builder()
-      .id("d-1")
-      .text("Spring AI rocks!!")
-      .metadata({ meta1: "meta1" })
-      .build();
+    const { document, sameIdDocument } =
+      createRedisVectorStoreUpdateDocuments();
 
     await vectorStore.add([document]);
 
@@ -260,12 +280,6 @@ describe("RedisVectorStoreIT", () => {
       RedisVectorStore.DISTANCE_FIELD_NAME,
     );
     expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
-
-    const sameIdDocument = VectorDocument.builder()
-      .id(document.id)
-      .text("The World is Big and Salvation Lurks Around the Corner")
-      .metadata({ meta2: "meta2" })
-      .build();
 
     await vectorStore.add([sameIdDocument]);
 
@@ -325,18 +339,7 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("deleteWithComplexFilterExpression", async () => {
-    const doc1 = VectorDocument.builder()
-      .text("Content 1")
-      .metadata({ type: "A", priority: 1 })
-      .build();
-    const doc2 = VectorDocument.builder()
-      .text("Content 2")
-      .metadata({ type: "A", priority: 2 })
-      .build();
-    const doc3 = VectorDocument.builder()
-      .text("Content 3")
-      .metadata({ type: "B", priority: 1 })
-      .build();
+    const [doc1, doc2, doc3] = createRedisVectorStoreDeleteDocuments();
 
     await vectorStore.add([doc1, doc2, doc3]);
 

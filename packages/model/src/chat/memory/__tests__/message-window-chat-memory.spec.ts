@@ -46,13 +46,13 @@ describe("MessageWindowChatMemory", () => {
       new UserMessage({ content: "Hello" }),
     ];
 
-    chatMemory.add(conversationId, messages);
+    await chatMemory.add(conversationId, messages);
 
     expect(summarizeMessages(await chatMemory.get(conversationId))).toEqual(
       summarizeMessages(messages),
     );
 
-    chatMemory.clear(conversationId);
+    await chatMemory.clear(conversationId);
 
     expect(await chatMemory.get(conversationId)).toEqual([]);
   });
@@ -64,18 +64,18 @@ describe("MessageWindowChatMemory", () => {
     const conversationId = randomUUID();
     const message = new UserMessage({ content: "Hello" });
 
-    chatMemory.add(conversationId, message);
+    await chatMemory.add(conversationId, message);
 
     expect(summarizeMessages(await chatMemory.get(conversationId))).toEqual(
       summarizeMessages([message]),
     );
 
-    chatMemory.clear(conversationId);
+    await chatMemory.clear(conversationId);
 
     expect(await chatMemory.get(conversationId)).toEqual([]);
   });
 
-  it("null conversation id not allowed", () => {
+  it("null conversation id not allowed", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -102,7 +102,7 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("empty conversation id not allowed", () => {
+  it("empty conversation id not allowed", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -124,7 +124,7 @@ describe("MessageWindowChatMemory", () => {
     );
   });
 
-  it("null messages not allowed", () => {
+  it("null messages not allowed", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -135,7 +135,7 @@ describe("MessageWindowChatMemory", () => {
     ).toThrow("message cannot be null");
   });
 
-  it("null message not allowed", () => {
+  it("null message not allowed", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -146,7 +146,7 @@ describe("MessageWindowChatMemory", () => {
     ).toThrow("message cannot be null");
   });
 
-  it("messages with null elements not allowed", () => {
+  it("messages with null elements not allowed", async () => {
     const chatMemory = new MessageWindowChatMemory({
       chatMemoryRepository: new InMemoryChatMemoryRepository(),
     });
@@ -172,7 +172,7 @@ describe("MessageWindowChatMemory", () => {
       new UserMessage({ content: "Message 3" }),
     ];
 
-    customChatMemory.add(conversationId, messages);
+    await customChatMemory.add(conversationId, messages);
     const result = await customChatMemory.get(conversationId);
 
     expect(result).toHaveLength(2);
@@ -185,11 +185,11 @@ describe("MessageWindowChatMemory", () => {
     });
 
     const conversationId = randomUUID();
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "Hello" }),
       new AssistantMessage({ content: "Hi there" }),
     ]);
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "How are you?" }),
     ]);
 
@@ -212,11 +212,11 @@ describe("MessageWindowChatMemory", () => {
     });
 
     const conversationId = randomUUID();
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "Message 1" }),
       new AssistantMessage({ content: "Response 1" }),
     ]);
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "Message 2" }),
       new AssistantMessage({ content: "Response 2" }),
     ]);
@@ -239,12 +239,12 @@ describe("MessageWindowChatMemory", () => {
     });
 
     const conversationId = randomUUID();
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new SystemMessage({ content: "System instruction" }),
       new UserMessage({ content: "Message 1" }),
       new AssistantMessage({ content: "Response 1" }),
     ]);
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "Message 2" }),
       new AssistantMessage({ content: "Response 2" }),
     ]);
@@ -268,13 +268,13 @@ describe("MessageWindowChatMemory", () => {
     });
 
     const conversationId = randomUUID();
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new SystemMessage({ content: "System instruction 1" }),
       new SystemMessage({ content: "System instruction 2" }),
       new UserMessage({ content: "Message 1" }),
       new AssistantMessage({ content: "Response 1" }),
     ]);
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "Message 2" }),
       new AssistantMessage({ content: "Response 2" }),
     ]);
@@ -309,11 +309,11 @@ describe("MessageWindowChatMemory", () => {
     });
 
     const conversationId = randomUUID();
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new SystemMessage({ content: "System instruction 1" }),
       new SystemMessage({ content: "System instruction 2" }),
     ]);
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new SystemMessage({ content: "System instruction 3" }),
     ]);
 
@@ -334,11 +334,11 @@ describe("MessageWindowChatMemory", () => {
     });
 
     const conversationId = randomUUID();
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new SystemMessage({ content: "System instruction 1" }),
       new SystemMessage({ content: "System instruction 2" }),
     ]);
-    customChatMemory.add(conversationId, [
+    await customChatMemory.add(conversationId, [
       new UserMessage({ content: "Message 1" }),
       new AssistantMessage({ content: "Response 1" }),
     ]);

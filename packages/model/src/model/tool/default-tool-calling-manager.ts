@@ -15,9 +15,7 @@ import {
   ToolResponseMessage,
 } from "../../chat";
 import {
-  DefaultToolCallingObservationConvention,
   DefaultToolExecutionExceptionProcessor,
-  DelegatingToolCallbackResolver,
   type ToolCallback,
   type ToolCallbackResolver,
   ToolCallingObservationContext,
@@ -27,6 +25,10 @@ import {
   ToolExecutionException,
   type ToolExecutionExceptionProcessor,
 } from "../../tool";
+// Import these directly to avoid the barrel re-export cycle through `../../tool`,
+// which can leave these constructors half-initialized during module evaluation.
+import { DefaultToolCallingObservationConvention } from "../../tool/observation/default-tool-calling-observation-convention";
+import { DelegatingToolCallbackResolver } from "../../tool/resolution/delegating-tool-callback-resolver";
 import { DefaultToolExecutionResult } from "./default-tool-execution-result";
 import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
 import type { ToolCallingManager } from "./tool-calling-manager.interface";

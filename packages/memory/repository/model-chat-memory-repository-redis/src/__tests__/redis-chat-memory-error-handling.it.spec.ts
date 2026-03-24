@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { type Message, UserMessage } from "@nestjs-ai/model";
+import {
+  RedisContainer,
+  type StartedRedisContainer,
+} from "@testcontainers/redis";
 import { createClient } from "redis";
-import { GenericContainer, type StartedTestContainer } from "testcontainers";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { RedisChatMemoryConfig } from "../redis-chat-memory-config";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
@@ -10,15 +13,15 @@ const sleep = async (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("RedisChatMemoryErrorHandlingIT", () => {
-  let redisContainer: StartedTestContainer | null = null;
+  let redisContainer: StartedRedisContainer | null = null;
   let client: ReturnType<typeof createClient>;
   let chatMemory: RedisChatMemoryRepository;
 
   beforeAll(async () => {
-    redisContainer = await new GenericContainer("redis/redis-stack:latest")
-      .withExposedPorts(6379)
-      .start();
-    const redisUrl = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
+    redisContainer = await new RedisContainer(
+      "redis/redis-stack:latest",
+    ).start();
+    const redisUrl = redisContainer.getConnectionUrl();
 
     client = createClient({ url: redisUrl });
     await client.connect();

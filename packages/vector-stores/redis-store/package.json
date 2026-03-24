@@ -25,7 +25,8 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
-    "@nestjs-ai/vector-store": "workspace:*"
+    "@nestjs-ai/vector-store": "workspace:*",
+    "testcontainers": "^11.13.0"
   },
   "dependencies": {
     "@redis/json": "^5.11.0",

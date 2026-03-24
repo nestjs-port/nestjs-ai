@@ -6,6 +6,15 @@ import { PromptMetadata } from "./prompt-metadata";
 import type { RateLimit } from "./rate-limit";
 import type { Usage } from "./usage";
 
+export interface ChatResponseMetadataProps {
+  id?: string;
+  model?: string;
+  rateLimit?: RateLimit;
+  usage?: Usage;
+  promptMetadata?: PromptMetadata;
+  metadata?: Record<string, unknown>;
+}
+
 /**
  * Models common AI provider metadata returned in an AI response.
  */
@@ -13,10 +22,6 @@ export class ChatResponseMetadata
   extends AbstractResponseMetadata
   implements ResponseMetadata
 {
-  private static readonly logger = LoggerFactory.getLogger(
-    ChatResponseMetadata.name,
-  );
-
   protected _id: string = ""; // Set to blank to preserve backward compat with previous interface default methods
 
   protected _model: string = "";
@@ -27,12 +32,30 @@ export class ChatResponseMetadata
 
   protected _promptMetadata: PromptMetadata = PromptMetadata.empty();
 
+  constructor(props: ChatResponseMetadataProps = {}) {
+    super();
+    this._id = "id" in props ? (props.id ?? "") : "";
+    this._model = "model" in props ? (props.model ?? "") : "";
+    this._rateLimit =
+      "rateLimit" in props
+        ? (props.rateLimit as RateLimit)
+        : new EmptyRateLimit();
+    this._usage = "usage" in props ? (props.usage as Usage) : new EmptyUsage();
+    this._promptMetadata =
+      "promptMetadata" in props
+        ? (props.promptMetadata as PromptMetadata)
+        : PromptMetadata.empty();
+    for (const [key, value] of Object.entries(props.metadata ?? {})) {
+      this.map.set(key, value);
+    }
+  }
+
   /**
    * Create a new Builder instance.
    *
    * @returns a new Builder instance
    */
-  static builder() {
+  static builder(): ChatResponseMetadata.Builder {
     return new ChatResponseMetadata.Builder();
   }
 
@@ -82,112 +105,72 @@ export class ChatResponseMetadata
   get promptMetadata(): PromptMetadata {
     return this._promptMetadata;
   }
+}
 
-  public static Builder = class ChatResponseMetadataBuilder {
-    readonly #chatResponseMetadata: ChatResponseMetadata;
+export namespace ChatResponseMetadata {
+  const logger = LoggerFactory.getLogger(ChatResponseMetadata.name);
 
-    /**
-     * Create a new Builder instance.
-     */
-    constructor() {
-      this.#chatResponseMetadata = new ChatResponseMetadata();
-    }
+  export class Builder {
+    private _id = "";
+    private _model = "";
+    private _rateLimit: RateLimit = new EmptyRateLimit();
+    private _usage: Usage = new EmptyUsage();
+    private _promptMetadata: PromptMetadata = PromptMetadata.empty();
+    private readonly _metadata: Record<string, unknown> = {};
 
-    /**
-     * Add metadata to the response metadata.
-     *
-     * @param metadata - the metadata map to copy
-     * @returns this builder for method chaining
-     */
     metadata(metadata: Record<string, unknown>): this {
       for (const [key, value] of Object.entries(metadata)) {
-        this.#chatResponseMetadata.map.set(key, value);
+        this._metadata[key] = value;
       }
       return this;
     }
 
-    /**
-     * Add a key-value pair to the metadata.
-     *
-     * @param key - the metadata key (must not be null)
-     * @param value - the metadata value (null values are ignored)
-     * @returns this builder for method chaining
-     * @throws {Error} if key is null
-     */
     keyValue(key: string, value: unknown): this {
       if (key === null) {
         throw new Error("Key must not be null");
       }
       if (value != null) {
-        this.#chatResponseMetadata.map.set(key, value);
+        this._metadata[key] = value;
       } else {
-        ChatResponseMetadata.logger.debug(`Ignore null value for key [${key}]`);
+        logger.debug(`Ignore null value for key [${key}]`);
       }
       return this;
     }
 
-    /**
-     * Set the response ID.
-     *
-     * @param id - the response ID
-     * @returns this builder for method chaining
-     */
     id(id: string): this {
-      this.#chatResponseMetadata._id = id;
+      this._id = id;
       return this;
     }
 
-    /**
-     * Set the model name.
-     *
-     * @param model - the model name
-     * @returns this builder for method chaining
-     */
     model(model: string): this {
-      this.#chatResponseMetadata._model = model;
+      this._model = model;
       return this;
     }
 
-    /**
-     * Set the rate limit information.
-     *
-     * @param rateLimit - the rate limit information
-     * @returns this builder for method chaining
-     */
     rateLimit(rateLimit: RateLimit): this {
-      this.#chatResponseMetadata._rateLimit = rateLimit;
+      this._rateLimit = rateLimit;
       return this;
     }
 
-    /**
-     * Set the token usage information.
-     *
-     * @param usage - the usage information
-     * @returns this builder for method chaining
-     */
     usage(usage: Usage): this {
-      this.#chatResponseMetadata._usage = usage;
+      this._usage = usage;
       return this;
     }
 
-    /**
-     * Set the prompt metadata.
-     *
-     * @param promptMetadata - the prompt metadata
-     * @returns this builder for method chaining
-     */
     promptMetadata(promptMetadata: PromptMetadata): this {
-      this.#chatResponseMetadata._promptMetadata = promptMetadata;
+      this._promptMetadata = promptMetadata;
       return this;
     }
 
-    /**
-     * Build the ChatResponseMetadata instance.
-     *
-     * @returns the built ChatResponseMetadata instance
-     */
     build(): ChatResponseMetadata {
-      return this.#chatResponseMetadata;
+      return new ChatResponseMetadata({
+        id: this._id,
+        model: this._model,
+        rateLimit: this._rateLimit,
+        usage: this._usage,
+        promptMetadata: this._promptMetadata,
+        metadata: this._metadata,
+      });
     }
-  };
+  }
 }

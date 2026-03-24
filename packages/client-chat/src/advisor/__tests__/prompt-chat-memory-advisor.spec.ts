@@ -145,7 +145,7 @@ describe("PromptChatMemoryAdvisor", () => {
     // Should return the same response
     expect(result).toBe(response);
     // Verify single message stored in memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(1);
     expect(messages[0]?.text).toBe("Single response");
   });
@@ -179,7 +179,7 @@ describe("PromptChatMemoryAdvisor", () => {
     // Should return the same response
     expect(result).toBe(response);
     // Verify all messages were stored in memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(3);
     expect(messages[0]?.text).toBe("Response 1");
     expect(messages[1]?.text).toBe("Response 2");
@@ -202,7 +202,7 @@ describe("PromptChatMemoryAdvisor", () => {
 
     expect(result).toBe(response);
     // Verify no messages were stored in memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(0);
   });
 
@@ -219,7 +219,7 @@ describe("PromptChatMemoryAdvisor", () => {
 
     expect(result).toBe(response);
     // Verify no messages were stored in memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(0);
   });
 
@@ -252,7 +252,7 @@ describe("PromptChatMemoryAdvisor", () => {
     await advisor.before(request, {} as AdvisorChain);
 
     // Verify that the ToolResponseMessage was added to memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(ToolResponseMessage);
   });
@@ -272,7 +272,7 @@ describe("PromptChatMemoryAdvisor", () => {
     await advisor.before(request, {} as AdvisorChain);
 
     // Verify that the UserMessage was added to memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(UserMessage);
     expect(messages[0]?.text).toBe("Hello");
@@ -314,7 +314,7 @@ describe("PromptChatMemoryAdvisor", () => {
     await advisor.before(request2, {} as AdvisorChain);
 
     // Verify that both messages were added to memory
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(2);
     expect(messages[0]).toBeInstanceOf(UserMessage);
     expect(messages[1]).toBeInstanceOf(ToolResponseMessage);

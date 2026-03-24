@@ -113,7 +113,7 @@ describe("MessageChatMemoryAdvisor", () => {
 
     await advisor.before(request, {} as AdvisorChain);
 
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(ToolResponseMessage);
   });
@@ -133,7 +133,7 @@ describe("MessageChatMemoryAdvisor", () => {
 
     await advisor.before(request, {} as AdvisorChain);
 
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(UserMessage);
     expect(messages[0]?.text).toBe("Hello");
@@ -173,7 +173,7 @@ describe("MessageChatMemoryAdvisor", () => {
 
     await advisor.before(request2, {} as AdvisorChain);
 
-    const messages = chatMemory.get("test-conversation");
+    const messages = await chatMemory.get("test-conversation");
     expect(messages).toHaveLength(2);
     expect(messages[0]).toBeInstanceOf(UserMessage);
     expect(messages[1]).toBeInstanceOf(ToolResponseMessage);

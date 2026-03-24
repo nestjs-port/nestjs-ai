@@ -353,6 +353,9 @@ importers:
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
+      '@testcontainers/redis':
+        specifier: ^11.13.0
+        version: 11.13.0
       testcontainers:
         specifier: ^11.13.0
         version: 11.13.0

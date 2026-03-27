@@ -349,23 +349,24 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   protected override async doAdd(documents: Document[]): Promise<void> {
-    const embeddings = (await this._embeddingModel.embed(
+    const embeddings = await this._embeddingModel.embed(
       documents,
       EmbeddingOptions.builder().build(),
       this._batchingStrategy,
-    )) as number[][];
+    );
 
     const responses = await Promise.all(
       documents.map((document, index) => {
         const fields: Record<string, RedisJSON> = {};
         let embedding = embeddings[index] ?? [];
+
+        // Normalize embeddings for COSINE distance metric
         if (this._distanceMetric === RedisDistanceMetric.COSINE) {
-          // Normalize embeddings for COSINE distance metric
           embedding = this.normalize(embedding);
         }
 
-        fields[this._embeddingFieldName] = embedding as unknown as RedisJSON;
-        fields[this._contentFieldName] = (document.text ?? "") as RedisJSON;
+        fields[this._embeddingFieldName] = embedding;
+        fields[this._contentFieldName] = document.text ?? "";
         for (const [key, value] of Object.entries(document.metadata)) {
           fields[key] = value as RedisJSON;
         }
@@ -376,6 +377,9 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
 
     const failed = responses.find((response) => response !== "OK");
     if (failed != null) {
+      if (this.logger.isErrorEnabled()) {
+        this.logger.error(`Could not add document: ${String(failed)}`);
+      }
       throw new Error(`Could not add document: ${String(failed)}`);
     }
   }
@@ -473,7 +477,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     // Apply filtering based on effective threshold (may be different for IP metric)
     const documents = result.documents
       .filter((document) => {
-        const score = this.similarityScore(document.value);
+        const score = this.similarityScore(document);
         const isAboveThreshold = score >= effectiveThreshold;
         if (this.logger.isDebugEnabled()) {
           const rawScore =
@@ -551,7 +555,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     }
 
     // Get similarity score first
-    const similarity = this.similarityScore(doc.value);
+    const similarity = this.similarityScore(doc);
     const rawScore = doc.value[RedisVectorStore.DISTANCE_FIELD_NAME];
     if (rawScore != null) {
       // We store the raw score from Redis so it can be used for debugging if available
@@ -568,41 +572,87 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       .build();
   }
 
-  private similarityScore(
-    value: SearchReply["documents"][number]["value"],
-  ): number {
-    const textScore = value.$score;
-    if (typeof textScore === "string" || typeof textScore === "number") {
-      const parsed = Number(textScore);
-      if (Number.isNaN(parsed)) {
+  private similarityScore(doc: SearchReply["documents"][number]): number {
+    const value = doc.value;
+    // For text search, check if we have a text score from Redis
+    if ("$score" in value) {
+      const textScore = Number.parseFloat(String(value.$score));
+      if (Number.isNaN(textScore)) {
+        // If we can't parse the score, fall back to default
+        if (this.logger.isDebugEnabled()) {
+          this.logger.warn(
+            `Could not parse text search score: ${String(value.$score)}`,
+          );
+        }
         return 0.9;
       }
-      // Text search scores can be very high, so normalize to a 0.0-1.0 range
-      return Math.min(parsed / 10, 1);
+
+      // A simple normalization strategy - text scores are usually positive,
+      // scale to 0.0-1.0
+      const normalizedTextScore = Math.min(textScore / 10, 1);
+      // Assuming 10.0 is a "perfect" score, but capping at 1.0
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug(
+          `Text search raw score: ${textScore}, normalized: ${normalizedTextScore}`,
+        );
+      }
+      return normalizedTextScore;
     }
 
+    // Handle the case where the distance field might not be present (like in text search)
     const rawValue = value[RedisVectorStore.DISTANCE_FIELD_NAME];
     if (rawValue == null) {
       // For text search, we don't have a vector distance, so use a default high similarity
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug(
+          "No vector distance score found. Using default similarity.",
+        );
+      }
       return 0.9;
     }
 
-    const rawScore = Number(rawValue);
+    const rawScore = Number.parseFloat(String(rawValue));
     if (Number.isNaN(rawScore)) {
       return 0;
     }
 
     // Different distance metrics need different score transformations
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        `Distance metric: ${this._distanceMetric}, Raw score: ${rawScore}`,
+      );
+    }
+
+    // If using IP (inner product), higher is better (it's a dot product)
+    // For COSINE and L2, lower is better (they're distances)
     switch (this._distanceMetric) {
       case RedisDistanceMetric.COSINE:
-        // Distance in Redis is between 0 and 2 for cosine, lower is better
+        // Following RedisVL's implementation in utils.py:
+        // norm_cosine_distance(value)
+        // Distance in Redis is between 0 and 2 for cosine (lower is better)
+        // A normalized similarity score would be (2-distance)/2 which gives 0 to
+        // 1 (higher is better)
         return Math.max((2 - rawScore) / 2, 0);
       case RedisDistanceMetric.L2:
+        // Following RedisVL's implementation in utils.py: norm_l2_distance(value)
         // For L2, convert to similarity score 0-1 where higher is better
         return 1 / (1 + rawScore);
-      case RedisDistanceMetric.IP:
-        // For IP, normalize similarity-like scores to the 0-1 range
-        return Math.min(Math.max((rawScore + 1) / 2, 0), 1);
+      case RedisDistanceMetric.IP: {
+        // For IP (Inner Product), the scores are naturally similarity-like,
+        // but need proper normalization to 0-1 range
+        // Map inner product scores to 0-1 range, usually IP scores are between -1
+        // and 1
+        // for unit vectors, so (score+1)/2 maps to 0-1 range
+        const normalizedScore = (rawScore + 1) / 2;
+        // Clamp to 0-1 range to ensure we don't exceed bounds
+        // Log the normalized IP score for debugging
+        if (this.logger.isDebugEnabled()) {
+          this.logger.debug(
+            `IP raw score: ${rawScore}, normalized score: ${normalizedScore}`,
+          );
+        }
+        return Math.min(Math.max(normalizedScore, 0.0), 1.0);
+      }
       default:
         // Should never happen, but just in case
         return 0;

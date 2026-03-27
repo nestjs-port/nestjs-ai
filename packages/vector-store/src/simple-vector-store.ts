@@ -46,9 +46,7 @@ export class SimpleVectorStore extends AbstractObservationVectorStore {
     }
 
     for (const document of documents) {
-      const embedding = (await this._embeddingModel.embed(
-        document,
-      )) as number[];
+      const embedding = await this._embeddingModel.embed(document);
       const storeContent = new SimpleVectorStoreContent({
         id: document.id,
         text: document.text ?? "",
@@ -182,7 +180,7 @@ export class SimpleVectorStore extends AbstractObservationVectorStore {
   }
 
   private async getUserQueryEmbedding(query: string): Promise<number[]> {
-    return (await this._embeddingModel.embed(query)) as number[];
+    return await this._embeddingModel.embed(query);
   }
 }
 

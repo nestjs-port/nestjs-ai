@@ -15,7 +15,7 @@ export class EmbeddingResultMetadata implements ResultMetadata {
 
   constructor(
     documentId: string = "",
-    modalityType: ModalityType = ModalityType.TEXT,
+    modalityType: ModalityType = "TEXT" as ModalityType,
     mimeType: MimeType = "text/plain",
     documentData: unknown = null,
   ) {

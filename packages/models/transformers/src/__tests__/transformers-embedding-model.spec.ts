@@ -34,10 +34,7 @@ describe("TransformersEmbeddingModel", () => {
   });
 
   it("embed list", async () => {
-    const embed = (await embeddingModel.embed([
-      "Hello world",
-      "World is big",
-    ])) as number[][];
+    const embed = await embeddingModel.embed(["Hello world", "World is big"]);
 
     expect(embed).toHaveLength(2);
     expect(embed[0]).toHaveLength(384);

@@ -119,8 +119,8 @@ class MockEmbeddingModel extends EmbeddingModel {
 }
 
 describe("RedisVectorStoreIT", () => {
-  let redisContainer: StartedRedisContainer | null;
-  let client: RedisClient | null;
+  let redisContainer: StartedRedisContainer;
+  let client: RedisClient;
   let vectorStore: RedisVectorStore;
 
   const documents = createRedisVectorStoreDocuments();
@@ -130,15 +130,12 @@ describe("RedisVectorStoreIT", () => {
       "redis/redis-stack:latest",
     ).start();
     const redisUrl = redisContainer.getConnectionUrl();
+    // Use the container connection URL directly for the Redis client.
     client = createClient({ url: redisUrl });
     await client.connect();
   }, 120_000);
 
   beforeEach(async () => {
-    if (client == null) {
-      throw new Error("Redis client was not initialized");
-    }
-
     await client.flushAll();
 
     vectorStore = RedisVectorStore.builder(
@@ -160,21 +157,17 @@ describe("RedisVectorStoreIT", () => {
   });
 
   afterAll(async () => {
-    await client?.close();
-    await redisContainer?.stop();
+    await client.close();
+    await redisContainer.stop();
   }, 60_000);
 
-  it("ensureIndexGetsCreated", async () => {
-    if (client == null) {
-      throw new Error("Redis client was not initialized");
-    }
-
+  it("ensure index gets created", async () => {
     expect(await client.ft._list()).toContain(
       RedisVectorStore.DEFAULT_INDEX_NAME,
     );
   });
 
-  it("addAndSearch", async () => {
+  it("add and search", async () => {
     await vectorStore.add(documents);
 
     const results = await vectorStore.similaritySearch(
@@ -194,6 +187,7 @@ describe("RedisVectorStoreIT", () => {
     );
     expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
 
+    // Remove all documents from the store.
     await vectorStore.delete(documents.map((document) => document.id));
 
     const emptyResults = await vectorStore.similaritySearch(
@@ -202,7 +196,7 @@ describe("RedisVectorStoreIT", () => {
     expect(emptyResults).toHaveLength(0);
   });
 
-  it("searchWithFilters", async () => {
+  it("search with filters", async () => {
     const { bgDocument, nlDocument, bgDocument2 } =
       createRedisVectorStoreFilterDocuments();
 
@@ -262,7 +256,7 @@ describe("RedisVectorStoreIT", () => {
     );
   });
 
-  it("documentUpdate", async () => {
+  it("document update", async () => {
     const { document, sameIdDocument } =
       createRedisVectorStoreUpdateDocuments();
 
@@ -301,7 +295,7 @@ describe("RedisVectorStoreIT", () => {
     await vectorStore.delete([document.id]);
   });
 
-  it("searchWithThreshold", async () => {
+  it("search with threshold", async () => {
     await vectorStore.add(documents);
 
     const fullResult = await vectorStore.similaritySearch(
@@ -338,7 +332,7 @@ describe("RedisVectorStoreIT", () => {
     expect(resultDoc.score).toBeGreaterThanOrEqual(similarityThreshold);
   });
 
-  it("deleteWithComplexFilterExpression", async () => {
+  it("delete with complex filter expression", async () => {
     const [doc1, doc2, doc3] = createRedisVectorStoreDeleteDocuments();
 
     await vectorStore.add([doc1, doc2, doc3]);
@@ -353,6 +347,7 @@ describe("RedisVectorStoreIT", () => {
       new Filter.Key("type"),
       new Filter.Value("A"),
     );
+    // Complex filter expression: (type == 'A' AND priority > 1)
     const complexFilter = new Filter.Expression(
       Filter.ExpressionType.AND,
       typeFilter,
@@ -378,7 +373,7 @@ describe("RedisVectorStoreIT", () => {
     ).toBe(true);
   });
 
-  it("getNativeClientTest", () => {
+  it("get native client test", () => {
     const nativeClient = vectorStore.getNativeClient<RedisClient>();
     expect(nativeClient).toBe(client);
   });

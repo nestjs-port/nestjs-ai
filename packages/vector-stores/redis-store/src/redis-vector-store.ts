@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   Document,
   DocumentMetadata,
+  LoggerFactory,
   VectorStoreProvider,
   VectorStoreSimilarityMetric,
 } from "@nestjs-ai/commons";
@@ -18,6 +19,7 @@ import {
   type RediSearchSchema,
   SCHEMA_FIELD_TYPE,
   SCHEMA_VECTOR_FIELD_ALGORITHM,
+  type SearchReply,
 } from "@redis/search";
 import type { RedisClientType, RedisJSON } from "redis";
 
@@ -26,10 +28,6 @@ import {
   type RedisMetadataField,
   RedisMetadataFieldType,
 } from "./redis-metadata-field";
-
-type SearchDocumentValue = Record<string, unknown>;
-type SearchReplyDocument = { id: string; value: SearchDocumentValue };
-type SearchReplyLike = { total: number; documents: SearchReplyDocument[] };
 
 export enum RedisVectorAlgorithm {
   FLAT = "FLAT",
@@ -51,6 +49,8 @@ export enum RedisTextScorer {
 }
 
 export class RedisVectorStore extends AbstractObservationVectorStore {
+  private readonly logger = LoggerFactory.getLogger(RedisVectorStore.name);
+
   static readonly DEFAULT_INDEX_NAME = "spring-ai-index";
   static readonly DEFAULT_CONTENT_FIELD_NAME = "content";
   static readonly DEFAULT_EMBEDDING_FIELD_NAME = "embedding";
@@ -98,10 +98,13 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     this._vectorAlgorithm = builder.configuredVectorAlgorithm;
     this._distanceMetric = builder.configuredDistanceMetric;
     this._metadataFields = [...builder.configuredMetadataFields];
+    // HNSW algorithm configuration parameters
     this._hnswM = builder.configuredHnswM;
     this._hnswEfConstruction = builder.configuredHnswEfConstruction;
     this._hnswEfRuntime = builder.configuredHnswEfRuntime;
+    // Default range threshold for range searches (0.0 to 1.0)
     this._defaultRangeThreshold = builder.configuredDefaultRangeThreshold;
+    // Text search configuration
     this._textScorer = builder.configuredTextScorer;
     this._inOrder = builder.configuredInOrder;
     this._stopwords = new Set(builder.configuredStopwords);
@@ -193,7 +196,6 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     filterExpression?: string | null,
   ): Promise<Document[]> {
     assert(query != null, "Query must not be null");
-
     let radius: number;
     let resolvedFilter: string | null = null;
     if (typeof radiusOrFilter === "number") {
@@ -220,25 +222,31 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       "Radius must be between 0.0 and 1.0 (inclusive) representing the similarity threshold",
     );
 
+    // Convert the normalized radius (0.0-1.0) to the appropriate distance metric value.
     let embedding = (await this._embeddingModel.embed(query)) as number[];
     if (this._distanceMetric === RedisDistanceMetric.COSINE) {
+      // Normalize embeddings for COSINE distance metric
       embedding = this.normalize(embedding);
     }
 
     let effectiveRadius = 0;
     switch (this._distanceMetric) {
       case RedisDistanceMetric.COSINE:
+        // Convert similarity score (0.0-1.0) to distance value (0.0-2.0)
         effectiveRadius = Math.max(2 - 2 * radius, 0);
         break;
       case RedisDistanceMetric.L2:
+        // For L2, convert similarity back to distance
         effectiveRadius = 1 / radius - 1;
         break;
       case RedisDistanceMetric.IP:
+        // For IP, convert similarity back to the raw score range
         effectiveRadius = 2 * radius - 1;
         break;
     }
 
     if (this._distanceMetric === RedisDistanceMetric.IP && radius < 0.1) {
+      // For very small similarity thresholds, do filtering in memory to be extra safe
       const requestBuilder = SearchRequest.builder()
         .query(query)
         .topK(1000)
@@ -249,12 +257,14 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       return this.similaritySearch(requestBuilder.build());
     }
 
+    // Build the base query with vector range
     let queryString = `@${this._embeddingFieldName}:[VECTOR_RANGE $radius $BLOB]=>{$YIELD_DISTANCE_AS: ${RedisVectorStore.DISTANCE_FIELD_NAME}}`;
     if (resolvedFilter != null && resolvedFilter.trim() !== "") {
+      // Add filter if provided
       queryString = `(${queryString} ${resolvedFilter})`;
     }
 
-    const rawResult = await this._redisClient.ft.search(
+    const result = await this._redisClient.ft.search(
       this._indexName,
       queryString,
       {
@@ -266,8 +276,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
         DIALECT: 2,
       },
     );
-
-    const result = this.asSearchReply(rawResult);
+    // Process the results and ensure they match the specified similarity threshold
     return result.documents
       .map((document) => this.toDocument(document))
       .filter((document) => (document.score ?? 0) >= radius);
@@ -282,16 +291,21 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     assert(query != null, "Query must not be null");
     assert(textField != null, "Text field must not be null");
     assert(limit > 0, "Limit must be greater than zero");
+    // Verify the field is a text field
     this.validateTextField(textField);
 
+    // Process and escape any special characters in the query
     const escapedQuery = this.escapeSpecialCharacters(query);
+    // Normalize field name (remove @ prefix and JSON path if present)
     const normalizedField = this.normalizeFieldName(textField);
     const queryBuilder: string[] = [`@${normalizedField}:`];
 
+    // Handle multi-word queries differently from single words
     if (escapedQuery.includes(" ")) {
       if (this._inOrder) {
         queryBuilder.push(`"${escapedQuery}"`);
       } else {
+        // For non-inOrder, search for any of the terms
         const terms = escapedQuery.split(/\s+/);
         const termParts = [`"${escapedQuery}"`];
         for (const term of terms) {
@@ -306,6 +320,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       queryBuilder.push(escapedQuery);
     }
 
+    // Add filter if provided
     if (filterExpression != null && filterExpression.trim() !== "") {
       queryBuilder.push(` ${filterExpression}`);
     }
@@ -324,12 +339,12 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       options.SCORER = this._textScorer;
     }
 
-    const rawResult = await this._redisClient.ft.search(
+    // Create and execute the query
+    const result = await this._redisClient.ft.search(
       this._indexName,
       queryBuilder.join(""),
       options,
     );
-    const result = this.asSearchReply(rawResult);
     return result.documents.map((document) => this.toDocument(document));
   }
 
@@ -345,6 +360,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
         const fields: Record<string, RedisJSON> = {};
         let embedding = embeddings[index] ?? [];
         if (this._distanceMetric === RedisDistanceMetric.COSINE) {
+          // Normalize embeddings for COSINE distance metric
           embedding = this.normalize(embedding);
         }
 
@@ -377,7 +393,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
 
     const filterString =
       this._filterExpressionConverter.convertExpression(filterExpression);
-    const rawResult = await this._redisClient.ft.search(
+    const result = await this._redisClient.ft.search(
       this._indexName,
       filterString,
       {
@@ -386,8 +402,8 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
         DIALECT: 2,
       },
     );
-    const result = this.asSearchReply(rawResult);
     const matchingIds = result.documents.map((document) =>
+      // Remove the key prefix to get original ID
       document.id.startsWith(this._prefix)
         ? document.id.slice(this._prefix.length)
         : document.id,
@@ -418,21 +434,24 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       "The similarity score is bounded between 0 and 1; least to most similar respectively.",
     );
 
+    // For IP metric, temporarily disable threshold filtering
     const effectiveThreshold =
       this._distanceMetric === RedisDistanceMetric.IP
         ? 0
         : request.similarityThreshold;
 
     const filter = this.nativeExpressionFilter(request);
+
     const queryString = `${filter}=>[KNN ${request.topK} @${this._embeddingFieldName} $BLOB AS ${RedisVectorStore.DISTANCE_FIELD_NAME}]`;
-    let embedding = (await this._embeddingModel.embed(
-      request.query,
-    )) as number[];
+
+    let embedding = await this._embeddingModel.embed(request.query);
+
     if (this._distanceMetric === RedisDistanceMetric.COSINE) {
+      // Normalize embeddings for COSINE distance metric
       embedding = this.normalize(embedding);
     }
 
-    const rawResult = await this._redisClient.ft.search(
+    const result = await this._redisClient.ft.search(
       this._indexName,
       queryString,
       {
@@ -442,14 +461,38 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
         DIALECT: 2,
       },
     );
-    const result = this.asSearchReply(rawResult);
 
-    return result.documents
-      .filter(
-        (document) =>
-          this.similarityScore(document.value) >= effectiveThreshold,
-      )
+    // Add more detailed logging to understand thresholding
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        `Applying filtering with effectiveThreshold: ${effectiveThreshold}`,
+      );
+      this.logger.debug(`Redis search returned ${result.total} documents`);
+    }
+
+    // Apply filtering based on effective threshold (may be different for IP metric)
+    const documents = result.documents
+      .filter((document) => {
+        const score = this.similarityScore(document.value);
+        const isAboveThreshold = score >= effectiveThreshold;
+        if (this.logger.isDebugEnabled()) {
+          const rawScore =
+            document.value[RedisVectorStore.DISTANCE_FIELD_NAME] ?? "N/A";
+          this.logger.debug(
+            `Document raw_score: ${String(rawScore)}, normalized_score: ${score}, above_threshold: ${isAboveThreshold}`,
+          );
+        }
+        return isAboveThreshold;
+      })
       .map((document) => this.toDocument(document));
+
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(
+        `After filtering, returning ${documents.length} documents`,
+      );
+    }
+
+    return documents;
   }
 
   protected override createObservationContextBuilder(
@@ -489,10 +532,10 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
         DIALECT: 2,
       },
     );
-    return this.asSearchReply(rawResult).total;
+    return rawResult.total;
   }
 
-  private toDocument(doc: SearchReplyDocument): Document {
+  private toDocument(doc: SearchReply["documents"][number]): Document {
     const id = doc.id.startsWith(this._prefix)
       ? doc.id.slice(this._prefix.length)
       : doc.id;
@@ -507,11 +550,14 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       }
     }
 
+    // Get similarity score first
     const similarity = this.similarityScore(doc.value);
     const rawScore = doc.value[RedisVectorStore.DISTANCE_FIELD_NAME];
     if (rawScore != null) {
+      // We store the raw score from Redis so it can be used for debugging if available
       metadata[RedisVectorStore.DISTANCE_FIELD_NAME] = rawScore;
     }
+    // The distance in the standard metadata should be inverted from similarity (1.0 - similarity)
     metadata[DocumentMetadata.DISTANCE] = 1 - similarity;
 
     return Document.builder()
@@ -522,18 +568,22 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       .build();
   }
 
-  private similarityScore(value: SearchDocumentValue): number {
+  private similarityScore(
+    value: SearchReply["documents"][number]["value"],
+  ): number {
     const textScore = value.$score;
     if (typeof textScore === "string" || typeof textScore === "number") {
       const parsed = Number(textScore);
       if (Number.isNaN(parsed)) {
         return 0.9;
       }
+      // Text search scores can be very high, so normalize to a 0.0-1.0 range
       return Math.min(parsed / 10, 1);
     }
 
     const rawValue = value[RedisVectorStore.DISTANCE_FIELD_NAME];
     if (rawValue == null) {
+      // For text search, we don't have a vector distance, so use a default high similarity
       return 0.9;
     }
 
@@ -542,14 +592,19 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
       return 0;
     }
 
+    // Different distance metrics need different score transformations
     switch (this._distanceMetric) {
       case RedisDistanceMetric.COSINE:
+        // Distance in Redis is between 0 and 2 for cosine, lower is better
         return Math.max((2 - rawScore) / 2, 0);
       case RedisDistanceMetric.L2:
+        // For L2, convert to similarity score 0-1 where higher is better
         return 1 / (1 + rawScore);
       case RedisDistanceMetric.IP:
+        // For IP, normalize similarity-like scores to the 0-1 range
         return Math.min(Math.max((rawScore + 1) / 2, 0), 1);
       default:
+        // Should never happen, but just in case
         return 0;
     }
   }
@@ -563,6 +618,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
 
   private async createSchema(): Promise<RediSearchSchema> {
     const dimensions = await this._embeddingModel.dimensions();
+    // Default HNSW algorithm parameters
     const vectorField: RediSearchSchema[string] =
       this._vectorAlgorithm === RedisVectorAlgorithm.HNSW
         ? {
@@ -628,11 +684,14 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   private validateTextField(fieldName: string): void {
+    // Normalize the field name for consistent checking
     const normalized = this.normalizeFieldName(fieldName);
+    // Check if it's the content field (always a text field)
     if (normalized === this._contentFieldName) {
       return;
     }
 
+    // Check if it's a metadata field with TEXT type
     const isTextField = this._metadataFields.some(
       (field) =>
         field.name === normalized &&
@@ -645,9 +704,11 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
 
   private normalizeFieldName(fieldName: string): string {
     let normalized = fieldName;
+    // Remove @ prefix
     if (normalized.startsWith("@")) {
       normalized = normalized.slice(1);
     }
+    // Remove JSON path prefix
     if (normalized.startsWith("$.")) {
       normalized = normalized.slice(2);
     }
@@ -655,6 +716,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   private escapeSpecialCharacters(query: string): string {
+    // Escape special characters in a query string for Redis search
     return query
       .replaceAll("-", "\\-")
       .replaceAll("@", "\\@")
@@ -665,34 +727,28 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   private normalize(vector: number[]): number[] {
+    // Calculate the magnitude of the vector
     let magnitude = 0;
     for (const value of vector) {
       magnitude += value * value;
     }
     magnitude = Math.sqrt(magnitude);
+
+    // Avoid division by zero
     if (magnitude === 0) {
       return vector;
     }
+
+    // Normalize the vector
     return vector.map((value) => value / magnitude);
   }
 
   private toFloat32Buffer(vector: number[]): Buffer {
-    const floatArray = Float32Array.from(vector);
-    return Buffer.from(
-      floatArray.buffer,
-      floatArray.byteOffset,
-      floatArray.byteLength,
-    );
-  }
-
-  private asSearchReply(value: unknown): SearchReplyLike {
-    const searchReply = value as SearchReplyLike;
-    return {
-      total: searchReply.total ?? 0,
-      documents: Array.isArray(searchReply.documents)
-        ? searchReply.documents
-        : [],
-    };
+    const buffer = Buffer.allocUnsafe(vector.length * 4);
+    for (let i = 0; i < vector.length; i++) {
+      buffer.writeFloatLE(vector[i], i * 4);
+    }
+    return buffer;
   }
 }
 

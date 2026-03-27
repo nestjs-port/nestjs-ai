@@ -368,7 +368,7 @@ describe("ToolCallAdvisor", () => {
     });
     const request = createRequest(true);
     const response = createResponse(false);
-    let capturedRequest: ChatClientRequest | null = null;
+    let capturedRequest!: ChatClientRequest | null;
 
     const capturingAdvisor = new TerminalCallAdvisor(async (req) => {
       capturedRequest = req;
@@ -490,7 +490,7 @@ describe("ToolCallAdvisor", () => {
     const responseWithToolCall = createResponse(true);
     const finalResponse = createResponse(false);
     let callCount = 0;
-    let capturedRequest: ChatClientRequest | null = null;
+    let capturedRequest!: ChatClientRequest | null;
     const terminalAdvisor = new TerminalCallAdvisor(async (req) => {
       callCount++;
       if (callCount === 2) {

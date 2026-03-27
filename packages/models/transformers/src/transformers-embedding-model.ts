@@ -20,6 +20,7 @@ import {
   env,
   type FeatureExtractionPipelineOptions,
   type FeatureExtractionPipelineType,
+  type PretrainedOptions,
   pipeline,
   type Tensor,
 } from "@xenova/transformers";
@@ -27,6 +28,10 @@ import {
 export interface TransformersEmbeddingModelProps {
   model?: string;
   cacheDir?: string | null;
+  quantized?: boolean;
+  config?: PretrainedOptions["config"];
+  localFilesOnly?: boolean;
+  revision?: string;
   metadataMode?: MetadataMode;
   observationRegistry?: ObservationRegistry;
 }
@@ -40,6 +45,10 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
   private _metadataMode: MetadataMode;
   private _model: string;
   private _cacheDir: string | null;
+  private _quantized: boolean;
+  private _config: PretrainedOptions["config"] | null;
+  private _localFilesOnly: boolean;
+  private _revision: string | undefined;
   private readonly _observationRegistry: ObservationRegistry;
   private _observationConvention: EmbeddingModelObservationConvention =
     new DefaultEmbeddingModelObservationConvention();
@@ -49,6 +58,10 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
     super();
     this._model = props.model ?? TransformersEmbeddingModel.DEFAULT_MODEL;
     this._cacheDir = props.cacheDir ?? null;
+    this._quantized = props.quantized ?? false;
+    this._config = props.config ?? null;
+    this._localFilesOnly = props.localFilesOnly ?? false;
+    this._revision = props.revision;
     this._metadataMode = props.metadataMode ?? MetadataMode.NONE;
     this._observationRegistry =
       props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
@@ -62,6 +75,26 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
 
   setCacheDir(cacheDir: string | null): void {
     this._cacheDir = cacheDir;
+    this._featureExtractor = null;
+  }
+
+  setQuantized(quantized: boolean): void {
+    this._quantized = quantized;
+    this._featureExtractor = null;
+  }
+
+  setConfig(config: PretrainedOptions["config"] | null): void {
+    this._config = config;
+    this._featureExtractor = null;
+  }
+
+  setLocalFilesOnly(localFilesOnly: boolean): void {
+    this._localFilesOnly = localFilesOnly;
+    this._featureExtractor = null;
+  }
+
+  setRevision(revision: string | undefined): void {
+    this._revision = revision;
     this._featureExtractor = null;
   }
 
@@ -80,15 +113,17 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
   protected override async embedDocument(
     document: Document,
   ): Promise<number[]> {
-    return this.embed(
-      document.getFormattedContent(this._metadataMode),
-    ) as Promise<number[]>;
+    return await this.embed(document.getFormattedContent(this._metadataMode));
   }
 
   async onModuleInit(): Promise<void> {
     const cacheDir = this._cacheDir ?? env.cacheDir;
     this._featureExtractor = await pipeline("feature-extraction", this._model, {
+      quantized: this._quantized,
       cache_dir: cacheDir,
+      config: this._config ?? undefined,
+      local_files_only: this._localFilesOnly,
+      revision: this._revision,
     });
   }
 

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  AiProvider,
   type Document,
   MetadataMode,
   NoopObservationRegistry,
@@ -133,7 +134,7 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
 
     const observationContext = new EmbeddingModelObservationContext(
       request,
-      "transformers",
+      AiProvider.ONNX.value,
     );
 
     const observation =

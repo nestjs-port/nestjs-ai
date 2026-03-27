@@ -255,6 +255,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-ai/testing':
+        specifier: workspace:*
+        version: link:../../testing
 
   packages/observation:
     dependencies:
@@ -1951,6 +1954,11 @@ packages:
 
   handlebars@4.7.8:
     resolution: {integrity: sha512-vafaFqs8MZkRrSX7sFVUdo3ap/eNiLnb4IakshzvP56X5Nr1iGKAIqdX6tMlm6HcNRIkr6AxO5jFEoJzzpT8aQ==}
+    engines: {node: '>=0.4.7'}
+    hasBin: true
+
+  handlebars@4.7.9:
+    resolution: {integrity: sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==}
     engines: {node: '>=0.4.7'}
     hasBin: true
 
@@ -3812,7 +3820,7 @@ snapshots:
       ci: 2.3.0
       decompress: 4.2.1
       fast-xml-parser: 4.5.4
-      handlebars: 4.7.8
+      handlebars: 4.7.9
 
   '@springio/asciidoctor-extensions@1.0.0-alpha.17':
     dependencies:
@@ -4791,6 +4799,15 @@ snapshots:
   guid-typescript@1.0.9: {}
 
   handlebars@4.7.8:
+    dependencies:
+      minimist: 1.2.8
+      neo-async: 2.6.2
+      source-map: 0.6.1
+      wordwrap: 1.0.0
+    optionalDependencies:
+      uglify-js: 3.19.3
+
+  handlebars@4.7.9:
     dependencies:
       minimist: 1.2.8
       neo-async: 2.6.2

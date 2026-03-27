@@ -1,4 +1,7 @@
-import type { ChatClientConfiguration } from "@nestjs-ai/commons";
+import type {
+  ChatClientConfiguration,
+  EmbeddingModelConfiguration,
+} from "@nestjs-ai/commons";
 import {
   HTTP_CLIENT_TOKEN,
   type ObservationConfiguration,
@@ -76,6 +79,33 @@ describe("NestAIModule", () => {
 
     expect(chatClientProvider).toBeDefined();
     expect(exportsList).toContain(CHAT_CLIENT_TOKEN);
+  });
+
+  it("registers embedding model providers and exports", () => {
+    const EMBEDDING_MODEL_TOKEN = Symbol("EMBEDDING_MODEL_TOKEN");
+    const dynamicModule = NestAiModule.forRoot({
+      embeddingModel: {
+        providers: [
+          {
+            token: EMBEDDING_MODEL_TOKEN,
+            useFactory: () => "embedding-model",
+          },
+        ],
+      } as unknown as EmbeddingModelConfiguration,
+    });
+    const providers = dynamicModule.providers ?? [];
+    const exportsList = dynamicModule.exports ?? [];
+
+    const embeddingModelProvider = providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "provide" in provider &&
+        provider.provide === EMBEDDING_MODEL_TOKEN,
+    );
+
+    expect(embeddingModelProvider).toBeDefined();
+    expect(exportsList).toContain(EMBEDDING_MODEL_TOKEN);
   });
 
   it("uses module global option when provided", () => {

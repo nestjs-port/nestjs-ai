@@ -40,7 +40,7 @@ export function configureTransformersEmbeddingModel(
         ],
       },
     ],
-  };
+  } as TransformersEmbeddingModelConfiguration;
 }
 
 export function createTransformersEmbeddingModel(

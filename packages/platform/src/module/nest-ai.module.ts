@@ -3,6 +3,7 @@ import { Module, Scope } from "@nestjs/common";
 import {
   type ChatClientConfiguration,
   type ChatModelConfiguration,
+  type EmbeddingModelConfiguration,
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
@@ -58,6 +59,11 @@ export class NestAiModule {
     NestAiModule.registerConfigurationProviders(
       providers,
       exports,
+      options.embeddingModel,
+    );
+    NestAiModule.registerConfigurationProviders(
+      providers,
+      exports,
       options.chatClient,
     );
     NestAiModule.registerConfigurationProviders(
@@ -81,6 +87,7 @@ export class NestAiModule {
     exports: InjectionToken[],
     configuration?:
       | ChatModelConfiguration
+      | EmbeddingModelConfiguration
       | ChatClientConfiguration
       | ObservationConfiguration,
   ): void {

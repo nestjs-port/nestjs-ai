@@ -385,9 +385,16 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
   }
 
   protected override async doDelete(idList: string[]): Promise<void> {
-    await Promise.all(
+    const responses = await Promise.all(
       idList.map((id) => this._redisClient.json.del(this.key(id))),
     );
+    const failed = responses.find((deletedCount) => deletedCount !== 1);
+    if (failed != null) {
+      if (this.logger.isErrorEnabled()) {
+        this.logger.error(`Could not delete document: ${String(failed)}`);
+      }
+      throw new Error(`Could not delete document: ${String(failed)}`);
+    }
   }
 
   protected override async doDeleteByFilterExpression(

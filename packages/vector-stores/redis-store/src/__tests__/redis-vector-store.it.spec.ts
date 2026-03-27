@@ -33,49 +33,6 @@ const createRedisVectorStoreDocuments = (): Document[] => [
   }),
 ];
 
-const createRedisVectorStoreFilterDocuments = (): {
-  bgDocument: Document;
-  nlDocument: Document;
-  bgDocument2: Document;
-} => ({
-  bgDocument: new VectorDocument(
-    "The World is Big and Salvation Lurks Around the Corner",
-    { country: "BG", year: 2020 },
-  ),
-  nlDocument: new VectorDocument(
-    "The World is Big and Salvation Lurks Around the Corner",
-    { country: "NL" },
-  ),
-  bgDocument2: new VectorDocument(
-    "The World is Big and Salvation Lurks Around the Corner",
-    { country: "BG", year: 2023 },
-  ),
-});
-
-const createRedisVectorStoreUpdateDocuments = (): {
-  document: Document;
-  sameIdDocument: Document;
-} => {
-  const document = new VectorDocument("d-1", "Spring AI rocks!!", {
-    meta1: "meta1",
-  });
-
-  return {
-    document,
-    sameIdDocument: new VectorDocument(
-      document.id,
-      "The World is Big and Salvation Lurks Around the Corner",
-      { meta2: "meta2" },
-    ),
-  };
-};
-
-const createRedisVectorStoreDeleteDocuments = (): Document[] => [
-  new VectorDocument("Content 1", { type: "A", priority: 1 }),
-  new VectorDocument("Content 2", { type: "A", priority: 2 }),
-  new VectorDocument("Content 3", { type: "B", priority: 1 }),
-];
-
 type RedisClient = ReturnType<typeof createClient>;
 
 class MockEmbeddingModel extends EmbeddingModel {
@@ -197,8 +154,18 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("search with filters", async () => {
-    const { bgDocument, nlDocument, bgDocument2 } =
-      createRedisVectorStoreFilterDocuments();
+    const bgDocument = new VectorDocument(
+      "The World is Big and Salvation Lurks Around the Corner",
+      { country: "BG", year: 2020 },
+    );
+    const nlDocument = new VectorDocument(
+      "The World is Big and Salvation Lurks Around the Corner",
+      { country: "NL" },
+    );
+    const bgDocument2 = new VectorDocument(
+      "The World is Big and Salvation Lurks Around the Corner",
+      { country: "BG", year: 2023 },
+    );
 
     await vectorStore.add([bgDocument, nlDocument, bgDocument2]);
 
@@ -257,8 +224,9 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("document update", async () => {
-    const { document, sameIdDocument } =
-      createRedisVectorStoreUpdateDocuments();
+    const document = new VectorDocument("d-1", "Spring AI rocks!!", {
+      meta1: "meta1",
+    });
 
     await vectorStore.add([document]);
 
@@ -275,6 +243,11 @@ describe("RedisVectorStoreIT", () => {
     );
     expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
 
+    const sameIdDocument = new VectorDocument(
+      document.id,
+      "The World is Big and Salvation Lurks Around the Corner",
+      { meta2: "meta2" },
+    );
     await vectorStore.add([sameIdDocument]);
 
     results = await vectorStore.similaritySearch(
@@ -333,7 +306,9 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("delete with complex filter expression", async () => {
-    const [doc1, doc2, doc3] = createRedisVectorStoreDeleteDocuments();
+    const doc1 = new VectorDocument("Content 1", { type: "A", priority: 1 });
+    const doc2 = new VectorDocument("Content 2", { type: "A", priority: 2 });
+    const doc3 = new VectorDocument("Content 3", { type: "B", priority: 1 });
 
     await vectorStore.add([doc1, doc2, doc3]);
 

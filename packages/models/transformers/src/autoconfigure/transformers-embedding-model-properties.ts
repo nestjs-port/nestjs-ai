@@ -1,4 +1,7 @@
-import type { MetadataMode, ProviderConfiguration } from "@nestjs-ai/commons";
+import type {
+  EmbeddingModelConfiguration,
+  MetadataMode,
+} from "@nestjs-ai/commons";
 import type { PretrainedOptions } from "@xenova/transformers";
 
 export interface TransformersEmbeddingModelCacheProperties {
@@ -15,6 +18,5 @@ export interface TransformersEmbeddingModelProperties {
   metadataMode?: MetadataMode;
 }
 
-export interface TransformersEmbeddingModelConfiguration {
-  providers: ProviderConfiguration[];
-}
+export interface TransformersEmbeddingModelConfiguration
+  extends EmbeddingModelConfiguration {}

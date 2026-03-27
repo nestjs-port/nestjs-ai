@@ -1,3 +1,4 @@
+export * from "./autoconfigure";
 export {
   TransformersEmbeddingModel,
   type TransformersEmbeddingModelProps,

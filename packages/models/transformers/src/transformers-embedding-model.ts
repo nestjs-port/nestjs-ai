@@ -181,20 +181,34 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
   private getFeatureExtractionOptions(): FeatureExtractionPipelineOptions {
     return {
       pooling: "mean",
-      normalize: true,
     };
   }
 
   private toEmbeddings(tensor: Tensor): number[][] {
-    const values = tensor.tolist() as number[] | number[][];
+    const values = tensor.tolist();
     if (values.length === 0) {
       return [];
     }
 
-    if (Array.isArray(values[0])) {
-      return values as number[][];
+    if (this.isMatrix(values)) {
+      return values;
     }
 
-    return [values as number[]];
+    if (this.isVector(values)) {
+      return [values];
+    }
+
+    throw new Error("Unexpected tensor shape.");
+  }
+
+  private isVector(values: unknown[]): values is number[] {
+    return values.every((value) => typeof value === "number");
+  }
+
+  private isMatrix(values: unknown[]): values is number[][] {
+    return values.every(
+      (value) =>
+        Array.isArray(value) && value.every((item) => typeof item === "number"),
+    );
   }
 }

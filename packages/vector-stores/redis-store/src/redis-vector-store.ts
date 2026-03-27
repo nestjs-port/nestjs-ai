@@ -223,7 +223,7 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
     );
 
     // Convert the normalized radius (0.0-1.0) to the appropriate distance metric value.
-    let embedding = (await this._embeddingModel.embed(query)) as number[];
+    let embedding = await this._embeddingModel.embed(query);
     if (this._distanceMetric === RedisDistanceMetric.COSINE) {
       // Normalize embeddings for COSINE distance metric
       embedding = this.normalize(embedding);

@@ -88,7 +88,7 @@ function createChatModel(
   callImpl?: (prompt: Prompt) => Promise<ChatResponse | null>,
   streamImpl?: (prompt: Prompt) => Observable<ChatResponse>,
 ): ChatModel {
-  let capturedPrompt: Prompt | null = null;
+  let capturedPrompt: Prompt | null;
   const model = {
     call: vi.fn(async (prompt: Prompt) => {
       capturedPrompt = prompt;

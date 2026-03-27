@@ -18,7 +18,7 @@ const sleep = async (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("RedisChatMemoryAdvancedQueryIT", () => {
-  let redisContainer: StartedRedisContainer | null = null;
+  let redisContainer: StartedRedisContainer | null;
   let client: ReturnType<typeof createClient>;
   let chatMemory: RedisChatMemoryRepository;
 

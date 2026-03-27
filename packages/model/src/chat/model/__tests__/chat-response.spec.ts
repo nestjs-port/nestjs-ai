@@ -170,7 +170,7 @@ describe("ChatResponse", () => {
 
     const streamingResponse = of(chunk1, chunk2);
 
-    let aggregatedResponse: ChatResponse | null = null;
+    let aggregatedResponse!: ChatResponse | null;
 
     await firstValueFrom(
       aggregator

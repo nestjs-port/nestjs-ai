@@ -12,7 +12,7 @@ describe("TikaDocumentReader", () => {
   const samplePpt = resolve(__dirname, "sample.ppt");
   const samplePptx = resolve(__dirname, "sample.pptx");
 
-  let tikaContainer: StartedTestContainer | null = null;
+  let tikaContainer: StartedTestContainer | null;
   let tikaServerUrl: string;
 
   beforeAll(async () => {

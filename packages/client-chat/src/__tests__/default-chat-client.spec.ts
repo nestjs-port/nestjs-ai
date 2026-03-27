@@ -88,7 +88,7 @@ function createChatModel(
   callImpl?: (prompt: Prompt) => Promise<ChatResponse | null>,
   streamImpl?: (prompt: Prompt) => Observable<ChatResponse>,
 ): ChatModel {
-  let capturedPrompt: Prompt | null;
+  let capturedPrompt!: Prompt;
   const model = {
     call: vi.fn(async (prompt: Prompt) => {
       capturedPrompt = prompt;
@@ -109,16 +109,14 @@ function createChatModel(
     },
   } as unknown as ChatModel;
 
-  (model as unknown as { __getPrompt: () => Prompt | null }).__getPrompt = () =>
+  (model as unknown as { __getPrompt: () => Prompt }).__getPrompt = () =>
     capturedPrompt;
 
   return model;
 }
 
-function getCapturedPrompt(chatModel: ChatModel): Prompt | null {
-  return (
-    chatModel as unknown as { __getPrompt: () => Prompt | null }
-  ).__getPrompt();
+function getCapturedPrompt(chatModel: ChatModel): Prompt {
+  return (chatModel as unknown as { __getPrompt: () => Prompt }).__getPrompt();
 }
 
 const userPromptResource = readFileSync(

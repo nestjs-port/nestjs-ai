@@ -170,7 +170,7 @@ describe("ChatResponse", () => {
 
     const streamingResponse = of(chunk1, chunk2);
 
-    let aggregatedResponse!: ChatResponse | null;
+    let aggregatedResponse!: ChatResponse;
 
     await firstValueFrom(
       aggregator
@@ -180,13 +180,8 @@ describe("ChatResponse", () => {
         .pipe(toArray()),
     );
 
-    expect(aggregatedResponse).not.toBeNull();
+    const finalAssistantMessage = aggregatedResponse.result?.output;
 
-    const finalAssistantMessage = (
-      aggregatedResponse as unknown as ChatResponse
-    ).result?.output;
-
-    expect(finalAssistantMessage).not.toBeNull();
     expect(finalAssistantMessage?.text).toBe("Thinking about the weather... ");
     expect(finalAssistantMessage?.hasToolCalls()).toBe(true);
     expect(finalAssistantMessage?.toolCalls).toHaveLength(1);

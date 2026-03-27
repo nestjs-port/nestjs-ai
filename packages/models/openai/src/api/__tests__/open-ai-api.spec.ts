@@ -323,7 +323,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
   });
 
   it("user agent header is sent in chat completion requests", async () => {
-    let recordedRequest!: IncomingMessage | null;
+    let recordedRequest!: IncomingMessage;
 
     const serverPromise = new Promise<Server>((resolve) => {
       const server = createServer((req, res) => {
@@ -389,9 +389,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
 
     expect(body).not.toBeNull();
 
-    expect(recordedRequest).not.toBeNull();
-    const userAgentHeader = (recordedRequest as unknown as IncomingMessage)
-      .headers[OpenAiApi.HTTP_USER_AGENT_HEADER.toLowerCase()];
+    const userAgentHeader =
+      recordedRequest.headers[OpenAiApi.HTTP_USER_AGENT_HEADER.toLowerCase()];
     expect(userAgentHeader).toBe(OpenAiApi.SPRING_AI_USER_AGENT);
 
     await new Promise<void>((resolve) => {

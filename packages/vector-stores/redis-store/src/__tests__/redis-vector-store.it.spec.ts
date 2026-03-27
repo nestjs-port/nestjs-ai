@@ -119,8 +119,8 @@ class MockEmbeddingModel extends EmbeddingModel {
 }
 
 describe("RedisVectorStoreIT", () => {
-  let redisContainer: StartedRedisContainer | null = null;
-  let client: RedisClient | null = null;
+  let redisContainer: StartedRedisContainer | null;
+  let client: RedisClient | null;
   let vectorStore: RedisVectorStore;
 
   const documents = createRedisVectorStoreDocuments();

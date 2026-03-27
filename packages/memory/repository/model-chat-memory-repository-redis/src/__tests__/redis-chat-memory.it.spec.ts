@@ -11,7 +11,7 @@ import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 describe("RedisChatMemoryIT", () => {
   const conversationId = "test-conversation";
 
-  let redisContainer: StartedRedisContainer | null = null;
+  let redisContainer: StartedRedisContainer | null;
   let client: ReturnType<typeof createClient>;
   let chatMemory: RedisChatMemoryRepository;
   const cleanupIndexes = new Set<string>();

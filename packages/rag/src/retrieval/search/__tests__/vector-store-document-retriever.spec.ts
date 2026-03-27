@@ -284,7 +284,7 @@ function createMockVectorStore(returnValue: Document[] = []) {
   };
 }
 
-let tenantIdentifier: string | null = null;
+let tenantIdentifier: string | null;
 
 function setTenantIdentifier(tenant: string): void {
   if (tenant.trim().length === 0) {

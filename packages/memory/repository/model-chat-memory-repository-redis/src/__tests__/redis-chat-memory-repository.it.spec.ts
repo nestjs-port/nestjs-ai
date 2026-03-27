@@ -14,7 +14,7 @@ import { RedisChatMemoryConfig } from "../redis-chat-memory-config";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 
 describe("RedisChatMemoryRepositoryIT", () => {
-  let redisContainer: StartedRedisContainer | null = null;
+  let redisContainer: StartedRedisContainer | null;
   let client: ReturnType<typeof createClient>;
   let chatMemoryRepository: ChatMemoryRepository;
 

@@ -36,7 +36,7 @@ function parseMetadata(metadataString: string): Record<string, unknown> {
 }
 
 describe("RedisChatMemoryMessageTypesIT", () => {
-  let redisContainer: StartedRedisContainer | null = null;
+  let redisContainer: StartedRedisContainer | null;
   let client: ReturnType<typeof createClient>;
   let chatMemory: RedisChatMemoryRepository;
 

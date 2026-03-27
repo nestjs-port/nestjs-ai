@@ -323,7 +323,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
   });
 
   it("user agent header is sent in chat completion requests", async () => {
-    let recordedRequest: IncomingMessage | null = null;
+    let recordedRequest!: IncomingMessage | null;
 
     const serverPromise = new Promise<Server>((resolve) => {
       const server = createServer((req, res) => {

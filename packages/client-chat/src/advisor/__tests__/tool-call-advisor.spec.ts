@@ -368,7 +368,7 @@ describe("ToolCallAdvisor", () => {
     });
     const request = createRequest(true);
     const response = createResponse(false);
-    let capturedRequest!: ChatClientRequest | null;
+    let capturedRequest!: ChatClientRequest;
 
     const capturingAdvisor = new TerminalCallAdvisor(async (req) => {
       capturedRequest = req;
@@ -382,7 +382,7 @@ describe("ToolCallAdvisor", () => {
 
     await advisor.adviseCall(request, chain);
 
-    const options = (capturedRequest as unknown as ChatClientRequest)?.prompt
+    const options = capturedRequest.prompt
       .options as DefaultToolCallingChatOptions;
     expect(options.internalToolExecutionEnabled).toBe(false);
   });
@@ -490,7 +490,7 @@ describe("ToolCallAdvisor", () => {
     const responseWithToolCall = createResponse(true);
     const finalResponse = createResponse(false);
     let callCount = 0;
-    let capturedRequest!: ChatClientRequest | null;
+    let capturedRequest!: ChatClientRequest;
     const terminalAdvisor = new TerminalCallAdvisor(async (req) => {
       callCount++;
       if (callCount === 2) {
@@ -516,10 +516,7 @@ describe("ToolCallAdvisor", () => {
 
     await advisor.adviseCall(request, chain);
 
-    expect(capturedRequest).not.toBeNull();
-    const instructions =
-      (capturedRequest as unknown as ChatClientRequest)?.prompt.instructions ??
-      [];
+    const instructions = capturedRequest.prompt.instructions ?? [];
     expect(instructions).toHaveLength(2);
     expect(instructions[0]).toBeInstanceOf(SystemMessage);
     expect(instructions[1]).toBeInstanceOf(ToolResponseMessage);

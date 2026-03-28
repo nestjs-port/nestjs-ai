@@ -17,8 +17,8 @@
     "clean": "rimraf dist",
     "test": "vitest run --passWithNoTests"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "*"
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*"

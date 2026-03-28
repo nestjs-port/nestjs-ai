@@ -46,14 +46,12 @@ jobs:
         run: pnpm docs:build
 
       - name: Disable Jekyll
-        run: |
-          mkdir -p site
-          touch site/.nojekyll
+        run: touch docs/antora/site/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: site
+          path: docs/antora/site
 
   deploy:
     name: Deploy to GitHub Pages

@@ -135,7 +135,8 @@ import type { Message } from "./message.interface";
 
 ## Comments Handling
 
-Do not migrate Javadoc or license headers.
+Do not migrate Javadoc.
+Add the standard Apache license header used by `nestjs-ai` to every migrated TypeScript source and test file.
 Preserve meaningful inline implementation comments inside method/function bodies.
 For test files, comments inside Java test methods MUST be copied verbatim into the corresponding TypeScript test body.
 Do not paraphrase, summarize, or omit Java method-body comments.
@@ -156,7 +157,8 @@ Migration Checklist:
 - [ ] Apply getter/field/constructor conversion rules
 - [ ] Keep imports and barrel exports consistent
 - [ ] `index.ts` uses `export *` only for directories; same-directory files use explicit exports
-- [ ] Omit Javadoc and license headers
+- [ ] Omit Javadoc
+- [ ] Add the `nestjs-ai` Apache license header to every migrated TypeScript source and test file
 - [ ] Preserve meaningful inline implementation comments
 - [ ] For tests, keep case names/structure aligned with source JUnit tests
 - [ ] Test-method inline comments copied verbatim and kept in matching locations

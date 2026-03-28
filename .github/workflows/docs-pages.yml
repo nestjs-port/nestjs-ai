@@ -46,7 +46,9 @@ jobs:
         run: pnpm docs:build
 
       - name: Disable Jekyll
-        run: touch site/.nojekyll
+        run: |
+          mkdir -p site
+          touch site/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

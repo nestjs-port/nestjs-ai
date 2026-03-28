@@ -2,6 +2,7 @@ import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
 import { Module, Scope } from "@nestjs/common";
 import {
   type ChatClientConfiguration,
+  type ChatMemoryConfiguration,
   type ChatModelConfiguration,
   type EmbeddingModelConfiguration,
   FetchHttpClient,
@@ -70,6 +71,11 @@ export class NestAiModule {
     NestAiModule.registerConfigurationProviders(
       providers,
       exports,
+      options.chatMemory,
+    );
+    NestAiModule.registerConfigurationProviders(
+      providers,
+      exports,
       options.observation,
     );
     NestAiModule.registerConfigurationProviders(
@@ -95,6 +101,7 @@ export class NestAiModule {
       | ChatModelConfiguration
       | EmbeddingModelConfiguration
       | ChatClientConfiguration
+      | ChatMemoryConfiguration
       | ObservationConfiguration
       | VectorStoreConfiguration,
   ): void {

@@ -24,7 +24,7 @@ import {
   type SearchReply,
 } from "@redis/search";
 import type { AggregateReply } from "@redis/search/dist/lib/commands/AGGREGATE";
-import { createClient, type RedisJSON } from "redis";
+import { createClient, type RedisClientType, type RedisJSON } from "redis";
 import type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
@@ -61,7 +61,7 @@ export class RedisChatMemoryRepository
     RedisChatMemoryRepository.name,
   );
   private readonly _config: RedisChatMemoryConfig;
-  private readonly _client: ReturnType<typeof createClient>;
+  private readonly _client: RedisClientType;
 
   private constructor(config: RedisChatMemoryConfig) {
     assert(config, "config must not be null");
@@ -745,14 +745,14 @@ export class RedisChatMemoryRepository
 export class RedisChatMemoryRepositoryBuilder {
   private readonly _configBuilder = new RedisChatMemoryConfigBuilder();
   private _redisUrl: string | null = null;
-  private _client: ReturnType<typeof createClient> | null = null;
+  private _client: RedisClientType | null = null;
 
   redisUrl(redisUrl: string): this {
     this._redisUrl = redisUrl;
     return this;
   }
 
-  client(redisClient: ReturnType<typeof createClient>): this {
+  client(redisClient: RedisClientType): this {
     this._client = redisClient;
     this._configBuilder.redisClient(redisClient);
     return this;
@@ -795,12 +795,14 @@ export class RedisChatMemoryRepositoryBuilder {
 
   async build(): Promise<RedisChatMemoryRepository> {
     if (!this._client) {
-      this._client = createClient(
+      const client = createClient(
         this._redisUrl ? { url: this._redisUrl } : undefined,
-      ).on("error", () => {
+      ) as RedisClientType;
+      client.on("error", () => {
         // No-op to avoid unhandled "error" event crashes when caller does not attach listeners.
       });
-      this._configBuilder.redisClient(this._client);
+      this._client = client;
+      this._configBuilder.redisClient(client);
     }
 
     const config = this._configBuilder.build();

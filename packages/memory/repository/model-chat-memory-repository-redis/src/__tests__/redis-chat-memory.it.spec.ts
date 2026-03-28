@@ -3,7 +3,7 @@ import {
   RedisContainer,
   type StartedRedisContainer,
 } from "@testcontainers/redis";
-import { createClient } from "redis";
+import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { RedisChatMemoryConfig } from "../redis-chat-memory-config";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
@@ -12,7 +12,7 @@ describe("RedisChatMemoryIT", () => {
   const conversationId = "test-conversation";
 
   let redisContainer: StartedRedisContainer | null;
-  let client: ReturnType<typeof createClient>;
+  let client: RedisClientType;
   let chatMemory: RedisChatMemoryRepository;
   const cleanupIndexes = new Set<string>();
 
@@ -22,7 +22,7 @@ describe("RedisChatMemoryIT", () => {
     ).start();
     const redisUrl = redisContainer.getConnectionUrl();
 
-    client = createClient({ url: redisUrl });
+    client = createClient({ url: redisUrl }) as RedisClientType;
     await client.connect();
   }, 120_000);
 

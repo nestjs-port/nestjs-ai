@@ -1,4 +1,5 @@
 import {
+  BATCHING_STRATEGY_TOKEN,
   EMBEDDING_MODEL_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
@@ -6,7 +7,6 @@ import {
   type VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
-import { TokenCountBatchingStrategy } from "@nestjs-ai/model";
 import { VectorStoreObservationConvention } from "@nestjs-ai/vector-store";
 import { createClient, type RedisClientType } from "redis";
 import { RedisVectorStore } from "../redis-vector-store";
@@ -32,7 +32,7 @@ function createRedisVectorStoreProviders(
         EMBEDDING_MODEL_TOKEN,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: VectorStoreObservationConvention, optional: true },
-        { token: TokenCountBatchingStrategy, optional: true },
+        { token: BATCHING_STRATEGY_TOKEN, optional: true },
       ],
     },
   ];

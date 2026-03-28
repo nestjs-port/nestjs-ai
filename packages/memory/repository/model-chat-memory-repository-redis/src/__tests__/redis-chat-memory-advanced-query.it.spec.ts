@@ -10,7 +10,7 @@ import {
   RedisContainer,
   type StartedRedisContainer,
 } from "@testcontainers/redis";
-import { createClient } from "redis";
+import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 
@@ -19,7 +19,7 @@ const sleep = async (ms: number) =>
 
 describe("RedisChatMemoryAdvancedQueryIT", () => {
   let redisContainer: StartedRedisContainer | null;
-  let client: ReturnType<typeof createClient>;
+  let client: RedisClientType;
   let chatMemory: RedisChatMemoryRepository;
 
   beforeAll(async () => {
@@ -28,7 +28,7 @@ describe("RedisChatMemoryAdvancedQueryIT", () => {
     ).start();
     const redisUrl = redisContainer.getConnectionUrl();
 
-    client = createClient({ url: redisUrl });
+    client = createClient({ url: redisUrl }) as RedisClientType;
     await client.connect();
   }, 120_000);
 

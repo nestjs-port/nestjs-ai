@@ -10,8 +10,8 @@ vi.mock("redis", () => ({
 }));
 
 describe("configureRedisChatMemory", () => {
-  it("uses a provided redis client directly", async () => {
-    const client = createMockRedisClient();
+  it("uses an already connected redis client directly", async () => {
+    const client = createMockRedisClient({ isOpen: true });
 
     const configuration = configureRedisChatMemory({
       client: client as unknown as RedisClientType,
@@ -41,6 +41,34 @@ describe("configureRedisChatMemory", () => {
     expect(chatMemory).toBeInstanceOf(RedisChatMemoryRepository);
     expect(chatMemory.indexName).toBe("custom-chat-memory-index");
     expect(client.connect).not.toHaveBeenCalled();
+  });
+
+  it("connects a provided redis client when it is not open", async () => {
+    const client = createMockRedisClient({ isOpen: false });
+
+    const configuration = configureRedisChatMemory({
+      client: client as unknown as RedisClientType,
+      initializeSchema: false,
+    });
+
+    const chatMemoryProvider = configuration.providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "token" in provider &&
+        provider.token === CHAT_MEMORY_TOKEN,
+    );
+
+    expect(chatMemoryProvider).toBeDefined();
+
+    const chatMemory = await (
+      chatMemoryProvider as unknown as {
+        useFactory: () => Promise<RedisChatMemoryRepository>;
+      }
+    ).useFactory();
+
+    expect(chatMemory).toBeInstanceOf(RedisChatMemoryRepository);
+    expect(client.connect).toHaveBeenCalled();
   });
 
   it("creates a redis client from clientOptions", async () => {
@@ -77,12 +105,17 @@ describe("configureRedisChatMemory", () => {
   });
 });
 
-function createMockRedisClient(): RedisClientType & {
+function createMockRedisClient(
+  options: { isOpen?: boolean } = {},
+): RedisClientType & {
   connect: ReturnType<typeof vi.fn>;
+  isOpen: boolean;
 } {
   return {
+    isOpen: options.isOpen ?? false,
     connect: vi.fn(async () => undefined),
   } as unknown as RedisClientType & {
     connect: ReturnType<typeof vi.fn>;
+    isOpen: boolean;
   };
 }

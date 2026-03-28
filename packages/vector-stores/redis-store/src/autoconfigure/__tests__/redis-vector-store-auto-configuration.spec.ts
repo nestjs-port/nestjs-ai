@@ -15,8 +15,8 @@ vi.mock("redis", () => ({
 }));
 
 describe("configureRedisVectorStore", () => {
-  it("uses a provided redis client directly", async () => {
-    const client = createMockRedisClient();
+  it("uses an already connected redis client directly", async () => {
+    const client = createMockRedisClient({ isOpen: true });
     const embeddingModel = createMockEmbeddingModel();
 
     const configuration = configureRedisVectorStore({
@@ -65,6 +65,39 @@ describe("configureRedisVectorStore", () => {
         PREFIX: "doc:",
       }),
     );
+    expect(client.connect).not.toHaveBeenCalled();
+  });
+
+  it("connects a provided redis client when it is not open", async () => {
+    const client = createMockRedisClient({ isOpen: false });
+    const embeddingModel = createMockEmbeddingModel();
+
+    const configuration = configureRedisVectorStore({
+      client: client as unknown as RedisClientType,
+      initializeSchema: false,
+    });
+
+    const vectorStoreProvider = configuration.providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "token" in provider &&
+        provider.token === VECTOR_STORE_TOKEN,
+    );
+
+    expect(vectorStoreProvider).toBeDefined();
+
+    const vectorStore = await (
+      vectorStoreProvider as unknown as {
+        useFactory: (
+          embeddingModel: EmbeddingModel,
+        ) => Promise<RedisVectorStore>;
+      }
+    ).useFactory(embeddingModel);
+
+    expect(vectorStore).toBeInstanceOf(RedisVectorStore);
+    expect(vectorStore.redisClient).toBe(client);
+    expect(client.connect).toHaveBeenCalled();
   });
 
   it("creates a redis client from clientOptions", async () => {
@@ -104,14 +137,18 @@ describe("configureRedisVectorStore", () => {
   });
 });
 
-function createMockRedisClient(): RedisClientType & {
+function createMockRedisClient(
+  options: { isOpen?: boolean } = {},
+): RedisClientType & {
   connect: ReturnType<typeof vi.fn>;
+  isOpen: boolean;
   ft: {
     _list: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
   };
 } {
   return {
+    isOpen: options.isOpen ?? false,
     connect: vi.fn(async () => undefined),
     ft: {
       _list: vi.fn(async () => []),

@@ -65,16 +65,25 @@ function createRedisVectorStoreFactory(
   };
 }
 
-function resolveRedisClient(
+async function resolveRedisClient(
   properties: RedisVectorStoreProperties,
-): RedisClientType | Promise<RedisClientType> {
-  if (properties.client != null) {
-    return properties.client;
+): Promise<RedisClientType> {
+  const client = properties.client;
+  if (client != null) {
+    if (client.isOpen) {
+      return client;
+    }
+
+    await client.connect();
+    return client;
   }
 
   if (properties.clientOptions != null) {
-    const client = createClient(properties.clientOptions) as RedisClientType;
-    return client.connect().then(() => client);
+    const createdClient = createClient(
+      properties.clientOptions,
+    ) as RedisClientType;
+    await createdClient.connect();
+    return createdClient;
   }
 
   throw new Error("Redis vector store client or clientOptions must be set");

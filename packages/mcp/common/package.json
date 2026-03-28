@@ -15,12 +15,15 @@
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0"
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0"
   }
 }

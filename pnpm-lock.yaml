@@ -366,6 +366,12 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-ai/model-transformers':
+        specifier: workspace:*
+        version: link:../../models/transformers
+      '@nestjs-ai/testing':
+        specifier: workspace:*
+        version: link:../../testing
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store

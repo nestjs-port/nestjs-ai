@@ -25,6 +25,8 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/model-transformers": "workspace:*",
+    "@nestjs-ai/testing": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "@testcontainers/redis": "^11.13.0",
     "testcontainers": "^11.13.0"

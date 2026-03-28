@@ -5,12 +5,7 @@ import {
   DocumentMetadata,
   Document as VectorDocument,
 } from "@nestjs-ai/commons";
-import {
-  Embedding,
-  EmbeddingModel,
-  type EmbeddingRequest,
-  EmbeddingResponse,
-} from "@nestjs-ai/model";
+import { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
 import { Filter, SearchRequest } from "@nestjs-ai/vector-store";
 import {
   RedisContainer,
@@ -35,49 +30,10 @@ const createRedisVectorStoreDocuments = (): Document[] => [
 
 type RedisClient = ReturnType<typeof createClient>;
 
-class MockEmbeddingModel extends EmbeddingModel {
-  override async call(request: EmbeddingRequest): Promise<EmbeddingResponse> {
-    return new EmbeddingResponse(
-      request.instructions.map(
-        (instruction, index) =>
-          new Embedding(this.vectorForText(instruction), index),
-      ),
-    );
-  }
-
-  protected override async embedDocument(
-    document: Document,
-  ): Promise<number[]> {
-    return this.vectorForText(document.text ?? "");
-  }
-
-  private vectorForText(text: string): number[] {
-    const normalized = text.toLowerCase();
-    if (normalized.includes("spring")) {
-      return [1, 0, 0];
-    }
-    if (normalized.includes("time shelter") || normalized.includes("andes")) {
-      return [0.7, 0.7, 0];
-    }
-    if (normalized.includes("great depression")) {
-      return [0, 1, 0];
-    }
-    if (normalized.includes("the world")) {
-      return [0, 1, 0];
-    }
-    if (normalized.includes("content")) {
-      return [0, 0, 1];
-    }
-    if (normalized.includes("foobar")) {
-      return [0, 0, 1];
-    }
-    return [0.2, 0.2, 0.2];
-  }
-}
-
 describe("RedisVectorStoreIT", () => {
   let redisContainer: StartedRedisContainer;
   let client: RedisClient;
+  let embeddingModel: TransformersEmbeddingModel;
   let vectorStore: RedisVectorStore;
 
   const documents = createRedisVectorStoreDocuments();
@@ -90,15 +46,15 @@ describe("RedisVectorStoreIT", () => {
     // Use the container connection URL directly for the Redis client.
     client = createClient({ url: redisUrl });
     await client.connect();
-  }, 120_000);
+
+    embeddingModel = new TransformersEmbeddingModel();
+    await embeddingModel.onModuleInit();
+  }, 240_000);
 
   beforeEach(async () => {
     await client.flushAll();
 
-    vectorStore = RedisVectorStore.builder(
-      client as never,
-      new MockEmbeddingModel(),
-    )
+    vectorStore = RedisVectorStore.builder(client as never, embeddingModel)
       .metadataFields(
         RedisMetadataField.tag("meta1"),
         RedisMetadataField.tag("meta2"),

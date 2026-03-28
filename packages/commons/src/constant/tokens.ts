@@ -1,4 +1,6 @@
 export const CHAT_MODEL_TOKEN = Symbol.for("CHAT_MODEL_TOKEN");
+export const EMBEDDING_MODEL_TOKEN = Symbol.for("EMBEDDING_MODEL_TOKEN");
+export const VECTOR_STORE_TOKEN = Symbol.for("VECTOR_STORE_TOKEN");
 export const CHAT_CLIENT_BUILDER_TOKEN = Symbol.for(
   "CHAT_CLIENT_BUILDER_TOKEN",
 );

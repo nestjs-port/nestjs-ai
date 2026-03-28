@@ -1,4 +1,8 @@
-import { MetadataMode, NoopObservationRegistry } from "@nestjs-ai/commons";
+import {
+  EMBEDDING_MODEL_TOKEN,
+  MetadataMode,
+  NoopObservationRegistry,
+} from "@nestjs-ai/commons";
 import { DefaultEmbeddingModelObservationConvention } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
@@ -12,10 +16,15 @@ describe("TransformersEmbeddingModelAutoConfiguration", () => {
   it("wires model provider and observation handlers", () => {
     const configuration = configureTransformersEmbeddingModel();
 
-    expect(configuration.providers).toHaveLength(2);
+    expect(configuration.providers).toHaveLength(3);
     expect(
       configuration.providers.some(
         (provider) => provider.token === TransformersEmbeddingModel,
+      ),
+    ).toBe(true);
+    expect(
+      configuration.providers.some(
+        (provider) => provider.token === EMBEDDING_MODEL_TOKEN,
       ),
     ).toBe(true);
   });

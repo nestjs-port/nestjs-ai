@@ -1,4 +1,5 @@
 import {
+  EMBEDDING_MODEL_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -24,7 +25,7 @@ export function configureTransformersEmbeddingModel(
     providers: [
       ...createModelObservationHandlerProviders(),
       {
-        token: TransformersEmbeddingModel,
+        token: EMBEDDING_MODEL_TOKEN,
         useFactory: (
           observationRegistry?: ObservationRegistry,
           observationConvention?: EmbeddingModelObservationConvention,

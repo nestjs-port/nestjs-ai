@@ -1,3 +1,4 @@
+export * from "./autoconfigure";
 export { RedisFilterExpressionConverter } from "./redis-filter-expression-converter";
 export {
   RedisMetadataField,

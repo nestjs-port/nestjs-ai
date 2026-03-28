@@ -13,7 +13,7 @@ const sleep = async (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("RedisChatMemoryErrorHandlingIT", () => {
-  let redisContainer: StartedRedisContainer | null;
+  let redisContainer: StartedRedisContainer;
   let client: RedisClientType;
   let chatMemory: RedisChatMemoryRepository;
 
@@ -39,12 +39,8 @@ describe("RedisChatMemoryErrorHandlingIT", () => {
   });
 
   afterAll(async () => {
-    if (!client) {
-      return;
-    }
-
     await client.close();
-    await redisContainer?.stop();
+    await redisContainer.stop();
   }, 60_000);
 
   it("should handle invalid conversation id", async () => {

@@ -10,7 +10,7 @@ import { RedisChatMemoryConfig } from "../redis-chat-memory-config";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 
 describe("RedisChatMemoryMediaIT", () => {
-  let redisContainer: StartedRedisContainer | null;
+  let redisContainer: StartedRedisContainer;
   let client: RedisClientType;
   let chatMemory: RedisChatMemoryRepository;
 

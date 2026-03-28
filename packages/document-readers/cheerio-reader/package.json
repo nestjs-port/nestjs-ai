@@ -1,7 +1,8 @@
 {
   "name": "@nestjs-ai/document-reader-cheerio",
   "version": "0.0.0",
-  "private": true,
+  "license": "Apache-2.0",
+  "private": false,
   "description": "Cheerio-based document reader for NestJS AI",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

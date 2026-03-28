@@ -1,7 +1,8 @@
 {
   "name": "@nestjs-ai/document-reader-pdf",
   "version": "0.0.0",
-  "private": true,
+  "license": "Apache-2.0",
+  "private": false,
   "description": "PDF.js document reader for NestJS AI",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

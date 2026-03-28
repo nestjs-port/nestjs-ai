@@ -14,7 +14,7 @@ import { RedisChatMemoryConfig } from "../redis-chat-memory-config";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 
 describe("RedisChatMemoryRepositoryIT", () => {
-  let redisContainer: StartedRedisContainer | null;
+  let redisContainer: StartedRedisContainer;
   let client: RedisClientType;
   let chatMemoryRepository: ChatMemoryRepository;
 
@@ -43,12 +43,8 @@ describe("RedisChatMemoryRepositoryIT", () => {
   });
 
   afterAll(async () => {
-    if (!client) {
-      return;
-    }
-
     await client.close();
-    await redisContainer?.stop();
+    await redisContainer.stop();
   }, 60_000);
 
   it("should find all conversation ids", async () => {

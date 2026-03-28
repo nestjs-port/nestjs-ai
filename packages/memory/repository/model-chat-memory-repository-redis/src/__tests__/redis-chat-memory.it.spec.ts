@@ -11,7 +11,7 @@ import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 describe("RedisChatMemoryIT", () => {
   const conversationId = "test-conversation";
 
-  let redisContainer: StartedRedisContainer | null;
+  let redisContainer: StartedRedisContainer;
   let client: RedisClientType;
   let chatMemory: RedisChatMemoryRepository;
   const cleanupIndexes = new Set<string>();
@@ -36,12 +36,8 @@ describe("RedisChatMemoryIT", () => {
   });
 
   afterAll(async () => {
-    if (!client) {
-      return;
-    }
-
     await client.close();
-    await redisContainer?.stop();
+    await redisContainer.stop();
   }, 60_000);
 
   it("should store and retrieve messages", async () => {

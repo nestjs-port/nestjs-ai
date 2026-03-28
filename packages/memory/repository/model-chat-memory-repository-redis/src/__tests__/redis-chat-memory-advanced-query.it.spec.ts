@@ -18,7 +18,7 @@ const sleep = async (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("RedisChatMemoryAdvancedQueryIT", () => {
-  let redisContainer: StartedRedisContainer | null;
+  let redisContainer: StartedRedisContainer;
   let client: RedisClientType;
   let chatMemory: RedisChatMemoryRepository;
 
@@ -57,12 +57,8 @@ describe("RedisChatMemoryAdvancedQueryIT", () => {
   });
 
   afterAll(async () => {
-    if (!client) {
-      return;
-    }
-
     await client.close();
-    await redisContainer?.stop();
+    await redisContainer.stop();
   }, 60_000);
 
   it("should find messages by type single conversation", async () => {

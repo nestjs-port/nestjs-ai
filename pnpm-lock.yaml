@@ -153,6 +153,12 @@ importers:
 
   packages/jsdbc: {}
 
+  packages/mcp/common:
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
+
   packages/memory/repository/model-chat-memory-repository-redis:
     dependencies:
       '@redis/json':

@@ -11,7 +11,7 @@ import {
   RedisContainer,
   type StartedRedisContainer,
 } from "@testcontainers/redis";
-import { createClient } from "redis";
+import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { RedisMetadataField } from "../redis-metadata-field";
@@ -28,11 +28,9 @@ const createRedisVectorStoreDocuments = (): Document[] => [
   }),
 ];
 
-type RedisClient = ReturnType<typeof createClient>;
-
 describe("RedisVectorStoreIT", () => {
   let redisContainer: StartedRedisContainer;
-  let client: RedisClient;
+  let client: RedisClientType;
   let embeddingModel: TransformersEmbeddingModel;
   let vectorStore: RedisVectorStore;
 
@@ -54,7 +52,7 @@ describe("RedisVectorStoreIT", () => {
   beforeEach(async () => {
     await client.flushAll();
 
-    vectorStore = RedisVectorStore.builder(client as never, embeddingModel)
+    vectorStore = RedisVectorStore.builder(client, embeddingModel)
       .metadataFields(
         RedisMetadataField.tag("meta1"),
         RedisMetadataField.tag("meta2"),
@@ -305,7 +303,8 @@ describe("RedisVectorStoreIT", () => {
   });
 
   it("get native client test", () => {
-    const nativeClient = vectorStore.getNativeClient<RedisClient>();
+    const nativeClient =
+      vectorStore.getNativeClient<ReturnType<typeof createClient>>();
     expect(nativeClient).toBe(client);
   });
 });

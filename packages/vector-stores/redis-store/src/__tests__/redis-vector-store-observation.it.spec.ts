@@ -9,7 +9,7 @@ import {
   RedisContainer,
   type StartedRedisContainer,
 } from "@testcontainers/redis";
-import { createClient } from "redis";
+import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { RedisMetadataField } from "../redis-metadata-field";
@@ -26,11 +26,9 @@ const createRedisVectorStoreDocuments = (): Document[] => [
   }),
 ];
 
-type RedisClient = ReturnType<typeof createClient>;
-
 describe("RedisVectorStoreObservationIT", () => {
   let redisContainer: StartedRedisContainer;
-  let client: RedisClient;
+  let client: RedisClientType;
   let embeddingModel: TransformersEmbeddingModel;
   let vectorStore: RedisVectorStore;
   let observationRegistry: TestObservationRegistry;
@@ -54,7 +52,7 @@ describe("RedisVectorStoreObservationIT", () => {
 
     observationRegistry = TestObservationRegistry.create();
 
-    vectorStore = RedisVectorStore.builder(client as never, embeddingModel)
+    vectorStore = RedisVectorStore.builder(client, embeddingModel)
       .observationRegistry(observationRegistry)
       .customObservationConvention(null)
       .initializeSchema(true)

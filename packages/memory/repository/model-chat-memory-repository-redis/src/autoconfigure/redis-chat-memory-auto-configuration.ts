@@ -24,16 +24,25 @@ export function configureRedisChatMemory(
   } as unknown as ChatMemoryConfiguration;
 }
 
-function resolveRedisClient(
+async function resolveRedisClient(
   properties: RedisChatMemoryProperties,
-): RedisClientType | Promise<RedisClientType> {
-  if (properties.client != null) {
-    return properties.client;
+): Promise<RedisClientType> {
+  const client = properties.client;
+  if (client != null) {
+    if (client.isOpen) {
+      return client;
+    }
+
+    await client.connect();
+    return client;
   }
 
   if (properties.clientOptions != null) {
-    const client = createClient(properties.clientOptions) as RedisClientType;
-    return client.connect().then(() => client);
+    const createdClient = createClient(
+      properties.clientOptions,
+    ) as RedisClientType;
+    await createdClient.connect();
+    return createdClient;
   }
 
   throw new Error("Redis chat memory client or clientOptions must be set");

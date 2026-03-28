@@ -45,9 +45,11 @@ describe("RedisChatMemoryAdvancedQueryIT", () => {
 
     // Use a unique index name to avoid conflicts with metadata schema
     const uniqueIndexName = `test-adv-app-${Date.now()}-${randomUUID()}`;
+    const uniqueKeyPrefix = `test-adv-chat-memory:${Date.now()}-${randomUUID()}:`;
     chatMemory = await RedisChatMemoryRepository.builder()
       .client(client)
       .indexName(uniqueIndexName)
+      .keyPrefix(uniqueKeyPrefix)
       .metadataFields(metadataFields)
       .build();
 

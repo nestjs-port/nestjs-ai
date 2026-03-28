@@ -148,3 +148,4 @@ vite.config.ts.timestamp-*
 
 # Docs
 docs/antora/site
+docs/antora/docs

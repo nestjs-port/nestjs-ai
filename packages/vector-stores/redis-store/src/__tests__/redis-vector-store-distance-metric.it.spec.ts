@@ -5,17 +5,15 @@ import {
   RedisContainer,
   type StartedRedisContainer,
 } from "@testcontainers/redis";
-import { createClient } from "redis";
+import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { RedisMetadataField } from "../redis-metadata-field";
 import { RedisDistanceMetric, RedisVectorStore } from "../redis-vector-store";
 
-type RedisClient = ReturnType<typeof createClient>;
-
 describe("RedisVectorStoreDistanceMetricIT", () => {
   let redisContainer: StartedRedisContainer;
-  let client: RedisClient;
+  let client: RedisClientType;
   let embeddingModel: TransformersEmbeddingModel;
 
   beforeAll(async () => {
@@ -132,10 +130,7 @@ describe("RedisVectorStoreDistanceMetricIT", () => {
 
   it("cosine distance metric", async () => {
     // Create the vector store with explicit COSINE distance metric
-    const vectorStore = RedisVectorStore.builder(
-      client as never,
-      embeddingModel,
-    )
+    const vectorStore = RedisVectorStore.builder(client, embeddingModel)
       .indexName("cosine-test-index")
       .distanceMetric(RedisDistanceMetric.COSINE) // New feature
       .metadataFields(RedisMetadataField.tag("category"))
@@ -148,10 +143,7 @@ describe("RedisVectorStoreDistanceMetricIT", () => {
 
   it("l2 distance metric", async () => {
     // Create the vector store with explicit L2 distance metric
-    const vectorStore = RedisVectorStore.builder(
-      client as never,
-      embeddingModel,
-    )
+    const vectorStore = RedisVectorStore.builder(client, embeddingModel)
       .indexName("l2-test-index")
       .distanceMetric(RedisDistanceMetric.L2)
       .metadataFields(RedisMetadataField.tag("category"))
@@ -219,10 +211,7 @@ describe("RedisVectorStoreDistanceMetricIT", () => {
 
   it("ip distance metric", async () => {
     // Create the vector store with explicit IP distance metric
-    const vectorStore = RedisVectorStore.builder(
-      client as never,
-      embeddingModel,
-    )
+    const vectorStore = RedisVectorStore.builder(client, embeddingModel)
       .indexName("ip-test-index")
       .distanceMetric(RedisDistanceMetric.IP) // New feature
       .metadataFields(RedisMetadataField.tag("category"))

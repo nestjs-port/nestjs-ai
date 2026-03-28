@@ -8,4 +8,5 @@ packages:
   - 'packages/document-readers/*'
 
 onlyBuiltDependencies:
-  - sharp
+  - '@nestjs/core'
+  - 'sharp'

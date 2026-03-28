@@ -1,7 +1,8 @@
 {
   "name": "@nestjs-ai/vector-store-redis",
   "version": "0.0.0",
-  "private": true,
+  "license": "Apache-2.0",
+  "private": false,
   "description": "Redis vector store for NestJS AI",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

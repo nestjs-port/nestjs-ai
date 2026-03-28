@@ -1,8 +1,9 @@
 {
   "name": "@nestjs-ai/advisors-vector-store",
   "version": "0.0.0",
+  "license": "Apache-2.0",
   "description": "Vector store advisors for NestJS AI",
-  "private": true,
+  "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

@@ -5,6 +5,7 @@ import type {
   EmbeddingModelConfiguration,
   HttpClient,
   ObservationConfiguration,
+  VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 
 export interface NestAiModuleOptions {
@@ -12,6 +13,7 @@ export interface NestAiModuleOptions {
   chatModel?: ChatModelConfiguration;
   embeddingModel?: EmbeddingModelConfiguration;
   observation?: ObservationConfiguration;
+  vectorStore?: VectorStoreConfiguration;
   httpClient?: HttpClient;
   providers?: Provider[];
   global?: boolean;

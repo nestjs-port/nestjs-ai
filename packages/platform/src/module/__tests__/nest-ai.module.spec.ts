@@ -1,6 +1,7 @@
 import type {
   ChatClientConfiguration,
   EmbeddingModelConfiguration,
+  VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 import {
   HTTP_CLIENT_TOKEN,
@@ -106,6 +107,33 @@ describe("NestAIModule", () => {
 
     expect(embeddingModelProvider).toBeDefined();
     expect(exportsList).toContain(EMBEDDING_MODEL_TOKEN);
+  });
+
+  it("registers vector store providers and exports", () => {
+    const VECTOR_STORE_TOKEN = Symbol("VECTOR_STORE_TOKEN");
+    const dynamicModule = NestAiModule.forRoot({
+      vectorStore: {
+        providers: [
+          {
+            token: VECTOR_STORE_TOKEN,
+            useFactory: () => "vector-store",
+          },
+        ],
+      } as unknown as VectorStoreConfiguration,
+    });
+    const providers = dynamicModule.providers ?? [];
+    const exportsList = dynamicModule.exports ?? [];
+
+    const vectorStoreProvider = providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "provide" in provider &&
+        provider.provide === VECTOR_STORE_TOKEN,
+    );
+
+    expect(vectorStoreProvider).toBeDefined();
+    expect(exportsList).toContain(VECTOR_STORE_TOKEN);
   });
 
   it("uses module global option when provided", () => {

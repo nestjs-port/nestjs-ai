@@ -10,6 +10,7 @@ import {
   type ObservationConfiguration,
   ObservationHandlers,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
+  type VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
 import { NestProviderInstanceExplorer } from "../provider";
@@ -71,6 +72,11 @@ export class NestAiModule {
       exports,
       options.observation,
     );
+    NestAiModule.registerConfigurationProviders(
+      providers,
+      exports,
+      options.vectorStore,
+    );
 
     LoggerFactory.bind(new NestLoggerFactory());
 
@@ -89,7 +95,8 @@ export class NestAiModule {
       | ChatModelConfiguration
       | EmbeddingModelConfiguration
       | ChatClientConfiguration
-      | ObservationConfiguration,
+      | ObservationConfiguration
+      | VectorStoreConfiguration,
   ): void {
     if (configuration == null) {
       return;

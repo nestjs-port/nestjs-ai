@@ -6,3 +6,4 @@ export type {
   ProviderConfiguration,
   ProviderScope,
 } from "./provider-configuration.type";
+export type { VectorStoreConfiguration } from "./vector-store-configuration.interface";

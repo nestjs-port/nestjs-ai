@@ -1,6 +1,7 @@
 export { AbstractResponseMetadata } from "./abstract-response-metadata";
 export type { ApiKey } from "./api-key.interface";
 export type { ChatModelDescription } from "./chat-model-description.interface";
+export { EmbeddingModelDescription } from "./embedding-model-description";
 export type { Model } from "./model.interface";
 export type { ModelDescription } from "./model-description.interface";
 export type { ModelOptions } from "./model-options.interface";

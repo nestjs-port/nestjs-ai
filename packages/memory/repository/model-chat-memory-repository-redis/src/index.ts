@@ -2,6 +2,7 @@ export type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
 } from "./advanced-redis-chat-memory-repository";
+export * from "./autoconfigure";
 export {
   RedisChatMemoryConfig,
   RedisChatMemoryConfigBuilder,

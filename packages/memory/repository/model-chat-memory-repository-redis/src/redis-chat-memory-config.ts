@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { createClient } from "redis";
+import type { RedisClientType } from "redis";
 
 export type RedisChatMemoryMetadataFieldType = "text" | "numeric" | "tag";
 
@@ -13,7 +13,7 @@ export class RedisChatMemoryConfig {
   static readonly DEFAULT_KEY_PREFIX = "chat-memory:";
   static readonly DEFAULT_MAX_RESULTS = 1000;
 
-  private readonly _client: ReturnType<typeof createClient>;
+  private readonly _client: RedisClientType;
   private readonly _indexName: string;
   private readonly _keyPrefix: string;
   private readonly _timeToLiveSeconds: number;
@@ -41,7 +41,7 @@ export class RedisChatMemoryConfig {
     return new RedisChatMemoryConfigBuilder();
   }
 
-  get client(): ReturnType<typeof createClient> {
+  get client(): RedisClientType {
     return this._client;
   }
 
@@ -75,7 +75,7 @@ export class RedisChatMemoryConfig {
 }
 
 export class RedisChatMemoryConfigBuilder {
-  private _clientValue: ReturnType<typeof createClient> | null = null;
+  private _clientValue: RedisClientType | null = null;
   private _indexNameValue: string = RedisChatMemoryConfig.DEFAULT_INDEX_NAME;
   private _keyPrefixValue: string = RedisChatMemoryConfig.DEFAULT_KEY_PREFIX;
   private _timeToLiveSecondsValue: number = -1;
@@ -85,7 +85,7 @@ export class RedisChatMemoryConfigBuilder {
     RedisChatMemoryConfig.DEFAULT_MAX_RESULTS;
   private _metadataFieldsValue: RedisChatMemoryMetadataField[] = [];
 
-  get client(): ReturnType<typeof createClient> | null {
+  get client(): RedisClientType | null {
     return this._clientValue;
   }
 
@@ -117,7 +117,7 @@ export class RedisChatMemoryConfigBuilder {
     return [...this._metadataFieldsValue];
   }
 
-  redisClient(client: ReturnType<typeof createClient>): this {
+  redisClient(client: RedisClientType): this {
     this._clientValue = client;
     return this;
   }

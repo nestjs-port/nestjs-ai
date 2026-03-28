@@ -1,6 +1,7 @@
 import type { Provider } from "@nestjs/common";
 import type {
   ChatClientConfiguration,
+  ChatMemoryConfiguration,
   ChatModelConfiguration,
   EmbeddingModelConfiguration,
   HttpClient,
@@ -11,6 +12,7 @@ import type {
 export interface NestAiModuleOptions {
   chatClient?: ChatClientConfiguration;
   chatModel?: ChatModelConfiguration;
+  chatMemory?: ChatMemoryConfiguration;
   embeddingModel?: EmbeddingModelConfiguration;
   observation?: ObservationConfiguration;
   vectorStore?: VectorStoreConfiguration;

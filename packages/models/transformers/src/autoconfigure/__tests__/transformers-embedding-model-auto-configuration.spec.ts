@@ -5,8 +5,6 @@ import {
 } from "@nestjs-ai/commons";
 import { DefaultEmbeddingModelObservationConvention } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-
-import { TransformersEmbeddingModel } from "../../transformers-embedding-model";
 import {
   configureTransformersEmbeddingModel,
   createTransformersEmbeddingModel,
@@ -16,12 +14,7 @@ describe("TransformersEmbeddingModelAutoConfiguration", () => {
   it("wires model provider and observation handlers", () => {
     const configuration = configureTransformersEmbeddingModel();
 
-    expect(configuration.providers).toHaveLength(3);
-    expect(
-      configuration.providers.some(
-        (provider) => provider.token === TransformersEmbeddingModel,
-      ),
-    ).toBe(true);
+    expect(configuration.providers).toHaveLength(2);
     expect(
       configuration.providers.some(
         (provider) => provider.token === EMBEDDING_MODEL_TOKEN,

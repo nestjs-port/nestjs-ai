@@ -1,6 +1,7 @@
 export {
   InjectChatClientBuilder,
   InjectChatClientCustomizer,
+  InjectChatMemory,
   InjectChatModel,
   InjectEmbeddingModel,
   InjectHttpClient,

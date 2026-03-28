@@ -2,6 +2,7 @@ import { Inject } from "@nestjs/common";
 import {
   CHAT_CLIENT_BUILDER_TOKEN,
   CHAT_CLIENT_CUSTOMIZER_TOKEN,
+  CHAT_MEMORY_TOKEN,
   CHAT_MODEL_TOKEN,
   EMBEDDING_MODEL_TOKEN,
   HTTP_CLIENT_TOKEN,
@@ -14,6 +15,12 @@ import {
  */
 export const InjectChatModel = (): ParameterDecorator =>
   Inject(CHAT_MODEL_TOKEN);
+
+/**
+ * Decorator that injects the chat memory instance.
+ */
+export const InjectChatMemory = (): ParameterDecorator =>
+  Inject(CHAT_MEMORY_TOKEN);
 
 /**
  * Decorator that injects the embedding model instance.

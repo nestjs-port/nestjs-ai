@@ -37,7 +37,7 @@ function createTool(
         param: { type: "string" },
       },
     },
-  } as McpTool;
+  };
 }
 
 function createClient(overrides: Partial<McpClient> = {}): McpClient {

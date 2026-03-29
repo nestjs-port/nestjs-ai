@@ -17,6 +17,12 @@
 import type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
 import type { McpConnectionInfo } from "./mcp-connection-info";
 
-export interface McpToolFilter {
-  test(connectionInfo: McpConnectionInfo, tool: McpTool): boolean;
+export abstract class McpToolFilter {
+  abstract test(connectionInfo: McpConnectionInfo, tool: McpTool): boolean;
+}
+
+export class DefaultMcpToolFilter extends McpToolFilter {
+  override test(_connectionInfo: McpConnectionInfo, _tool: McpTool): boolean {
+    return true;
+  }
 }

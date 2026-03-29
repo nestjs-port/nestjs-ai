@@ -36,6 +36,7 @@ import {
   ChatResponse,
   ChatResponseMetadata,
   DefaultChatModelObservationConvention,
+  DefaultToolCallingManager,
   DefaultToolExecutionEligibilityPredicate,
   DefaultUsage,
   EmptyUsage,
@@ -44,7 +45,7 @@ import {
   MessageType,
   Prompt,
   type ToolCall,
-  ToolCallingManager,
+  type ToolCallingManager,
   type ToolExecutionEligibilityPredicate,
   ToolExecutionResult,
   type ToolResponseMessage,
@@ -958,7 +959,7 @@ interface OpenAiChatModelBuilderCopyProps {
 
 export class OpenAiChatModelBuilder {
   private static readonly DEFAULT_TOOL_CALLING_MANAGER =
-    ToolCallingManager.builder();
+    new DefaultToolCallingManager();
 
   private _openAiApi?: OpenAiApi;
   private _defaultOptions = new OpenAiChatOptions({

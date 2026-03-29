@@ -1,17 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Page Not Found | {{{site.title}}}</title>
-  <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
-</head>
-<body>
-  <main class="site-main site-main--404">
-    <article class="doc">
-      <h1>Page Not Found</h1>
-      <p>The requested page could not be found.</p>
-    </article>
+  <head>
+{{> head defaultPageTitle='Page Not Found'}}
+  </head>
+  <body class="status-404">
+{{> header}}
+  <main class="article">
+    <div class="content">
+{{> article-404}}
+    </div>
   </main>
-</body>
+{{> footer}}
+  </body>
 </html>

@@ -1,13 +1,10 @@
 name: Deploy Docs to GitHub Pages
 
-on: []
-
-# Temporarily disabled. Restore the triggers below when re-enabling.
-# on:
-#   push:
-#     branches:
-#       - main
-#   workflow_dispatch:
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

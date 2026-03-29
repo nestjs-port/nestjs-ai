@@ -19,10 +19,12 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "*"
+    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/model": "*"
   },
   "devDependencies": {
-    "@nestjs-ai/commons": "workspace:*"
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0"

@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-export {};
+export class Book {
+  constructor(
+    public readonly title: string,
+    public readonly author: string,
+  ) {}
+}

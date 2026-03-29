@@ -11,6 +11,10 @@ export default defineConfig({
       "@nestjs-ai/commons": path.resolve(__dirname, "packages/commons/src"),
       "@nestjs-ai/jsdbc": path.resolve(__dirname, "packages/jsdbc/src"),
       "@nestjs-ai/model": path.resolve(__dirname, "packages/model/src"),
+      "@nestjs-ai/model-openai": path.resolve(
+        __dirname,
+        "packages/models/openai/src",
+      ),
       "@nestjs-ai/model-transformers": path.resolve(
         __dirname,
         "packages/models/transformers/src",

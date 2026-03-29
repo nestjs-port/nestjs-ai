@@ -21,6 +21,11 @@ export {
   McpConnectionInfo,
   type McpConnectionInfoProps,
 } from "./mcp-connection-info";
-export type { McpToolFilter } from "./mcp-tool-filter";
+export { McpToolCallback, McpToolCallbackBuilder } from "./mcp-tool-callback";
+export {
+  McpToolCallbackProvider,
+  McpToolCallbackProviderBuilder,
+} from "./mcp-tool-callback-provider";
+export { DefaultMcpToolFilter, McpToolFilter } from "./mcp-tool-filter";
 export { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator";
 export { McpToolUtils } from "./mcp-tool-utils";

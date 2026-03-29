@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-export abstract class McpToolUtils {
-  static readonly TOOL_CONTEXT_MCP_EXCHANGE_KEY = "exchange";
+import type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
+import type { ToolDefinition } from "@nestjs-ai/model";
+import { DefaultToolDefinition } from "@nestjs-ai/model";
 
+export abstract class McpToolUtils {
   static prefixedToolName(
     prefix: string,
     title: string | null,
@@ -74,6 +76,17 @@ export abstract class McpToolUtils {
     );
 
     return formatted.replaceAll("-", "_");
+  }
+
+  static createToolDefinition(
+    prefixedToolName: string,
+    tool: McpTool,
+  ): ToolDefinition {
+    return DefaultToolDefinition.builder()
+      .name(prefixedToolName)
+      .description(tool.description ?? "")
+      .inputSchema(JSON.stringify(tool.inputSchema ?? {}))
+      .build();
   }
 
   private static shorten(input: string): string {

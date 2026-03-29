@@ -18,11 +18,11 @@ import "reflect-metadata";
 import assert from "node:assert/strict";
 import {
   type ChatResponse,
+  DefaultToolCallingManager,
   type Message,
   Prompt,
   Tool,
   ToolCallbacks,
-  ToolCallingManager,
   type ToolExecutionResult,
   ToolResponseMessage,
   UserMessage,
@@ -43,7 +43,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
   const tools = new Tools();
-  const toolCallingManager = ToolCallingManager.builder();
+  const toolCallingManager = new DefaultToolCallingManager();
   const openAiApi = OpenAiApi.builder()
     .apiKey(OPENAI_API_KEY ?? "")
     .build();

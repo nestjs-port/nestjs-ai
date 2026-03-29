@@ -52,6 +52,7 @@ import {
   ChatResponse,
   ChatResponseMetadata,
   DefaultChatModelObservationConvention,
+  DefaultToolCallingManager,
   DefaultToolExecutionEligibilityPredicate,
   DefaultUsage,
   Generation,
@@ -60,7 +61,7 @@ import {
   MessageType,
   Prompt,
   type ToolCall,
-  ToolCallingManager,
+  type ToolCallingManager,
   type ToolExecutionEligibilityPredicate,
   ToolExecutionResult,
   type ToolResponseMessage,
@@ -152,7 +153,7 @@ export class GoogleGenAiChatModel extends ChatModel {
       : null;
 
     // Wrap the provided tool calling manager in a GoogleGenAiToolCallingManager
-    const tcm = props.toolCallingManager ?? ToolCallingManager.builder();
+    const tcm = props.toolCallingManager ?? new DefaultToolCallingManager();
     if (tcm instanceof GoogleGenAiToolCallingManager) {
       this._toolCallingManager = tcm;
     } else {

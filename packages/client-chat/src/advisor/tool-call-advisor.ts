@@ -18,10 +18,11 @@ import assert from "node:assert/strict";
 import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-ai/commons";
 import {
   ChatResponse,
+  DefaultToolCallingManager,
   type Message,
   Prompt,
   type ToolCallingChatOptions,
-  ToolCallingManager,
+  type ToolCallingManager,
   ToolExecutionResult,
 } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
@@ -62,7 +63,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
   constructor(props: ToolCallAdvisorProps = {}) {
     const toolCallingManager =
       props.toolCallingManager === undefined
-        ? ToolCallingManager.builder()
+        ? new DefaultToolCallingManager()
         : props.toolCallingManager;
     assert(toolCallingManager, "toolCallingManager must not be null");
 

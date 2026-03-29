@@ -128,7 +128,7 @@ When committing changes, follow these steps:
 8. **Determine type**: Classify as feat/fix/refactor/test/docs/chore based on each unit
 9. **Identify scope**: Check if changes are package-specific (model/core/commons/openai)
 10. **Generate commit message**: Create message following the format above
-11. **Execute commit**: Run `git commit -m "subject" -m "body"` with the generated message
+11. **Execute commit**: Run `git commit --signoff -m "subject" -m "body"` with the generated message
 
 ### Important Notes
 
@@ -139,7 +139,8 @@ When committing changes, follow these steps:
 - **Default behavior**: If the user says "commit" without a file scope, treat all current repository changes (staged, unstaged, and untracked) as commit candidates
 - **Do not force a single commit for all candidates**: Split into multiple commits when logical units are separable; use one commit only when split is not meaningful
 - **Only ask for scope confirmation** when the user explicitly indicates a partial commit, file-specific commit, or when the target repository is ambiguous
-- **Use `git commit -m` for subject and `-m` for body** (multiple `-m` flags create multi-line commit)
+- **Always use `--signoff` flag** to add `Signed-off-by` trailer to every commit
+- **Use `git commit --signoff -m` for subject and `-m` for body** (multiple `-m` flags create multi-line commit)
 - **If no changes are staged**, stage all changes by default (`git add -A`) and then split/stage per logical unit as needed, unless the user asked for a partial commit
 - **Never force push** or perform destructive git operations without explicit user request
 
@@ -179,8 +180,8 @@ git diff --staged
 # - Implement default options builder
 # - Add comprehensive tests
 
-# 7. Execute commit
-git commit -m "feat(model): add new chat options interface" -m "- Add ChatOptions interface with streaming support
+# 7. Execute commit (always use --signoff)
+git commit --signoff -m "feat(model): add new chat options interface" -m "- Add ChatOptions interface with streaming support
 - Implement default options builder
 - Add comprehensive tests"
 ```

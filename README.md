@@ -1,4 +1,4 @@
-# nestjs-ai
+# NestJS AI
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-**nestjs-ai** is a comprehensive TypeScript port of the [Spring AI](https://github.com/spring-projects/spring-ai) project, reimagined for the NestJS/Node.js ecosystem. It provides a unified abstraction layer for integrating Large Language Models (LLMs), vector stores, document readers, and RAG pipelines into NestJS applications.
+**NestJS AI** is a comprehensive TypeScript port of the [Spring AI](https://github.com/spring-projects/spring-ai) project, reimagined for the NestJS/Node.js ecosystem. It provides a unified abstraction layer for integrating Large Language Models (LLMs), vector stores, document readers, and RAG pipelines into NestJS applications.
 
 The project faithfully mirrors Spring AI's module structure and API design while leveraging TypeScript idioms, RxJS reactive streams, and NestJS dependency injection.
 
@@ -39,7 +39,7 @@ The project faithfully mirrors Spring AI's module structure and API design while
 
 ## Porting Progress
 
-Spring AI module porting status to nestjs-ai. (~520 source files, ~180 test files ported across 22 packages)
+Spring AI module porting status to NestJS AI. (~520 source files, ~180 test files ported across 22 packages)
 
 | Category | Spring AI Module | nestjs-ai Package | Progress |
 |---|---|---|---|
@@ -146,4 +146,3 @@ pnpm test
 pnpm lint
 pnpm format
 ```
-

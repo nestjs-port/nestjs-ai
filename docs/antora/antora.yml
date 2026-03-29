@@ -1,5 +1,5 @@
 name: ai
 version: true
-title: Spring AI
+title: NestJS AI
 nav:
   - modules/ROOT/nav.adoc

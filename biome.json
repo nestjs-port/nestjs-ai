@@ -10,6 +10,7 @@
     "includes": [
       "**",
       "!.claude",
+      "!docs/antora/ui-bundle",
       "!packages/vector-store/src/filter/antlr4",
       "packages/vector-store/src/filter/antlr4/index.ts"
     ]

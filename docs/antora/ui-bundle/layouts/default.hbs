@@ -1,31 +1,11 @@
-<!doctype html>
-<html lang="{{page.lang}}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{{page.title}}} | {{{site.title}}}</title>
-  <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
-</head>
-<body>
-  <div class="site-shell">
-    {{#if page.navigation}}
-    <aside class="site-nav" aria-label="Page navigation">
-      <div class="site-nav__title">{{{site.title}}}</div>
-      <nav>
-        <ul class="nav-list">
-          {{#each page.navigation}}
-          {{> nav-item}}
-          {{/each}}
-        </ul>
-      </nav>
-    </aside>
-    {{/if}}
-
-    <main class="site-main">
-      <article class="doc">
-        {{{page.contents}}}
-      </article>
-    </main>
-  </div>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Untitled'}}
+  </head>
+  <body class="article{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}">
+{{> header}}
+{{> body}}
+{{> footer}}
+  </body>
 </html>

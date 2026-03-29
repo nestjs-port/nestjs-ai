@@ -16,5 +16,14 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.1.11",
+    "@nestjs/core": "^11.1.11",
+    "@nestjs/testing": "^11.1.11",
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/platform": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*"
   }
 }

@@ -16,7 +16,6 @@
 
 import type { ChatResponse, Prompt } from "../../chat";
 import type { ToolDefinition } from "../../tool";
-import { DefaultToolCallingManager } from "./default-tool-calling-manager";
 import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
 import type { ToolExecutionResult } from "./tool-execution-result";
 
@@ -36,13 +35,4 @@ export interface ToolCallingManager {
     prompt: Prompt,
     chatResponse: ChatResponse,
   ): Promise<ToolExecutionResult>;
-}
-
-export namespace ToolCallingManager {
-  /**
-   * Create a default {@link ToolCallingManager} builder.
-   */
-  export function builder() {
-    return new DefaultToolCallingManager();
-  }
 }

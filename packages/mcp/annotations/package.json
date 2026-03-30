@@ -1,0 +1,20 @@
+{
+  "name": "@nestjs-ai/mcp-annotations",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": false,
+  "description": "MCP annotations for NestJS AI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  }
+}

@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-export { NestAiModule } from "./nest-ai.module";
-export { NestAiModuleOptions } from "./nest-ai-module.options";
+export {
+  NEST_AI_FEATURE_MODULE_OPTIONS,
+  NEST_AI_ROOT_MODULE_OPTIONS,
+  NestAiModule,
+} from "./nest-ai.module";
+export { NestAiChatClientModule } from "./nest-ai-chat-client.module";
+export { NestAiChatModelModule } from "./nest-ai-chat-model.module";
+export type {
+  NestAiChatClientModuleAsyncOptions,
+  NestAiChatModelModuleAsyncOptions,
+  NestAiFeatureAsyncProviderDescriptor,
+  NestAiFeatureModuleAsyncOptions,
+  NestAiFeatureModuleOptions,
+  NestAiRootModuleAsyncFactoryOptions,
+  NestAiRootModuleAsyncOptions,
+  NestAiRootModuleOptions,
+} from "./nest-ai-module.options";

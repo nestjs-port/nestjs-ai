@@ -17,109 +17,176 @@
 import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
 import { Module, Scope } from "@nestjs/common";
 import {
-  type ChatClientConfiguration,
-  type ChatMemoryConfiguration,
-  type ChatModelConfiguration,
-  type EmbeddingModelConfiguration,
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
-  type ObservationConfiguration,
   ObservationHandlers,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
-  type VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
 import { NestProviderInstanceExplorer } from "../provider";
-import type { NestAiModuleOptions } from "./nest-ai-module.options";
+import type {
+  NestAiFeatureAsyncProviderDescriptor,
+  NestAiFeatureModuleAsyncOptions,
+  NestAiFeatureModuleOptions,
+  NestAiRootModuleAsyncFactoryOptions,
+  NestAiRootModuleAsyncOptions,
+  NestAiRootModuleOptions,
+} from "./nest-ai-module.options";
+
+export const NEST_AI_ROOT_MODULE_OPTIONS = Symbol(
+  "NEST_AI_ROOT_MODULE_OPTIONS",
+);
+export const NEST_AI_FEATURE_MODULE_OPTIONS = Symbol(
+  "NEST_AI_FEATURE_MODULE_OPTIONS",
+);
 
 @Module({})
 export class NestAiModule {
-  static forRoot(options: NestAiModuleOptions = {}): DynamicModule {
+  static forRoot(options: NestAiRootModuleOptions = {}): DynamicModule {
+    LoggerFactory.bind(new NestLoggerFactory());
+
+    return {
+      module: NestAiModule,
+      providers: NestAiModule.createRootProviders(options),
+      exports: NestAiModule.getRootExports(),
+      global: options.global ?? true,
+    };
+  }
+
+  static forRootAsync(options: NestAiRootModuleAsyncOptions): DynamicModule {
+    LoggerFactory.bind(new NestLoggerFactory());
+
+    return {
+      module: NestAiModule,
+      imports: options.imports ?? [],
+      providers: [
+        {
+          provide: NEST_AI_ROOT_MODULE_OPTIONS,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        },
+        ...NestAiModule.createAsyncRootProviders(),
+      ],
+      exports: NestAiModule.getRootExports(),
+      global: options.global ?? true,
+    };
+  }
+
+  static forFeature(...features: NestAiFeatureModuleOptions[]): DynamicModule {
     const providers: Provider[] = [];
     const exports: InjectionToken[] = [];
 
-    NestAiModule.registerUserProviders(providers, exports, options.providers);
-
-    NestAiModule.addProviderIfMissing(
-      providers,
-      exports,
-      {
-        provide: HTTP_CLIENT_TOKEN,
-        useValue: options.httpClient ?? new FetchHttpClient(),
-      },
-      HTTP_CLIENT_TOKEN,
-    );
-    NestAiModule.addProviderIfMissing(
-      providers,
-      exports,
-      {
-        provide: ObservationHandlers,
-        useValue: new ObservationHandlers(),
-      },
-      ObservationHandlers,
-    );
-    NestAiModule.addProviderIfMissing(
-      providers,
-      exports,
-      {
-        provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
-        useClass: NestProviderInstanceExplorer,
-      },
-      PROVIDER_INSTANCE_EXPLORER_TOKEN,
-    );
-
-    NestAiModule.registerConfigurationProviders(
-      providers,
-      exports,
-      options.chatModel,
-    );
-    NestAiModule.registerConfigurationProviders(
-      providers,
-      exports,
-      options.embeddingModel,
-    );
-    NestAiModule.registerConfigurationProviders(
-      providers,
-      exports,
-      options.chatClient,
-    );
-    NestAiModule.registerConfigurationProviders(
-      providers,
-      exports,
-      options.chatMemory,
-    );
-    NestAiModule.registerConfigurationProviders(
-      providers,
-      exports,
-      options.observation,
-    );
-    NestAiModule.registerConfigurationProviders(
-      providers,
-      exports,
-      options.vectorStore,
-    );
-
-    LoggerFactory.bind(new NestLoggerFactory());
+    for (const feature of features) {
+      NestAiModule.registerConfigurationProviders(providers, exports, feature);
+    }
 
     return {
       module: NestAiModule,
       providers,
       exports,
-      global: options.global ?? true,
     };
+  }
+
+  static forFeatureAsync(
+    options: NestAiFeatureModuleAsyncOptions,
+  ): DynamicModule {
+    return {
+      module: NestAiModule,
+      imports: options.imports ?? [],
+      providers: [
+        {
+          provide: NEST_AI_FEATURE_MODULE_OPTIONS,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        },
+        ...NestAiModule.createAsyncFeatureProviders(options.providers),
+      ],
+      exports: options.providers.map((provider) => provider.token),
+    };
+  }
+
+  private static createRootProviders(
+    options: Pick<NestAiRootModuleOptions, "httpClient">,
+  ): Provider[] {
+    return [
+      {
+        provide: HTTP_CLIENT_TOKEN,
+        useValue: options.httpClient ?? new FetchHttpClient(),
+      },
+      {
+        provide: ObservationHandlers,
+        useValue: new ObservationHandlers(),
+      },
+      {
+        provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+        useClass: NestProviderInstanceExplorer,
+      },
+    ];
+  }
+
+  private static createAsyncRootProviders(): Provider[] {
+    return [
+      {
+        provide: HTTP_CLIENT_TOKEN,
+        useFactory: (options: NestAiRootModuleAsyncFactoryOptions): unknown =>
+          options.httpClient ?? new FetchHttpClient(),
+        inject: [NEST_AI_ROOT_MODULE_OPTIONS],
+      },
+      {
+        provide: ObservationHandlers,
+        useValue: new ObservationHandlers(),
+      },
+      {
+        provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+        useClass: NestProviderInstanceExplorer,
+      },
+    ];
+  }
+
+  private static getRootExports(): InjectionToken[] {
+    return [
+      HTTP_CLIENT_TOKEN,
+      ObservationHandlers,
+      PROVIDER_INSTANCE_EXPLORER_TOKEN,
+    ];
+  }
+
+  private static createAsyncFeatureProviders(
+    providers: NestAiFeatureAsyncProviderDescriptor[],
+  ): Provider[] {
+    return providers.map((descriptor) => ({
+      provide: descriptor.token,
+      useFactory: async (
+        configuration: NestAiFeatureModuleOptions,
+        ...dependencies: unknown[]
+      ): Promise<unknown> => {
+        const provider = configuration.providers.find(
+          (candidate) => candidate.token === descriptor.token,
+        );
+
+        if (provider == null) {
+          throw new Error(
+            `Missing async Nest AI feature provider for token ${String(descriptor.token)}`,
+          );
+        }
+
+        return (provider.useFactory as (...args: unknown[]) => unknown)(
+          ...dependencies,
+        );
+      },
+      inject: [
+        NEST_AI_FEATURE_MODULE_OPTIONS,
+        ...(descriptor.inject ?? []),
+      ],
+      scope: NestAiModule.toProviderScope(descriptor.scope),
+    }));
   }
 
   private static registerConfigurationProviders(
     providers: Provider[],
     exports: InjectionToken[],
-    configuration?:
-      | ChatModelConfiguration
-      | EmbeddingModelConfiguration
-      | ChatClientConfiguration
-      | ChatMemoryConfiguration
-      | ObservationConfiguration
-      | VectorStoreConfiguration,
+    configuration?: NestAiFeatureModuleOptions,
   ): void {
     if (configuration == null) {
       return;
@@ -144,39 +211,6 @@ export class NestAiModule {
         token,
       );
     }
-  }
-
-  private static registerUserProviders(
-    providers: Provider[],
-    exports: InjectionToken[],
-    userProviders: Provider[] | undefined,
-  ): void {
-    if (userProviders == null) {
-      return;
-    }
-
-    for (const provider of userProviders) {
-      const token = NestAiModule.resolveProviderToken(provider);
-      if (token == null) {
-        continue;
-      }
-      NestAiModule.addProviderIfMissing(providers, exports, provider, token);
-    }
-  }
-
-  private static resolveProviderToken(
-    provider: Provider,
-  ): InjectionToken | null {
-    if (typeof provider === "function") {
-      return provider as InjectionToken;
-    }
-    if (typeof provider !== "object" || provider == null) {
-      return null;
-    }
-    if (!("provide" in provider)) {
-      return null;
-    }
-    return provider.provide as InjectionToken;
   }
 
   private static addProviderIfMissing(

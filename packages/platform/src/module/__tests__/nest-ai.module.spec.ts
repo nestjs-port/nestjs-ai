@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import { Module } from "@nestjs/common";
+import { Test } from "@nestjs/testing";
 import type {
   ChatClientConfiguration,
-  EmbeddingModelConfiguration,
-  VectorStoreConfiguration,
+  ChatModelConfiguration,
+  HttpClient,
 } from "@nestjs-ai/commons";
 import {
+  CHAT_CLIENT_BUILDER_TOKEN,
+  CHAT_CLIENT_CUSTOMIZER_TOKEN,
+  CHAT_MODEL_PROPERTIES_TOKEN,
+  CHAT_MODEL_TOKEN,
   HTTP_CLIENT_TOKEN,
   type ObservationConfiguration,
   ObservationHandlers,
@@ -27,6 +33,103 @@ import {
 } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { NestAiModule } from "../nest-ai.module";
+import { NestAiChatClientModule } from "../nest-ai-chat-client.module";
+import { NestAiChatModelModule } from "../nest-ai-chat-model.module";
+
+const TEST_HTTP_CLIENT: HttpClient = {
+  fetch: async () => new Response(null, { status: 200 }),
+};
+
+const CONFIG_TOKEN = Symbol("CONFIG_TOKEN");
+const FEATURE_CONFIG_TOKEN = Symbol("FEATURE_CONFIG_TOKEN");
+const OPTIONAL_DEPENDENCY_TOKEN = Symbol("OPTIONAL_DEPENDENCY_TOKEN");
+const OPTIONAL_RESULT_TOKEN = Symbol("OPTIONAL_RESULT_TOKEN");
+const MISSING_ASYNC_PROVIDER_TOKEN = Symbol("MISSING_ASYNC_PROVIDER_TOKEN");
+const FEATURE_CONSUMER_TOKEN = Symbol("FEATURE_CONSUMER_TOKEN");
+
+@Module({
+  providers: [
+    {
+      provide: CONFIG_TOKEN,
+      useValue: {
+        httpClient: TEST_HTTP_CLIENT,
+      },
+    },
+  ],
+  exports: [CONFIG_TOKEN],
+})
+class ConfigModule {}
+
+@Module({
+  providers: [
+    {
+      provide: FEATURE_CONFIG_TOKEN,
+      useValue: {
+        modelName: "async-chat-model",
+      },
+    },
+  ],
+  exports: [FEATURE_CONFIG_TOKEN],
+})
+class FeatureConfigModule {}
+
+@Module({
+  imports: [
+    NestAiModule.forRoot({
+      global: false,
+      httpClient: TEST_HTTP_CLIENT,
+    }),
+    NestAiModule.forFeature(
+      {
+        providers: [
+          {
+            token: CHAT_MODEL_TOKEN,
+            useFactory: () => "shared-chat-model",
+          },
+        ],
+      } as unknown as ChatModelConfiguration,
+      {
+        providers: [
+          {
+            token: CHAT_CLIENT_CUSTOMIZER_TOKEN,
+            useFactory: () => ["shared-customizer"],
+          },
+          {
+            token: CHAT_CLIENT_BUILDER_TOKEN,
+            useFactory: (chatModel: string) => ({
+              chatModel,
+              createdAt: Symbol("shared-builder"),
+            }),
+            inject: [CHAT_MODEL_TOKEN],
+            scope: "TRANSIENT",
+          },
+        ],
+      } as unknown as ChatClientConfiguration,
+    ),
+  ],
+  exports: [NestAiModule],
+})
+class SharedAiModule {}
+
+@Module({
+  imports: [SharedAiModule],
+  providers: [
+    {
+      provide: FEATURE_CONSUMER_TOKEN,
+      useFactory: (
+        httpClient: HttpClient,
+        chatModel: string,
+        chatClientBuilder: { chatModel: string; createdAt: symbol },
+      ) => ({
+        httpClient,
+        chatModel,
+        chatClientBuilder,
+      }),
+      inject: [HTTP_CLIENT_TOKEN, CHAT_MODEL_TOKEN, CHAT_CLIENT_BUILDER_TOKEN],
+    },
+  ],
+})
+class ConsumerModule {}
 
 describe("NestAIModule", () => {
   it("registers default HTTP client provider in forRoot", () => {
@@ -54,6 +157,30 @@ describe("NestAIModule", () => {
     expect(exportsList).toContain(HTTP_CLIENT_TOKEN);
   });
 
+  it("uses explicit HTTP client when provided in forRoot", () => {
+    const dynamicModule = NestAiModule.forRoot({
+      httpClient: TEST_HTTP_CLIENT,
+    });
+    const providers = dynamicModule.providers ?? [];
+
+    const httpClientProvider = providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "provide" in provider &&
+        provider.provide === HTTP_CLIENT_TOKEN,
+    );
+
+    expect(httpClientProvider).toBeDefined();
+    expect(
+      typeof httpClientProvider === "object" &&
+        httpClientProvider !== null &&
+        "useValue" in httpClientProvider
+        ? httpClientProvider.useValue
+        : undefined,
+    ).toBe(TEST_HTTP_CLIENT);
+  });
+
   it("registers observation handlers provider and export", () => {
     const dynamicModule = NestAiModule.forRoot();
     const providers = dynamicModule.providers ?? [];
@@ -71,18 +198,301 @@ describe("NestAIModule", () => {
     expect(exportsList).toContain(ObservationHandlers);
   });
 
+  it("supports async root configuration with imports and inject", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiModule.forRootAsync({
+          imports: [ConfigModule],
+          inject: [CONFIG_TOKEN],
+          useFactory: (config: { httpClient: HttpClient }) => ({
+            httpClient: config.httpClient,
+          }),
+        }),
+      ],
+    }).compile();
+
+    expect(testingModule.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
+  });
+
+  it("uses async module global option when provided", () => {
+    const dynamicModule = NestAiModule.forRootAsync({
+      useFactory: () => ({
+        httpClient: TEST_HTTP_CLIENT,
+      }),
+      global: false,
+    });
+
+    expect(dynamicModule.global).toBe(false);
+  });
+
+  it("supports async feature configuration with imports and inject", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiModule.forFeatureAsync({
+          imports: [FeatureConfigModule],
+          inject: [FEATURE_CONFIG_TOKEN],
+          providers: [{ token: CHAT_MODEL_TOKEN }],
+          useFactory: (config: { modelName: string }) =>
+            ({
+              providers: [
+                {
+                  token: CHAT_MODEL_TOKEN,
+                  useFactory: () => config.modelName,
+                },
+              ],
+            }) as unknown as ChatModelConfiguration,
+        }),
+      ],
+    }).compile();
+
+    expect(testingModule.get(CHAT_MODEL_TOKEN)).toBe("async-chat-model");
+  });
+
+  it("supports async feature provider scopes", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiModule.forFeatureAsync({
+          providers: [
+            {
+              token: CHAT_CLIENT_BUILDER_TOKEN,
+              scope: "TRANSIENT",
+            },
+          ],
+          useFactory: () =>
+            ({
+              providers: [
+                {
+                  token: CHAT_CLIENT_BUILDER_TOKEN,
+                  useFactory: () => ({ createdAt: Symbol("builder") }),
+                  scope: "TRANSIENT",
+                },
+              ],
+            }) as unknown as ChatClientConfiguration,
+        }),
+      ],
+    }).compile();
+
+    const firstBuilder = await testingModule.resolve(CHAT_CLIENT_BUILDER_TOKEN);
+    const secondBuilder = await testingModule.resolve(
+      CHAT_CLIENT_BUILDER_TOKEN,
+    );
+
+    expect(firstBuilder).not.toBe(secondBuilder);
+  });
+
+  it("supports optional async feature dependencies", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiModule.forFeatureAsync({
+          providers: [
+            {
+              token: OPTIONAL_RESULT_TOKEN,
+              inject: [
+                { token: OPTIONAL_DEPENDENCY_TOKEN, optional: true },
+              ],
+            },
+          ],
+          useFactory: () =>
+            ({
+              providers: [
+                {
+                  token: OPTIONAL_RESULT_TOKEN,
+                  useFactory: (dependency?: string) => dependency ?? "fallback",
+                },
+              ],
+            }) as unknown as ChatModelConfiguration,
+        }),
+      ],
+    }).compile();
+
+    expect(testingModule.get(OPTIONAL_RESULT_TOKEN)).toBe("fallback");
+  });
+
+  it("throws a clear error when async feature descriptors are incomplete", async () => {
+    await expect(
+      Test.createTestingModule({
+        imports: [
+          NestAiModule.forFeatureAsync({
+            providers: [{ token: MISSING_ASYNC_PROVIDER_TOKEN }],
+            useFactory: () =>
+              ({
+                providers: [
+                  {
+                    token: CHAT_MODEL_TOKEN,
+                    useFactory: () => "actual-provider",
+                  },
+                ],
+              }) as unknown as ChatModelConfiguration,
+          }),
+        ],
+      }).compile(),
+    ).rejects.toThrow(
+      `Missing async Nest AI feature provider for token ${String(MISSING_ASYNC_PROVIDER_TOKEN)}`,
+    );
+  });
+
+  it("resolves root and feature providers through a shared module when global is false", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [ConsumerModule],
+    }).compile();
+
+    const consumer = await testingModule.resolve<{
+      httpClient: HttpClient;
+      chatModel: string;
+      chatClientBuilder: { chatModel: string; createdAt: symbol };
+    }>(FEATURE_CONSUMER_TOKEN);
+    const anotherBuilder = await testingModule.resolve(
+      CHAT_CLIENT_BUILDER_TOKEN,
+    );
+
+    expect(consumer.httpClient).toBe(TEST_HTTP_CLIENT);
+    expect(consumer.chatModel).toBe("shared-chat-model");
+    expect(consumer.chatClientBuilder.chatModel).toBe("shared-chat-model");
+    expect(consumer.chatClientBuilder).not.toBe(anotherBuilder);
+  });
+
+  it("registers chat model through typed wrapper module", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiChatModelModule.forFeature({
+          providers: [
+            {
+              token: CHAT_MODEL_TOKEN,
+              useFactory: () => "wrapped-chat-model",
+            },
+          ],
+        } as unknown as ChatModelConfiguration),
+      ],
+    }).compile();
+
+    expect(testingModule.get(CHAT_MODEL_TOKEN)).toBe("wrapped-chat-model");
+  });
+
+  it("registers chat client through typed wrapper module", async () => {
+    const chatModelModule = NestAiChatModelModule.forFeature({
+      providers: [
+        {
+          token: CHAT_MODEL_TOKEN,
+          useFactory: () => "wrapped-chat-model",
+        },
+      ],
+    } as unknown as ChatModelConfiguration);
+
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        chatModelModule,
+        NestAiChatClientModule.forFeature(
+          {
+            providers: [
+              {
+                token: CHAT_CLIENT_CUSTOMIZER_TOKEN,
+                useFactory: () => ["customizer"],
+              },
+              {
+                token: CHAT_CLIENT_BUILDER_TOKEN,
+                useFactory: (chatModel: string) => ({
+                  chatModel,
+                  createdAt: Symbol("builder"),
+                }),
+                inject: [CHAT_MODEL_TOKEN],
+                scope: "TRANSIENT",
+              },
+            ],
+          } as unknown as ChatClientConfiguration,
+          { imports: [chatModelModule] },
+        ),
+      ],
+    }).compile();
+
+    const firstBuilder = await testingModule.resolve(CHAT_CLIENT_BUILDER_TOKEN);
+    const secondBuilder = await testingModule.resolve(
+      CHAT_CLIENT_BUILDER_TOKEN,
+    );
+
+    expect(firstBuilder.chatModel).toBe("wrapped-chat-model");
+    expect(firstBuilder).not.toBe(secondBuilder);
+  });
+
+  it("registers chat client through typed async wrapper module", async () => {
+    const chatModelModule = NestAiChatModelModule.forFeature({
+      providers: [
+        {
+          token: CHAT_MODEL_TOKEN,
+          useFactory: () => "wrapped-chat-model",
+        },
+      ],
+    } as unknown as ChatModelConfiguration);
+
+    const chatClientConfiguration = {
+      providers: [
+        {
+          token: CHAT_CLIENT_CUSTOMIZER_TOKEN,
+          useFactory: () => ["customizer"],
+        },
+        {
+          token: CHAT_CLIENT_BUILDER_TOKEN,
+          useFactory: (chatModel: string) => ({
+            chatModel,
+            createdAt: Symbol("builder"),
+          }),
+          inject: [CHAT_MODEL_TOKEN],
+          scope: "TRANSIENT",
+        },
+      ],
+    } as unknown as ChatClientConfiguration;
+
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        chatModelModule,
+        NestAiChatClientModule.forFeatureAsync({
+          configuration: chatClientConfiguration,
+          imports: [chatModelModule],
+        }),
+      ],
+    }).compile();
+
+    const firstBuilder = await testingModule.resolve(CHAT_CLIENT_BUILDER_TOKEN);
+    const secondBuilder = await testingModule.resolve(
+      CHAT_CLIENT_BUILDER_TOKEN,
+    );
+
+    expect(firstBuilder.chatModel).toBe("wrapped-chat-model");
+    expect(firstBuilder).not.toBe(secondBuilder);
+  });
+
+  it("registers chat model through async wrapper with properties token", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiChatModelModule.forFeatureAsync({
+          configuration: {
+            providers: [
+              {
+                token: CHAT_MODEL_TOKEN,
+                useFactory: (props: { modelName: string }) => props.modelName,
+                inject: [CHAT_MODEL_PROPERTIES_TOKEN],
+              },
+            ],
+          } as unknown as ChatModelConfiguration,
+          imports: [FeatureConfigModule],
+          inject: [FEATURE_CONFIG_TOKEN],
+          useFactory: (config: { modelName: string }) => config,
+        }),
+      ],
+    }).compile();
+
+    expect(testingModule.get(CHAT_MODEL_TOKEN)).toBe("async-chat-model");
+  });
+
   it("registers chat client providers and exports", () => {
     const CHAT_CLIENT_TOKEN = Symbol("CHAT_CLIENT_TOKEN");
-    const dynamicModule = NestAiModule.forRoot({
-      chatClient: {
-        providers: [
-          {
-            token: CHAT_CLIENT_TOKEN,
-            useFactory: () => "chat-client",
-          },
-        ],
-      } as unknown as ChatClientConfiguration,
-    });
+    const dynamicModule = NestAiModule.forFeature({
+      providers: [
+        {
+          token: CHAT_CLIENT_TOKEN,
+          useFactory: () => "chat-client",
+        },
+      ],
+    } as unknown as ChatClientConfiguration);
     const providers = dynamicModule.providers ?? [];
     const exportsList = dynamicModule.exports ?? [];
 
@@ -98,58 +508,30 @@ describe("NestAIModule", () => {
     expect(exportsList).toContain(CHAT_CLIENT_TOKEN);
   });
 
-  it("registers embedding model providers and exports", () => {
-    const EMBEDDING_MODEL_TOKEN = Symbol("EMBEDDING_MODEL_TOKEN");
-    const dynamicModule = NestAiModule.forRoot({
-      embeddingModel: {
+  it("registers multiple feature configurations in a single forFeature call", () => {
+    const CHAT_MODEL_TOKEN = Symbol("CHAT_MODEL_TOKEN");
+    const CHAT_CLIENT_TOKEN = Symbol("CHAT_CLIENT_TOKEN");
+    const dynamicModule = NestAiModule.forFeature(
+      {
         providers: [
           {
-            token: EMBEDDING_MODEL_TOKEN,
-            useFactory: () => "embedding-model",
+            token: CHAT_MODEL_TOKEN,
+            useFactory: () => "chat-model",
           },
         ],
-      } as unknown as EmbeddingModelConfiguration,
-    });
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
-
-    const embeddingModelProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === EMBEDDING_MODEL_TOKEN,
-    );
-
-    expect(embeddingModelProvider).toBeDefined();
-    expect(exportsList).toContain(EMBEDDING_MODEL_TOKEN);
-  });
-
-  it("registers vector store providers and exports", () => {
-    const VECTOR_STORE_TOKEN = Symbol("VECTOR_STORE_TOKEN");
-    const dynamicModule = NestAiModule.forRoot({
-      vectorStore: {
+      } as unknown as ChatModelConfiguration,
+      {
         providers: [
           {
-            token: VECTOR_STORE_TOKEN,
-            useFactory: () => "vector-store",
+            token: CHAT_CLIENT_TOKEN,
+            useFactory: () => "chat-client",
           },
         ],
-      } as unknown as VectorStoreConfiguration,
-    });
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
-
-    const vectorStoreProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === VECTOR_STORE_TOKEN,
+      } as unknown as ChatClientConfiguration,
     );
 
-    expect(vectorStoreProvider).toBeDefined();
-    expect(exportsList).toContain(VECTOR_STORE_TOKEN);
+    expect(dynamicModule.exports).toContain(CHAT_MODEL_TOKEN);
+    expect(dynamicModule.exports).toContain(CHAT_CLIENT_TOKEN);
   });
 
   it("uses module global option when provided", () => {
@@ -157,47 +539,15 @@ describe("NestAIModule", () => {
     expect(dynamicModule.global).toBe(false);
   });
 
-  it("uses user provider when same token is provided in forRoot options", () => {
-    const customHttpClient = { name: "custom-http-client" };
-    const dynamicModule = NestAiModule.forRoot({
+  it("keeps first provider when duplicate token is configured", () => {
+    const dynamicModule = NestAiModule.forFeature({
       providers: [
         {
-          provide: HTTP_CLIENT_TOKEN,
-          useValue: customHttpClient,
+          token: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+          useFactory: () => "override",
         },
       ],
-    });
-
-    const providers = dynamicModule.providers ?? [];
-    const httpClientProviders = providers.filter(
-      (provider) =>
-        typeof provider === "object" &&
-        provider != null &&
-        "provide" in provider &&
-        provider.provide === HTTP_CLIENT_TOKEN,
-    );
-
-    expect(httpClientProviders).toHaveLength(1);
-    expect(
-      typeof httpClientProviders[0] === "object" &&
-        httpClientProviders[0] != null &&
-        "useValue" in httpClientProviders[0]
-        ? httpClientProviders[0].useValue
-        : undefined,
-    ).toBe(customHttpClient);
-  });
-
-  it("keeps first provider when duplicate token is configured", () => {
-    const dynamicModule = NestAiModule.forRoot({
-      observation: {
-        providers: [
-          {
-            token: PROVIDER_INSTANCE_EXPLORER_TOKEN,
-            useFactory: () => "override",
-          },
-        ],
-      } as unknown as ObservationConfiguration,
-    });
+    } as unknown as ObservationConfiguration);
 
     const providers = dynamicModule.providers ?? [];
     const duplicateProviders = providers.filter(
@@ -209,35 +559,5 @@ describe("NestAIModule", () => {
     );
 
     expect(duplicateProviders).toHaveLength(1);
-  });
-
-  it("detects duplicate token from user class shorthand providers", () => {
-    class CustomProvider {}
-
-    const dynamicModule = NestAiModule.forRoot({
-      providers: [CustomProvider],
-      observation: {
-        providers: [
-          {
-            token: CustomProvider,
-            useFactory: () => "override",
-          },
-        ],
-      } as unknown as ObservationConfiguration,
-    });
-
-    const providers = dynamicModule.providers ?? [];
-    const customProviders = providers.filter((provider) => {
-      if (typeof provider === "function") {
-        return provider === CustomProvider;
-      }
-      if (typeof provider !== "object" || provider == null) {
-        return false;
-      }
-      return "provide" in provider && provider.provide === CustomProvider;
-    });
-
-    expect(customProviders).toHaveLength(1);
-    expect(customProviders[0]).toBe(CustomProvider);
   });
 });

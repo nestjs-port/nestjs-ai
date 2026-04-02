@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { Provider } from "@nestjs/common";
+import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
+import type { FactoryProvider } from "@nestjs/common/interfaces/modules/provider.interface";
 import type {
   ChatClientConfiguration,
   ChatMemoryConfiguration,
@@ -22,17 +23,63 @@ import type {
   EmbeddingModelConfiguration,
   HttpClient,
   ObservationConfiguration,
+  ProviderScope,
   VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 
-export interface NestAiModuleOptions {
-  chatClient?: ChatClientConfiguration;
-  chatModel?: ChatModelConfiguration;
-  chatMemory?: ChatMemoryConfiguration;
-  embeddingModel?: EmbeddingModelConfiguration;
-  observation?: ObservationConfiguration;
-  vectorStore?: VectorStoreConfiguration;
+export interface NestAiRootModuleOptions {
   httpClient?: HttpClient;
-  providers?: Provider[];
   global?: boolean;
 }
+
+export interface NestAiRootModuleAsyncOptions {
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (
+    ...args: never[]
+  ) =>
+    | Promise<NestAiRootModuleAsyncFactoryOptions>
+    | NestAiRootModuleAsyncFactoryOptions;
+  global?: boolean;
+}
+
+export interface NestAiRootModuleAsyncFactoryOptions {
+  httpClient?: HttpClient;
+}
+
+export interface NestAiFeatureAsyncProviderDescriptor {
+  token: InjectionToken;
+  scope?: ProviderScope;
+  inject?: FactoryProvider["inject"];
+}
+
+export interface NestAiFeatureModuleAsyncOptions {
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (
+    ...args: never[]
+  ) => Promise<NestAiFeatureModuleOptions> | NestAiFeatureModuleOptions;
+  providers: NestAiFeatureAsyncProviderDescriptor[];
+}
+
+export interface NestAiChatModelModuleAsyncOptions {
+  configuration: ChatModelConfiguration;
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (...args: never[]) => Promise<unknown> | unknown;
+}
+
+export interface NestAiChatClientModuleAsyncOptions {
+  configuration: ChatClientConfiguration;
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory?: (...args: never[]) => Promise<unknown> | unknown;
+}
+
+export type NestAiFeatureModuleOptions =
+  | ChatModelConfiguration
+  | ChatClientConfiguration
+  | ChatMemoryConfiguration
+  | EmbeddingModelConfiguration
+  | ObservationConfiguration
+  | VectorStoreConfiguration;

@@ -10,11 +10,9 @@ import type { NestAiChatModelModuleAsyncOptions } from "./nest-ai-module.options
 @Module({})
 export class NestAiChatModelModule {
   static forFeature(configuration: ChatModelConfiguration): DynamicModule {
-    return {
-      module: NestAiChatModelModule,
-      imports: [NestAiModule.forFeature(configuration)],
-      exports: [NestAiModule],
-    };
+    return NestAiChatModelModule.forFeatureAsync({
+      useFactory: () => configuration,
+    });
   }
 
   static forFeatureAsync(

@@ -18,6 +18,7 @@ import assert from "node:assert/strict";
 import { GoogleGenAI, type GoogleGenAIOptions } from "@google/genai";
 import type {
   DynamicModule,
+  FactoryProvider,
   InjectionToken,
   ModuleMetadata,
   Provider,
@@ -72,7 +73,7 @@ export class GoogleGenAiChatModelModule {
         },
         ...providers,
       ],
-      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      exports: providers.map((p) => (p as FactoryProvider).provide),
       global: options?.global ?? false,
     };
   }
@@ -93,7 +94,7 @@ export class GoogleGenAiChatModelModule {
         },
         ...providers,
       ],
-      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      exports: providers.map((p) => (p as FactoryProvider).provide),
       global: options.global ?? false,
     };
   }

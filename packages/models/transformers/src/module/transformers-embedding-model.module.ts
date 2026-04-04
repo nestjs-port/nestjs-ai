@@ -16,6 +16,7 @@
 
 import type {
   DynamicModule,
+  FactoryProvider,
   InjectionToken,
   ModuleMetadata,
   Provider,
@@ -66,7 +67,7 @@ export class TransformersEmbeddingModelModule {
         },
         ...providers,
       ],
-      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      exports: providers.map((p) => (p as FactoryProvider).provide),
       global: options?.global ?? false,
     };
   }
@@ -87,7 +88,7 @@ export class TransformersEmbeddingModelModule {
         },
         ...providers,
       ],
-      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      exports: providers.map((p) => (p as FactoryProvider).provide),
       global: options.global ?? false,
     };
   }

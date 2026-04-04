@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
+import type {
+  DynamicModule,
+  FactoryProvider,
+  InjectionToken,
+  Provider,
+} from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import {
   AlsObservationRegistry,
@@ -53,7 +58,7 @@ export class ObservationModule {
     return {
       module: ObservationModule,
       providers,
-      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      exports: providers.map((p) => (p as FactoryProvider).provide),
       global: properties.global ?? true,
     };
   }
@@ -74,7 +79,7 @@ export class ObservationModule {
         },
         ...providers,
       ],
-      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      exports: providers.map((p) => (p as FactoryProvider).provide),
       global: options.global ?? true,
     };
   }

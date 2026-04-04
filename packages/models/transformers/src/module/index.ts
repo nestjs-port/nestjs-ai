@@ -15,7 +15,8 @@
  */
 
 export {
-  configureTransformersEmbeddingModel,
-  createTransformersEmbeddingModel,
-} from "./transformers-embedding-model-auto-configuration";
+  TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN,
+  TransformersEmbeddingModelModule,
+  TransformersEmbeddingModelModuleAsyncOptions,
+} from "./transformers-embedding-model.module";
 export * from "./transformers-embedding-model-properties";

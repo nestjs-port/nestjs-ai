@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./autoconfigure";
+export * from "./module";
 export {
   TransformersEmbeddingModel,
   type TransformersEmbeddingModelProps,

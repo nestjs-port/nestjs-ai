@@ -16,11 +16,18 @@
 
 import assert from "node:assert/strict";
 import { GoogleGenAI, type GoogleGenAIOptions } from "@google/genai";
+import type {
+  DynamicModule,
+  InjectionToken,
+  ModuleMetadata,
+  Provider,
+} from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
-  type ChatModelConfiguration,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
+  type ProviderConfiguration,
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
@@ -35,78 +42,121 @@ import type {
   GoogleGenAiConnectionProperties,
 } from "./google-gen-ai-properties";
 
-/**
- * Creates a ChatModelConfiguration for Google GenAI that produces a GoogleGenAI client
- * and a GoogleGenAiChatModel.
- */
-export function configureGoogleGenAiChatModel(
-  properties: GoogleGenAiChatProperties,
-): ChatModelConfiguration {
-  return {
-    providers: [
-      ...createModelObservationHandlerProviders(),
-      ...createGoogleGenAiProviders(properties),
-      ...createGoogleGenAiChatModelProviders(properties),
-      ...createCachedContentProviders(properties),
-    ],
-  } as ChatModelConfiguration;
+export const GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN = Symbol.for(
+  "GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN",
+);
+
+export interface GoogleGenAiChatModelModuleAsyncOptions {
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (
+    ...args: never[]
+  ) => Promise<GoogleGenAiChatProperties> | GoogleGenAiChatProperties;
 }
 
-function createGoogleGenAiProviders(
-  properties: GoogleGenAiChatProperties,
-): ChatModelConfiguration["providers"] {
+@Module({})
+export class GoogleGenAiChatModelModule {
+  static forFeature(
+    properties: GoogleGenAiChatProperties,
+    options?: { imports?: ModuleMetadata["imports"] },
+  ): DynamicModule {
+    const providers = createProviders(properties);
+
+    return {
+      module: GoogleGenAiChatModelModule,
+      imports: options?.imports ?? [],
+      providers: [
+        {
+          provide: GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
+          useValue: properties,
+        },
+        ...providers,
+      ],
+      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+    };
+  }
+
+  static forFeatureAsync(
+    options: GoogleGenAiChatModelModuleAsyncOptions,
+  ): DynamicModule {
+    const providers = createProviders();
+
+    return {
+      module: GoogleGenAiChatModelModule,
+      imports: options.imports ?? [],
+      providers: [
+        {
+          provide: GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        },
+        ...providers,
+      ],
+      exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+    };
+  }
+}
+
+function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
   return [
+    ...toProviders(createModelObservationHandlerProviders()),
     {
-      token: GoogleGenAI,
-      useFactory: () => createGoogleGenAiClient(properties),
-      inject: [],
+      provide: GoogleGenAI,
+      useFactory: (props: GoogleGenAiChatProperties) =>
+        createGoogleGenAiClient(props),
+      inject: [GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN],
     },
-  ];
-}
-
-function createGoogleGenAiChatModelProviders(
-  properties: GoogleGenAiChatProperties,
-): ChatModelConfiguration["providers"] {
-  return [
     {
-      token: CHAT_MODEL_TOKEN,
+      provide: CHAT_MODEL_TOKEN,
       useFactory: (
+        props: GoogleGenAiChatProperties,
         genAiClient: GoogleGenAI,
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
         toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
       ) =>
         createGoogleGenAiChatModel(
-          properties,
+          props,
           genAiClient,
           observationRegistry,
           observationConvention,
           toolExecutionEligibilityPredicate,
         ),
       inject: [
+        GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
         GoogleGenAI,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
         { token: ToolExecutionEligibilityPredicate, optional: true },
       ],
     },
+    ...createCachedContentProviders(properties),
   ];
 }
 
 function createCachedContentProviders(
-  properties: GoogleGenAiChatProperties,
-): ChatModelConfiguration["providers"] {
-  if (properties.enableCachedContent === false) {
+  properties?: GoogleGenAiChatProperties,
+): Provider[] {
+  if (properties?.enableCachedContent === false) {
     return [];
   }
 
   return [
     {
-      token: GoogleGenAiCachedContentService,
-      useFactory: createGoogleGenAiCachedContentService,
+      provide: GoogleGenAiCachedContentService,
+      useFactory: (genAiClient: GoogleGenAI) =>
+        new GoogleGenAiCachedContentService(genAiClient),
       inject: [GoogleGenAI],
     },
   ];
+}
+
+function toProviders(configurations: ProviderConfiguration[]): Provider[] {
+  return configurations.map((config) => ({
+    provide: config.token as InjectionToken,
+    useFactory: config.useFactory,
+    inject: (config.inject ?? []) as InjectionToken[],
+  }));
 }
 
 function createGoogleGenAiChatModel(
@@ -129,22 +179,14 @@ function createGoogleGenAiChatModel(
   });
 }
 
-function createGoogleGenAiCachedContentService(
-  genAiClient: GoogleGenAI,
-): GoogleGenAiCachedContentService {
-  return new GoogleGenAiCachedContentService(genAiClient);
-}
-
 function createGoogleGenAiClient(
   properties: GoogleGenAiConnectionProperties,
 ): GoogleGenAI {
   const options: GoogleGenAIOptions = {};
   const apiKey = normalizedText(properties.apiKey);
   if (apiKey) {
-    // Gemini Developer API mode
     options.apiKey = apiKey;
   } else {
-    // Vertex AI mode
     const projectId = normalizedText(properties.projectId);
     const location = normalizedText(properties.location);
     assert(
@@ -158,8 +200,6 @@ function createGoogleGenAiClient(
     options.vertexai = true;
     options.project = projectId;
     options.location = location;
-    // Note: Similar to Spring AI auto-configuration, credentialsUri is kept as
-    // connection metadata but is not wired directly into the SDK client here.
   }
 
   return new GoogleGenAI(options);

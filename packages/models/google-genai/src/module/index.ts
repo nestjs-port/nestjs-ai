@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-export { configureGoogleGenAiChatModel } from "./google-gen-ai-chat-model-auto-configuration";
-export type {
-  GoogleGenAiChatProperties,
-  GoogleGenAiConnectionProperties,
-} from "./google-gen-ai-properties";
+export {
+  GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
+  GoogleGenAiChatModelModule,
+  GoogleGenAiChatModelModuleAsyncOptions,
+} from "./google-gen-ai-chat-model.module";
+export * from "./google-gen-ai-properties";

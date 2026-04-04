@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-export { configureChatClient } from "./chat-client-auto-configuration";
+export {
+  ChatClientModule,
+  ChatClientModuleAsyncOptions,
+} from "./chat-client.module";
 export { ChatClientBuilderConfigurer } from "./chat-client-builder-configurer";
 export type {
   ChatClientBuilderObservationProperties,

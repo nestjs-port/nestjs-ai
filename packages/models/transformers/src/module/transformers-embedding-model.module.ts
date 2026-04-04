@@ -46,13 +46,14 @@ export interface TransformersEmbeddingModelModuleAsyncOptions {
   ) =>
     | Promise<TransformersEmbeddingModelProperties>
     | TransformersEmbeddingModelProperties;
+  global?: boolean;
 }
 
 @Module({})
 export class TransformersEmbeddingModelModule {
   static forFeature(
     properties: TransformersEmbeddingModelProperties = {},
-    options?: { imports?: ModuleMetadata["imports"] },
+    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
     const providers = createProviders();
 
@@ -67,6 +68,7 @@ export class TransformersEmbeddingModelModule {
         ...providers,
       ],
       exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      global: options?.global ?? false,
     };
   }
 
@@ -87,6 +89,7 @@ export class TransformersEmbeddingModelModule {
         ...providers,
       ],
       exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      global: options.global ?? false,
     };
   }
 }

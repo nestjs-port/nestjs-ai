@@ -49,13 +49,14 @@ export interface ChatClientModuleAsyncOptions {
     | Promise<ChatClientCustomizerDefinition | undefined>
     | ChatClientCustomizerDefinition
     | undefined;
+  global?: boolean;
 }
 
 @Module({})
 export class ChatClientModule {
   static forFeature(
     customizer?: ChatClientCustomizerDefinition,
-    options?: { imports?: ModuleMetadata["imports"] },
+    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
     const providers = createProviders(customizer);
 
@@ -64,6 +65,7 @@ export class ChatClientModule {
       imports: options?.imports ?? [],
       providers,
       exports: [CHAT_CLIENT_BUILDER_TOKEN],
+      global: options?.global ?? false,
     };
   }
 
@@ -85,6 +87,7 @@ export class ChatClientModule {
         ...providers,
       ],
       exports: [CHAT_CLIENT_BUILDER_TOKEN],
+      global: options.global ?? false,
     };
   }
 }

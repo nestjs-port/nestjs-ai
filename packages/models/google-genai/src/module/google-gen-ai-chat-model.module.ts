@@ -52,13 +52,14 @@ export interface GoogleGenAiChatModelModuleAsyncOptions {
   useFactory: (
     ...args: never[]
   ) => Promise<GoogleGenAiChatProperties> | GoogleGenAiChatProperties;
+  global?: boolean;
 }
 
 @Module({})
 export class GoogleGenAiChatModelModule {
   static forFeature(
     properties: GoogleGenAiChatProperties,
-    options?: { imports?: ModuleMetadata["imports"] },
+    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
     const providers = createProviders(properties);
 
@@ -73,6 +74,7 @@ export class GoogleGenAiChatModelModule {
         ...providers,
       ],
       exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      global: options?.global ?? false,
     };
   }
 
@@ -93,6 +95,7 @@ export class GoogleGenAiChatModelModule {
         ...providers,
       ],
       exports: providers.map((p) => (p as { provide: InjectionToken }).provide),
+      global: options.global ?? false,
     };
   }
 }

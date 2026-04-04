@@ -50,13 +50,14 @@ export interface OpenAiChatModelModuleAsyncOptions {
   useFactory: (
     ...args: never[]
   ) => Promise<OpenAiChatProperties> | OpenAiChatProperties;
+  global?: boolean;
 }
 
 @Module({})
 export class OpenAiChatModelModule {
   static forFeature(
     properties: OpenAiChatProperties,
-    options?: { imports?: ModuleMetadata["imports"] },
+    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
     const providers = createProviders();
 
@@ -68,6 +69,7 @@ export class OpenAiChatModelModule {
         ...providers,
       ],
       exports: providers.map((p) => (p as FactoryProvider).provide),
+      global: options?.global ?? false,
     };
   }
 
@@ -88,6 +90,7 @@ export class OpenAiChatModelModule {
         ...providers,
       ],
       exports: providers.map((p) => (p as FactoryProvider).provide),
+      global: options.global ?? false,
     };
   }
 }

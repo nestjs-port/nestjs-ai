@@ -28,7 +28,6 @@ import {
   type HttpClient,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
-  type ProviderConfiguration,
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
@@ -97,7 +96,7 @@ export class OpenAiChatModelModule {
 
 function createProviders(): Provider[] {
   return [
-    ...toProviders(createModelObservationHandlerProviders()),
+    ...createModelObservationHandlerProviders(),
     {
       provide: OpenAiApi,
       useFactory: (properties: OpenAiChatProperties, httpClient: HttpClient) =>
@@ -129,14 +128,6 @@ function createProviders(): Provider[] {
       ],
     },
   ];
-}
-
-function toProviders(configurations: ProviderConfiguration[]): Provider[] {
-  return configurations.map((config) => ({
-    provide: config.token as InjectionToken,
-    useFactory: config.useFactory,
-    inject: (config.inject ?? []) as InjectionToken[],
-  }));
 }
 
 function createOpenAiChatModel(

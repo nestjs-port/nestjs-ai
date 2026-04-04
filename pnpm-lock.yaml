@@ -229,6 +229,9 @@ importers:
       '@nestjs-ai/template-st':
         specifier: workspace:*
         version: link:../template-st
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1

@@ -27,7 +27,6 @@ import {
   CHAT_MODEL_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
-  type ProviderConfiguration,
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
@@ -102,7 +101,7 @@ export class GoogleGenAiChatModelModule {
 
 function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
   return [
-    ...toProviders(createModelObservationHandlerProviders()),
+    ...createModelObservationHandlerProviders(),
     {
       provide: GoogleGenAI,
       useFactory: (props: GoogleGenAiChatProperties) =>
@@ -153,15 +152,6 @@ function createCachedContentProviders(
     },
   ];
 }
-
-function toProviders(configurations: ProviderConfiguration[]): Provider[] {
-  return configurations.map((config) => ({
-    provide: config.token as InjectionToken,
-    useFactory: config.useFactory,
-    inject: (config.inject ?? []) as InjectionToken[],
-  }));
-}
-
 function createGoogleGenAiChatModel(
   properties: GoogleGenAiChatProperties,
   genAiClient: GoogleGenAI,

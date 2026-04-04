@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-  EmbeddingModelConfiguration,
-  MetadataMode,
-} from "@nestjs-ai/commons";
+import type { MetadataMode } from "@nestjs-ai/commons";
 import type { PretrainedOptions } from "@xenova/transformers";
 
 export interface TransformersEmbeddingModelCacheProperties {
@@ -33,6 +30,3 @@ export interface TransformersEmbeddingModelProperties {
   revision?: string;
   metadataMode?: MetadataMode;
 }
-
-export interface TransformersEmbeddingModelConfiguration
-  extends EmbeddingModelConfiguration {}

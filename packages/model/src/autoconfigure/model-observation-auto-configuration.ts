@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { Provider } from "@nestjs/common";
 import {
   METER_REGISTRY_TOKEN,
   type MeterRegistry,
   ObservationHandlers,
-  type ProviderConfiguration,
 } from "@nestjs-ai/commons";
 import {
   ChatModelCompletionObservationHandler,
@@ -31,10 +31,10 @@ class ModelObservationHandlerConfigurer {}
 /**
  * Creates providers that register default model observation handlers.
  */
-export function createModelObservationHandlerProviders(): ProviderConfiguration[] {
+export function createModelObservationHandlerProviders(): Provider[] {
   return [
     {
-      token: ModelObservationHandlerConfigurer,
+      provide: ModelObservationHandlerConfigurer,
       useFactory: (
         observationHandlers: ObservationHandlers,
         meterRegistry?: MeterRegistry,

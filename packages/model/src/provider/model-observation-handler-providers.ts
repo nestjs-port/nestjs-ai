@@ -26,7 +26,9 @@ import {
 } from "../chat";
 import { EmbeddingModelMeterObservationHandler } from "../embedding";
 
-class ModelObservationHandlerConfigurer {}
+const MODEL_OBSERVATION_HANDLER_CONFIGURER = Symbol.for(
+  "MODEL_OBSERVATION_HANDLER_CONFIGURER",
+);
 
 /**
  * Creates providers that register default model observation handlers.
@@ -34,7 +36,7 @@ class ModelObservationHandlerConfigurer {}
 export function createModelObservationHandlerProviders(): Provider[] {
   return [
     {
-      provide: ModelObservationHandlerConfigurer,
+      provide: MODEL_OBSERVATION_HANDLER_CONFIGURER,
       useFactory: (
         observationHandlers: ObservationHandlers,
         meterRegistry?: MeterRegistry,

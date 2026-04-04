@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+import type {
+  DynamicModule,
+  FactoryProvider,
+  InjectionToken,
+  ModuleMetadata,
+  Provider,
+} from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
-  type ChatModelConfiguration,
   HTTP_CLIENT_TOKEN,
   type HttpClient,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
+  type ProviderConfiguration,
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
@@ -32,41 +40,71 @@ import { OpenAiChatModel } from "../open-ai-chat-model";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
 import type { OpenAiChatProperties } from "./open-ai-properties";
 
-/**
- * Creates a ChatModelConfiguration for OpenAI that produces an OpenAiApi and OpenAiChatModel.
- */
-export function configureOpenAiChatModel(
-  properties: OpenAiChatProperties,
-): ChatModelConfiguration {
-  return {
-    providers: [
-      ...createModelObservationHandlerProviders(),
-      ...createOpenAiApiProviders(properties),
-      ...createOpenAiChatModelProviders(properties),
-    ],
-  } as ChatModelConfiguration;
+export const OPEN_AI_CHAT_PROPERTIES_TOKEN = Symbol.for(
+  "OPEN_AI_CHAT_PROPERTIES_TOKEN",
+);
+
+export interface OpenAiChatModelModuleAsyncOptions {
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (
+    ...args: never[]
+  ) => Promise<OpenAiChatProperties> | OpenAiChatProperties;
 }
 
-function createOpenAiApiProviders(
-  properties: OpenAiChatProperties,
-): ChatModelConfiguration["providers"] {
+@Module({})
+export class OpenAiChatModelModule {
+  static forFeature(
+    properties: OpenAiChatProperties,
+    options?: { imports?: ModuleMetadata["imports"] },
+  ): DynamicModule {
+    const providers = createProviders();
+
+    return {
+      module: OpenAiChatModelModule,
+      imports: options?.imports ?? [],
+      providers: [
+        { provide: OPEN_AI_CHAT_PROPERTIES_TOKEN, useValue: properties },
+        ...providers,
+      ],
+      exports: providers.map((p) => (p as FactoryProvider).provide),
+    };
+  }
+
+  static forFeatureAsync(
+    options: OpenAiChatModelModuleAsyncOptions,
+  ): DynamicModule {
+    const providers = createProviders();
+
+    return {
+      module: OpenAiChatModelModule,
+      imports: options.imports ?? [],
+      providers: [
+        {
+          provide: OPEN_AI_CHAT_PROPERTIES_TOKEN,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        },
+        ...providers,
+      ],
+      exports: providers.map((p) => (p as FactoryProvider).provide),
+    };
+  }
+}
+
+function createProviders(): Provider[] {
   return [
+    ...toProviders(createModelObservationHandlerProviders()),
     {
-      token: OpenAiApi,
-      useFactory: (httpClient: HttpClient) =>
+      provide: OpenAiApi,
+      useFactory: (properties: OpenAiChatProperties, httpClient: HttpClient) =>
         createOpenAiApi(properties, httpClient),
-      inject: [HTTP_CLIENT_TOKEN],
+      inject: [OPEN_AI_CHAT_PROPERTIES_TOKEN, HTTP_CLIENT_TOKEN],
     },
-  ];
-}
-
-function createOpenAiChatModelProviders(
-  properties: OpenAiChatProperties,
-): ChatModelConfiguration["providers"] {
-  return [
     {
-      token: CHAT_MODEL_TOKEN,
+      provide: CHAT_MODEL_TOKEN,
       useFactory: (
+        properties: OpenAiChatProperties,
         openAiApi: OpenAiApi,
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
@@ -80,6 +118,7 @@ function createOpenAiChatModelProviders(
           toolExecutionEligibilityPredicate,
         ),
       inject: [
+        OPEN_AI_CHAT_PROPERTIES_TOKEN,
         OpenAiApi,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
@@ -87,6 +126,14 @@ function createOpenAiChatModelProviders(
       ],
     },
   ];
+}
+
+function toProviders(configurations: ProviderConfiguration[]): Provider[] {
+  return configurations.map((config) => ({
+    provide: config.token as InjectionToken,
+    useFactory: config.useFactory,
+    inject: (config.inject ?? []) as InjectionToken[],
+  }));
 }
 
 function createOpenAiChatModel(

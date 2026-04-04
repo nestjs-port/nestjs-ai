@@ -14,5 +14,9 @@
  * limitations under the License.
  */
 
-export { configureOpenAiChatModel } from "./open-ai-chat-model-auto-configuration";
+export {
+  OPEN_AI_CHAT_PROPERTIES_TOKEN,
+  OpenAiChatModelModule,
+  OpenAiChatModelModuleAsyncOptions,
+} from "./open-ai-chat-model.module";
 export * from "./open-ai-properties";

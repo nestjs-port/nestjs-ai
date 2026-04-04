@@ -174,6 +174,8 @@ importers:
 
   packages/jsdbc: {}
 
+  packages/mcp/annotations: {}
+
   packages/mcp/common:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -273,6 +275,9 @@ importers:
       '@nestjs-ai/testing':
         specifier: workspace:*
         version: link:../../testing
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2

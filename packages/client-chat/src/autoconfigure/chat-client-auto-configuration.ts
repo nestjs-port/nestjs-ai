@@ -29,20 +29,20 @@ import { ChatClient } from "../chat-client";
 import type { ChatClientCustomizer } from "../chat-client-customizer.interface";
 import { ChatClientObservationConvention } from "../observation";
 import { ChatClientBuilderConfigurer } from "./chat-client-builder-configurer";
-import type {
-  ChatClientBuilderProperties,
-  ChatClientCustomizerDefinition,
-} from "./chat-client-builder-properties";
+import type { ChatClientCustomizerDefinition } from "./chat-client-builder-properties";
 
 /**
  * Creates a ChatClientConfiguration that wires ChatClientBuilderConfigurer and ChatClient.Builder.
+ *
+ * The configuration is static — all dependencies including CHAT_MODEL_TOKEN are resolved via
+ * standard injection. An optional customizer can be provided to influence builder behavior.
  */
 export function configureChatClient(
-  properties: ChatClientBuilderProperties = {},
+  customizer?: ChatClientCustomizerDefinition,
 ): ChatClientConfiguration {
   return {
     providers: [
-      ...createCustomizerProviders(properties.customizer),
+      ...createCustomizerProviders(customizer),
       ...createConfigurerProviders(),
       ...createChatClientBuilderProviders(),
     ],

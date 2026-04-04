@@ -15,17 +15,7 @@
  */
 
 import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
-import type { FactoryProvider } from "@nestjs/common/interfaces/modules/provider.interface";
-import type {
-  ChatClientConfiguration,
-  ChatMemoryConfiguration,
-  ChatModelConfiguration,
-  EmbeddingModelConfiguration,
-  HttpClient,
-  ObservationConfiguration,
-  ProviderScope,
-  VectorStoreConfiguration,
-} from "@nestjs-ai/commons";
+import type { HttpClient } from "@nestjs-ai/commons";
 
 export interface NestAiRootModuleOptions {
   httpClient?: HttpClient;
@@ -46,40 +36,3 @@ export interface NestAiRootModuleAsyncOptions {
 export interface NestAiRootModuleAsyncFactoryOptions {
   httpClient?: HttpClient;
 }
-
-export interface NestAiFeatureAsyncProviderDescriptor {
-  token: InjectionToken;
-  scope?: ProviderScope;
-  inject?: FactoryProvider["inject"];
-}
-
-export interface NestAiFeatureModuleAsyncOptions {
-  imports?: ModuleMetadata["imports"];
-  inject?: InjectionToken[];
-  useFactory: (
-    ...args: never[]
-  ) => Promise<NestAiFeatureModuleOptions> | NestAiFeatureModuleOptions;
-  providers: NestAiFeatureAsyncProviderDescriptor[];
-}
-
-export interface NestAiChatModelModuleAsyncOptions {
-  configuration: ChatModelConfiguration;
-  imports?: ModuleMetadata["imports"];
-  inject?: InjectionToken[];
-  useFactory: (...args: never[]) => Promise<unknown> | unknown;
-}
-
-export interface NestAiChatClientModuleAsyncOptions {
-  configuration: ChatClientConfiguration;
-  imports?: ModuleMetadata["imports"];
-  inject?: InjectionToken[];
-  useFactory?: (...args: never[]) => Promise<unknown> | unknown;
-}
-
-export type NestAiFeatureModuleOptions =
-  | ChatModelConfiguration
-  | ChatClientConfiguration
-  | ChatMemoryConfiguration
-  | EmbeddingModelConfiguration
-  | ObservationConfiguration
-  | VectorStoreConfiguration;

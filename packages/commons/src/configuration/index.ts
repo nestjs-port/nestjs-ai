@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-export type { ChatMemoryConfiguration } from "./chat-memory-configuration.interface";
 export type {
   ProviderConfiguration,
   ProviderScope,
 } from "./provider-configuration.type";
-export type { VectorStoreConfiguration } from "./vector-store-configuration.interface";

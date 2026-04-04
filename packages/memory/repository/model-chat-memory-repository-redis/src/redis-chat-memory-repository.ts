@@ -33,14 +33,15 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import {
+  createClient,
   FT_AGGREGATE_GROUP_BY_REDUCERS,
   FT_AGGREGATE_STEPS,
   type RediSearchSchema,
+  type RedisClientType,
+  type RedisJSON,
   SCHEMA_FIELD_TYPE,
   type SearchReply,
-} from "@redis/search";
-import type { AggregateReply } from "@redis/search/dist/lib/commands/AGGREGATE";
-import { createClient, type RedisClientType, type RedisJSON } from "redis";
+} from "redis";
 import type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
@@ -1041,7 +1042,10 @@ function asSearchReply(value: unknown): SearchReply {
   };
 }
 
-function asAggregateReply(value: unknown): AggregateReply {
+function asAggregateReply(value: unknown): {
+  total: number;
+  results: Record<string, unknown>[];
+} {
   if (
     value &&
     typeof value === "object" &&
@@ -1049,7 +1053,7 @@ function asAggregateReply(value: unknown): AggregateReply {
     "results" in value &&
     Array.isArray((value as Record<string, unknown>).results)
   ) {
-    return value as AggregateReply;
+    return value as { total: number; results: Record<string, unknown>[] };
   }
 
   return {

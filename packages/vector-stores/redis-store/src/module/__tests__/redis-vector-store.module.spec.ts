@@ -30,9 +30,13 @@ import {
   RedisVectorStoreModule,
 } from "../redis-vector-store.module";
 
-vi.mock("redis", () => ({
-  createClient: vi.fn(),
-}));
+vi.mock("redis", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("redis")>();
+  return {
+    ...actual,
+    createClient: vi.fn(),
+  };
+});
 
 describe("RedisVectorStoreModule", () => {
   it("registers vector store provider via forFeature", () => {

@@ -8,9 +8,20 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@google/genai": "^1.40.0",
+    "@nestjs/common": "^11.1.11",
+    "@nestjs/core": "^11.1.11",
+    "@nestjs/testing": "^11.1.11",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/model-chat-memory-repository-redis": "workspace:*",
+    "@nestjs-ai/model-google-genai": "workspace:*",
     "@nestjs-ai/model-openai": "workspace:*",
+    "@nestjs-ai/model-transformers": "workspace:*",
+    "@nestjs-ai/platform": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*",
+    "@nestjs-ai/vector-store-redis": "workspace:*",
+    "redis": "^5.11.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.3.6"

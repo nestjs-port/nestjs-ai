@@ -156,15 +156,48 @@ importers:
 
   packages/integration-tests:
     devDependencies:
+      '@google/genai':
+        specifier: ^1.40.0
+        version: 1.40.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
+      '@nestjs-ai/model-chat-memory-repository-redis':
+        specifier: workspace:*
+        version: link:../memory/repository/model-chat-memory-repository-redis
+      '@nestjs-ai/model-google-genai':
+        specifier: workspace:*
+        version: link:../models/google-genai
       '@nestjs-ai/model-openai':
         specifier: workspace:*
         version: link:../models/openai
+      '@nestjs-ai/model-transformers':
+        specifier: workspace:*
+        version: link:../models/transformers
+      '@nestjs-ai/platform':
+        specifier: workspace:*
+        version: link:../platform
+      '@nestjs-ai/vector-store':
+        specifier: workspace:*
+        version: link:../vector-store
+      '@nestjs-ai/vector-store-redis':
+        specifier: workspace:*
+        version: link:../vector-stores/redis-store
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^11.1.11
+        version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/testing':
+        specifier: ^11.1.11
+        version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      redis:
+        specifier: ^5.11.0
+        version: 5.11.0
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -193,16 +226,6 @@ importers:
         version: link:../../model
 
   packages/memory/repository/model-chat-memory-repository-redis:
-    dependencies:
-      '@redis/json':
-        specifier: ^5.11.0
-        version: 5.11.0(@redis/client@5.11.0)
-      '@redis/search':
-        specifier: ^5.11.0
-        version: 5.11.0(@redis/client@5.11.0)
-      redis:
-        specifier: ^5.11.0
-        version: 5.11.0
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -216,6 +239,9 @@ importers:
       '@testcontainers/redis':
         specifier: ^11.13.0
         version: 11.13.0
+      redis:
+        specifier: ^5.11.0
+        version: 5.11.0
       testcontainers:
         specifier: ^11.13.0
         version: 11.13.0
@@ -403,16 +429,6 @@ importers:
         version: link:../model
 
   packages/vector-stores/redis-store:
-    dependencies:
-      '@redis/json':
-        specifier: ^5.11.0
-        version: 5.11.0(@redis/client@5.11.0)
-      '@redis/search':
-        specifier: ^5.11.0
-        version: 5.11.0(@redis/client@5.11.0)
-      redis:
-        specifier: ^5.11.0
-        version: 5.11.0
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -435,6 +451,9 @@ importers:
       '@testcontainers/redis':
         specifier: ^11.13.0
         version: 11.13.0
+      redis:
+        specifier: ^5.11.0
+        version: 5.11.0
       testcontainers:
         specifier: ^11.13.0
         version: 11.13.0

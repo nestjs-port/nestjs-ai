@@ -21,18 +21,15 @@
   "peerDependencies": {
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@nestjs-ai/commons": "*",
-    "@nestjs-ai/model": "*"
+    "@nestjs-ai/model": "*",
+    "redis": "^5.0.0"
   },
   "devDependencies": {
     "@nestjs/common": "^11.1.11",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@testcontainers/redis": "^11.13.0",
+    "redis": "^5.11.0",
     "testcontainers": "^11.13.0"
-  },
-  "dependencies": {
-    "@redis/json": "^5.11.0",
-    "@redis/search": "^5.11.0",
-    "redis": "^5.11.0"
   }
 }

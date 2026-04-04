@@ -24,9 +24,13 @@ import {
   RedisChatMemoryModule,
 } from "../redis-chat-memory.module";
 
-vi.mock("redis", () => ({
-  createClient: vi.fn(),
-}));
+vi.mock("redis", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("redis")>();
+  return {
+    ...actual,
+    createClient: vi.fn(),
+  };
+});
 
 describe("RedisChatMemoryModule", () => {
   describe("forFeature", () => {

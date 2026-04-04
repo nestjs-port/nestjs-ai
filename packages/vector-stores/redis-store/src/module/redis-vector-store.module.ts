@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+import type {
+  DynamicModule,
+  FactoryProvider,
+  InjectionToken,
+  ModuleMetadata,
+  Provider,
+} from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import {
   BATCHING_STRATEGY_TOKEN,
   EMBEDDING_MODEL_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
   VECTOR_STORE_TOKEN,
-  type VectorStoreConfiguration,
 } from "@nestjs-ai/commons";
 import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
 import { VectorStoreObservationConvention } from "@nestjs-ai/vector-store";
@@ -29,22 +36,81 @@ import { RedisVectorStore } from "../redis-vector-store";
 
 import type { RedisVectorStoreProperties } from "./redis-vector-store-properties";
 
-export function configureRedisVectorStore(
-  properties: RedisVectorStoreProperties,
-): VectorStoreConfiguration {
-  return {
-    providers: createRedisVectorStoreProviders(properties),
-  } as VectorStoreConfiguration;
+export const REDIS_VECTOR_STORE_PROPERTIES_TOKEN = Symbol.for(
+  "REDIS_VECTOR_STORE_PROPERTIES_TOKEN",
+);
+
+export interface RedisVectorStoreModuleAsyncOptions {
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (
+    ...args: never[]
+  ) => Promise<RedisVectorStoreProperties> | RedisVectorStoreProperties;
+  global?: boolean;
 }
 
-function createRedisVectorStoreProviders(
-  properties: RedisVectorStoreProperties,
-): VectorStoreConfiguration["providers"] {
+@Module({})
+export class RedisVectorStoreModule {
+  static forFeature(
+    properties: RedisVectorStoreProperties,
+    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
+  ): DynamicModule {
+    const providers = createProviders();
+
+    return {
+      module: RedisVectorStoreModule,
+      imports: options?.imports ?? [],
+      providers: [
+        { provide: REDIS_VECTOR_STORE_PROPERTIES_TOKEN, useValue: properties },
+        ...providers,
+      ],
+      exports: providers.map((p) => (p as FactoryProvider).provide),
+      global: options?.global ?? false,
+    };
+  }
+
+  static forFeatureAsync(
+    options: RedisVectorStoreModuleAsyncOptions,
+  ): DynamicModule {
+    const providers = createProviders();
+
+    return {
+      module: RedisVectorStoreModule,
+      imports: options.imports ?? [],
+      providers: [
+        {
+          provide: REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        },
+        ...providers,
+      ],
+      exports: providers.map((p) => (p as FactoryProvider).provide),
+      global: options.global ?? false,
+    };
+  }
+}
+
+function createProviders(): Provider[] {
   return [
     {
-      token: VECTOR_STORE_TOKEN,
-      useFactory: createRedisVectorStoreFactory(properties),
+      provide: VECTOR_STORE_TOKEN,
+      useFactory: (
+        properties: RedisVectorStoreProperties,
+        embeddingModel: EmbeddingModel,
+        observationRegistry?: ObservationRegistry,
+        observationConvention?: VectorStoreObservationConvention,
+        batchingStrategy?: BatchingStrategy,
+      ) =>
+        createRedisVectorStore(
+          properties,
+          embeddingModel,
+          observationRegistry,
+          observationConvention,
+          batchingStrategy,
+        ),
       inject: [
+        REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
         EMBEDDING_MODEL_TOKEN,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: VectorStoreObservationConvention, optional: true },
@@ -54,31 +120,29 @@ function createRedisVectorStoreProviders(
   ];
 }
 
-function createRedisVectorStoreFactory(
+async function createRedisVectorStore(
   properties: RedisVectorStoreProperties,
-): (
   embeddingModel: EmbeddingModel,
   observationRegistry?: ObservationRegistry,
   observationConvention?: VectorStoreObservationConvention,
   batchingStrategy?: BatchingStrategy,
-) => Promise<RedisVectorStore> {
-  return async (
-    embeddingModel: EmbeddingModel,
-    observationRegistry?: ObservationRegistry,
-    observationConvention?: VectorStoreObservationConvention,
-    batchingStrategy?: BatchingStrategy,
-  ) => {
-    const redisClient = await resolveRedisClient(properties);
+): Promise<RedisVectorStore> {
+  const redisClient = await resolveRedisClient(properties);
 
-    return createRedisVectorStore(
-      properties,
-      embeddingModel,
-      redisClient,
-      observationRegistry,
-      observationConvention,
-      batchingStrategy,
-    );
-  };
+  const builder = RedisVectorStore.builder(redisClient, embeddingModel);
+
+  applyRedisVectorStoreProperties(builder, properties);
+  if (observationRegistry != null) {
+    builder.observationRegistry(observationRegistry);
+  }
+  if (observationConvention != null) {
+    builder.customObservationConvention(observationConvention);
+  }
+  if (batchingStrategy != null) {
+    builder.batchingStrategy(batchingStrategy);
+  }
+
+  return builder.build();
 }
 
 async function resolveRedisClient(
@@ -103,30 +167,6 @@ async function resolveRedisClient(
   }
 
   throw new Error("Redis vector store client or clientOptions must be set");
-}
-
-function createRedisVectorStore(
-  properties: RedisVectorStoreProperties,
-  embeddingModel: EmbeddingModel,
-  redisClient: RedisClientType,
-  observationRegistry?: ObservationRegistry,
-  observationConvention?: VectorStoreObservationConvention,
-  batchingStrategy?: BatchingStrategy,
-): RedisVectorStore {
-  const builder = RedisVectorStore.builder(redisClient, embeddingModel);
-
-  applyRedisVectorStoreProperties(builder, properties);
-  if (observationRegistry != null) {
-    builder.observationRegistry(observationRegistry);
-  }
-  if (observationConvention != null) {
-    builder.customObservationConvention(observationConvention);
-  }
-  if (batchingStrategy != null) {
-    builder.batchingStrategy(batchingStrategy);
-  }
-
-  return builder.build();
 }
 
 function applyRedisVectorStoreProperties(

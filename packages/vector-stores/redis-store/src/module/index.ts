@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-export { configureRedisVectorStore } from "./redis-vector-store-auto-configuration";
+export {
+  REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
+  RedisVectorStoreModule,
+  RedisVectorStoreModuleAsyncOptions,
+} from "./redis-vector-store.module";
 export type {
   RedisVectorStoreHnswProperties,
   RedisVectorStoreProperties,

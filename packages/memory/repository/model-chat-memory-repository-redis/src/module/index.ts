@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import type { RedisClientOptions, RedisClientType } from "redis";
-
-import type { RedisChatMemoryMetadataField } from "../redis-chat-memory-config";
-
-export interface RedisChatMemoryProperties {
-  client?: RedisClientType;
-  clientOptions?: RedisClientOptions;
-  indexName?: string;
-  keyPrefix?: string;
-  timeToLive?: number | null;
-  initializeSchema?: boolean;
-  maxConversationIds?: number;
-  maxMessagesPerConversation?: number;
-  metadataFields?: RedisChatMemoryMetadataField[];
-}
+export {
+  REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
+  RedisChatMemoryModule,
+  type RedisChatMemoryModuleAsyncOptions,
+  type RedisChatMemoryModuleOptions,
+} from "./redis-chat-memory.module";
+export type { RedisChatMemoryProperties } from "./redis-chat-memory-properties";

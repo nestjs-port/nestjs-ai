@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,70 @@
  * limitations under the License.
  */
 
-import {
-  CHAT_MEMORY_TOKEN,
-  type ChatMemoryConfiguration,
-} from "@nestjs-ai/commons";
+import type { Provider } from "@nestjs/common";
+import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
 import { createClient, type RedisClientType } from "redis";
 
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
 import type { RedisChatMemoryProperties } from "./redis-chat-memory-properties";
 
-export function configureRedisChatMemory(
-  properties: RedisChatMemoryProperties,
-): ChatMemoryConfiguration {
-  return {
-    providers: [
+export const REDIS_CHAT_MEMORY_PROPERTIES_TOKEN = Symbol.for(
+  "REDIS_CHAT_MEMORY_PROPERTIES_TOKEN",
+);
+
+export interface RedisChatMemoryModuleOptions {
+  global?: boolean;
+}
+
+export interface RedisChatMemoryModuleAsyncOptions {
+  global?: boolean;
+  useFactory: (
+    ...args: never[]
+  ) => RedisChatMemoryProperties | Promise<RedisChatMemoryProperties>;
+  inject?: unknown[];
+}
+
+export class RedisChatMemoryModule {
+  static forFeature(
+    properties: RedisChatMemoryProperties,
+    _options: RedisChatMemoryModuleOptions = {},
+  ): Provider[] {
+    return [
       {
-        token: CHAT_MEMORY_TOKEN,
-        useFactory: async () => {
+        provide: REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
+        useValue: properties,
+      },
+      ...RedisChatMemoryModule.createChatMemoryProviders(),
+    ];
+  }
+
+  static forFeatureAsync(
+    options: RedisChatMemoryModuleAsyncOptions,
+  ): Provider[] {
+    return [
+      {
+        provide: REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
+        useFactory: options.useFactory,
+        inject: (options.inject ?? []) as never[],
+      },
+      ...RedisChatMemoryModule.createChatMemoryProviders(),
+    ];
+  }
+
+  private static createChatMemoryProviders(): Provider[] {
+    return [
+      {
+        provide: CHAT_MEMORY_TOKEN,
+        useFactory: async (
+          properties: RedisChatMemoryProperties,
+        ): Promise<RedisChatMemoryRepository> => {
           const client = await resolveRedisClient(properties);
           return createRedisChatMemory(properties, client);
         },
-        inject: [],
+        inject: [REDIS_CHAT_MEMORY_PROPERTIES_TOKEN],
       },
-    ],
-  } as unknown as ChatMemoryConfiguration;
+    ];
+  }
 }
 
 async function resolveRedisClient(

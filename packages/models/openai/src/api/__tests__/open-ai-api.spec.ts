@@ -75,7 +75,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
     expect(chunks).not.toBeNull();
   });
 
-  it("validate reasoning tokens", { timeout: 60_000 }, async () => {
+  it("validate reasoning tokens", async () => {
     const userMessage: ChatCompletionMessage = {
       content:
         "Are there an infinite number of prime numbers such that n mod 4 == 3? Think through the steps and respond.",
@@ -209,32 +209,28 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiApi", () => {
     ChatModel.GPT_5_CHAT_LATEST,
     ChatModel.GPT_5_MINI,
     ChatModel.GPT_5_NANO,
-  ])(
-    "chat completion entity with new models: %s",
-    { timeout: 30_000 },
-    async (modelName) => {
-      const chatCompletionMessage: ChatCompletionMessage = {
-        content: "Hello world",
-        role: Role.USER,
-      };
-      const request: ChatCompletionRequest = {
-        messages: [chatCompletionMessage],
-        model: modelName,
-        temperature: 1.0,
-        stream: false,
-      };
-      const { body } = await openAiApi.chatCompletionEntity(request);
+  ])("chat completion entity with new models: %s", async (modelName) => {
+    const chatCompletionMessage: ChatCompletionMessage = {
+      content: "Hello world",
+      role: Role.USER,
+    };
+    const request: ChatCompletionRequest = {
+      messages: [chatCompletionMessage],
+      model: modelName,
+      temperature: 1.0,
+      stream: false,
+    };
+    const { body } = await openAiApi.chatCompletionEntity(request);
 
-      expect(body).not.toBeNull();
-      expect(body.choices.length).toBeGreaterThan(0);
-      const messageContent =
-        typeof body.choices[0].message.content === "string"
-          ? body.choices[0].message.content
-          : "";
-      expect(messageContent.length).toBeGreaterThan(0);
-      expect(body.model.toLowerCase()).toContain(modelName.toLowerCase());
-    },
-  );
+    expect(body).not.toBeNull();
+    expect(body.choices.length).toBeGreaterThan(0);
+    const messageContent =
+      typeof body.choices[0].message.content === "string"
+        ? body.choices[0].message.content
+        : "";
+    expect(messageContent.length).toBeGreaterThan(0);
+    expect(body.model.toLowerCase()).toContain(modelName.toLowerCase());
+  });
 
   it.each([
     ChatModel.GPT_5_NANO,

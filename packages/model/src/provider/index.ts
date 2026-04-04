@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { createModelObservationHandlerProviders } from "./model-observation-auto-configuration";
+export { createModelObservationHandlerProviders } from "./model-observation-handler-providers";

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./autoconfigure";
 export * from "./chat";
 export * from "./converter";
 export * from "./embedding";
 export * from "./model";
+export * from "./provider";
 export * from "./support";
 export * from "./tool";
 export * from "./util";

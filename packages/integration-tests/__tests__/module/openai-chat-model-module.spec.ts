@@ -40,7 +40,7 @@ const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 })
 class ApiKeyConfigModule {}
 
-describe("OpenAiChatModelModule (forFeature / forFeatureAsync)", () => {
+describe("OpenAiChatModelModule", () => {
   describe("forFeature", () => {
     it("should resolve CHAT_MODEL_TOKEN via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
@@ -57,27 +57,48 @@ describe("OpenAiChatModelModule (forFeature / forFeatureAsync)", () => {
       expect(chatModel).toBeDefined();
     });
 
-    it("should not export properties token", () => {
-      const dynamicModule = OpenAiChatModelModule.forFeature({
+    it("should not export properties token", async () => {
+      const featureModule = OpenAiChatModelModule.forFeature({
         apiKey: "test-key",
       });
-      const exports = dynamicModule.exports as symbol[];
 
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
+      expect(chatModel).toBeDefined();
+
+      const exports = featureModule.exports as symbol[];
       expect(exports).toContain(CHAT_MODEL_TOKEN);
       expect(exports).not.toContain(OPEN_AI_CHAT_PROPERTIES_TOKEN);
     });
 
-    it("should default global to false", () => {
-      const dynamicModule = OpenAiChatModelModule.forFeature({});
-      expect(dynamicModule.global).toBe(false);
+    it("should default global to false", async () => {
+      const featureModule = OpenAiChatModelModule.forFeature({
+        apiKey: "test-key",
+      });
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(featureModule.global).toBe(false);
     });
 
-    it("should support global option", () => {
-      const dynamicModule = OpenAiChatModelModule.forFeature(
-        {},
+    it("should support global option", async () => {
+      const featureModule = OpenAiChatModelModule.forFeature(
+        { apiKey: "test-key" },
         { global: true },
       );
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(featureModule.global).toBe(true);
     });
   });
 
@@ -135,19 +156,31 @@ describe("OpenAiChatModelModule (forFeature / forFeatureAsync)", () => {
       expect(chatModel).toBeDefined();
     });
 
-    it("should default global to false for async", () => {
-      const dynamicModule = OpenAiChatModelModule.forFeatureAsync({
+    it("should default global to false for async", async () => {
+      const featureModule = OpenAiChatModelModule.forFeatureAsync({
         useFactory: () => ({ apiKey: "key" }),
       });
-      expect(dynamicModule.global).toBe(false);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(featureModule.global).toBe(false);
     });
 
-    it("should support global option for async", () => {
-      const dynamicModule = OpenAiChatModelModule.forFeatureAsync({
+    it("should support global option for async", async () => {
+      const featureModule = OpenAiChatModelModule.forFeatureAsync({
         useFactory: () => ({ apiKey: "key" }),
         global: true,
       });
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(featureModule.global).toBe(true);
     });
   });
 });

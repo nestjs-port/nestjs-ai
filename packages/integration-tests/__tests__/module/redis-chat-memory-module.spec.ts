@@ -15,6 +15,8 @@
  */
 
 import "reflect-metadata";
+import { Module } from "@nestjs/common";
+import { Test } from "@nestjs/testing";
 import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
 import {
   REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
@@ -43,44 +45,38 @@ vi.mock("redis", async (importOriginal) => {
   };
 });
 
-describe("RedisChatMemoryModule (forFeature / forFeatureAsync)", () => {
+const REDIS_CONFIG_TOKEN = Symbol("REDIS_CONFIG_TOKEN");
+
+@Module({
+  providers: [
+    {
+      provide: REDIS_CONFIG_TOKEN,
+      useValue: {
+        clientOptions: { url: "redis://localhost:6379" },
+        indexName: "async-index",
+      },
+    },
+  ],
+  exports: [REDIS_CONFIG_TOKEN],
+})
+class RedisConfigModule {}
+
+describe("RedisChatMemoryModule", () => {
   describe("forFeature", () => {
-    it("should return providers array with CHAT_MEMORY_TOKEN", () => {
-      const providers = RedisChatMemoryModule.forFeature({
-        clientOptions: { url: "redis://localhost:6379" },
-      });
+    it("should resolve CHAT_MEMORY_TOKEN via NestJS DI", async () => {
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          ...RedisChatMemoryModule.forFeature({
+            clientOptions: { url: "redis://localhost:6379" },
+          }),
+        ],
+      }).compile();
 
-      expect(Array.isArray(providers)).toBe(true);
-      expect(
-        providers.some(
-          (p) =>
-            typeof p === "object" &&
-            "provide" in p &&
-            p.provide === CHAT_MEMORY_TOKEN,
-        ),
-      ).toBe(true);
+      const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
+      expect(chatMemory).toBeDefined();
     });
 
-    it("should register properties provider", () => {
-      const providers = RedisChatMemoryModule.forFeature({
-        clientOptions: { url: "redis://localhost:6379" },
-        indexName: "test-memory-index",
-        keyPrefix: "test:",
-      });
-
-      const propertiesProvider = providers.find(
-        (p) =>
-          typeof p === "object" &&
-          "provide" in p &&
-          p.provide === REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
-      ) as { provide: symbol; useValue: RedisChatMemoryProperties } | undefined;
-
-      expect(propertiesProvider).toBeDefined();
-      expect(propertiesProvider?.useValue.indexName).toBe("test-memory-index");
-      expect(propertiesProvider?.useValue.keyPrefix).toBe("test:");
-    });
-
-    it("should pass all configuration properties", () => {
+    it("should resolve properties with custom configuration", async () => {
       const properties: RedisChatMemoryProperties = {
         clientOptions: { url: "redis://localhost:6379" },
         indexName: "custom-index",
@@ -91,93 +87,72 @@ describe("RedisChatMemoryModule (forFeature / forFeatureAsync)", () => {
         maxMessagesPerConversation: 50,
       };
 
-      const providers = RedisChatMemoryModule.forFeature(properties);
-      const propertiesProvider = providers.find(
-        (p) =>
-          typeof p === "object" &&
-          "provide" in p &&
-          p.provide === REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
-      ) as { provide: symbol; useValue: RedisChatMemoryProperties } | undefined;
+      const moduleRef = await Test.createTestingModule({
+        providers: [...RedisChatMemoryModule.forFeature(properties)],
+      }).compile();
 
-      expect(propertiesProvider?.useValue).toEqual(properties);
+      const resolvedProperties = moduleRef.get<RedisChatMemoryProperties>(
+        REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
+      );
+      expect(resolvedProperties).toEqual(properties);
+
+      const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
+      expect(chatMemory).toBeDefined();
     });
   });
 
   describe("forFeatureAsync", () => {
-    it("should return providers array with async factory for CHAT_MEMORY_TOKEN", () => {
-      const providers = RedisChatMemoryModule.forFeatureAsync({
-        useFactory: () => ({
-          clientOptions: { url: "redis://localhost:6379" },
-        }),
-      });
+    it("should resolve CHAT_MEMORY_TOKEN from async factory via NestJS DI", async () => {
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          ...RedisChatMemoryModule.forFeatureAsync({
+            useFactory: () => ({
+              clientOptions: { url: "redis://localhost:6379" },
+            }),
+          }),
+        ],
+      }).compile();
 
-      expect(Array.isArray(providers)).toBe(true);
-      expect(
-        providers.some(
-          (p) =>
-            typeof p === "object" &&
-            "provide" in p &&
-            p.provide === CHAT_MEMORY_TOKEN,
-        ),
-      ).toBe(true);
+      const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
+      expect(chatMemory).toBeDefined();
     });
 
-    it("should register async properties provider with useFactory", () => {
-      const factory = () => ({
-        clientOptions: { url: "redis://localhost:6379" } as const,
-      });
-
-      const providers = RedisChatMemoryModule.forFeatureAsync({
-        useFactory: factory,
-      });
-
-      const propertiesProvider = providers.find(
-        (p) =>
-          typeof p === "object" &&
-          "provide" in p &&
-          p.provide === REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
-      ) as { provide: symbol; useFactory: unknown } | undefined;
-
-      expect(propertiesProvider).toBeDefined();
-      expect(propertiesProvider?.useFactory).toBe(factory);
-    });
-
-    it("should support inject tokens for async factory", () => {
+    it("should support inject tokens for async factory", async () => {
       const EXTERNAL_TOKEN = Symbol("EXTERNAL_TOKEN");
 
-      const providers = RedisChatMemoryModule.forFeatureAsync({
-        inject: [EXTERNAL_TOKEN],
-        useFactory: (_config: unknown) => ({
-          clientOptions: { url: "redis://localhost:6379" },
-        }),
-      });
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          {
+            provide: EXTERNAL_TOKEN,
+            useValue: { url: "redis://localhost:6379" },
+          },
+          ...RedisChatMemoryModule.forFeatureAsync({
+            inject: [EXTERNAL_TOKEN],
+            useFactory: (config: { url: string }) => ({
+              clientOptions: { url: config.url },
+            }),
+          }),
+        ],
+      }).compile();
 
-      const propertiesProvider = providers.find(
-        (p) =>
-          typeof p === "object" &&
-          "provide" in p &&
-          p.provide === REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
-      ) as { provide: symbol; inject: unknown[] } | undefined;
-
-      expect(propertiesProvider?.inject).toContain(EXTERNAL_TOKEN);
+      const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
+      expect(chatMemory).toBeDefined();
     });
 
-    it("should support async factory returning a Promise", () => {
-      const providers = RedisChatMemoryModule.forFeatureAsync({
-        useFactory: async () => ({
-          clientOptions: { url: "redis://localhost:6379" },
-          indexName: "async-index",
-        }),
-      });
+    it("should support async factory returning a Promise", async () => {
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          ...RedisChatMemoryModule.forFeatureAsync({
+            useFactory: async () => ({
+              clientOptions: { url: "redis://localhost:6379" },
+              indexName: "async-index",
+            }),
+          }),
+        ],
+      }).compile();
 
-      expect(
-        providers.some(
-          (p) =>
-            typeof p === "object" &&
-            "provide" in p &&
-            p.provide === REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
-        ),
-      ).toBe(true);
+      const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
+      expect(chatMemory).toBeDefined();
     });
   });
 });

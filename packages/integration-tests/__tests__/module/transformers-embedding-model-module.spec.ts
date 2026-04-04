@@ -39,7 +39,7 @@ const MODEL_CONFIG_TOKEN = Symbol("MODEL_CONFIG_TOKEN");
 })
 class ModelConfigModule {}
 
-describe("TransformersEmbeddingModelModule (forFeature / forFeatureAsync)", () => {
+describe("TransformersEmbeddingModelModule", () => {
   describe("forFeature", () => {
     it("should resolve EMBEDDING_MODEL_TOKEN via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
@@ -71,25 +71,50 @@ describe("TransformersEmbeddingModelModule (forFeature / forFeatureAsync)", () =
       expect(embeddingModel).toBeDefined();
     });
 
-    it("should not export properties token", () => {
-      const dynamicModule = TransformersEmbeddingModelModule.forFeature();
-      const exports = dynamicModule.exports as symbol[];
+    it("should not export properties token", async () => {
+      const featureModule = TransformersEmbeddingModelModule.forFeature();
 
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      const embeddingModel = moduleRef.get<EmbeddingModel>(
+        EMBEDDING_MODEL_TOKEN,
+      );
+      expect(embeddingModel).toBeDefined();
+
+      const exports = featureModule.exports as symbol[];
       expect(exports).toContain(EMBEDDING_MODEL_TOKEN);
       expect(exports).not.toContain(TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN);
     });
 
-    it("should default global to false", () => {
-      const dynamicModule = TransformersEmbeddingModelModule.forFeature();
-      expect(dynamicModule.global).toBe(false);
+    it("should default global to false", async () => {
+      const featureModule = TransformersEmbeddingModelModule.forFeature();
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(
+        moduleRef.get<EmbeddingModel>(EMBEDDING_MODEL_TOKEN),
+      ).toBeDefined();
+      expect(featureModule.global).toBe(false);
     });
 
-    it("should support global option", () => {
-      const dynamicModule = TransformersEmbeddingModelModule.forFeature(
+    it("should support global option", async () => {
+      const featureModule = TransformersEmbeddingModelModule.forFeature(
         {},
         { global: true },
       );
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(
+        moduleRef.get<EmbeddingModel>(EMBEDDING_MODEL_TOKEN),
+      ).toBeDefined();
+      expect(featureModule.global).toBe(true);
     });
   });
 
@@ -150,19 +175,35 @@ describe("TransformersEmbeddingModelModule (forFeature / forFeatureAsync)", () =
       expect(embeddingModel).toBeDefined();
     });
 
-    it("should default global to false for async", () => {
-      const dynamicModule = TransformersEmbeddingModelModule.forFeatureAsync({
+    it("should default global to false for async", async () => {
+      const featureModule = TransformersEmbeddingModelModule.forFeatureAsync({
         useFactory: () => ({}),
       });
-      expect(dynamicModule.global).toBe(false);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(
+        moduleRef.get<EmbeddingModel>(EMBEDDING_MODEL_TOKEN),
+      ).toBeDefined();
+      expect(featureModule.global).toBe(false);
     });
 
-    it("should support global option for async", () => {
-      const dynamicModule = TransformersEmbeddingModelModule.forFeatureAsync({
+    it("should support global option for async", async () => {
+      const featureModule = TransformersEmbeddingModelModule.forFeatureAsync({
         useFactory: () => ({}),
         global: true,
       });
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [NestAiModule.forRoot(), featureModule],
+      }).compile();
+
+      expect(
+        moduleRef.get<EmbeddingModel>(EMBEDDING_MODEL_TOKEN),
+      ).toBeDefined();
+      expect(featureModule.global).toBe(true);
     });
   });
 });

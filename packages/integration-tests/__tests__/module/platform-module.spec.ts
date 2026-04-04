@@ -43,7 +43,7 @@ const CONFIG_TOKEN = Symbol("CONFIG_TOKEN");
 })
 class ConfigModule {}
 
-describe("NestAiModule (forRoot / forRootAsync)", () => {
+describe("NestAiModule", () => {
   describe("forRoot", () => {
     it("should register default providers and resolve them via DI", async () => {
       const moduleRef = await Test.createTestingModule({
@@ -65,14 +65,26 @@ describe("NestAiModule (forRoot / forRootAsync)", () => {
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
     });
 
-    it("should be global by default", () => {
-      const dynamicModule = NestAiModule.forRoot();
-      expect(dynamicModule.global).toBe(true);
+    it("should be global by default", async () => {
+      const rootModule = NestAiModule.forRoot();
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [rootModule],
+      }).compile();
+
+      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      expect(rootModule.global).toBe(true);
     });
 
-    it("should respect global: false option", () => {
-      const dynamicModule = NestAiModule.forRoot({ global: false });
-      expect(dynamicModule.global).toBe(false);
+    it("should respect global: false option", async () => {
+      const rootModule = NestAiModule.forRoot({ global: false });
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [rootModule],
+      }).compile();
+
+      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      expect(rootModule.global).toBe(false);
     });
   });
 
@@ -110,19 +122,31 @@ describe("NestAiModule (forRoot / forRootAsync)", () => {
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
     });
 
-    it("should be global by default for async", () => {
-      const dynamicModule = NestAiModule.forRootAsync({
+    it("should be global by default for async", async () => {
+      const rootModule = NestAiModule.forRootAsync({
         useFactory: () => ({}),
       });
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [rootModule],
+      }).compile();
+
+      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      expect(rootModule.global).toBe(true);
     });
 
-    it("should respect global: false for async", () => {
-      const dynamicModule = NestAiModule.forRootAsync({
+    it("should respect global: false for async", async () => {
+      const rootModule = NestAiModule.forRootAsync({
         useFactory: () => ({}),
         global: false,
       });
-      expect(dynamicModule.global).toBe(false);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [rootModule],
+      }).compile();
+
+      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      expect(rootModule.global).toBe(false);
     });
   });
 });

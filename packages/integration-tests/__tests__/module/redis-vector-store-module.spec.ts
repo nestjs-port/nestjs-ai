@@ -58,34 +58,8 @@ const REDIS_CONFIG_TOKEN = Symbol("REDIS_CONFIG_TOKEN");
 })
 class RedisConfigModule {}
 
-describe("RedisVectorStoreModule (forFeature / forFeatureAsync)", () => {
+describe("RedisVectorStoreModule", () => {
   describe("forFeature", () => {
-    it("should register VECTOR_STORE_TOKEN provider", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeature({
-        clientOptions: { url: "redis://localhost:6379" },
-      });
-      const providers = dynamicModule.providers as { provide: unknown }[];
-
-      expect(providers.some((p) => p.provide === VECTOR_STORE_TOKEN)).toBe(
-        true,
-      );
-      expect(
-        providers.some(
-          (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
-        ),
-      ).toBe(true);
-    });
-
-    it("should not export properties token", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeature({
-        clientOptions: { url: "redis://localhost:6379" },
-      });
-      const exports = dynamicModule.exports as symbol[];
-
-      expect(exports).toContain(VECTOR_STORE_TOKEN);
-      expect(exports).not.toContain(REDIS_VECTOR_STORE_PROPERTIES_TOKEN);
-    });
-
     it("should resolve VECTOR_STORE_TOKEN via NestJS DI with embedding model", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
@@ -101,39 +75,66 @@ describe("RedisVectorStoreModule (forFeature / forFeatureAsync)", () => {
       expect(vectorStore).toBeDefined();
     });
 
-    it("should default global to false", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeature({
+    it("should not export properties token", async () => {
+      const featureModule = RedisVectorStoreModule.forFeature({
         clientOptions: { url: "redis://localhost:6379" },
       });
-      expect(dynamicModule.global).toBe(false);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          TransformersEmbeddingModelModule.forFeature({}, { global: true }),
+          featureModule,
+        ],
+      }).compile();
+
+      const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
+      expect(vectorStore).toBeDefined();
+
+      const exports = featureModule.exports as symbol[];
+      expect(exports).toContain(VECTOR_STORE_TOKEN);
+      expect(exports).not.toContain(REDIS_VECTOR_STORE_PROPERTIES_TOKEN);
     });
 
-    it("should support global option", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeature(
+    it("should default global to false", async () => {
+      const featureModule = RedisVectorStoreModule.forFeature({
+        clientOptions: { url: "redis://localhost:6379" },
+      });
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          TransformersEmbeddingModelModule.forFeature({}, { global: true }),
+          featureModule,
+        ],
+      }).compile();
+
+      const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
+      expect(vectorStore).toBeDefined();
+      expect(featureModule.global).toBe(false);
+    });
+
+    it("should support global option", async () => {
+      const featureModule = RedisVectorStoreModule.forFeature(
         { clientOptions: { url: "redis://localhost:6379" } },
         { global: true },
       );
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          TransformersEmbeddingModelModule.forFeature({}, { global: true }),
+          featureModule,
+        ],
+      }).compile();
+
+      const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
+      expect(vectorStore).toBeDefined();
+      expect(featureModule.global).toBe(true);
     });
   });
 
   describe("forFeatureAsync", () => {
-    it("should register async properties provider", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeatureAsync({
-        useFactory: () => ({
-          clientOptions: { url: "redis://localhost:6379" },
-        }),
-      });
-      const providers = dynamicModule.providers as { provide: unknown }[];
-
-      const propertiesProvider = providers.find(
-        (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
-      ) as { useFactory?: unknown };
-
-      expect(propertiesProvider).toBeDefined();
-      expect(propertiesProvider.useFactory).toBeDefined();
-    });
-
     it("should resolve VECTOR_STORE_TOKEN from async factory via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
@@ -187,23 +188,45 @@ describe("RedisVectorStoreModule (forFeature / forFeatureAsync)", () => {
       expect(vectorStore).toBeDefined();
     });
 
-    it("should default global to false for async", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeatureAsync({
+    it("should default global to false for async", async () => {
+      const featureModule = RedisVectorStoreModule.forFeatureAsync({
         useFactory: () => ({
           clientOptions: { url: "redis://localhost:6379" },
         }),
       });
-      expect(dynamicModule.global).toBe(false);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          TransformersEmbeddingModelModule.forFeature({}, { global: true }),
+          featureModule,
+        ],
+      }).compile();
+
+      const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
+      expect(vectorStore).toBeDefined();
+      expect(featureModule.global).toBe(false);
     });
 
-    it("should support global option for async", () => {
-      const dynamicModule = RedisVectorStoreModule.forFeatureAsync({
+    it("should support global option for async", async () => {
+      const featureModule = RedisVectorStoreModule.forFeatureAsync({
         useFactory: () => ({
           clientOptions: { url: "redis://localhost:6379" },
         }),
         global: true,
       });
-      expect(dynamicModule.global).toBe(true);
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          TransformersEmbeddingModelModule.forFeature({}, { global: true }),
+          featureModule,
+        ],
+      }).compile();
+
+      const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
+      expect(vectorStore).toBeDefined();
+      expect(featureModule.global).toBe(true);
     });
   });
 });

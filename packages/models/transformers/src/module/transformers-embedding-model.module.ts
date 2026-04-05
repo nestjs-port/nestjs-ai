@@ -55,21 +55,11 @@ export class TransformersEmbeddingModelModule {
     properties: TransformersEmbeddingModelProperties = {},
     options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
-    const providers = createProviders();
-
-    return {
-      module: TransformersEmbeddingModelModule,
-      imports: [ModelObservationModule, ...(options?.imports ?? [])],
-      providers: [
-        {
-          provide: TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN,
-          useValue: properties,
-        },
-        ...providers,
-      ],
-      exports: providers.map((p) => (p as FactoryProvider).provide),
-      global: options?.global ?? false,
-    };
+    return TransformersEmbeddingModelModule.forFeatureAsync({
+      imports: options?.imports,
+      useFactory: () => properties,
+      global: options?.global,
+    });
   }
 
   static forFeatureAsync(

@@ -61,14 +61,16 @@ describe("ObservationModule", () => {
     expect(dynamicModule.exports).toContain(OBSERVATION_REGISTRY_TOKEN);
   });
 
-  it("does not register meter providers when meter is not provided", () => {
+  it("returns a null meter registry when meter is not provided", () => {
     const dynamicModule = ObservationModule.forRoot({});
     const providers = dynamicModule.providers as FactoryProvider[];
+    const meterProvider = providers.find(
+      (p) => p.provide === OtelMeterRegistry,
+    ) as {
+      useFactory?: (properties: { meter?: unknown } | null) => unknown;
+    };
 
-    expect(providers.some((p) => p.provide === OtelMeterRegistry)).toBe(false);
-    expect(providers.some((p) => p.provide === METER_REGISTRY_TOKEN)).toBe(
-      false,
-    );
+    expect(meterProvider.useFactory?.({})).toBeNull();
   });
 
   it("registers meter providers when meter is provided", () => {
@@ -95,17 +97,22 @@ describe("ObservationModule", () => {
     ).toBe(true);
   });
 
-  it("does not register tool calling observation properties when content logging is disabled", () => {
+  it("returns no tool calling observation properties when content logging is disabled", () => {
     const dynamicModule = ObservationModule.forRoot({
       toolCalling: { includeContent: false },
     });
     const providers = dynamicModule.providers as FactoryProvider[];
+    const toolCallingProvider = providers.find(
+      (p) => p.provide === TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+    ) as {
+      useFactory?: (properties: {
+        toolCalling?: { includeContent?: boolean };
+      }) => unknown;
+    };
 
     expect(
-      providers.some(
-        (p) => p.provide === TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
-      ),
-    ).toBe(false);
+      toolCallingProvider.useFactory?.({ toolCalling: {} }),
+    ).toBeUndefined();
   });
 
   it("registers async providers via forRootAsync", () => {

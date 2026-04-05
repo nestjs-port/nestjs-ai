@@ -58,15 +58,11 @@ export class ChatClientModule {
     customizer?: ChatClientCustomizerDefinition,
     options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
-    const providers = createProviders(customizer);
-
-    return {
-      module: ChatClientModule,
-      imports: options?.imports ?? [],
-      providers,
-      exports: [CHAT_CLIENT_BUILDER_TOKEN],
-      global: options?.global ?? false,
-    };
+    return ChatClientModule.forFeatureAsync({
+      imports: options?.imports,
+      useFactory: () => customizer,
+      global: options?.global,
+    });
   }
 
   static forFeatureAsync(options: ChatClientModuleAsyncOptions): DynamicModule {
@@ -92,11 +88,8 @@ export class ChatClientModule {
   }
 }
 
-function createProviders(
-  customizer?: ChatClientCustomizerDefinition,
-): Provider[] {
+function createProviders(): Provider[] {
   return [
-    ...createCustomizerProviders(customizer),
     {
       provide: ChatClientBuilderConfigurer,
       useFactory: (customizerInstance?: ChatClientCustomizer | null) => {
@@ -133,31 +126,6 @@ function createProviders(
         { token: AdvisorObservationConvention, optional: true },
       ],
       scope: Scope.TRANSIENT,
-    },
-  ];
-}
-
-function createCustomizerProviders(
-  customizer?: ChatClientCustomizerDefinition,
-): Provider[] {
-  if (customizer == null) {
-    return [];
-  }
-
-  if (isCustomizerFactoryDefinition(customizer)) {
-    return [
-      {
-        provide: CHAT_CLIENT_CUSTOMIZER_TOKEN,
-        useFactory: customizer.useFactory,
-        inject: (customizer.inject ?? []) as InjectionToken[],
-      },
-    ];
-  }
-
-  return [
-    {
-      provide: CHAT_CLIENT_CUSTOMIZER_TOKEN,
-      useFactory: () => customizer,
     },
   ];
 }

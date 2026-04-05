@@ -65,16 +65,16 @@ describe("ChatClientModule", () => {
     expect(builderProvider.inject).toContain(CHAT_MODEL_TOKEN);
   });
 
-  it("does not register customizer when none provided", () => {
+  it("registers customizer provider placeholder when none provided", () => {
     const dynamicModule = ChatClientModule.forFeature();
     const providers = dynamicModule.providers as FactoryProvider[];
 
     expect(
       providers.some((p) => p.provide === CHAT_CLIENT_CUSTOMIZER_TOKEN),
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it("registers customizer function via forFeature", () => {
+  it("registers customizer function via forFeature", async () => {
     const customizer = () => {};
     const dynamicModule = ChatClientModule.forFeature(customizer);
     const providers = dynamicModule.providers as FactoryProvider[];
@@ -84,10 +84,10 @@ describe("ChatClientModule", () => {
     ) as FactoryProvider;
 
     expect(customizerProvider).toBeDefined();
-    expect(customizerProvider.useFactory()).toBe(customizer);
+    await expect(customizerProvider.useFactory()).resolves.toBe(customizer);
   });
 
-  it("registers customizer factory definition via forFeature", () => {
+  it("registers customizer factory definition via forFeature", async () => {
     const customizerFn = () => {};
     const dynamicModule = ChatClientModule.forFeature({
       useFactory: () => customizerFn,
@@ -100,7 +100,7 @@ describe("ChatClientModule", () => {
     ) as FactoryProvider;
 
     expect(customizerProvider).toBeDefined();
-    expect(customizerProvider.useFactory()).toBe(customizerFn);
+    await expect(customizerProvider.useFactory()).resolves.toBe(customizerFn);
   });
 
   it("registers async customizer provider via forFeatureAsync", () => {

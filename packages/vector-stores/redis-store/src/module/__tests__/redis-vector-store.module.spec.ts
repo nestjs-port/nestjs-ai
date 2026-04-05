@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FactoryProvider, ValueProvider } from "@nestjs/common";
+import type { FactoryProvider } from "@nestjs/common";
 import { VECTOR_STORE_TOKEN } from "@nestjs-ai/commons";
 import type { EmbeddingModel } from "@nestjs-ai/model";
 import { createClient, type RedisClientType } from "redis";
@@ -99,11 +99,22 @@ describe("RedisVectorStoreModule", () => {
       (p) => p.provide === VECTOR_STORE_TOKEN,
     ) as FactoryProvider;
 
-    const properties = (
-      providers.find(
-        (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
-      ) as unknown as ValueProvider
-    ).useValue;
+    const propertiesProvider = providers.find(
+      (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
+    ) as FactoryProvider;
+    const properties = propertiesProvider.useFactory?.({
+      client: client as unknown as RedisClientType,
+      initializeSchema: true,
+      indexName: "custom-index",
+      prefix: "doc:",
+      distanceMetric: RedisDistanceMetric.L2,
+      metadataFields: [RedisMetadataField.tag("type")],
+      hnsw: {
+        m: 32,
+        efConstruction: 100,
+        efRuntime: 50,
+      },
+    });
 
     const vectorStore = await (
       vectorStoreProvider.useFactory as (
@@ -143,11 +154,13 @@ describe("RedisVectorStoreModule", () => {
       (p) => p.provide === VECTOR_STORE_TOKEN,
     ) as FactoryProvider;
 
-    const properties = (
-      providers.find(
-        (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
-      ) as unknown as ValueProvider
-    ).useValue;
+    const propertiesProvider = providers.find(
+      (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
+    ) as FactoryProvider;
+    const properties = propertiesProvider.useFactory?.({
+      client: client as unknown as RedisClientType,
+      initializeSchema: false,
+    });
 
     const vectorStore = await (
       vectorStoreProvider.useFactory as (
@@ -177,11 +190,12 @@ describe("RedisVectorStoreModule", () => {
       (p) => p.provide === VECTOR_STORE_TOKEN,
     ) as FactoryProvider;
 
-    const properties = (
-      providers.find(
-        (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
-      ) as unknown as ValueProvider
-    ).useValue;
+    const propertiesProvider = providers.find(
+      (p) => p.provide === REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
+    ) as FactoryProvider;
+    const properties = propertiesProvider.useFactory?.({
+      clientOptions: { url: "redis://localhost:6379" },
+    });
 
     const vectorStore = await (
       vectorStoreProvider.useFactory as (

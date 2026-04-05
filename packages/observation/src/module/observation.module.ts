@@ -55,14 +55,10 @@ export class ObservationModule {
   static forRoot(
     properties: ObservationConfigurationProperties & { global?: boolean } = {},
   ): DynamicModule {
-    const providers = createProviders(properties);
-
-    return {
-      module: ObservationModule,
-      providers,
-      exports: providers.map((p) => (p as FactoryProvider).provide),
-      global: properties.global ?? true,
-    };
+    return ObservationModule.forRootAsync({
+      useFactory: () => properties,
+      global: properties.global,
+    });
   }
 
   static forRootAsync(options: ObservationModuleAsyncOptions): DynamicModule {
@@ -86,18 +82,6 @@ export class ObservationModule {
 }
 
 const OBSERVATION_PROPERTIES_TOKEN = Symbol.for("OBSERVATION_PROPERTIES_TOKEN");
-
-function createProviders(
-  properties: ObservationConfigurationProperties,
-): Provider[] {
-  return [
-    ...createMeterRegistryProviders(properties),
-    ...createObservationContainerProviders(),
-    ...createObservationHandlerProviders(properties),
-    ...createObservationRegistryProviders(),
-    ...createToolCallingObservationPropertiesProviders(properties),
-  ];
-}
 
 function createAsyncProviders(): Provider[] {
   return [
@@ -154,80 +138,6 @@ function createAsyncProviders(): Provider[] {
       },
       inject: [
         OBSERVATION_PROPERTIES_TOKEN,
-        OBSERVATION_REGISTRY_TOKEN,
-        ObservationHandlers,
-        ObservationFilters,
-      ],
-    },
-  ];
-}
-
-function createToolCallingObservationPropertiesProviders(
-  properties: ObservationConfigurationProperties,
-): Provider[] {
-  if (!properties.toolCalling?.includeContent) {
-    return [];
-  }
-
-  return [
-    {
-      provide: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
-      useValue: properties.toolCalling,
-    },
-  ];
-}
-
-function createMeterRegistryProviders(
-  properties: ObservationConfigurationProperties,
-): Provider[] {
-  if (!properties.meter) {
-    return [];
-  }
-
-  return [
-    {
-      provide: OtelMeterRegistry,
-      useFactory: () => new OtelMeterRegistry(properties.meter as never),
-    },
-    {
-      provide: METER_REGISTRY_TOKEN,
-      useFactory: (registry: OtelMeterRegistry) => registry as MeterRegistry,
-      inject: [OtelMeterRegistry],
-    },
-  ];
-}
-
-function createObservationHandlerProviders(
-  properties: ObservationConfigurationProperties,
-): Provider[] {
-  return [
-    {
-      provide: ObservationProviderPostProcessor,
-      useFactory: (
-        observationRegistry: ObservationRegistry,
-        observationHandlers: ObservationHandlers,
-        observationFilters: ObservationFilters,
-      ) => {
-        if (properties.tracer) {
-          observationHandlers.addHandler(
-            new OtelTracingObservationHandler(properties.tracer),
-          );
-        }
-        if (properties.meter) {
-          observationHandlers.addHandler(
-            new OtelMeterObservationHandler(
-              properties.meter,
-              ...(properties.ignoredMeters ?? []),
-            ),
-          );
-        }
-        return new ObservationProviderPostProcessor(
-          observationRegistry,
-          observationHandlers,
-          observationFilters,
-        );
-      },
-      inject: [
         OBSERVATION_REGISTRY_TOKEN,
         ObservationHandlers,
         ObservationFilters,

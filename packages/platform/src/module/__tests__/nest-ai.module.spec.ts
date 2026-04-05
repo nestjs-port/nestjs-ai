@@ -16,7 +16,11 @@
 
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { HTTP_CLIENT_TOKEN, type HttpClient } from "@nestjs-ai/commons";
+import {
+  FetchHttpClient,
+  HTTP_CLIENT_TOKEN,
+  type HttpClient,
+} from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { NestAiModule } from "../nest-ai.module";
 
@@ -54,14 +58,17 @@ describe("NestAIModule", () => {
         provider !== null &&
         "provide" in provider &&
         provider.provide === HTTP_CLIENT_TOKEN,
-    );
+    ) as {
+      useFactory?: (options: { httpClient?: HttpClient }) => HttpClient;
+    };
 
     expect(httpClientProvider).toBeDefined();
     expect(
       typeof httpClientProvider === "object" &&
         httpClientProvider !== null &&
-        "useValue" in httpClientProvider,
+        "useFactory" in httpClientProvider,
     ).toBe(true);
+    expect(httpClientProvider.useFactory?.({})).toBeInstanceOf(FetchHttpClient);
     expect(exportsList).toContain(HTTP_CLIENT_TOKEN);
   });
 
@@ -77,15 +84,18 @@ describe("NestAIModule", () => {
         provider !== null &&
         "provide" in provider &&
         provider.provide === HTTP_CLIENT_TOKEN,
-    );
+    ) as {
+      useFactory?: (options: { httpClient?: HttpClient }) => HttpClient;
+    };
 
     expect(httpClientProvider).toBeDefined();
     expect(
       typeof httpClientProvider === "object" &&
         httpClientProvider !== null &&
-        "useValue" in httpClientProvider
-        ? httpClientProvider.useValue
-        : undefined,
+        "useFactory" in httpClientProvider,
+    ).toBe(true);
+    expect(
+      httpClientProvider.useFactory?.({ httpClient: TEST_HTTP_CLIENT }),
     ).toBe(TEST_HTTP_CLIENT);
   });
 

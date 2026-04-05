@@ -152,6 +152,7 @@ function createCachedContentProviders(
     },
   ];
 }
+
 function createGoogleGenAiChatModel(
   properties: GoogleGenAiChatProperties,
   genAiClient: GoogleGenAI,

@@ -42,13 +42,9 @@ export class RedisChatMemoryModule {
     properties: RedisChatMemoryProperties,
     _options: RedisChatMemoryModuleOptions = {},
   ): Provider[] {
-    return [
-      {
-        provide: REDIS_CHAT_MEMORY_PROPERTIES_TOKEN,
-        useValue: properties,
-      },
-      ...RedisChatMemoryModule.createChatMemoryProviders(),
-    ];
+    return RedisChatMemoryModule.forFeatureAsync({
+      useFactory: () => properties,
+    });
   }
 
   static forFeatureAsync(

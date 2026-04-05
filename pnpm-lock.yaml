@@ -159,6 +159,9 @@ importers:
       '@google/genai':
         specifier: ^1.40.0
         version: 1.40.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
+      '@nestjs-ai/client-chat':
+        specifier: workspace:*
+        version: link:../client-chat
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
@@ -177,6 +180,9 @@ importers:
       '@nestjs-ai/model-transformers':
         specifier: workspace:*
         version: link:../models/transformers
+      '@nestjs-ai/observation':
+        specifier: workspace:*
+        version: link:../observation
       '@nestjs-ai/platform':
         specifier: workspace:*
         version: link:../platform

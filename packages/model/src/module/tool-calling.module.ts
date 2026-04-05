@@ -16,48 +16,139 @@
 
 import type { Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import { ObservationFilters } from "@nestjs-ai/commons";
+import {
+  OBSERVATION_REGISTRY_TOKEN,
+  ObservationFilters,
+  type ObservationRegistry,
+  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+  type ToolCallingObservationProperties,
+} from "@nestjs-ai/commons";
+import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
 import {
   DefaultToolExecutionExceptionProcessor,
+  StaticToolCallbackResolver,
+  type ToolCallback,
+  type ToolCallbackProvider,
+  type ToolCallbackResolver,
   ToolCallingContentObservationFilter,
+  ToolCallingObservationConvention,
 } from "../tool";
+import {
+  TOOL_CALLBACK_PROVIDER_TOKEN,
+  TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
+  TOOL_CALLBACK_RESOLVER_TOKEN,
+  TOOL_CALLBACKS_TOKEN,
+  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
+  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
+  TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
+  TOOL_CALLING_MANAGER_TOKEN,
+  TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
+  TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
+} from "./tool-calling.tokens";
 
-export const TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN = Symbol.for(
-  "TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN",
-);
-
-const defaultToolExecutionExceptionProcessorProvider: Provider = {
-  provide: DefaultToolExecutionExceptionProcessor,
-  useFactory: () => new DefaultToolExecutionExceptionProcessor(false),
+const toolCallbackResolverProvider: Provider = {
+  provide: TOOL_CALLBACK_RESOLVER_TOKEN,
+  useFactory: (
+    toolCallbackResolver?: ToolCallbackResolver | null,
+    toolCallbacks?: ToolCallback[] | null,
+    toolCallbackProvider?: ToolCallbackProvider | null,
+  ) =>
+    toolCallbackResolver ??
+    new StaticToolCallbackResolver([
+      ...(toolCallbacks ?? []),
+      ...(toolCallbackProvider?.toolCallbacks ?? []),
+    ]),
+  inject: [
+    { token: TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN, optional: true },
+    { token: TOOL_CALLBACKS_TOKEN, optional: true },
+    { token: TOOL_CALLBACK_PROVIDER_TOKEN, optional: true },
+  ],
 };
 
-const toolExecutionExceptionProcessorAliasProvider: Provider = {
+const toolExecutionExceptionProcessorProvider: Provider = {
   provide: TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
-  useExisting: DefaultToolExecutionExceptionProcessor,
+  useFactory: (
+    toolExecutionExceptionProcessor?: DefaultToolExecutionExceptionProcessor | null,
+  ) =>
+    toolExecutionExceptionProcessor ??
+    new DefaultToolExecutionExceptionProcessor(false),
+  inject: [
+    {
+      token: TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
+      optional: true,
+    },
+  ],
+};
+
+const toolCallingManagerProvider: Provider = {
+  provide: TOOL_CALLING_MANAGER_TOKEN,
+  useFactory: (
+    toolCallingManager?: ToolCallingManager | null,
+    toolCallbackResolver?: ToolCallbackResolver | null,
+    toolExecutionExceptionProcessor?: DefaultToolExecutionExceptionProcessor | null,
+    observationRegistry?: ObservationRegistry | null,
+    observationConvention?: ToolCallingObservationConvention | null,
+  ) =>
+    toolCallingManager ??
+    new DefaultToolCallingManager({
+      observationRegistry: observationRegistry ?? undefined,
+      observationConvention: observationConvention ?? undefined,
+      toolCallbackResolver:
+        toolCallbackResolver ?? new StaticToolCallbackResolver([]),
+      toolExecutionExceptionProcessor:
+        toolExecutionExceptionProcessor ?? undefined,
+    }),
+  inject: [
+    { token: TOOL_CALLING_MANAGER_OVERRIDE_TOKEN, optional: true },
+    { token: TOOL_CALLBACK_RESOLVER_TOKEN, optional: true },
+    { token: TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN, optional: true },
+    { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
+    { token: ToolCallingObservationConvention, optional: true },
+  ],
 };
 
 const toolCallingContentObservationFilterProvider: Provider = {
-  provide: ToolCallingContentObservationFilter,
-  useFactory: (observationFilters: ObservationFilters) => {
+  provide: TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
+  useFactory: (
+    toolCallingContentObservationFilter: ToolCallingContentObservationFilter | null,
+    observationProperties: ToolCallingObservationProperties | null,
+    observationFilters: ObservationFilters | null,
+  ) => {
+    if (toolCallingContentObservationFilter != null) {
+      return toolCallingContentObservationFilter;
+    }
+
     const filter = new ToolCallingContentObservationFilter();
-    observationFilters.addFilter(filter);
+    if (observationProperties?.includeContent && observationFilters != null) {
+      observationFilters.addFilter(filter);
+    }
     return filter;
   },
-  inject: [ObservationFilters],
+  inject: [
+    {
+      token: TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
+      optional: true,
+    },
+    { token: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN, optional: true },
+    { token: ObservationFilters, optional: true },
+  ],
 };
 
 /**
- * Tool calling auto-configuration entry point for default tool-related providers.
+ * Module that registers tool calling providers.
  */
 @Module({
   providers: [
-    defaultToolExecutionExceptionProcessorProvider,
+    toolCallbackResolverProvider,
+    toolExecutionExceptionProcessorProvider,
+    toolCallingManagerProvider,
     toolCallingContentObservationFilterProvider,
-    toolExecutionExceptionProcessorAliasProvider,
   ],
   exports: [
+    TOOL_CALLBACK_RESOLVER_TOKEN,
     TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
-    ToolCallingContentObservationFilter,
+    TOOL_CALLING_MANAGER_TOKEN,
+    TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
   ],
 })
 export class ToolCallingModule {}

@@ -16,7 +16,11 @@
 
 import type { Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import { ObservationFilters } from "@nestjs-ai/commons";
+import {
+  ObservationFilters,
+  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+  type ToolCallingObservationProperties,
+} from "@nestjs-ai/commons";
 import {
   DefaultToolExecutionExceptionProcessor,
   ToolCallingContentObservationFilter,
@@ -38,12 +42,20 @@ const toolExecutionExceptionProcessorAliasProvider: Provider = {
 
 const toolCallingContentObservationFilterProvider: Provider = {
   provide: ToolCallingContentObservationFilter,
-  useFactory: (observationFilters: ObservationFilters) => {
+  useFactory: (
+    observationProperties: ToolCallingObservationProperties | null,
+    observationFilters: ObservationFilters | null,
+  ) => {
     const filter = new ToolCallingContentObservationFilter();
-    observationFilters.addFilter(filter);
+    if (observationProperties?.includeContent && observationFilters != null) {
+      observationFilters.addFilter(filter);
+    }
     return filter;
   },
-  inject: [ObservationFilters],
+  inject: [
+    { token: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN, optional: true },
+    { token: ObservationFilters, optional: true },
+  ],
 };
 
 /**

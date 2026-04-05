@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-export {
-  BATCHING_STRATEGY_TOKEN,
-  CHAT_CLIENT_BUILDER_TOKEN,
-  CHAT_CLIENT_CUSTOMIZER_TOKEN,
-  CHAT_MEMORY_TOKEN,
-  CHAT_MODEL_TOKEN,
-  EMBEDDING_MODEL_TOKEN,
-  HTTP_CLIENT_TOKEN,
-  METER_REGISTRY_TOKEN,
-  OBSERVATION_REGISTRY_TOKEN,
-  PROVIDER_INSTANCE_EXPLORER_TOKEN,
-  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
-  VECTOR_STORE_TOKEN,
-} from "./tokens";
+export interface ToolCallingObservationProperties {
+  /**
+   * Whether to include the tool call content in the observations.
+   */
+  includeContent?: boolean;
+}

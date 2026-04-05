@@ -29,6 +29,7 @@ import {
   ObservationFilters,
   ObservationHandlers,
   type ObservationRegistry,
+  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
 } from "@nestjs-ai/commons";
 import {
   OtelMeterObservationHandler,
@@ -51,7 +52,7 @@ export interface ObservationModuleAsyncOptions {
 
 @Module({})
 export class ObservationModule {
-  static forFeature(
+  static forRoot(
     properties: ObservationConfigurationProperties & { global?: boolean } = {},
   ): DynamicModule {
     const providers = createProviders(properties);
@@ -64,9 +65,7 @@ export class ObservationModule {
     };
   }
 
-  static forFeatureAsync(
-    options: ObservationModuleAsyncOptions,
-  ): DynamicModule {
+  static forRootAsync(options: ObservationModuleAsyncOptions): DynamicModule {
     const providers = createAsyncProviders();
 
     return {
@@ -96,6 +95,7 @@ function createProviders(
     ...createObservationContainerProviders(),
     ...createObservationHandlerProviders(properties),
     ...createObservationRegistryProviders(),
+    ...createToolCallingObservationPropertiesProviders(properties),
   ];
 }
 
@@ -117,6 +117,14 @@ function createAsyncProviders(): Provider[] {
     },
     ...createObservationContainerProviders(),
     ...createObservationRegistryProviders(),
+    {
+      provide: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+      useFactory: (properties: ObservationConfigurationProperties) =>
+        properties.toolCalling?.includeContent
+          ? properties.toolCalling
+          : undefined,
+      inject: [OBSERVATION_PROPERTIES_TOKEN],
+    },
     {
       provide: ObservationProviderPostProcessor,
       useFactory: (
@@ -150,6 +158,21 @@ function createAsyncProviders(): Provider[] {
         ObservationHandlers,
         ObservationFilters,
       ],
+    },
+  ];
+}
+
+function createToolCallingObservationPropertiesProviders(
+  properties: ObservationConfigurationProperties,
+): Provider[] {
+  if (!properties.toolCalling?.includeContent) {
+    return [];
+  }
+
+  return [
+    {
+      provide: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+      useValue: properties.toolCalling,
     },
   ];
 }

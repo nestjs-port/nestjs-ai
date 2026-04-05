@@ -21,6 +21,7 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   ObservationFilters,
   ObservationHandlers,
+  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
 } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { OtelMeterRegistry } from "../../otel-meter-registry";
@@ -28,8 +29,8 @@ import { ObservationModule } from "../observation.module";
 import { ObservationProviderPostProcessor } from "../observation-provider-post-processor";
 
 describe("ObservationModule", () => {
-  it("registers observation registry providers via forFeature", () => {
-    const dynamicModule = ObservationModule.forFeature({});
+  it("registers observation registry providers via forRoot", () => {
+    const dynamicModule = ObservationModule.forRoot({});
     const providers = dynamicModule.providers as FactoryProvider[];
 
     expect(providers.some((p) => p.provide === ObservationHandlers)).toBe(true);
@@ -46,22 +47,22 @@ describe("ObservationModule", () => {
   });
 
   it("is global by default", () => {
-    const dynamicModule = ObservationModule.forFeature({});
+    const dynamicModule = ObservationModule.forRoot({});
     expect(dynamicModule.global).toBe(true);
   });
 
   it("can be non-global", () => {
-    const dynamicModule = ObservationModule.forFeature({ global: false });
+    const dynamicModule = ObservationModule.forRoot({ global: false });
     expect(dynamicModule.global).toBe(false);
   });
 
   it("exports observation registry token", () => {
-    const dynamicModule = ObservationModule.forFeature({});
+    const dynamicModule = ObservationModule.forRoot({});
     expect(dynamicModule.exports).toContain(OBSERVATION_REGISTRY_TOKEN);
   });
 
   it("does not register meter providers when meter is not provided", () => {
-    const dynamicModule = ObservationModule.forFeature({});
+    const dynamicModule = ObservationModule.forRoot({});
     const providers = dynamicModule.providers as FactoryProvider[];
 
     expect(providers.some((p) => p.provide === OtelMeterRegistry)).toBe(false);
@@ -72,7 +73,7 @@ describe("ObservationModule", () => {
 
   it("registers meter providers when meter is provided", () => {
     const fakeMeter = {} as never;
-    const dynamicModule = ObservationModule.forFeature({ meter: fakeMeter });
+    const dynamicModule = ObservationModule.forRoot({ meter: fakeMeter });
     const providers = dynamicModule.providers as FactoryProvider[];
 
     expect(providers.some((p) => p.provide === OtelMeterRegistry)).toBe(true);
@@ -81,9 +82,35 @@ describe("ObservationModule", () => {
     );
   });
 
-  it("registers async providers via forFeatureAsync", () => {
-    const dynamicModule = ObservationModule.forFeatureAsync({
-      useFactory: () => ({}),
+  it("registers tool calling observation properties when content logging is enabled", () => {
+    const dynamicModule = ObservationModule.forRoot({
+      toolCalling: { includeContent: true },
+    });
+    const providers = dynamicModule.providers as FactoryProvider[];
+
+    expect(
+      providers.some(
+        (p) => p.provide === TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+      ),
+    ).toBe(true);
+  });
+
+  it("does not register tool calling observation properties when content logging is disabled", () => {
+    const dynamicModule = ObservationModule.forRoot({
+      toolCalling: { includeContent: false },
+    });
+    const providers = dynamicModule.providers as FactoryProvider[];
+
+    expect(
+      providers.some(
+        (p) => p.provide === TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+      ),
+    ).toBe(false);
+  });
+
+  it("registers async providers via forRootAsync", () => {
+    const dynamicModule = ObservationModule.forRootAsync({
+      useFactory: () => ({ toolCalling: { includeContent: true } }),
     });
     const providers = dynamicModule.providers as FactoryProvider[];
 
@@ -92,6 +119,11 @@ describe("ObservationModule", () => {
     ).toBe(true);
     expect(
       providers.some((p) => p.provide === ObservationProviderPostProcessor),
+    ).toBe(true);
+    expect(
+      providers.some(
+        (p) => p.provide === TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
+      ),
     ).toBe(true);
     expect(dynamicModule.global).toBe(true);
   });

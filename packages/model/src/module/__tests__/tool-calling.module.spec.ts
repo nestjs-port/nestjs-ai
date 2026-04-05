@@ -15,6 +15,7 @@
  */
 
 import "reflect-metadata";
+import { ObservationFilters } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { ToolCallingContentObservationFilter } from "../../tool";
 import {
@@ -43,5 +44,34 @@ describe("ToolCallingModule", () => {
           provider.provide === ToolCallingContentObservationFilter,
       ),
     ).toBe(true);
+  });
+
+  it("only adds the content observation filter when the observation token enables it", () => {
+    const providers = Reflect.getMetadata("providers", ToolCallingModule) ?? [];
+    const filterProvider = providers.find(
+      (provider: { provide?: unknown }) =>
+        provider.provide === ToolCallingContentObservationFilter,
+    ) as {
+      useFactory?: (
+        observationProperties: { includeContent?: boolean } | null,
+        observationFilters: ObservationFilters | null,
+      ) => ToolCallingContentObservationFilter;
+    };
+
+    const disabledFilters = new ObservationFilters();
+    const disabledFilter = filterProvider.useFactory?.(null, disabledFilters);
+
+    expect(disabledFilter).toBeInstanceOf(ToolCallingContentObservationFilter);
+    expect(disabledFilters.filters).toHaveLength(0);
+
+    const enabledFilters = new ObservationFilters();
+    const enabledFilter = filterProvider.useFactory?.(
+      { includeContent: true },
+      enabledFilters,
+    );
+
+    expect(enabledFilter).toBeInstanceOf(ToolCallingContentObservationFilter);
+    expect(enabledFilters.filters).toHaveLength(1);
+    expect(enabledFilters.filters[0]).toBe(enabledFilter);
   });
 });

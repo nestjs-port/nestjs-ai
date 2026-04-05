@@ -55,18 +55,11 @@ export class RedisVectorStoreModule {
     properties: RedisVectorStoreProperties,
     options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
   ): DynamicModule {
-    const providers = createProviders();
-
-    return {
-      module: RedisVectorStoreModule,
-      imports: options?.imports ?? [],
-      providers: [
-        { provide: REDIS_VECTOR_STORE_PROPERTIES_TOKEN, useValue: properties },
-        ...providers,
-      ],
-      exports: providers.map((p) => (p as FactoryProvider).provide),
-      global: options?.global ?? false,
-    };
+    return RedisVectorStoreModule.forFeatureAsync({
+      imports: options?.imports,
+      useFactory: () => properties,
+      global: options?.global,
+    });
   }
 
   static forFeatureAsync(

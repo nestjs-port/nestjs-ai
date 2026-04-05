@@ -32,6 +32,9 @@ import {
 import {
   ChatModelObservationConvention,
   ModelObservationModule,
+  TOOL_CALLING_MANAGER_TOKEN,
+  type ToolCallingManager,
+  ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import { GoogleGenAiCachedContentService } from "../cache";
@@ -65,7 +68,11 @@ export class GoogleGenAiChatModelModule {
 
     return {
       module: GoogleGenAiChatModelModule,
-      imports: [ModelObservationModule, ...(options?.imports ?? [])],
+      imports: [
+        ModelObservationModule,
+        ToolCallingModule,
+        ...(options?.imports ?? []),
+      ],
       providers: [
         {
           provide: GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -85,7 +92,11 @@ export class GoogleGenAiChatModelModule {
 
     return {
       module: GoogleGenAiChatModelModule,
-      imports: [ModelObservationModule, ...(options.imports ?? [])],
+      imports: [
+        ModelObservationModule,
+        ToolCallingModule,
+        ...(options.imports ?? []),
+      ],
       providers: [
         {
           provide: GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -113,6 +124,7 @@ function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
       useFactory: (
         props: GoogleGenAiChatProperties,
         genAiClient: GoogleGenAI,
+        toolCallingManager: ToolCallingManager,
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
         toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
@@ -120,6 +132,7 @@ function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
         createGoogleGenAiChatModel(
           props,
           genAiClient,
+          toolCallingManager,
           observationRegistry,
           observationConvention,
           toolExecutionEligibilityPredicate,
@@ -127,6 +140,7 @@ function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
       inject: [
         GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
         GoogleGenAI,
+        TOOL_CALLING_MANAGER_TOKEN,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
         { token: ToolExecutionEligibilityPredicate, optional: true },
@@ -152,9 +166,11 @@ function createCachedContentProviders(
     },
   ];
 }
+
 function createGoogleGenAiChatModel(
   properties: GoogleGenAiChatProperties,
   genAiClient: GoogleGenAI,
+  toolCallingManager: ToolCallingManager,
   observationRegistry?: ObservationRegistry,
   observationConvention?: ChatModelObservationConvention,
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
@@ -166,6 +182,7 @@ function createGoogleGenAiChatModel(
   return new GoogleGenAiChatModel({
     genAiClient,
     defaultOptions,
+    toolCallingManager,
     observationRegistry,
     observationConvention,
     toolExecutionEligibilityPredicate,

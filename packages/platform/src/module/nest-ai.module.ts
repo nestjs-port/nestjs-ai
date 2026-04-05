@@ -37,15 +37,13 @@ export const NEST_AI_ROOT_MODULE_OPTIONS = Symbol(
 @Module({})
 export class NestAiModule {
   static forRoot(options: NestAiRootModuleOptions = {}): DynamicModule {
-    LoggerFactory.bind(new NestLoggerFactory());
-
-    return {
-      module: NestAiModule,
-      imports: options.imports ?? [],
-      providers: NestAiModule.createRootProviders(options),
-      exports: NestAiModule.getRootExports(),
-      global: options.global ?? true,
-    };
+    return NestAiModule.forRootAsync({
+      imports: options.imports,
+      useFactory: () => ({
+        httpClient: options.httpClient,
+      }),
+      global: options.global,
+    });
   }
 
   static forRootAsync(options: NestAiRootModuleAsyncOptions): DynamicModule {
@@ -65,21 +63,6 @@ export class NestAiModule {
       exports: NestAiModule.getRootExports(),
       global: options.global ?? true,
     };
-  }
-
-  private static createRootProviders(
-    options: Pick<NestAiRootModuleOptions, "httpClient">,
-  ): Provider[] {
-    return [
-      {
-        provide: HTTP_CLIENT_TOKEN,
-        useValue: options.httpClient ?? new FetchHttpClient(),
-      },
-      {
-        provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
-        useClass: NestProviderInstanceExplorer,
-      },
-    ];
   }
 
   private static createAsyncRootProviders(): Provider[] {

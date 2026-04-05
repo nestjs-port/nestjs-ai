@@ -15,12 +15,17 @@
  */
 
 import "reflect-metadata";
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
 import {
+  TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
+  TOOL_CALLING_MANAGER_TOKEN,
+} from "@nestjs-ai/model";
+import {
   OPEN_AI_CHAT_PROPERTIES_TOKEN,
+  OpenAiApi,
   OpenAiChatModelModule,
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";
@@ -28,6 +33,9 @@ import { NestAiModule } from "@nestjs-ai/platform";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
+const TOOL_CALLING_MANAGER_OVERRIDE = {
+  resolvedBy: "override",
+};
 
 @Module({
   providers: [
@@ -39,6 +47,18 @@ const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
   exports: [API_KEY_TOKEN],
 })
 class ApiKeyConfigModule {}
+
+@Global()
+@Module({
+  providers: [
+    {
+      provide: TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
+      useValue: TOOL_CALLING_MANAGER_OVERRIDE,
+    },
+  ],
+  exports: [TOOL_CALLING_MANAGER_OVERRIDE_TOKEN],
+})
+class ToolCallingManagerOverrideModule {}
 
 describe("OpenAiChatModelModule", () => {
   describe("forFeature", () => {
@@ -55,6 +75,29 @@ describe("OpenAiChatModelModule", () => {
 
       const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
       expect(chatModel).toBeDefined();
+    });
+
+    it("should resolve OpenAiApi from feature properties via NestJS DI", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          OpenAiChatModelModule.forFeature({
+            apiKey: "test-api-key",
+            baseUrl: "https://example.test",
+            completionsPath: "/v1/custom/completions",
+            projectId: "test-project",
+            organizationId: "test-org",
+            options: { model: "gpt-4o-mini" },
+          }),
+        ],
+      }).compile();
+
+      const openAiApi = moduleRef.get(OpenAiApi);
+      expect(openAiApi.baseUrl).toBe("https://example.test");
+      expect(openAiApi.apiKey.value).toBe("test-api-key");
+      expect(openAiApi.completionsPath).toBe("/v1/custom/completions");
+      expect(openAiApi.headers.get("OpenAI-Project")).toBe("test-project");
+      expect(openAiApi.headers.get("OpenAI-Organization")).toBe("test-org");
     });
 
     it("should not export properties token", async () => {
@@ -99,6 +142,31 @@ describe("OpenAiChatModelModule", () => {
 
       expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
       expect(featureModule.global).toBe(true);
+    });
+
+    it("should prefer a provided tool calling manager override", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          ToolCallingManagerOverrideModule,
+          OpenAiChatModelModule.forFeature({
+            apiKey: "test-key",
+            options: { model: "gpt-4o-mini" },
+          }),
+        ],
+      }).compile();
+
+      expect(moduleRef.get(TOOL_CALLING_MANAGER_TOKEN)).toBe(
+        TOOL_CALLING_MANAGER_OVERRIDE,
+      );
+
+      expect(
+        (
+          moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
+            _toolCallingManager: unknown;
+          }
+        )._toolCallingManager,
+      ).toBe(TOOL_CALLING_MANAGER_OVERRIDE);
     });
   });
 
@@ -154,6 +222,25 @@ describe("OpenAiChatModelModule", () => {
 
       const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
       expect(chatModel).toBeDefined();
+    });
+
+    it("should resolve OpenAiApi from async feature properties via NestJS DI", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          OpenAiChatModelModule.forFeatureAsync({
+            useFactory: () => ({
+              apiKey: "async-api-key",
+              baseUrl: "https://async.example.test",
+              options: { model: "gpt-4o-mini" },
+            }),
+          }),
+        ],
+      }).compile();
+
+      const openAiApi = moduleRef.get(OpenAiApi);
+      expect(openAiApi.baseUrl).toBe("https://async.example.test");
+      expect(openAiApi.apiKey.value).toBe("async-api-key");
     });
 
     it("should default global to false for async", async () => {

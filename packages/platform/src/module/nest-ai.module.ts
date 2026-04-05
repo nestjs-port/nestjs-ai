@@ -20,8 +20,6 @@ import {
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
-  ObservationFilters,
-  ObservationHandlers,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
 import { NestLoggerFactory } from "../logging";
@@ -43,6 +41,7 @@ export class NestAiModule {
 
     return {
       module: NestAiModule,
+      imports: options.imports ?? [],
       providers: NestAiModule.createRootProviders(options),
       exports: NestAiModule.getRootExports(),
       global: options.global ?? true,
@@ -77,14 +76,6 @@ export class NestAiModule {
         useValue: options.httpClient ?? new FetchHttpClient(),
       },
       {
-        provide: ObservationHandlers,
-        useValue: new ObservationHandlers(),
-      },
-      {
-        provide: ObservationFilters,
-        useValue: new ObservationFilters(),
-      },
-      {
         provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
         useClass: NestProviderInstanceExplorer,
       },
@@ -100,14 +91,6 @@ export class NestAiModule {
         inject: [NEST_AI_ROOT_MODULE_OPTIONS],
       },
       {
-        provide: ObservationHandlers,
-        useValue: new ObservationHandlers(),
-      },
-      {
-        provide: ObservationFilters,
-        useValue: new ObservationFilters(),
-      },
-      {
         provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
         useClass: NestProviderInstanceExplorer,
       },
@@ -115,11 +98,6 @@ export class NestAiModule {
   }
 
   private static getRootExports(): InjectionToken[] {
-    return [
-      HTTP_CLIENT_TOKEN,
-      ObservationHandlers,
-      ObservationFilters,
-      PROVIDER_INSTANCE_EXPLORER_TOKEN,
-    ];
+    return [HTTP_CLIENT_TOKEN, PROVIDER_INSTANCE_EXPLORER_TOKEN];
   }
 }

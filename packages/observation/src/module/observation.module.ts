@@ -93,6 +93,7 @@ function createProviders(
 ): Provider[] {
   return [
     ...createMeterRegistryProviders(properties),
+    ...createObservationContainerProviders(),
     ...createObservationHandlerProviders(properties),
     ...createObservationRegistryProviders(),
   ];
@@ -114,6 +115,7 @@ function createAsyncProviders(): Provider[] {
         registry as MeterRegistry | null,
       inject: [OtelMeterRegistry],
     },
+    ...createObservationContainerProviders(),
     ...createObservationRegistryProviders(),
     {
       provide: ObservationProviderPostProcessor,
@@ -207,6 +209,19 @@ function createObservationHandlerProviders(
         ObservationHandlers,
         ObservationFilters,
       ],
+    },
+  ];
+}
+
+function createObservationContainerProviders(): Provider[] {
+  return [
+    {
+      provide: ObservationHandlers,
+      useValue: new ObservationHandlers(),
+    },
+    {
+      provide: ObservationFilters,
+      useValue: new ObservationFilters(),
     },
   ];
 }

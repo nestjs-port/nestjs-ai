@@ -20,7 +20,6 @@ import { Test } from "@nestjs/testing";
 import {
   HTTP_CLIENT_TOKEN,
   type HttpClient,
-  ObservationHandlers,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
 import { NestAiModule } from "@nestjs-ai/platform";
@@ -51,9 +50,6 @@ describe("NestAiModule", () => {
       }).compile();
 
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
-      expect(moduleRef.get(ObservationHandlers)).toBeInstanceOf(
-        ObservationHandlers,
-      );
       expect(moduleRef.get(PROVIDER_INSTANCE_EXPLORER_TOKEN)).toBeDefined();
     });
 
@@ -103,9 +99,6 @@ describe("NestAiModule", () => {
       }).compile();
 
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
-      expect(moduleRef.get(ObservationHandlers)).toBeInstanceOf(
-        ObservationHandlers,
-      );
     });
 
     it("should support async factory returning a Promise", async () => {

@@ -19,6 +19,8 @@ import {
   AlsObservationRegistry,
   METER_REGISTRY_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
+  ObservationFilters,
+  ObservationHandlers,
 } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { OtelMeterRegistry } from "../../otel-meter-registry";
@@ -30,6 +32,8 @@ describe("ObservationModule", () => {
     const dynamicModule = ObservationModule.forFeature({});
     const providers = dynamicModule.providers as FactoryProvider[];
 
+    expect(providers.some((p) => p.provide === ObservationHandlers)).toBe(true);
+    expect(providers.some((p) => p.provide === ObservationFilters)).toBe(true);
     expect(providers.some((p) => p.provide === AlsObservationRegistry)).toBe(
       true,
     );

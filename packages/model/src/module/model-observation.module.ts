@@ -30,9 +30,13 @@ import { EmbeddingModelMeterObservationHandler } from "../embedding";
 const modelObservationHandlerProvider: Provider = {
   provide: Symbol.for("MODEL_OBSERVATION_HANDLER_PROVIDER"),
   useFactory: (
-    observationHandlers: ObservationHandlers,
+    observationHandlers?: ObservationHandlers,
     meterRegistry?: MeterRegistry,
   ) => {
+    if (observationHandlers == null) {
+      return;
+    }
+
     if (
       !observationHandlers.handlers.some(
         (handler) => handler instanceof ChatModelCompletionObservationHandler,
@@ -66,7 +70,7 @@ const modelObservationHandlerProvider: Provider = {
     }
   },
   inject: [
-    ObservationHandlers,
+    { token: ObservationHandlers, optional: true },
     { token: METER_REGISTRY_TOKEN, optional: true },
   ],
 };

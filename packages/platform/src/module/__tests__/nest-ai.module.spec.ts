@@ -16,12 +16,7 @@
 
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import type { HttpClient } from "@nestjs-ai/commons";
-import {
-  HTTP_CLIENT_TOKEN,
-  ObservationFilters,
-  ObservationHandlers,
-} from "@nestjs-ai/commons";
+import { HTTP_CLIENT_TOKEN, type HttpClient } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { NestAiModule } from "../nest-ai.module";
 
@@ -94,38 +89,26 @@ describe("NestAIModule", () => {
     ).toBe(TEST_HTTP_CLIENT);
   });
 
-  it("registers observation handlers provider and export", () => {
-    const dynamicModule = NestAiModule.forRoot();
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
+  it("forwards imports in forRoot", () => {
+    const dynamicModule = NestAiModule.forRoot({ imports: [ConfigModule] });
+    const imports = dynamicModule.imports ?? [];
 
-    const observationHandlersProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === ObservationHandlers,
+    const observationModuleImport = imports.find(
+      (provider) => provider === ConfigModule,
     );
 
-    expect(observationHandlersProvider).toBeDefined();
-    expect(exportsList).toContain(ObservationHandlers);
+    expect(observationModuleImport).toBeDefined();
   });
 
-  it("registers observation filters provider and export", () => {
-    const dynamicModule = NestAiModule.forRoot();
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
+  it("forwards imports in forRootAsync", () => {
+    const asyncModule = NestAiModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: () => ({
+        httpClient: TEST_HTTP_CLIENT,
+      }),
+    });
 
-    const observationFiltersProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === ObservationFilters,
-    );
-
-    expect(observationFiltersProvider).toBeDefined();
-    expect(exportsList).toContain(ObservationFilters);
+    expect(asyncModule.imports ?? []).toContain(ConfigModule);
   });
 
   it("supports async root configuration with imports and inject", async () => {

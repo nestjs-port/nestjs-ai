@@ -16,6 +16,7 @@
 
 import type { OnApplicationBootstrap } from "@nestjs/common";
 import type {
+  ObservationFilters,
   ObservationHandlers,
   ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -26,11 +27,16 @@ export class ObservationProviderPostProcessor
   constructor(
     private readonly registry: ObservationRegistry,
     private readonly observationHandlers: ObservationHandlers,
+    private readonly observationFilters: ObservationFilters,
   ) {}
 
   onApplicationBootstrap(): void {
     for (const handler of this.observationHandlers.handlers) {
       this.registry.addHandler(handler);
+    }
+
+    for (const filter of this.observationFilters.orderedFilters) {
+      this.registry.addFilter(filter);
     }
   }
 }

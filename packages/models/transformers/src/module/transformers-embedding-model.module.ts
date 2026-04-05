@@ -28,8 +28,8 @@ import {
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
-  createModelObservationHandlerProviders,
   EmbeddingModelObservationConvention,
+  ModelObservationModule,
 } from "@nestjs-ai/model";
 import { TransformersEmbeddingModel } from "../transformers-embedding-model";
 import type { TransformersEmbeddingModelProperties } from "./transformers-embedding-model-properties";
@@ -59,7 +59,7 @@ export class TransformersEmbeddingModelModule {
 
     return {
       module: TransformersEmbeddingModelModule,
-      imports: options?.imports ?? [],
+      imports: [ModelObservationModule, ...(options?.imports ?? [])],
       providers: [
         {
           provide: TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN,
@@ -79,7 +79,7 @@ export class TransformersEmbeddingModelModule {
 
     return {
       module: TransformersEmbeddingModelModule,
-      imports: options.imports ?? [],
+      imports: [ModelObservationModule, ...(options.imports ?? [])],
       providers: [
         {
           provide: TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN,
@@ -96,7 +96,6 @@ export class TransformersEmbeddingModelModule {
 
 function createProviders(): Provider[] {
   return [
-    ...createModelObservationHandlerProviders(),
     {
       provide: EMBEDDING_MODEL_TOKEN,
       useFactory: (

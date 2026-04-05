@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export { createModelObservationHandlerProviders } from "./model-observation-handler-providers";
+export { ModelObservationModule } from "./model-observation.module";
+export {
+  TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
+  ToolCallingModule,
+} from "./tool-calling.module";

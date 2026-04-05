@@ -20,6 +20,7 @@ import {
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   LoggerFactory,
+  ObservationFilters,
   ObservationHandlers,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
@@ -80,6 +81,10 @@ export class NestAiModule {
         useValue: new ObservationHandlers(),
       },
       {
+        provide: ObservationFilters,
+        useValue: new ObservationFilters(),
+      },
+      {
         provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
         useClass: NestProviderInstanceExplorer,
       },
@@ -99,6 +104,10 @@ export class NestAiModule {
         useValue: new ObservationHandlers(),
       },
       {
+        provide: ObservationFilters,
+        useValue: new ObservationFilters(),
+      },
+      {
         provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
         useClass: NestProviderInstanceExplorer,
       },
@@ -109,6 +118,7 @@ export class NestAiModule {
     return [
       HTTP_CLIENT_TOKEN,
       ObservationHandlers,
+      ObservationFilters,
       PROVIDER_INSTANCE_EXPLORER_TOKEN,
     ];
   }

@@ -31,7 +31,7 @@ import {
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
-  createModelObservationHandlerProviders,
+  ModelObservationModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import { GoogleGenAiCachedContentService } from "../cache";
@@ -65,7 +65,7 @@ export class GoogleGenAiChatModelModule {
 
     return {
       module: GoogleGenAiChatModelModule,
-      imports: options?.imports ?? [],
+      imports: [ModelObservationModule, ...(options?.imports ?? [])],
       providers: [
         {
           provide: GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -85,7 +85,7 @@ export class GoogleGenAiChatModelModule {
 
     return {
       module: GoogleGenAiChatModelModule,
-      imports: options.imports ?? [],
+      imports: [ModelObservationModule, ...(options.imports ?? [])],
       providers: [
         {
           provide: GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -102,7 +102,6 @@ export class GoogleGenAiChatModelModule {
 
 function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
   return [
-    ...createModelObservationHandlerProviders(),
     {
       provide: GoogleGenAI,
       useFactory: (props: GoogleGenAiChatProperties) =>

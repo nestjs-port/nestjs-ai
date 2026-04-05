@@ -17,7 +17,11 @@
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import type { HttpClient } from "@nestjs-ai/commons";
-import { HTTP_CLIENT_TOKEN, ObservationHandlers } from "@nestjs-ai/commons";
+import {
+  HTTP_CLIENT_TOKEN,
+  ObservationFilters,
+  ObservationHandlers,
+} from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { NestAiModule } from "../nest-ai.module";
 
@@ -105,6 +109,23 @@ describe("NestAIModule", () => {
 
     expect(observationHandlersProvider).toBeDefined();
     expect(exportsList).toContain(ObservationHandlers);
+  });
+
+  it("registers observation filters provider and export", () => {
+    const dynamicModule = NestAiModule.forRoot();
+    const providers = dynamicModule.providers ?? [];
+    const exportsList = dynamicModule.exports ?? [];
+
+    const observationFiltersProvider = providers.find(
+      (provider) =>
+        typeof provider === "object" &&
+        provider !== null &&
+        "provide" in provider &&
+        provider.provide === ObservationFilters,
+    );
+
+    expect(observationFiltersProvider).toBeDefined();
+    expect(exportsList).toContain(ObservationFilters);
   });
 
   it("supports async root configuration with imports and inject", async () => {

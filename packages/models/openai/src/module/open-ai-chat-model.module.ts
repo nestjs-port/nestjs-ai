@@ -31,7 +31,7 @@ import {
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
-  createModelObservationHandlerProviders,
+  ModelObservationModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import { OpenAiApi } from "../api";
@@ -62,7 +62,7 @@ export class OpenAiChatModelModule {
 
     return {
       module: OpenAiChatModelModule,
-      imports: options?.imports ?? [],
+      imports: [ModelObservationModule, ...(options?.imports ?? [])],
       providers: [
         { provide: OPEN_AI_CHAT_PROPERTIES_TOKEN, useValue: properties },
         ...providers,
@@ -79,7 +79,7 @@ export class OpenAiChatModelModule {
 
     return {
       module: OpenAiChatModelModule,
-      imports: options.imports ?? [],
+      imports: [ModelObservationModule, ...(options.imports ?? [])],
       providers: [
         {
           provide: OPEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -96,7 +96,6 @@ export class OpenAiChatModelModule {
 
 function createProviders(): Provider[] {
   return [
-    ...createModelObservationHandlerProviders(),
     {
       provide: OpenAiApi,
       useFactory: (properties: OpenAiChatProperties, httpClient: HttpClient) =>

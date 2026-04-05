@@ -26,6 +26,7 @@ import {
   METER_REGISTRY_TOKEN,
   type MeterRegistry,
   OBSERVATION_REGISTRY_TOKEN,
+  ObservationFilters,
   ObservationHandlers,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -120,6 +121,7 @@ function createAsyncProviders(): Provider[] {
         properties: ObservationConfigurationProperties,
         observationRegistry: ObservationRegistry,
         observationHandlers: ObservationHandlers,
+        observationFilters: ObservationFilters,
       ) => {
         if (properties.tracer) {
           observationHandlers.addHandler(
@@ -137,12 +139,14 @@ function createAsyncProviders(): Provider[] {
         return new ObservationProviderPostProcessor(
           observationRegistry,
           observationHandlers,
+          observationFilters,
         );
       },
       inject: [
         OBSERVATION_PROPERTIES_TOKEN,
         OBSERVATION_REGISTRY_TOKEN,
         ObservationHandlers,
+        ObservationFilters,
       ],
     },
   ];
@@ -177,6 +181,7 @@ function createObservationHandlerProviders(
       useFactory: (
         observationRegistry: ObservationRegistry,
         observationHandlers: ObservationHandlers,
+        observationFilters: ObservationFilters,
       ) => {
         if (properties.tracer) {
           observationHandlers.addHandler(
@@ -194,9 +199,14 @@ function createObservationHandlerProviders(
         return new ObservationProviderPostProcessor(
           observationRegistry,
           observationHandlers,
+          observationFilters,
         );
       },
-      inject: [OBSERVATION_REGISTRY_TOKEN, ObservationHandlers],
+      inject: [
+        OBSERVATION_REGISTRY_TOKEN,
+        ObservationHandlers,
+        ObservationFilters,
+      ],
     },
   ];
 }

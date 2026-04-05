@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-import type { ObservationContext, ObservationFilter } from "@nestjs-ai/commons";
+import type {
+  ObservationContext,
+  ObservationFilter,
+  Ordered,
+} from "@nestjs-ai/commons";
 import { KeyValue } from "@nestjs-ai/commons";
 import { ToolCallingObservationContext } from "./tool-calling-observation-context";
 
 const TOOL_CALL_ARGUMENTS = "spring.ai.tool.call.arguments";
 const TOOL_CALL_RESULT = "spring.ai.tool.call.result";
 
-export class ToolCallingContentObservationFilter implements ObservationFilter {
+export class ToolCallingContentObservationFilter
+  implements ObservationFilter, Ordered
+{
+  get order(): number {
+    return 0;
+  }
+
   map(context: ObservationContext): ObservationContext {
     if (!(context instanceof ToolCallingObservationContext)) {
       return context;

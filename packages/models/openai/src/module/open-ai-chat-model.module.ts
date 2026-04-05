@@ -32,6 +32,9 @@ import {
 import {
   ChatModelObservationConvention,
   ModelObservationModule,
+  TOOL_CALLING_MANAGER_TOKEN,
+  type ToolCallingManager,
+  ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import { OpenAiApi } from "../api";
@@ -72,7 +75,11 @@ export class OpenAiChatModelModule {
 
     return {
       module: OpenAiChatModelModule,
-      imports: [ModelObservationModule, ...(options.imports ?? [])],
+      imports: [
+        ModelObservationModule,
+        ToolCallingModule,
+        ...(options.imports ?? []),
+      ],
       providers: [
         {
           provide: OPEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -100,6 +107,7 @@ function createProviders(): Provider[] {
       useFactory: (
         properties: OpenAiChatProperties,
         openAiApi: OpenAiApi,
+        toolCallingManager: ToolCallingManager,
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
         toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
@@ -107,6 +115,7 @@ function createProviders(): Provider[] {
         createOpenAiChatModel(
           properties,
           openAiApi,
+          toolCallingManager,
           observationRegistry,
           observationConvention,
           toolExecutionEligibilityPredicate,
@@ -114,6 +123,7 @@ function createProviders(): Provider[] {
       inject: [
         OPEN_AI_CHAT_PROPERTIES_TOKEN,
         OpenAiApi,
+        TOOL_CALLING_MANAGER_TOKEN,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
         { token: ToolExecutionEligibilityPredicate, optional: true },
@@ -125,6 +135,7 @@ function createProviders(): Provider[] {
 function createOpenAiChatModel(
   properties: OpenAiChatProperties,
   openAiApi: OpenAiApi,
+  toolCallingManager: ToolCallingManager,
   observationRegistry?: ObservationRegistry,
   observationConvention?: ChatModelObservationConvention,
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
@@ -136,6 +147,9 @@ function createOpenAiChatModel(
   }
   if (observationRegistry) {
     builder.observationRegistry(observationRegistry);
+  }
+  if (toolCallingManager) {
+    builder.toolCallingManager(toolCallingManager);
   }
   if (toolExecutionEligibilityPredicate) {
     builder.toolExecutionEligibilityPredicate(

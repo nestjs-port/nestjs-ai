@@ -15,10 +15,14 @@
  */
 
 import "reflect-metadata";
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
+import {
+  TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
+  TOOL_CALLING_MANAGER_TOKEN,
+} from "@nestjs-ai/model";
 import {
   GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
   GoogleGenAiChatModelModule,
@@ -28,6 +32,9 @@ import { NestAiModule } from "@nestjs-ai/platform";
 import { describe, expect, it } from "vitest";
 
 const CONFIG_TOKEN = Symbol("CONFIG_TOKEN");
+const TOOL_CALLING_MANAGER_OVERRIDE = {
+  resolvedBy: "override",
+};
 
 @Module({
   providers: [
@@ -39,6 +46,18 @@ const CONFIG_TOKEN = Symbol("CONFIG_TOKEN");
   exports: [CONFIG_TOKEN],
 })
 class GoogleConfigModule {}
+
+@Global()
+@Module({
+  providers: [
+    {
+      provide: TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
+      useValue: TOOL_CALLING_MANAGER_OVERRIDE,
+    },
+  ],
+  exports: [TOOL_CALLING_MANAGER_OVERRIDE_TOKEN],
+})
+class ToolCallingManagerOverrideModule {}
 
 describe("GoogleGenAiChatModelModule", () => {
   describe("forFeature", () => {
@@ -99,6 +118,31 @@ describe("GoogleGenAiChatModelModule", () => {
 
       expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
       expect(featureModule.global).toBe(true);
+    });
+
+    it("should prefer a provided tool calling manager override", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          ToolCallingManagerOverrideModule,
+          GoogleGenAiChatModelModule.forFeature({
+            apiKey: "test-google-key",
+            options: { model: "gemini-2.0-flash" },
+          }),
+        ],
+      }).compile();
+
+      expect(moduleRef.get(TOOL_CALLING_MANAGER_TOKEN)).toBe(
+        TOOL_CALLING_MANAGER_OVERRIDE,
+      );
+
+      expect(
+        (
+          moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
+            _toolCallingManager: { _delegateToolCallingManager: unknown };
+          }
+        )._toolCallingManager._delegateToolCallingManager,
+      ).toBe(TOOL_CALLING_MANAGER_OVERRIDE);
     });
   });
 

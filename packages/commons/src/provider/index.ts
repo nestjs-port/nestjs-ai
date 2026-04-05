@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { createConditionalProvider } from "./conditional-provider";
 export type { ProviderInstanceExplorer } from "./provider-instance-explorer.interface";

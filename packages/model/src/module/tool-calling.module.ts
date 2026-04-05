@@ -14,68 +14,75 @@
  * limitations under the License.
  */
 
+import type { Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import {
-  createConditionalProvider,
   OBSERVATION_REGISTRY_TOKEN,
   ObservationFilters,
   type ObservationRegistry,
-  PROVIDER_INSTANCE_EXPLORER_TOKEN,
-  type ProviderInstanceExplorer,
   TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
   type ToolCallingObservationProperties,
 } from "@nestjs-ai/commons";
 import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
 import {
   DefaultToolExecutionExceptionProcessor,
-  DelegatingToolCallbackResolver,
-  NestProviderToolCallbackResolver,
+  StaticToolCallbackResolver,
+  type ToolCallback,
+  type ToolCallbackProvider,
   type ToolCallbackResolver,
   ToolCallingContentObservationFilter,
   ToolCallingObservationConvention,
 } from "../tool";
+import {
+  TOOL_CALLBACK_PROVIDER_TOKEN,
+  TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
+  TOOL_CALLBACK_RESOLVER_TOKEN,
+  TOOL_CALLBACKS_TOKEN,
+  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
+  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
+  TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
+  TOOL_CALLING_MANAGER_TOKEN,
+  TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
+  TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
+} from "./tool-calling.tokens";
 
-const toolCallbackResolverCondition = createConditionalProvider({
-  token: "TOOL_CALLBACK_RESOLVER_TOKEN",
-  inject: [{ token: PROVIDER_INSTANCE_EXPLORER_TOKEN, optional: true }],
-  resolve: (
+const toolCallbackResolverProvider: Provider = {
+  provide: TOOL_CALLBACK_RESOLVER_TOKEN,
+  useFactory: (
     toolCallbackResolver?: ToolCallbackResolver | null,
-    providerInstanceExplorer?: ProviderInstanceExplorer | null,
+    toolCallbacks?: ToolCallback[] | null,
+    toolCallbackProvider?: ToolCallbackProvider | null,
   ) =>
     toolCallbackResolver ??
-    (providerInstanceExplorer != null
-      ? new NestProviderToolCallbackResolver(providerInstanceExplorer)
-      : new DelegatingToolCallbackResolver([])),
-});
+    new StaticToolCallbackResolver([
+      ...(toolCallbacks ?? []),
+      ...(toolCallbackProvider?.toolCallbacks ?? []),
+    ]),
+  inject: [
+    { token: TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN, optional: true },
+    { token: TOOL_CALLBACKS_TOKEN, optional: true },
+    { token: TOOL_CALLBACK_PROVIDER_TOKEN, optional: true },
+  ],
+};
 
-export const TOOL_CALLBACK_RESOLVER_TOKEN = toolCallbackResolverCondition.token;
-export const TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN =
-  toolCallbackResolverCondition.overrideToken;
-
-const toolExecutionExceptionProcessorCondition = createConditionalProvider({
-  token: "TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN",
-  inject: [],
-  resolve: (
+const toolExecutionExceptionProcessorProvider: Provider = {
+  provide: TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
+  useFactory: (
     toolExecutionExceptionProcessor?: DefaultToolExecutionExceptionProcessor | null,
   ) =>
     toolExecutionExceptionProcessor ??
     new DefaultToolExecutionExceptionProcessor(false),
-});
-
-export const TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN =
-  toolExecutionExceptionProcessorCondition.token;
-export const TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN =
-  toolExecutionExceptionProcessorCondition.overrideToken;
-
-const toolCallingManagerCondition = createConditionalProvider({
-  token: "TOOL_CALLING_MANAGER_TOKEN",
   inject: [
-    { token: TOOL_CALLBACK_RESOLVER_TOKEN, optional: true },
-    { token: TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN, optional: true },
-    { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
-    { token: ToolCallingObservationConvention, optional: true },
+    {
+      token: TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
+      optional: true,
+    },
   ],
-  resolve: (
+};
+
+const toolCallingManagerProvider: Provider = {
+  provide: TOOL_CALLING_MANAGER_TOKEN,
+  useFactory: (
     toolCallingManager?: ToolCallingManager | null,
     toolCallbackResolver?: ToolCallbackResolver | null,
     toolExecutionExceptionProcessor?: DefaultToolExecutionExceptionProcessor | null,
@@ -87,23 +94,22 @@ const toolCallingManagerCondition = createConditionalProvider({
       observationRegistry: observationRegistry ?? undefined,
       observationConvention: observationConvention ?? undefined,
       toolCallbackResolver:
-        toolCallbackResolver ?? new DelegatingToolCallbackResolver([]),
+        toolCallbackResolver ?? new StaticToolCallbackResolver([]),
       toolExecutionExceptionProcessor:
         toolExecutionExceptionProcessor ?? undefined,
     }),
-});
-
-export const TOOL_CALLING_MANAGER_TOKEN = toolCallingManagerCondition.token;
-export const TOOL_CALLING_MANAGER_OVERRIDE_TOKEN =
-  toolCallingManagerCondition.overrideToken;
-
-const toolCallingContentObservationFilterCondition = createConditionalProvider({
-  token: "TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN",
   inject: [
-    { token: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN, optional: true },
-    { token: ObservationFilters, optional: true },
+    { token: TOOL_CALLING_MANAGER_OVERRIDE_TOKEN, optional: true },
+    { token: TOOL_CALLBACK_RESOLVER_TOKEN, optional: true },
+    { token: TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN, optional: true },
+    { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
+    { token: ToolCallingObservationConvention, optional: true },
   ],
-  resolve: (
+};
+
+const toolCallingContentObservationFilterProvider: Provider = {
+  provide: TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
+  useFactory: (
     toolCallingContentObservationFilter: ToolCallingContentObservationFilter | null,
     observationProperties: ToolCallingObservationProperties | null,
     observationFilters: ObservationFilters | null,
@@ -118,22 +124,25 @@ const toolCallingContentObservationFilterCondition = createConditionalProvider({
     }
     return filter;
   },
-});
-
-export const TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN =
-  toolCallingContentObservationFilterCondition.token;
-export const TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN =
-  toolCallingContentObservationFilterCondition.overrideToken;
+  inject: [
+    {
+      token: TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
+      optional: true,
+    },
+    { token: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN, optional: true },
+    { token: ObservationFilters, optional: true },
+  ],
+};
 
 /**
- * Tool calling auto-configuration entry point for default tool-related providers.
+ * Module that registers tool calling providers.
  */
 @Module({
   providers: [
-    toolCallbackResolverCondition.provider,
-    toolExecutionExceptionProcessorCondition.provider,
-    toolCallingManagerCondition.provider,
-    toolCallingContentObservationFilterCondition.provider,
+    toolCallbackResolverProvider,
+    toolExecutionExceptionProcessorProvider,
+    toolCallingManagerProvider,
+    toolCallingContentObservationFilterProvider,
   ],
   exports: [
     TOOL_CALLBACK_RESOLVER_TOKEN,

@@ -21,7 +21,7 @@
  */
 
 export * from "./api";
-export * from "./autoconfigure";
 export * from "./metadata";
+export * from "./module";
 export * from "./open-ai-chat-model";
 export * from "./open-ai-chat-options";

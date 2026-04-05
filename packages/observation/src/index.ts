@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./autoconfigure";
 export * from "./handlers";
+export * from "./module";
 export { OtelMeterRegistry } from "./otel-meter-registry";

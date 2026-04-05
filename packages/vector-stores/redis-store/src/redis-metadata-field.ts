@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SCHEMA_FIELD_TYPE } from "@redis/search";
+import { SCHEMA_FIELD_TYPE } from "redis";
 
 export const RedisMetadataFieldType = SCHEMA_FIELD_TYPE;
 export type RedisMetadataFieldType =

@@ -18,12 +18,14 @@
     "test": "vitest run"
   },
   "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@nestjs-ai/commons": "*",
     "@nestjs-ai/model": "*",
     "@nestjs-ai/retry": "*",
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
+    "@nestjs/common": "^11.1.11",
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",

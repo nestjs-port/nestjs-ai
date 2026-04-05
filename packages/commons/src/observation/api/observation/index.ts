@@ -19,6 +19,7 @@ export { ObservationContext } from "./observation-context";
 export type { ObservationConvention } from "./observation-convention.interface";
 export { ObservationDocumentation } from "./observation-documentation";
 export type { ObservationFilter } from "./observation-filter.interface";
+export { ObservationFilters } from "./observation-filters";
 export type { ObservationHandler } from "./observation-handler.interface";
 export { ObservationHandlers } from "./observation-handlers";
 export type { ObservationScope } from "./observation-scope.interface";

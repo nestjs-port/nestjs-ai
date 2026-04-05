@@ -31,13 +31,13 @@ import {
   SearchRequest,
   VectorStoreObservationContext,
 } from "@nestjs-ai/vector-store";
-import {
-  type RediSearchSchema,
-  SCHEMA_FIELD_TYPE,
-  SCHEMA_VECTOR_FIELD_ALGORITHM,
-  type SearchReply,
-} from "@redis/search";
-import type { RedisClientType, RedisJSON } from "redis";
+import type {
+  RediSearchSchema,
+  RedisClientType,
+  RedisJSON,
+  SearchReply,
+} from "redis";
+import { SCHEMA_FIELD_TYPE, SCHEMA_VECTOR_FIELD_ALGORITHM } from "redis";
 
 import { RedisFilterExpressionConverter } from "./redis-filter-expression-converter";
 import {

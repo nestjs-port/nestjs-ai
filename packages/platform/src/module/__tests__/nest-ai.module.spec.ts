@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-import type {
-  ChatClientConfiguration,
-  EmbeddingModelConfiguration,
-  VectorStoreConfiguration,
-} from "@nestjs-ai/commons";
-import {
-  HTTP_CLIENT_TOKEN,
-  type ObservationConfiguration,
-  ObservationHandlers,
-  PROVIDER_INSTANCE_EXPLORER_TOKEN,
-} from "@nestjs-ai/commons";
+import { Module } from "@nestjs/common";
+import { Test } from "@nestjs/testing";
+import { HTTP_CLIENT_TOKEN, type HttpClient } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { NestAiModule } from "../nest-ai.module";
+
+const TEST_HTTP_CLIENT: HttpClient = {
+  fetch: async () => new Response(null, { status: 200 }),
+};
+
+const CONFIG_TOKEN = Symbol("CONFIG_TOKEN");
+
+@Module({
+  providers: [
+    {
+      provide: CONFIG_TOKEN,
+      useValue: {
+        httpClient: TEST_HTTP_CLIENT,
+      },
+    },
+  ],
+  exports: [CONFIG_TOKEN],
+})
+class ConfigModule {}
 
 describe("NestAIModule", () => {
   it("registers default HTTP client provider in forRoot", () => {
@@ -54,190 +65,81 @@ describe("NestAIModule", () => {
     expect(exportsList).toContain(HTTP_CLIENT_TOKEN);
   });
 
-  it("registers observation handlers provider and export", () => {
-    const dynamicModule = NestAiModule.forRoot();
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
-
-    const observationHandlersProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === ObservationHandlers,
-    );
-
-    expect(observationHandlersProvider).toBeDefined();
-    expect(exportsList).toContain(ObservationHandlers);
-  });
-
-  it("registers chat client providers and exports", () => {
-    const CHAT_CLIENT_TOKEN = Symbol("CHAT_CLIENT_TOKEN");
+  it("uses explicit HTTP client when provided in forRoot", () => {
     const dynamicModule = NestAiModule.forRoot({
-      chatClient: {
-        providers: [
-          {
-            token: CHAT_CLIENT_TOKEN,
-            useFactory: () => "chat-client",
-          },
-        ],
-      } as unknown as ChatClientConfiguration,
+      httpClient: TEST_HTTP_CLIENT,
     });
     const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
 
-    const chatClientProvider = providers.find(
+    const httpClientProvider = providers.find(
       (provider) =>
         typeof provider === "object" &&
         provider !== null &&
         "provide" in provider &&
-        provider.provide === CHAT_CLIENT_TOKEN,
+        provider.provide === HTTP_CLIENT_TOKEN,
     );
 
-    expect(chatClientProvider).toBeDefined();
-    expect(exportsList).toContain(CHAT_CLIENT_TOKEN);
+    expect(httpClientProvider).toBeDefined();
+    expect(
+      typeof httpClientProvider === "object" &&
+        httpClientProvider !== null &&
+        "useValue" in httpClientProvider
+        ? httpClientProvider.useValue
+        : undefined,
+    ).toBe(TEST_HTTP_CLIENT);
   });
 
-  it("registers embedding model providers and exports", () => {
-    const EMBEDDING_MODEL_TOKEN = Symbol("EMBEDDING_MODEL_TOKEN");
-    const dynamicModule = NestAiModule.forRoot({
-      embeddingModel: {
-        providers: [
-          {
-            token: EMBEDDING_MODEL_TOKEN,
-            useFactory: () => "embedding-model",
-          },
-        ],
-      } as unknown as EmbeddingModelConfiguration,
-    });
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
+  it("forwards imports in forRoot", () => {
+    const dynamicModule = NestAiModule.forRoot({ imports: [ConfigModule] });
+    const imports = dynamicModule.imports ?? [];
 
-    const embeddingModelProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === EMBEDDING_MODEL_TOKEN,
+    const observationModuleImport = imports.find(
+      (provider) => provider === ConfigModule,
     );
 
-    expect(embeddingModelProvider).toBeDefined();
-    expect(exportsList).toContain(EMBEDDING_MODEL_TOKEN);
+    expect(observationModuleImport).toBeDefined();
   });
 
-  it("registers vector store providers and exports", () => {
-    const VECTOR_STORE_TOKEN = Symbol("VECTOR_STORE_TOKEN");
-    const dynamicModule = NestAiModule.forRoot({
-      vectorStore: {
-        providers: [
-          {
-            token: VECTOR_STORE_TOKEN,
-            useFactory: () => "vector-store",
-          },
-        ],
-      } as unknown as VectorStoreConfiguration,
+  it("forwards imports in forRootAsync", () => {
+    const asyncModule = NestAiModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: () => ({
+        httpClient: TEST_HTTP_CLIENT,
+      }),
     });
-    const providers = dynamicModule.providers ?? [];
-    const exportsList = dynamicModule.exports ?? [];
 
-    const vectorStoreProvider = providers.find(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === VECTOR_STORE_TOKEN,
-    );
+    expect(asyncModule.imports ?? []).toContain(ConfigModule);
+  });
 
-    expect(vectorStoreProvider).toBeDefined();
-    expect(exportsList).toContain(VECTOR_STORE_TOKEN);
+  it("supports async root configuration with imports and inject", async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        NestAiModule.forRootAsync({
+          imports: [ConfigModule],
+          inject: [CONFIG_TOKEN],
+          useFactory: (config: { httpClient: HttpClient }) => ({
+            httpClient: config.httpClient,
+          }),
+        }),
+      ],
+    }).compile();
+
+    expect(testingModule.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
+  });
+
+  it("uses async module global option when provided", () => {
+    const dynamicModule = NestAiModule.forRootAsync({
+      useFactory: () => ({
+        httpClient: TEST_HTTP_CLIENT,
+      }),
+      global: false,
+    });
+
+    expect(dynamicModule.global).toBe(false);
   });
 
   it("uses module global option when provided", () => {
     const dynamicModule = NestAiModule.forRoot({ global: false });
     expect(dynamicModule.global).toBe(false);
-  });
-
-  it("uses user provider when same token is provided in forRoot options", () => {
-    const customHttpClient = { name: "custom-http-client" };
-    const dynamicModule = NestAiModule.forRoot({
-      providers: [
-        {
-          provide: HTTP_CLIENT_TOKEN,
-          useValue: customHttpClient,
-        },
-      ],
-    });
-
-    const providers = dynamicModule.providers ?? [];
-    const httpClientProviders = providers.filter(
-      (provider) =>
-        typeof provider === "object" &&
-        provider != null &&
-        "provide" in provider &&
-        provider.provide === HTTP_CLIENT_TOKEN,
-    );
-
-    expect(httpClientProviders).toHaveLength(1);
-    expect(
-      typeof httpClientProviders[0] === "object" &&
-        httpClientProviders[0] != null &&
-        "useValue" in httpClientProviders[0]
-        ? httpClientProviders[0].useValue
-        : undefined,
-    ).toBe(customHttpClient);
-  });
-
-  it("keeps first provider when duplicate token is configured", () => {
-    const dynamicModule = NestAiModule.forRoot({
-      observation: {
-        providers: [
-          {
-            token: PROVIDER_INSTANCE_EXPLORER_TOKEN,
-            useFactory: () => "override",
-          },
-        ],
-      } as unknown as ObservationConfiguration,
-    });
-
-    const providers = dynamicModule.providers ?? [];
-    const duplicateProviders = providers.filter(
-      (provider) =>
-        typeof provider === "object" &&
-        provider !== null &&
-        "provide" in provider &&
-        provider.provide === PROVIDER_INSTANCE_EXPLORER_TOKEN,
-    );
-
-    expect(duplicateProviders).toHaveLength(1);
-  });
-
-  it("detects duplicate token from user class shorthand providers", () => {
-    class CustomProvider {}
-
-    const dynamicModule = NestAiModule.forRoot({
-      providers: [CustomProvider],
-      observation: {
-        providers: [
-          {
-            token: CustomProvider,
-            useFactory: () => "override",
-          },
-        ],
-      } as unknown as ObservationConfiguration,
-    });
-
-    const providers = dynamicModule.providers ?? [];
-    const customProviders = providers.filter((provider) => {
-      if (typeof provider === "function") {
-        return provider === CustomProvider;
-      }
-      if (typeof provider !== "object" || provider == null) {
-        return false;
-      }
-      return "provide" in provider && provider.provide === CustomProvider;
-    });
-
-    expect(customProviders).toHaveLength(1);
-    expect(customProviders[0]).toBe(CustomProvider);
   });
 });

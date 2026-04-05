@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./configuration";
 export * from "./constant";
 export * from "./content";
 export * from "./converter";

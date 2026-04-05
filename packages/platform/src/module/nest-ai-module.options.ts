@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import type { Provider } from "@nestjs/common";
-import type {
-  ChatClientConfiguration,
-  ChatMemoryConfiguration,
-  ChatModelConfiguration,
-  EmbeddingModelConfiguration,
-  HttpClient,
-  ObservationConfiguration,
-  VectorStoreConfiguration,
-} from "@nestjs-ai/commons";
+import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
+import type { HttpClient } from "@nestjs-ai/commons";
 
-export interface NestAiModuleOptions {
-  chatClient?: ChatClientConfiguration;
-  chatModel?: ChatModelConfiguration;
-  chatMemory?: ChatMemoryConfiguration;
-  embeddingModel?: EmbeddingModelConfiguration;
-  observation?: ObservationConfiguration;
-  vectorStore?: VectorStoreConfiguration;
+export interface NestAiRootModuleOptions {
+  imports?: ModuleMetadata["imports"];
   httpClient?: HttpClient;
-  providers?: Provider[];
   global?: boolean;
+}
+
+export interface NestAiRootModuleAsyncOptions {
+  imports?: ModuleMetadata["imports"];
+  inject?: InjectionToken[];
+  useFactory: (
+    ...args: never[]
+  ) =>
+    | Promise<NestAiRootModuleAsyncFactoryOptions>
+    | NestAiRootModuleAsyncFactoryOptions;
+  global?: boolean;
+}
+
+export interface NestAiRootModuleAsyncFactoryOptions {
+  httpClient?: HttpClient;
 }

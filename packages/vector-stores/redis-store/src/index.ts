@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./autoconfigure";
+export * from "./module";
 export { RedisFilterExpressionConverter } from "./redis-filter-expression-converter";
 export {
   RedisMetadataField,

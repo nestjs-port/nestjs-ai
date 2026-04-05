@@ -25,6 +25,7 @@ import {
 } from "@nestjs-ai/model";
 import {
   OPEN_AI_CHAT_PROPERTIES_TOKEN,
+  OpenAiApi,
   OpenAiChatModelModule,
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";
@@ -74,6 +75,29 @@ describe("OpenAiChatModelModule", () => {
 
       const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
       expect(chatModel).toBeDefined();
+    });
+
+    it("should resolve OpenAiApi from feature properties via NestJS DI", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          OpenAiChatModelModule.forFeature({
+            apiKey: "test-api-key",
+            baseUrl: "https://example.test",
+            completionsPath: "/v1/custom/completions",
+            projectId: "test-project",
+            organizationId: "test-org",
+            options: { model: "gpt-4o-mini" },
+          }),
+        ],
+      }).compile();
+
+      const openAiApi = moduleRef.get(OpenAiApi);
+      expect(openAiApi.baseUrl).toBe("https://example.test");
+      expect(openAiApi.apiKey.value).toBe("test-api-key");
+      expect(openAiApi.completionsPath).toBe("/v1/custom/completions");
+      expect(openAiApi.headers.get("OpenAI-Project")).toBe("test-project");
+      expect(openAiApi.headers.get("OpenAI-Organization")).toBe("test-org");
     });
 
     it("should not export properties token", async () => {
@@ -198,6 +222,25 @@ describe("OpenAiChatModelModule", () => {
 
       const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
       expect(chatModel).toBeDefined();
+    });
+
+    it("should resolve OpenAiApi from async feature properties via NestJS DI", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          NestAiModule.forRoot(),
+          OpenAiChatModelModule.forFeatureAsync({
+            useFactory: () => ({
+              apiKey: "async-api-key",
+              baseUrl: "https://async.example.test",
+              options: { model: "gpt-4o-mini" },
+            }),
+          }),
+        ],
+      }).compile();
+
+      const openAiApi = moduleRef.get(OpenAiApi);
+      expect(openAiApi.baseUrl).toBe("https://async.example.test");
+      expect(openAiApi.apiKey.value).toBe("async-api-key");
     });
 
     it("should default global to false for async", async () => {

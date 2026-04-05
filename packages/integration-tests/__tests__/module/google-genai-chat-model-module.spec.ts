@@ -15,218 +15,214 @@
  */
 
 import "reflect-metadata";
-import { Global, Module } from "@nestjs/common";
+import { GoogleGenAI } from "@google/genai";
+import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
-import type { ChatModel } from "@nestjs-ai/model";
 import {
-  TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
-  TOOL_CALLING_MANAGER_TOKEN,
-} from "@nestjs-ai/model";
-import {
-  GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
+  GoogleGenAiCachedContentService,
   GoogleGenAiChatModelModule,
   type GoogleGenAiChatProperties,
 } from "@nestjs-ai/model-google-genai";
-import { NestAiModule } from "@nestjs-ai/platform";
 import { describe, expect, it } from "vitest";
 
-const CONFIG_TOKEN = Symbol("CONFIG_TOKEN");
-const TOOL_CALLING_MANAGER_OVERRIDE = {
-  resolvedBy: "override",
-};
+const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 
 @Module({
   providers: [
     {
-      provide: CONFIG_TOKEN,
-      useValue: { apiKey: "test-google-api-key" },
+      provide: API_KEY_TOKEN,
+      useValue: "test-google-api-key",
     },
   ],
-  exports: [CONFIG_TOKEN],
+  exports: [API_KEY_TOKEN],
 })
 class GoogleConfigModule {}
 
-@Global()
-@Module({
-  providers: [
-    {
-      provide: TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
-      useValue: TOOL_CALLING_MANAGER_OVERRIDE,
-    },
-  ],
-  exports: [TOOL_CALLING_MANAGER_OVERRIDE_TOKEN],
-})
-class ToolCallingManagerOverrideModule {}
-
 describe("GoogleGenAiChatModelModule", () => {
   describe("forFeature", () => {
-    it("should resolve CHAT_MODEL_TOKEN via NestJS DI", async () => {
+    it("resolves the chat model and client via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          NestAiModule.forRoot(),
           GoogleGenAiChatModelModule.forFeature({
-            apiKey: "test-google-key",
+            apiKey: "test-google-api-key",
             options: { model: "gemini-2.0-flash" },
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
-      expect(chatModel).toBeDefined();
+      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(moduleRef.get(GoogleGenAI)).toBeDefined();
     });
 
-    it("should not export properties token", async () => {
-      const featureModule = GoogleGenAiChatModelModule.forFeature({
-        apiKey: "test-key",
-      });
-
-      const moduleRef = await Test.createTestingModule({
-        imports: [NestAiModule.forRoot(), featureModule],
-      }).compile();
-
-      const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
-      expect(chatModel).toBeDefined();
-
-      const exports = featureModule.exports as symbol[];
-      expect(exports).toContain(CHAT_MODEL_TOKEN);
-      expect(exports).not.toContain(GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN);
-    });
-
-    it("should default global to false", async () => {
-      const featureModule = GoogleGenAiChatModelModule.forFeature({
-        apiKey: "test-key",
-      });
-
-      const moduleRef = await Test.createTestingModule({
-        imports: [NestAiModule.forRoot(), featureModule],
-      }).compile();
-
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
-      expect(featureModule.global).toBe(false);
-    });
-
-    it("should support global option", async () => {
-      const featureModule = GoogleGenAiChatModelModule.forFeature(
-        { apiKey: "test-key" },
-        { global: true },
-      );
-
-      const moduleRef = await Test.createTestingModule({
-        imports: [NestAiModule.forRoot(), featureModule],
-      }).compile();
-
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
-      expect(featureModule.global).toBe(true);
-    });
-
-    it("should prefer a provided tool calling manager override", async () => {
+    it("builds a GoogleGenAI client from apiKey properties", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          NestAiModule.forRoot(),
-          ToolCallingManagerOverrideModule,
           GoogleGenAiChatModelModule.forFeature({
-            apiKey: "test-google-key",
+            apiKey: "test-google-api-key",
             options: { model: "gemini-2.0-flash" },
           }),
         ],
       }).compile();
 
-      expect(moduleRef.get(TOOL_CALLING_MANAGER_TOKEN)).toBe(
-        TOOL_CALLING_MANAGER_OVERRIDE,
-      );
+      const genAiClient = moduleRef.get(GoogleGenAI);
+      expect(genAiClient.vertexai).toBe(false);
+    });
 
+    it("builds a vertex AI client when apiKey is not provided", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          GoogleGenAiChatModelModule.forFeature({
+            projectId: "test-project",
+            location: "us-central1",
+            options: { model: "gemini-2.0-flash" },
+          }),
+        ],
+      }).compile();
+
+      const genAiClient = moduleRef.get(GoogleGenAI);
+      expect(genAiClient.vertexai).toBe(true);
+    });
+
+    it("applies custom options to the chat model", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          GoogleGenAiChatModelModule.forFeature({
+            apiKey: "test-google-api-key",
+            options: {
+              model: "gemini-2.0-flash",
+              temperature: 0.2,
+              topP: 0.7,
+              maxOutputTokens: 128,
+            },
+          }),
+        ],
+      }).compile();
+
+      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
+        _defaultOptions: {
+          model: string;
+          temperature: number;
+          topP: number;
+          maxOutputTokens: number;
+        };
+      };
+
+      expect(chatModel._defaultOptions.model).toBe("gemini-2.0-flash");
+      expect(chatModel._defaultOptions.temperature).toBe(0.2);
+      expect(chatModel._defaultOptions.topP).toBe(0.7);
+      expect(chatModel._defaultOptions.maxOutputTokens).toBe(128);
+    });
+
+    it("resolves cached content service by default", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          GoogleGenAiChatModelModule.forFeature({
+            apiKey: "test-google-api-key",
+          }),
+        ],
+      }).compile();
+
+      expect(moduleRef.get(GoogleGenAiCachedContentService)).toBeDefined();
+    });
+
+    it("omits cached content service when disabled", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          GoogleGenAiChatModelModule.forFeature({
+            apiKey: "test-google-api-key",
+            enableCachedContent: false,
+          }),
+        ],
+      }).compile();
+
+      expect(() => moduleRef.get(GoogleGenAiCachedContentService)).toThrow();
+    });
+
+    it("uses global false by default", () => {
       expect(
-        (
-          moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-            _toolCallingManager: { _delegateToolCallingManager: unknown };
-          }
-        )._toolCallingManager._delegateToolCallingManager,
-      ).toBe(TOOL_CALLING_MANAGER_OVERRIDE);
+        GoogleGenAiChatModelModule.forFeature({
+          apiKey: "test-google-api-key",
+        }).global,
+      ).toBe(false);
+    });
+
+    it("supports global true", () => {
+      expect(
+        GoogleGenAiChatModelModule.forFeature(
+          { apiKey: "test-google-api-key" },
+          { global: true },
+        ).global,
+      ).toBe(true);
     });
   });
 
   describe("forFeatureAsync", () => {
-    it("should resolve CHAT_MODEL_TOKEN from async factory via NestJS DI", async () => {
+    it("resolves the chat model from async factory via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          NestAiModule.forRoot(),
           GoogleGenAiChatModelModule.forFeatureAsync({
             useFactory: () => ({
-              apiKey: "async-google-key",
+              apiKey: "async-google-api-key",
               options: { model: "gemini-2.0-flash" },
             }),
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
-      expect(chatModel).toBeDefined();
+      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(moduleRef.get(GoogleGenAI)).toBeDefined();
     });
 
-    it("should support imports and inject for async factory", async () => {
+    it("supports imports and inject for async factory", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          NestAiModule.forRoot(),
           GoogleGenAiChatModelModule.forFeatureAsync({
             imports: [GoogleConfigModule],
-            inject: [CONFIG_TOKEN],
-            useFactory: (
-              config: Pick<GoogleGenAiChatProperties, "apiKey">,
-            ): GoogleGenAiChatProperties => ({
-              apiKey: config.apiKey,
+            inject: [API_KEY_TOKEN],
+            useFactory: (apiKey: string): GoogleGenAiChatProperties => ({
+              apiKey,
               options: { model: "gemini-2.0-flash" },
             }),
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
-      expect(chatModel).toBeDefined();
+      const genAiClient = moduleRef.get(GoogleGenAI);
+      expect(genAiClient.vertexai).toBe(false);
+      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
     });
 
-    it("should support async factory returning a Promise", async () => {
+    it("supports async factory returning a Promise", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          NestAiModule.forRoot(),
           GoogleGenAiChatModelModule.forFeatureAsync({
             useFactory: async () => ({
-              apiKey: "promise-google-key",
+              apiKey: "promise-google-api-key",
               options: { model: "gemini-2.0-flash" },
             }),
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
-      expect(chatModel).toBeDefined();
+      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
     });
 
-    it("should default global to false for async", async () => {
-      const featureModule = GoogleGenAiChatModelModule.forFeatureAsync({
-        useFactory: () => ({ apiKey: "key" }),
-      });
-
-      const moduleRef = await Test.createTestingModule({
-        imports: [NestAiModule.forRoot(), featureModule],
-      }).compile();
-
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
-      expect(featureModule.global).toBe(false);
+    it("uses global false by default for async", () => {
+      expect(
+        GoogleGenAiChatModelModule.forFeatureAsync({
+          useFactory: () => ({ apiKey: "key" }),
+        }).global,
+      ).toBe(false);
     });
 
-    it("should support global option for async", async () => {
-      const featureModule = GoogleGenAiChatModelModule.forFeatureAsync({
-        useFactory: () => ({ apiKey: "key" }),
-        global: true,
-      });
-
-      const moduleRef = await Test.createTestingModule({
-        imports: [NestAiModule.forRoot(), featureModule],
-      }).compile();
-
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
-      expect(featureModule.global).toBe(true);
+    it("supports global true for async", () => {
+      expect(
+        GoogleGenAiChatModelModule.forFeatureAsync({
+          useFactory: () => ({ apiKey: "key" }),
+          global: true,
+        }).global,
+      ).toBe(true);
     });
   });
 });

@@ -52,16 +52,19 @@ export interface ChatClientModuleAsyncOptions {
   global?: boolean;
 }
 
+export interface ChatClientModuleOptions {
+  customizer?: ChatClientCustomizerDefinition;
+  imports?: ModuleMetadata["imports"];
+  global?: boolean;
+}
+
 @Module({})
 export class ChatClientModule {
-  static forFeature(
-    customizer?: ChatClientCustomizerDefinition,
-    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
-  ): DynamicModule {
+  static forFeature(options: ChatClientModuleOptions = {}): DynamicModule {
     return ChatClientModule.forFeatureAsync({
-      imports: options?.imports,
-      useFactory: () => customizer,
-      global: options?.global,
+      imports: options.imports,
+      useFactory: () => options.customizer,
+      global: options.global,
     });
   }
 

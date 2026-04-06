@@ -28,5 +28,9 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

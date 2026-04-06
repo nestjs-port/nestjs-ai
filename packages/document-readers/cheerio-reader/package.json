@@ -26,5 +26,9 @@
   },
   "dependencies": {
     "cheerio": "^1.2.0"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

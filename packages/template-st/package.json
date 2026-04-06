@@ -23,5 +23,9 @@
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "*"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

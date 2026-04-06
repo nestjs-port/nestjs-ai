@@ -33,5 +33,9 @@
     "@nestjs-ai/testing": "workspace:*",
     "rxjs": "^7.0.0",
     "zod": "4.3.6"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

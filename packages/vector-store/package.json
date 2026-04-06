@@ -30,5 +30,9 @@
   "dependencies": {
     "antlr4ng": "^3.0.16",
     "spel2js": "^0.2.9"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

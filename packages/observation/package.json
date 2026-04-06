@@ -29,5 +29,9 @@
     "@nestjs/common": "^11.1.11",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

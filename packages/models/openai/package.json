@@ -32,5 +32,9 @@
     "@nestjs-ai/retry": "workspace:*",
     "@nestjs-ai/testing": "workspace:*",
     "rxjs": "^7.0.0"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

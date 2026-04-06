@@ -2,7 +2,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `65fc66` (Fri Jan 23 10:48:57 2026)
+**Last synced Spring AI commit:** `19c606ad` (Add streaming support to ToolCallAdvisor)
 
 ## Overview
 

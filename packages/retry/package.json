@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/retry",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "Apache-2.0",
   "description": "Retry utilities for NestJS AI - provides transient/non-transient exceptions and retry configuration",
   "private": false,

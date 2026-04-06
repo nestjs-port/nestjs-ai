@@ -36,6 +36,8 @@ export abstract class BaseAdvisorChain
 
   abstract copy(after: CallAdvisor): CallAdvisorChain;
 
+  abstract copy(after: StreamAdvisor): StreamAdvisorChain;
+
   abstract nextStream(
     chatClientRequest: ChatClientRequest,
   ): Observable<ChatClientResponse>;

@@ -177,7 +177,7 @@ describe("DefaultAroundAdvisorChain", () => {
     ).build();
 
     expect(() => chain.copy(null as unknown as CallAdvisor)).toThrow(
-      "The after call advisor must not be null",
+      "The after advisor must not be null",
     );
   });
 

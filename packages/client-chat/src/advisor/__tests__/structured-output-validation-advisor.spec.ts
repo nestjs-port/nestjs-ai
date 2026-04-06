@@ -62,7 +62,11 @@ class FakeCallAdvisorChain extends BaseAdvisorChain {
     return response;
   }
 
-  copy(_after: CallAdvisor): CallAdvisorChain {
+  copy(_after: CallAdvisor): CallAdvisorChain;
+  copy(_after: StreamAdvisor): StreamAdvisorChain;
+  copy(
+    _after: CallAdvisor | StreamAdvisor,
+  ): CallAdvisorChain | StreamAdvisorChain {
     return this;
   }
 

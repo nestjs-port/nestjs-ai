@@ -164,11 +164,32 @@ export class DefaultAroundAdvisorChain extends BaseAdvisorChain {
   ): CallAdvisorChain | StreamAdvisorChain {
     assert(after, "The after advisor must not be null");
 
-    if (this.isCallAdvisor(after)) {
-      return this.copyAdvisorsAfter(this.callAdvisors, after);
+    const afterCallIndex = this.callAdvisors.indexOf(after as CallAdvisor);
+    const afterStreamIndex = this.streamAdvisors.indexOf(
+      after as StreamAdvisor,
+    );
+
+    if (afterCallIndex < 0 && afterStreamIndex < 0) {
+      throw new TypeError(
+        `The specified advisor is not part of the chain: ${after.name}`,
+      );
     }
 
-    return this.copyAdvisorsAfter(this.streamAdvisors, after);
+    const remainingCallAdvisors =
+      afterCallIndex < 0
+        ? this.callAdvisors
+        : this.callAdvisors.slice(afterCallIndex + 1);
+    const remainingStreamAdvisors =
+      afterStreamIndex < 0
+        ? this.streamAdvisors
+        : this.streamAdvisors.slice(afterStreamIndex + 1);
+
+    return new DefaultAroundAdvisorChain({
+      observationRegistry: this.observationRegistry,
+      callAdvisors: remainingCallAdvisors,
+      streamAdvisors: remainingStreamAdvisors,
+      observationConvention: this._observationConvention,
+    });
   }
 
   override get callAdvisors(): CallAdvisor[] {
@@ -181,34 +202,6 @@ export class DefaultAroundAdvisorChain extends BaseAdvisorChain {
 
   override get observationRegistry(): ObservationRegistry {
     return this._observationRegistry;
-  }
-
-  private copyAdvisorsAfter<T extends Advisor>(
-    advisors: T[],
-    after: T,
-  ): DefaultAroundAdvisorChain {
-    assert(after, "The after advisor must not be null");
-    assert(advisors, "The advisors must not be null");
-
-    const afterAdvisorIndex = advisors.indexOf(after);
-
-    if (afterAdvisorIndex < 0) {
-      throw new TypeError(
-        `The specified advisor is not part of the chain: ${after.name}`,
-      );
-    }
-
-    const remainingAdvisors = advisors.slice(afterAdvisorIndex + 1);
-
-    return DefaultAroundAdvisorChain.builder(this.observationRegistry)
-      .pushAll(remainingAdvisors)
-      .build();
-  }
-
-  private isCallAdvisor(
-    advisor: CallAdvisor | StreamAdvisor,
-  ): advisor is CallAdvisor {
-    return typeof (advisor as CallAdvisor).adviseCall === "function";
   }
 }
 

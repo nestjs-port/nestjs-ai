@@ -38,19 +38,19 @@ describe("DefaultToolExecutionEligibilityPredicate", () => {
       get toolCallbacks() {
         return [];
       },
-      set toolCallbacks(_value: ToolCallback[]) {},
+      setToolCallbacks(_value: ToolCallback[]) {},
       get toolNames() {
         return new Set();
       },
-      set toolNames(_value: Set<string>) {},
+      setToolNames(_value: Set<string>) {},
       get internalToolExecutionEnabled() {
         return internalToolExecutionEnabled;
       },
-      set internalToolExecutionEnabled(_value: boolean | null) {},
+      setInternalToolExecutionEnabled(_value: boolean | null) {},
       get toolContext() {
         return {};
       },
-      set toolContext(_value: Record<string, unknown>) {},
+      setToolContext(_value: Record<string, unknown>) {},
       copy: () => createToolCallingChatOptions(internalToolExecutionEnabled),
     } as ToolCallingChatOptions;
   }

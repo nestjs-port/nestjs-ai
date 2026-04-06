@@ -30,20 +30,14 @@ export interface ToolCallingChatOptions extends ChatOptions {
    */
   get toolCallbacks(): ToolCallback[];
 
-  /**
-   * Set the ToolCallbacks to be registered with the ChatModel.
-   */
-  set toolCallbacks(toolCallbacks: ToolCallback[]);
+  setToolCallbacks(toolCallbacks: ToolCallback[]): void;
 
   /**
    * Names of the tools to register with the ChatModel.
    */
   get toolNames(): Set<string>;
 
-  /**
-   * Set the names of the tools to register with the ChatModel.
-   */
-  set toolNames(toolNames: Set<string>);
+  setToolNames(toolNames: Set<string>): void;
 
   /**
    * Whether the {@link ChatModel} is responsible for executing the tools requested by
@@ -51,13 +45,9 @@ export interface ToolCallingChatOptions extends ChatOptions {
    */
   get internalToolExecutionEnabled(): boolean | null;
 
-  /**
-   * Set whether the {@link ChatModel} is responsible for executing the tools requested
-   * by the model or if the tools should be executed directly by the caller.
-   */
-  set internalToolExecutionEnabled(internalToolExecutionEnabled:
-    | boolean
-    | null,);
+  setInternalToolExecutionEnabled(
+    internalToolExecutionEnabled: boolean | null,
+  ): void;
 
   /**
    * Get the configured tool context.
@@ -65,11 +55,7 @@ export interface ToolCallingChatOptions extends ChatOptions {
    */
   get toolContext(): Record<string, unknown>;
 
-  /**
-   * Set the tool context values as map.
-   * @param toolContext as map
-   */
-  set toolContext(toolContext: Record<string, unknown>);
+  setToolContext(toolContext: Record<string, unknown>): void;
 }
 
 export namespace ToolCallingChatOptions {

@@ -121,9 +121,11 @@ export abstract class DefaultChatClientUtils {
       DefaultChatClientUtils.isToolCallingChatOptions(processedChatOptions)
     ) {
       if (inputRequest.getToolNames().length > 0) {
-        processedChatOptions.toolNames = ToolCallingChatOptions.mergeToolNames(
-          new Set(inputRequest.getToolNames()),
-          processedChatOptions.toolNames,
+        processedChatOptions.setToolNames(
+          ToolCallingChatOptions.mergeToolNames(
+            new Set(inputRequest.getToolNames()),
+            processedChatOptions.toolNames,
+          ),
         );
       }
 
@@ -139,15 +141,16 @@ export abstract class DefaultChatClientUtils {
           processedChatOptions.toolCallbacks,
         );
         ToolCallingChatOptions.validateToolCallbacks(toolCallbacks);
-        processedChatOptions.toolCallbacks = toolCallbacks;
+        processedChatOptions.setToolCallbacks(toolCallbacks);
       }
 
       if (inputRequest.getToolContext().size > 0) {
-        processedChatOptions.toolContext =
+        processedChatOptions.setToolContext(
           ToolCallingChatOptions.mergeToolContext(
             DefaultChatClientUtils.mapToRecord(inputRequest.getToolContext()),
             processedChatOptions.toolContext,
-          );
+          ),
+        );
       }
     }
 

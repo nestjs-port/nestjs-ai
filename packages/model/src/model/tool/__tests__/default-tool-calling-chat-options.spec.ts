@@ -48,7 +48,7 @@ describe("DefaultToolCallingChatOptions", () => {
     const callback1 = new TestToolCallback("tool1");
     const callback2 = new TestToolCallback("tool2");
 
-    options.toolCallbacks = [callback1, callback2];
+    options.setToolCallbacks([callback1, callback2]);
 
     expect(options.toolCallbacks).toHaveLength(2);
     expect(options.toolCallbacks).toEqual([callback1, callback2]);
@@ -59,7 +59,7 @@ describe("DefaultToolCallingChatOptions", () => {
     const callback1 = new TestToolCallback("tool1");
     const callback2 = new TestToolCallback("tool2");
 
-    options.toolCallbacks = [callback1, callback2];
+    options.setToolCallbacks([callback1, callback2]);
 
     expect(options.toolCallbacks).toHaveLength(2);
     expect(options.toolCallbacks[0]).toBe(callback1);
@@ -70,13 +70,13 @@ describe("DefaultToolCallingChatOptions", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(() => {
-      options.toolCallbacks = null as unknown as ToolCallback[];
+      options.setToolCallbacks(null as unknown as ToolCallback[]);
     }).toThrow("toolCallbacks cannot be null");
   });
 
   it("should store tool names when set", () => {
     const options = new DefaultToolCallingChatOptions();
-    options.toolNames = new Set(["tool1", "tool2"]);
+    options.setToolNames(new Set(["tool1", "tool2"]));
 
     expect(options.toolNames.size).toBe(2);
     expect(options.toolNames.has("tool1")).toBe(true);
@@ -86,7 +86,7 @@ describe("DefaultToolCallingChatOptions", () => {
   it("should store tool names when set with varargs-style set", () => {
     const options = new DefaultToolCallingChatOptions();
 
-    options.toolNames = new Set(["tool1", "tool2"]);
+    options.setToolNames(new Set(["tool1", "tool2"]));
 
     expect(options.toolNames.size).toBe(2);
     expect(options.toolNames.has("tool1")).toBe(true);
@@ -97,13 +97,13 @@ describe("DefaultToolCallingChatOptions", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(() => {
-      options.toolNames = null as unknown as Set<string>;
+      options.setToolNames(null as unknown as Set<string>);
     }).toThrow("toolNames cannot be null");
   });
 
   it("should store tool context", () => {
     const options = new DefaultToolCallingChatOptions();
-    options.toolContext = { key1: "value1", key2: 42 };
+    options.setToolContext({ key1: "value1", key2: 42 });
 
     expect(Object.keys(options.toolContext)).toHaveLength(2);
     expect(options.toolContext.key1).toBe("value1");
@@ -114,17 +114,17 @@ describe("DefaultToolCallingChatOptions", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(() => {
-      options.toolContext = null as unknown as Record<string, unknown>;
+      options.setToolContext(null as unknown as Record<string, unknown>);
     }).toThrow("toolContext cannot be null");
   });
 
   it("should create new instance with same values when copied", () => {
     const original = new DefaultToolCallingChatOptions();
     const callback = new TestToolCallback("tool1");
-    original.toolCallbacks = [callback];
-    original.toolNames = new Set(["tool1"]);
-    original.toolContext = { key: "value" };
-    original.internalToolExecutionEnabled = true;
+    original.setToolCallbacks([callback]);
+    original.setToolNames(new Set(["tool1"]));
+    original.setToolContext({ key: "value" });
+    original.setInternalToolExecutionEnabled(true);
     original.model = "gpt-4";
     original.temperature = 0.7;
 
@@ -144,9 +144,9 @@ describe("DefaultToolCallingChatOptions", () => {
   it("should return immutable collections from getters", () => {
     const options = new DefaultToolCallingChatOptions();
     const callback = new TestToolCallback("tool1");
-    options.toolCallbacks = [callback];
-    options.toolNames = new Set(["tool1"]);
-    options.toolContext = { key: "value" };
+    options.setToolCallbacks([callback]);
+    options.setToolNames(new Set(["tool1"]));
+    options.setToolContext({ key: "value" });
 
     // toolCallbacks returns a copy, so modifying it doesn't affect internal state
     const callbacks = options.toolCallbacks;
@@ -230,11 +230,11 @@ describe("DefaultToolCallingChatOptions", () => {
 
   it("should accept null value for internalToolExecutionEnabled", () => {
     const options = new DefaultToolCallingChatOptions();
-    options.internalToolExecutionEnabled = true;
+    options.setInternalToolExecutionEnabled(true);
     expect(options.internalToolExecutionEnabled).toBe(true);
 
     // Should be able to set back to null
-    options.internalToolExecutionEnabled = null;
+    options.setInternalToolExecutionEnabled(null);
     expect(options.internalToolExecutionEnabled).toBeNull();
   });
 });

@@ -39,7 +39,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return [...this._toolCallbacks];
   }
 
-  set toolCallbacks(toolCallbacks: ToolCallback[]) {
+  setToolCallbacks(toolCallbacks: ToolCallback[]): void {
     assert(toolCallbacks, "toolCallbacks cannot be null");
     this._toolCallbacks = [...toolCallbacks];
   }
@@ -48,7 +48,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return new Set(this._toolNames);
   }
 
-  set toolNames(toolNames: Set<string>) {
+  setToolNames(toolNames: Set<string>): void {
     assert(toolNames, "toolNames cannot be null");
     this._toolNames = new Set(toolNames);
   }
@@ -57,7 +57,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return { ...this._toolContext };
   }
 
-  set toolContext(toolContext: Record<string, unknown>) {
+  setToolContext(toolContext: Record<string, unknown>): void {
     assert(toolContext, "toolContext cannot be null");
     this._toolContext = { ...toolContext };
   }
@@ -66,9 +66,9 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._internalToolExecutionEnabled;
   }
 
-  set internalToolExecutionEnabled(internalToolExecutionEnabled:
-    | boolean
-    | null,) {
+  setInternalToolExecutionEnabled(
+    internalToolExecutionEnabled: boolean | null,
+  ): void {
     this._internalToolExecutionEnabled = internalToolExecutionEnabled;
   }
 
@@ -138,10 +138,10 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
 
   copy(): ChatOptions {
     const options = new DefaultToolCallingChatOptions();
-    options.toolCallbacks = this.toolCallbacks;
-    options.toolNames = this.toolNames;
-    options.toolContext = this.toolContext;
-    options.internalToolExecutionEnabled = this.internalToolExecutionEnabled;
+    options.setToolCallbacks(this.toolCallbacks);
+    options.setToolNames(this.toolNames);
+    options.setToolContext(this.toolContext);
+    options.setInternalToolExecutionEnabled(this.internalToolExecutionEnabled);
     options.model = this.model;
     options.frequencyPenalty = this.frequencyPenalty;
     options.maxTokens = this.maxTokens;
@@ -165,18 +165,18 @@ export class DefaultToolCallingChatOptionsBuilder
 
   toolCallbacks(...toolCallbacks: ToolCallback[] | [ToolCallback[]]): this {
     if (toolCallbacks.length === 1 && Array.isArray(toolCallbacks[0])) {
-      this._options.toolCallbacks = toolCallbacks[0] as ToolCallback[];
+      this._options.setToolCallbacks(toolCallbacks[0] as ToolCallback[]);
     } else {
-      this._options.toolCallbacks = toolCallbacks as ToolCallback[];
+      this._options.setToolCallbacks(toolCallbacks as ToolCallback[]);
     }
     return this;
   }
 
   toolNames(...toolNames: string[] | [Set<string>]): this {
     if (toolNames.length === 1 && toolNames[0] instanceof Set) {
-      this._options.toolNames = toolNames[0] as Set<string>;
+      this._options.setToolNames(toolNames[0] as Set<string>);
     } else {
-      this._options.toolNames = new Set(toolNames as string[]);
+      this._options.setToolNames(new Set(toolNames as string[]));
     }
     return this;
   }
@@ -184,7 +184,7 @@ export class DefaultToolCallingChatOptionsBuilder
   internalToolExecutionEnabled(
     internalToolExecutionEnabled: boolean | null,
   ): this {
-    this._options.internalToolExecutionEnabled = internalToolExecutionEnabled;
+    this._options.setInternalToolExecutionEnabled(internalToolExecutionEnabled);
     return this;
   }
 
@@ -199,9 +199,9 @@ export class DefaultToolCallingChatOptionsBuilder
       assert(value != null, "value cannot be null");
       const updatedContext = { ...this._options.toolContext };
       updatedContext[keyOrContext] = value;
-      this._options.toolContext = updatedContext;
+      this._options.setToolContext(updatedContext);
     } else {
-      this._options.toolContext = keyOrContext;
+      this._options.setToolContext(keyOrContext);
     }
     return this;
   }

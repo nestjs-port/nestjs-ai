@@ -48,7 +48,7 @@ describe("ToolCallingChatOptions", () => {
 
   it("when tool calling chat options and execution enabled true", () => {
     const options = new DefaultToolCallingChatOptions();
-    options.internalToolExecutionEnabled = true;
+    options.setInternalToolExecutionEnabled(true);
     expect(ToolCallingChatOptions.isInternalToolExecutionEnabled(options)).toBe(
       true,
     );
@@ -56,7 +56,7 @@ describe("ToolCallingChatOptions", () => {
 
   it("when tool calling chat options and execution enabled false", () => {
     const options = new DefaultToolCallingChatOptions();
-    options.internalToolExecutionEnabled = false;
+    options.setInternalToolExecutionEnabled(false);
     expect(ToolCallingChatOptions.isInternalToolExecutionEnabled(options)).toBe(
       false,
     );

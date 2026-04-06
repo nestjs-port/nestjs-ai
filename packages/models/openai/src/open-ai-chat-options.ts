@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
+import { StringUtils } from "@nestjs-ai/commons";
 import type {
   StructuredOutputChatOptions,
   ToolCallback,
@@ -160,6 +162,40 @@ export class OpenAiChatOptions
       if (options.toolContext != null)
         this.toolContext = { ...options.toolContext };
     }
+  }
+
+  setToolCallbacks(toolCallbacks: ToolCallback[]): void {
+    assert(toolCallbacks, "toolCallbacks cannot be null");
+    assert(
+      toolCallbacks.every((toolCallback) => toolCallback != null),
+      "toolCallbacks cannot contain null elements",
+    );
+    this.toolCallbacks = toolCallbacks;
+  }
+
+  setToolNames(toolNames: Set<string>): void {
+    assert(toolNames, "toolNames cannot be null");
+    assert(
+      [...toolNames].every((toolName) => toolName != null),
+      "toolNames cannot contain null elements",
+    );
+    for (const toolName of toolNames) {
+      assert(
+        StringUtils.hasText(toolName),
+        "toolNames cannot contain empty elements",
+      );
+    }
+    this.toolNames = toolNames;
+  }
+
+  setInternalToolExecutionEnabled(
+    internalToolExecutionEnabled: boolean | null,
+  ): void {
+    this.internalToolExecutionEnabled = internalToolExecutionEnabled;
+  }
+
+  setToolContext(toolContext: Record<string, unknown>): void {
+    this.toolContext = toolContext;
   }
 
   get stopSequences(): string[] | undefined {

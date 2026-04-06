@@ -28,5 +28,9 @@
   "dependencies": {
     "commonmark": "^0.31.2",
     "fast-glob": "^3.3.3"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

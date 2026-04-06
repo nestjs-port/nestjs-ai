@@ -26,5 +26,9 @@
   },
   "dependencies": {
     "pdfjs-dist": "^5.4.624"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

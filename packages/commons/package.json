@@ -25,5 +25,9 @@
   },
   "dependencies": {
     "tiktoken": "^1.0.22"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

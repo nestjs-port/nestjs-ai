@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/advisors-vector-store",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "Apache-2.0",
   "description": "Vector store advisors for NestJS AI",
   "private": false,

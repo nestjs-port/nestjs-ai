@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ToolCallback, type ToolDefinition } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 import {
   type AudioParameters,
@@ -26,6 +27,20 @@ import {
   type WebSearchOptions,
 } from "../api";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
+
+class TestToolCallback extends ToolCallback {
+  get toolDefinition(): ToolDefinition {
+    return {
+      name: "test-tool",
+      description: "test tool",
+      inputSchema: "{}",
+    };
+  }
+
+  async call(toolInput: string): Promise<string> {
+    return toolInput;
+  }
+}
 
 describe("OpenAiChatOptions", () => {
   it("test builder with all fields", () => {
@@ -424,5 +439,65 @@ describe("OpenAiChatOptions", () => {
     // Both should be set when using direct assignment
     expect(options.maxTokens).toBe(50);
     expect(options.maxCompletionTokens).toBe(100);
+  });
+
+  it("test tool callback setter", () => {
+    const options = new OpenAiChatOptions();
+    const callbacks = [new TestToolCallback()];
+
+    options.setToolCallbacks(callbacks);
+
+    expect(options.toolCallbacks).toBe(callbacks);
+    callbacks.push(new TestToolCallback());
+    expect(options.toolCallbacks).toHaveLength(2);
+    expect(() => {
+      options.setToolCallbacks(null as unknown as ToolCallback[]);
+    }).toThrow("toolCallbacks cannot be null");
+    expect(() => {
+      options.setToolCallbacks([
+        new TestToolCallback(),
+        null as unknown as ToolCallback,
+      ]);
+    }).toThrow("toolCallbacks cannot contain null elements");
+  });
+
+  it("test tool names setter", () => {
+    const options = new OpenAiChatOptions();
+    const toolNames = new Set(["tool1"]);
+
+    options.setToolNames(toolNames);
+
+    expect(options.toolNames).toBe(toolNames);
+    toolNames.add("tool2");
+    expect(options.toolNames.has("tool2")).toBe(true);
+    expect(() => {
+      options.setToolNames(null as unknown as Set<string>);
+    }).toThrow("toolNames cannot be null");
+    expect(() => {
+      options.setToolNames(new Set(["tool1", null as unknown as string]));
+    }).toThrow("toolNames cannot contain null elements");
+    expect(() => {
+      options.setToolNames(new Set(["", "tool1"]));
+    }).toThrow("toolNames cannot contain empty elements");
+  });
+
+  it("test internal tool execution enabled setter", () => {
+    const options = new OpenAiChatOptions();
+
+    options.setInternalToolExecutionEnabled(true);
+    expect(options.internalToolExecutionEnabled).toBe(true);
+    options.setInternalToolExecutionEnabled(null);
+    expect(options.internalToolExecutionEnabled).toBeNull();
+  });
+
+  it("test tool context setter", () => {
+    const options = new OpenAiChatOptions();
+    const toolContext = { key: "value" };
+
+    options.setToolContext(toolContext);
+
+    expect(options.toolContext).toBe(toolContext);
+    toolContext.key = "updated";
+    expect(options.toolContext.key).toBe("updated");
   });
 });

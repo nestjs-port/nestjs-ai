@@ -32,7 +32,7 @@ export abstract class UsageCalculator {
     previousChatResponse: ChatResponse | null,
   ): Usage {
     let usageFromPreviousChatResponse: Usage | null = null;
-    if (previousChatResponse?.metadata?.usage) {
+    if (previousChatResponse != null) {
       usageFromPreviousChatResponse = previousChatResponse.metadata.usage;
     } else {
       // Return the current usage when the previous chat response usage is empty or

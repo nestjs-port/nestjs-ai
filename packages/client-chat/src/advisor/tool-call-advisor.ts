@@ -26,8 +26,9 @@ import {
   ToolExecutionResult,
 } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
-import { throwError } from "rxjs";
+import { concatWith, defer, EMPTY, filter, from, mergeMap, of } from "rxjs";
 
+import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
 import { ChatClientRequest } from "../chat-client-request";
 import type { ChatClientResponse } from "../chat-client-response";
 import type {
@@ -41,8 +42,15 @@ export interface ToolCallAdvisorProps {
   toolCallingManager?: ToolCallingManager;
   advisorOrder?: number;
   conversationHistoryEnabled?: boolean;
+  streamToolCallResponses?: boolean;
 }
 
+/**
+ * Checks whether the supplied options support tool calling.
+ *
+ * @param options candidate prompt options
+ * @returns true when the options are tool calling options
+ */
 function isToolCallingChatOptions(
   options: unknown,
 ): options is ToolCallingChatOptions {
@@ -53,13 +61,26 @@ function isToolCallingChatOptions(
   );
 }
 
+/**
+ * Recursive advisor that disables the internal tool execution flow and implements
+ * the tool calling loop as part of the advisor chain.
+ *
+ * It enables intercepting the tool calling loop by the rest of the advisors next in
+ * the chain.
+ */
 export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
   static readonly DEFAULT_ADVISOR_ORDER = HIGHEST_PRECEDENCE + 300;
 
   protected readonly _toolCallingManager: ToolCallingManager;
   private readonly _advisorOrder: number;
   private readonly _conversationHistoryEnabled: boolean;
+  private readonly _streamToolCallResponses: boolean;
 
+  /**
+   * Creates a tool call advisor with the provided configuration.
+   *
+   * @param props advisor configuration overrides
+   */
   constructor(props: ToolCallAdvisorProps = {}) {
     const toolCallingManager =
       props.toolCallingManager === undefined
@@ -77,16 +98,30 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     this._toolCallingManager = toolCallingManager;
     this._advisorOrder = advisorOrder;
     this._conversationHistoryEnabled = props.conversationHistoryEnabled ?? true;
+    this._streamToolCallResponses = props.streamToolCallResponses ?? false;
   }
 
+  /**
+   * Returns the advisor name used in chain diagnostics.
+   */
   get name(): string {
     return "Tool Calling Advisor";
   }
 
+  /**
+   * Returns the advisor order.
+   */
   get order(): number {
     return this._advisorOrder;
   }
 
+  /**
+   * Executes the non-streaming tool calling loop.
+   *
+   * @param chatClientRequest input chat request
+   * @param callAdvisorChain advisor chain to invoke
+   * @returns the final chat client response
+   */
   async adviseCall(
     chatClientRequest: ChatClientRequest,
     callAdvisorChain: CallAdvisorChain,
@@ -101,7 +136,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
       );
     }
 
-    const initializedChatClientRequest = await this.initializeLoop(
+    const initializedChatClientRequest = await this.doInitializeLoop(
       chatClientRequest,
       callAdvisorChain,
     );
@@ -115,7 +150,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     }
 
     // Disable internal tool execution to allow ToolCallAdvisor to handle tool calls.
-    optionsCopy.internalToolExecutionEnabled = false;
+    optionsCopy.setInternalToolExecutionEnabled(false);
 
     let instructions = initializedChatClientRequest.prompt.instructions;
     let chatClientResponse: ChatClientResponse | null = null;
@@ -129,7 +164,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
         .build();
 
       // Next Call
-      processedChatClientRequest = await this.beforeCall(
+      processedChatClientRequest = await this.doBeforeCall(
         processedChatClientRequest,
         callAdvisorChain,
       );
@@ -138,7 +173,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
         .copy(this)
         .nextCall(processedChatClientRequest);
 
-      chatClientResponse = await this.afterCall(
+      chatClientResponse = await this.doAfterCall(
         chatClientResponse,
         callAdvisorChain,
       );
@@ -181,7 +216,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
           break;
         }
 
-        instructions = this.getNextInstructionsForToolCall(
+        instructions = this.doGetNextInstructionsForToolCall(
           processedChatClientRequest,
           chatClientResponse,
           toolExecutionResult,
@@ -190,10 +225,18 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     } while (isToolCall); // loop until no tool calls are present
 
     assert(chatClientResponse != null, "chatClientResponse must not be null");
-    return await this.finalizeLoop(chatClientResponse, callAdvisorChain);
+    return await this.doFinalizeLoop(chatClientResponse, callAdvisorChain);
   }
 
-  protected getNextInstructionsForToolCall(
+  /**
+   * Determines the next prompt instructions after tool execution.
+   *
+   * @param chatClientRequest current chat request
+   * @param _chatClientResponse current chat response
+   * @param toolExecutionResult tool execution result
+   * @returns the next instruction messages
+   */
+  protected doGetNextInstructionsForToolCall(
     chatClientRequest: ChatClientRequest,
     _chatClientResponse: ChatClientResponse,
     toolExecutionResult: ToolExecutionResult,
@@ -213,38 +256,333 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     return conversationHistory;
   }
 
-  protected async finalizeLoop(
+  /**
+   * Finalizes the non-streaming tool call loop.
+   *
+   * @param chatClientResponse final chat response
+   * @param _callAdvisorChain advisor chain used during the loop
+   * @returns the finalized response
+   */
+  protected async doFinalizeLoop(
     chatClientResponse: ChatClientResponse,
     _callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientResponse> {
     return chatClientResponse;
   }
 
-  protected async initializeLoop(
+  /**
+   * Initializes the non-streaming tool call loop.
+   *
+   * @param chatClientRequest input chat request
+   * @param _callAdvisorChain advisor chain used during the loop
+   * @returns the initialized request
+   */
+  protected async doInitializeLoop(
     chatClientRequest: ChatClientRequest,
     _callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientRequest> {
     return chatClientRequest;
   }
 
-  protected async beforeCall(
+  /**
+   * Hook invoked before each non-streaming call.
+   *
+   * @param chatClientRequest current chat request
+   * @param _callAdvisorChain advisor chain used during the loop
+   * @returns the request to send downstream
+   */
+  protected async doBeforeCall(
     chatClientRequest: ChatClientRequest,
     _callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientRequest> {
     return chatClientRequest;
   }
 
-  protected async afterCall(
+  /**
+   * Hook invoked after each non-streaming call.
+   *
+   * @param chatClientResponse current chat response
+   * @param _callAdvisorChain advisor chain used during the loop
+   * @returns the response to continue processing
+   */
+  protected async doAfterCall(
     chatClientResponse: ChatClientResponse,
     _callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientResponse> {
     return chatClientResponse;
   }
 
+  /**
+   * Executes the streaming tool calling loop.
+   *
+   * @param chatClientRequest input chat request
+   * @param streamAdvisorChain advisor chain to invoke
+   * @returns an observable of chat client responses
+   */
   adviseStream(
-    _chatClientRequest: ChatClientRequest,
+    chatClientRequest: ChatClientRequest,
+    streamAdvisorChain: StreamAdvisorChain,
+  ): Observable<ChatClientResponse> {
+    assert(streamAdvisorChain, "streamAdvisorChain must not be null");
+    assert(chatClientRequest, "chatClientRequest must not be null");
+
+    const promptOptions = chatClientRequest.prompt.options;
+    if (!isToolCallingChatOptions(promptOptions)) {
+      throw new TypeError(
+        "ToolCall Advisor requires ToolCallingChatOptions to be set in the ChatClientRequest options.",
+      );
+    }
+
+    return from(
+      this.doInitializeLoopStream(chatClientRequest, streamAdvisorChain),
+    ).pipe(
+      mergeMap((initializedRequest) => {
+        // Overwrite the ToolCallingChatOptions to disable internal tool execution.
+        const optionsCopy =
+          chatClientRequest.prompt.options.copy() as ToolCallingChatOptions;
+        optionsCopy.setInternalToolExecutionEnabled(false);
+
+        return this.internalStream(
+          streamAdvisorChain,
+          initializedRequest,
+          optionsCopy,
+          initializedRequest.prompt.instructions,
+        );
+      }),
+    );
+  }
+
+  /**
+   * Initializes the streaming tool call loop.
+   *
+   * @param chatClientRequest input chat request
+   * @param _streamAdvisorChain advisor chain used during the loop
+   * @returns the initialized request
+   */
+  protected async doInitializeLoopStream(
+    chatClientRequest: ChatClientRequest,
+    _streamAdvisorChain: StreamAdvisorChain,
+  ): Promise<ChatClientRequest> {
+    return chatClientRequest;
+  }
+
+  /**
+   * Hook invoked before each streaming call.
+   *
+   * @param chatClientRequest current chat request
+   * @param _streamAdvisorChain advisor chain used during the loop
+   * @returns the request to send downstream
+   */
+  protected async doBeforeStream(
+    chatClientRequest: ChatClientRequest,
+    _streamAdvisorChain: StreamAdvisorChain,
+  ): Promise<ChatClientRequest> {
+    return chatClientRequest;
+  }
+
+  /**
+   * Hook invoked after each streaming call.
+   *
+   * @param chatClientResponse current chat response
+   * @param _streamAdvisorChain advisor chain used during the loop
+   * @returns the response to continue processing
+   */
+  protected async doAfterStream(
+    chatClientResponse: ChatClientResponse,
+    _streamAdvisorChain: StreamAdvisorChain,
+  ): Promise<ChatClientResponse> {
+    return chatClientResponse;
+  }
+
+  /**
+   * Finalizes the streaming tool call loop.
+   *
+   * @param chatClientResponses response stream to finalize
+   * @param _streamAdvisorChain advisor chain used during the loop
+   * @returns the finalized response stream
+   */
+  protected doFinalizeLoopStream(
+    chatClientResponses: Observable<ChatClientResponse>,
     _streamAdvisorChain: StreamAdvisorChain,
   ): Observable<ChatClientResponse> {
-    return throwError(() => new Error("Unimplemented method 'adviseStream'"));
+    return chatClientResponses;
+  }
+
+  /**
+   * Determines the next streaming instructions after tool execution.
+   *
+   * @param chatClientRequest current chat request
+   * @param _chatClientResponse current chat response
+   * @param toolExecutionResult tool execution result
+   * @returns the next instruction messages
+   */
+  protected doGetNextInstructionsForToolCallStream(
+    chatClientRequest: ChatClientRequest,
+    _chatClientResponse: ChatClientResponse,
+    toolExecutionResult: ToolExecutionResult,
+  ): Message[] {
+    const conversationHistory = toolExecutionResult.conversationHistory();
+    if (!this._conversationHistoryEnabled) {
+      const lastConversationMessage =
+        conversationHistory[conversationHistory.length - 1];
+      return [
+        chatClientRequest.prompt.systemMessage,
+        lastConversationMessage ?? chatClientRequest.prompt.systemMessage,
+      ];
+    }
+
+    return conversationHistory;
+  }
+
+  /**
+   * Runs the recursive streaming loop for tool call handling.
+   *
+   * @param streamAdvisorChain advisor chain to invoke
+   * @param originalRequest original chat request
+   * @param optionsCopy tool calling options with internal execution disabled
+   * @param instructions current instruction list
+   * @returns an observable of chat client responses
+   */
+  private internalStream(
+    streamAdvisorChain: StreamAdvisorChain,
+    originalRequest: ChatClientRequest,
+    optionsCopy: ToolCallingChatOptions,
+    instructions: Message[],
+  ): Observable<ChatClientResponse> {
+    return defer(() => {
+      // Build request with current instructions
+      const processedRequest = ChatClientRequest.builder()
+        .prompt(new Prompt(instructions, optionsCopy))
+        .context(originalRequest.context)
+        .build();
+
+      return from(
+        this.doBeforeStream(processedRequest, streamAdvisorChain),
+      ).pipe(
+        mergeMap((beforeRequest) => {
+          // Get a copy of the chain excluding this advisor
+          const chainCopy = streamAdvisorChain.copy(this);
+
+          const aggregatedResponseRef: {
+            value: ChatClientResponse | null;
+          } = { value: null };
+
+          // Get the streaming response
+          const responseFlux = chainCopy.nextStream(beforeRequest);
+
+          const streamingBranch =
+            new ChatClientMessageAggregator().aggregateChatClientResponse(
+              responseFlux,
+              (aggregatedResponse) => {
+                aggregatedResponseRef.value = aggregatedResponse;
+              },
+            );
+
+          return streamingBranch.pipe(
+            concatWith(
+              defer(() =>
+                this.handleToolCallRecursion(
+                  aggregatedResponseRef.value,
+                  beforeRequest,
+                  streamAdvisorChain,
+                  originalRequest,
+                  optionsCopy,
+                ),
+              ),
+            ),
+            filter(
+              (chatClientResponse) =>
+                this._streamToolCallResponses ||
+                !(chatClientResponse.chatResponse?.hasToolCalls() ?? false),
+            ),
+          );
+        }),
+      );
+    });
+  }
+
+  /**
+   * Handles tool call detection and recursion after streaming completes.
+   *
+   * @param aggregatedResponse aggregated streaming response
+   * @param finalRequest final request used for tool execution
+   * @param streamAdvisorChain advisor chain to invoke
+   * @param originalRequest original chat request
+   * @param optionsCopy tool calling options with internal execution disabled
+   * @returns an observable of chat client responses
+   */
+  private handleToolCallRecursion(
+    aggregatedResponse: ChatClientResponse | null,
+    finalRequest: ChatClientRequest,
+    streamAdvisorChain: StreamAdvisorChain,
+    originalRequest: ChatClientRequest,
+    optionsCopy: ToolCallingChatOptions,
+  ): Observable<ChatClientResponse> {
+    if (aggregatedResponse == null) {
+      return this.doFinalizeLoopStream(EMPTY, streamAdvisorChain);
+    }
+
+    return from(
+      this.doAfterStream(aggregatedResponse, streamAdvisorChain),
+    ).pipe(
+      mergeMap((afterResponse) => {
+        const chatResponse = afterResponse.chatResponse;
+        const isToolCall = chatResponse?.hasToolCalls() === true;
+
+        if (!isToolCall) {
+          // No tool call - streaming already happened, nothing more to emit.
+          return this.doFinalizeLoopStream(EMPTY, streamAdvisorChain);
+        }
+
+        assert(
+          chatResponse,
+          "redundant check that should never fail, but here to help nullability checks",
+        );
+
+        // Execute tool calls and continue the loop if the response is not direct.
+        return from(
+          this._toolCallingManager.executeToolCalls(
+            finalRequest.prompt,
+            chatResponse,
+          ),
+        ).pipe(
+          mergeMap((toolExecutionResult) => {
+            if (toolExecutionResult.returnDirect()) {
+              // Return tool execution result directly to the application client.
+              return of(
+                afterResponse
+                  .mutate()
+                  .chatResponse(
+                    ChatResponse.builder()
+                      .from(chatResponse)
+                      .generations(
+                        ToolExecutionResult.buildGenerations(
+                          toolExecutionResult,
+                        ),
+                      )
+                      .build(),
+                  )
+                  .build(),
+              );
+            }
+
+            // Recursive call with updated conversation history.
+            const nextInstructions =
+              this.doGetNextInstructionsForToolCallStream(
+                finalRequest,
+                afterResponse,
+                toolExecutionResult,
+              );
+
+            return this.internalStream(
+              streamAdvisorChain,
+              originalRequest,
+              optionsCopy,
+              nextInstructions,
+            );
+          }),
+        );
+      }),
+    );
   }
 }

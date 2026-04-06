@@ -27,4 +27,6 @@ export interface StreamAdvisorChain extends AdvisorChain {
   ): Observable<ChatClientResponse>;
 
   get streamAdvisors(): StreamAdvisor[];
+
+  copy(after: StreamAdvisor): StreamAdvisorChain;
 }

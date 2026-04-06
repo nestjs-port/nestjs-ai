@@ -111,7 +111,7 @@ export interface ChatGenerationMetadataBuilder {
    * @param finishReason - the finish reason
    * @returns this builder for method chaining
    */
-  finishReason(finishReason: string): this;
+  finishReason(finishReason: string | null): this;
 
   /**
    * Add metadata to the Generation result.

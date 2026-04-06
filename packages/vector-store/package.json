@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run",
-    "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 resources/Filters.g4"
+    "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 src/filter/antlr4/Filters.g4"
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "*",

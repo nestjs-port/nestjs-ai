@@ -31,5 +31,9 @@
     "@testcontainers/redis": "^11.13.0",
     "redis": "^5.11.0",
     "testcontainers": "^11.13.0"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

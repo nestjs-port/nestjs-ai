@@ -24,5 +24,9 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "testcontainers": "^11.13.0"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

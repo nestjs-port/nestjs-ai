@@ -29,5 +29,9 @@
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
 }

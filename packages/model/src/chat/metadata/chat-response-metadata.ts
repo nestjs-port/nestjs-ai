@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
 import { LoggerFactory } from "@nestjs-ai/commons";
 import { AbstractResponseMetadata, type ResponseMetadata } from "../../model";
 import { EmptyRateLimit } from "./empty-rate-limit";
@@ -142,9 +143,7 @@ export namespace ChatResponseMetadata {
     }
 
     keyValue(key: string, value: unknown): this {
-      if (key === null) {
-        throw new Error("Key must not be null");
-      }
+      assert(key != null, "Key must not be null"); // Defensive check
       if (value != null) {
         this._metadata[key] = value;
       } else {

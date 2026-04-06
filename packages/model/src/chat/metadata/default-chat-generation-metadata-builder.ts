@@ -36,7 +36,7 @@ export class DefaultChatGenerationMetadataBuilder
    * @param finishReason - the finish reason
    * @returns this builder for method chaining
    */
-  finishReason(finishReason: string): this {
+  finishReason(finishReason: string | null): this {
     this._finishReason = finishReason;
     return this;
   }

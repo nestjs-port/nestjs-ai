@@ -21,7 +21,7 @@ import { EmbeddingModelObservationContext } from "../embedding-model-observation
 
 describe("EmbeddingModelObservationContext", () => {
   it("sets embedding operation metadata", () => {
-    const request = new EmbeddingRequest(["test input"], null);
+    const request = new EmbeddingRequest(["test input"]);
     const context = new EmbeddingModelObservationContext(
       request,
       "test-provider",
@@ -33,14 +33,14 @@ describe("EmbeddingModelObservationContext", () => {
     expect(context.operationMetadata.provider).toBe("test-provider");
   });
 
-  it("allows request with null options", () => {
-    const request = new EmbeddingRequest(["test input"], null);
+  it("allows request with default options", () => {
+    const request = new EmbeddingRequest(["test input"]);
 
     const context = new EmbeddingModelObservationContext(
       request,
       "test-provider",
     );
 
-    expect(context.request.options).toBeNull();
+    expect(context.request.options).toBeDefined();
   });
 });

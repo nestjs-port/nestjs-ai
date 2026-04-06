@@ -33,12 +33,17 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, type Observable, of, toArray } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request";
 import { ChatClientResponse } from "../../chat-client-response";
-import type { CallAdvisor, CallAdvisorChain } from "../api";
+import type {
+  CallAdvisor,
+  CallAdvisorChain,
+  StreamAdvisor,
+  StreamAdvisorChain,
+} from "../api";
 import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain";
 import {
   ToolCallAdvisor,
@@ -76,6 +81,37 @@ class TerminalCallAdvisor implements CallAdvisor {
   }
 }
 
+class TerminalStreamAdvisor implements StreamAdvisor {
+  private readonly _responseFn: (
+    req: ChatClientRequest,
+    chain: StreamAdvisorChain,
+  ) => Observable<ChatClientResponse>;
+
+  constructor(
+    responseFn: (
+      req: ChatClientRequest,
+      chain: StreamAdvisorChain,
+    ) => Observable<ChatClientResponse>,
+  ) {
+    this._responseFn = responseFn;
+  }
+
+  get name(): string {
+    return "terminal-stream";
+  }
+
+  get order(): number {
+    return 0;
+  }
+
+  adviseStream(
+    req: ChatClientRequest,
+    chain: StreamAdvisorChain,
+  ): Observable<ChatClientResponse> {
+    return this._responseFn(req, chain);
+  }
+}
+
 class TestableToolCallAdvisor extends ToolCallAdvisor {
   private readonly _hookCallCounts: [number, number, number] | null;
 
@@ -87,34 +123,34 @@ class TestableToolCallAdvisor extends ToolCallAdvisor {
     this._hookCallCounts = hookCallCounts;
   }
 
-  protected override async initializeLoop(
+  protected override async doInitializeLoop(
     chatClientRequest: ChatClientRequest,
     callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientRequest> {
     if (this._hookCallCounts != null) {
       this._hookCallCounts[0]++;
     }
-    return await super.initializeLoop(chatClientRequest, callAdvisorChain);
+    return await super.doInitializeLoop(chatClientRequest, callAdvisorChain);
   }
 
-  protected override async beforeCall(
+  protected override async doBeforeCall(
     chatClientRequest: ChatClientRequest,
     callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientRequest> {
     if (this._hookCallCounts != null) {
       this._hookCallCounts[1]++;
     }
-    return await super.beforeCall(chatClientRequest, callAdvisorChain);
+    return await super.doBeforeCall(chatClientRequest, callAdvisorChain);
   }
 
-  protected override async afterCall(
+  protected override async doAfterCall(
     chatClientResponse: ChatClientResponse,
     callAdvisorChain: CallAdvisorChain,
   ): Promise<ChatClientResponse> {
     if (this._hookCallCounts != null) {
       this._hookCallCounts[2]++;
     }
-    return await super.afterCall(chatClientResponse, callAdvisorChain);
+    return await super.doAfterCall(chatClientResponse, callAdvisorChain);
   }
 }
 
@@ -403,18 +439,110 @@ describe("ToolCallAdvisor", () => {
     expect(options.internalToolExecutionEnabled).toBe(false);
   });
 
-  it("test advise stream throws unsupported operation exception", async () => {
-    const advisor = new ToolCallAdvisor();
+  it("test advise stream without tool calls", async () => {
+    const toolCallingManager = createToolCallingManagerMock();
+    const advisor = new ToolCallAdvisor({
+      toolCallingManager,
+    });
     const request = createRequest(true);
+    const response = createResponse(false);
+    const terminalAdvisor = new TerminalStreamAdvisor(() => of(response));
+    const realChain = DefaultAroundAdvisorChain.builder(
+      NoopObservationRegistry.INSTANCE,
+    )
+      .pushAll([advisor, terminalAdvisor])
+      .build();
 
-    await expect(
-      firstValueFrom(
-        advisor.adviseStream(
-          request,
-          {} as unknown as Parameters<ToolCallAdvisor["adviseStream"]>[1],
-        ),
-      ),
-    ).rejects.toThrow("Unimplemented method 'adviseStream'");
+    const results = await firstValueFrom(
+      advisor.adviseStream(request, realChain).pipe(toArray()),
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0]?.chatResponse?.result?.output.text).toBe("response");
+    expect(toolCallingManager.executeToolCalls).not.toHaveBeenCalled();
+  });
+
+  it("test advise stream with single tool call iteration", async () => {
+    const toolCallingManager = createToolCallingManagerMock();
+    const advisor = new ToolCallAdvisor({
+      toolCallingManager,
+    });
+    const request = createRequest(true);
+    const responseWithToolCall = createResponse(true);
+    const finalResponse = createResponse(false);
+    let callCount = 0;
+    const terminalAdvisor = new TerminalStreamAdvisor(() => {
+      callCount++;
+      return of(callCount === 1 ? responseWithToolCall : finalResponse);
+    });
+    const realChain = DefaultAroundAdvisorChain.builder(
+      NoopObservationRegistry.INSTANCE,
+    )
+      .pushAll([advisor, terminalAdvisor])
+      .build();
+
+    toolCallingManager.executeToolCalls.mockResolvedValue(
+      new DefaultToolExecutionResult({
+        conversationHistory: [
+          UserMessage.of("test"),
+          AssistantMessage.of(""),
+          new ToolResponseMessage(),
+        ],
+      }),
+    );
+
+    const results = await firstValueFrom(
+      advisor.adviseStream(request, realChain).pipe(toArray()),
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0]?.chatResponse?.result?.output.text).toBe("response");
+    expect(results[0]?.chatResponse?.hasToolCalls()).toBe(false);
+    expect(callCount).toBe(2);
+    expect(toolCallingManager.executeToolCalls).toHaveBeenCalledTimes(1);
+  });
+
+  it("test advise stream with stream tool call responses enabled", async () => {
+    const toolCallingManager = createToolCallingManagerMock();
+    const advisor = new ToolCallAdvisor({
+      toolCallingManager,
+      streamToolCallResponses: true,
+    });
+    const request = createRequest(true);
+    const responseWithToolCall = createResponse(true);
+    const finalResponse = createResponse(false);
+    let callCount = 0;
+    const terminalAdvisor = new TerminalStreamAdvisor(() => {
+      callCount++;
+      return of(callCount === 1 ? responseWithToolCall : finalResponse);
+    });
+    const realChain = DefaultAroundAdvisorChain.builder(
+      NoopObservationRegistry.INSTANCE,
+    )
+      .pushAll([advisor, terminalAdvisor])
+      .build();
+
+    toolCallingManager.executeToolCalls.mockResolvedValue(
+      new DefaultToolExecutionResult({
+        conversationHistory: [
+          UserMessage.of("test"),
+          AssistantMessage.of(""),
+          new ToolResponseMessage(),
+        ],
+      }),
+    );
+
+    const results = await firstValueFrom(
+      advisor.adviseStream(request, realChain).pipe(toArray()),
+    );
+
+    expect(results).toHaveLength(2);
+    expect(results[0]?.chatResponse?.result?.output.text).toBe("response");
+    expect(results[0]?.chatResponse?.hasToolCalls()).toBe(true);
+    expect(results[1]?.chatResponse?.result?.output.text).toBe("response");
+    expect(results[1]?.chatResponse?.hasToolCalls()).toBe(false);
+    expect(callCount).toBe(2);
+    expect(toolCallingManager.executeToolCalls).toHaveBeenCalledTimes(1);
   });
 
   it("test get name", () => {
@@ -646,9 +774,11 @@ function createRequest(withToolCallingOptions: boolean): ChatClientRequest {
         .internalToolExecutionEnabled(true)
         .build()
     : null;
-  return ChatClientRequest.builder()
-    .prompt(new Prompt(instructions, options))
-    .build();
+  const prompt =
+    options == null
+      ? new Prompt(instructions)
+      : new Prompt(instructions, options);
+  return ChatClientRequest.builder().prompt(prompt).build();
 }
 
 function createRequestWithSystemMessage(): ChatClientRequest {

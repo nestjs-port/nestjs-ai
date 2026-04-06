@@ -439,7 +439,7 @@ export class OpenAiChatModel extends ChatModel {
     )) {
       headers.set(key, value);
     }
-    if (prompt.options != null && prompt.options instanceof OpenAiChatOptions) {
+    if (prompt.options instanceof OpenAiChatOptions) {
       for (const [key, value] of Object.entries(
         (prompt.options as OpenAiChatOptions).httpHeaders,
       )) {
@@ -585,12 +585,9 @@ export class OpenAiChatModel extends ChatModel {
 
   buildRequestPrompt(prompt: Prompt): Prompt {
     // Process runtime options
-    let runtimeOptions: OpenAiChatOptions | null = null;
-    if (prompt.options) {
-      runtimeOptions = new OpenAiChatOptions(
-        prompt.options as Partial<OpenAiChatOptions>,
-      );
-    }
+    const runtimeOptions = new OpenAiChatOptions(
+      prompt.options as Partial<OpenAiChatOptions>,
+    );
 
     // Merge runtime options and default options
     const requestOptions = OpenAiChatModel.mergeOptions(
@@ -599,49 +596,35 @@ export class OpenAiChatModel extends ChatModel {
     );
 
     // Merge options explicitly since they are not handled by simple copy
-    if (runtimeOptions) {
-      if (runtimeOptions.topK != null) {
-        this.logger.warn(
-          "The topK option is not supported by OpenAI chat models. Ignoring.",
-        );
-      }
-
-      requestOptions.httpHeaders = {
-        ...this._defaultOptions.httpHeaders,
-        ...runtimeOptions.httpHeaders,
-      };
-      requestOptions.internalToolExecutionEnabled =
-        runtimeOptions.internalToolExecutionEnabled ??
-        this._defaultOptions.internalToolExecutionEnabled;
-      requestOptions.toolNames =
-        runtimeOptions.toolNames.size > 0
-          ? new Set(runtimeOptions.toolNames)
-          : new Set(this._defaultOptions.toolNames);
-      requestOptions.toolCallbacks =
-        runtimeOptions.toolCallbacks.length > 0
-          ? [...runtimeOptions.toolCallbacks]
-          : [...this._defaultOptions.toolCallbacks];
-      requestOptions.toolContext = {
-        ...this._defaultOptions.toolContext,
-        ...runtimeOptions.toolContext,
-      };
-      requestOptions.extraBody = OpenAiChatModel.mergeExtraBody(
-        runtimeOptions.extraBody,
-        this._defaultOptions.extraBody,
+    if (runtimeOptions.topK != null) {
+      this.logger.warn(
+        "The topK option is not supported by OpenAI chat models. Ignoring.",
       );
-    } else {
-      requestOptions.httpHeaders = { ...this._defaultOptions.httpHeaders };
-      requestOptions.internalToolExecutionEnabled =
-        this._defaultOptions.internalToolExecutionEnabled;
-      requestOptions.toolNames = new Set(this._defaultOptions.toolNames);
-      requestOptions.toolCallbacks = [...this._defaultOptions.toolCallbacks];
-      requestOptions.toolContext = {
-        ...this._defaultOptions.toolContext,
-      };
-      requestOptions.extraBody = this._defaultOptions.extraBody
-        ? { ...this._defaultOptions.extraBody }
-        : undefined;
     }
+
+    requestOptions.httpHeaders = {
+      ...this._defaultOptions.httpHeaders,
+      ...runtimeOptions.httpHeaders,
+    };
+    requestOptions.internalToolExecutionEnabled =
+      runtimeOptions.internalToolExecutionEnabled ??
+      this._defaultOptions.internalToolExecutionEnabled;
+    requestOptions.toolNames =
+      runtimeOptions.toolNames.size > 0
+        ? new Set(runtimeOptions.toolNames)
+        : new Set(this._defaultOptions.toolNames);
+    requestOptions.toolCallbacks =
+      runtimeOptions.toolCallbacks.length > 0
+        ? [...runtimeOptions.toolCallbacks]
+        : [...this._defaultOptions.toolCallbacks];
+    requestOptions.toolContext = {
+      ...this._defaultOptions.toolContext,
+      ...runtimeOptions.toolContext,
+    };
+    requestOptions.extraBody = OpenAiChatModel.mergeExtraBody(
+      runtimeOptions.extraBody,
+      this._defaultOptions.extraBody,
+    );
 
     return new Prompt(prompt.instructions, requestOptions);
   }

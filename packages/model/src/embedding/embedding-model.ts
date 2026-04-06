@@ -43,7 +43,7 @@ export abstract class EmbeddingModel
   async embed(texts: string[]): Promise<number[][]>;
   async embed(
     documents: Document[],
-    options: EmbeddingOptions | null,
+    options: EmbeddingOptions,
     batchingStrategy: BatchingStrategy,
   ): Promise<number[][]>;
   async embed(
@@ -73,23 +73,21 @@ export abstract class EmbeddingModel
     assert(batchingStrategy != null, "BatchingStrategy must not be null");
     return this.embedDocumentBatch(
       input as Document[],
-      options ?? null,
+      options ?? EmbeddingOptions.builder().build(),
       batchingStrategy,
     );
   }
 
   private async embedTexts(texts: string[]): Promise<number[][]> {
     assert(texts != null, "Texts must not be null");
-    const response = await this.call(
-      new EmbeddingRequest(texts, EmbeddingOptions.builder().build()),
-    );
+    const response = await this.call(new EmbeddingRequest(texts));
 
     return response.results.map((embedding) => embedding.output);
   }
 
   private async embedDocumentBatch(
     documents: Document[],
-    options: EmbeddingOptions | null,
+    options: EmbeddingOptions,
     batchingStrategy: BatchingStrategy,
   ): Promise<number[][]> {
     assert(documents != null, "Documents must not be null");
@@ -123,9 +121,7 @@ export abstract class EmbeddingModel
    */
   async embedForResponse(texts: string[]): Promise<EmbeddingResponse> {
     assert(texts != null, "Texts must not be null");
-    return this.call(
-      new EmbeddingRequest(texts, EmbeddingOptions.builder().build()),
-    );
+    return this.call(new EmbeddingRequest(texts));
   }
 
   /**

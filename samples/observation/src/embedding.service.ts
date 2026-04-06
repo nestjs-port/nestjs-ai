@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { type EmbeddingModel } from '@nestjs-ai/model';
-import { InjectEmbeddingModel } from '@nestjs-ai/platform';
+import { Injectable } from "@nestjs/common";
+import type { EmbeddingModel } from "@nestjs-ai/model";
+import { InjectEmbeddingModel } from "@nestjs-ai/platform";
 
 @Injectable()
 export class EmbeddingService {

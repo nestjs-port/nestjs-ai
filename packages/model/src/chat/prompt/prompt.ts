@@ -25,6 +25,7 @@ import {
   UserMessage,
 } from "../messages";
 import type { ChatOptions } from "./chat-options.interface";
+import { DefaultChatOptions } from "./default-chat-options";
 
 /**
  * Type guard to check if a message is a {@link UserMessage}.
@@ -74,22 +75,23 @@ function isToolResponseMessage(
  */
 export class Prompt implements ModelRequest<Message[]> {
   private readonly messages: Message[];
-  private readonly chatOptions: ChatOptions | null;
+  private readonly chatOptions: ChatOptions;
 
   constructor(content: string);
   constructor(message: Message);
   constructor(messages: Message[]);
-  constructor(content: string, chatOptions: ChatOptions | null);
-  constructor(message: Message, chatOptions: ChatOptions | null);
-  constructor(messages: Message[], chatOptions: ChatOptions | null);
+  constructor(content: string, chatOptions: ChatOptions);
+  constructor(message: Message, chatOptions: ChatOptions);
+  constructor(messages: Message[], chatOptions: ChatOptions);
   constructor(
     contentOrMessageOrMessages: string | Message | Message[],
-    chatOptions: ChatOptions | null = null,
+    chatOptions: ChatOptions = new DefaultChatOptions(),
   ) {
     assert(
       contentOrMessageOrMessages != null,
       "content or messages cannot be null",
     );
+    assert(chatOptions, "chatOptions cannot be null");
 
     if (typeof contentOrMessageOrMessages === "string") {
       this.messages = [UserMessage.of(contentOrMessageOrMessages)];
@@ -113,9 +115,9 @@ export class Prompt implements ModelRequest<Message[]> {
 
   /**
    * Get the chat options.
-   * @returns The {@link ChatOptions} or null if not set.
+   * @returns The {@link ChatOptions}.
    */
-  get options(): ChatOptions | null {
+  get options(): ChatOptions {
     return this.chatOptions;
   }
 
@@ -184,10 +186,7 @@ export class Prompt implements ModelRequest<Message[]> {
    * @returns A new {@link Prompt} instance with copied messages and options.
    */
   copy(): Prompt {
-    return new Prompt(
-      this.instructionsCopy(),
-      this.chatOptions?.copy() ?? null,
-    );
+    return new Prompt(this.instructionsCopy(), this.chatOptions.copy());
   }
 
   private instructionsCopy(): Message[] {
@@ -249,7 +248,7 @@ export class Prompt implements ModelRequest<Message[]> {
       messagesCopy.unshift(augmenter(SystemMessage.of("")));
     }
 
-    return new Prompt(messagesCopy, this.chatOptions?.copy() ?? null);
+    return new Prompt(messagesCopy, this.chatOptions.copy());
   }
 
   /**
@@ -278,14 +277,14 @@ export class Prompt implements ModelRequest<Message[]> {
       const message = messagesCopy[i];
       if (isUserMessage(message)) {
         messagesCopy[i] = augmenter(message);
-        return new Prompt(messagesCopy, this.chatOptions?.copy() ?? null);
+        return new Prompt(messagesCopy, this.chatOptions.copy());
       }
       if (i === 0) {
         messagesCopy.push(augmenter(UserMessage.of("")));
       }
     }
 
-    return new Prompt(messagesCopy, this.chatOptions?.copy() ?? null);
+    return new Prompt(messagesCopy, this.chatOptions.copy());
   }
 
   /**
@@ -294,9 +293,7 @@ export class Prompt implements ModelRequest<Message[]> {
    */
   mutate(): PromptBuilder {
     const builder = Prompt.builder().messages(this.instructionsCopy());
-    if (this.chatOptions) {
-      builder.chatOptions(this.chatOptions.copy());
-    }
+    builder.chatOptions(this.chatOptions.copy());
     return builder;
   }
 
@@ -375,6 +372,9 @@ export class PromptBuilder {
    */
   build(): Prompt {
     assert(this._messages, "either messages or content needs to be set");
-    return new Prompt(this._messages, this._chatOptions);
+    return new Prompt(
+      this._messages,
+      this._chatOptions ?? new DefaultChatOptions(),
+    );
   }
 }

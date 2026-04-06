@@ -162,11 +162,7 @@ export class DefaultChatClientObservationConvention extends ChatClientObservatio
     context: ChatClientObservationContext,
   ): ToolCallingChatOptions | null {
     const options = context.request.prompt.options;
-    if (
-      options == null ||
-      !("toolCallbacks" in options) ||
-      !("toolNames" in options)
-    ) {
+    if (!("toolCallbacks" in options) || !("toolNames" in options)) {
       return null;
     }
     return options as ToolCallingChatOptions;

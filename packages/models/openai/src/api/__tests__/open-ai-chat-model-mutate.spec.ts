@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Prompt } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 import { OpenAiChatModel } from "../../open-ai-chat-model";
 import { OpenAiChatOptions } from "../../open-ai-chat-options";
@@ -243,5 +244,17 @@ describe("OpenAiChatModelMutate", () => {
 
     expect(mutated.baseUrl).toBe(originalBaseUrl);
     expect(mutated.apiKey.value).toBe(newApiKey);
+  });
+
+  it("buildRequestPrompt promotes default prompt options", () => {
+    const baseApi = createBaseApi();
+    const model = createBaseModel(baseApi);
+    const prompt = new Prompt("test input");
+
+    const requestPrompt = model.buildRequestPrompt(prompt);
+
+    expect(requestPrompt.options).toBeDefined();
+    expect(requestPrompt.options).toBeInstanceOf(OpenAiChatOptions);
+    expect(requestPrompt.instructions).toEqual(prompt.instructions);
   });
 });

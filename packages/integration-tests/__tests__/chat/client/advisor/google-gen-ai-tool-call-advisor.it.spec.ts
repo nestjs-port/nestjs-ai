@@ -19,26 +19,30 @@ import {
   GoogleGenAiChatModel,
   GoogleGenAiChatOptions,
 } from "@nestjs-ai/model-google-genai";
-import { describe, it } from "vitest";
+import { beforeAll, describe, it } from "vitest";
 import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared";
 
 const GOOGLE_CLOUD_PROJECT = process.env.GOOGLE_CLOUD_PROJECT;
 
 describe.skipIf(!GOOGLE_CLOUD_PROJECT)("GoogleGenAiToolCallAdvisorIT", () => {
-  const genAiClient = new GoogleGenAI({
-    project: GOOGLE_CLOUD_PROJECT ?? "",
-    location: "global",
-    vertexai: true,
-  });
+  let abstractIT: AbstractToolCallAdvisorIT;
 
-  const abstractIT = new AbstractToolCallAdvisorIT(
-    new GoogleGenAiChatModel({
-      genAiClient,
-      defaultOptions: new GoogleGenAiChatOptions({
-        model: GoogleGenAiChatModel.ChatModel.GEMINI_3_PRO_PREVIEW,
+  beforeAll(() => {
+    const genAiClient = new GoogleGenAI({
+      project: GOOGLE_CLOUD_PROJECT ?? "",
+      location: "global",
+      vertexai: true,
+    });
+
+    abstractIT = new AbstractToolCallAdvisorIT(
+      new GoogleGenAiChatModel({
+        genAiClient,
+        defaultOptions: new GoogleGenAiChatOptions({
+          model: GoogleGenAiChatModel.ChatModel.GEMINI_3_PRO_PREVIEW,
+        }),
       }),
-    }),
-  );
+    );
+  });
 
   describe("CallTests", () => {
     it("call multiple tool invocations", async () => {

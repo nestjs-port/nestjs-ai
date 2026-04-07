@@ -339,7 +339,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
       mergeMap((initializedRequest) => {
         // Overwrite the ToolCallingChatOptions to disable internal tool execution.
         const optionsCopy =
-          chatClientRequest.prompt.options.copy() as ToolCallingChatOptions;
+          chatClientRequest.prompt.options?.copy() as ToolCallingChatOptions;
         optionsCopy.setInternalToolExecutionEnabled(false);
 
         return this.internalStream(

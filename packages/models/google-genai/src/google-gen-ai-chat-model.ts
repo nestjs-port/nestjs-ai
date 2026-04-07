@@ -247,9 +247,12 @@ export class GoogleGenAiChatModel extends ChatModel {
 
   buildRequestPrompt(prompt: Prompt): Prompt {
     // Process runtime options
-    const runtimeOptions = new GoogleGenAiChatOptions(
-      prompt.options as Partial<GoogleGenAiChatOptions>,
-    );
+    let runtimeOptions: GoogleGenAiChatOptions | null = null;
+    if (prompt.options) {
+      runtimeOptions = new GoogleGenAiChatOptions(
+        prompt.options as Partial<GoogleGenAiChatOptions>,
+      );
+    }
 
     // Merge runtime options and default options
     const requestOptions = GoogleGenAiChatModel.mergeOptions(
@@ -258,38 +261,50 @@ export class GoogleGenAiChatModel extends ChatModel {
     );
 
     // Merge @JsonIgnore-annotated options explicitly
-    requestOptions.internalToolExecutionEnabled =
-      runtimeOptions.internalToolExecutionEnabled ??
-      this._defaultOptions.internalToolExecutionEnabled;
+    if (runtimeOptions) {
+      requestOptions.internalToolExecutionEnabled =
+        runtimeOptions.internalToolExecutionEnabled ??
+        this._defaultOptions.internalToolExecutionEnabled;
 
-    requestOptions.toolNames =
-      runtimeOptions.toolNames.size > 0
-        ? new Set(runtimeOptions.toolNames)
-        : new Set(this._defaultOptions.toolNames);
+      requestOptions.toolNames =
+        runtimeOptions.toolNames.size > 0
+          ? new Set(runtimeOptions.toolNames)
+          : new Set(this._defaultOptions.toolNames);
 
-    requestOptions.toolCallbacks =
-      runtimeOptions.toolCallbacks.length > 0
-        ? [...runtimeOptions.toolCallbacks]
-        : [...this._defaultOptions.toolCallbacks];
+      requestOptions.toolCallbacks =
+        runtimeOptions.toolCallbacks.length > 0
+          ? [...runtimeOptions.toolCallbacks]
+          : [...this._defaultOptions.toolCallbacks];
 
-    requestOptions.toolContext = {
-      ...this._defaultOptions.toolContext,
-      ...runtimeOptions.toolContext,
-    };
+      requestOptions.toolContext = {
+        ...this._defaultOptions.toolContext,
+        ...runtimeOptions.toolContext,
+      };
 
-    requestOptions.googleSearchRetrieval =
-      runtimeOptions.googleSearchRetrieval ??
-      this._defaultOptions.googleSearchRetrieval;
+      requestOptions.googleSearchRetrieval =
+        runtimeOptions.googleSearchRetrieval ??
+        this._defaultOptions.googleSearchRetrieval;
 
-    requestOptions.safetySettings =
-      runtimeOptions.safetySettings.length > 0
-        ? [...runtimeOptions.safetySettings]
-        : [...this._defaultOptions.safetySettings];
+      requestOptions.safetySettings =
+        runtimeOptions.safetySettings.length > 0
+          ? [...runtimeOptions.safetySettings]
+          : [...this._defaultOptions.safetySettings];
 
-    requestOptions.labels =
-      Object.keys(runtimeOptions.labels).length > 0
-        ? { ...runtimeOptions.labels }
-        : { ...this._defaultOptions.labels };
+      requestOptions.labels =
+        Object.keys(runtimeOptions.labels).length > 0
+          ? { ...runtimeOptions.labels }
+          : { ...this._defaultOptions.labels };
+    } else {
+      requestOptions.internalToolExecutionEnabled =
+        this._defaultOptions.internalToolExecutionEnabled;
+      requestOptions.toolNames = new Set(this._defaultOptions.toolNames);
+      requestOptions.toolCallbacks = [...this._defaultOptions.toolCallbacks];
+      requestOptions.toolContext = { ...this._defaultOptions.toolContext };
+      requestOptions.googleSearchRetrieval =
+        this._defaultOptions.googleSearchRetrieval;
+      requestOptions.safetySettings = [...this._defaultOptions.safetySettings];
+      requestOptions.labels = { ...this._defaultOptions.labels };
+    }
 
     return new Prompt(prompt.instructions, requestOptions);
   }

@@ -10,9 +10,7 @@ async function bootstrap() {
   const runtime = createProductionOtelRuntime();
   runtime.start();
 
-  const app = await NestFactory.create(AppModule, {
-    logger: false,
-  });
+  const app = await NestFactory.create(AppModule);
   const port = Number(process.env.PORT ?? 3000);
 
   const shutdown = async () => {

@@ -41,16 +41,19 @@ import {
  * Abstract base suite for tool call advisor integration tests.
  * Contains common test logic to avoid duplication between advisor implementations.
  */
-export abstract class AbstractToolCallAdvisorIT {
-  protected readonly logger = LoggerFactory.getLogger(
+export class AbstractToolCallAdvisorIT {
+  private readonly logger = LoggerFactory.getLogger(
     AbstractToolCallAdvisorIT.name,
   );
 
   private readonly weatherService = new MockWeatherService();
+  private readonly chatModel: ChatModel;
 
-  protected abstract getChatModel(): ChatModel;
+  constructor(chatModel: ChatModel) {
+    this.chatModel = chatModel;
+  }
 
-  protected createWeatherToolCallback(): FunctionToolCallback<
+  private createWeatherToolCallback(): FunctionToolCallback<
     WeatherRequest,
     WeatherResponse
   > {
@@ -63,7 +66,7 @@ export abstract class AbstractToolCallAdvisorIT {
       .build();
   }
 
-  protected createReturnDirectWeatherToolCallback(): FunctionToolCallback<
+  private createReturnDirectWeatherToolCallback(): FunctionToolCallback<
     WeatherRequest,
     WeatherResponse
   > {
@@ -77,8 +80,8 @@ export abstract class AbstractToolCallAdvisorIT {
       .build();
   }
 
-  protected async testCallMultipleToolInvocations(): Promise<void> {
-    const response = await ChatClient.create(this.getChatModel())
+  async testCallMultipleToolInvocations(): Promise<void> {
+    const response = await ChatClient.create(this.chatModel)
       .prompt()
       .advisors(new ToolCallAdvisor())
       .user((user) =>
@@ -97,8 +100,8 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(response).toContain("15");
   }
 
-  protected async testCallMultipleToolInvocationsWithExternalMemory(): Promise<void> {
-    const response = await ChatClient.create(this.getChatModel())
+  async testCallMultipleToolInvocationsWithExternalMemory(): Promise<void> {
+    const response = await ChatClient.create(this.chatModel)
       .prompt()
       .advisors(
         new ToolCallAdvisor({ conversationHistoryEnabled: false }),
@@ -125,8 +128,8 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(response).toContain("15");
   }
 
-  protected async testCallDefaultAdvisorConfiguration(): Promise<void> {
-    const chatClient = ChatClient.builder(this.getChatModel())
+  async testCallDefaultAdvisorConfiguration(): Promise<void> {
+    const chatClient = ChatClient.builder(this.chatModel)
       .defaultAdvisors(new ToolCallAdvisor())
       .build();
 
@@ -146,8 +149,8 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(response).toContain("15");
   }
 
-  protected async testCallDefaultAdvisorConfigurationWithExternalMemory(): Promise<void> {
-    const chatClient = ChatClient.builder(this.getChatModel())
+  async testCallDefaultAdvisorConfigurationWithExternalMemory(): Promise<void> {
+    const chatClient = ChatClient.builder(this.chatModel)
       .defaultAdvisors(
         new ToolCallAdvisor({ conversationHistoryEnabled: false }),
         new MessageChatMemoryAdvisor({
@@ -175,8 +178,8 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(response).toContain("15");
   }
 
-  protected async testCallWithReturnDirect(): Promise<void> {
-    const response = await ChatClient.create(this.getChatModel())
+  async testCallWithReturnDirect(): Promise<void> {
+    const response = await ChatClient.create(this.chatModel)
       .prompt()
       .advisors(new ToolCallAdvisor())
       .user("What's the weather like in Tokyo?")
@@ -189,9 +192,9 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(response).toContain("temp");
   }
 
-  protected async testStreamMultipleToolInvocations(): Promise<void> {
+  async testStreamMultipleToolInvocations(): Promise<void> {
     const chunks = await firstValueFrom(
-      ChatClient.create(this.getChatModel())
+      ChatClient.create(this.chatModel)
         .prompt()
         .advisors(new ToolCallAdvisor())
         .user(
@@ -211,9 +214,9 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(content).toContain("15");
   }
 
-  protected async testStreamMultipleToolInvocationsWithExternalMemory(): Promise<void> {
+  async testStreamMultipleToolInvocationsWithExternalMemory(): Promise<void> {
     const chunks = await firstValueFrom(
-      ChatClient.create(this.getChatModel())
+      ChatClient.create(this.chatModel)
         .prompt()
         .advisors(
           new ToolCallAdvisor({ conversationHistoryEnabled: false }),
@@ -241,8 +244,8 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(content).toContain("15");
   }
 
-  protected async testStreamDefaultAdvisorConfiguration(): Promise<void> {
-    const chatClient = ChatClient.builder(this.getChatModel())
+  async testStreamDefaultAdvisorConfiguration(): Promise<void> {
+    const chatClient = ChatClient.builder(this.chatModel)
       .defaultAdvisors(new ToolCallAdvisor())
       .build();
 
@@ -266,8 +269,8 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(content).toContain("15");
   }
 
-  protected async testStreamDefaultAdvisorConfigurationWithExternalMemory(): Promise<void> {
-    const chatClient = ChatClient.builder(this.getChatModel())
+  async testStreamDefaultAdvisorConfigurationWithExternalMemory(): Promise<void> {
+    const chatClient = ChatClient.builder(this.chatModel)
       .defaultAdvisors(
         new ToolCallAdvisor({ conversationHistoryEnabled: false }),
         new MessageChatMemoryAdvisor({
@@ -299,9 +302,9 @@ export abstract class AbstractToolCallAdvisorIT {
     expect(content).toContain("15");
   }
 
-  protected async testStreamWithReturnDirect(): Promise<void> {
+  async testStreamWithReturnDirect(): Promise<void> {
     const chunks = await firstValueFrom(
-      ChatClient.create(this.getChatModel())
+      ChatClient.create(this.chatModel)
         .prompt()
         .advisors(new ToolCallAdvisor())
         .user("What's the weather like in Tokyo?")

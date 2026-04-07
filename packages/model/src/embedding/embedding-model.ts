@@ -36,6 +36,15 @@ export abstract class EmbeddingModel
   protected abstract embedDocument(document: Document): Promise<number[]>;
 
   /**
+   * Extracts the text content from a {@link Document} to be used for embedding.
+   * Implementations that support metadata-aware embedding should override this method.
+   */
+  protected getEmbeddingContent(document: Document): string {
+    assert(document != null, "Document must not be null");
+    return document.text ?? "";
+  }
+
+  /**
    * Embeds the given text into a vector.
    */
   async embed(text: string): Promise<number[]>;
@@ -98,11 +107,10 @@ export abstract class EmbeddingModel
     const batches = batchingStrategy.batch(documents);
 
     for (const subBatch of batches) {
-      const texts = subBatch.map((document) => document.text ?? "");
-      const request = new EmbeddingRequest(
-        texts.map((text) => text ?? ""),
-        options,
+      const texts = subBatch.map((document) =>
+        this.getEmbeddingContent(document),
       );
+      const request = new EmbeddingRequest(texts, options);
       const response = await this.call(request);
 
       for (let i = 0; i < subBatch.length; i += 1) {

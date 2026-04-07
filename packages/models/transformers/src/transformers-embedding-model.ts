@@ -127,10 +127,15 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
     this._observationConvention = observationConvention;
   }
 
+  protected getEmbeddingContent(document: Document): string {
+    assert(document, "document cannot be null");
+    return document.getFormattedContent(this._metadataMode);
+  }
+
   protected override async embedDocument(
     document: Document,
   ): Promise<number[]> {
-    return await this.embed(document.getFormattedContent(this._metadataMode));
+    return await this.embed(this.getEmbeddingContent(document));
   }
 
   async onModuleInit(): Promise<void> {

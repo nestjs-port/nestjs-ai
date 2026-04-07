@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import { Document, MetadataMode } from "@nestjs-ai/commons";
 import { describe, expect, it, vi } from "vitest";
 import { AbstractEmbeddingModel } from "../abstract-embedding-model";
+import { Embedding } from "../embedding";
 import type { EmbeddingModel } from "../embedding-model";
+import { EmbeddingOptions } from "../embedding-options.interface";
+import type { EmbeddingRequest } from "../embedding-request";
+import { EmbeddingResponse } from "../embedding-response";
+import { TokenCountBatchingStrategy } from "../token-count-batching-strategy";
 
 describe("AbstractEmbeddingModel", () => {
   it("unknown model dimension", async () => {
@@ -35,4 +41,63 @@ describe("AbstractEmbeddingModel", () => {
     expect(embedMock).toHaveBeenCalledOnce();
     expect(embedMock).toHaveBeenCalledWith("Hello world!");
   });
+
+  it("uses metadata-aware document content when batching", async () => {
+    const embeddingModel = new DummyEmbeddingModel(MetadataMode.EMBED);
+    const document = new Document("Some content", { title: "Getting Started" });
+
+    await embeddingModel.embed(
+      [document],
+      EmbeddingOptions.builder().build(),
+      new TokenCountBatchingStrategy(),
+    );
+
+    expect(embeddingModel.requests).toHaveLength(1);
+    expect(embeddingModel.requests[0]).toHaveLength(1);
+    expect(embeddingModel.requests[0][0]).toContain("Getting Started");
+    expect(embeddingModel.requests[0][0]).toContain("Some content");
+  });
+
+  it("uses raw text when batching without metadata mode", async () => {
+    const embeddingModel = new DummyEmbeddingModel();
+    const document = new Document("Some content", { title: "Getting Started" });
+
+    await embeddingModel.embed(
+      [document],
+      EmbeddingOptions.builder().build(),
+      new TokenCountBatchingStrategy(),
+    );
+
+    expect(embeddingModel.requests).toHaveLength(1);
+    expect(embeddingModel.requests[0]).toEqual(["Some content"]);
+  });
 });
+
+class DummyEmbeddingModel extends AbstractEmbeddingModel {
+  readonly requests: string[][] = [];
+
+  constructor(private readonly metadataMode: MetadataMode | null = null) {
+    super();
+  }
+
+  protected override getEmbeddingContent(document: Document): string {
+    if (this.metadataMode != null) {
+      return document.getFormattedContent(this.metadataMode);
+    }
+    return document.text ?? "";
+  }
+
+  protected override async embedDocument(
+    document: Document,
+  ): Promise<number[]> {
+    return (await this.embed(this.getEmbeddingContent(document))) as number[];
+  }
+
+  override async call(request: EmbeddingRequest): Promise<EmbeddingResponse> {
+    this.requests.push(request.instructions);
+    const embeddings = request.instructions.map(
+      (_text: string, index: number) => new Embedding([0.1, 0.2, 0.3], index),
+    );
+    return new EmbeddingResponse(embeddings);
+  }
+}

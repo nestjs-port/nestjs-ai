@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Document } from "@nestjs-ai/commons";
 import { EmbeddingModel } from "./embedding-model";
 
 /**
@@ -49,6 +50,10 @@ export abstract class AbstractEmbeddingModel extends EmbeddingModel {
    * Cached embedding dimensions.
    */
   protected _embeddingDimensions = -1;
+
+  protected override getEmbeddingContent(document: Document): string {
+    return super.getEmbeddingContent(document);
+  }
 
   /**
    * Return the dimension of the requested embedding model name.

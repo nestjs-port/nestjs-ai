@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import type { EmbeddingService } from "./embedding.service";
+// biome-ignore lint/style/useImportType: Nest DI requires runtime class value
+import { EmbeddingService } from "./embedding.service";
 
 @Controller()
 export class AppController {

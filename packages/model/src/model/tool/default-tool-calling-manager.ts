@@ -22,7 +22,7 @@ import {
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
-  AssistantMessage,
+  type AssistantMessage,
   type ChatResponse,
   type Message,
   type Prompt,
@@ -179,7 +179,7 @@ export class DefaultToolCallingManager implements ToolCallingManager {
 
   private static buildToolContext(
     prompt: Prompt,
-    assistantMessage: AssistantMessage,
+    _assistantMessage: AssistantMessage,
   ): ToolContext {
     let toolContextMap: Record<string, unknown> = {};
 
@@ -189,30 +189,10 @@ export class DefaultToolCallingManager implements ToolCallingManager {
       const ctx = toolCallingChatOptions.toolContext;
       if (ctx && Object.keys(ctx).length > 0) {
         toolContextMap = { ...ctx };
-        toolContextMap[ToolContext.TOOL_CALL_HISTORY] =
-          DefaultToolCallingManager.buildConversationHistoryBeforeToolExecution(
-            prompt,
-            assistantMessage,
-          );
       }
     }
 
     return new ToolContext(toolContextMap);
-  }
-
-  private static buildConversationHistoryBeforeToolExecution(
-    prompt: Prompt,
-    assistantMessage: AssistantMessage,
-  ): Message[] {
-    const messageHistory: Message[] = [...prompt.copy().instructions];
-    messageHistory.push(
-      new AssistantMessage({
-        content: assistantMessage.text ?? "",
-        properties: assistantMessage.metadata,
-        toolCalls: assistantMessage.toolCalls,
-      }),
-    );
-    return messageHistory;
   }
 
   private async executeToolCall(

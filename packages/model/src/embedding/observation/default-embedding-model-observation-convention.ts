@@ -44,7 +44,7 @@ export class DefaultEmbeddingModelObservationConvention extends EmbeddingModelOb
   override getContextualName(
     context: EmbeddingModelObservationContext,
   ): string {
-    const model = (context.request.options as EmbeddingOptions).model;
+    const model = (context.request.options as EmbeddingOptions | null)?.model;
     if (StringUtils.hasText(model)) {
       return `${context.operationMetadata.operationType} ${model}`;
     }
@@ -79,7 +79,7 @@ export class DefaultEmbeddingModelObservationConvention extends EmbeddingModelOb
   }
 
   protected requestModel(context: EmbeddingModelObservationContext): KeyValue {
-    const model = (context.request.options as EmbeddingOptions).model;
+    const model = (context.request.options as EmbeddingOptions | null)?.model;
     if (StringUtils.hasText(model)) {
       return KeyValue.of(AiObservationAttributes.REQUEST_MODEL.value, model);
     }
@@ -112,7 +112,8 @@ export class DefaultEmbeddingModelObservationConvention extends EmbeddingModelOb
     keyValues: KeyValues,
     context: EmbeddingModelObservationContext,
   ): KeyValues {
-    const dimensions = (context.request.options as EmbeddingOptions).dimensions;
+    const dimensions = (context.request.options as EmbeddingOptions | null)
+      ?.dimensions;
     if (dimensions != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_EMBEDDING_DIMENSIONS.value,

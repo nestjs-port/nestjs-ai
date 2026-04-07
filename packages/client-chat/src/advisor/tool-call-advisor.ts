@@ -130,7 +130,7 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     assert(chatClientRequest, "chatClientRequest must not be null");
 
     const promptOptions = chatClientRequest.prompt.options;
-    if (!isToolCallingChatOptions(promptOptions)) {
+    if (promptOptions == null || !isToolCallingChatOptions(promptOptions)) {
       throw new TypeError(
         "ToolCall Advisor requires ToolCallingChatOptions to be set in the ChatClientRequest options.",
       );
@@ -142,8 +142,8 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     );
 
     // Overwrite the ToolCallingChatOptions to disable internal tool execution.
-    const optionsCopy = initializedChatClientRequest.prompt.options.copy();
-    if (!isToolCallingChatOptions(optionsCopy)) {
+    const optionsCopy = initializedChatClientRequest.prompt.options?.copy();
+    if (optionsCopy == null || !isToolCallingChatOptions(optionsCopy)) {
       throw new TypeError(
         "ToolCall Advisor requires ToolCallingChatOptions to be set in the ChatClientRequest options.",
       );

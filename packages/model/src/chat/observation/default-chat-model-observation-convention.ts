@@ -43,8 +43,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
   }
 
   override getContextualName(context: ChatModelObservationContext): string {
-    const options = context.request.options as ChatOptions;
-    if (StringUtils.hasText(options.model)) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && StringUtils.hasText(options.model)) {
       return `${context.operationMetadata.operationType} ${options.model}`;
     }
     return context.operationMetadata.operationType;
@@ -76,8 +76,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
   }
 
   protected requestModel(context: ChatModelObservationContext): KeyValue {
-    const options = context.request.options as ChatOptions;
-    if (StringUtils.hasText(options.model)) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && StringUtils.hasText(options.model)) {
       return KeyValue.of(
         AiObservationAttributes.REQUEST_MODEL.value,
         options.model,
@@ -122,8 +122,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.frequencyPenalty != null) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && options.frequencyPenalty != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_FREQUENCY_PENALTY.value,
         String(options.frequencyPenalty),
@@ -136,8 +136,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.maxTokens != null) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && options.maxTokens != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_MAX_TOKENS.value,
         String(options.maxTokens),
@@ -150,8 +150,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.presencePenalty != null) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && options.presencePenalty != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_PRESENCE_PENALTY.value,
         String(options.presencePenalty),
@@ -164,8 +164,12 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.stopSequences != null && options.stopSequences.length > 0) {
+    const options = context.request.options as ChatOptions | null;
+    if (
+      options != null &&
+      options.stopSequences != null &&
+      options.stopSequences.length > 0
+    ) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_STOP_SEQUENCES.value,
         this.formatQuotedArray(options.stopSequences),
@@ -178,8 +182,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.temperature != null) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && options.temperature != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_TEMPERATURE.value,
         String(options.temperature),
@@ -215,8 +219,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.topK != null) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && options.topK != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_TOP_K.value,
         String(options.topK),
@@ -229,8 +233,8 @@ export class DefaultChatModelObservationConvention extends ChatModelObservationC
     keyValues: KeyValues,
     context: ChatModelObservationContext,
   ): KeyValues {
-    const options = context.request.options as ChatOptions;
-    if (options.topP != null) {
+    const options = context.request.options as ChatOptions | null;
+    if (options != null && options.topP != null) {
       return keyValues.and(
         AiObservationAttributes.REQUEST_TOP_P.value,
         String(options.topP),

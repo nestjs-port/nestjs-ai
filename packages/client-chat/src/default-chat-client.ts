@@ -98,7 +98,9 @@ export class DefaultChatClient implements ChatClient {
       this._defaultChatClientRequest,
     );
 
-    spec.options(contentOrPrompt.options as ChatOptions);
+    if (contentOrPrompt.options != null) {
+      spec.options(contentOrPrompt.options as ChatOptions);
+    }
 
     if (contentOrPrompt.instructions != null) {
       spec.messages(contentOrPrompt.instructions);

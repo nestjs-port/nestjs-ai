@@ -15,19 +15,16 @@
  */
 
 import type { ModelRequest } from "../model";
-import { EmbeddingOptions } from "./embedding-options.interface";
+import type { EmbeddingOptions } from "./embedding-options.interface";
 
 /**
  * Request to embed a list of input instructions.
  */
 export class EmbeddingRequest implements ModelRequest<string[]> {
   private readonly _inputs: string[];
-  private readonly _options: EmbeddingOptions;
+  private readonly _options: EmbeddingOptions | null;
 
-  constructor(
-    inputs: string[],
-    options: EmbeddingOptions = EmbeddingOptions.builder().build(),
-  ) {
+  constructor(inputs: string[], options: EmbeddingOptions | null = null) {
     this._inputs = inputs;
     this._options = options;
   }
@@ -36,7 +33,7 @@ export class EmbeddingRequest implements ModelRequest<string[]> {
     return this._inputs;
   }
 
-  get options(): EmbeddingOptions {
+  get options(): EmbeddingOptions | null {
     return this._options;
   }
 }

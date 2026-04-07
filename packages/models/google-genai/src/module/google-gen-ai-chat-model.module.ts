@@ -194,22 +194,28 @@ function createGoogleGenAiClient(
 ): GoogleGenAI {
   const options: GoogleGenAIOptions = {};
   const apiKey = normalizedText(properties.apiKey);
-  if (apiKey) {
-    options.apiKey = apiKey;
-  } else {
-    const projectId = normalizedText(properties.projectId);
-    const location = normalizedText(properties.location);
+  const projectId = normalizedText(properties.projectId);
+  const location = normalizedText(properties.location);
+  const hasVertexConfig = !!projectId && !!location;
+
+  if (properties.vertexAi) {
     assert(
-      projectId,
-      "Google GenAI projectId must be set when apiKey is not provided",
-    );
-    assert(
-      location,
-      "Google GenAI location must be set when apiKey is not provided",
+      hasVertexConfig,
+      "Google GenAI projectId and location must be set when vertexAi is enabled",
     );
     options.vertexai = true;
     options.project = projectId;
     options.location = location;
+  } else if (apiKey) {
+    options.apiKey = apiKey;
+  } else if (hasVertexConfig) {
+    options.vertexai = true;
+    options.project = projectId;
+    options.location = location;
+  } else {
+    throw new Error(
+      "Incomplete Google GenAI configuration: provide apiKey for Gemini API or projectId and location for Vertex AI",
+    );
   }
 
   return new GoogleGenAI(options);

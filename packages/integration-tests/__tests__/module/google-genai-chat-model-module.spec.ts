@@ -69,6 +69,23 @@ describe("GoogleGenAiChatModelModule", () => {
       expect(genAiClient.vertexai).toBe(false);
     });
 
+    it("prefers Vertex AI when explicitly enabled even if apiKey is also present", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          GoogleGenAiChatModelModule.forFeature({
+            apiKey: "test-google-api-key",
+            projectId: "test-project",
+            location: "us-central1",
+            vertexAi: true,
+            options: { model: "gemini-2.0-flash" },
+          }),
+        ],
+      }).compile();
+
+      const genAiClient = moduleRef.get(GoogleGenAI);
+      expect(genAiClient.vertexai).toBe(true);
+    });
+
     it("builds a vertex AI client when apiKey is not provided", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
@@ -82,6 +99,36 @@ describe("GoogleGenAiChatModelModule", () => {
 
       const genAiClient = moduleRef.get(GoogleGenAI);
       expect(genAiClient.vertexai).toBe(true);
+    });
+
+    it("fails fast when vertex AI is explicitly enabled without project or location", async () => {
+      await expect(
+        Test.createTestingModule({
+          imports: [
+            GoogleGenAiChatModelModule.forFeature({
+              vertexAi: true,
+              apiKey: "test-google-api-key",
+              options: { model: "gemini-2.0-flash" },
+            }),
+          ],
+        }).compile(),
+      ).rejects.toThrow(
+        "Google GenAI projectId and location must be set when vertexAi is enabled",
+      );
+    });
+
+    it("fails when neither apiKey nor vertex AI configuration is provided", async () => {
+      await expect(
+        Test.createTestingModule({
+          imports: [
+            GoogleGenAiChatModelModule.forFeature({
+              options: { model: "gemini-2.0-flash" },
+            }),
+          ],
+        }).compile(),
+      ).rejects.toThrow(
+        "Incomplete Google GenAI configuration: provide apiKey for Gemini API or projectId and location for Vertex AI",
+      );
     });
 
     it("applies custom options to the chat model", async () => {

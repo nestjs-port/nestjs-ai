@@ -8,7 +8,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@google/genai": "^1.40.0",
+    "@google/genai": "^1.48.0",
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",

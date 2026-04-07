@@ -36,5 +36,5 @@ export interface ModelRequest<T> {
    * Retrieves the customizable options for AI model interactions.
    * @returns the customizable options for AI model interactions
    */
-  get options(): ModelOptions;
+  get options(): ModelOptions | null;
 }

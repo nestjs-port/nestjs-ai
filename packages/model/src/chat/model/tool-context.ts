@@ -15,7 +15,6 @@
  */
 
 import { z } from "zod";
-import type { Message } from "../messages";
 
 /**
  * Represents the context for tool execution in a function calling scenario.
@@ -30,11 +29,6 @@ import type { Message } from "../messages";
  * The context map can contain any information that is relevant to the tool execution.
  */
 export class ToolContext {
-  /**
-   * The key for the running, tool call history stored in the context map.
-   */
-  static readonly TOOL_CALL_HISTORY = "TOOL_CALL_HISTORY";
-
   private readonly _context: Readonly<Record<string, unknown>>;
 
   /**
@@ -52,17 +46,6 @@ export class ToolContext {
    */
   get context(): Readonly<Record<string, unknown>> {
     return this._context;
-  }
-
-  /**
-   * Returns the tool call history from the context map.
-   * @returns The tool call history. TODO: review whether we still need this or
-   * ToolCallingManager solves the original issue
-   */
-  get toolCallHistory(): Message[] | undefined {
-    return this._context[ToolContext.TOOL_CALL_HISTORY] as
-      | Message[]
-      | undefined;
   }
 }
 

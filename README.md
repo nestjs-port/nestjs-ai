@@ -2,7 +2,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `df894ccc` (Disable WebFluxStreamableIT)
+**Last synced Spring AI commit:** `019267f6` (Support dynamic disabling of Structured Output Native)
 
 ## Overview
 

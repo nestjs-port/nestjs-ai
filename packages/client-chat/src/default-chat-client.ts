@@ -510,7 +510,8 @@ export namespace DefaultChatClient {
       }
 
       if (
-        context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key) &&
+        context.get(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key) ===
+          true &&
         outputConverter instanceof BeanOutputConverter
       ) {
         context.set(

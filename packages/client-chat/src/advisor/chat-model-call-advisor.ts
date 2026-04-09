@@ -87,9 +87,9 @@ export class ChatModelCallAdvisor implements CallAdvisor {
     }
 
     if (
-      chatClientRequest.context.has(
+      chatClientRequest.context.get(
         ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key,
-      ) &&
+      ) === true &&
       StringUtils.hasText(outputSchema) &&
       isStructuredOutputChatOptions(chatClientRequest.prompt.options)
     ) {

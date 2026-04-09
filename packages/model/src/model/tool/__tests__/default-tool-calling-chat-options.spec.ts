@@ -228,6 +228,33 @@ describe("DefaultToolCallingChatOptions", () => {
     expect(Object.keys(options.toolContext)).toHaveLength(0);
   });
 
+  it("should treat null collection inputs as unset values", () => {
+    const options = DefaultToolCallingChatOptions.builder()
+      .toolCallbacks(null)
+      .toolNames(null)
+      .toolContext(null)
+      .build();
+
+    expect(options.toolCallbacks).toHaveLength(0);
+    expect(options.toolNames.size).toBe(0);
+    expect(Object.keys(options.toolContext)).toHaveLength(0);
+  });
+
+  it("should allow null collection inputs to be followed by concrete values", () => {
+    const options = DefaultToolCallingChatOptions.builder()
+      .toolCallbacks(null)
+      .toolCallbacks([])
+      .toolNames(null)
+      .toolNames(new Set(["tool1"]))
+      .toolContext(null)
+      .toolContext("key1", "value1")
+      .build();
+
+    expect(options.toolCallbacks).toHaveLength(0);
+    expect(options.toolNames.has("tool1")).toBe(true);
+    expect(options.toolContext).toEqual({ key1: "value1" });
+  });
+
   it("should accept null value for internalToolExecutionEnabled", () => {
     const options = new DefaultToolCallingChatOptions();
     options.setInternalToolExecutionEnabled(true);

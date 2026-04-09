@@ -79,6 +79,48 @@ describe("ChatClient Native Structured Response Tests", () => {
     expect(userMessage?.text).toContain("Tell me about John");
   });
 
+  it("fallback response entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+
+    const responseEntity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions)
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .responseEntity(UserEntitySchema, UserEntity);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      false,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      false,
+    );
+
+    expect(responseEntity.response).toBe(chatResponse);
+    expect(responseEntity.response?.metadata.get("key1")).toBe("value1");
+    expect(responseEntity.entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toContain("Tell me about John");
+  });
+
   it("native entity test", async () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
@@ -116,6 +158,142 @@ describe("ChatClient Native Structured Response Tests", () => {
     expect(responseEntity.response).toBe(chatResponse);
     expect(responseEntity.response?.metadata.get("key1")).toBe("value1");
     expect(responseEntity.entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toContain("Tell me about John");
+  });
+
+  it("native response entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+
+    const responseEntity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions)
+      .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .responseEntity(UserEntitySchema, UserEntity);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      true,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      true,
+    );
+
+    expect(responseEntity.response).toBe(chatResponse);
+    expect(responseEntity.response?.metadata.get("key1")).toBe("value1");
+    expect(responseEntity.entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toBe("Tell me about John");
+  });
+
+  it("dynamic disable native response entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+
+    const responseEntity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions)
+      .advisors((advisorSpec) =>
+        advisorSpec.param(
+          ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key,
+          false,
+        ),
+      )
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .responseEntity(UserEntitySchema, UserEntity);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.get(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      false,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      false,
+    );
+
+    expect(responseEntity.response).toBe(chatResponse);
+    expect(responseEntity.entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toContain("Tell me about John");
+  });
+
+  it("dynamic disable native entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+
+    const entity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions)
+      .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+      .advisors(textCallAdvisor)
+      .advisors((advisorSpec) =>
+        advisorSpec.param(
+          ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key,
+          false,
+        ),
+      )
+      .user("Tell me about John")
+      .call()
+      .entity(UserEntitySchema, UserEntity);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      false,
+    );
+    expect(context.get(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      false,
+    );
+
+    expect(entity).toEqual({ name: "John", age: 30 });
 
     const userMessage = capturedPrompt.instructions[0];
     expect(userMessage?.messageType).toBe(MessageType.USER);

@@ -22,9 +22,9 @@ import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interfa
 export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
   readonly DEFAULT_TOOL_EXECUTION_ENABLED = true as const;
 
-  private _toolCallbacks: ToolCallback[] = [];
-  private _toolNames: Set<string> = new Set();
-  private _toolContext: Record<string, unknown> = {};
+  private _toolCallbacks: ToolCallback[] | null = null;
+  private _toolNames: Set<string> | null = null;
+  private _toolContext: Record<string, unknown> | null = null;
   private _internalToolExecutionEnabled: boolean | null = null;
   private _model: string | null = null;
   private _frequencyPenalty: number | null = null;
@@ -36,7 +36,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
   private _topP: number | null = null;
 
   get toolCallbacks(): ToolCallback[] {
-    return [...this._toolCallbacks];
+    return this._toolCallbacks != null ? [...this._toolCallbacks] : [];
   }
 
   setToolCallbacks(toolCallbacks: ToolCallback[]): void {
@@ -45,7 +45,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
   }
 
   get toolNames(): Set<string> {
-    return new Set(this._toolNames);
+    return this._toolNames != null ? new Set(this._toolNames) : new Set();
   }
 
   setToolNames(toolNames: Set<string>): void {
@@ -54,7 +54,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
   }
 
   get toolContext(): Record<string, unknown> {
-    return { ...this._toolContext };
+    return this._toolContext != null ? { ...this._toolContext } : {};
   }
 
   setToolContext(toolContext: Record<string, unknown>): void {
@@ -138,9 +138,15 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
 
   copy(): ChatOptions {
     const options = new DefaultToolCallingChatOptions();
-    options.setToolCallbacks(this.toolCallbacks);
-    options.setToolNames(this.toolNames);
-    options.setToolContext(this.toolContext);
+    if (this._toolCallbacks != null) {
+      options.setToolCallbacks(this._toolCallbacks);
+    }
+    if (this._toolNames != null) {
+      options.setToolNames(this._toolNames);
+    }
+    if (this._toolContext != null) {
+      options.setToolContext(this._toolContext);
+    }
     options.setInternalToolExecutionEnabled(this.internalToolExecutionEnabled);
     options.model = this.model;
     options.frequencyPenalty = this.frequencyPenalty;
@@ -162,22 +168,43 @@ export class DefaultToolCallingChatOptionsBuilder
   implements ToolCallingChatOptions.Builder
 {
   private readonly _options = new DefaultToolCallingChatOptions();
+  private _toolCallbacks: ToolCallback[] | null = null;
+  private _toolNames: Set<string> | null = null;
+  private _toolContext: Record<string, unknown> | null = null;
 
-  toolCallbacks(...toolCallbacks: ToolCallback[] | [ToolCallback[]]): this {
-    if (toolCallbacks.length === 1 && Array.isArray(toolCallbacks[0])) {
-      this._options.setToolCallbacks(toolCallbacks[0] as ToolCallback[]);
-    } else {
-      this._options.setToolCallbacks(toolCallbacks as ToolCallback[]);
+  toolCallbacks(toolCallbacks: ToolCallback[] | null): this;
+  toolCallbacks(...toolCallbacks: ToolCallback[]): this;
+  toolCallbacks(...toolCallbacks: unknown[]): this {
+    if (toolCallbacks.length === 1) {
+      const [singleValue] = toolCallbacks;
+      if (singleValue == null) {
+        this._toolCallbacks = null;
+        return this;
+      }
+      if (Array.isArray(singleValue)) {
+        this._toolCallbacks = [...singleValue];
+        return this;
+      }
     }
+    this._toolCallbacks = [...(toolCallbacks as ToolCallback[])];
     return this;
   }
 
-  toolNames(...toolNames: string[] | [Set<string>]): this {
-    if (toolNames.length === 1 && toolNames[0] instanceof Set) {
-      this._options.setToolNames(toolNames[0] as Set<string>);
-    } else {
-      this._options.setToolNames(new Set(toolNames as string[]));
+  toolNames(toolNames: Set<string> | null): this;
+  toolNames(...toolNames: string[]): this;
+  toolNames(...toolNames: unknown[]): this {
+    if (toolNames.length === 1) {
+      const [singleValue] = toolNames;
+      if (singleValue == null) {
+        this._toolNames = null;
+        return this;
+      }
+      if (singleValue instanceof Set) {
+        this._toolNames = new Set(singleValue);
+        return this;
+      }
     }
+    this._toolNames = new Set(toolNames as string[]);
     return this;
   }
 
@@ -188,21 +215,30 @@ export class DefaultToolCallingChatOptionsBuilder
     return this;
   }
 
-  toolContext(context: Record<string, unknown>): this;
+  toolContext(context: Record<string, unknown> | null): this;
   toolContext(key: string, value: unknown): this;
-  toolContext(
-    keyOrContext: string | Record<string, unknown>,
-    value?: unknown,
-  ): this {
-    if (typeof keyOrContext === "string") {
+  toolContext(...args: unknown[]): this {
+    if (args.length === 1) {
+      const [singleValue] = args;
+      if (singleValue == null) {
+        this._toolContext = null;
+        return this;
+      }
+      this._toolContext = { ...(singleValue as Record<string, unknown>) };
+      return this;
+    }
+
+    if (args.length === 2) {
+      const [keyOrContext, value] = args;
       assert(keyOrContext, "key cannot be null");
       assert(value != null, "value cannot be null");
-      const updatedContext = { ...this._options.toolContext };
-      updatedContext[keyOrContext] = value;
-      this._options.setToolContext(updatedContext);
-    } else {
-      this._options.setToolContext(keyOrContext);
+      const updatedContext = { ...(this._toolContext ?? {}) };
+      updatedContext[keyOrContext as string] = value;
+      this._toolContext = updatedContext;
+      return this;
     }
+
+    this._toolContext = {};
     return this;
   }
 
@@ -247,6 +283,15 @@ export class DefaultToolCallingChatOptionsBuilder
   }
 
   build(): ToolCallingChatOptions {
+    if (this._toolCallbacks != null) {
+      this._options.setToolCallbacks(this._toolCallbacks);
+    }
+    if (this._toolNames != null) {
+      this._options.setToolNames(this._toolNames);
+    }
+    if (this._toolContext != null) {
+      this._options.setToolContext(this._toolContext);
+    }
     return this._options;
   }
 }

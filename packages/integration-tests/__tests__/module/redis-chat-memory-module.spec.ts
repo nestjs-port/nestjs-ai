@@ -15,7 +15,6 @@
  */
 
 import "reflect-metadata";
-import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
 import {
@@ -44,22 +43,6 @@ vi.mock("redis", async (importOriginal) => {
     })),
   };
 });
-
-const REDIS_CONFIG_TOKEN = Symbol("REDIS_CONFIG_TOKEN");
-
-@Module({
-  providers: [
-    {
-      provide: REDIS_CONFIG_TOKEN,
-      useValue: {
-        clientOptions: { url: "redis://localhost:6379" },
-        indexName: "async-index",
-      },
-    },
-  ],
-  exports: [REDIS_CONFIG_TOKEN],
-})
-class RedisConfigModule {}
 
 describe("RedisChatMemoryModule", () => {
   describe("forFeature", () => {

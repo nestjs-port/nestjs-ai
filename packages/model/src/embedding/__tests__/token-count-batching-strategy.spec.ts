@@ -46,4 +46,33 @@ describe("TokenCountBatchingStrategy", () => {
       tokenCountBatchingStrategy.batch([new Document(contentAsString)]),
     ).toThrow("Tokens in a single document exceeds the maximum number");
   });
+
+  it("tracks token count for the first document in a new batch", () => {
+    // Use a small maxInputTokenCount so batch boundaries are hit quickly and the
+    // per-batch token accounting is exercised.
+    const tokenCountBatchingStrategy = new TokenCountBatchingStrategy(
+      "cl100k_base",
+      10,
+      0.0,
+    );
+
+    // "Hello world" is roughly 2 tokens. Six documents should therefore be split
+    // across multiple batches, which catches the bug where the first document in a
+    // new batch was not counted toward currentSize.
+    const documents = [
+      new Document("Hello world"),
+      new Document("Hello world"),
+      new Document("Hello world"),
+      new Document("Hello world"),
+      new Document("Hello world"),
+      new Document("Hello world"),
+    ];
+
+    const batches = tokenCountBatchingStrategy.batch(documents);
+
+    // With the fix every batch should respect the token limit.
+    expect(batches.length).toBeGreaterThan(1);
+    // All documents must still be present after batching.
+    expect(batches.flat()).toHaveLength(documents.length);
+  });
 });

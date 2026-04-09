@@ -266,6 +266,7 @@ describe("OpenAiChatOptions", () => {
     expect(options.outputAudio).toBeUndefined();
     expect(options.presencePenalty).toBeUndefined();
     expect(options.responseFormat).toBeUndefined();
+    expect(options.outputSchema).toBe("");
     expect(options.streamOptions).toBeUndefined();
     expect(options.seed).toBeUndefined();
     expect(options.stop).toBeUndefined();
@@ -325,6 +326,46 @@ describe("OpenAiChatOptions", () => {
     expect(target.webSearchOptions?.user_location?.approximate?.timezone).toBe(
       "UTC+8",
     );
+  });
+
+  it("test output schema setter preserves the original schema string", () => {
+    const schema = `{
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    }`;
+
+    const options = new OpenAiChatOptions();
+    options.outputSchema = schema;
+
+    expect(options.responseFormat).toEqual({
+      type: "json_schema",
+      json_schema: JSON.parse(schema),
+    });
+    expect(options.outputSchema).toBe(schema);
+  });
+
+  it("test output schema falls back to response format json schema", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+        },
+      },
+    };
+
+    const options = new OpenAiChatOptions({
+      responseFormat: {
+        type: "json_schema",
+        json_schema: schema,
+      },
+    });
+
+    expect(options.outputSchema).toBe(JSON.stringify(schema));
   });
 
   it("test null and empty collections", () => {

@@ -34,6 +34,8 @@ export class OpenAiChatOptions
 {
   readonly DEFAULT_TOOL_EXECUTION_ENABLED = true as const;
 
+  private _outputSchema?: string;
+
   model?: string;
 
   frequencyPenalty?: number;
@@ -125,6 +127,11 @@ export class OpenAiChatOptions
         this.presencePenalty = options.presencePenalty;
       if (options.responseFormat != null)
         this.responseFormat = options.responseFormat;
+      if (
+        options.outputSchema != null &&
+        StringUtils.hasText(options.outputSchema)
+      )
+        this.outputSchema = options.outputSchema;
       if (options.streamOptions != null)
         this.streamOptions = options.streamOptions;
       if (options.seed != null) this.seed = options.seed;
@@ -217,12 +224,16 @@ export class OpenAiChatOptions
   }
 
   get outputSchema(): string {
-    return this.responseFormat?.json_schema
-      ? JSON.stringify(this.responseFormat.json_schema)
-      : "";
+    return (
+      this._outputSchema ??
+      (this.responseFormat?.json_schema
+        ? JSON.stringify(this.responseFormat.json_schema)
+        : "")
+    );
   }
 
   set outputSchema(outputSchema: string) {
+    this._outputSchema = outputSchema;
     this.responseFormat = {
       type: "json_schema",
       json_schema: JSON.parse(outputSchema),

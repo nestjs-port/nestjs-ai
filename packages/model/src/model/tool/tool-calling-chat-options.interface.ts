@@ -132,11 +132,11 @@ export namespace ToolCallingChatOptions {
    * A builder to create a {@link ToolCallingChatOptions} instance.
    */
   export interface Builder extends ChatOptions.Builder {
-    toolCallbacks(toolCallbacks: ToolCallback[]): Builder;
+    toolCallbacks(toolCallbacks: ToolCallback[] | null): Builder;
 
     toolCallbacks(...toolCallbacks: ToolCallback[]): Builder;
 
-    toolNames(toolNames: Set<string>): Builder;
+    toolNames(toolNames: Set<string> | null): Builder;
 
     toolNames(...toolNames: string[]): Builder;
 
@@ -144,7 +144,7 @@ export namespace ToolCallingChatOptions {
       internalToolExecutionEnabled: boolean | null,
     ): Builder;
 
-    toolContext(context: Record<string, unknown>): Builder;
+    toolContext(context: Record<string, unknown> | null): Builder;
 
     toolContext(key: string, value: unknown): Builder;
 

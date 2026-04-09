@@ -143,7 +143,7 @@ export class TokenCountBatchingStrategy implements BatchingStrategy {
       if (currentSize > this._maxInputTokenCount) {
         batches.push(currentBatch);
         currentBatch = [];
-        currentSize = 0;
+        currentSize = tokenCount;
       }
       currentBatch.push(document);
     }

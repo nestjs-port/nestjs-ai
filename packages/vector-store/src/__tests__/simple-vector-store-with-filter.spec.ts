@@ -90,6 +90,23 @@ describe("SimpleVectorStoreWithFilterTests", () => {
     results = await vectorStore.similaritySearch(
       SearchRequest.builder()
         .query("test content")
+        .filterExpression("publisher is null")
+        .build(),
+    );
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe("1");
+
+    results = await vectorStore.similaritySearch(
+      SearchRequest.builder()
+        .query("test content")
+        .filterExpression("publisher is not null")
+        .build(),
+    );
+    expect(results).toHaveLength(0);
+
+    results = await vectorStore.similaritySearch(
+      SearchRequest.builder()
+        .query("test content")
         .filterExpression("country == 'BG' && year == 2020")
         .build(),
     );

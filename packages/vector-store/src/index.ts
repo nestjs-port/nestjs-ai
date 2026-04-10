@@ -24,10 +24,6 @@ export {
   SimpleVectorStore,
   SimpleVectorStoreBuilder,
 } from "./simple-vector-store";
-export {
-  SimpleVectorStoreContent,
-  type SimpleVectorStoreContentProps,
-} from "./simple-vector-store-content";
 export { SpringAIVectorStoreTypes } from "./spring-ai-vector-store-types";
 export { VectorStore } from "./vector-store";
 export { VectorStoreRetriever } from "./vector-store-retriever";

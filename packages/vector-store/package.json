@@ -28,8 +28,7 @@
     "@nestjs-ai/model": "workspace:*"
   },
   "dependencies": {
-    "antlr4ng": "^3.0.16",
-    "spel2js": "^0.2.9"
+    "antlr4ng": "^3.0.16"
   },
   "files": [
     "dist",

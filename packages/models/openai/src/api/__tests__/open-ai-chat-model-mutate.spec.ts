@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import type { HttpClient } from "@nestjs-ai/commons";
+import type { ToolContext } from "@nestjs-ai/model";
+import {
+  DefaultToolDefinition,
+  ToolCallback,
+  UserMessage,
+} from "@nestjs-ai/model";
+import { describe, expect, it, vi } from "vitest";
 import { OpenAiChatModel } from "../../open-ai-chat-model";
 import { OpenAiChatOptions } from "../../open-ai-chat-options";
 import { OpenAiApi } from "../open-ai-api";
@@ -31,6 +38,25 @@ describe("OpenAiChatModelMutate", () => {
       .openAiApi(baseApi)
       .defaultOptions(new OpenAiChatOptions({ model: "gpt-3.5-turbo" }))
       .build();
+
+  class TestToolCallback extends ToolCallback {
+    private readonly _toolDefinition = DefaultToolDefinition.builder()
+      .name("weather")
+      .description("Weather lookup")
+      .inputSchema("{}")
+      .build();
+
+    override get toolDefinition() {
+      return this._toolDefinition;
+    }
+
+    override async call(
+      toolInput: string,
+      _toolContext: ToolContext | null = null,
+    ): Promise<string> {
+      return toolInput;
+    }
+  }
 
   it("test mutate creates distinct clients with different endpoints and models", () => {
     const baseApi = createBaseApi();
@@ -243,5 +269,82 @@ describe("OpenAiChatModelMutate", () => {
 
     expect(mutated.baseUrl).toBe(originalBaseUrl);
     expect(mutated.apiKey.value).toBe(newApiKey);
+  });
+
+  it("keeps extraBody when tool definitions are present", async () => {
+    let recordedBody: Record<string, unknown> | null = null;
+
+    const httpClient: HttpClient = {
+      fetch: vi.fn(async (_input, init) => {
+        recordedBody = JSON.parse(init?.body as string) as Record<
+          string,
+          unknown
+        >;
+        return new Response(
+          JSON.stringify({
+            id: "chatcmpl-123",
+            object: "chat.completion",
+            created: 1677652288,
+            model: "gpt-3.5-turbo",
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: "assistant",
+                  content: "Hello there!",
+                },
+                finish_reason: "stop",
+              },
+            ],
+            usage: {
+              prompt_tokens: 9,
+              completion_tokens: 2,
+              total_tokens: 11,
+            },
+          }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      }),
+    };
+
+    const api = OpenAiApi.builder()
+      .baseUrl("https://api.openai.com")
+      .apiKey("test-key")
+      .httpClient(httpClient)
+      .build();
+    const model = OpenAiChatModel.builder()
+      .openAiApi(api)
+      .defaultOptions(
+        new OpenAiChatOptions({
+          model: "gpt-3.5-turbo",
+          tools: [],
+          toolCallbacks: [new TestToolCallback()],
+          extraBody: {
+            custom_flag: true,
+          },
+        }),
+      )
+      .build();
+
+    const result = await model.call(UserMessage.of("Hello"));
+
+    expect(result).toBe("Hello there!");
+    expect(recordedBody).not.toBeNull();
+    if (recordedBody == null) {
+      throw new Error("Request body was not captured");
+    }
+    const body = recordedBody as { tools?: unknown[] } & Record<
+      string,
+      unknown
+    >;
+    expect(body.tools).toHaveLength(1);
+    expect(body).toMatchObject({
+      custom_flag: true,
+    });
   });
 });

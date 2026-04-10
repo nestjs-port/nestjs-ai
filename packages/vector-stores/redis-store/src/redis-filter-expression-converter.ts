@@ -180,25 +180,40 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
         break;
       }
       case RedisMetadataFieldType.TAG:
-        context.value += `{${String(this.stringValue(expression, value))}}`;
+        context.value += `{${this.tagStringValue(expression, value)}}`;
         break;
       case RedisMetadataFieldType.TEXT:
-        context.value += `(${String(this.stringValue(expression, value))})`;
+        context.value += `(${this.textStringValue(expression, value)})`;
         break;
       default:
         throw new Error(`Field type ${field.fieldType} not supported`);
     }
   }
 
-  private stringValue(
+  private tagStringValue(
     expression: Filter.Expression,
     value: Filter.Value,
-  ): unknown {
+  ): string {
     const delimiter = this.tagValueDelimiter(expression);
     if (Array.isArray(value.value)) {
-      return value.value.map((listItem) => String(listItem)).join(delimiter);
+      return value.value
+        .map((listItem) => this.escapeTagValue(String(listItem)))
+        .join(delimiter);
     }
-    return value.value;
+    return this.escapeTagValue(String(value.value));
+  }
+
+  private textStringValue(
+    expression: Filter.Expression,
+    value: Filter.Value,
+  ): string {
+    const delimiter = this.tagValueDelimiter(expression);
+    if (Array.isArray(value.value)) {
+      return value.value
+        .map((listItem) => this.escapeTextValue(String(listItem)))
+        .join(delimiter);
+    }
+    return this.escapeTextValue(String(value.value));
   }
 
   private tagValueDelimiter(expression: Filter.Expression): string {
@@ -210,6 +225,56 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
       default:
         throw new Error(`Tag operand ${expression.type} not supported`);
     }
+  }
+
+  private escapeTagValue(value: string): string {
+    let escaped = "";
+    for (const char of value) {
+      switch (char) {
+        case "\\":
+        case "$":
+        case "|":
+        case "{":
+        case "}":
+        case "(":
+        case ")":
+        case "[":
+        case "]":
+        case "-":
+        case "'":
+          escaped += `\\${char}`;
+          break;
+        default:
+          escaped += char;
+      }
+    }
+    return escaped;
+  }
+
+  private escapeTextValue(value: string): string {
+    let escaped = "";
+    for (const char of value) {
+      switch (char) {
+        case "\\":
+        case "@":
+        case ":":
+        case ".":
+        case "(":
+        case ")":
+        case "-":
+        case "[":
+        case "]":
+        case "{":
+        case "}":
+        case "|":
+        case '"':
+          escaped += `\\${char}`;
+          break;
+        default:
+          escaped += char;
+      }
+    }
+    return escaped;
   }
 
   private numeric(expression: Filter.Expression, value: Filter.Value): Numeric {

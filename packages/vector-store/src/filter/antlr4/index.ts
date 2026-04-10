@@ -25,6 +25,7 @@ export {
   ConstantArrayContext,
   ConstantContext,
   DecimalConstantContext,
+  CompoundIdentifierContext,
   FiltersParser,
   GroupExpressionContext,
   IdentifierContext,
@@ -36,6 +37,8 @@ export {
   NinExpressionContext,
   NotExpressionContext,
   OrExpressionContext,
+  QuotedIdentifierContext,
+  SimpleIdentifierContext,
   TextConstantContext,
   WhereContext,
 } from "./FiltersParser";

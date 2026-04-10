@@ -32,13 +32,13 @@ import {
   type AndExpressionContext,
   type BooleanConstantContext,
   type CompareExpressionContext,
+  type CompoundIdentifierContext,
   type ConstantArrayContext,
   type DecimalConstantContext,
   FiltersLexer,
   FiltersParser,
   FiltersVisitor,
   type GroupExpressionContext,
-  type IdentifierContext,
   type InExpressionContext,
   type IntegerConstantContext,
   type IsNotNullExpressionContext,
@@ -47,6 +47,8 @@ import {
   type NinExpressionContext,
   type NotExpressionContext,
   type OrExpressionContext,
+  type QuotedIdentifierContext,
+  type SimpleIdentifierContext,
   type TextConstantContext,
   type WhereContext,
 } from "./antlr4";
@@ -145,8 +147,18 @@ export class FilterExpressionVisitor extends FiltersVisitor<Filter.Operand> {
     super();
     this.visitWhere = (ctx: WhereContext): Filter.Operand =>
       this.visit(ctx.booleanExpression()) as Filter.Operand;
-    this.visitIdentifier = (ctx: IdentifierContext): Filter.Operand =>
-      new Filter.Key(ctx.getText());
+    this.visitCompoundIdentifier = (
+      ctx: CompoundIdentifierContext,
+    ): Filter.Operand =>
+      new Filter.Key(this.normalizeIdentifier(ctx.getText()));
+    this.visitSimpleIdentifier = (
+      ctx: SimpleIdentifierContext,
+    ): Filter.Operand =>
+      new Filter.Key(this.normalizeIdentifier(ctx.getText()));
+    this.visitQuotedIdentifier = (
+      ctx: QuotedIdentifierContext,
+    ): Filter.Operand =>
+      new Filter.Key(this.normalizeIdentifier(ctx.getText()));
     this.visitTextConstant = (ctx: TextConstantContext): Filter.Operand =>
       new Filter.Value(this.unescapeStringValue(ctx.getText()));
     this.visitIntegerConstant = (ctx: IntegerConstantContext): Filter.Operand =>
@@ -256,6 +268,14 @@ export class FilterExpressionVisitor extends FiltersVisitor<Filter.Operand> {
       default:
         throw new Error("Unexpected quote style");
     }
+  }
+
+  private normalizeIdentifier(input: string): string {
+    const quoteStyle = input.at(0);
+    if (quoteStyle === '"' || quoteStyle === "'") {
+      return this.unescapeStringValue(input);
+    }
+    return input;
   }
 }
 

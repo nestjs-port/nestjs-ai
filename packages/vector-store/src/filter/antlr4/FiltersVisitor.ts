@@ -35,7 +35,9 @@ import { AndExpressionContext } from "./FiltersParser.js";
 import { OrExpressionContext } from "./FiltersParser.js";
 import { ConstantArrayContext } from "./FiltersParser.js";
 import { CompareContext } from "./FiltersParser.js";
-import { IdentifierContext } from "./FiltersParser.js";
+import { CompoundIdentifierContext } from "./FiltersParser.js";
+import { SimpleIdentifierContext } from "./FiltersParser.js";
+import { QuotedIdentifierContext } from "./FiltersParser.js";
 import { LongConstantContext } from "./FiltersParser.js";
 import { IntegerConstantContext } from "./FiltersParser.js";
 import { DecimalConstantContext } from "./FiltersParser.js";
@@ -133,11 +135,26 @@ export class FiltersVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitCompare?: (ctx: CompareContext) => Result;
     /**
-     * Visit a parse tree produced by `FiltersParser.identifier`.
+     * Visit a parse tree produced by the `CompoundIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitIdentifier?: (ctx: IdentifierContext) => Result;
+    visitCompoundIdentifier?: (ctx: CompoundIdentifierContext) => Result;
+    /**
+     * Visit a parse tree produced by the `SimpleIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSimpleIdentifier?: (ctx: SimpleIdentifierContext) => Result;
+    /**
+     * Visit a parse tree produced by the `QuotedIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitQuotedIdentifier?: (ctx: QuotedIdentifierContext) => Result;
     /**
      * Visit a parse tree produced by the `LongConstant`
      * labeled alternative in `FiltersParser.constant`.

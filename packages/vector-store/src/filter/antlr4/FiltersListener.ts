@@ -35,7 +35,9 @@ import { AndExpressionContext } from "./FiltersParser.js";
 import { OrExpressionContext } from "./FiltersParser.js";
 import { ConstantArrayContext } from "./FiltersParser.js";
 import { CompareContext } from "./FiltersParser.js";
-import { IdentifierContext } from "./FiltersParser.js";
+import { CompoundIdentifierContext } from "./FiltersParser.js";
+import { SimpleIdentifierContext } from "./FiltersParser.js";
+import { QuotedIdentifierContext } from "./FiltersParser.js";
 import { LongConstantContext } from "./FiltersParser.js";
 import { IntegerConstantContext } from "./FiltersParser.js";
 import { DecimalConstantContext } from "./FiltersParser.js";
@@ -187,15 +189,41 @@ export class FiltersListener implements ParseTreeListener {
      */
     exitCompare?: (ctx: CompareContext) => void;
     /**
-     * Enter a parse tree produced by `FiltersParser.identifier`.
+     * Enter a parse tree produced by the `CompoundIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
      * @param ctx the parse tree
      */
-    enterIdentifier?: (ctx: IdentifierContext) => void;
+    enterCompoundIdentifier?: (ctx: CompoundIdentifierContext) => void;
     /**
-     * Exit a parse tree produced by `FiltersParser.identifier`.
+     * Exit a parse tree produced by the `CompoundIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
      * @param ctx the parse tree
      */
-    exitIdentifier?: (ctx: IdentifierContext) => void;
+    exitCompoundIdentifier?: (ctx: CompoundIdentifierContext) => void;
+    /**
+     * Enter a parse tree produced by the `SimpleIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
+     * @param ctx the parse tree
+     */
+    enterSimpleIdentifier?: (ctx: SimpleIdentifierContext) => void;
+    /**
+     * Exit a parse tree produced by the `SimpleIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
+     * @param ctx the parse tree
+     */
+    exitSimpleIdentifier?: (ctx: SimpleIdentifierContext) => void;
+    /**
+     * Enter a parse tree produced by the `QuotedIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
+     * @param ctx the parse tree
+     */
+    enterQuotedIdentifier?: (ctx: QuotedIdentifierContext) => void;
+    /**
+     * Exit a parse tree produced by the `QuotedIdentifier`
+     * labeled alternative in `FiltersParser.identifier`.
+     * @param ctx the parse tree
+     */
+    exitQuotedIdentifier?: (ctx: QuotedIdentifierContext) => void;
     /**
      * Enter a parse tree produced by the `LongConstant`
      * labeled alternative in `FiltersParser.constant`.

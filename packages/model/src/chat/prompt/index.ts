@@ -15,10 +15,11 @@
  */
 
 export { AssistantPromptTemplate } from "./assistant-prompt-template";
-export type { ChatOptions } from "./chat-options.interface";
+export { ChatOptions } from "./chat-options.interface";
 export { ChatPromptTemplate } from "./chat-prompt-template";
 export type { DefaultChatOptionsProps } from "./default-chat-options";
 export { DefaultChatOptions } from "./default-chat-options";
+export { DefaultChatOptionsBuilder } from "./default-chat-options-builder";
 export { Prompt, PromptBuilder } from "./prompt";
 export { PromptTemplate, PromptTemplateBuilder } from "./prompt-template";
 export type { PromptTemplateActions } from "./prompt-template-actions.interface";

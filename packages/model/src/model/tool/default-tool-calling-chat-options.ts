@@ -165,12 +165,86 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
 }
 
 export class DefaultToolCallingChatOptionsBuilder
-  implements ToolCallingChatOptions.Builder
+  implements
+    ToolCallingChatOptions.Builder<DefaultToolCallingChatOptionsBuilder>
 {
   private readonly _options = new DefaultToolCallingChatOptions();
   private _toolCallbacks: ToolCallback[] | null = null;
   private _toolNames: Set<string> | null = null;
   private _toolContext: Record<string, unknown> | null = null;
+
+  clone(): DefaultToolCallingChatOptionsBuilder {
+    const copy = new DefaultToolCallingChatOptionsBuilder();
+    copy._options.model = this._options.model;
+    copy._options.frequencyPenalty = this._options.frequencyPenalty;
+    copy._options.maxTokens = this._options.maxTokens;
+    copy._options.presencePenalty = this._options.presencePenalty;
+    copy._options.stopSequences = this._options.stopSequences
+      ? [...this._options.stopSequences]
+      : null;
+    copy._options.temperature = this._options.temperature;
+    copy._options.topK = this._options.topK;
+    copy._options.topP = this._options.topP;
+    copy._options.setInternalToolExecutionEnabled(
+      this._options.internalToolExecutionEnabled,
+    );
+    copy._toolCallbacks = this._toolCallbacks ? [...this._toolCallbacks] : null;
+    copy._toolNames = this._toolNames ? new Set(this._toolNames) : null;
+    copy._toolContext = this._toolContext ? { ...this._toolContext } : null;
+    return copy;
+  }
+
+  combineWith(
+    other: ChatOptions.BuilderType,
+  ): DefaultToolCallingChatOptionsBuilder {
+    if (other instanceof DefaultToolCallingChatOptionsBuilder) {
+      if (other._toolCallbacks != null) {
+        this._toolCallbacks = [...other._toolCallbacks];
+      }
+      if (other._toolNames != null) {
+        this._toolNames = new Set(other._toolNames);
+      }
+      if (other._toolContext != null) {
+        if (this._toolContext == null) {
+          this._toolContext = {};
+        }
+        this._toolContext = {
+          ...this._toolContext,
+          ...other._toolContext,
+        };
+      }
+      if (other._options.model != null) {
+        this._options.model = other._options.model;
+      }
+      if (other._options.frequencyPenalty != null) {
+        this._options.frequencyPenalty = other._options.frequencyPenalty;
+      }
+      if (other._options.maxTokens != null) {
+        this._options.maxTokens = other._options.maxTokens;
+      }
+      if (other._options.presencePenalty != null) {
+        this._options.presencePenalty = other._options.presencePenalty;
+      }
+      if (other._options.stopSequences != null) {
+        this._options.stopSequences = [...other._options.stopSequences];
+      }
+      if (other._options.temperature != null) {
+        this._options.temperature = other._options.temperature;
+      }
+      if (other._options.topK != null) {
+        this._options.topK = other._options.topK;
+      }
+      if (other._options.topP != null) {
+        this._options.topP = other._options.topP;
+      }
+      if (other._options.internalToolExecutionEnabled != null) {
+        this._options.setInternalToolExecutionEnabled(
+          other._options.internalToolExecutionEnabled,
+        );
+      }
+    }
+    return this;
+  }
 
   toolCallbacks(toolCallbacks: ToolCallback[] | null): this;
   toolCallbacks(...toolCallbacks: ToolCallback[]): this;

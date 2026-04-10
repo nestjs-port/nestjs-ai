@@ -15,6 +15,7 @@
  */
 
 import type { ChatOptions } from "./chat-options.interface";
+import { DefaultChatOptionsBuilder } from "./default-chat-options-builder";
 
 export type DefaultChatOptionsProps = Omit<Partial<ChatOptions>, "copy">;
 
@@ -22,38 +23,58 @@ export type DefaultChatOptionsProps = Omit<Partial<ChatOptions>, "copy">;
  * Default implementation for the {@link ChatOptions}.
  */
 export class DefaultChatOptions implements ChatOptions {
-  model?: string | null;
-  frequencyPenalty?: number | null;
-  maxTokens?: number | null;
-  presencePenalty?: number | null;
-  stopSequences?: string[] | null;
-  temperature?: number | null;
-  topK?: number | null;
-  topP?: number | null;
+  model: string | null = null;
+  frequencyPenalty: number | null = null;
+  maxTokens: number | null = null;
+  presencePenalty: number | null = null;
+  private _stopSequences: string[] | null = null;
+  temperature: number | null = null;
+  topK: number | null = null;
+  topP: number | null = null;
 
   constructor(options?: DefaultChatOptionsProps) {
     if (options) {
-      this.model = options.model;
-      this.frequencyPenalty = options.frequencyPenalty;
-      this.maxTokens = options.maxTokens;
-      this.presencePenalty = options.presencePenalty;
-      this.stopSequences = options.stopSequences;
-      this.temperature = options.temperature;
-      this.topK = options.topK;
-      this.topP = options.topP;
+      this.model = options.model ?? null;
+      this.frequencyPenalty = options.frequencyPenalty ?? null;
+      this.maxTokens = options.maxTokens ?? null;
+      this.presencePenalty = options.presencePenalty ?? null;
+      this.stopSequences = options.stopSequences ?? null;
+      this.temperature = options.temperature ?? null;
+      this.topK = options.topK ?? null;
+      this.topP = options.topP ?? null;
     }
   }
 
-  copy(): ChatOptions {
-    return new DefaultChatOptions({
-      model: this.model,
-      frequencyPenalty: this.frequencyPenalty,
-      maxTokens: this.maxTokens,
-      presencePenalty: this.presencePenalty,
-      stopSequences: this.stopSequences ? [...this.stopSequences] : null,
-      temperature: this.temperature,
-      topK: this.topK,
-      topP: this.topP,
-    });
+  static builder(): ChatOptions.BuilderType {
+    return new DefaultChatOptionsBuilder();
+  }
+
+  /**
+   * Create a builder to mutate this chat options.
+   */
+  mutate(): ChatOptions.BuilderType {
+    return DefaultChatOptions.builder()
+      .model(this.model ?? null)
+      .frequencyPenalty(this.frequencyPenalty ?? null)
+      .maxTokens(this.maxTokens ?? null)
+      .presencePenalty(this.presencePenalty ?? null)
+      .stopSequences(this.stopSequences ? [...this.stopSequences] : null)
+      .temperature(this.temperature ?? null)
+      .topK(this.topK ?? null)
+      .topP(this.topP ?? null);
+  }
+
+  copy<T extends ChatOptions>(): T {
+    return this.mutate().build() as T;
+  }
+
+  get stopSequences(): string[] | null {
+    return this._stopSequences != null
+      ? (Object.freeze([...this._stopSequences]) as string[])
+      : null;
+  }
+
+  set stopSequences(stopSequences: string[] | null) {
+    this._stopSequences = stopSequences != null ? [...stopSequences] : null;
   }
 }

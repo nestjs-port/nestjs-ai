@@ -15,6 +15,7 @@
  */
 
 import type { ModelOptions } from "../../model";
+import { DefaultChatOptionsBuilder } from "./default-chat-options-builder";
 
 /**
  * {@link ModelOptions} representing the common options that are portable across different
@@ -77,23 +78,33 @@ export interface ChatOptions extends ModelOptions {
 }
 
 export namespace ChatOptions {
-  export interface Builder {
-    model(model: string | null): Builder;
+  export interface Builder<B extends Builder<B>> {
+    clone(): B;
 
-    frequencyPenalty(frequencyPenalty: number | null): Builder;
+    combineWith(other: BuilderType): B;
 
-    maxTokens(maxTokens: number | null): Builder;
+    model(model: string | null): B;
 
-    presencePenalty(presencePenalty: number | null): Builder;
+    frequencyPenalty(frequencyPenalty: number | null): B;
 
-    stopSequences(stopSequences: string[] | null): Builder;
+    maxTokens(maxTokens: number | null): B;
 
-    temperature(temperature: number | null): Builder;
+    presencePenalty(presencePenalty: number | null): B;
 
-    topK(topK: number | null): Builder;
+    stopSequences(stopSequences: string[] | null): B;
 
-    topP(topP: number | null): Builder;
+    temperature(temperature: number | null): B;
+
+    topK(topK: number | null): B;
+
+    topP(topP: number | null): B;
 
     build(): ChatOptions;
+  }
+
+  export interface BuilderType extends Builder<BuilderType> {}
+
+  export function builder(): BuilderType {
+    return new DefaultChatOptionsBuilder();
   }
 }

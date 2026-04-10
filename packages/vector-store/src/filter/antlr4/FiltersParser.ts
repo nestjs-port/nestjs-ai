@@ -407,6 +407,7 @@ export class FiltersParser extends antlr.Parser {
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 5, this.context) ) {
             case 1:
+                localContext = new CompoundIdentifierContext(localContext);
                 this.enterOuterAlt(localContext, 1);
                 {
                 this.state = 74;
@@ -418,6 +419,7 @@ export class FiltersParser extends antlr.Parser {
                 }
                 break;
             case 2:
+                localContext = new SimpleIdentifierContext(localContext);
                 this.enterOuterAlt(localContext, 2);
                 {
                 this.state = 77;
@@ -425,6 +427,7 @@ export class FiltersParser extends antlr.Parser {
                 }
                 break;
             case 3:
+                localContext = new QuotedIdentifierContext(localContext);
                 this.enterOuterAlt(localContext, 3);
                 {
                 this.state = 78;
@@ -1090,6 +1093,18 @@ export class IdentifierContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
+    public override get ruleIndex(): number {
+        return FiltersParser.RULE_identifier;
+    }
+    public override copyFrom(ctx: IdentifierContext): void {
+        super.copyFrom(ctx);
+    }
+}
+export class CompoundIdentifierContext extends IdentifierContext {
+    public constructor(ctx: IdentifierContext) {
+        super(ctx.parent, ctx.invokingState);
+        super.copyFrom(ctx);
+    }
     public IDENTIFIER(): antlr.TerminalNode[];
     public IDENTIFIER(i: number): antlr.TerminalNode | null;
     public IDENTIFIER(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
@@ -1099,28 +1114,74 @@ export class IdentifierContext extends antlr.ParserRuleContext {
     		return this.getToken(FiltersParser.IDENTIFIER, i);
     	}
     }
-    public DOT(): antlr.TerminalNode | null {
-        return this.getToken(FiltersParser.DOT, 0);
-    }
-    public QUOTED_STRING(): antlr.TerminalNode | null {
-        return this.getToken(FiltersParser.QUOTED_STRING, 0);
-    }
-    public override get ruleIndex(): number {
-        return FiltersParser.RULE_identifier;
+    public DOT(): antlr.TerminalNode {
+        return this.getToken(FiltersParser.DOT, 0)!;
     }
     public override enterRule(listener: FiltersListener): void {
-        if(listener.enterIdentifier) {
-             listener.enterIdentifier(this);
+        if(listener.enterCompoundIdentifier) {
+             listener.enterCompoundIdentifier(this);
         }
     }
     public override exitRule(listener: FiltersListener): void {
-        if(listener.exitIdentifier) {
-             listener.exitIdentifier(this);
+        if(listener.exitCompoundIdentifier) {
+             listener.exitCompoundIdentifier(this);
         }
     }
     public override accept<Result>(visitor: FiltersVisitor<Result>): Result | null {
-        if (visitor.visitIdentifier) {
-            return visitor.visitIdentifier(this);
+        if (visitor.visitCompoundIdentifier) {
+            return visitor.visitCompoundIdentifier(this);
+        } else {
+            return visitor.visitChildren(this);
+        }
+    }
+}
+export class SimpleIdentifierContext extends IdentifierContext {
+    public constructor(ctx: IdentifierContext) {
+        super(ctx.parent, ctx.invokingState);
+        super.copyFrom(ctx);
+    }
+    public IDENTIFIER(): antlr.TerminalNode {
+        return this.getToken(FiltersParser.IDENTIFIER, 0)!;
+    }
+    public override enterRule(listener: FiltersListener): void {
+        if(listener.enterSimpleIdentifier) {
+             listener.enterSimpleIdentifier(this);
+        }
+    }
+    public override exitRule(listener: FiltersListener): void {
+        if(listener.exitSimpleIdentifier) {
+             listener.exitSimpleIdentifier(this);
+        }
+    }
+    public override accept<Result>(visitor: FiltersVisitor<Result>): Result | null {
+        if (visitor.visitSimpleIdentifier) {
+            return visitor.visitSimpleIdentifier(this);
+        } else {
+            return visitor.visitChildren(this);
+        }
+    }
+}
+export class QuotedIdentifierContext extends IdentifierContext {
+    public constructor(ctx: IdentifierContext) {
+        super(ctx.parent, ctx.invokingState);
+        super.copyFrom(ctx);
+    }
+    public QUOTED_STRING(): antlr.TerminalNode {
+        return this.getToken(FiltersParser.QUOTED_STRING, 0)!;
+    }
+    public override enterRule(listener: FiltersListener): void {
+        if(listener.enterQuotedIdentifier) {
+             listener.enterQuotedIdentifier(this);
+        }
+    }
+    public override exitRule(listener: FiltersListener): void {
+        if(listener.exitQuotedIdentifier) {
+             listener.exitQuotedIdentifier(this);
+        }
+    }
+    public override accept<Result>(visitor: FiltersVisitor<Result>): Result | null {
+        if (visitor.visitQuotedIdentifier) {
+            return visitor.visitQuotedIdentifier(this);
         } else {
             return visitor.visitChildren(this);
         }

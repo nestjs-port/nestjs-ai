@@ -23,10 +23,8 @@ import {
   VectorStoreSimilarityMetric,
 } from "@nestjs-ai/commons";
 import type { EmbeddingModel } from "@nestjs-ai/model";
-import { SpelExpressionEvaluator, StandardContext } from "spel2js";
 import { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder";
-import type { Filter, FilterExpressionConverter } from "./filter";
-import { SimpleVectorStoreFilterExpressionConverter } from "./filter";
+import type { Filter } from "./filter";
 import {
   AbstractObservationVectorStore,
   VectorStoreObservationContext as ObservationContext,
@@ -34,10 +32,11 @@ import {
 } from "./observation";
 import type { SearchRequest } from "./search-request";
 import { SimpleVectorStoreContent } from "./simple-vector-store-content";
+import { SimpleVectorStoreFilterExpressionEvaluator } from "./simple-vector-store-filter-expression-evaluator";
 
 export class SimpleVectorStore extends AbstractObservationVectorStore {
-  private readonly _spelContext = StandardContext.create({}, {});
-  private readonly _filterExpressionConverter: FilterExpressionConverter;
+  private readonly _filterExpressionEvaluator =
+    new SimpleVectorStoreFilterExpressionEvaluator();
   protected _store = new Map<string, SimpleVectorStoreContent>();
 
   constructor(builder: SimpleVectorStoreBuilder) {
@@ -47,8 +46,6 @@ export class SimpleVectorStore extends AbstractObservationVectorStore {
       customObservationConvention: builder.configuredObservationConvention,
       batchingStrategy: builder.configuredBatchingStrategy,
     });
-    this._filterExpressionConverter =
-      new SimpleVectorStoreFilterExpressionConverter();
   }
 
   static builder(embeddingModel: EmbeddingModel): SimpleVectorStoreBuilder {
@@ -156,36 +153,11 @@ export class SimpleVectorStore extends AbstractObservationVectorStore {
       return () => true;
     }
 
-    const expression =
-      this._filterExpressionConverter.convertExpression(filterExpression);
     return (document) =>
-      this.evaluateSpelExpression(expression, document.metadata) === true;
-  }
-
-  private evaluateSpelExpression(
-    expression: string,
-    metadata: Record<string, unknown>,
-  ): boolean {
-    try {
-      return (
-        SpelExpressionEvaluator.eval(expression, this._spelContext, {
-          metadata,
-        }) === true
+      this._filterExpressionEvaluator.evaluate(
+        filterExpression,
+        document.metadata,
       );
-    } catch (_error) {
-      const fallbackExpression = expression.replace(
-        /\bnot\s+(\{[^}]+\}\.contains\([^)]*\))/g,
-        "!$1",
-      );
-      if (fallbackExpression === expression) {
-        throw _error;
-      }
-      return (
-        SpelExpressionEvaluator.eval(fallbackExpression, this._spelContext, {
-          metadata,
-        }) === true
-      );
-    }
   }
 
   private getVectorDbAsJson(): string {

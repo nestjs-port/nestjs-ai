@@ -79,6 +79,8 @@ export class GoogleGenAiChatOptions
 
   googleSearchRetrieval = false;
 
+  includeServerSideToolInvocations = false;
+
   safetySettings: GoogleGenAiSafetySetting[] = [];
 
   labels: Record<string, string> = {};
@@ -132,6 +134,9 @@ export class GoogleGenAiChatOptions
         this.toolContext = { ...options.toolContext };
       if (options.googleSearchRetrieval !== undefined)
         this.googleSearchRetrieval = options.googleSearchRetrieval;
+      if (options.includeServerSideToolInvocations !== undefined)
+        this.includeServerSideToolInvocations =
+          options.includeServerSideToolInvocations;
       if (options.safetySettings !== undefined)
         this.safetySettings = [...options.safetySettings];
       if (options.labels !== undefined) this.labels = { ...options.labels };

@@ -83,6 +83,58 @@ describe("GoogleGenAiChatOptions", () => {
     expect(options.labels).toEqual({});
   });
 
+  it("should get and set includeServerSideToolInvocations", () => {
+    const options = new GoogleGenAiChatOptions();
+
+    expect(options.includeServerSideToolInvocations).toBe(false);
+
+    options.includeServerSideToolInvocations = true;
+    expect(options.includeServerSideToolInvocations).toBe(true);
+
+    options.includeServerSideToolInvocations = false;
+    expect(options.includeServerSideToolInvocations).toBe(false);
+  });
+
+  it("should construct with includeServerSideToolInvocations", () => {
+    const options = new GoogleGenAiChatOptions({
+      model: "test-model",
+      includeServerSideToolInvocations: true,
+    });
+
+    expect(options.model).toBe("test-model");
+    expect(options.includeServerSideToolInvocations).toBe(true);
+  });
+
+  it("should copy includeServerSideToolInvocations values", () => {
+    const original = new GoogleGenAiChatOptions({
+      model: "test-model",
+      includeServerSideToolInvocations: true,
+    });
+
+    const copy = original.copy();
+
+    expect(copy).not.toBe(original);
+    expect(copy.includeServerSideToolInvocations).toBe(true);
+  });
+
+  it("should compare equal for identical includeServerSideToolInvocations values", () => {
+    const options1 = new GoogleGenAiChatOptions({
+      model: "test-model",
+      includeServerSideToolInvocations: true,
+    });
+    const options2 = new GoogleGenAiChatOptions({
+      model: "test-model",
+      includeServerSideToolInvocations: true,
+    });
+    const options3 = new GoogleGenAiChatOptions({
+      model: "test-model",
+      includeServerSideToolInvocations: false,
+    });
+
+    expect(options1).toEqual(options2);
+    expect(options1).not.toEqual(options3);
+  });
+
   it("should get and set thinkingLevel", () => {
     const options = new GoogleGenAiChatOptions();
 

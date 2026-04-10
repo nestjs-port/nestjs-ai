@@ -284,6 +284,9 @@ export class GoogleGenAiChatModel extends ChatModel {
       requestOptions.googleSearchRetrieval =
         runtimeOptions.googleSearchRetrieval ??
         this._defaultOptions.googleSearchRetrieval;
+      requestOptions.includeServerSideToolInvocations =
+        runtimeOptions.includeServerSideToolInvocations ??
+        this._defaultOptions.includeServerSideToolInvocations;
 
       requestOptions.safetySettings =
         runtimeOptions.safetySettings.length > 0
@@ -302,6 +305,8 @@ export class GoogleGenAiChatModel extends ChatModel {
       requestOptions.toolContext = { ...this._defaultOptions.toolContext };
       requestOptions.googleSearchRetrieval =
         this._defaultOptions.googleSearchRetrieval;
+      requestOptions.includeServerSideToolInvocations =
+        this._defaultOptions.includeServerSideToolInvocations;
       requestOptions.safetySettings = [...this._defaultOptions.safetySettings];
       requestOptions.labels = { ...this._defaultOptions.labels };
     }
@@ -437,6 +442,30 @@ export class GoogleGenAiChatModel extends ChatModel {
       if (thoughtSignatures.length > 0) {
         messageMetadata.thoughtSignatures = thoughtSignatures;
       }
+
+      const serverSideToolInvocations: Record<string, unknown>[] = [];
+      for (const part of candidate.content.parts) {
+        if (part.toolCall != null) {
+          serverSideToolInvocations.push({
+            type: "toolCall",
+            id: part.toolCall.id ?? "",
+            toolType: String(part.toolCall.toolType ?? ""),
+            args: part.toolCall.args ?? {},
+          });
+        }
+        if (part.toolResponse != null) {
+          serverSideToolInvocations.push({
+            type: "toolResponse",
+            id: part.toolResponse.id ?? "",
+            toolType: String(part.toolResponse.toolType ?? ""),
+            response: part.toolResponse.response ?? {},
+          });
+        }
+      }
+
+      if (serverSideToolInvocations.length > 0) {
+        messageMetadata.serverSideToolInvocations = serverSideToolInvocations;
+      }
     }
 
     const chatGenerationMetadata = ChatGenerationMetadata.builder()
@@ -446,7 +475,7 @@ export class GoogleGenAiChatModel extends ChatModel {
     const isFunctionCall =
       candidate.content?.parts != null &&
       candidate.content.parts.length > 0 &&
-      candidate.content.parts.every((part) => part.functionCall != null);
+      candidate.content.parts.some((part) => part.functionCall != null);
 
     if (isFunctionCall) {
       const assistantToolCalls: ToolCall[] = (candidate.content?.parts ?? [])
@@ -479,16 +508,38 @@ export class GoogleGenAiChatModel extends ChatModel {
       ];
     }
 
-    return (candidate.content?.parts ?? []).map((part) => {
+    const generations = (candidate.content?.parts ?? [])
+      .filter((part) => part.functionCall == null)
+      .filter((part) => part.toolCall == null)
+      .filter((part) => part.toolResponse == null)
+      .map((part) => {
+        const assistantMessage = new AssistantMessage({
+          content: part.text ?? "",
+          properties: {
+            ...messageMetadata,
+            isThought: part.thought ?? false,
+          },
+        });
+        return new Generation({
+          assistantMessage,
+          chatGenerationMetadata,
+        });
+      });
+
+    if (generations.length === 0) {
       const assistantMessage = new AssistantMessage({
-        content: part.text ?? "",
+        content: "",
         properties: messageMetadata,
       });
-      return new Generation({
-        assistantMessage,
-        chatGenerationMetadata,
-      });
-    });
+      return [
+        new Generation({
+          assistantMessage,
+          chatGenerationMetadata,
+        }),
+      ];
+    }
+
+    return generations;
   }
 
   private toChatResponseMetadata(
@@ -627,6 +678,13 @@ export class GoogleGenAiChatModel extends ChatModel {
 
     if (tools.length > 0) {
       config.tools = tools;
+    }
+
+    if (requestOptions.includeServerSideToolInvocations) {
+      config.toolConfig = {
+        ...config.toolConfig,
+        includeServerSideToolInvocations: true,
+      };
     }
 
     // Handle cached content
@@ -963,6 +1021,11 @@ export class GoogleGenAiChatModel extends ChatModel {
       autoCacheThreshold:
         runtime.autoCacheThreshold ?? defaults.autoCacheThreshold,
       autoCacheTtl: runtime.autoCacheTtl ?? defaults.autoCacheTtl,
+      googleSearchRetrieval:
+        runtime.googleSearchRetrieval ?? defaults.googleSearchRetrieval,
+      includeServerSideToolInvocations:
+        runtime.includeServerSideToolInvocations ??
+        defaults.includeServerSideToolInvocations,
     });
   }
 
@@ -976,7 +1039,8 @@ export class GoogleGenAiChatModel extends ChatModel {
     GEMINI_2_5_PRO: "gemini-2.5-pro",
     GEMINI_2_5_FLASH: "gemini-2.5-flash",
     GEMINI_2_5_FLASH_LIGHT: "gemini-2.5-flash-lite",
-    GEMINI_3_PRO_PREVIEW: "gemini-3-pro-preview",
+    GEMINI_3_PRO_PREVIEW: "gemini-3.1-pro-preview",
     GEMINI_3_FLASH_PREVIEW: "gemini-3-flash-preview",
+    GEMINI_3_1_FLASH_LITE_PREVIEW: "gemini-3.1-flash-lite-preview",
   } as const;
 }

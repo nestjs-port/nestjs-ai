@@ -235,7 +235,6 @@ describe("RedisFilterExpressionConverter", () => {
   });
 
   it("test special characters in values", () => {
-    // Test values with Redis special characters that need escaping
     const vectorExpr = converter(
       RedisMetadataField.tag("description"),
     ).convertExpression(
@@ -246,8 +245,85 @@ describe("RedisFilterExpressionConverter", () => {
       ),
     );
 
-    // Should properly escape special Redis characters
-    expect(vectorExpr).toBe("@description:{test@value{with}special|chars}");
+    expect(vectorExpr).toBe(
+      "@description:{test@value\\{with\\}special\\|chars}",
+    );
+  });
+
+  it("test tag value with injection payload", () => {
+    const vectorExpr = converter(
+      RedisMetadataField.tag("category"),
+    ).convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key("category"),
+        new Filter.Value("science} | @access_level:{restricted"),
+      ),
+    );
+
+    expect(vectorExpr).toBe(
+      "@category:{science\\} \\| @access_level:\\{restricted}",
+    );
+    expect(vectorExpr).not.toContain("} | @");
+  });
+
+  it("test tag value in list with special chars", () => {
+    const vectorExpr = converter(
+      RedisMetadataField.tag("category"),
+    ).convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.IN,
+        new Filter.Key("category"),
+        new Filter.Value(["science} | @access_level:{restricted", "normal"]),
+      ),
+    );
+
+    expect(vectorExpr).toBe(
+      "@category:{science\\} \\| @access_level:\\{restricted | normal}",
+    );
+    expect(vectorExpr).not.toContain("} | @");
+  });
+
+  it("test tag value with pipe", () => {
+    const vectorExpr = converter(
+      RedisMetadataField.tag("status"),
+    ).convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key("status"),
+        new Filter.Value("active|inactive"),
+      ),
+    );
+
+    expect(vectorExpr).toBe("@status:{active\\|inactive}");
+  });
+
+  it("test tag value with hyphen", () => {
+    const vectorExpr = converter(
+      RedisMetadataField.tag("type"),
+    ).convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key("type"),
+        new Filter.Value("non-fiction"),
+      ),
+    );
+
+    expect(vectorExpr).toBe("@type:{non\\-fiction}");
+  });
+
+  it("test special characters in text values", () => {
+    const vectorExpr = converter(
+      RedisMetadataField.text("description"),
+    ).convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key("description"),
+        new Filter.Value("hello@world.com (test)"),
+      ),
+    );
+
+    expect(vectorExpr).toBe("@description:(hello\\@world\\.com \\(test\\))");
   });
 
   it("test empty string values", () => {

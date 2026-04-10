@@ -160,8 +160,8 @@ importers:
   packages/integration-tests:
     devDependencies:
       '@google/genai':
-        specifier: ^1.48.0
-        version: 1.48.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
+        specifier: ^1.49.0
+        version: 1.49.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
       '@nestjs-ai/client-chat':
         specifier: workspace:*
         version: link:../client-chat
@@ -292,8 +292,8 @@ importers:
   packages/models/google-genai:
     dependencies:
       '@google/genai':
-        specifier: ^1.48.0
-        version: 1.48.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
+        specifier: ^1.49.0
+        version: 1.49.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -849,8 +849,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@google/genai@1.48.0':
-    resolution: {integrity: sha512-plonYK4ML2PrxsRD9SeqmFt76eREWkQdPCglOA6aYDzL1AAbE+7PUnT54SvpWGfws13L0AZEqGSpL7+1IPnTxQ==}
+  '@google/genai@1.49.0':
+    resolution: {integrity: sha512-hO69Zl0H3x+L0KL4stl1pLYgnqnwHoLqtKy6MRlNnW8TAxjqMdOUVafomKd4z1BePkzoxJWbYILny9a2Zk43VQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
@@ -4339,7 +4339,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.2':
     optional: true
 
-  '@google/genai@1.48.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))':
+  '@google/genai@1.49.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))':
     dependencies:
       google-auth-library: 10.5.0
       p-retry: 4.6.2

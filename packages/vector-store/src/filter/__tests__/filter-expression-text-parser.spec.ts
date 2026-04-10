@@ -386,7 +386,7 @@ describe("FilterExpressionTextParser", () => {
     expect(exp).toEqual(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
-        new Filter.Key("'country.1'"),
+        new Filter.Key("country.1"),
         new Filter.Value("BG"),
       ),
     );
@@ -395,7 +395,7 @@ describe("FilterExpressionTextParser", () => {
     expect(exp).toEqual(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
-        new Filter.Key("'country_1_2_3'"),
+        new Filter.Key("country_1_2_3"),
         new Filter.Value("BG"),
       ),
     );
@@ -404,7 +404,20 @@ describe("FilterExpressionTextParser", () => {
     expect(exp).toEqual(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
-        new Filter.Key('"country 1 2 3"'),
+        new Filter.Key("country 1 2 3"),
+        new Filter.Value("BG"),
+      ),
+    );
+
+    // case where there is an actual quote in the identifier (assuming this is what
+    // the user really wants
+    // may not be supported by all VS impl., but this is correct at the DSL -> java
+    // level
+    exp = parser.parse('"country \\"1 2 3" == \'BG\'');
+    expect(exp).toEqual(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key('country "1 2 3'),
         new Filter.Value("BG"),
       ),
     );

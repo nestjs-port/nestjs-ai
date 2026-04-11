@@ -19,6 +19,7 @@ import {
   AssistantMessage,
   type ChatModel,
   ChatResponse,
+  DefaultToolCallingChatOptions,
   Generation,
   InMemoryChatMemoryRepository,
   MessageType,
@@ -34,6 +35,7 @@ describe("ChatClientAdvisorTests", () => {
   it("promptChatMemory", async () => {
     let capturedPrompt = {} as Prompt;
     const chatModel = {
+      defaultOptions: new DefaultToolCallingChatOptions(),
       call: vi
         .fn(async (prompt: Prompt) => {
           capturedPrompt = prompt;
@@ -132,6 +134,7 @@ describe("ChatClientAdvisorTests", () => {
   it("streamingPromptChatMemory", async () => {
     let capturedPrompt = {} as Prompt;
     const chatModel = {
+      defaultOptions: new DefaultToolCallingChatOptions(),
       call: vi.fn(),
       stream: vi
         .fn((prompt: Prompt) => {

@@ -98,10 +98,6 @@ export class DefaultChatClient implements ChatClient {
       this._defaultChatClientRequest,
     );
 
-    if (contentOrPrompt.options != null) {
-      spec.options(contentOrPrompt.options as ChatOptions);
-    }
-
     if (contentOrPrompt.instructions != null) {
       spec.messages(contentOrPrompt.instructions);
     }
@@ -659,84 +655,84 @@ export namespace DefaultChatClient {
     private readonly _toolCallbackProviders: ChatClient.ToolCallbackProvider[] =
       [];
     private readonly _messages: Message[] = [];
-    private readonly _userParams = new Map<string, unknown>();
-    private readonly _userMetadata = new Map<string, unknown>();
-    private readonly _systemParams = new Map<string, unknown>();
-    private readonly _systemMetadata = new Map<string, unknown>();
+    private readonly _userParams: Record<string, unknown> = {};
+    private readonly _userMetadata: Record<string, unknown> = {};
+    private readonly _systemParams: Record<string, unknown> = {};
+    private readonly _systemMetadata: Record<string, unknown> = {};
     private readonly _advisors: Advisor[] = [];
-    private readonly _advisorParams = new Map<string, unknown>();
-    private readonly _toolContext = new Map<string, unknown>();
+    private readonly _advisorParams: Record<string, unknown> = {};
+    private readonly _toolContext: Record<string, unknown> = {};
     private _templateRenderer: TemplateRenderer;
     private _userText: string | null;
     private _systemText: string | null;
-    private _chatOptions: ChatOptions | null;
+    private _optionsCustomizer: ChatOptions.Builder | null;
 
     constructor(ccr: DefaultChatClientRequestSpec);
     constructor(
       chatModel: ChatModel,
       userText: string | null,
-      userParams: Map<string, unknown>,
-      userMetadata: Map<string, unknown>,
+      userParams: Record<string, unknown>,
+      userMetadata: Record<string, unknown>,
       systemText: string | null,
-      systemParams: Map<string, unknown>,
-      systemMetadata: Map<string, unknown>,
+      systemParams: Record<string, unknown>,
+      systemMetadata: Record<string, unknown>,
       toolCallbacks: ToolCallback[],
       toolCallbackProviders: ChatClient.ToolCallbackProvider[],
       messages: Message[],
       toolNames: string[],
       media: Media[],
-      chatOptions: ChatOptions | null,
+      optionsCustomizer: ChatOptions.Builder | null,
       advisors: Advisor[],
-      advisorParams: Map<string, unknown>,
+      advisorParams: Record<string, unknown>,
       observationRegistry: ObservationRegistry,
       chatClientObservationConvention: ChatClientObservationConvention | null,
-      toolContext: Map<string, unknown>,
+      toolContext: Record<string, unknown>,
       templateRenderer: TemplateRenderer | null,
       advisorObservationConvention: AdvisorObservationConvention | null,
     );
     constructor(
       chatModelOrSpec: ChatModel | DefaultChatClientRequestSpec,
       userText?: string | null,
-      userParams?: Map<string, unknown>,
-      userMetadata?: Map<string, unknown>,
+      userParams?: Record<string, unknown>,
+      userMetadata?: Record<string, unknown>,
       systemText?: string | null,
-      systemParams?: Map<string, unknown>,
-      systemMetadata?: Map<string, unknown>,
+      systemParams?: Record<string, unknown>,
+      systemMetadata?: Record<string, unknown>,
       toolCallbacks?: ToolCallback[],
       toolCallbackProviders?: ChatClient.ToolCallbackProvider[],
       messages?: Message[],
       toolNames?: string[],
       media?: Media[],
-      chatOptions?: ChatOptions | null,
+      optionsCustomizer?: ChatOptions.Builder | null,
       advisors?: Advisor[],
-      advisorParams?: Map<string, unknown>,
+      advisorParams?: Record<string, unknown>,
       observationRegistry?: ObservationRegistry,
       chatClientObservationConvention?: ChatClientObservationConvention | null,
-      toolContext?: Map<string, unknown>,
+      toolContext?: Record<string, unknown>,
       templateRenderer?: TemplateRenderer | null,
       advisorObservationConvention?: AdvisorObservationConvention | null,
     ) {
       if (chatModelOrSpec instanceof DefaultChatClientRequestSpec) {
         const ccr = chatModelOrSpec;
         this._chatModel = ccr._chatModel;
-        this._chatOptions = ccr._chatOptions?.copy() ?? null;
+        this._optionsCustomizer = ccr._optionsCustomizer?.clone() ?? null;
         this._userText = ccr._userText;
-        this._userParams = new Map(ccr._userParams);
-        this._userMetadata = new Map(ccr._userMetadata);
+        this._userParams = { ...ccr._userParams };
+        this._userMetadata = { ...ccr._userMetadata };
         this._systemText = ccr._systemText;
-        this._systemParams = new Map(ccr._systemParams);
-        this._systemMetadata = new Map(ccr._systemMetadata);
+        this._systemParams = { ...ccr._systemParams };
+        this._systemMetadata = { ...ccr._systemMetadata };
         this._toolNames.push(...ccr._toolNames);
         this._toolCallbacks.push(...ccr._toolCallbacks);
         this._toolCallbackProviders.push(...ccr._toolCallbackProviders);
         this._messages.push(...ccr._messages);
         this._media.push(...ccr._media);
         this._advisors.push(...ccr._advisors);
-        this._advisorParams = new Map(ccr._advisorParams);
+        this._advisorParams = { ...ccr._advisorParams };
         this._observationRegistry = ccr._observationRegistry;
         this._chatClientObservationConvention =
           ccr._chatClientObservationConvention;
-        this._toolContext = new Map(ccr._toolContext);
+        this._toolContext = { ...ccr._toolContext };
         this._templateRenderer = ccr._templateRenderer;
         this._advisorObservationConvention = ccr._advisorObservationConvention;
         return;
@@ -759,26 +755,25 @@ export namespace DefaultChatClient {
       assert(toolContext, "toolContext cannot be null");
 
       this._chatModel = chatModel;
-      this._chatOptions =
-        chatOptions?.copy() ?? this._chatModel.defaultOptions?.copy() ?? null;
+      this._optionsCustomizer = optionsCustomizer?.clone() ?? null;
       this._userText = userText ?? null;
-      this._userParams = new Map(userParams);
-      this._userMetadata = new Map(userMetadata);
+      this._userParams = { ...userParams };
+      this._userMetadata = { ...userMetadata };
       this._systemText = systemText ?? null;
-      this._systemParams = new Map(systemParams);
-      this._systemMetadata = new Map(systemMetadata);
+      this._systemParams = { ...systemParams };
+      this._systemMetadata = { ...systemMetadata };
       this._toolNames.push(...toolNames);
       this._toolCallbacks.push(...toolCallbacks);
       this._toolCallbackProviders.push(...toolCallbackProviders);
       this._messages.push(...messages);
       this._media.push(...media);
       this._advisors.push(...advisors);
-      this._advisorParams = new Map(advisorParams);
+      this._advisorParams = { ...advisorParams };
       this._observationRegistry = observationRegistry;
       this._chatClientObservationConvention =
         chatClientObservationConvention ??
         DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION;
-      this._toolContext = new Map(toolContext);
+      this._toolContext = { ...toolContext };
       this._templateRenderer = templateRenderer ?? DEFAULT_TEMPLATE_RENDERER;
       this._advisorObservationConvention = advisorObservationConvention ?? null;
     }
@@ -787,11 +782,11 @@ export namespace DefaultChatClient {
       return this._userText;
     }
 
-    get userParams(): Map<string, unknown> {
+    get userParams(): Record<string, unknown> {
       return this._userParams;
     }
 
-    get userMetadata(): Map<string, unknown> {
+    get userMetadata(): Record<string, unknown> {
       return this._userMetadata;
     }
 
@@ -799,23 +794,27 @@ export namespace DefaultChatClient {
       return this._systemText;
     }
 
-    get systemParams(): Map<string, unknown> {
+    get systemParams(): Record<string, unknown> {
       return this._systemParams;
     }
 
-    get systemMetadata(): Map<string, unknown> {
+    get systemMetadata(): Record<string, unknown> {
       return this._systemMetadata;
     }
 
-    get chatOptions(): ChatOptions | null {
-      return this._chatOptions;
+    get chatModel(): ChatModel {
+      return this._chatModel;
+    }
+
+    get chatOptionsCustomizer(): ChatOptions.Builder | null {
+      return this._optionsCustomizer;
     }
 
     getAdvisors(): Advisor[] {
       return this._advisors;
     }
 
-    get advisorParams(): Map<string, unknown> {
+    get advisorParams(): Record<string, unknown> {
       return this._advisorParams;
     }
 
@@ -839,7 +838,7 @@ export namespace DefaultChatClient {
       return this._toolCallbackProviders;
     }
 
-    getToolContext(): Map<string, unknown> {
+    getToolContext(): Record<string, unknown> {
       return this._toolContext;
     }
 
@@ -859,12 +858,14 @@ export namespace DefaultChatClient {
         .defaultTemplateRenderer(this._templateRenderer)
         .defaultToolCallbacks(this._toolCallbacks)
         .defaultToolCallbacks(...this._toolCallbackProviders)
-        .defaultToolContext(new Map(this._toolContext))
+        .defaultToolContext(new Map(Object.entries(this._toolContext)))
         .defaultToolNames(...this._toolNames);
 
       if (this._advisors.length > 0) {
         builder.defaultAdvisors((a) =>
-          a.advisors(this._advisors).params(this._advisorParams),
+          a
+            .advisors(this._advisors)
+            .params(new Map(Object.entries(this._advisorParams))),
         );
       }
 
@@ -873,9 +874,9 @@ export namespace DefaultChatClient {
         builder.defaultUser((u) =>
           u
             .text(text)
-            .params(new Map(this._userParams))
+            .params(new Map(Object.entries(this._userParams)))
             .media(...this._media)
-            .metadata(new Map(this._userMetadata)),
+            .metadata(new Map(Object.entries(this._userMetadata))),
         );
       }
 
@@ -884,13 +885,13 @@ export namespace DefaultChatClient {
         builder.defaultSystem((s) =>
           s
             .text(text)
-            .params(new Map(this._systemParams))
-            .metadata(new Map(this._systemMetadata)),
+            .params(new Map(Object.entries(this._systemParams)))
+            .metadata(new Map(Object.entries(this._systemMetadata))),
         );
       }
 
-      if (this._chatOptions != null) {
-        builder.defaultOptions(this._chatOptions);
+      if (this._optionsCustomizer != null) {
+        builder.defaultOptions(this._optionsCustomizer);
       }
 
       (builder as DefaultChatClientBuilder).addMessages(this._messages);
@@ -914,9 +915,10 @@ export namespace DefaultChatClient {
       if (typeof consumerOrAdvisorOrAdvisors === "function") {
         const advisorSpec = new DefaultAdvisorSpec();
         consumerOrAdvisorOrAdvisors(advisorSpec);
-        for (const [key, value] of advisorSpec.paramsValue.entries()) {
-          this._advisorParams.set(key, value);
-        }
+        Object.assign(
+          this._advisorParams,
+          Object.fromEntries(advisorSpec.paramsValue.entries()),
+        );
         this._advisors.push(...advisorSpec.advisorsValue);
         return this;
       }
@@ -951,11 +953,11 @@ export namespace DefaultChatClient {
       return this;
     }
 
-    options<T extends ChatOptions>(
-      options: T,
+    options<T extends ChatOptions.Builder>(
+      optionsCustomizer: T,
     ): ChatClient.ChatClientRequestSpec {
-      assert(options, "options cannot be null");
-      this._chatOptions = options;
+      assert(optionsCustomizer, "customizer cannot be null");
+      this._optionsCustomizer = optionsCustomizer;
       return this;
     }
 
@@ -1027,15 +1029,25 @@ export namespace DefaultChatClient {
 
     toolContext(
       toolContext: Map<string, unknown>,
+    ): ChatClient.ChatClientRequestSpec;
+    toolContext(
+      toolContext: Record<string, unknown>,
+    ): ChatClient.ChatClientRequestSpec;
+    toolContext(
+      toolContext: Map<string, unknown> | Record<string, unknown>,
     ): ChatClient.ChatClientRequestSpec {
       assert(toolContext, "toolContext cannot be null");
-      for (const [key, value] of toolContext.entries()) {
+      const entries =
+        toolContext instanceof Map
+          ? [...toolContext.entries()]
+          : Object.entries(toolContext);
+      for (const [key, value] of entries) {
         assert(key != null, "toolContext keys cannot contain null elements");
         assert(
           value != null,
           "toolContext values cannot contain null elements",
         );
-        this._toolContext.set(key, value);
+        this._toolContext[key] = value;
       }
       return this;
     }
@@ -1062,12 +1074,14 @@ export namespace DefaultChatClient {
         this._systemText = StringUtils.hasText(systemSpec.textValue)
           ? systemSpec.textValue
           : this._systemText;
-        for (const [key, value] of systemSpec.paramsValue.entries()) {
-          this._systemParams.set(key, value);
-        }
-        for (const [key, value] of systemSpec.metadataValue.entries()) {
-          this._systemMetadata.set(key, value);
-        }
+        Object.assign(
+          this._systemParams,
+          Object.fromEntries(systemSpec.paramsValue.entries()),
+        );
+        Object.assign(
+          this._systemMetadata,
+          Object.fromEntries(systemSpec.metadataValue.entries()),
+        );
         return this;
       }
 
@@ -1107,13 +1121,15 @@ export namespace DefaultChatClient {
         this._userText = StringUtils.hasText(userSpec.textValue)
           ? userSpec.textValue
           : this._userText;
-        for (const [key, value] of userSpec.paramsValue.entries()) {
-          this._userParams.set(key, value);
-        }
+        Object.assign(
+          this._userParams,
+          Object.fromEntries(userSpec.paramsValue.entries()),
+        );
         this._media.push(...userSpec.mediaValue);
-        for (const [key, value] of userSpec.metadataValue.entries()) {
-          this._userMetadata.set(key, value);
-        }
+        Object.assign(
+          this._userMetadata,
+          Object.fromEntries(userSpec.metadataValue.entries()),
+        );
         return this;
       }
 

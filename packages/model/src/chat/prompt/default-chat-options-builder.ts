@@ -17,7 +17,7 @@
 import type { ChatOptions } from "./chat-options.interface";
 import { DefaultChatOptions } from "./default-chat-options";
 
-export class DefaultChatOptionsBuilder implements ChatOptions.BuilderType {
+export class DefaultChatOptionsBuilder implements ChatOptions.Builder {
   protected _model: string | null = null;
   protected _frequencyPenalty: number | null = null;
   protected _maxTokens: number | null = null;
@@ -82,7 +82,7 @@ export class DefaultChatOptionsBuilder implements ChatOptions.BuilderType {
     return this.self();
   }
 
-  combineWith(other: ChatOptions.BuilderType): this {
+  combineWith(other: this): this {
     if (other instanceof DefaultChatOptionsBuilder) {
       if (other._model != null) {
         this._model = other._model;
@@ -109,7 +109,7 @@ export class DefaultChatOptionsBuilder implements ChatOptions.BuilderType {
         this._topP = other._topP;
       }
     }
-    return this;
+    return this.self();
   }
 
   build(): ChatOptions {

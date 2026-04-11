@@ -308,16 +308,31 @@ describe("ChatClient Native Structured Response Tests", () => {
   });
 });
 
-class TestStructuredOutputChatOptions implements StructuredOutputChatOptions {
+class TestStructuredOutputChatOptions
+  extends DefaultToolCallingChatOptions
+  implements StructuredOutputChatOptions
+{
   private _outputSchema = "";
 
-  copy(): ChatOptions {
+  override copy(): ChatOptions {
     const copy = new TestStructuredOutputChatOptions();
     copy.setOutputSchema(this._outputSchema);
+    copy.setToolCallbacks(this.toolCallbacks);
+    copy.setToolNames(this.toolNames);
+    copy.setToolContext(this.toolContext);
+    copy.setInternalToolExecutionEnabled(this.internalToolExecutionEnabled);
+    copy.setModel(this.model);
+    copy.setFrequencyPenalty(this.frequencyPenalty);
+    copy.setMaxTokens(this.maxTokens);
+    copy.setPresencePenalty(this.presencePenalty);
+    copy.setStopSequences(this.stopSequences);
+    copy.setTemperature(this.temperature);
+    copy.setTopK(this.topK);
+    copy.setTopP(this.topP);
     return copy;
   }
 
-  mutate(): ChatOptions.Builder {
+  override mutate(): TestStructuredOutputChatOptionsBuilder {
     return new TestStructuredOutputChatOptionsBuilder(this._outputSchema);
   }
 
@@ -335,7 +350,12 @@ class TestStructuredOutputChatOptionsBuilder extends DefaultToolCallingChatOptio
     super();
   }
 
-  override build(): ChatOptions {
+  outputSchema(outputSchema: string): this {
+    this._outputSchema = outputSchema;
+    return this;
+  }
+
+  override build(): TestStructuredOutputChatOptions {
     const options = new TestStructuredOutputChatOptions();
     options.setOutputSchema(this._outputSchema);
     return options;

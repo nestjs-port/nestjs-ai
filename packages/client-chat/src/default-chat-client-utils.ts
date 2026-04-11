@@ -172,14 +172,14 @@ export abstract class DefaultChatClientUtils {
     source: DefaultChatOptions,
   ): DefaultToolCallingChatOptions {
     const target = new DefaultToolCallingChatOptions();
-    target.model = source.model ?? null;
-    target.frequencyPenalty = source.frequencyPenalty ?? null;
-    target.maxTokens = source.maxTokens ?? null;
-    target.presencePenalty = source.presencePenalty ?? null;
-    target.stopSequences = source.stopSequences ?? null;
-    target.temperature = source.temperature ?? null;
-    target.topK = source.topK ?? null;
-    target.topP = source.topP ?? null;
+    target.setModel(source.model ?? null);
+    target.setFrequencyPenalty(source.frequencyPenalty ?? null);
+    target.setMaxTokens(source.maxTokens ?? null);
+    target.setPresencePenalty(source.presencePenalty ?? null);
+    target.setStopSequences(source.stopSequences ?? null);
+    target.setTemperature(source.temperature ?? null);
+    target.setTopK(source.topK ?? null);
+    target.setTopP(source.topP ?? null);
     return target;
   }
 

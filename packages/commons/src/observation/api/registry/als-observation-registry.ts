@@ -58,7 +58,7 @@ export class AlsObservationRegistry implements ObservationRegistry {
     return this.scopeStorage.getStore()?.scope ?? null;
   }
 
-  set currentObservationScope(scope: ObservationScope | null) {
+  setCurrentObservationScope(scope: ObservationScope | null): void {
     const store = this.scopeStorage.getStore();
     if (!store) {
       return;

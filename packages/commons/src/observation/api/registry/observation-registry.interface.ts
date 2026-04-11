@@ -56,7 +56,7 @@ export interface ObservationRegistry {
   /**
    * Sets the current observation scope.
    */
-  set currentObservationScope(scope: ObservationScope | null);
+  setCurrentObservationScope(scope: ObservationScope | null): void;
 
   /**
    * Returns the current observation from the current scope, or null if none.

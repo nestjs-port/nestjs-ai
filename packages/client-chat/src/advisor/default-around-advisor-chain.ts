@@ -112,7 +112,7 @@ export class DefaultAroundAdvisorChain extends BaseAdvisorChain {
         chatClientRequest,
         this,
       );
-      observationContext.chatClientResponse = chatClientResponse;
+      observationContext.setChatClientResponse(chatClientResponse);
       return chatClientResponse;
     });
   }
@@ -151,7 +151,7 @@ export class DefaultAroundAdvisorChain extends BaseAdvisorChain {
       return DefaultAroundAdvisorChain.CHAT_CLIENT_MESSAGE_AGGREGATOR.aggregateChatClientResponse(
         chatClientResponse,
         (aggregated) => {
-          observationContext.chatClientResponse = aggregated;
+          observationContext.setChatClientResponse(aggregated);
         },
       );
     });

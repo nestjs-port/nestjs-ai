@@ -2,7 +2,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `ce9c9982` (Upgraded Google GenAI SDK to 1.44.0 and support search with custom tools in Gemini 3.x models)
+**Last synced Spring AI commit:** `da8db657` (Remove Anthropic IT that no longer makes sense)
 
 ## Overview
 

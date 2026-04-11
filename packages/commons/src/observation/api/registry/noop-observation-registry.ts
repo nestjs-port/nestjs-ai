@@ -55,7 +55,7 @@ export class NoopObservationRegistry implements ObservationRegistry {
     return null;
   }
 
-  set currentObservationScope(_scope: ObservationScope | null) {
+  setCurrentObservationScope(_scope: ObservationScope | null): void {
     // no-op
   }
 

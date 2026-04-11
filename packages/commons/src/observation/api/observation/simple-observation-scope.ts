@@ -38,7 +38,7 @@ export class SimpleObservationScope implements ObservationScope {
     this._observation = observation;
     this._registry = registry;
     this._previousObservationScope = registry.currentObservationScope;
-    registry.currentObservationScope = this;
+    registry.setCurrentObservationScope(this);
   }
 
   get currentObservation(): Observation<ObservationContext> {
@@ -51,6 +51,6 @@ export class SimpleObservationScope implements ObservationScope {
 
   close(): void {
     this._observation.notifyOnScopeClosed();
-    this._registry.currentObservationScope = this._previousObservationScope;
+    this._registry.setCurrentObservationScope(this._previousObservationScope);
   }
 }

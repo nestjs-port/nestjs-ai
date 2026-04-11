@@ -545,7 +545,7 @@ export namespace DefaultChatClient {
 
       const chatClientResponse = await observation.observe(async () => {
         const response = await this._advisorChain.nextCall(chatClientRequest);
-        observationContext.response = response;
+        observationContext.setResponse(response);
         return response;
       });
 
@@ -620,7 +620,7 @@ export namespace DefaultChatClient {
       return CHAT_CLIENT_MESSAGE_AGGREGATOR.aggregateChatClientResponse(
         chatClientResponse,
         (aggregated) => {
-          observationContext.response = aggregated;
+          observationContext.setResponse(aggregated);
         },
       );
     }

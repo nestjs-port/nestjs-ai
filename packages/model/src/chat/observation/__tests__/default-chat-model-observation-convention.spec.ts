@@ -121,32 +121,34 @@ describe("DefaultChatModelObservationConvention", () => {
       "superprovider",
     );
 
-    observationContext.response = new ChatResponse({
-      generations: [
-        new Generation({
-          assistantMessage: AssistantMessage.of("response"),
-          chatGenerationMetadata: ChatGenerationMetadata.builder()
-            .finishReason("this-is-the-end")
-            .build(),
-        }),
-      ],
-      chatResponseMetadata: ChatResponseMetadata.builder()
-        .id("say33")
-        .model("mistral-42")
-        .usage(
-          new DefaultUsage({
-            promptTokens: 1000,
-            completionTokens: 500,
-            totalTokens: 1500,
-            nativeUsage: {
+    observationContext.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({
+            assistantMessage: AssistantMessage.of("response"),
+            chatGenerationMetadata: ChatGenerationMetadata.builder()
+              .finishReason("this-is-the-end")
+              .build(),
+          }),
+        ],
+        chatResponseMetadata: ChatResponseMetadata.builder()
+          .id("say33")
+          .model("mistral-42")
+          .usage(
+            new DefaultUsage({
               promptTokens: 1000,
               completionTokens: 500,
               totalTokens: 1500,
-            },
-          }),
-        )
-        .build(),
-    });
+              nativeUsage: {
+                promptTokens: 1000,
+                completionTokens: 500,
+                totalTokens: 1500,
+              },
+            }),
+          )
+          .build(),
+      }),
+    );
 
     const lowCardinalityKeyValues = observationConvention
       .getLowCardinalityKeyValues(observationContext)
@@ -278,17 +280,19 @@ describe("DefaultChatModelObservationConvention", () => {
       "superprovider",
     );
 
-    observationContext.response = new ChatResponse({
-      generations: [
-        new Generation({
-          assistantMessage: AssistantMessage.of("response"),
-          chatGenerationMetadata: ChatGenerationMetadata.builder()
-            .finishReason("")
-            .build(),
-        }),
-      ],
-      chatResponseMetadata: ChatResponseMetadata.builder().id("").build(),
-    });
+    observationContext.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({
+            assistantMessage: AssistantMessage.of("response"),
+            chatGenerationMetadata: ChatGenerationMetadata.builder()
+              .finishReason("")
+              .build(),
+          }),
+        ],
+        chatResponseMetadata: ChatResponseMetadata.builder().id("").build(),
+      }),
+    );
 
     const highCardinalityKeys = observationConvention
       .getHighCardinalityKeyValues(observationContext)

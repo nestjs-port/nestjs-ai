@@ -185,7 +185,7 @@ export class Document implements Content {
     return this._contentFormatter;
   }
 
-  set contentFormatter(contentFormatter: ContentFormatter) {
+  setContentFormatter(contentFormatter: ContentFormatter): void {
     this._contentFormatter = contentFormatter;
   }
 

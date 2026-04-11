@@ -52,8 +52,8 @@ describe("OtelTracingObservationHandler", () => {
     const { tracer, startSpan } = createTracerWithSpan(span);
     const handler = new OtelTracingObservationHandler(tracer);
     const context = new ObservationContext();
-    context.name = "ai.chat";
-    context.contextualName = "chat gpt-4o";
+    context.setName("ai.chat");
+    context.setContextualName("chat gpt-4o");
     context.addLowCardinalityKeyValue(KeyValue.of("model", "gpt-4o"));
     context.addHighCardinalityKeyValue(KeyValue.of("prompt.size", "123"));
 
@@ -78,8 +78,8 @@ describe("OtelTracingObservationHandler", () => {
     const { tracer } = createTracerWithSpan(span);
     const handler = new OtelTracingObservationHandler(tracer);
     const context = new ObservationContext();
-    context.name = "ai.chat";
-    context.error = new Error("boom");
+    context.setName("ai.chat");
+    context.setError(new Error("boom"));
 
     handler.onStart(context);
     handler.onStop(context);
@@ -149,7 +149,7 @@ describe("OtelTracingObservationHandler", () => {
     const { tracer } = createTracerWithSpan(span);
     const handler = new OtelTracingObservationHandler(tracer);
     const context = new ObservationContext();
-    context.name = "ai.chat";
+    context.setName("ai.chat");
     const manager = new TestContextManager().enable();
     otelContext.setGlobalContextManager(manager);
 

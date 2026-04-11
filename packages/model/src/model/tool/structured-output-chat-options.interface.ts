@@ -23,5 +23,5 @@ import type { ChatOptions } from "../../chat";
 export interface StructuredOutputChatOptions extends ChatOptions {
   get outputSchema(): string;
 
-  set outputSchema(outputSchema: string);
+  setOutputSchema(outputSchema: string): void;
 }

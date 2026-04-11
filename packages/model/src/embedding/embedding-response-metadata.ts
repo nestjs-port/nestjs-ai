@@ -48,7 +48,7 @@ export class EmbeddingResponseMetadata
     return this._model;
   }
 
-  set model(model: string) {
+  setModel(model: string): void {
     this._model = model;
   }
 
@@ -59,7 +59,7 @@ export class EmbeddingResponseMetadata
     return this._usage;
   }
 
-  set usage(usage: Usage) {
+  setUsage(usage: Usage): void {
     this._usage = usage;
   }
 }

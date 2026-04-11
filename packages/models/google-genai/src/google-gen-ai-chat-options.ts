@@ -181,7 +181,7 @@ export class GoogleGenAiChatOptions
     return this.maxOutputTokens;
   }
 
-  set maxTokens(maxTokens: number | undefined) {
+  setMaxTokens(maxTokens: number | undefined): void {
     this.maxOutputTokens = maxTokens;
   }
 
@@ -189,7 +189,7 @@ export class GoogleGenAiChatOptions
     return this.responseSchema ?? "";
   }
 
-  set outputSchema(jsonSchemaText: string) {
+  setOutputSchema(jsonSchemaText: string): void {
     this.responseSchema = jsonSchemaText;
     this.responseMimeType = "application/json";
   }

@@ -80,7 +80,7 @@ describe("OtelMeterObservationHandler", () => {
   it("should create all meters during an observation without error", () => {
     const handler = new OtelMeterObservationHandler(meter as unknown as Meter);
     const context = new ObservationContext();
-    context.name = "test.observation";
+    context.setName("test.observation");
     context.addLowCardinalityKeyValue(KeyValue.of("low", "1"));
     context.addHighCardinalityKeyValue(KeyValue.of("high", "2"));
 
@@ -111,12 +111,12 @@ describe("OtelMeterObservationHandler", () => {
   it("should create all meters during an observation with error", () => {
     const handler = new OtelMeterObservationHandler(meter as unknown as Meter);
     const context = new ObservationContext();
-    context.name = "test.observation";
+    context.setName("test.observation");
     context.addLowCardinalityKeyValue(KeyValue.of("low", "1"));
     context.addHighCardinalityKeyValue(KeyValue.of("high", "2"));
 
     handler.onStart(context);
-    context.error = new SocketTimeoutException("simulated");
+    context.setError(new SocketTimeoutException("simulated"));
     handler.onStop(context);
 
     const activeCounter = meter.upDownCounters.get("test.observation.active");
@@ -145,7 +145,7 @@ describe("OtelMeterObservationHandler", () => {
       IgnoredMeters.LONG_TASK_TIMER,
     );
     const context = new ObservationContext();
-    context.name = "test.observation";
+    context.setName("test.observation");
     context.addLowCardinalityKeyValue(KeyValue.of("low", "1"));
     context.addHighCardinalityKeyValue(KeyValue.of("high", "2"));
 

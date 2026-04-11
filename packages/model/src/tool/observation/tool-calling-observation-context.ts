@@ -72,7 +72,7 @@ export class ToolCallingObservationContext extends ObservationContext {
     return this._toolCallResult;
   }
 
-  set toolCallResult(toolCallResult: string | null) {
+  setToolCallResult(toolCallResult: string | null): void {
     this._toolCallResult = toolCallResult;
   }
 }

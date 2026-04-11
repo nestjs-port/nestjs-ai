@@ -213,7 +213,7 @@ export class GoogleGenAiChatModel extends ChatModel {
         },
       );
 
-      observationContext.response = chatResponse;
+      observationContext.setResponse(chatResponse);
       return chatResponse;
     });
 
@@ -418,7 +418,7 @@ export class GoogleGenAiChatModel extends ChatModel {
       );
       return observation.observeStream(() =>
         new MessageAggregator().aggregate(flux, (chatResponse) => {
-          observationContext.response = chatResponse;
+          observationContext.setResponse(chatResponse);
         }),
       );
     });

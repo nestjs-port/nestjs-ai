@@ -109,9 +109,11 @@ describe("DefaultEmbeddingModelObservationConvention", () => {
       "superprovider",
     );
 
-    observationContext.response = new EmbeddingResponse(
-      [],
-      new EmbeddingResponseMetadata("mistral-42", new TestUsage(), {}),
+    observationContext.setResponse(
+      new EmbeddingResponse(
+        [],
+        new EmbeddingResponseMetadata("mistral-42", new TestUsage(), {}),
+      ),
     );
 
     const lowCardinalityKeyValues = observationConvention

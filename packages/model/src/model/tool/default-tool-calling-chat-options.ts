@@ -94,7 +94,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._model;
   }
 
-  set model(model: string | null) {
+  setModel(model: string | null): void {
     this._model = model;
   }
 
@@ -102,7 +102,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._frequencyPenalty;
   }
 
-  set frequencyPenalty(frequencyPenalty: number | null) {
+  setFrequencyPenalty(frequencyPenalty: number | null): void {
     this._frequencyPenalty = frequencyPenalty;
   }
 
@@ -110,7 +110,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._maxTokens;
   }
 
-  set maxTokens(maxTokens: number | null) {
+  setMaxTokens(maxTokens: number | null): void {
     this._maxTokens = maxTokens;
   }
 
@@ -118,7 +118,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._presencePenalty;
   }
 
-  set presencePenalty(presencePenalty: number | null) {
+  setPresencePenalty(presencePenalty: number | null): void {
     this._presencePenalty = presencePenalty;
   }
 
@@ -126,7 +126,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._stopSequences;
   }
 
-  set stopSequences(stopSequences: string[] | null) {
+  setStopSequences(stopSequences: string[] | null): void {
     this._stopSequences = stopSequences;
   }
 
@@ -134,7 +134,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._temperature;
   }
 
-  set temperature(temperature: number | null) {
+  setTemperature(temperature: number | null): void {
     this._temperature = temperature;
   }
 
@@ -142,7 +142,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._topK;
   }
 
-  set topK(topK: number | null) {
+  setTopK(topK: number | null): void {
     this._topK = topK;
   }
 
@@ -150,7 +150,7 @@ export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {
     return this._topP;
   }
 
-  set topP(topP: number | null) {
+  setTopP(topP: number | null): void {
     this._topP = topP;
   }
 
@@ -400,14 +400,14 @@ export namespace DefaultToolCallingChatOptions {
       options.setInternalToolExecutionEnabled(
         this._internalToolExecutionEnabled,
       );
-      options.model = this._model;
-      options.frequencyPenalty = this._frequencyPenalty;
-      options.maxTokens = this._maxTokens;
-      options.presencePenalty = this._presencePenalty;
-      options.stopSequences = this._stopSequences;
-      options.temperature = this._temperature;
-      options.topK = this._topK;
-      options.topP = this._topP;
+      options.setModel(this._model);
+      options.setFrequencyPenalty(this._frequencyPenalty);
+      options.setMaxTokens(this._maxTokens);
+      options.setPresencePenalty(this._presencePenalty);
+      options.setStopSequences(this._stopSequences);
+      options.setTemperature(this._temperature);
+      options.setTopK(this._topK);
+      options.setTopP(this._topP);
       return options;
     }
   }

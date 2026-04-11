@@ -105,7 +105,7 @@ export class RetryTemplate {
    * @see RetryPolicy.withMaxRetries
    * @see RetryPolicy.builder
    */
-  set retryPolicy(retryPolicy: RetryPolicy) {
+  setRetryPolicy(retryPolicy: RetryPolicy): void {
     assert(retryPolicy != null, "Retry policy must not be null");
     this._retryPolicy = retryPolicy;
   }
@@ -125,7 +125,7 @@ export class RetryTemplate {
    * Defaults to a no-op implementation.
    * @param retryListener the retry listener to use
    */
-  set retryListener(retryListener: RetryListener) {
+  setRetryListener(retryListener: RetryListener): void {
     assert(retryListener != null, "Retry listener must not be null");
     this._retryListener = retryListener;
   }

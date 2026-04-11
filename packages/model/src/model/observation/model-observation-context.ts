@@ -55,7 +55,7 @@ export class ModelObservationContext<REQ, RES> extends ObservationContext {
     return this._response;
   }
 
-  set response(response: RES) {
+  setResponse(response: RES): void {
     assert(response != null, "response cannot be null");
     this._response = response;
   }

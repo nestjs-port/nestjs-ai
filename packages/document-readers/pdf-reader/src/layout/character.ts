@@ -56,7 +56,7 @@ export class Character {
     return this._index;
   }
 
-  set index(index: number) {
+  setIndex(index: number): void {
     this._index = index;
   }
 

@@ -142,18 +142,17 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     );
 
     // Overwrite the ToolCallingChatOptions to disable internal tool execution.
-    const optionsCopy = initializedChatClientRequest.prompt.options?.copy();
-    if (optionsCopy == null || !isToolCallingChatOptions(optionsCopy)) {
-      throw new TypeError(
-        "ToolCall Advisor requires ToolCallingChatOptions to be set in the ChatClientRequest options.",
-      );
-    }
-
-    // Disable internal tool execution to allow ToolCallAdvisor to handle tool calls.
-    optionsCopy.setInternalToolExecutionEnabled(false);
+    // Disable internal tool execution to allow ToolCallAdvisor to handle tool calls
+    const optionsCopy = (
+      promptOptions.mutate() as ToolCallingChatOptions.Builder
+    )
+      .internalToolExecutionEnabled(false)
+      .build();
 
     let instructions = initializedChatClientRequest.prompt.instructions;
+
     let chatClientResponse: ChatClientResponse | null = null;
+
     let isToolCall = false;
 
     do {
@@ -338,9 +337,11 @@ export class ToolCallAdvisor implements CallAdvisor, StreamAdvisor {
     ).pipe(
       mergeMap((initializedRequest) => {
         // Overwrite the ToolCallingChatOptions to disable internal tool execution.
-        const optionsCopy =
-          chatClientRequest.prompt.options?.copy() as ToolCallingChatOptions;
-        optionsCopy.setInternalToolExecutionEnabled(false);
+        const optionsCopy = (
+          promptOptions.mutate() as ToolCallingChatOptions.Builder
+        )
+          .internalToolExecutionEnabled(false)
+          .build();
 
         return this.internalStream(
           streamAdvisorChain,

@@ -50,11 +50,11 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
     this.defaultRequest = new DefaultChatClient.DefaultChatClientRequestSpec(
       chatModel,
       null,
-      new Map<string, unknown>(),
-      new Map<string, unknown>(),
+      {},
+      {},
       null,
-      new Map<string, unknown>(),
-      new Map<string, unknown>(),
+      {},
+      {},
       [],
       [],
       [],
@@ -62,10 +62,10 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
       [],
       null,
       [],
-      new Map<string, unknown>(),
+      {},
       observationRegistry,
       chatClientObservationConvention,
-      new Map<string, unknown>(),
+      {},
       null,
       advisorObservationConvention,
     );
@@ -101,8 +101,8 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
     return this;
   }
 
-  defaultOptions(chatOptions: ChatOptions): ChatClient.Builder {
-    this.defaultRequest.options(chatOptions);
+  defaultOptions(optionsCustomizer: ChatOptions.Builder): ChatClient.Builder {
+    this.defaultRequest.options(optionsCustomizer);
     return this;
   }
 
@@ -189,7 +189,7 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
   }
 
   defaultToolContext(toolContext: Map<string, unknown>): ChatClient.Builder {
-    this.defaultRequest.toolContext(toolContext);
+    this.defaultRequest.toolContext(Object.fromEntries(toolContext.entries()));
     return this;
   }
 

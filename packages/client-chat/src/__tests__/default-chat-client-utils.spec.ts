@@ -17,7 +17,7 @@
 import type { Media } from "@nestjs-ai/commons";
 import {
   type ChatModel,
-  DefaultChatOptions,
+  ChatOptions,
   DefaultToolCallingChatOptions,
   type Message,
   SystemMessage,
@@ -46,8 +46,12 @@ function toChatClientRequest(
   return DefaultChatClientUtils.toChatClientRequest(spec);
 }
 
-function createChatModel(): ChatModel {
-  return {} as ChatModel;
+function createChatModel(
+  defaultOptions: ChatOptions = ChatOptions.builder().build(),
+): ChatModel {
+  return {
+    defaultOptions,
+  } as unknown as ChatModel;
 }
 
 class TestToolCallback extends ToolCallback {
@@ -233,9 +237,9 @@ describe("DefaultChatClientUtils", () => {
     const chatOptions = DefaultToolCallingChatOptions.builder().build();
     const toolNames = ["tool1", "tool2"];
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(createChatModel(chatOptions))
         .prompt()
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .toolNames(...toolNames),
     );
 
@@ -252,9 +256,9 @@ describe("DefaultChatClientUtils", () => {
     const chatOptions = DefaultToolCallingChatOptions.builder().build();
     const toolCallback = new TestToolCallback("tool1");
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(createChatModel(chatOptions))
         .prompt()
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .toolCallbacks(toolCallback),
     );
 
@@ -271,9 +275,9 @@ describe("DefaultChatClientUtils", () => {
     const chatOptions = DefaultToolCallingChatOptions.builder().build();
     const toolContext = new Map<string, unknown>([["key", "value"]]);
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(createChatModel(chatOptions))
         .prompt()
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .toolContext(toolContext),
     );
 
@@ -293,9 +297,9 @@ describe("DefaultChatClientUtils", () => {
       .build();
     const toolNames2 = ["tool1", "tool2"];
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(createChatModel(chatOptions))
         .prompt()
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .toolNames(...toolNames2),
     );
 
@@ -315,9 +319,9 @@ describe("DefaultChatClientUtils", () => {
       .build();
     const toolCallback2 = new TestToolCallback("tool2");
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(createChatModel(chatOptions))
         .prompt()
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .toolCallbacks(toolCallback2),
     );
 
@@ -336,9 +340,9 @@ describe("DefaultChatClientUtils", () => {
       .build();
     const toolContext2 = new Map<string, unknown>([["key2", "value2"]]);
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(createChatModel(chatOptions))
         .prompt()
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .toolContext(toolContext2),
     );
 
@@ -356,9 +360,11 @@ describe("DefaultChatClientUtils", () => {
 
   it("when tool names and chat options are default chat options", () => {
     const toolNames1 = new Set(["toolA", "toolB"]);
-    const chatOptions = new DefaultChatOptions();
+    const chatOptions = ChatOptions.builder();
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(
+        createChatModel(DefaultToolCallingChatOptions.builder().build()),
+      )
         .prompt()
         .options(chatOptions)
         .toolNames(...Array.from(toolNames1)),
@@ -375,9 +381,11 @@ describe("DefaultChatClientUtils", () => {
 
   it("when tool callbacks and chat options are default chat options", () => {
     const toolCallback1 = new TestToolCallback("tool1");
-    const chatOptions = new DefaultChatOptions();
+    const chatOptions = ChatOptions.builder();
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(
+        createChatModel(DefaultToolCallingChatOptions.builder().build()),
+      )
         .prompt()
         .options(chatOptions)
         .toolCallbacks(toolCallback1),
@@ -394,9 +402,11 @@ describe("DefaultChatClientUtils", () => {
 
   it("when tool context and chat options are default chat options", () => {
     const toolContext1 = new Map<string, unknown>([["key1", "value1"]]);
-    const chatOptions = new DefaultChatOptions();
+    const chatOptions = ChatOptions.builder();
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(
+        createChatModel(DefaultToolCallingChatOptions.builder().build()),
+      )
         .prompt()
         .options(chatOptions)
         .toolContext(toolContext1),
@@ -438,7 +448,9 @@ describe("DefaultChatClientUtils", () => {
       endDelimiterToken: ">",
     });
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(
+        createChatModel(DefaultToolCallingChatOptions.builder().build()),
+      )
         .prompt()
         .system((s) => s.text(systemText).params(systemParams))
         .templateRenderer(customRenderer),
@@ -474,7 +486,9 @@ describe("DefaultChatClientUtils", () => {
     ]);
 
     const inputRequest = asRequestSpec(
-      ChatClient.create(createChatModel())
+      ChatClient.create(
+        createChatModel(DefaultToolCallingChatOptions.builder().build()),
+      )
         .prompt()
         .system((s) => s.text(systemText).params(systemParams))
         .user((u) => u.text(userText).params(userParams).media(media))
@@ -482,7 +496,7 @@ describe("DefaultChatClientUtils", () => {
         .toolNames(...toolNames)
         .toolCallbacks(toolCallback)
         .toolContext(toolContext)
-        .options(chatOptions)
+        .options(chatOptions.mutate())
         .advisors((a) => a.params(advisorParams)),
     );
 

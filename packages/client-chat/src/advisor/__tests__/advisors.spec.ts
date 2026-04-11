@@ -17,12 +17,13 @@
 import {
   AssistantMessage,
   type ChatModel,
+  ChatOptions,
   ChatResponse,
   Generation,
   type Prompt,
 } from "@nestjs-ai/model";
 import { lastValueFrom, map, of, reduce, tap } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatClient } from "../../chat-client";
 import type { ChatClientRequest } from "../../chat-client-request";
@@ -35,6 +36,16 @@ import type {
 } from "../api";
 
 describe("Advisors", () => {
+  let chatModel: ChatModel;
+
+  beforeEach(() => {
+    chatModel = {
+      call: vi.fn(),
+      stream: vi.fn(),
+      defaultOptions: ChatOptions.builder().build(),
+    } as unknown as ChatModel;
+  });
+
   it("call advisors context propagation", async () => {
     let capturedPrompt = {} as Prompt;
 
@@ -43,13 +54,10 @@ describe("Advisors", () => {
     const mockAroundAdvisor1 = new MockAroundAdvisor("Advisor1", 0);
     const mockAroundAdvisor2 = new MockAroundAdvisor("Advisor2", 1);
 
-    const chatModel = {
-      call: vi.fn(async (prompt: Prompt) => {
-        capturedPrompt = prompt;
-        return createResponse("Hello John");
-      }),
-      stream: vi.fn(),
-    } as unknown as ChatModel;
+    vi.mocked(chatModel.call).mockImplementation(async (prompt: Prompt) => {
+      capturedPrompt = prompt;
+      return createResponse("Hello John");
+    });
 
     const chatClient = ChatClient.builder(chatModel)
       .defaultSystem("Default system text.")
@@ -71,6 +79,7 @@ describe("Advisors", () => {
     // AROUND
     expect(mockAroundAdvisor1.chatClientResponse?.chatResponse).not.toBeNull();
     const context = mockAroundAdvisor1.chatClientResponse?.context;
+    expect(context).toBeDefined();
     expect(context?.get("key1")).toBe("value1");
     expect(context?.get("key2")).toBe("value2");
     expect(context?.get("aroundCallBeforeAdvisor1")).toBe(
@@ -98,13 +107,10 @@ describe("Advisors", () => {
     const mockAroundAdvisor1 = new MockAroundAdvisor("Advisor1", 0);
     const mockAroundAdvisor2 = new MockAroundAdvisor("Advisor2", 1);
 
-    const chatModel = {
-      call: vi.fn(),
-      stream: vi.fn((prompt: Prompt) => {
-        capturedPrompt = prompt;
-        return of(createResponse("Hello"), createResponse(" John"));
-      }),
-    } as unknown as ChatModel;
+    vi.mocked(chatModel.stream).mockImplementation((prompt: Prompt) => {
+      capturedPrompt = prompt;
+      return of(createResponse("Hello"), createResponse(" John"));
+    });
 
     const chatClient = ChatClient.builder(chatModel)
       .defaultSystem("Default system text.")

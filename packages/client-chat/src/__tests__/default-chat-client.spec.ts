@@ -72,21 +72,21 @@ function asRequestSpec(
 
 function requestData(spec: DefaultChatClient.DefaultChatClientRequestSpec) {
   return spec as unknown as {
-    _chatOptions: ChatOptions | null;
+    _optionsCustomizer: ChatOptions.Builder | null;
     _messages: Message[];
     _advisors: Advisor[];
     _toolNames: string[];
     _toolCallbacks: ToolCallback[];
-    _toolContext: Map<string, unknown>;
+    _toolContext: Record<string, unknown>;
     _systemText: string | null;
-    _systemParams: Map<string, unknown>;
-    _systemMetadata: Map<string, unknown>;
+    _systemParams: Record<string, unknown>;
+    _systemMetadata: Record<string, unknown>;
     _userText: string | null;
-    _userParams: Map<string, unknown>;
-    _userMetadata: Map<string, unknown>;
+    _userParams: Record<string, unknown>;
+    _userMetadata: Record<string, unknown>;
     _media: Media[];
     _templateRenderer: TemplateRenderer;
-    _advisorParams: Map<string, unknown>;
+    _advisorParams: Record<string, unknown>;
   };
 }
 
@@ -195,7 +195,7 @@ describe("DefaultChatClient", () => {
       expect(data._messages).toHaveLength(2);
       expect(data._messages[0]?.text).toBe("instructions");
       expect(data._messages[1]?.text).toBe("my question");
-      expect(data._chatOptions).not.toBeNull();
+      expect(data._optionsCustomizer).toBeNull();
     });
 
     it("when prompt with options then return", () => {
@@ -207,7 +207,7 @@ describe("DefaultChatClient", () => {
       const spec = asRequestSpec(chatClient.prompt(prompt));
       const data = requestData(spec);
       expect(data._messages).toHaveLength(0);
-      expect(data._chatOptions).toBe(chatOptions);
+      expect(data._optionsCustomizer).toBeNull();
     });
 
     it("test mutate", () => {
@@ -238,7 +238,7 @@ describe("DefaultChatClient", () => {
       builder.addMessages([userMessage1, userMessage2]);
       const original = builder
         .defaultAdvisors(advisor)
-        .defaultOptions(chatOptions)
+        .defaultOptions(chatOptions.mutate())
         .defaultUser((u) =>
           u
             .text("original user {userParams}")
@@ -261,21 +261,28 @@ describe("DefaultChatClient", () => {
       const mutated = original.mutate().build();
       const mutatedSpec = asRequestSpec(mutated.prompt());
       const data = requestData(mutatedSpec);
+      const builtOptions = data._optionsCustomizer?.build() as
+        | DefaultToolCallingChatOptions
+        | undefined;
 
       expect(mutatedSpec).not.toBe(originalSpec);
       expect(data._messages).toHaveLength(2);
       expect(data._advisors).toHaveLength(1);
-      expect(data._chatOptions).toBe(copyChatOptions);
+      expect(builtOptions?.toolCallbacks).toEqual(
+        copyChatOptions.toolCallbacks,
+      );
+      expect(builtOptions?.toolNames).toEqual(copyChatOptions.toolNames);
+      expect(builtOptions?.toolContext).toEqual(copyChatOptions.toolContext);
       expect(data._userText).toBe("original user {userParams}");
-      expect(data._userParams.get("userParams")).toBe("user value2");
-      expect(data._userMetadata.get("userMetadata")).toBe("user data3");
+      expect(data._userParams.userParams).toBe("user value2");
+      expect(data._userMetadata.userMetadata).toBe("user data3");
       expect(data._media).toHaveLength(1);
       expect(data._systemText).toBe("original system {sysParams}");
-      expect(data._systemParams.get("sysParams")).toBe("system value1");
+      expect(data._systemParams.sysParams).toBe("system value1");
       expect(data._templateRenderer).toBe(templateRenderer);
       expect(data._toolNames).toEqual(["toolName1", "toolName2"]);
       expect(data._toolCallbacks).toEqual([toolCallback]);
-      expect(data._toolContext.get("k")).toBe("v");
+      expect(data._toolContext.k).toBe("v");
 
       chatOptionsSpy.mockRestore();
     });
@@ -1369,11 +1376,11 @@ describe("DefaultChatClient", () => {
       const spec = new DefaultChatClient.DefaultChatClientRequestSpec(
         chatModel,
         null,
-        new Map(),
-        new Map(),
+        {},
+        {},
         null,
-        new Map(),
-        new Map(),
+        {},
+        {},
         [],
         [],
         [],
@@ -1381,10 +1388,10 @@ describe("DefaultChatClient", () => {
         [],
         null,
         [],
-        new Map(),
+        {},
         NoopObservationRegistry.INSTANCE,
         null,
-        new Map(),
+        {},
         null,
         null,
       );
@@ -1397,11 +1404,11 @@ describe("DefaultChatClient", () => {
           new DefaultChatClient.DefaultChatClientRequestSpec(
             null as never,
             null,
-            new Map(),
-            new Map(),
+            {},
+            {},
             null,
-            new Map(),
-            new Map(),
+            {},
+            {},
             [],
             [],
             [],
@@ -1409,10 +1416,10 @@ describe("DefaultChatClient", () => {
             [],
             null,
             [],
-            new Map(),
+            {},
             NoopObservationRegistry.INSTANCE,
             null,
-            new Map(),
+            {},
             null,
             null,
           ),
@@ -1425,11 +1432,11 @@ describe("DefaultChatClient", () => {
           new DefaultChatClient.DefaultChatClientRequestSpec(
             createChatModel(),
             null,
-            new Map(),
-            new Map(),
+            {},
+            {},
             null,
-            new Map(),
-            new Map(),
+            {},
+            {},
             [],
             [],
             [],
@@ -1437,10 +1444,10 @@ describe("DefaultChatClient", () => {
             [],
             null,
             [],
-            new Map(),
+            {},
             null as never,
             null,
-            new Map(),
+            {},
             null,
             null,
           ),
@@ -1461,7 +1468,7 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._advisors).toContain(loggerAdvisor);
-      expect(data._advisorParams.get("topic")).toBe("AI");
+      expect(data._advisorParams.topic).toBe("AI");
     });
 
     it("when advisor consumer is null then throw", () => {
@@ -1572,8 +1579,8 @@ describe("DefaultChatClient", () => {
         createChatModel(),
       ).build();
       expect(() =>
-        chatClient.prompt().options(null as unknown as ChatOptions),
-      ).toThrow("options cannot be null");
+        chatClient.prompt().options(null as unknown as ChatOptions.Builder),
+      ).toThrow("customizer cannot be null");
     });
 
     it("when options then return", () => {
@@ -1581,8 +1588,13 @@ describe("DefaultChatClient", () => {
         createChatModel(),
       ).build();
       const options = new DefaultToolCallingChatOptions();
-      const spec = asRequestSpec(chatClient.prompt().options(options));
-      expect(requestData(spec)._chatOptions).toBe(options);
+      const spec = asRequestSpec(chatClient.prompt().options(options.mutate()));
+      const builtOptions = requestData(spec)._optionsCustomizer?.build() as
+        | DefaultToolCallingChatOptions
+        | undefined;
+      expect(builtOptions?.toolCallbacks).toEqual(options.toolCallbacks);
+      expect(builtOptions?.toolNames).toEqual(options.toolNames);
+      expect(builtOptions?.toolContext).toEqual(options.toolContext);
     });
 
     it("when tool names element is null then throw", () => {
@@ -1775,7 +1787,7 @@ describe("DefaultChatClient", () => {
       const spec = asRequestSpec(
         chatClient.prompt().toolContext(new Map([["key", "value"]])),
       );
-      expect(requestData(spec)._toolContext.get("key")).toBe("value");
+      expect(requestData(spec)._toolContext.key).toBe("value");
     });
 
     it("when system text is null then throw", () => {
@@ -1871,8 +1883,8 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._systemText).toBe("my instruction about {topic}");
-      expect(data._systemParams.get("topic")).toBe("AI");
-      expect(data._systemMetadata.get("msgId")).toBe("uuid-xxx");
+      expect(data._systemParams.topic).toBe("AI");
+      expect(data._systemMetadata.msgId).toBe("uuid-xxx");
     });
 
     it("when system consumer is null then throw", () => {
@@ -1901,8 +1913,8 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._systemText).toBe("my instruction about {topic}");
-      expect(data._systemParams.get("topic")).toBe("AI");
-      expect(data._systemMetadata.get("msgId")).toBe("uuid-xxx");
+      expect(data._systemParams.topic).toBe("AI");
+      expect(data._systemMetadata.msgId).toBe("uuid-xxx");
     });
 
     it("when system consumer without system text then return", () => {
@@ -1919,8 +1931,8 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._systemText).toBe("my instruction about {topic}");
-      expect(data._systemParams.get("topic")).toBe("AI");
-      expect(data._systemMetadata.get("msgId")).toBe("uuid-xxx");
+      expect(data._systemParams.topic).toBe("AI");
+      expect(data._systemMetadata.msgId).toBe("uuid-xxx");
     });
 
     it("when user text is null then throw", () => {
@@ -2015,9 +2027,9 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._userText).toBe("my question about {topic}");
-      expect(data._userParams.get("topic")).toBe("AI");
+      expect(data._userParams.topic).toBe("AI");
       expect(data._media).toHaveLength(1);
-      expect(data._userMetadata.get("msgId")).toBe("uuid-xxx");
+      expect(data._userMetadata.msgId).toBe("uuid-xxx");
     });
 
     it("when user consumer is null then throw", () => {
@@ -2047,9 +2059,9 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._userText).toBe("my question about {topic}");
-      expect(data._userParams.get("topic")).toBe("AI");
+      expect(data._userParams.topic).toBe("AI");
       expect(data._media).toHaveLength(1);
-      expect(data._userMetadata.get("msgId")).toBe("uuid-xxx");
+      expect(data._userMetadata.msgId).toBe("uuid-xxx");
     });
 
     it("when user consumer without user text then return", () => {
@@ -2069,9 +2081,9 @@ describe("DefaultChatClient", () => {
       );
       const data = requestData(spec);
       expect(data._userText).toBe("my question about {topic}");
-      expect(data._userParams.get("topic")).toBe("AI");
+      expect(data._userParams.topic).toBe("AI");
       expect(data._media).toHaveLength(1);
-      expect(data._userMetadata.get("msgId")).toBe("uuid-xxx");
+      expect(data._userMetadata.msgId).toBe("uuid-xxx");
     });
 
     it("when default chat client builder with observation registry then return", () => {
@@ -2098,12 +2110,17 @@ describe("DefaultChatClient", () => {
           .prompt()
           .system("instructions")
           .user("question")
-          .options(options),
+          .options(options.mutate()),
       );
       const data = requestData(spec);
+      const builtOptions = data._optionsCustomizer?.build() as
+        | DefaultToolCallingChatOptions
+        | undefined;
       expect(data._systemText).toBe("instructions");
       expect(data._userText).toBe("question");
-      expect(data._chatOptions).toBe(options);
+      expect(builtOptions?.toolCallbacks).toEqual(options.toolCallbacks);
+      expect(builtOptions?.toolNames).toEqual(options.toolNames);
+      expect(builtOptions?.toolContext).toEqual(options.toolContext);
     });
 
     it("when tool names with empty array then return", () => {

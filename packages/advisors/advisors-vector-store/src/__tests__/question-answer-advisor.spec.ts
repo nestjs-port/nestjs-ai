@@ -19,6 +19,7 @@ import { Document, type Milliseconds, ms } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatModel,
+  ChatOptions,
   ChatResponse,
   ChatResponseMetadata,
   DefaultUsage,
@@ -33,10 +34,25 @@ import {
   SearchRequest,
   type VectorStore,
 } from "@nestjs-ai/vector-store";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QuestionAnswerAdvisor } from "../question-answer-advisor";
 
 describe("QuestionAnswerAdvisorTests", () => {
+  let chatModel: ChatModel;
+  let vectorStore: VectorStore;
+
+  beforeEach(() => {
+    chatModel = {
+      call: vi.fn(),
+      stream: vi.fn(),
+      defaultOptions: ChatOptions.builder().build(),
+    } as unknown as ChatModel;
+
+    vectorStore = {
+      similaritySearch: vi.fn(),
+    } as unknown as VectorStore;
+  });
+
   it("qa advisor with dynamic filter expressions", async () => {
     let capturedPrompt = {} as Prompt;
     let capturedSearchRequest = {} as SearchRequest;
@@ -62,7 +78,7 @@ describe("QuestionAnswerAdvisorTests", () => {
       },
     };
 
-    const chatModel = createChatModel(async (prompt) => {
+    vi.mocked(chatModel.call).mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return new ChatResponse({
         generations: [
@@ -83,10 +99,15 @@ describe("QuestionAnswerAdvisorTests", () => {
       });
     });
 
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [new Document("doc1"), new Document("doc2")];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [new Document("doc1"), new Document("doc2")];
+      },
+    );
 
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
       .searchRequest(
@@ -168,15 +189,20 @@ describe("QuestionAnswerAdvisorTests", () => {
     let capturedPrompt = {} as Prompt;
     let capturedSearchRequest = {} as SearchRequest;
 
-    const chatModel = createChatModel(async (prompt) => {
+    vi.mocked(chatModel.call).mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return createResponse("Your answer is ZXY");
     });
 
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [new Document("doc1"), new Document("doc2")];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [new Document("doc1"), new Document("doc2")];
+      },
+    );
 
     const chatClient = ChatClient.builder(chatModel).build();
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
@@ -204,15 +230,20 @@ describe("QuestionAnswerAdvisorTests", () => {
     let capturedPrompt = {} as Prompt;
     let capturedSearchRequest = {} as SearchRequest;
 
-    const chatModel = createChatModel(async (prompt) => {
+    vi.mocked(chatModel.call).mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return createResponse("Your answer is ZXY");
     });
 
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [new Document("doc1"), new Document("doc2")];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [new Document("doc1"), new Document("doc2")];
+      },
+    );
 
     const chatClient = ChatClient.builder(chatModel).build();
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
@@ -243,13 +274,18 @@ describe("QuestionAnswerAdvisorTests", () => {
   it("qa advisor with multiple filter parameters", async () => {
     let capturedSearchRequest = {} as SearchRequest;
 
-    const chatModel = createChatModel(async () =>
+    vi.mocked(chatModel.call).mockImplementation(async () =>
       createResponse("Filtered response"),
     );
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [new Document("doc1"), new Document("doc2")];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [new Document("doc1"), new Document("doc2")];
+      },
+    );
 
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
       .searchRequest(SearchRequest.builder().topK(10).build())
@@ -281,13 +317,18 @@ describe("QuestionAnswerAdvisorTests", () => {
   it("qa advisor with different similarity thresholds", async () => {
     let capturedSearchRequest = {} as SearchRequest;
 
-    const chatModel = createChatModel(async () =>
+    vi.mocked(chatModel.call).mockImplementation(async () =>
       createResponse("High threshold response"),
     );
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [new Document("relevant doc")];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [new Document("relevant doc")];
+      },
+    );
 
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
       .searchRequest(
@@ -313,14 +354,19 @@ describe("QuestionAnswerAdvisorTests", () => {
     let capturedPrompt = {} as Prompt;
     let capturedSearchRequest = {} as SearchRequest;
 
-    const chatModel = createChatModel(async (prompt) => {
+    vi.mocked(chatModel.call).mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return createResponse("Complex template response");
     });
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [new Document("template doc")];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [new Document("template doc")];
+      },
+    );
 
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
       .searchRequest(SearchRequest.builder().build())
@@ -360,7 +406,7 @@ describe("QuestionAnswerAdvisorTests", () => {
   it("qa advisor with documents containing metadata", async () => {
     let capturedPrompt = {} as Prompt;
 
-    const chatModel = createChatModel(async (prompt) => {
+    vi.mocked(chatModel.call).mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return createResponse("Metadata response");
     });
@@ -374,7 +420,7 @@ describe("QuestionAnswerAdvisorTests", () => {
       version: "2.1",
     });
 
-    const vectorStore = createVectorStore(async () => [
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(async () => [
       docWithMetadata1,
       docWithMetadata2,
     ]);
@@ -405,22 +451,25 @@ describe("QuestionAnswerAdvisorTests", () => {
     ).toThrow();
 
     // Test successful builder creation
-    const advisor = QuestionAnswerAdvisor.builder(
-      createVectorStore(async () => []),
-    ).build();
+    const advisor = QuestionAnswerAdvisor.builder(vectorStore).build();
     expect(advisor).not.toBeNull();
   });
 
   it("qa advisor with zero top k", async () => {
     let capturedSearchRequest = {} as SearchRequest;
 
-    const chatModel = createChatModel(async () =>
+    vi.mocked(chatModel.call).mockImplementation(async () =>
       createResponse("Zero docs response"),
     );
-    const vectorStore = createVectorStore(async (searchRequest) => {
-      capturedSearchRequest = searchRequest;
-      return [];
-    });
+    vi.mocked(vectorStore.similaritySearch).mockImplementation(
+      async (searchRequest) => {
+        if (typeof searchRequest === "string") {
+          throw new Error("Expected SearchRequest");
+        }
+        capturedSearchRequest = searchRequest;
+        return [];
+      },
+    );
 
     const qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
       .searchRequest(SearchRequest.builder().topK(0).build())
@@ -439,28 +488,6 @@ describe("QuestionAnswerAdvisorTests", () => {
     expect(capturedSearchRequest.topK).toBe(0);
   });
 });
-
-function createChatModel(
-  onCall: (prompt: Prompt) => Promise<ChatResponse>,
-): ChatModel {
-  return {
-    call: vi.fn(onCall),
-    stream: vi.fn(),
-  } as unknown as ChatModel;
-}
-
-function createVectorStore(
-  onSimilaritySearch: (request: SearchRequest) => Promise<Document[]>,
-): VectorStore {
-  return {
-    similaritySearch: vi.fn(async (request: SearchRequest | string) => {
-      if (typeof request === "string") {
-        throw new Error("Expected SearchRequest");
-      }
-      return onSimilaritySearch(request);
-    }),
-  } as unknown as VectorStore;
-}
 
 function createResponse(content: string): ChatResponse {
   return new ChatResponse({

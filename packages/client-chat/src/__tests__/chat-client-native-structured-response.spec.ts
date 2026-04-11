@@ -23,6 +23,7 @@ import {
   AssistantMessage,
   ChatResponse,
   ChatResponseMetadata,
+  DefaultToolCallingChatOptions,
   Generation,
   MessageType,
   type Prompt,
@@ -41,6 +42,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
     const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
       call: vi.fn(async (prompt: Prompt) => {
         capturedPrompt = prompt;
         return chatResponse;
@@ -54,7 +56,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     const responseEntity = await ChatClient.builder(chatModel)
       .build()
       .prompt()
-      .options(structuredOutputChatOptions)
+      .options(structuredOutputChatOptions.mutate())
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
@@ -83,6 +85,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
     const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
       call: vi.fn(async (prompt: Prompt) => {
         capturedPrompt = prompt;
         return chatResponse;
@@ -96,7 +99,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     const responseEntity = await ChatClient.builder(chatModel)
       .build()
       .prompt()
-      .options(structuredOutputChatOptions)
+      .options(structuredOutputChatOptions.mutate())
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
@@ -125,6 +128,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
     const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
       call: vi.fn(async (prompt: Prompt) => {
         capturedPrompt = prompt;
         return chatResponse;
@@ -138,7 +142,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     const responseEntity = await ChatClient.builder(chatModel)
       .build()
       .prompt()
-      .options(structuredOutputChatOptions)
+      .options(structuredOutputChatOptions.mutate())
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .advisors(textCallAdvisor)
       .user("Tell me about John")
@@ -168,6 +172,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
     const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
       call: vi.fn(async (prompt: Prompt) => {
         capturedPrompt = prompt;
         return chatResponse;
@@ -181,7 +186,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     const responseEntity = await ChatClient.builder(chatModel)
       .build()
       .prompt()
-      .options(structuredOutputChatOptions)
+      .options(structuredOutputChatOptions.mutate())
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .advisors(textCallAdvisor)
       .user("Tell me about John")
@@ -211,6 +216,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
     const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
       call: vi.fn(async (prompt: Prompt) => {
         capturedPrompt = prompt;
         return chatResponse;
@@ -224,7 +230,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     const responseEntity = await ChatClient.builder(chatModel)
       .build()
       .prompt()
-      .options(structuredOutputChatOptions)
+      .options(structuredOutputChatOptions.mutate())
       .advisors((advisorSpec) =>
         advisorSpec.param(
           ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key,
@@ -257,6 +263,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
     const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
       call: vi.fn(async (prompt: Prompt) => {
         capturedPrompt = prompt;
         return chatResponse;
@@ -270,7 +277,7 @@ describe("ChatClient Native Structured Response Tests", () => {
     const entity = await ChatClient.builder(chatModel)
       .build()
       .prompt()
-      .options(structuredOutputChatOptions)
+      .options(structuredOutputChatOptions.mutate())
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .advisors(textCallAdvisor)
       .advisors((advisorSpec) =>
@@ -310,12 +317,28 @@ class TestStructuredOutputChatOptions implements StructuredOutputChatOptions {
     return copy;
   }
 
+  mutate(): ChatOptions.Builder {
+    return new TestStructuredOutputChatOptionsBuilder(this._outputSchema);
+  }
+
   get outputSchema(): string {
     return this._outputSchema;
   }
 
   setOutputSchema(outputSchema: string): void {
     this._outputSchema = outputSchema;
+  }
+}
+
+class TestStructuredOutputChatOptionsBuilder extends DefaultToolCallingChatOptions.Builder {
+  constructor(private _outputSchema: string) {
+    super();
+  }
+
+  override build(): ChatOptions {
+    const options = new TestStructuredOutputChatOptions();
+    options.setOutputSchema(this._outputSchema);
+    return options;
   }
 }
 

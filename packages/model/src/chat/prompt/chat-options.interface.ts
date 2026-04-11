@@ -75,6 +75,12 @@ export interface ChatOptions extends ModelOptions {
    * @returns a copy of this {@link ChatOptions}
    */
   copy(): ChatOptions;
+
+  /**
+   * Returns a new {@link ChatOptions.Builder} initialized with this
+   * {@link ChatOptions} values.
+   */
+  mutate(): ChatOptions.Builder;
 }
 
 export namespace ChatOptions {

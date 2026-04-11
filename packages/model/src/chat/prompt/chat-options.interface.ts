@@ -78,33 +78,78 @@ export interface ChatOptions extends ModelOptions {
 }
 
 export namespace ChatOptions {
-  export interface Builder<B extends Builder<B>> {
-    clone(): B;
+  /**
+   * Builder for creating {@link ChatOptions} instance.
+   */
+  export interface Builder {
+    clone(): this;
 
-    combineWith(other: BuilderType): B;
+    /**
+     * Mutate this builder by taking all `other`'s values that are non-null,
+     * retaining `this` other values.
+     */
+    combineWith(other: this): this;
 
-    model(model: string | null): B;
+    /**
+     * Builds with the model to use for the chat.
+     * @param model - the model to use for the chat
+     */
+    model(model: string | null): this;
 
-    frequencyPenalty(frequencyPenalty: number | null): B;
+    /**
+     * Builds with the frequency penalty to use for the chat.
+     * @param frequencyPenalty - the frequency penalty to use for the chat
+     */
+    frequencyPenalty(frequencyPenalty: number | null): this;
 
-    maxTokens(maxTokens: number | null): B;
+    /**
+     * Builds with the maximum number of tokens to use for the chat.
+     * @param maxTokens - the maximum number of tokens to use for the chat
+     */
+    maxTokens(maxTokens: number | null): this;
 
-    presencePenalty(presencePenalty: number | null): B;
+    /**
+     * Builds with the presence penalty to use for the chat.
+     * @param presencePenalty - the presence penalty to use for the chat
+     */
+    presencePenalty(presencePenalty: number | null): this;
 
-    stopSequences(stopSequences: string[] | null): B;
+    /**
+     * Builds with the stop sequences to use for the chat.
+     * @param stopSequences - the stop sequences to use for the chat
+     */
+    stopSequences(stopSequences: string[] | null): this;
 
-    temperature(temperature: number | null): B;
+    /**
+     * Builds with the temperature to use for the chat.
+     * @param temperature - the temperature to use for the chat
+     */
+    temperature(temperature: number | null): this;
 
-    topK(topK: number | null): B;
+    /**
+     * Builds with the top K to use for the chat.
+     * @param topK - the top K to use for the chat
+     */
+    topK(topK: number | null): this;
 
-    topP(topP: number | null): B;
+    /**
+     * Builds with the top P to use for the chat.
+     * @param topP - the top P to use for the chat
+     */
+    topP(topP: number | null): this;
 
+    /**
+     * Build the `ChatOptions`.
+     * @returns the Chat options
+     */
     build(): ChatOptions;
   }
 
-  export interface BuilderType extends Builder<BuilderType> {}
-
-  export function builder(): BuilderType {
+  /**
+   * Creates a new `Builder` to create the default `ChatOptions`.
+   * @returns a new `Builder`
+   */
+  export function builder(): Builder {
     return new DefaultChatOptionsBuilder();
   }
 }

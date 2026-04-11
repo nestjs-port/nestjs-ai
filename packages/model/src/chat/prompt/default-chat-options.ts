@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatOptions } from "./chat-options.interface";
-import { DefaultChatOptionsBuilder } from "./default-chat-options-builder";
+import { ChatOptions } from "./chat-options.interface";
 
 export type DefaultChatOptionsProps = Omit<Partial<ChatOptions>, "copy">;
 
@@ -45,15 +44,11 @@ export class DefaultChatOptions implements ChatOptions {
     }
   }
 
-  static builder(): ChatOptions.BuilderType {
-    return new DefaultChatOptionsBuilder();
-  }
-
   /**
    * Create a builder to mutate this chat options.
    */
-  mutate(): ChatOptions.BuilderType {
-    return DefaultChatOptions.builder()
+  mutate(): ChatOptions.Builder {
+    return ChatOptions.builder()
       .model(this.model ?? null)
       .frequencyPenalty(this.frequencyPenalty ?? null)
       .maxTokens(this.maxTokens ?? null)

@@ -18,8 +18,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ChatOptions } from "../chat-options.interface";
 import type { DefaultChatOptions } from "../default-chat-options";
 
-describe("DefaultChatOptionsBuilder", () => {
-  let builder: ChatOptions.BuilderType;
+describe("ChatOptionsBuilder", () => {
+  let builder: ChatOptions.Builder;
 
   beforeEach(() => {
     builder = ChatOptions.builder();

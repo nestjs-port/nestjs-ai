@@ -131,39 +131,38 @@ export namespace ToolCallingChatOptions {
   /**
    * A builder to create a {@link ToolCallingChatOptions} instance.
    */
-  export interface Builder<B extends Builder<B>>
-    extends ChatOptions.Builder<B> {
-    toolCallbacks(toolCallbacks: ToolCallback[] | null): B;
+  export interface Builder extends ChatOptions.Builder {
+    toolCallbacks(toolCallbacks: ToolCallback[] | null): this;
 
-    toolCallbacks(...toolCallbacks: ToolCallback[]): B;
+    toolCallbacks(...toolCallbacks: ToolCallback[]): this;
 
-    toolNames(toolNames: Set<string> | null): B;
+    toolNames(toolNames: Set<string> | null): this;
 
-    toolNames(...toolNames: string[]): B;
+    toolNames(...toolNames: string[]): this;
 
     internalToolExecutionEnabled(
       internalToolExecutionEnabled: boolean | null,
-    ): B;
+    ): this;
 
-    toolContext(context: Record<string, unknown> | null): B;
+    toolContext(context: Record<string, unknown> | null): this;
 
-    toolContext(key: string, value: unknown): B;
+    toolContext(key: string, value: unknown): this;
 
-    model(model: string | null): B;
+    model(model: string | null): this;
 
-    frequencyPenalty(frequencyPenalty: number | null): B;
+    frequencyPenalty(frequencyPenalty: number | null): this;
 
-    maxTokens(maxTokens: number | null): B;
+    maxTokens(maxTokens: number | null): this;
 
-    presencePenalty(presencePenalty: number | null): B;
+    presencePenalty(presencePenalty: number | null): this;
 
-    stopSequences(stopSequences: string[] | null): B;
+    stopSequences(stopSequences: string[] | null): this;
 
-    temperature(temperature: number | null): B;
+    temperature(temperature: number | null): this;
 
-    topK(topK: number | null): B;
+    topK(topK: number | null): this;
 
-    topP(topP: number | null): B;
+    topP(topP: number | null): this;
 
     build(): ToolCallingChatOptions;
   }

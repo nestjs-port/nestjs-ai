@@ -43,7 +43,19 @@ class TestToolCallback extends ToolCallback {
 }
 
 describe("DefaultToolCallingChatOptions", () => {
-  it("should store tool callbacks when set with list", () => {
+  it("set tool callbacks should store tool callbacks", () => {
+    const options = new DefaultToolCallingChatOptions();
+    const callback1 = new TestToolCallback("tool1");
+    const callback2 = new TestToolCallback("tool2");
+    const callbacks = [callback1, callback2];
+
+    options.setToolCallbacks(callbacks);
+
+    expect(options.toolCallbacks).toHaveLength(2);
+    expect(options.toolCallbacks).toEqual(callbacks);
+  });
+
+  it("set tool callbacks with varargs should store tool callbacks", () => {
     const options = new DefaultToolCallingChatOptions();
     const callback1 = new TestToolCallback("tool1");
     const callback2 = new TestToolCallback("tool2");
@@ -54,19 +66,7 @@ describe("DefaultToolCallingChatOptions", () => {
     expect(options.toolCallbacks).toEqual([callback1, callback2]);
   });
 
-  it("should store tool callbacks when set with varargs-style list", () => {
-    const options = new DefaultToolCallingChatOptions();
-    const callback1 = new TestToolCallback("tool1");
-    const callback2 = new TestToolCallback("tool2");
-
-    options.setToolCallbacks([callback1, callback2]);
-
-    expect(options.toolCallbacks).toHaveLength(2);
-    expect(options.toolCallbacks[0]).toBe(callback1);
-    expect(options.toolCallbacks[1]).toBe(callback2);
-  });
-
-  it("should reject null tool callbacks", () => {
+  it("set tool callbacks should reject null list", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(() => {
@@ -74,26 +74,26 @@ describe("DefaultToolCallingChatOptions", () => {
     }).toThrow("toolCallbacks cannot be null");
   });
 
-  it("should store tool names when set", () => {
+  it("set tool names should store tool names", () => {
     const options = new DefaultToolCallingChatOptions();
+    const toolNames = new Set(["tool1", "tool2"]);
+
+    options.setToolNames(toolNames);
+
+    expect(options.toolNames.size).toBe(2);
+    expect(options.toolNames).toEqual(toolNames);
+  });
+
+  it("set tool names with varargs should store tool names", () => {
+    const options = new DefaultToolCallingChatOptions();
+
     options.setToolNames(new Set(["tool1", "tool2"]));
 
     expect(options.toolNames.size).toBe(2);
-    expect(options.toolNames.has("tool1")).toBe(true);
-    expect(options.toolNames.has("tool2")).toBe(true);
+    expect(options.toolNames).toEqual(new Set(["tool1", "tool2"]));
   });
 
-  it("should store tool names when set with varargs-style set", () => {
-    const options = new DefaultToolCallingChatOptions();
-
-    options.setToolNames(new Set(["tool1", "tool2"]));
-
-    expect(options.toolNames.size).toBe(2);
-    expect(options.toolNames.has("tool1")).toBe(true);
-    expect(options.toolNames.has("tool2")).toBe(true);
-  });
-
-  it("should reject null tool names", () => {
+  it("set tool names should reject null set", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(() => {
@@ -101,16 +101,35 @@ describe("DefaultToolCallingChatOptions", () => {
     }).toThrow("toolNames cannot be null");
   });
 
-  it("should store tool context", () => {
+  it("set tool names should reject null elements", () => {
     const options = new DefaultToolCallingChatOptions();
-    options.setToolContext({ key1: "value1", key2: 42 });
+    const toolNames = new Set([null as unknown as string]);
 
-    expect(Object.keys(options.toolContext)).toHaveLength(2);
-    expect(options.toolContext.key1).toBe("value1");
-    expect(options.toolContext.key2).toBe(42);
+    expect(() => {
+      options.setToolNames(toolNames);
+    }).toThrow("toolNames cannot contain null elements");
   });
 
-  it("should reject null tool context", () => {
+  it("set tool names should reject empty elements", () => {
+    const options = new DefaultToolCallingChatOptions();
+    const toolNames = new Set([""]);
+
+    expect(() => {
+      options.setToolNames(toolNames);
+    }).toThrow("toolNames cannot contain empty elements");
+  });
+
+  it("set tool context should store context", () => {
+    const options = new DefaultToolCallingChatOptions();
+    const context = { key1: "value1", key2: 42 };
+
+    options.setToolContext(context);
+
+    expect(Object.keys(options.toolContext)).toHaveLength(2);
+    expect(options.toolContext).toEqual(context);
+  });
+
+  it("set tool context should reject null map", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(() => {
@@ -118,7 +137,7 @@ describe("DefaultToolCallingChatOptions", () => {
     }).toThrow("toolContext cannot be null");
   });
 
-  it("should create new instance with same values when copied", () => {
+  it("copy should create new instance with same values", () => {
     const original = new DefaultToolCallingChatOptions();
     const callback = new TestToolCallback("tool1");
     original.setToolCallbacks([callback]);
@@ -141,30 +160,27 @@ describe("DefaultToolCallingChatOptions", () => {
     expect(copy.temperature).toBe(original.temperature);
   });
 
-  it("should return immutable collections from getters", () => {
+  it("getters should return immutable collections", () => {
     const options = new DefaultToolCallingChatOptions();
     const callback = new TestToolCallback("tool1");
     options.setToolCallbacks([callback]);
     options.setToolNames(new Set(["tool1"]));
     options.setToolContext({ key: "value" });
 
-    // toolCallbacks returns a copy, so modifying it doesn't affect internal state
     const callbacks = options.toolCallbacks;
     callbacks.push(new TestToolCallback("tool2"));
     expect(options.toolCallbacks).toHaveLength(1);
 
-    // toolNames returns a copy
     const names = options.toolNames;
     names.add("tool2");
     expect(options.toolNames.size).toBe(1);
 
-    // toolContext returns a copy
     const context = options.toolContext;
     context.key2 = "value2";
     expect(Object.keys(options.toolContext)).toHaveLength(1);
   });
 
-  it("should create options with all properties via builder", () => {
+  it("builder should create options with all properties", () => {
     const callback = new TestToolCallback("tool1");
     const context = { key: "value" };
 
@@ -184,7 +200,7 @@ describe("DefaultToolCallingChatOptions", () => {
       .build();
 
     expect(options.toolCallbacks).toEqual([callback]);
-    expect(options.toolNames.has("tool1")).toBe(true);
+    expect(options.toolNames).toEqual(new Set(["tool1"]));
     expect(options.toolContext).toEqual(context);
     expect(options.internalToolExecutionEnabled).toBe(true);
     expect(options.model).toBe("gpt-4");
@@ -197,17 +213,34 @@ describe("DefaultToolCallingChatOptions", () => {
     expect(options.topP).toBe(0.9);
   });
 
-  it("should support tool context addition via builder", () => {
+  it("builder should support tool context addition", () => {
     const options = DefaultToolCallingChatOptions.builder()
       .toolContext("key1", "value1")
       .toolContext("key2", "value2")
       .build();
 
-    expect(options.toolContext.key1).toBe("value1");
-    expect(options.toolContext.key2).toBe("value2");
+    expect(options.toolContext).toEqual({ key1: "value1", key2: "value2" });
   });
 
-  it("should initialize with empty collections by default", () => {
+  it("deprecated methods should work correctly", () => {
+    const options = new DefaultToolCallingChatOptions();
+
+    const callback1 = new TestToolCallback("tool1");
+    const callback2 = new TestToolCallback("tool2");
+    options.setToolCallbacks([callback1, callback2]);
+    expect(options.toolCallbacks).toHaveLength(2);
+
+    options.setToolNames(new Set(["tool1"]));
+    expect(options.toolNames).toEqual(new Set(["tool1"]));
+
+    options.setToolNames(new Set(["function1"]));
+    expect(options.toolNames).toEqual(new Set(["function1"]));
+
+    options.setInternalToolExecutionEnabled(true);
+    expect(options.internalToolExecutionEnabled).toBe(true);
+  });
+
+  it("default constructor should initialize with empty collections", () => {
     const options = new DefaultToolCallingChatOptions();
 
     expect(options.toolCallbacks).toHaveLength(0);
@@ -216,7 +249,7 @@ describe("DefaultToolCallingChatOptions", () => {
     expect(options.internalToolExecutionEnabled).toBeNull();
   });
 
-  it("should handle empty collections via builder", () => {
+  it("builder should handle empty collections", () => {
     const options = DefaultToolCallingChatOptions.builder()
       .toolCallbacks([])
       .toolNames(new Set<string>())
@@ -228,34 +261,7 @@ describe("DefaultToolCallingChatOptions", () => {
     expect(Object.keys(options.toolContext)).toHaveLength(0);
   });
 
-  it("should treat null collection inputs as unset values", () => {
-    const options = DefaultToolCallingChatOptions.builder()
-      .toolCallbacks(null)
-      .toolNames(null)
-      .toolContext(null)
-      .build();
-
-    expect(options.toolCallbacks).toHaveLength(0);
-    expect(options.toolNames.size).toBe(0);
-    expect(Object.keys(options.toolContext)).toHaveLength(0);
-  });
-
-  it("should allow null collection inputs to be followed by concrete values", () => {
-    const options = DefaultToolCallingChatOptions.builder()
-      .toolCallbacks(null)
-      .toolCallbacks([])
-      .toolNames(null)
-      .toolNames(new Set(["tool1"]))
-      .toolContext(null)
-      .toolContext("key1", "value1")
-      .build();
-
-    expect(options.toolCallbacks).toHaveLength(0);
-    expect(options.toolNames.has("tool1")).toBe(true);
-    expect(options.toolContext).toEqual({ key1: "value1" });
-  });
-
-  it("should accept null value for internalToolExecutionEnabled", () => {
+  it("set internal tool execution enabled should accept null value", () => {
     const options = new DefaultToolCallingChatOptions();
     options.setInternalToolExecutionEnabled(true);
     expect(options.internalToolExecutionEnabled).toBe(true);

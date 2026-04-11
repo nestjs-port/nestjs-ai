@@ -17,10 +17,7 @@
 export { DefaultToolExecutionExceptionProcessor } from "../../tool/execution/default-tool-execution-exception-processor";
 export { ToolExecutionException } from "../../tool/execution/tool-execution-exception";
 export type { ToolExecutionExceptionProcessor } from "../../tool/execution/tool-execution-exception-processor.interface";
-export {
-  DefaultToolCallingChatOptions,
-  DefaultToolCallingChatOptionsBuilder,
-} from "./default-tool-calling-chat-options";
+export { DefaultToolCallingChatOptions } from "./default-tool-calling-chat-options";
 export {
   DefaultToolCallingManager,
   type DefaultToolCallingManagerProps,

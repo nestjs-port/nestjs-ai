@@ -51,6 +51,11 @@ describe("DefaultToolExecutionEligibilityPredicate", () => {
         return {};
       },
       setToolContext(_value: Record<string, unknown>) {},
+      mutate(): ChatOptions.Builder {
+        throw new Error(
+          "mutate() must be overridden to return most concrete Builder",
+        );
+      },
       copy: () => createToolCallingChatOptions(internalToolExecutionEnabled),
     } as ToolCallingChatOptions;
   }

@@ -16,10 +16,11 @@
 
 import assert from "node:assert/strict";
 import { StringUtils } from "@nestjs-ai/commons";
-import type {
-  StructuredOutputChatOptions,
-  ToolCallback,
-  ToolCallingChatOptions,
+import {
+  ChatOptions,
+  type StructuredOutputChatOptions,
+  type ToolCallback,
+  type ToolCallingChatOptions,
 } from "@nestjs-ai/model";
 import type {
   AudioParameters,
@@ -238,6 +239,20 @@ export class OpenAiChatOptions
       type: "json_schema",
       json_schema: JSON.parse(outputSchema),
     };
+  }
+
+  mutate(): ChatOptions.Builder {
+    return ChatOptions.builder()
+      .model(this.model ?? null)
+      .frequencyPenalty(this.frequencyPenalty ?? null)
+      .maxTokens(this.maxTokens ?? null)
+      .presencePenalty(this.presencePenalty ?? null)
+      .stopSequences(
+        this.stopSequences != null ? [...this.stopSequences] : null,
+      )
+      .temperature(this.temperature ?? null)
+      .topK(this.topK ?? null)
+      .topP(this.topP ?? null);
   }
 
   copy(): OpenAiChatOptions {

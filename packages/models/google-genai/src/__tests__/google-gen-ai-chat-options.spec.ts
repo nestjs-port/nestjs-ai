@@ -32,53 +32,63 @@ describe("GoogleGenAiChatOptions", () => {
   });
 
   it("should construct with thinkingBudget", () => {
-    const options = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingBudget: 15000,
-    });
+    const options = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(15000)
+      .build();
 
     expect(options.model).toBe("test-model");
     expect(options.thinkingBudget).toBe(15000);
   });
 
-  it("should copy thinkingBudget values", () => {
-    const original = new GoogleGenAiChatOptions({
-      model: "test-model",
-      temperature: 0.8,
-      thinkingBudget: 20000,
-    });
+  it("should create fromOptions with thinkingBudget", () => {
+    const original = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .temperature(0.8)
+      .thinkingBudget(20000)
+      .build();
 
-    const copy = original.copy();
+    const copy = GoogleGenAiChatOptions.fromOptions(original);
 
-    expect(copy).not.toBe(original);
     expect(copy.model).toBe("test-model");
     expect(copy.temperature).toBe(0.8);
     expect(copy.thinkingBudget).toBe(20000);
+    expect(copy).not.toBe(original);
+  });
+
+  it("should copy thinkingBudget values", () => {
+    const original = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(30000)
+      .build();
+
+    const copy = original.copy();
+
+    expect(copy.model).toBe("test-model");
+    expect(copy.thinkingBudget).toBe(30000);
+    expect(copy).not.toBe(original);
   });
 
   it("should compare equal for identical thinkingBudget values", () => {
-    const options1 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingBudget: 12853,
-    });
-    const options2 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingBudget: 12853,
-    });
-    const options3 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingBudget: 25000,
-    });
+    const options1 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(12853)
+      .build();
+    const options2 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(12853)
+      .build();
+    const options3 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(25000)
+      .build();
 
     expect(options1).toEqual(options2);
     expect(options1).not.toEqual(options3);
   });
 
   it("should preserve labels and accept an empty labels map", () => {
-    const options = new GoogleGenAiChatOptions({
-      model: "test-model",
-      labels: {},
-    });
+    const options = GoogleGenAiChatOptions.builder().labels({}).build();
 
     expect(options.labels).toEqual({});
   });
@@ -96,40 +106,52 @@ describe("GoogleGenAiChatOptions", () => {
   });
 
   it("should construct with includeServerSideToolInvocations", () => {
-    const options = new GoogleGenAiChatOptions({
-      model: "test-model",
-      includeServerSideToolInvocations: true,
-    });
+    const options = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .includeServerSideToolInvocations(true)
+      .build();
 
     expect(options.model).toBe("test-model");
     expect(options.includeServerSideToolInvocations).toBe(true);
   });
 
+  it("should create fromOptions with includeServerSideToolInvocations", () => {
+    const original = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .includeServerSideToolInvocations(true)
+      .build();
+
+    const copy = GoogleGenAiChatOptions.fromOptions(original);
+
+    expect(copy.includeServerSideToolInvocations).toBe(true);
+    expect(copy).not.toBe(original);
+  });
+
   it("should copy includeServerSideToolInvocations values", () => {
-    const original = new GoogleGenAiChatOptions({
-      model: "test-model",
-      includeServerSideToolInvocations: true,
-    });
+    const original = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .includeServerSideToolInvocations(true)
+      .build();
 
     const copy = original.copy();
 
-    expect(copy).not.toBe(original);
     expect(copy.includeServerSideToolInvocations).toBe(true);
+    expect(copy).not.toBe(original);
   });
 
   it("should compare equal for identical includeServerSideToolInvocations values", () => {
-    const options1 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      includeServerSideToolInvocations: true,
-    });
-    const options2 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      includeServerSideToolInvocations: true,
-    });
-    const options3 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      includeServerSideToolInvocations: false,
-    });
+    const options1 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .includeServerSideToolInvocations(true)
+      .build();
+    const options2 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .includeServerSideToolInvocations(true)
+      .build();
+    const options3 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .includeServerSideToolInvocations(false)
+      .build();
 
     expect(options1).toEqual(options2);
     expect(options1).not.toEqual(options3);
@@ -151,52 +173,64 @@ describe("GoogleGenAiChatOptions", () => {
   });
 
   it("should construct with thinkingLevel", () => {
-    const options = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingLevel: GoogleGenAiThinkingLevel.HIGH,
-    });
+    const options = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingLevel(GoogleGenAiThinkingLevel.HIGH)
+      .build();
 
     expect(options.model).toBe("test-model");
     expect(options.thinkingLevel).toBe(GoogleGenAiThinkingLevel.HIGH);
   });
 
+  it("should create fromOptions with thinkingLevel", () => {
+    const original = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingLevel(GoogleGenAiThinkingLevel.LOW)
+      .build();
+
+    const copy = GoogleGenAiChatOptions.fromOptions(original);
+
+    expect(copy.thinkingLevel).toBe(GoogleGenAiThinkingLevel.LOW);
+    expect(copy).not.toBe(original);
+  });
+
   it("should copy thinkingLevel values", () => {
-    const original = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingLevel: GoogleGenAiThinkingLevel.HIGH,
-    });
+    const original = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingLevel(GoogleGenAiThinkingLevel.HIGH)
+      .build();
 
     const copy = original.copy();
 
-    expect(copy).not.toBe(original);
     expect(copy.thinkingLevel).toBe(GoogleGenAiThinkingLevel.HIGH);
+    expect(copy).not.toBe(original);
   });
 
   it("should compare equal for identical thinkingLevel values", () => {
-    const options1 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingLevel: GoogleGenAiThinkingLevel.HIGH,
-    });
-    const options2 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingLevel: GoogleGenAiThinkingLevel.HIGH,
-    });
-    const options3 = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingLevel: GoogleGenAiThinkingLevel.LOW,
-    });
+    const options1 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingLevel(GoogleGenAiThinkingLevel.HIGH)
+      .build();
+    const options2 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingLevel(GoogleGenAiThinkingLevel.HIGH)
+      .build();
+    const options3 = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingLevel(GoogleGenAiThinkingLevel.LOW)
+      .build();
 
     expect(options1).toEqual(options2);
     expect(options1).not.toEqual(options3);
   });
 
   it("should support thinkingBudget, includeThoughts, and thinkingLevel together", () => {
-    const options = new GoogleGenAiChatOptions({
-      model: "test-model",
-      thinkingBudget: 8192,
-      includeThoughts: true,
-      thinkingLevel: GoogleGenAiThinkingLevel.HIGH,
-    });
+    const options = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(8192)
+      .includeThoughts(true)
+      .thinkingLevel(GoogleGenAiThinkingLevel.HIGH)
+      .build();
 
     expect(options.thinkingBudget).toBe(8192);
     expect(options.includeThoughts).toBe(true);
@@ -204,13 +238,52 @@ describe("GoogleGenAiChatOptions", () => {
   });
 
   it("should support all thinking level values", () => {
+    // Test all enum values work correctly
     for (const level of Object.values(GoogleGenAiThinkingLevel)) {
-      const options = new GoogleGenAiChatOptions({
-        model: "test-model",
-        thinkingLevel: level,
-      });
+      const options = GoogleGenAiChatOptions.builder()
+        .model("test-model")
+        .thinkingLevel(level)
+        .build();
 
       expect(options.thinkingLevel).toBe(level);
     }
+  });
+
+  it("should build options with the namespace builder", () => {
+    const options = GoogleGenAiChatOptions.builder()
+      .model("builder-model")
+      .temperature(0.5)
+      .candidateCount(2)
+      .googleSearchRetrieval(true)
+      .labels({ env: "test" })
+      .build();
+
+    expect(options.model).toBe("builder-model");
+    expect(options.temperature).toBe(0.5);
+    expect(options.candidateCount).toBe(2);
+    expect(options.googleSearchRetrieval).toBe(true);
+    expect(options.labels).toEqual({ env: "test" });
+  });
+
+  it("should preserve thinkingBudget in toString", () => {
+    const options = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .thinkingBudget(12853)
+      .build();
+
+    const rendered = options.toString();
+    expect(rendered).toContain("thinkingBudget=12853");
+    expect(rendered).toContain("test-model");
+  });
+
+  it("should preserve labels in toString", () => {
+    const options = GoogleGenAiChatOptions.builder()
+      .model("test-model")
+      .labels({ org: "my-org" })
+      .build();
+
+    const rendered = options.toString();
+    expect(rendered).toContain("labels={org=my-org}");
+    expect(rendered).toContain("test-model");
   });
 });

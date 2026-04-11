@@ -61,6 +61,7 @@ import {
   MessageType,
   Prompt,
   type ToolCall,
+  ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolExecutionEligibilityPredicate,
   ToolExecutionResult,
@@ -247,71 +248,12 @@ export class GoogleGenAiChatModel extends ChatModel {
 
   buildRequestPrompt(prompt: Prompt): Prompt {
     // Process runtime options
-    let runtimeOptions: GoogleGenAiChatOptions | null = null;
-    if (prompt.options) {
-      runtimeOptions = new GoogleGenAiChatOptions(
-        prompt.options as Partial<GoogleGenAiChatOptions>,
-      );
-    }
+    const runtimeOptions =
+      (prompt.options as GoogleGenAiChatOptions | null) ?? this._defaultOptions;
 
-    // Merge runtime options and default options
-    const requestOptions = GoogleGenAiChatModel.mergeOptions(
-      runtimeOptions,
-      this._defaultOptions,
-    );
+    ToolCallingChatOptions.validateToolCallbacks(runtimeOptions.toolCallbacks);
 
-    // Merge @JsonIgnore-annotated options explicitly
-    if (runtimeOptions) {
-      requestOptions.internalToolExecutionEnabled =
-        runtimeOptions.internalToolExecutionEnabled ??
-        this._defaultOptions.internalToolExecutionEnabled;
-
-      requestOptions.toolNames =
-        runtimeOptions.toolNames.size > 0
-          ? new Set(runtimeOptions.toolNames)
-          : new Set(this._defaultOptions.toolNames);
-
-      requestOptions.toolCallbacks =
-        runtimeOptions.toolCallbacks.length > 0
-          ? [...runtimeOptions.toolCallbacks]
-          : [...this._defaultOptions.toolCallbacks];
-
-      requestOptions.toolContext = {
-        ...this._defaultOptions.toolContext,
-        ...runtimeOptions.toolContext,
-      };
-
-      requestOptions.googleSearchRetrieval =
-        runtimeOptions.googleSearchRetrieval ??
-        this._defaultOptions.googleSearchRetrieval;
-      requestOptions.includeServerSideToolInvocations =
-        runtimeOptions.includeServerSideToolInvocations ??
-        this._defaultOptions.includeServerSideToolInvocations;
-
-      requestOptions.safetySettings =
-        runtimeOptions.safetySettings.length > 0
-          ? [...runtimeOptions.safetySettings]
-          : [...this._defaultOptions.safetySettings];
-
-      requestOptions.labels =
-        Object.keys(runtimeOptions.labels).length > 0
-          ? { ...runtimeOptions.labels }
-          : { ...this._defaultOptions.labels };
-    } else {
-      requestOptions.internalToolExecutionEnabled =
-        this._defaultOptions.internalToolExecutionEnabled;
-      requestOptions.toolNames = new Set(this._defaultOptions.toolNames);
-      requestOptions.toolCallbacks = [...this._defaultOptions.toolCallbacks];
-      requestOptions.toolContext = { ...this._defaultOptions.toolContext };
-      requestOptions.googleSearchRetrieval =
-        this._defaultOptions.googleSearchRetrieval;
-      requestOptions.includeServerSideToolInvocations =
-        this._defaultOptions.includeServerSideToolInvocations;
-      requestOptions.safetySettings = [...this._defaultOptions.safetySettings];
-      requestOptions.labels = { ...this._defaultOptions.labels };
-    }
-
-    return new Prompt(prompt.instructions, requestOptions);
+    return new Prompt(prompt.instructions, runtimeOptions);
   }
 
   protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
@@ -987,46 +929,6 @@ export class GoogleGenAiChatModel extends ChatModel {
         );
       }
     }
-  }
-
-  private static mergeOptions(
-    runtime: GoogleGenAiChatOptions | null,
-    defaults: GoogleGenAiChatOptions,
-  ): GoogleGenAiChatOptions {
-    if (!runtime) {
-      return new GoogleGenAiChatOptions(defaults);
-    }
-
-    return new GoogleGenAiChatOptions({
-      model: runtime.model ?? defaults.model,
-      temperature: runtime.temperature ?? defaults.temperature,
-      topP: runtime.topP ?? defaults.topP,
-      topK: runtime.topK ?? defaults.topK,
-      candidateCount: runtime.candidateCount ?? defaults.candidateCount,
-      maxOutputTokens: runtime.maxOutputTokens ?? defaults.maxOutputTokens,
-      stopSequences: runtime.stopSequences ?? defaults.stopSequences,
-      responseMimeType: runtime.responseMimeType ?? defaults.responseMimeType,
-      responseSchema: runtime.responseSchema ?? defaults.responseSchema,
-      frequencyPenalty: runtime.frequencyPenalty ?? defaults.frequencyPenalty,
-      presencePenalty: runtime.presencePenalty ?? defaults.presencePenalty,
-      thinkingBudget: runtime.thinkingBudget ?? defaults.thinkingBudget,
-      includeThoughts: runtime.includeThoughts ?? defaults.includeThoughts,
-      thinkingLevel: runtime.thinkingLevel ?? defaults.thinkingLevel,
-      includeExtendedUsageMetadata:
-        runtime.includeExtendedUsageMetadata ??
-        defaults.includeExtendedUsageMetadata,
-      cachedContentName:
-        runtime.cachedContentName ?? defaults.cachedContentName,
-      useCachedContent: runtime.useCachedContent ?? defaults.useCachedContent,
-      autoCacheThreshold:
-        runtime.autoCacheThreshold ?? defaults.autoCacheThreshold,
-      autoCacheTtl: runtime.autoCacheTtl ?? defaults.autoCacheTtl,
-      googleSearchRetrieval:
-        runtime.googleSearchRetrieval ?? defaults.googleSearchRetrieval,
-      includeServerSideToolInvocations:
-        runtime.includeServerSideToolInvocations ??
-        defaults.includeServerSideToolInvocations,
-    });
   }
 
   // --- ChatModel enum ---

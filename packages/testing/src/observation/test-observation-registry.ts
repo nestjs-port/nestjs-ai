@@ -83,8 +83,8 @@ export class TestObservationRegistry implements ObservationRegistry {
     return this.delegate.currentObservationScope;
   }
 
-  set currentObservationScope(scope: ObservationScope | null) {
-    this.delegate.currentObservationScope = scope;
+  setCurrentObservationScope(scope: ObservationScope | null): void {
+    this.delegate.setCurrentObservationScope(scope);
   }
 
   get currentObservation(): Observation<ObservationContext> | null {

@@ -89,7 +89,7 @@ describe("OpenAiChatOptions", () => {
     });
 
     // streamUsage set separately since it's a derived property
-    options.streamUsage = true;
+    options.setStreamUsage(true);
 
     expect(options.model).toBe("test-model");
     expect(options.frequencyPenalty).toBe(0.5);
@@ -243,10 +243,10 @@ describe("OpenAiChatOptions", () => {
     expect(options.internalToolExecutionEnabled).toBe(false);
     expect(options.httpHeaders).toEqual({ header2: "value2" });
     expect(options.streamUsage).toBe(true);
-    options.streamUsage = false;
+    options.setStreamUsage(false);
     expect(options.streamUsage).toBe(false);
     expect(options.streamOptions).toBeUndefined();
-    options.stopSequences = ["s1", "s2"];
+    options.setStopSequences(["s1", "s2"]);
     expect(options.stopSequences).toEqual(["s1", "s2"]);
     expect(options.stop).toEqual(["s1", "s2"]);
     expect(options.serviceTier).toBe("default");
@@ -339,7 +339,7 @@ describe("OpenAiChatOptions", () => {
     }`;
 
     const options = new OpenAiChatOptions();
-    options.outputSchema = schema;
+    options.setOutputSchema(schema);
 
     expect(options.responseFormat).toEqual({
       type: "json_schema",
@@ -406,12 +406,12 @@ describe("OpenAiChatOptions", () => {
     expect(options.streamOptions).toBeUndefined();
 
     // Setting streamUsage to true should set streamOptions
-    options.streamUsage = true;
+    options.setStreamUsage(true);
     expect(options.streamUsage).toBe(true);
     expect(options.streamOptions).toEqual({ include_usage: true });
 
     // Setting streamUsage to false should clear streamOptions
-    options.streamUsage = false;
+    options.setStreamUsage(false);
     expect(options.streamUsage).toBe(false);
     expect(options.streamOptions).toBeUndefined();
 
@@ -431,7 +431,7 @@ describe("OpenAiChatOptions", () => {
     const stopSequences = ["stop1", "stop2"];
 
     // Setting stopSequences should also set stop
-    options.stopSequences = stopSequences;
+    options.setStopSequences(stopSequences);
     expect(options.stopSequences).toEqual(stopSequences);
     expect(options.stop).toEqual(stopSequences);
 

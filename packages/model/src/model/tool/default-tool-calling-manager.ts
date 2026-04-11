@@ -269,7 +269,7 @@ export class DefaultToolCallingManager implements ToolCallingManager {
               throw ex;
             }
           }
-          observationContext.toolCallResult = result;
+          observationContext.setToolCallResult(result);
           return result;
         });
 

@@ -62,14 +62,14 @@ export class SimpleObservation<
   }
 
   contextualName(contextualName: string | null): this {
-    this._context.contextualName = contextualName;
+    this._context.setContextualName(contextualName);
     return this;
   }
 
   start(): this {
-    this._context.name = this._convention.getName();
-    this._context.contextualName = this._convention.getContextualName(
-      this._context,
+    this._context.setName(this._convention.getName());
+    this._context.setContextualName(
+      this._convention.getContextualName(this._context),
     );
 
     this.addConventionKeyValues();
@@ -88,7 +88,7 @@ export class SimpleObservation<
   }
 
   error(err: Error): this {
-    this._context.error = err;
+    this._context.setError(err);
     for (const handler of this._handlers) {
       handler.onError?.(this._context);
     }

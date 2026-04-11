@@ -98,7 +98,7 @@ export abstract class RetryUtils {
     const retryTemplate = new RetryTemplate(retryPolicy);
 
     let retryCount = 0;
-    retryTemplate.retryListener = {
+    retryTemplate.setRetryListener({
       onRetryFailure(
         _policy: RetryPolicy,
         _retryable: Retryable,
@@ -117,7 +117,7 @@ export abstract class RetryUtils {
           );
         }
       },
-    };
+    });
     return retryTemplate;
   }
 
@@ -135,7 +135,7 @@ export abstract class RetryUtils {
     const retryTemplate = new RetryTemplate(retryPolicy);
 
     let retryCount = 0;
-    retryTemplate.retryListener = {
+    retryTemplate.setRetryListener({
       onRetryFailure(
         _policy: RetryPolicy,
         _retryable: Retryable,
@@ -154,7 +154,7 @@ export abstract class RetryUtils {
           );
         }
       },
-    };
+    });
     return retryTemplate;
   }
 

@@ -93,11 +93,11 @@ export abstract class ObservationDocumentation {
     );
 
     if (this.name != null) {
-      observation.context.name = this.name;
+      observation.context.setName(this.name);
     }
 
     if (this.contextualName != null) {
-      observation.contextualName(this.contextualName);
+      observation.context.setContextualName(this.contextualName);
     }
 
     return observation;

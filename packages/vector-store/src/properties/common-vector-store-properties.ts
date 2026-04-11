@@ -21,7 +21,7 @@ export class CommonVectorStoreProperties {
     return this._initializeSchema;
   }
 
-  set initializeSchema(initializeSchema: boolean) {
+  setInitializeSchema(initializeSchema: boolean): void {
     this._initializeSchema = initializeSchema;
   }
 }

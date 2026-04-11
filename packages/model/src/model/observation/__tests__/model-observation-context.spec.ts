@@ -84,7 +84,7 @@ describe("ModelObservationContext", () => {
         AiProvider.OLLAMA.value,
       ),
     );
-    observationContext.response = "test response";
+    observationContext.setResponse("test response");
 
     expect(observationContext).toBeDefined();
   });
@@ -99,7 +99,7 @@ describe("ModelObservationContext", () => {
     );
 
     expect(() => {
-      observationContext.response = null as unknown as string;
+      observationContext.setResponse(null as unknown as string);
     }).toThrow("response cannot be null");
   });
 
@@ -161,7 +161,7 @@ describe("ModelObservationContext", () => {
         AiProvider.OLLAMA.value,
       ),
     );
-    observationContext.response = true;
+    observationContext.setResponse(true);
 
     expect(observationContext).toBeDefined();
   });
@@ -200,7 +200,7 @@ describe("ModelObservationContext", () => {
         AiProvider.OLLAMA.value,
       ),
     );
-    observationContext.response = testResponse;
+    observationContext.setResponse(testResponse);
 
     expect(observationContext.response).toBe(testResponse);
   });
@@ -227,9 +227,9 @@ describe("ModelObservationContext", () => {
       ),
     );
 
-    observationContext.response = "first response";
-    observationContext.response = "second response";
-    observationContext.response = "final response";
+    observationContext.setResponse("first response");
+    observationContext.setResponse("second response");
+    observationContext.setResponse("final response");
 
     expect(observationContext.response).toBe("final response");
   });
@@ -275,7 +275,7 @@ describe("ModelObservationContext", () => {
         AiProvider.OLLAMA.value,
       ),
     );
-    observationContext.response = "";
+    observationContext.setResponse("");
 
     expect(observationContext.response).toBe("");
   });

@@ -82,13 +82,15 @@ describe("ChatModelCompletionObservationHandler", () => {
   it("when empty completion then output nothing", () => {
     const observationHandler = new ChatModelCompletionObservationHandler();
     const context = createContext();
-    context.response = new ChatResponse({
-      generations: [
-        new Generation({
-          assistantMessage: AssistantMessage.of(""),
-        }),
-      ],
-    });
+    context.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({
+            assistantMessage: AssistantMessage.of(""),
+          }),
+        ],
+      }),
+    );
 
     observationHandler.onStop(context);
 
@@ -98,16 +100,18 @@ describe("ChatModelCompletionObservationHandler", () => {
   it("when completion with text then output it", () => {
     const observationHandler = new ChatModelCompletionObservationHandler();
     const context = createContext();
-    context.response = new ChatResponse({
-      generations: [
-        new Generation({
-          assistantMessage: AssistantMessage.of("say please"),
-        }),
-        new Generation({
-          assistantMessage: AssistantMessage.of("seriously, say please"),
-        }),
-      ],
-    });
+    context.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({
+            assistantMessage: AssistantMessage.of("say please"),
+          }),
+          new Generation({
+            assistantMessage: AssistantMessage.of("seriously, say please"),
+          }),
+        ],
+      }),
+    );
 
     observationHandler.onStop(context);
 

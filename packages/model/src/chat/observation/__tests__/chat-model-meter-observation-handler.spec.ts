@@ -136,15 +136,17 @@ describe("ChatModelMeterObservationHandler", () => {
     const observation = createObservation(observationContext, meterRegistry);
 
     observation.start();
-    observationContext.response = new ChatResponse({
-      generations: [
-        new Generation({ assistantMessage: AssistantMessage.of("test") }),
-      ],
-      chatResponseMetadata: ChatResponseMetadata.builder()
-        .model("mistral-42")
-        .usage(new TestUsage())
-        .build(),
-    });
+    observationContext.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({ assistantMessage: AssistantMessage.of("test") }),
+        ],
+        chatResponseMetadata: ChatResponseMetadata.builder()
+          .model("mistral-42")
+          .usage(new TestUsage())
+          .build(),
+      }),
+    );
     observation.stop();
 
     expect(
@@ -203,15 +205,17 @@ describe("ChatModelMeterObservationHandler", () => {
     const observation = createObservation(observationContext, meterRegistry);
 
     observation.start();
-    observationContext.response = new ChatResponse({
-      generations: [
-        new Generation({ assistantMessage: AssistantMessage.of("test") }),
-      ],
-      chatResponseMetadata: ChatResponseMetadata.builder()
-        .model("model")
-        .usage(undefined as unknown as Usage)
-        .build(),
-    });
+    observationContext.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({ assistantMessage: AssistantMessage.of("test") }),
+        ],
+        chatResponseMetadata: ChatResponseMetadata.builder()
+          .model("model")
+          .usage(undefined as unknown as Usage)
+          .build(),
+      }),
+    );
     observation.stop();
 
     expect(
@@ -227,13 +231,15 @@ describe("ChatModelMeterObservationHandler", () => {
     const observation = createObservation(observationContext, meterRegistry);
 
     observation.start();
-    observationContext.response = new ChatResponse({
-      generations: [],
-      chatResponseMetadata: ChatResponseMetadata.builder()
-        .model("model")
-        .usage(new TestUsage())
-        .build(),
-    });
+    observationContext.setResponse(
+      new ChatResponse({
+        generations: [],
+        chatResponseMetadata: ChatResponseMetadata.builder()
+          .model("model")
+          .usage(new TestUsage())
+          .build(),
+      }),
+    );
     observation.stop();
 
     expect(
@@ -249,17 +255,25 @@ describe("ChatModelMeterObservationHandler", () => {
     const observation = createObservation(observationContext, meterRegistry);
 
     observation.start();
-    observationContext.response = new ChatResponse({
-      generations: [
-        new Generation({ assistantMessage: AssistantMessage.of("response1") }),
-        new Generation({ assistantMessage: AssistantMessage.of("response2") }),
-        new Generation({ assistantMessage: AssistantMessage.of("response3") }),
-      ],
-      chatResponseMetadata: ChatResponseMetadata.builder()
-        .model("model")
-        .usage(new TestUsage())
-        .build(),
-    });
+    observationContext.setResponse(
+      new ChatResponse({
+        generations: [
+          new Generation({
+            assistantMessage: AssistantMessage.of("response1"),
+          }),
+          new Generation({
+            assistantMessage: AssistantMessage.of("response2"),
+          }),
+          new Generation({
+            assistantMessage: AssistantMessage.of("response3"),
+          }),
+        ],
+        chatResponseMetadata: ChatResponseMetadata.builder()
+          .model("model")
+          .usage(new TestUsage())
+          .build(),
+      }),
+    );
     observation.stop();
 
     expect(

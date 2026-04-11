@@ -71,7 +71,7 @@ describe("ChatClientCompletionObservationHandler", () => {
       )
       .build();
 
-    context.response = response;
+    context.setResponse(response);
     observationHandler.onStop(context);
 
     expect(infoSpy).toHaveBeenCalledWith("Chat Client Completion:\n[]");
@@ -101,7 +101,7 @@ describe("ChatClientCompletionObservationHandler", () => {
       )
       .build();
 
-    context.response = response;
+    context.setResponse(response);
     observationHandler.onStop(context);
 
     expect(infoSpy).toHaveBeenCalledWith(

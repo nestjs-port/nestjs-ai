@@ -52,7 +52,7 @@ export class TextReader implements DocumentReader {
     return this._charset;
   }
 
-  set charset(charset: BufferEncoding) {
+  setCharset(charset: BufferEncoding): void {
     assert(charset != null, "The charset must not be null");
     this._charset = charset;
   }

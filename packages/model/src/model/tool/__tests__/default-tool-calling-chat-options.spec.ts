@@ -144,8 +144,8 @@ describe("DefaultToolCallingChatOptions", () => {
     original.setToolNames(new Set(["tool1"]));
     original.setToolContext({ key: "value" });
     original.setInternalToolExecutionEnabled(true);
-    original.model = "gpt-4";
-    original.temperature = 0.7;
+    original.setModel("gpt-4");
+    original.setTemperature(0.7);
 
     const copy = original.copy() as DefaultToolCallingChatOptions;
 

@@ -37,7 +37,7 @@ export class TextLine {
   }
 
   writeCharacterAtIndex(character: Character): void {
-    character.index = this._computeIndexForCharacter(character);
+    character.setIndex(this._computeIndexForCharacter(character));
 
     const index = character.index;
     const characterValue = character.characterValue;

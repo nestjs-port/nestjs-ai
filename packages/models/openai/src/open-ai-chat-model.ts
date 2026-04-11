@@ -237,7 +237,7 @@ export class OpenAiChatModel extends ChatModel {
         },
       );
 
-      observationContext.response = chatResponse;
+      observationContext.setResponse(chatResponse);
       return chatResponse;
     });
 
@@ -426,7 +426,7 @@ export class OpenAiChatModel extends ChatModel {
       );
       return observation.observeStream(() =>
         new MessageAggregator().aggregate(flux, (chatResponse) => {
-          observationContext.response = chatResponse;
+          observationContext.setResponse(chatResponse);
         }),
       );
     });

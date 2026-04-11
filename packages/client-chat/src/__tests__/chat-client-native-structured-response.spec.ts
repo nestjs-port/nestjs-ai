@@ -306,7 +306,7 @@ class TestStructuredOutputChatOptions implements StructuredOutputChatOptions {
 
   copy(): ChatOptions {
     const copy = new TestStructuredOutputChatOptions();
-    copy.outputSchema = this._outputSchema;
+    copy.setOutputSchema(this._outputSchema);
     return copy;
   }
 
@@ -314,7 +314,7 @@ class TestStructuredOutputChatOptions implements StructuredOutputChatOptions {
     return this._outputSchema;
   }
 
-  set outputSchema(outputSchema: string) {
+  setOutputSchema(outputSchema: string): void {
     this._outputSchema = outputSchema;
   }
 }

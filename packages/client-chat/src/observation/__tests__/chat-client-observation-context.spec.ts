@@ -93,7 +93,7 @@ describe("ChatClientObservationContext", () => {
       .build();
     const response = ChatClientResponse.builder().build();
 
-    observationContext.response = response;
+    observationContext.setResponse(response);
 
     expect(observationContext.response).toBe(response);
   });

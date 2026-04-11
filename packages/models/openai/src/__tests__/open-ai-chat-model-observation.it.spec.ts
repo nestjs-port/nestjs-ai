@@ -85,7 +85,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelObservationIT", () => {
       temperature: 0.7,
       topP: 1.0,
     });
-    options.streamUsage = true;
+    options.setStreamUsage(true);
 
     const prompt = new Prompt("Why does a raven look like a desk?", options);
 

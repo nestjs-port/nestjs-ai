@@ -93,7 +93,7 @@ export class ChatModelCallAdvisor implements CallAdvisor {
       StringUtils.hasText(outputSchema) &&
       isStructuredOutputChatOptions(chatClientRequest.prompt.options)
     ) {
-      chatClientRequest.prompt.options.outputSchema = outputSchema;
+      chatClientRequest.prompt.options.setOutputSchema(outputSchema);
       return chatClientRequest;
     }
 

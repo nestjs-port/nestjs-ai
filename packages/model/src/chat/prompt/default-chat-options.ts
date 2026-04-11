@@ -37,7 +37,7 @@ export class DefaultChatOptions implements ChatOptions {
       this.frequencyPenalty = options.frequencyPenalty ?? null;
       this.maxTokens = options.maxTokens ?? null;
       this.presencePenalty = options.presencePenalty ?? null;
-      this.stopSequences = options.stopSequences ?? null;
+      this.setStopSequences(options.stopSequences ?? null);
       this.temperature = options.temperature ?? null;
       this.topK = options.topK ?? null;
       this.topP = options.topP ?? null;
@@ -69,7 +69,7 @@ export class DefaultChatOptions implements ChatOptions {
       : null;
   }
 
-  set stopSequences(stopSequences: string[] | null) {
+  setStopSequences(stopSequences: string[] | null): void {
     this._stopSequences = stopSequences != null ? [...stopSequences] : null;
   }
 }

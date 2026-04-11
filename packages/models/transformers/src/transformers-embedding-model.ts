@@ -172,7 +172,7 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
           [],
           new EmbeddingResponseMetadata(this._model),
         );
-        observationContext.response = response;
+        observationContext.setResponse(response);
         return response;
       }
 
@@ -195,7 +195,7 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
         new EmbeddingResponseMetadata(this._model),
       );
 
-      observationContext.response = response;
+      observationContext.setResponse(response);
       return response;
     });
   }

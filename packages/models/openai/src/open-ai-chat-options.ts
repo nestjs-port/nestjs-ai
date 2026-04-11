@@ -131,7 +131,7 @@ export class OpenAiChatOptions
         options.outputSchema != null &&
         StringUtils.hasText(options.outputSchema)
       )
-        this.outputSchema = options.outputSchema;
+        this.setOutputSchema(options.outputSchema);
       if (options.streamOptions != null)
         this.streamOptions = options.streamOptions;
       if (options.seed != null) this.seed = options.seed;
@@ -209,7 +209,7 @@ export class OpenAiChatOptions
     return this.stop;
   }
 
-  set stopSequences(stopSequences: string[] | undefined) {
+  setStopSequences(stopSequences: string[] | undefined): void {
     this.stop = stopSequences;
   }
 
@@ -217,7 +217,7 @@ export class OpenAiChatOptions
     return this.streamOptions != null;
   }
 
-  set streamUsage(enableStreamUsage: boolean) {
+  setStreamUsage(enableStreamUsage: boolean): void {
     this.streamOptions = enableStreamUsage
       ? { include_usage: true }
       : undefined;
@@ -232,7 +232,7 @@ export class OpenAiChatOptions
     );
   }
 
-  set outputSchema(outputSchema: string) {
+  setOutputSchema(outputSchema: string): void {
     this._outputSchema = outputSchema;
     this.responseFormat = {
       type: "json_schema",

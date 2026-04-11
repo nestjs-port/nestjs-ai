@@ -91,21 +91,21 @@ describe("Observation", () => {
     const registry = new AlsObservationRegistry();
     const originalContext = new ObservationContext();
     const filteredContext = new ObservationContext();
-    filteredContext.name = "filtered";
+    filteredContext.setName("filtered");
     const applied: string[] = [];
     let stopContext = {} as ObservationContext;
 
     const filter1: ObservationFilter = {
       map(context) {
         applied.push(`f1:${context.name}`);
-        filteredContext.contextualName = "from-filter-1";
+        filteredContext.setContextualName("from-filter-1");
         return filteredContext;
       },
     };
     const filter2: ObservationFilter = {
       map(context) {
         applied.push(`f2:${context.name}`);
-        context.contextualName = "from-filter-2";
+        context.setContextualName("from-filter-2");
         return context;
       },
     };

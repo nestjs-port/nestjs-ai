@@ -33,7 +33,7 @@ export class ObservationContext {
     return this._name;
   }
 
-  set name(name: string) {
+  setName(name: string): void {
     this._name = name;
   }
 
@@ -41,7 +41,7 @@ export class ObservationContext {
     return this._contextualName;
   }
 
-  set contextualName(contextualName: string | null) {
+  setContextualName(contextualName: string | null): void {
     this._contextualName = contextualName;
   }
 
@@ -49,7 +49,7 @@ export class ObservationContext {
     return this._error;
   }
 
-  set error(error: Error | null) {
+  setError(error: Error | null): void {
     this._error = error;
   }
 

@@ -39,7 +39,7 @@ describe("RetryTemplate", () => {
     retryPolicy = RetryPolicy.builder().maxRetries(3).delay(ms(0)).build();
     retryTemplate = new RetryTemplate(retryPolicy);
     mockListener = createMockRetryListener();
-    retryTemplate.retryListener = mockListener;
+    retryTemplate.setRetryListener(mockListener);
   });
 
   it("check retry template configuration", () => {
@@ -81,7 +81,7 @@ describe("RetryTemplate", () => {
       .predicate(() => false) // Zero retries
       .build();
     const template = new RetryTemplate(zeroRetriesPolicy);
-    template.retryListener = mockListener;
+    template.setRetryListener(mockListener);
     const exception = new Error("Boom!");
     const retryable: Retryable<string> = () => {
       throw exception;
@@ -109,7 +109,7 @@ describe("RetryTemplate", () => {
   it("retryable with initial failure and zero retries fixed back off policy", async () => {
     const zeroRetriesPolicy = RetryPolicy.withMaxRetries(0);
     const template = new RetryTemplate(zeroRetriesPolicy);
-    template.retryListener = mockListener;
+    template.setRetryListener(mockListener);
     const exception = new Error("Boom!");
     const retryable: Retryable<string> = () => {
       throw exception;
@@ -136,7 +136,7 @@ describe("RetryTemplate", () => {
       .delay(ms(0))
       .build();
     const template = new RetryTemplate(zeroRetriesPolicy);
-    template.retryListener = mockListener;
+    template.setRetryListener(mockListener);
     const exception = new Error("Boom!");
     const retryable: Retryable<string> = () => {
       throw exception;
@@ -251,7 +251,7 @@ describe("RetryTemplate", () => {
       .predicate((t) => (t as Error).message === "Boom!")
       .build();
 
-    retryTemplate.retryPolicy = multiPredicatePolicy;
+    retryTemplate.setRetryPolicy(multiPredicatePolicy);
 
     expect(invocationCount).toBe(0);
     try {
@@ -300,7 +300,7 @@ describe("RetryTemplate", () => {
       .includes(IOError)
       .build();
 
-    retryTemplate.retryPolicy = includesPolicy;
+    retryTemplate.setRetryPolicy(includesPolicy);
 
     expect(invocationCount).toBe(0);
     try {
@@ -332,7 +332,7 @@ describe("RetryTemplate", () => {
       .excludes(FileNotFoundError)
       .build();
 
-    retryTemplate.retryPolicy = excludesPolicy;
+    retryTemplate.setRetryPolicy(excludesPolicy);
 
     let invocationCount = 0;
 
@@ -381,7 +381,7 @@ describe("RetryTemplate", () => {
       .excludes(FileNotFoundError)
       .build();
 
-    retryTemplate.retryPolicy = includesAndExcludesPolicy;
+    retryTemplate.setRetryPolicy(includesAndExcludesPolicy);
 
     let invocationCount = 0;
 
@@ -591,7 +591,7 @@ describe("RetryTemplate", () => {
         .delay(ms(0))
         .build();
       const template = new RetryTemplate(timeoutPolicy);
-      template.retryListener = mockListener;
+      template.setRetryListener(mockListener);
 
       let invocationCount = 0;
       const retryable: Retryable<string> = async () => {
@@ -624,7 +624,7 @@ describe("RetryTemplate", () => {
         .predicate(() => false) // Zero retries
         .build();
       const template = new RetryTemplate(timeoutPolicy);
-      template.retryListener = mockListener;
+      template.setRetryListener(mockListener);
 
       const exception = new Error("Boom!");
       const retryable: Retryable<string> = async () => {
@@ -658,7 +658,7 @@ describe("RetryTemplate", () => {
         .delay(ms(0))
         .build();
       const template = new RetryTemplate(timeoutPolicy);
-      template.retryListener = mockListener;
+      template.setRetryListener(mockListener);
 
       let invocationCount = 0;
       const retryable: Retryable<string> = async () => {
@@ -694,7 +694,7 @@ describe("RetryTemplate", () => {
         .delay(ms(100)) // Delay > Timeout
         .build();
       const template = new RetryTemplate(timeoutPolicy);
-      template.retryListener = mockListener;
+      template.setRetryListener(mockListener);
 
       let invocationCount = 0;
       const retryable: Retryable<string> = () => {
@@ -729,7 +729,7 @@ describe("RetryTemplate", () => {
         .delay(ms(0))
         .build();
       const template = new RetryTemplate(timeoutPolicy);
-      template.retryListener = mockListener;
+      template.setRetryListener(mockListener);
 
       let invocationCount = 0;
       const retryable: Retryable<string> = async () => {
@@ -781,7 +781,7 @@ describe("RetryTemplate", () => {
         .delay(ms(0))
         .build();
       const template = new RetryTemplate(timeoutPolicy);
-      template.retryListener = mockListener;
+      template.setRetryListener(mockListener);
 
       let invocationCount = 0;
       const retryable: Retryable<string> = async () => {

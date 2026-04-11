@@ -86,7 +86,7 @@ export class ChatClientObservationContext extends ObservationContext {
     return this._response;
   }
 
-  set response(response: ChatClientResponse | null) {
+  setResponse(response: ChatClientResponse | null): void {
     this._response = response;
   }
 }

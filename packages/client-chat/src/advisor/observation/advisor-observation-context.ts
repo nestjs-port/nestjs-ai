@@ -56,7 +56,7 @@ export class AdvisorObservationContext extends ObservationContext {
     return this._chatClientResponse;
   }
 
-  set chatClientResponse(chatClientResponse: ChatClientResponse | null) {
+  setChatClientResponse(chatClientResponse: ChatClientResponse | null): void {
     this._chatClientResponse = chatClientResponse;
   }
 }

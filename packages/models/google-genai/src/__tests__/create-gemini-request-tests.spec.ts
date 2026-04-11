@@ -97,7 +97,7 @@ describe("GoogleGenAiChatModel", () => {
 
     let request = model.createGeminiRequest(
       model.buildRequestPrompt(
-        new Prompt("Test message content", new GoogleGenAiChatOptions().copy()),
+        new Prompt("Test message content", model.defaultOptions.copy()),
       ),
     );
 
@@ -187,14 +187,13 @@ describe("GoogleGenAiChatModel", () => {
       }),
     );
 
+    const promptOptions = new GoogleGenAiChatOptions({
+      model: "PROMPT_MODEL",
+      toolCallbacks: [createWeatherToolCallback()],
+    });
+
     const requestPrompt = model.buildRequestPrompt(
-      new Prompt(
-        "Test message content",
-        new GoogleGenAiChatOptions({
-          model: "PROMPT_MODEL",
-          toolCallbacks: [createWeatherToolCallback()],
-        }),
-      ),
+      new Prompt("Test message content", promptOptions),
     );
 
     const request = model.createGeminiRequest(requestPrompt);
@@ -229,13 +228,11 @@ describe("GoogleGenAiChatModel", () => {
     expect(tools?.[0].functionDeclarations).toHaveLength(1);
     expect(tools?.[0].functionDeclarations?.[0].name).toBe("CurrentWeather");
 
+    const promptOptions = model.defaultOptions.copy() as GoogleGenAiChatOptions;
+    promptOptions.toolNames = new Set(["CurrentWeather"]);
+
     requestPrompt = model.buildRequestPrompt(
-      new Prompt(
-        "Test message content",
-        new GoogleGenAiChatOptions({
-          toolNames: new Set(["CurrentWeather"]),
-        }),
-      ),
+      new Prompt("Test message content", promptOptions),
     );
     request = model.createGeminiRequest(requestPrompt);
 

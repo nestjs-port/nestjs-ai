@@ -285,6 +285,9 @@ importers:
       typeorm:
         specifier: ^0.3.28
         version: 0.3.28(mysql2@3.22.0(@types/node@25.5.0))(pg@8.20.0)(redis@5.11.0)
+      zod:
+        specifier: 4.3.6
+        version: 4.3.6
 
   packages/mcp/annotations: {}
 

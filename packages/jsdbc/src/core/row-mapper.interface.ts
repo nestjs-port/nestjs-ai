@@ -14,5 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./api";
-export * from "./core";
+export interface RowMapper<T> {
+  mapRow(row: Record<string, unknown>, rowNum: number): T;
+}
+
+export type RowMapperFunction<T> = (
+  row: Record<string, unknown>,
+  rowNum: number,
+) => T;

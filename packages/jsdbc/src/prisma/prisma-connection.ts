@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Connection, DatabaseDialect } from "../api";
-import { rewritePositionalParameters } from "../api/sql-placeholder";
+import type { Connection, DatabaseDialect, SqlFragment } from "../api";
+import { buildSqlTag } from "../api/sql-tag";
 
 export interface PrismaExecutor {
   $queryRawUnsafe(sql: string, ...values: readonly unknown[]): Promise<unknown>;
@@ -48,20 +48,25 @@ export class PrismaConnection implements Connection {
     return this.dialect;
   }
 
-  async query(
-    sql: string,
-    ...args: readonly unknown[]
-  ): Promise<Record<string, unknown>[]> {
+  async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
-    const result = await this.prisma.$queryRawUnsafe(rewrittenSql, ...args);
+    const { query, parameters } = buildSqlTag(
+      fragment.strings,
+      fragment.expressions,
+      this.dialect,
+    );
+    const result = await this.prisma.$queryRawUnsafe(query, ...parameters);
     return toRecordArray(result);
   }
 
-  async update(sql: string, ...args: readonly unknown[]): Promise<number> {
+  async update(fragment: SqlFragment): Promise<number> {
     this.assertOpen();
-    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
-    return this.prisma.$executeRawUnsafe(rewrittenSql, ...args);
+    const { query, parameters } = buildSqlTag(
+      fragment.strings,
+      fragment.expressions,
+      this.dialect,
+    );
+    return this.prisma.$executeRawUnsafe(query, ...parameters);
   }
 
   async close(): Promise<void> {

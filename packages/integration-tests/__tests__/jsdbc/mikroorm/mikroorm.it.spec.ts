@@ -21,7 +21,7 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { Test, type TestingModule } from "@nestjs/testing";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_DATA_SOURCE } from "@nestjs-ai/jsdbc";
+import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
 import { MikroOrmJsdbcModule } from "@nestjs-ai/jsdbc/mikroorm";
 import {
   PostgreSqlContainer,
@@ -90,13 +90,11 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      "INSERT INTO jsdbc_mikroorm_items (name) VALUES (?)",
-      "alpha",
+      sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"alpha"})`,
     );
 
     const rows = await connection.query(
-      "SELECT id, name FROM jsdbc_mikroorm_items WHERE name = ?",
-      "alpha",
+      sql`SELECT id, name FROM jsdbc_mikroorm_items WHERE name = ${"alpha"}`,
     );
 
     expect(rows).toEqual([
@@ -113,13 +111,11 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_mikroorm_items (name) VALUES (?)",
-          "inside-transaction",
+          sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"inside-transaction"})`,
         );
 
         const rows = await connection.query(
-          "SELECT name FROM jsdbc_mikroorm_items WHERE name = ?",
-          "inside-transaction",
+          sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"inside-transaction"}`,
         );
 
         expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -128,7 +124,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      "SELECT name FROM jsdbc_mikroorm_items ORDER BY id",
+      sql`SELECT name FROM jsdbc_mikroorm_items ORDER BY id`,
     );
 
     expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -138,8 +134,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_mikroorm_items (name) VALUES (?)",
-          "rollback-me",
+          sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
@@ -147,8 +142,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      "SELECT name FROM jsdbc_mikroorm_items WHERE name = ?",
-      "rollback-me",
+      sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"rollback-me"}`,
     );
 
     expect(rows).toEqual([]);

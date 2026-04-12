@@ -37,10 +37,6 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
     assert(dialect, "dialect cannot be null");
   }
 
-  static builder(): JsdbcChatMemoryRepositoryBuilder {
-    return new JsdbcChatMemoryRepositoryBuilder();
-  }
-
   async findConversationIds(): Promise<string[]> {
     const connection = await this.dataSource.getConnection();
     try {
@@ -66,8 +62,7 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
     const connection = await this.dataSource.getConnection();
     try {
       const rows = await connection.query(
-        this.dialect.getSelectMessagesSql(),
-        conversationId,
+        this.dialect.getSelectMessagesSql(conversationId),
       );
       return rows.map((row) => this.toMessage(row));
     } finally {
@@ -87,8 +82,7 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
 
     await this.dataSource.transaction(async (connection) => {
       await connection.update(
-        this.dialect.getDeleteMessagesSql(),
-        conversationId,
+        this.dialect.getDeleteMessagesSql(conversationId),
       );
 
       // Use second-level granularity to ensure compatibility with all database
@@ -96,12 +90,14 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       // message ordering, not as a precise temporal record.
       let sequenceId = Math.floor(Date.now() / 1000);
       for (const message of messages) {
+        const messageType = String(message.messageType.getName());
         await connection.update(
-          this.dialect.getInsertMessageSql(),
-          conversationId,
-          message.text,
-          message.messageType.getName(),
-          new Date(sequenceId++ * 1000),
+          this.dialect.getInsertMessageSql(
+            conversationId,
+            message.text,
+            messageType,
+            new Date(sequenceId++ * 1000),
+          ),
         );
       }
     });
@@ -116,12 +112,15 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
     const connection = await this.dataSource.getConnection();
     try {
       await connection.update(
-        this.dialect.getDeleteMessagesSql(),
-        conversationId,
+        this.dialect.getDeleteMessagesSql(conversationId),
       );
     } finally {
       await connection.close();
     }
+  }
+
+  static builder(): JsdbcChatMemoryRepositoryBuilder {
+    return new JsdbcChatMemoryRepositoryBuilder();
   }
 
   private readConversationId(row: Record<string, unknown>): string {
@@ -210,13 +209,13 @@ export class JsdbcChatMemoryRepositoryBuilder {
   private _dataSource: DataSource | null = null;
   private _dialect: JsdbcChatMemoryRepositoryDialect | null = null;
 
-  dataSource(dataSource: DataSource): this {
-    this._dataSource = dataSource;
+  dialect(dialect: JsdbcChatMemoryRepositoryDialect): this {
+    this._dialect = dialect;
     return this;
   }
 
-  dialect(dialect: JsdbcChatMemoryRepositoryDialect): this {
-    this._dialect = dialect;
+  dataSource(dataSource: DataSource): this {
+    this._dataSource = dataSource;
     return this;
   }
 

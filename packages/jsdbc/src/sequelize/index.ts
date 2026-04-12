@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-export type { Connection } from "./connection.interface";
-export type { DataSource } from "./data-source.interface";
-export { DatabaseDialect } from "./database-dialect.enum";
 export {
-  InjectJsdbcDataSource,
-  JSDBC_DATA_SOURCE,
-} from "./tokens";
+  SequelizeJsdbcModule,
+  type SequelizeJsdbcModuleOptions,
+} from "./sequelize.module";
+export {
+  SequelizeConnection,
+  type SequelizeExecutor,
+} from "./sequelize-connection";
+export {
+  SequelizeDataSource,
+  type SequelizeLike,
+} from "./sequelize-data-source";

@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-export type { JsdbcTemplate } from "./jsdbc-template";
+export {
+  TypeOrmJsdbcModule,
+  type TypeOrmJsdbcModuleOptions,
+} from "./typeorm.module";
+export { type QueryExecutor, TypeOrmConnection } from "./typeorm-connection";
+export { TypeOrmDataSource } from "./typeorm-data-source";

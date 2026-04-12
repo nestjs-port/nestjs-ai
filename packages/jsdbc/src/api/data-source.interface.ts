@@ -15,7 +15,10 @@
  */
 
 import type { Connection } from "./connection.interface";
+import type { DatabaseDialect } from "./database-dialect.enum";
 
 export interface DataSource {
   getConnection(): Promise<Connection>;
+  getDialect(): Promise<DatabaseDialect>;
+  transaction<T>(callback: (connection: Connection) => Promise<T>): Promise<T>;
 }

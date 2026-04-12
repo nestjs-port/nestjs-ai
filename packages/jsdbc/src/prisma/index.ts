@@ -14,4 +14,16 @@
  * limitations under the License.
  */
 
-export type { TransactionTemplate } from "./transaction-template.interface";
+export {
+  PrismaJsdbcModule,
+  type PrismaJsdbcModuleOptions,
+} from "./prisma.module";
+export {
+  PrismaConnection,
+  type PrismaExecutor,
+} from "./prisma-connection";
+export {
+  PrismaDataSource,
+  type PrismaJsdbcOptions,
+  type PrismaLike,
+} from "./prisma-data-source";

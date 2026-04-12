@@ -14,108 +14,88 @@
  * limitations under the License.
  */
 
+import type { Sequelize } from "sequelize";
 import { QueryTypes, type Transaction } from "sequelize";
-import type { Connection, DatabaseDialect, SqlFragment } from "../api";
-import { buildSqlTag } from "../api/sql-tag";
+import type { Connection, SqlFragment } from "../api";
 
-export interface SequelizeExecutor {
-  query(sql: string, options?: Record<string, unknown>): Promise<unknown>;
-}
+function buildSequelizeSqlTag(fragment: SqlFragment): {
+  query: string;
+  parameters: unknown[];
+} {
+  let query = "";
+  const parameters: unknown[] = [];
 
-function toRecordArray(result: unknown): Record<string, unknown>[] {
-  if (!Array.isArray(result)) {
-    return [];
-  }
+  for (let index = 0; index < fragment.expressions.length; index++) {
+    query += fragment.strings[index];
+    const expression = fragment.expressions[index];
 
-  return result.filter(
-    (value): value is Record<string, unknown> =>
-      value != null && typeof value === "object" && !Array.isArray(value),
-  );
-}
-
-function extractAffectedRows(result: unknown): number {
-  if (typeof result === "number") {
-    return result;
-  }
-
-  if (Array.isArray(result)) {
-    return result.length;
-  }
-
-  if (result != null && typeof result === "object") {
-    const candidate = result as {
-      affected?: unknown;
-      affectedRows?: unknown;
-      changes?: unknown;
-      rowCount?: unknown;
-      rowsAffected?: unknown;
-    };
-
-    const values = [
-      candidate.affected,
-      candidate.affectedRows,
-      candidate.changes,
-      candidate.rowCount,
-      candidate.rowsAffected,
-    ];
-
-    for (const value of values) {
-      if (typeof value === "number") {
-        return value;
-      }
-      if (Array.isArray(value) && typeof value[0] === "number") {
-        return value[0];
-      }
+    if (expression === null) {
+      query += "NULL";
+      continue;
     }
+
+    if (typeof expression === "function") {
+      const value = expression();
+
+      if (typeof value === "string") {
+        query += value;
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          throw new Error(
+            `Expression ${index} in this sql tagged template is a function which returned an empty array. Empty arrays cannot safely be expanded into parameter lists.`,
+          );
+        }
+
+        query += value.map(() => "?").join(", ");
+        parameters.push(...value);
+        continue;
+      }
+
+      throw new Error(
+        `Expression ${index} in this sql tagged template is a function which returned a value of type "${value === null ? "null" : typeof value}". Only array and string types are supported as function return values in sql tagged template expressions.`,
+      );
+    }
+
+    query += "?";
+    parameters.push(expression);
   }
 
-  return 0;
+  query += fragment.strings[fragment.strings.length - 1];
+
+  return { query, parameters };
 }
 
 export class SequelizeConnection implements Connection {
   #closed = false;
 
   constructor(
-    private readonly sequelize: SequelizeExecutor & {
-      getDialect(): string;
-    },
-    private readonly dialect: DatabaseDialect,
+    private readonly sequelize: Sequelize,
     private readonly transaction?: Transaction,
   ) {}
 
-  get dialectName(): DatabaseDialect {
-    return this.dialect;
-  }
-
   async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    const { query, parameters } = buildSqlTag(
-      fragment.strings,
-      fragment.expressions,
-      this.dialect,
-    );
-    const result = await this.sequelize.query(query, {
+    const { query, parameters } = buildSequelizeSqlTag(fragment);
+    return await this.sequelize.query(query, {
       replacements: parameters,
       raw: true,
       transaction: this.transaction,
       type: QueryTypes.SELECT,
     });
-    return toRecordArray(result);
   }
 
   async update(fragment: SqlFragment): Promise<number> {
     this.assertOpen();
-    const { query, parameters } = buildSqlTag(
-      fragment.strings,
-      fragment.expressions,
-      this.dialect,
-    );
+    const { query, parameters } = buildSequelizeSqlTag(fragment);
     const result = await this.sequelize.query(query, {
       replacements: parameters,
       transaction: this.transaction,
+      type: QueryTypes.UPDATE,
     });
-    const metadata = Array.isArray(result) ? result[1] : result;
-    return extractAffectedRows(metadata);
+    return Array.isArray(result) ? result[1] : 0;
   }
 
   async close(): Promise<void> {

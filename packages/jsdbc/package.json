@@ -39,6 +39,7 @@
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@nestjs/sequelize": "^11.0.0",
     "@nestjs/typeorm": "^10.0.0 || ^11.0.0",
+    "@prisma/client": "^6.18.0",
     "sequelize": "^6.37.0",
     "typeorm": "^0.3.0"
   },
@@ -50,6 +51,9 @@
       "optional": true
     },
     "@nestjs/typeorm": {
+      "optional": true
+    },
+    "@prisma/client": {
       "optional": true
     },
     "sequelize": {
@@ -68,6 +72,7 @@
     "@nestjs/common": "^11.1.11",
     "@nestjs/sequelize": "^11.0.1",
     "@nestjs/typeorm": "^11.0.1",
+    "@prisma/client": "^6.18.0",
     "sequelize": "^6.37.7",
     "typeorm": "^0.3.28"
   }

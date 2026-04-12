@@ -18,11 +18,5 @@ export {
   SequelizeJsdbcModule,
   type SequelizeJsdbcModuleOptions,
 } from "./sequelize.module";
-export {
-  SequelizeConnection,
-  type SequelizeExecutor,
-} from "./sequelize-connection";
-export {
-  SequelizeDataSource,
-  type SequelizeLike,
-} from "./sequelize-data-source";
+export { SequelizeConnection } from "./sequelize-connection";
+export { SequelizeDataSource } from "./sequelize-data-source";

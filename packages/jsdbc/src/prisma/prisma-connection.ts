@@ -14,59 +14,25 @@
  * limitations under the License.
  */
 
-import type { Connection, DatabaseDialect, SqlFragment } from "../api";
-import { buildSqlTag } from "../api/sql-tag";
-
-export interface PrismaExecutor {
-  $queryRawUnsafe(sql: string, ...values: readonly unknown[]): Promise<unknown>;
-  $executeRawUnsafe(
-    sql: string,
-    ...values: readonly unknown[]
-  ): Promise<number>;
-}
-
-function toRecordArray(result: unknown): Record<string, unknown>[] {
-  if (!Array.isArray(result)) {
-    return [];
-  }
-
-  return result.filter(
-    (value): value is Record<string, unknown> =>
-      value != null && typeof value === "object" && !Array.isArray(value),
-  );
-}
+import type { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import type { Connection, SqlFragment } from "../api";
 
 export class PrismaConnection implements Connection {
   #closed = false;
 
   constructor(
-    private readonly prisma: PrismaExecutor,
-    private readonly dialect: DatabaseDialect,
+    private readonly prisma: Pick<PrismaClient, "$queryRaw" | "$executeRaw">,
   ) {}
-
-  get dialectName(): DatabaseDialect {
-    return this.dialect;
-  }
 
   async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    const { query, parameters } = buildSqlTag(
-      fragment.strings,
-      fragment.expressions,
-      this.dialect,
-    );
-    const result = await this.prisma.$queryRawUnsafe(query, ...parameters);
-    return toRecordArray(result);
+    return this.prisma.$queryRaw(this.toPrismaSql(fragment));
   }
 
   async update(fragment: SqlFragment): Promise<number> {
     this.assertOpen();
-    const { query, parameters } = buildSqlTag(
-      fragment.strings,
-      fragment.expressions,
-      this.dialect,
-    );
-    return this.prisma.$executeRawUnsafe(query, ...parameters);
+    return this.prisma.$executeRaw(this.toPrismaSql(fragment));
   }
 
   async close(): Promise<void> {
@@ -77,5 +43,39 @@ export class PrismaConnection implements Connection {
     if (this.#closed) {
       throw new Error("Connection is already closed.");
     }
+  }
+
+  private toPrismaSql(fragment: SqlFragment): Prisma.Sql {
+    const expressions = fragment.expressions.map((expression, index) => {
+      if (expression === null) {
+        return Prisma.raw("NULL");
+      }
+
+      if (typeof expression === "function") {
+        const value = expression();
+
+        if (typeof value === "string") {
+          return Prisma.raw(value);
+        }
+
+        if (Array.isArray(value)) {
+          if (value.length === 0) {
+            throw new Error(
+              `Expression ${index} in this sql tagged template is a function which returned an empty array. Empty arrays cannot safely be expanded into parameter lists.`,
+            );
+          }
+
+          return Prisma.join(value);
+        }
+
+        throw new Error(
+          `Expression ${index} in this sql tagged template is a function which returned a value of type "${value === null ? "null" : typeof value}". Only array and string types are supported as function return values in sql tagged template expressions.`,
+        );
+      }
+
+      return expression;
+    });
+
+    return Prisma.sql(fragment.strings, ...expressions);
   }
 }

@@ -15,6 +15,7 @@
  */
 
 import type { Connection, DatabaseDialect } from "../api";
+import { rewritePositionalParameters } from "../api/sql-placeholder";
 
 export interface PrismaExecutor {
   $queryRawUnsafe(sql: string, ...values: readonly unknown[]): Promise<unknown>;
@@ -52,13 +53,15 @@ export class PrismaConnection implements Connection {
     ...args: readonly unknown[]
   ): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    const result = await this.prisma.$queryRawUnsafe(sql, ...args);
+    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
+    const result = await this.prisma.$queryRawUnsafe(rewrittenSql, ...args);
     return toRecordArray(result);
   }
 
   async update(sql: string, ...args: readonly unknown[]): Promise<number> {
     this.assertOpen();
-    return this.prisma.$executeRawUnsafe(sql, ...args);
+    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
+    return this.prisma.$executeRawUnsafe(rewrittenSql, ...args);
   }
 
   async close(): Promise<void> {

@@ -19,15 +19,15 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "*",
     "@nestjs-ai/client-chat": "*",
+    "@nestjs-ai/commons": "*",
     "@nestjs-ai/model": "*",
     "@nestjs-ai/vector-store": "*",
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
-    "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/client-chat": "workspace:*",
+    "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "rxjs": "^7.0.0"

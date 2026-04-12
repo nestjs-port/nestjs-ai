@@ -19,7 +19,7 @@ import "reflect-metadata";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_DATA_SOURCE } from "@nestjs-ai/jsdbc";
+import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
 import { TypeOrmJsdbcModule } from "@nestjs-ai/jsdbc/typeorm";
 import {
   PostgreSqlContainer,
@@ -81,13 +81,11 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      "INSERT INTO jsdbc_typeorm_items (name) VALUES (?)",
-      "alpha",
+      sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"alpha"})`,
     );
 
     const rows = await connection.query(
-      "SELECT id, name FROM jsdbc_typeorm_items WHERE name = ?",
-      "alpha",
+      sql`SELECT id, name FROM jsdbc_typeorm_items WHERE name = ${"alpha"}`,
     );
 
     expect(rows).toEqual([
@@ -104,13 +102,11 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_typeorm_items (name) VALUES (?)",
-          "inside-transaction",
+          sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"inside-transaction"})`,
         );
 
         const rows = await connection.query(
-          "SELECT name FROM jsdbc_typeorm_items WHERE name = ?",
-          "inside-transaction",
+          sql`SELECT name FROM jsdbc_typeorm_items WHERE name = ${"inside-transaction"}`,
         );
 
         expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -128,8 +124,7 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_typeorm_items (name) VALUES (?)",
-          "rollback-me",
+          sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),

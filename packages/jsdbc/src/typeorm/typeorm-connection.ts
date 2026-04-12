@@ -14,93 +14,41 @@
  * limitations under the License.
  */
 
-import type { Connection, DatabaseDialect } from "../api";
-import { rewritePositionalParameters } from "../api/sql-placeholder";
+import type { Driver } from "typeorm/driver/Driver";
+import type { QueryRunner } from "typeorm/query-runner/QueryRunner";
+import { buildSqlTag } from "typeorm/util/SqlTagUtils";
 
-export interface QueryExecutor {
-  query(sql: string, parameters?: readonly unknown[]): Promise<unknown>;
-}
-
-function toRecordArray(result: unknown): Record<string, unknown>[] {
-  if (!Array.isArray(result)) {
-    return [];
-  }
-
-  return result.filter(
-    (value): value is Record<string, unknown> =>
-      value != null && typeof value === "object" && !Array.isArray(value),
-  );
-}
-
-function extractAffectedRows(result: unknown): number {
-  if (typeof result === "number") {
-    return result;
-  }
-
-  if (Array.isArray(result)) {
-    return result.length;
-  }
-
-  if (result != null && typeof result === "object") {
-    const candidate = result as {
-      affected?: unknown;
-      affectedRows?: unknown;
-      changes?: unknown;
-      rowCount?: unknown;
-      rowsAffected?: unknown;
-    };
-
-    const values = [
-      candidate.affected,
-      candidate.affectedRows,
-      candidate.changes,
-      candidate.rowCount,
-      candidate.rowsAffected,
-    ];
-
-    for (const value of values) {
-      if (typeof value === "number") {
-        return value;
-      }
-      if (Array.isArray(value) && typeof value[0] === "number") {
-        return value[0];
-      }
-    }
-  }
-
-  return 0;
-}
+import type { Connection, SqlFragment } from "../api";
 
 export class TypeOrmConnection implements Connection {
   #closed = false;
 
-  constructor(
-    private readonly executor: QueryExecutor,
-    private readonly dialect: DatabaseDialect,
-  ) {}
+  constructor(private readonly queryRunner: QueryRunner) {}
 
-  get dialectName(): DatabaseDialect {
-    return this.dialect;
+  async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
+    this.assertOpen();
+    const { query, parameters } = buildSqlTag({
+      driver: this.queryRunner.connection.driver as Driver,
+      strings: fragment.strings,
+      expressions: [...fragment.expressions],
+    });
+    const result = await this.queryRunner.query(query, parameters, true);
+    return result.records;
   }
 
-  async query(
-    sql: string,
-    ...args: readonly unknown[]
-  ): Promise<Record<string, unknown>[]> {
+  async update(fragment: SqlFragment): Promise<number> {
     this.assertOpen();
-    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
-    const result = await this.executor.query(rewrittenSql, args);
-    return toRecordArray(result);
-  }
-
-  async update(sql: string, ...args: readonly unknown[]): Promise<number> {
-    this.assertOpen();
-    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
-    const result = await this.executor.query(rewrittenSql, args);
-    return extractAffectedRows(result);
+    const { query, parameters } = buildSqlTag({
+      driver: this.queryRunner.connection.driver as Driver,
+      strings: fragment.strings,
+      expressions: [...fragment.expressions],
+    });
+    const result = await this.queryRunner.query(query, parameters, true);
+    return result.affected ?? 0;
   }
 
   async close(): Promise<void> {
+    await this.queryRunner.release();
     this.#closed = true;
   }
 

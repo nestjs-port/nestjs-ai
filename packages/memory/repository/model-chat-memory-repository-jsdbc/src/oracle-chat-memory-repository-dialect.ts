@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
+import { sql } from "@nestjs-ai/jsdbc";
 import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
 
 /**
  * Dialect for Oracle.
  */
 export class OracleChatMemoryRepositoryDialect extends JsdbcChatMemoryRepositoryDialect {
-  getSelectMessagesSql(): string {
-    return 'SELECT content, type FROM SPRING_AI_CHAT_MEMORY WHERE CONVERSATION_ID = ? ORDER BY "TIMESTAMP"';
+  getSelectMessagesSql(conversationId: string) {
+    return sql`SELECT content, type FROM SPRING_AI_CHAT_MEMORY WHERE CONVERSATION_ID = ${conversationId} ORDER BY "TIMESTAMP"`;
   }
 
-  getInsertMessageSql(): string {
-    return 'INSERT INTO SPRING_AI_CHAT_MEMORY (CONVERSATION_ID, CONTENT, TYPE, "TIMESTAMP") VALUES (?, ?, ?, ?)';
+  getInsertMessageSql(
+    conversationId: string,
+    content: string | null,
+    type: string,
+    timestamp: Date,
+  ) {
+    return sql`INSERT INTO SPRING_AI_CHAT_MEMORY (CONVERSATION_ID, CONTENT, TYPE, "TIMESTAMP") VALUES (${conversationId}, ${content}, ${type}, ${timestamp})`;
   }
 
-  getSelectConversationIdsSql(): string {
-    return "SELECT DISTINCT conversation_id FROM SPRING_AI_CHAT_MEMORY";
+  getSelectConversationIdsSql() {
+    return sql`SELECT DISTINCT conversation_id FROM SPRING_AI_CHAT_MEMORY`;
   }
 
-  getDeleteMessagesSql(): string {
-    return "DELETE FROM SPRING_AI_CHAT_MEMORY WHERE CONVERSATION_ID = ?";
+  getDeleteMessagesSql(conversationId: string) {
+    return sql`DELETE FROM SPRING_AI_CHAT_MEMORY WHERE CONVERSATION_ID = ${conversationId}`;
   }
 }

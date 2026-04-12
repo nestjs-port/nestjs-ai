@@ -15,7 +15,11 @@
  */
 
 import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import { DatabaseDialect, type DataSource } from "@nestjs-ai/jsdbc";
+import {
+  DatabaseDialect,
+  type DataSource,
+  type SqlFragment,
+} from "@nestjs-ai/jsdbc";
 import { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
 import { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";
 import { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect";
@@ -30,13 +34,18 @@ export abstract class JsdbcChatMemoryRepositoryDialect {
     JsdbcChatMemoryRepositoryDialect.name,
   );
 
-  abstract getSelectMessagesSql(): string;
+  abstract getSelectMessagesSql(conversationId: string): SqlFragment;
 
-  abstract getInsertMessageSql(): string;
+  abstract getInsertMessageSql(
+    conversationId: string,
+    content: string | null,
+    type: string,
+    timestamp: Date,
+  ): SqlFragment;
 
-  abstract getSelectConversationIdsSql(): string;
+  abstract getSelectConversationIdsSql(): SqlFragment;
 
-  abstract getDeleteMessagesSql(): string;
+  abstract getDeleteMessagesSql(conversationId: string): SqlFragment;
 
   static async from(
     dataSource: DataSource,

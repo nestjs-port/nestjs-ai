@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import type { SqlFragment } from "./sql-tag";
+
 export interface Connection {
-  query(
-    sql: string,
-    ...args: readonly unknown[]
-  ): Promise<Record<string, unknown>[]>;
-  update(sql: string, ...args: readonly unknown[]): Promise<number>;
+  query(fragment: SqlFragment): Promise<Record<string, unknown>[]>;
+  update(fragment: SqlFragment): Promise<number>;
   close(): Promise<void>;
 }

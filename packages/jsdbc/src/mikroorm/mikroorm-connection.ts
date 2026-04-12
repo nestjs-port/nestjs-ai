@@ -14,86 +14,34 @@
  * limitations under the License.
  */
 
-import type { Connection, DatabaseDialect } from "../api";
+import type { MikroORM } from "@mikro-orm/core";
+import type { Connection, SqlFragment } from "../api";
 
-export interface SqlExecutor {
-  execute(sql: string, parameters?: readonly unknown[]): Promise<unknown>;
-}
-
-function toRecordArray(result: unknown): Record<string, unknown>[] {
-  if (!Array.isArray(result)) {
-    return [];
-  }
-
-  return result.filter(
-    (value): value is Record<string, unknown> =>
-      value != null && typeof value === "object" && !Array.isArray(value),
-  );
-}
-
-function extractAffectedRows(result: unknown): number {
-  if (typeof result === "number") {
-    return result;
-  }
-
-  if (Array.isArray(result)) {
-    return result.length;
-  }
-
-  if (result != null && typeof result === "object") {
-    const candidate = result as {
-      affected?: unknown;
-      affectedRows?: unknown;
-      changes?: unknown;
-      rowCount?: unknown;
-      rowsAffected?: unknown;
-    };
-
-    const values = [
-      candidate.affected,
-      candidate.affectedRows,
-      candidate.changes,
-      candidate.rowCount,
-      candidate.rowsAffected,
-    ];
-
-    for (const value of values) {
-      if (typeof value === "number") {
-        return value;
-      }
-      if (Array.isArray(value) && typeof value[0] === "number") {
-        return value[0];
-      }
-    }
-  }
-
-  return 0;
-}
+type MikroOrmEntityManager = MikroORM["em"] & {
+  execute(
+    query: string,
+    params?: readonly unknown[],
+    method?: "all" | "get" | "run",
+  ): Promise<unknown>;
+};
 
 export class MikroOrmConnection implements Connection {
   #closed = false;
 
-  constructor(
-    private readonly executor: SqlExecutor,
-    private readonly dialect: DatabaseDialect,
-  ) {}
+  constructor(private readonly executor: MikroOrmEntityManager) {}
 
-  get dialectName(): DatabaseDialect {
-    return this.dialect;
+  async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
+    this.assertOpen();
+    const { query, parameters } = buildMikroOrmSqlTag(fragment);
+    return this.executor.execute(query, parameters, "all") as Promise<
+      Record<string, unknown>[]
+    >;
   }
 
-  async query(
-    sql: string,
-    ...args: readonly unknown[]
-  ): Promise<Record<string, unknown>[]> {
+  async update(fragment: SqlFragment): Promise<number> {
     this.assertOpen();
-    const result = await this.executor.execute(sql, args);
-    return toRecordArray(result);
-  }
-
-  async update(sql: string, ...args: readonly unknown[]): Promise<number> {
-    this.assertOpen();
-    const result = await this.executor.execute(sql, args);
+    const { query, parameters } = buildMikroOrmSqlTag(fragment);
+    const result = await this.executor.execute(query, parameters, "run");
     return extractAffectedRows(result);
   }
 
@@ -106,4 +54,68 @@ export class MikroOrmConnection implements Connection {
       throw new Error("Connection is already closed.");
     }
   }
+}
+
+function buildMikroOrmSqlTag(fragment: SqlFragment): {
+  query: string;
+  parameters: unknown[];
+} {
+  let query = "";
+  const parameters: unknown[] = [];
+
+  for (let index = 0; index < fragment.expressions.length; index++) {
+    query += fragment.strings[index];
+    const expression = fragment.expressions[index];
+
+    if (expression === null) {
+      query += "NULL";
+      continue;
+    }
+
+    if (typeof expression === "function") {
+      const value = expression();
+
+      if (typeof value === "string") {
+        query += value;
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          throw new Error(
+            `Expression ${index} in this sql tagged template is a function which returned an empty array. Empty arrays cannot safely be expanded into parameter lists.`,
+          );
+        }
+
+        query += value.map(() => "?").join(", ");
+        parameters.push(...value);
+        continue;
+      }
+
+      throw new Error(
+        `Expression ${index} in this sql tagged template is a function which returned a value of type "${value === null ? "null" : typeof value}". Only array and string types are supported as function return values in sql tagged template expressions.`,
+      );
+    }
+
+    query += "?";
+    parameters.push(expression);
+  }
+
+  query += fragment.strings[fragment.strings.length - 1];
+
+  return { query, parameters };
+}
+
+function extractAffectedRows(result: unknown): number {
+  if (result != null && typeof result === "object") {
+    const candidate = result as {
+      affectedRows?: unknown;
+    };
+
+    if (typeof candidate.affectedRows === "number") {
+      return candidate.affectedRows;
+    }
+  }
+
+  return 0;
 }

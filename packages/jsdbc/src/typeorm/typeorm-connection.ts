@@ -15,6 +15,7 @@
  */
 
 import type { Connection, DatabaseDialect } from "../api";
+import { rewritePositionalParameters } from "../api/sql-placeholder";
 
 export interface QueryExecutor {
   query(sql: string, parameters?: readonly unknown[]): Promise<unknown>;
@@ -87,13 +88,15 @@ export class TypeOrmConnection implements Connection {
     ...args: readonly unknown[]
   ): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    const result = await this.executor.query(sql, args);
+    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
+    const result = await this.executor.query(rewrittenSql, args);
     return toRecordArray(result);
   }
 
   async update(sql: string, ...args: readonly unknown[]): Promise<number> {
     this.assertOpen();
-    const result = await this.executor.query(sql, args);
+    const rewrittenSql = rewritePositionalParameters(sql, this.dialect);
+    const result = await this.executor.query(rewrittenSql, args);
     return extractAffectedRows(result);
   }
 

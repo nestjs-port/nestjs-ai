@@ -113,12 +113,12 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      "INSERT INTO jsdbc_prisma_items (name) VALUES ($1)",
+      "INSERT INTO jsdbc_prisma_items (name) VALUES (?)",
       "alpha",
     );
 
     const rows = await connection.query(
-      "SELECT id, name FROM jsdbc_prisma_items WHERE name = $1",
+      "SELECT id, name FROM jsdbc_prisma_items WHERE name = ?",
       "alpha",
     );
 
@@ -136,12 +136,12 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_prisma_items (name) VALUES ($1)",
+          "INSERT INTO jsdbc_prisma_items (name) VALUES (?)",
           "inside-transaction",
         );
 
         const rows = await connection.query(
-          "SELECT name FROM jsdbc_prisma_items WHERE name = $1",
+          "SELECT name FROM jsdbc_prisma_items WHERE name = ?",
           "inside-transaction",
         );
 
@@ -161,7 +161,7 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_prisma_items (name) VALUES ($1)",
+          "INSERT INTO jsdbc_prisma_items (name) VALUES (?)",
           "rollback-me",
         );
         throw new Error("boom");
@@ -170,7 +170,7 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      "SELECT name FROM jsdbc_prisma_items WHERE name = $1",
+      "SELECT name FROM jsdbc_prisma_items WHERE name = ?",
       "rollback-me",
     );
 

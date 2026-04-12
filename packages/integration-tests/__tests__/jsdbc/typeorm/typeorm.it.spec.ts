@@ -81,12 +81,12 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      "INSERT INTO jsdbc_typeorm_items (name) VALUES ($1)",
+      "INSERT INTO jsdbc_typeorm_items (name) VALUES (?)",
       "alpha",
     );
 
     const rows = await connection.query(
-      "SELECT id, name FROM jsdbc_typeorm_items WHERE name = $1",
+      "SELECT id, name FROM jsdbc_typeorm_items WHERE name = ?",
       "alpha",
     );
 
@@ -104,12 +104,12 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_typeorm_items (name) VALUES ($1)",
+          "INSERT INTO jsdbc_typeorm_items (name) VALUES (?)",
           "inside-transaction",
         );
 
         const rows = await connection.query(
-          "SELECT name FROM jsdbc_typeorm_items WHERE name = $1",
+          "SELECT name FROM jsdbc_typeorm_items WHERE name = ?",
           "inside-transaction",
         );
 
@@ -128,7 +128,7 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          "INSERT INTO jsdbc_typeorm_items (name) VALUES ($1)",
+          "INSERT INTO jsdbc_typeorm_items (name) VALUES (?)",
           "rollback-me",
         );
         throw new Error("boom");

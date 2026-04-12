@@ -10,6 +10,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
+    },
+    "./typeorm": {
+      "types": "./dist/typeorm/index.d.ts",
+      "require": "./dist/typeorm/index.js"
+    },
+    "./mikroorm": {
+      "types": "./dist/mikroorm/index.d.ts",
+      "require": "./dist/mikroorm/index.js"
+    },
+    "./sequelize": {
+      "types": "./dist/sequelize/index.d.ts",
+      "require": "./dist/sequelize/index.js"
+    },
+    "./prisma": {
+      "types": "./dist/prisma/index.d.ts",
+      "require": "./dist/prisma/index.js"
     }
   },
   "scripts": {
@@ -18,8 +34,41 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/sequelize": "^11.0.0",
+    "@mikro-orm/core": "^7.0.0",
+    "@nestjs/typeorm": "^10.0.0 || ^11.0.0",
+    "sequelize": "^6.37.0",
+    "typeorm": "^0.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/sequelize": {
+      "optional": true
+    },
+    "@mikro-orm/core": {
+      "optional": true
+    },
+    "@nestjs/typeorm": {
+      "optional": true
+    },
+    "sequelize": {
+      "optional": true
+    },
+    "typeorm": {
+      "optional": true
+    }
+  },
   "files": [
     "dist",
     "CHANGELOG.md"
-  ]
+  ],
+  "devDependencies": {
+    "@nestjs/sequelize": "^11.0.1",
+    "@mikro-orm/core": "^7.0.10",
+    "@nestjs/common": "^11.1.11",
+    "@nestjs/typeorm": "^11.0.1",
+    "sequelize": "^6.37.7",
+    "typeorm": "^0.3.28"
+  }
 }

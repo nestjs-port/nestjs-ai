@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { DatabaseMetaData } from "./database-metadata.interface";
-
 export interface Connection {
-  getMetaData(): Promise<DatabaseMetaData>;
-
+  query(
+    sql: string,
+    ...args: readonly unknown[]
+  ): Promise<Record<string, unknown>[]>;
+  update(sql: string, ...args: readonly unknown[]): Promise<number>;
   close(): Promise<void>;
 }

@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-export interface TransactionTemplate<TSession> {
-  execute<T>(callback: (session: TSession) => Promise<T>): Promise<T>;
+import { Inject } from "@nestjs/common";
+
+export const JSDBC_DATA_SOURCE = Symbol.for("JSDBC_DATA_SOURCE");
+
+export function InjectJsdbcDataSource(): ParameterDecorator {
+  return Inject(JSDBC_DATA_SOURCE);
 }

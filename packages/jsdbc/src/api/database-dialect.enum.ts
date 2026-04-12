@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-export interface DatabaseMetaData {
-  getDatabaseProductName(): Promise<string>;
+export enum DatabaseDialect {
+  H2 = "H2",
+  HSQLDB = "HSQL Database Engine",
+  MARIADB = "MariaDB",
+  MICROSOFT_SQL_SERVER = "Microsoft SQL Server",
+  MYSQL = "MySQL",
+  ORACLE = "Oracle",
+  POSTGRESQL = "PostgreSQL",
+  SQLITE = "SQLite",
 }

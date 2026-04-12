@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { DataSource } from "../api";
-
-export interface JsdbcTemplate {
-  get dataSource(): DataSource | null;
-  execute(sql: string): Promise<void>;
-  update(sql: string, ...args: readonly unknown[]): Promise<number>;
-}
+export {
+  MikroOrmJsdbcModule,
+  type MikroOrmJsdbcModuleOptions,
+} from "./mikroorm.module";
+export {
+  MikroOrmConnection,
+  type SqlExecutor,
+} from "./mikroorm-connection";
+export { MikroOrmDataSource, type MikroOrmLike } from "./mikroorm-data-source";

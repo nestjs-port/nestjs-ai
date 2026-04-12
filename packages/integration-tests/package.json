@@ -4,13 +4,18 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
+    "prisma:generate": "DATABASE_URL=postgresql://jsdbc:jsdbc@localhost:5432/jsdbc_integration pnpm exec prisma generate --schema __tests__/jsdbc/prisma/schema.prisma",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "devDependencies": {
     "@google/genai": "^1.49.0",
+    "@mikro-orm/core": "^7.0.10",
+    "@mikro-orm/nestjs": "^7.0.1",
+    "@mikro-orm/postgresql": "^7.0.10",
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/jsdbc": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/model-chat-memory-repository-redis": "workspace:*",
     "@nestjs-ai/model-google-genai": "workspace:*",
@@ -22,12 +27,21 @@
     "@nestjs-ai/vector-store-redis": "workspace:*",
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
+    "@prisma/client": "^6.18.0",
+    "@nestjs/sequelize": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.1",
     "@nestjs/testing": "^11.1.11",
+    "@testcontainers/postgresql": "^11.13.0",
     "@opentelemetry/sdk-metrics": "^2.6.1",
     "@opentelemetry/sdk-trace-base": "^2.6.1",
+    "pg": "^8.20.0",
     "redis": "^5.11.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "prisma": "^6.18.0",
+    "sequelize": "^6.37.7",
+    "testcontainers": "^11.13.0",
+    "typeorm": "^0.3.28",
     "zod": "^4.3.6"
   }
 }

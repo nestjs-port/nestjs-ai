@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
+import type { MikroORM, Platform } from "@mikro-orm/core";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { MikroOrmConnection, type SqlExecutor } from "./mikroorm-connection";
+import { MikroOrmConnection } from "./mikroorm-connection";
 
-export type MikroOrmLike = {
-  em: SqlExecutor & {
-    transactional<T>(
-      callback: (em: MikroOrmLike["em"]) => Promise<T>,
-    ): Promise<T>;
-    getPlatform(): { constructor: { name: string } };
-  };
+type MikroOrmExecutor = MikroORM["em"] & {
+  execute(
+    query: string,
+    params?: readonly unknown[],
+    method?: "all" | "get" | "run",
+  ): Promise<unknown>;
 };
 
 export class MikroOrmDataSource implements DataSource {
   private readonly dialect: DatabaseDialect;
 
-  constructor(private readonly orm: MikroOrmLike) {
-    this.dialect = resolveDialect(this.orm.em.getPlatform().constructor.name);
+  constructor(private readonly orm: MikroORM) {
+    this.dialect = resolveDialect(this.orm.em.getPlatform());
   }
 
   async getConnection(): Promise<Connection> {
-    return new MikroOrmConnection(this.orm.em, this.dialect);
+    return new MikroOrmConnection(this.orm.em as MikroOrmExecutor);
   }
 
   async getDialect(): Promise<DatabaseDialect> {
@@ -44,13 +44,15 @@ export class MikroOrmDataSource implements DataSource {
   async transaction<T>(
     callback: (connection: Connection) => Promise<T>,
   ): Promise<T> {
-    return this.orm.em.transactional(async (em: MikroOrmLike["em"]) =>
-      callback(new MikroOrmConnection(em, this.dialect)),
+    return this.orm.em.transactional(async (em) =>
+      callback(new MikroOrmConnection(em as MikroOrmExecutor)),
     );
   }
 }
 
-function resolveDialect(platformName: string): DatabaseDialect {
+function resolveDialect(platform: Platform): DatabaseDialect {
+  const platformName = platform.constructor.name;
+
   if (platformName.includes("Maria")) {
     return DatabaseDialect.MARIADB;
   }

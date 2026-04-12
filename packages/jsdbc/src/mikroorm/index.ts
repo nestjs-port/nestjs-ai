@@ -18,8 +18,5 @@ export {
   MikroOrmJsdbcModule,
   type MikroOrmJsdbcModuleOptions,
 } from "./mikroorm.module";
-export {
-  MikroOrmConnection,
-  type SqlExecutor,
-} from "./mikroorm-connection";
-export { MikroOrmDataSource, type MikroOrmLike } from "./mikroorm-data-source";
+export { MikroOrmConnection } from "./mikroorm-connection";
+export { MikroOrmDataSource } from "./mikroorm-data-source";

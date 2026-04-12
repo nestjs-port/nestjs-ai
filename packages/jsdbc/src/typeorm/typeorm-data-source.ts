@@ -14,12 +14,42 @@
  * limitations under the License.
  */
 
-import type { EntityManager, DataSource as TypeOrmSource } from "typeorm";
+import type { DataSourceOptions, DataSource as TypeOrmSource } from "typeorm";
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { type QueryExecutor, TypeOrmConnection } from "./typeorm-connection";
+import { TypeOrmConnection } from "./typeorm-connection";
 
-function toDialectFromTypeOrmType(type: string): DatabaseDialect {
+export class TypeOrmDataSource implements DataSource {
+  private readonly dialect: DatabaseDialect;
+
+  constructor(private readonly source: TypeOrmSource) {
+    this.dialect = toDialectFromTypeOrmType(this.source.options.type);
+  }
+
+  async getConnection(): Promise<Connection> {
+    return new TypeOrmConnection(this.source.createQueryRunner());
+  }
+
+  async getDialect(): Promise<DatabaseDialect> {
+    return this.dialect;
+  }
+
+  async transaction<T>(
+    callback: (connection: Connection) => Promise<T>,
+  ): Promise<T> {
+    return this.source.transaction(async (manager) => {
+      if (!manager.queryRunner) {
+        throw new Error("TypeORM transaction query runner is not available.");
+      }
+
+      return callback(new TypeOrmConnection(manager.queryRunner));
+    });
+  }
+}
+
+function toDialectFromTypeOrmType(
+  type: DataSourceOptions["type"],
+): DatabaseDialect {
   switch (type) {
     case "mariadb":
       return DatabaseDialect.MARIADB;
@@ -35,36 +65,5 @@ function toDialectFromTypeOrmType(type: string): DatabaseDialect {
       return DatabaseDialect.ORACLE;
     default:
       return DatabaseDialect.POSTGRESQL;
-  }
-}
-
-type TypeOrmSqlExecutor = Pick<
-  TypeOrmSource,
-  "options" | "query" | "transaction"
-> &
-  Pick<EntityManager, "query">;
-
-export class TypeOrmDataSource implements DataSource {
-  private readonly dialect: DatabaseDialect;
-
-  constructor(private readonly source: TypeOrmSqlExecutor) {
-    this.dialect = toDialectFromTypeOrmType(String(this.source.options.type));
-  }
-
-  async getConnection(): Promise<Connection> {
-    return new TypeOrmConnection(this.source, this.dialect);
-  }
-
-  async getDialect(): Promise<DatabaseDialect> {
-    return this.dialect;
-  }
-
-  async transaction<T>(
-    callback: (connection: Connection) => Promise<T>,
-  ): Promise<T> {
-    return this.source.transaction(async (manager) => {
-      const executor: QueryExecutor = manager;
-      return callback(new TypeOrmConnection(executor, this.dialect));
-    });
   }
 }

@@ -15,7 +15,8 @@
  */
 
 import { QueryTypes, type Transaction } from "sequelize";
-import type { Connection, DatabaseDialect } from "../api";
+import type { Connection, DatabaseDialect, SqlFragment } from "../api";
+import { buildSqlTag } from "../api/sql-tag";
 
 export interface SequelizeExecutor {
   query(sql: string, options?: Record<string, unknown>): Promise<unknown>;
@@ -86,13 +87,15 @@ export class SequelizeConnection implements Connection {
     return this.dialect;
   }
 
-  async query(
-    sql: string,
-    ...args: readonly unknown[]
-  ): Promise<Record<string, unknown>[]> {
+  async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    const result = await this.sequelize.query(sql, {
-      replacements: args,
+    const { query, parameters } = buildSqlTag(
+      fragment.strings,
+      fragment.expressions,
+      this.dialect,
+    );
+    const result = await this.sequelize.query(query, {
+      replacements: parameters,
       raw: true,
       transaction: this.transaction,
       type: QueryTypes.SELECT,
@@ -100,10 +103,15 @@ export class SequelizeConnection implements Connection {
     return toRecordArray(result);
   }
 
-  async update(sql: string, ...args: readonly unknown[]): Promise<number> {
+  async update(fragment: SqlFragment): Promise<number> {
     this.assertOpen();
-    const result = await this.sequelize.query(sql, {
-      replacements: args,
+    const { query, parameters } = buildSqlTag(
+      fragment.strings,
+      fragment.expressions,
+      this.dialect,
+    );
+    const result = await this.sequelize.query(query, {
+      replacements: parameters,
       transaction: this.transaction,
     });
     const metadata = Array.isArray(result) ? result[1] : result;

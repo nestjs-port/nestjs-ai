@@ -24,7 +24,7 @@ import type {
 import { Module } from "@nestjs/common";
 
 import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
-import { MikroOrmDataSource, type MikroOrmLike } from "./mikroorm-data-source";
+import { MikroOrmDataSource } from "./mikroorm-data-source";
 
 export interface MikroOrmJsdbcModuleOptions {
   global?: boolean;
@@ -48,8 +48,7 @@ export class MikroOrmJsdbcModule {
 function createMikroOrmProvider(ormToken?: InjectionToken): Provider {
   return {
     provide: JSDBC_DATA_SOURCE,
-    useFactory: (orm: MikroORM): DataSource =>
-      new MikroOrmDataSource(orm as unknown as MikroOrmLike),
+    useFactory: (orm: MikroORM): DataSource => new MikroOrmDataSource(orm),
     inject: [ormToken ?? MikroORM],
   };
 }

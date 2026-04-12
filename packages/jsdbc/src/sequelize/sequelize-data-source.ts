@@ -14,19 +14,29 @@
  * limitations under the License.
  */
 
-import type { Transaction } from "sequelize";
+import type { Sequelize } from "sequelize";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import {
-  SequelizeConnection,
-  type SequelizeExecutor,
-} from "./sequelize-connection";
+import { SequelizeConnection } from "./sequelize-connection";
 
-export type SequelizeLike = SequelizeExecutor & {
-  getDialect(): string;
-  transaction<T>(
-    callback: (transaction: Transaction) => Promise<T>,
-  ): Promise<T>;
-};
+export class SequelizeDataSource implements DataSource {
+  constructor(private readonly sequelize: Sequelize) {}
+
+  async getConnection(): Promise<Connection> {
+    return new SequelizeConnection(this.sequelize);
+  }
+
+  async getDialect(): Promise<DatabaseDialect> {
+    return resolveDialect(this.sequelize.getDialect());
+  }
+
+  async transaction<T>(
+    callback: (connection: Connection) => Promise<T>,
+  ): Promise<T> {
+    return this.sequelize.transaction(async (transaction) =>
+      callback(new SequelizeConnection(this.sequelize, transaction)),
+    );
+  }
+}
 
 function resolveDialect(dialect: string): DatabaseDialect {
   switch (dialect) {
@@ -44,31 +54,5 @@ function resolveDialect(dialect: string): DatabaseDialect {
       return DatabaseDialect.ORACLE;
     default:
       return DatabaseDialect.POSTGRESQL;
-  }
-}
-
-export class SequelizeDataSource implements DataSource {
-  private readonly dialect: DatabaseDialect;
-
-  constructor(private readonly sequelize: SequelizeLike) {
-    this.dialect = resolveDialect(this.sequelize.getDialect());
-  }
-
-  async getConnection(): Promise<Connection> {
-    return new SequelizeConnection(this.sequelize, this.dialect);
-  }
-
-  async getDialect(): Promise<DatabaseDialect> {
-    return this.dialect;
-  }
-
-  async transaction<T>(
-    callback: (connection: Connection) => Promise<T>,
-  ): Promise<T> {
-    return this.sequelize.transaction(async (transaction) =>
-      callback(
-        new SequelizeConnection(this.sequelize, this.dialect, transaction),
-      ),
-    );
   }
 }

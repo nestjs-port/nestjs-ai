@@ -14,33 +14,11 @@
  * limitations under the License.
  */
 
-import { DatabaseDialect } from "./database-dialect.enum";
-
 export type SqlTagExpression = unknown | (() => unknown);
 
 export interface SqlFragment {
   readonly strings: TemplateStringsArray;
   readonly expressions: readonly SqlTagExpression[];
-}
-
-export interface BuiltSqlTag {
-  query: string;
-  parameters: unknown[];
-}
-
-function createParameterFormatter(
-  dialect: DatabaseDialect,
-): (index: number) => string {
-  switch (dialect) {
-    case DatabaseDialect.POSTGRESQL:
-      return (index) => `$${index + 1}`;
-    case DatabaseDialect.ORACLE:
-      return (index) => `:${index + 1}`;
-    case DatabaseDialect.MICROSOFT_SQL_SERVER:
-      return (index) => `@${index}`;
-    default:
-      return () => "?";
-  }
 }
 
 export function sql(
@@ -51,63 +29,4 @@ export function sql(
     strings,
     expressions,
   };
-}
-
-/**
- * Builds a parameterized SQL query from a tagged template literal in the same
- * shape TypeORM's `sql` tag uses.
- */
-export function buildSqlTag(
-  strings: TemplateStringsArray,
-  expressions: readonly SqlTagExpression[],
-  dialect: DatabaseDialect,
-): BuiltSqlTag {
-  const formatParameter = createParameterFormatter(dialect);
-  let query = "";
-  const parameters: unknown[] = [];
-
-  for (let index = 0; index < expressions.length; index++) {
-    query += strings[index];
-    const expression = expressions[index];
-
-    if (expression === null) {
-      query += "NULL";
-      continue;
-    }
-
-    if (typeof expression === "function") {
-      const value = expression();
-
-      if (typeof value === "string") {
-        query += value;
-        continue;
-      }
-
-      if (Array.isArray(value)) {
-        if (value.length === 0) {
-          throw new Error(
-            `Expression ${index} in this sql tagged template is a function which returned an empty array. Empty arrays cannot safely be expanded into parameter lists.`,
-          );
-        }
-
-        const placeholders = value.map((_, arrayIndex) =>
-          formatParameter(parameters.length + arrayIndex),
-        );
-        query += placeholders.join(", ");
-        parameters.push(...value);
-        continue;
-      }
-
-      throw new Error(
-        `Expression ${index} in this sql tagged template is a function which returned a value of type "${value === null ? "null" : typeof value}". Only array and string types are supported as function return values in sql tagged template expressions.`,
-      );
-    }
-
-    query += formatParameter(parameters.length);
-    parameters.push(expression);
-  }
-
-  query += strings[strings.length - 1];
-
-  return { query, parameters };
 }

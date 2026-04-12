@@ -25,10 +25,7 @@ import { getConnectionToken } from "@nestjs/sequelize";
 import type { Sequelize } from "sequelize";
 
 import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
-import {
-  SequelizeDataSource,
-  type SequelizeLike,
-} from "./sequelize-data-source";
+import { SequelizeDataSource } from "./sequelize-data-source";
 
 export interface SequelizeJsdbcModuleOptions {
   connectionName?: string;
@@ -59,7 +56,7 @@ function createSequelizeProvider(
   return {
     provide: JSDBC_DATA_SOURCE,
     useFactory: (sequelize: Sequelize): DataSource =>
-      new SequelizeDataSource(sequelize as unknown as SequelizeLike),
+      new SequelizeDataSource(sequelize),
     inject: [sequelizeToken ?? getConnectionToken(connectionName)],
   };
 }

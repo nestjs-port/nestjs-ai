@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import type { PrismaClient } from "@prisma/client";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { PrismaConnection, type PrismaExecutor } from "./prisma-connection";
-
-export type PrismaLike = PrismaExecutor & {
-  $transaction<T>(callback: (prisma: PrismaLike) => Promise<T>): Promise<T>;
-  _activeProvider?: string;
-  _engineConfig?: { activeProvider?: string };
-};
+import { PrismaConnection } from "./prisma-connection";
 
 export interface PrismaJsdbcOptions {
   dialect?: DatabaseDialect;
 }
 
+type PrismaDialectInfo = {
+  _activeProvider?: string;
+  _engineConfig?: { activeProvider?: string };
+};
+
 function resolveDialect(
-  prisma: PrismaLike,
+  prisma: PrismaClient & PrismaDialectInfo,
   dialect?: DatabaseDialect,
 ): DatabaseDialect {
   if (dialect) {
@@ -61,14 +61,14 @@ export class PrismaDataSource implements DataSource {
   private readonly dialect: DatabaseDialect;
 
   constructor(
-    private readonly prisma: PrismaLike,
+    private readonly prisma: PrismaClient & PrismaDialectInfo,
     options: PrismaJsdbcOptions = {},
   ) {
     this.dialect = resolveDialect(this.prisma, options.dialect);
   }
 
   async getConnection(): Promise<Connection> {
-    return new PrismaConnection(this.prisma, this.dialect);
+    return new PrismaConnection(this.prisma);
   }
 
   async getDialect(): Promise<DatabaseDialect> {
@@ -79,7 +79,7 @@ export class PrismaDataSource implements DataSource {
     callback: (connection: Connection) => Promise<T>,
   ): Promise<T> {
     return this.prisma.$transaction(async (prisma) =>
-      callback(new PrismaConnection(prisma, this.dialect)),
+      callback(new PrismaConnection(prisma)),
     );
   }
 }

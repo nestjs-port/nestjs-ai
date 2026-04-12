@@ -18,17 +18,17 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@nestjs/common": "^10.0.0 || ^11.0.0",
-    "@nestjs/core": "^10.0.0 || ^11.0.0",
     "@nestjs-ai/commons": "*",
-    "@nestjs-ai/model": "*"
+    "@nestjs-ai/model": "*",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/core": "^10.0.0 || ^11.0.0"
   },
   "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
-    "@nestjs/testing": "^11.1.11",
-    "@nestjs-ai/commons": "workspace:*",
-    "@nestjs-ai/model": "workspace:*"
+    "@nestjs/testing": "^11.1.11"
   },
   "files": [
     "dist",

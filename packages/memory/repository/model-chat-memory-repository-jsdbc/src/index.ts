@@ -14,4 +14,13 @@
  * limitations under the License.
  */
 
-export {};
+export {
+  JsdbcChatMemoryRepository,
+  JsdbcChatMemoryRepositoryBuilder,
+} from "./jsdbc-chat-memory-repository";
+export { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
+export { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
+export { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";
+export { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect";
+export { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect";
+export { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect";

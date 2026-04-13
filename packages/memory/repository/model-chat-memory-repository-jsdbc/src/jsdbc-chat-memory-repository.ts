@@ -19,7 +19,9 @@ import { LoggerFactory, StringUtils } from "@nestjs-ai/commons";
 import {
   type DataSource,
   JsdbcTemplate,
+  type RowMapper,
   SingleColumnRowMapper,
+  ZodRowMapper,
 } from "@nestjs-ai/jsdbc";
 import {
   AssistantMessage,
@@ -30,6 +32,7 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
+import { z } from "zod";
 import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
 
 export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
@@ -54,10 +57,10 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       "conversationId cannot be null or empty",
     );
 
-    const rows = await this.template.queryForList(
+    return await this.template.queryForList(
       this.dialect.getSelectMessagesSql(conversationId),
+      new MessageRowMapper(),
     );
-    return rows.map((row) => this.toMessage(row));
   }
 
   async saveAll(conversationId: string, messages: Message[]): Promise<void> {
@@ -107,41 +110,44 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
   static builder(): JsdbcChatMemoryRepositoryBuilder {
     return new JsdbcChatMemoryRepositoryBuilder();
   }
+}
 
-  private toMessage(row: Record<string, unknown>): Message {
-    const content = this.getRowValue(row, ["content", "CONTENT"]);
-    const type = this.getRowValue(row, ["type", "TYPE"]);
+class MessageRowMapper implements RowMapper<Message> {
+  private static readonly messageRowSchema = z.object({
+    content: z.string(),
+    type: z.string(),
+  });
 
+  private readonly delegate = new ZodRowMapper(
+    MessageRowMapper.messageRowSchema,
+  );
+
+  mapRow(row: Record<string, unknown>, rowNum: number): Message {
+    return this.toMessage(this.delegate.mapRow(row, rowNum));
+  }
+
+  private toMessage(
+    row: z.infer<typeof MessageRowMapper.messageRowSchema>,
+  ): Message {
     assert(
-      typeof type === "string" && StringUtils.hasText(type),
+      StringUtils.hasText(row.type),
       "message type cannot be null or empty",
     );
 
-    switch (this.toMessageType(type)) {
+    switch (this.toMessageType(row.type)) {
       case MessageType.USER:
-        assert(
-          typeof content === "string",
-          "content cannot be null for USER messages",
-        );
-        return new UserMessage({ content, properties: {} });
+        return new UserMessage({ content: row.content, properties: {} });
       case MessageType.ASSISTANT:
-        return new AssistantMessage({
-          content: typeof content === "string" ? content : null,
-          properties: {},
-        });
+        return new AssistantMessage({ content: row.content, properties: {} });
       case MessageType.SYSTEM:
-        assert(
-          typeof content === "string",
-          "content cannot be null for SYSTEM messages",
-        );
-        return new SystemMessage({ content, properties: {} });
+        return new SystemMessage({ content: row.content, properties: {} });
       case MessageType.TOOL:
         // The content is always stored empty for ToolResponseMessages.
         // If we want to capture the actual content, we need to extend
         // message persistence to support it.
         return new ToolResponseMessage({ responses: [] });
       default:
-        throw new Error(`Unknown message type: ${String(type)}`);
+        throw new Error(`Unknown message type: ${String(row.type)}`);
     }
   }
 
@@ -158,19 +164,6 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       default:
         throw new Error(`Unknown message type: ${value}`);
     }
-  }
-
-  private getRowValue(
-    row: Record<string, unknown>,
-    keys: readonly string[],
-  ): unknown {
-    for (const key of keys) {
-      if (Object.hasOwn(row, key)) {
-        return row[key];
-      }
-    }
-
-    return undefined;
   }
 }
 

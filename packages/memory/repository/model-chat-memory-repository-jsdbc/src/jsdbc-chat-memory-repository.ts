@@ -134,7 +134,7 @@ class MessageRowMapper implements RowMapper<Message> {
       "message type cannot be null or empty",
     );
 
-    switch (this.toMessageType(row.type)) {
+    switch (MessageType.valueOf(row.type)) {
       case MessageType.USER:
         return new UserMessage({ content: row.content, properties: {} });
       case MessageType.ASSISTANT:
@@ -148,21 +148,6 @@ class MessageRowMapper implements RowMapper<Message> {
         return new ToolResponseMessage({ responses: [] });
       default:
         throw new Error(`Unknown message type: ${String(row.type)}`);
-    }
-  }
-
-  private toMessageType(value: string): MessageType {
-    switch (value) {
-      case MessageType.USER.getName():
-        return MessageType.USER;
-      case MessageType.ASSISTANT.getName():
-        return MessageType.ASSISTANT;
-      case MessageType.SYSTEM.getName():
-        return MessageType.SYSTEM;
-      case MessageType.TOOL.getName():
-        return MessageType.TOOL;
-      default:
-        throw new Error(`Unknown message type: ${value}`);
     }
   }
 }

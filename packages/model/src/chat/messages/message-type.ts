@@ -89,4 +89,24 @@ export class MessageType {
    * @see ToolResponseMessage
    */
   static readonly TOOL = new MessageType("TOOL", "tool");
+
+  /**
+   * Resolve a message type from its uppercase name.
+   * @param name the message type name, such as USER or ASSISTANT
+   * @returns the matching message type
+   */
+  static valueOf(name: string): MessageType {
+    switch (name) {
+      case MessageType.USER.getName():
+        return MessageType.USER;
+      case MessageType.ASSISTANT.getName():
+        return MessageType.ASSISTANT;
+      case MessageType.SYSTEM.getName():
+        return MessageType.SYSTEM;
+      case MessageType.TOOL.getName():
+        return MessageType.TOOL;
+      default:
+        throw new Error(`Unknown message type: ${name}`);
+    }
+  }
 }

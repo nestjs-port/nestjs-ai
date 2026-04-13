@@ -27,6 +27,38 @@ import { JsdbcTemplate } from "../jsdbc-template";
 import type { RowMapper, RowMapperFunction } from "../row-mapper.interface";
 
 describe("JsdbcTemplate", () => {
+  describe("update", () => {
+    it("executes an update statement and closes the connection", async () => {
+      const close = vi.fn(async () => {});
+      const update = vi.fn(async () => 3);
+      const connection = createConnection({ query: vi.fn(), update, close });
+      const dataSource = createDataSource(connection);
+      const template = new JsdbcTemplate(dataSource);
+
+      await expect(
+        template.update(sql`update users set name = 'Ada'`),
+      ).resolves.toBe(3);
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes the connection when update fails", async () => {
+      const close = vi.fn(async () => {});
+      const update = vi.fn(async () => {
+        throw new Error("boom");
+      });
+      const connection = createConnection({ query: vi.fn(), update, close });
+      const dataSource = createDataSource(connection);
+      const template = new JsdbcTemplate(dataSource);
+
+      await expect(
+        template.update(sql`update users set name = 'Ada'`),
+      ).rejects.toThrow("boom");
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("queryForList", () => {
     it("maps single-column rows using a scalar zod schema", async () => {
       const rows = [{ CONVERSATION_ID: "1" }];
@@ -170,20 +202,17 @@ describe("JsdbcTemplate", () => {
 
 function createConnection(connection: {
   query: (fragment: SqlFragment) => Promise<Record<string, unknown>[]>;
+  update?: (fragment: SqlFragment) => Promise<number>;
   close: () => Promise<void>;
 }): Connection {
   return {
     query: connection.query,
-    update: vi.fn(async () => 0),
+    update: connection.update ?? vi.fn(async () => 0),
     close: connection.close,
   };
 }
 
-function createDataSource(connection: {
-  query: (fragment: SqlFragment) => Promise<Record<string, unknown>[]>;
-  update: (fragment: SqlFragment) => Promise<number>;
-  close: () => Promise<void>;
-}): DataSource {
+function createDataSource(connection: Connection): DataSource {
   const getConnection = vi.fn(async () => connection);
   const getDialect = vi.fn(async () => DatabaseDialect.POSTGRESQL);
   const transaction: DataSource["transaction"] = async <T>(

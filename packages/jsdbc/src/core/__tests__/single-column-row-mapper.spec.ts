@@ -57,4 +57,12 @@ describe("SingleColumnRowMapper", () => {
 
     expect(mapper.mapRow({ value: null }, 0)).toBeNull();
   });
+
+  it("rejects null values when nullable is false", () => {
+    const mapper = new SingleColumnRowMapper(Number, { nullable: false });
+
+    expect(() => mapper.mapRow({ value: null }, 0)).toThrow(
+      "Expected a non-null single-column row at row number 0, but received null.",
+    );
+  });
 });

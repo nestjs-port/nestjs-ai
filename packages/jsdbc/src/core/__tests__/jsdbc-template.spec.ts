@@ -164,6 +164,14 @@ describe("JsdbcTemplate", () => {
       );
       expectTypeOf(await singleColumnResult).toEqualTypeOf<(number | null)[]>();
 
+      const nonNullableSingleColumnResult = template.queryForList(
+        sql`select conversation_id from chat`,
+        new SingleColumnRowMapper(String, { nullable: false }),
+      );
+      expectTypeOf(await nonNullableSingleColumnResult).toEqualTypeOf<
+        string[]
+      >();
+
       const objectResult = template.queryForList(
         sql`select * from users`,
         new ZodRowMapper(

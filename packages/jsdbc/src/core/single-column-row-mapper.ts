@@ -35,16 +35,29 @@ type SingleColumnValue<T extends SingleColumnType> = T extends StringConstructor
           ? bigint
           : never;
 
+type SingleColumnRowMapperOptions<Nullable extends boolean = true> = {
+  nullable?: Nullable;
+};
+
 export class SingleColumnRowMapper<
   T extends SingleColumnType = SingleColumnType,
-> implements RowMapper<SingleColumnValue<T> | null>
+  Nullable extends boolean = true,
+> implements
+    RowMapper<
+      Nullable extends true ? SingleColumnValue<T> | null : SingleColumnValue<T>
+    >
 {
-  constructor(private readonly requiredType: T) {}
+  constructor(
+    private readonly requiredType: T,
+    private readonly options: SingleColumnRowMapperOptions<Nullable> = {},
+  ) {}
 
   mapRow(
     row: Record<string, unknown>,
     rowNum: number,
-  ): SingleColumnValue<T> | null {
+  ): Nullable extends true
+    ? SingleColumnValue<T> | null
+    : SingleColumnValue<T> {
     const columnCount = Object.keys(row).length;
     if (columnCount !== 1) {
       throw new Error(
@@ -54,10 +67,20 @@ export class SingleColumnRowMapper<
 
     const value = Object.values(row)[0];
     if (value == null) {
-      return null;
+      if (this.options.nullable === false) {
+        throw new Error(
+          `Expected a non-null single-column row at row number ${rowNum}, but received null.`,
+        );
+      }
+
+      return null as Nullable extends true
+        ? SingleColumnValue<T> | null
+        : SingleColumnValue<T>;
     }
 
-    return this.convertValue(value);
+    return this.convertValue(value) as Nullable extends true
+      ? SingleColumnValue<T> | null
+      : SingleColumnValue<T>;
   }
 
   private convertValue(value: unknown): SingleColumnValue<T> {

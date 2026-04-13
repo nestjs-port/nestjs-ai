@@ -16,7 +16,7 @@
 
 import type { Sequelize } from "sequelize";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-context";
+import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
 import { SequelizeConnection } from "./sequelize-connection";
 
 export class SequelizeDataSource implements DataSource {

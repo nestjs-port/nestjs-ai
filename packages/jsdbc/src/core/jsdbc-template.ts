@@ -17,7 +17,7 @@
 import { LoggerFactory } from "@nestjs-ai/commons";
 import { type DataSource, type SqlFragment, toSql } from "../api";
 import type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
-import { TransactionSynchronizationManager } from "./transaction-context";
+import { TransactionSynchronizationManager } from "./transaction-synchronization-manager";
 
 interface ConnectionHandle {
   connection: Awaited<ReturnType<DataSource["getConnection"]>>;

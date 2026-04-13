@@ -17,7 +17,7 @@
 import type { DataSourceOptions, DataSource as TypeOrmSource } from "typeorm";
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-context";
+import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
 import { TypeOrmConnection } from "./typeorm-connection";
 
 export class TypeOrmDataSource implements DataSource {

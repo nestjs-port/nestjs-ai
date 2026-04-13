@@ -26,7 +26,7 @@ import {
 import { JsdbcTemplate } from "../jsdbc-template";
 import type { RowMapper, RowMapperFunction } from "../row-mapper.interface";
 import { SingleColumnRowMapper } from "../single-column-row-mapper";
-import { TransactionSynchronizationManager } from "../transaction-context";
+import { TransactionSynchronizationManager } from "../transaction-synchronization-manager";
 import { ZodRowMapper } from "../zod-row-mapper";
 
 describe("JsdbcTemplate", () => {

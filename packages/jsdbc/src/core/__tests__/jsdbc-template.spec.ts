@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { Expose, Transform } from "class-transformer";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import { z } from "zod";
 import {
   type Connection,
@@ -23,11 +24,21 @@ import {
   type SqlFragment,
   sql,
 } from "../../api";
+import { ClassTransformerRowMapper } from "../class-transformer-row-mapper";
 import { JsdbcTemplate } from "../jsdbc-template";
 import type { RowMapper, RowMapperFunction } from "../row-mapper.interface";
 import { SingleColumnRowMapper } from "../single-column-row-mapper";
 import { TransactionSynchronizationManager } from "../transaction-synchronization-manager";
 import { ZodRowMapper } from "../zod-row-mapper";
+
+class ConversationRow {
+  @Expose({ name: "conversation_id" })
+  @Transform(({ value }) => Number(value))
+  conversationId!: number;
+
+  @Expose({ name: "display_name" })
+  displayName!: string;
+}
 
 describe("JsdbcTemplate", () => {
   describe("dataSource", () => {
@@ -143,6 +154,54 @@ describe("JsdbcTemplate", () => {
   });
 
   describe("queryForList", () => {
+    it("infers row types from zod and single-column row mappers", async () => {
+      const dataSource = createDataSource(createConnection());
+      const template = new JsdbcTemplate(dataSource);
+
+      const singleColumnResult = template.queryForList(
+        sql`select value from items`,
+        new SingleColumnRowMapper(Number),
+      );
+      expectTypeOf(await singleColumnResult).toEqualTypeOf<(number | null)[]>();
+
+      const objectResult = template.queryForList(
+        sql`select * from users`,
+        new ZodRowMapper(
+          z.object({
+            conversationId: z.number(),
+            displayName: z.string(),
+          }),
+        ),
+      );
+      expectTypeOf(await objectResult).toEqualTypeOf<
+        Array<{ conversationId: number; displayName: string }>
+      >();
+
+      const zodScalarResult = template.queryForList(
+        sql`select value from items`,
+        new ZodRowMapper(z.number()),
+      );
+      expectTypeOf(await zodScalarResult).toEqualTypeOf<number[]>();
+
+      const nullableZodScalarResult = template.queryForList(
+        sql`select value from items`,
+        new ZodRowMapper(z.number().nullable()),
+      );
+      expectTypeOf(await nullableZodScalarResult).toEqualTypeOf<
+        Array<number | null>
+      >();
+
+      const classTransformerResult = template.queryForList(
+        sql`select * from users`,
+        new ClassTransformerRowMapper(ConversationRow, {
+          excludeExtraneousValues: true,
+        }),
+      );
+      expectTypeOf(await classTransformerResult).toEqualTypeOf<
+        ConversationRow[]
+      >();
+    });
+
     it("returns raw rows when no mapper is provided", async () => {
       const rows = [{ conversation_id: "1" }];
       const close = vi.fn(async () => {});

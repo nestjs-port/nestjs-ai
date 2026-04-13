@@ -17,23 +17,33 @@
 import { LoggerFactory } from "@nestjs-ai/commons";
 import { type DataSource, type SqlFragment, toSql } from "../api";
 import type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
+import { TransactionSynchronizationManager } from "./transaction-context";
+
+interface ConnectionHandle {
+  connection: Awaited<ReturnType<DataSource["getConnection"]>>;
+  transactional: boolean;
+}
 
 export class JsdbcTemplate {
   private readonly logger = LoggerFactory.getLogger(JsdbcTemplate.name);
 
   constructor(private readonly dataSource: DataSource) {}
 
+  async transaction<T>(callback: () => Promise<T>): Promise<T> {
+    return this.dataSource.transaction(async () => callback());
+  }
+
   async update(fragment: SqlFragment): Promise<number> {
     this.logger.debug(`Executing SQL update [${toSql(fragment)}]`);
 
-    const connection = await this.dataSource.getConnection();
+    const connection = await this.getConnection();
 
     try {
-      const updatedRows = await connection.update(fragment);
+      const updatedRows = await connection.connection.update(fragment);
       this.logger.trace("SQL update affected {} rows", updatedRows);
       return updatedRows;
     } finally {
-      await connection.close();
+      await this.releaseConnection(connection);
     }
   }
 
@@ -55,10 +65,10 @@ export class JsdbcTemplate {
   ): Promise<T[] | Record<string, unknown>[]> {
     this.logger.debug(`Executing SQL query [${toSql(fragment)}]`);
 
-    const connection = await this.dataSource.getConnection();
+    const connection = await this.getConnection();
 
     try {
-      const rows = await connection.query(fragment);
+      const rows = await connection.connection.query(fragment);
 
       if (!rowMapper) {
         return rows;
@@ -74,8 +84,32 @@ export class JsdbcTemplate {
 
       return rows;
     } finally {
-      await connection.close();
+      await this.releaseConnection(connection);
     }
+  }
+
+  private async getConnection(): Promise<ConnectionHandle> {
+    const transactionalConnection =
+      TransactionSynchronizationManager.getResource(this.dataSource);
+    if (transactionalConnection != null) {
+      return {
+        connection: transactionalConnection,
+        transactional: true,
+      };
+    }
+
+    return {
+      connection: await this.dataSource.getConnection(),
+      transactional: false,
+    };
+  }
+
+  private async releaseConnection(handle: ConnectionHandle): Promise<void> {
+    if (handle.transactional) {
+      return;
+    }
+
+    await handle.connection.close();
   }
 }
 

@@ -16,6 +16,7 @@
 
 import type { Sequelize } from "sequelize";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
+import { TransactionSynchronizationManager } from "../core/transaction-context";
 import { SequelizeConnection } from "./sequelize-connection";
 
 export class SequelizeDataSource implements DataSource {
@@ -32,9 +33,20 @@ export class SequelizeDataSource implements DataSource {
   async transaction<T>(
     callback: (connection: Connection) => Promise<T>,
   ): Promise<T> {
-    return this.sequelize.transaction(async (transaction) =>
-      callback(new SequelizeConnection(this.sequelize, transaction)),
-    );
+    const transactionalConnection =
+      TransactionSynchronizationManager.getResource(this);
+    if (transactionalConnection != null) {
+      return callback(transactionalConnection);
+    }
+
+    return this.sequelize.transaction(async (transaction) => {
+      const connection = new SequelizeConnection(this.sequelize, transaction);
+      return TransactionSynchronizationManager.withResourceContext(
+        this,
+        connection,
+        () => callback(connection),
+      );
+    });
   }
 }
 

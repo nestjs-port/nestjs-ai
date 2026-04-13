@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-import type { PrismaClient } from "@prisma/client";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
+import type { PrismaClientLike, PrismaDialectInfo } from "./prisma";
 import { PrismaConnection } from "./prisma-connection";
 
 export interface PrismaJsdbcOptions {
   dialect?: DatabaseDialect;
 }
 
-type PrismaDialectInfo = {
-  _activeProvider?: string;
-  _engineConfig?: { activeProvider?: string };
-};
-
 function resolveDialect(
-  prisma: PrismaClient & PrismaDialectInfo,
+  prisma: PrismaClientLike & PrismaDialectInfo,
   dialect?: DatabaseDialect,
 ): DatabaseDialect {
   if (dialect) {
@@ -61,7 +56,7 @@ export class PrismaDataSource implements DataSource {
   private readonly dialect: DatabaseDialect;
 
   constructor(
-    private readonly prisma: PrismaClient & PrismaDialectInfo,
+    private readonly prisma: PrismaClientLike & PrismaDialectInfo,
     options: PrismaJsdbcOptions = {},
   ) {
     this.dialect = resolveDialect(this.prisma, options.dialect);

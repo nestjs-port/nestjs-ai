@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { PrismaClient } from "@prisma/client";
-import { Prisma } from "@prisma/client";
 import type { Connection, SqlFragment } from "../api";
+import type { PrismaRawClient, PrismaSql } from "./prisma";
+import { Prisma } from "./prisma-runtime";
 
 export class PrismaConnection implements Connection {
   #closed = false;
 
-  constructor(
-    private readonly prisma: Pick<PrismaClient, "$queryRaw" | "$executeRaw">,
-  ) {}
+  constructor(private readonly prisma: PrismaRawClient) {}
 
   async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
     this.assertOpen();
-    return this.prisma.$queryRaw(this.toPrismaSql(fragment));
+    return this.prisma.$queryRaw<Record<string, unknown>[]>(
+      this.toPrismaSql(fragment),
+    );
   }
 
   async update(fragment: SqlFragment): Promise<number> {
@@ -45,7 +45,7 @@ export class PrismaConnection implements Connection {
     }
   }
 
-  private toPrismaSql(fragment: SqlFragment): Prisma.Sql {
+  private toPrismaSql(fragment: SqlFragment): PrismaSql {
     const expressions = fragment.expressions.map((expression, index) => {
       if (expression === null) {
         return Prisma.raw("NULL");

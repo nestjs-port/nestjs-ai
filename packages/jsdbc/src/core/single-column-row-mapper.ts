@@ -23,12 +23,28 @@ type SingleColumnType =
   | DateConstructor
   | BigIntConstructor;
 
-type SingleColumnValue = string | number | boolean | Date | bigint | null;
+type SingleColumnValue<T extends SingleColumnType> = T extends StringConstructor
+  ? string
+  : T extends NumberConstructor
+    ? number
+    : T extends BooleanConstructor
+      ? boolean
+      : T extends DateConstructor
+        ? Date
+        : T extends BigIntConstructor
+          ? bigint
+          : never;
 
-export class SingleColumnRowMapper implements RowMapper<SingleColumnValue> {
-  constructor(private readonly requiredType: SingleColumnType) {}
+export class SingleColumnRowMapper<
+  T extends SingleColumnType = SingleColumnType,
+> implements RowMapper<SingleColumnValue<T> | null>
+{
+  constructor(private readonly requiredType: T) {}
 
-  mapRow(row: Record<string, unknown>, rowNum: number): SingleColumnValue {
+  mapRow(
+    row: Record<string, unknown>,
+    rowNum: number,
+  ): SingleColumnValue<T> | null {
     const columnCount = Object.keys(row).length;
     if (columnCount !== 1) {
       throw new Error(
@@ -44,39 +60,44 @@ export class SingleColumnRowMapper implements RowMapper<SingleColumnValue> {
     return this.convertValue(value);
   }
 
-  private convertValue(value: unknown): SingleColumnValue {
+  private convertValue(value: unknown): SingleColumnValue<T> {
     if (this.requiredType === String) {
-      return String(value);
+      return String(value) as SingleColumnValue<T>;
     }
 
     if (this.requiredType === Number) {
-      return typeof value === "number" ? value : Number(value);
+      return (
+        typeof value === "number" ? value : Number(value)
+      ) as SingleColumnValue<T>;
     }
 
     if (this.requiredType === Boolean) {
       if (typeof value === "boolean") {
-        return value;
+        return value as SingleColumnValue<T>;
       }
 
       if (typeof value === "number") {
-        return value !== 0;
+        return (value !== 0) as SingleColumnValue<T>;
       }
 
       if (typeof value === "string") {
-        return value.toLowerCase() === "true" || value === "1";
+        return (value.toLowerCase() === "true" ||
+          value === "1") as SingleColumnValue<T>;
       }
     }
 
     if (this.requiredType === Date) {
-      return value instanceof Date ? value : new Date(value as string | number);
+      return (
+        value instanceof Date ? value : new Date(value as string | number)
+      ) as SingleColumnValue<T>;
     }
 
     if (this.requiredType === BigInt) {
-      return typeof value === "bigint"
-        ? value
-        : BigInt(value as string | number);
+      return (
+        typeof value === "bigint" ? value : BigInt(value as string | number)
+      ) as SingleColumnValue<T>;
     }
 
-    return value as SingleColumnValue;
+    return value as SingleColumnValue<T>;
   }
 }

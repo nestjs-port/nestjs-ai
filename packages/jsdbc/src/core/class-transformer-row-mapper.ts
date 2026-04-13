@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  type ClassConstructor,
-  type ClassTransformOptions,
-  plainToInstance,
+import type {
+  ClassConstructor,
+  ClassTransformOptions,
+  plainToInstance as PlainToInstanceFunction,
 } from "class-transformer";
 
 import type { RowMapper } from "./row-mapper.interface";
+
+let plainToInstanceImplementation: typeof PlainToInstanceFunction | null = null;
 
 export class ClassTransformerRowMapper<T extends object>
   implements RowMapper<T>
@@ -31,6 +33,19 @@ export class ClassTransformerRowMapper<T extends object>
   ) {}
 
   mapRow(row: Record<string, unknown>, _rowNum: number): T {
-    return plainToInstance(this.targetType, row, this.options);
+    return getPlainToInstance()(this.targetType, row, this.options);
   }
+}
+
+function getPlainToInstance(): typeof PlainToInstanceFunction {
+  if (plainToInstanceImplementation != null) {
+    return plainToInstanceImplementation;
+  }
+
+  // Lazy load to avoid requiring class-transformer until this mapper is used.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { plainToInstance } =
+    require("class-transformer") as typeof import("class-transformer");
+  plainToInstanceImplementation = plainToInstance;
+  return plainToInstanceImplementation;
 }

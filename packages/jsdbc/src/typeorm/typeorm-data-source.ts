@@ -17,6 +17,7 @@
 import type { DataSourceOptions, DataSource as TypeOrmSource } from "typeorm";
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
+import { TransactionSynchronizationManager } from "../core/transaction-context";
 import { TypeOrmConnection } from "./typeorm-connection";
 
 export class TypeOrmDataSource implements DataSource {
@@ -37,12 +38,23 @@ export class TypeOrmDataSource implements DataSource {
   async transaction<T>(
     callback: (connection: Connection) => Promise<T>,
   ): Promise<T> {
+    const transactionalConnection =
+      TransactionSynchronizationManager.getResource(this);
+    if (transactionalConnection != null) {
+      return callback(transactionalConnection);
+    }
+
     return this.source.transaction(async (manager) => {
       if (!manager.queryRunner) {
         throw new Error("TypeORM transaction query runner is not available.");
       }
 
-      return callback(new TypeOrmConnection(manager.queryRunner));
+      const connection = new TypeOrmConnection(manager.queryRunner);
+      return TransactionSynchronizationManager.withResourceContext(
+        this,
+        connection,
+        () => callback(connection),
+      );
     });
   }
 }

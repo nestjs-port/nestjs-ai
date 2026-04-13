@@ -16,6 +16,7 @@
 
 import type { MikroORM, Platform } from "@mikro-orm/core";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
+import { TransactionSynchronizationManager } from "../core/transaction-context";
 import { MikroOrmConnection } from "./mikroorm-connection";
 
 type MikroOrmExecutor = MikroORM["em"] & {
@@ -44,9 +45,20 @@ export class MikroOrmDataSource implements DataSource {
   async transaction<T>(
     callback: (connection: Connection) => Promise<T>,
   ): Promise<T> {
-    return this.orm.em.transactional(async (em) =>
-      callback(new MikroOrmConnection(em as MikroOrmExecutor)),
-    );
+    const transactionalConnection =
+      TransactionSynchronizationManager.getResource(this);
+    if (transactionalConnection != null) {
+      return callback(transactionalConnection);
+    }
+
+    return this.orm.em.transactional(async (em) => {
+      const connection = new MikroOrmConnection(em as MikroOrmExecutor);
+      return TransactionSynchronizationManager.withResourceContext(
+        this,
+        connection,
+        () => callback(connection),
+      );
+    });
   }
 }
 

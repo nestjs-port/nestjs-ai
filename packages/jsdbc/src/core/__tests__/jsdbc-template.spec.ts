@@ -26,6 +26,7 @@ import {
 import { JsdbcTemplate } from "../jsdbc-template";
 import type { RowMapper, RowMapperFunction } from "../row-mapper.interface";
 import { SingleColumnRowMapper } from "../single-column-row-mapper";
+import { TransactionSynchronizationManager } from "../transaction-context";
 import { ZodRowMapper } from "../zod-row-mapper";
 
 describe("JsdbcTemplate", () => {
@@ -58,6 +59,77 @@ describe("JsdbcTemplate", () => {
       ).rejects.toThrow("boom");
       expect(update).toHaveBeenCalledTimes(1);
       expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it("reuses the current transaction connection without closing it", async () => {
+      const close = vi.fn(async () => {});
+      const update = vi.fn(async () => 3);
+      const connection = createConnection({ query: vi.fn(), update, close });
+      const getConnection = vi.fn(async () => {
+        throw new Error(
+          "should not fetch a new connection inside a transaction",
+        );
+      });
+      const dataSource: DataSource = {
+        getConnection,
+        getDialect: vi.fn(async () => DatabaseDialect.POSTGRESQL),
+        transaction: async <T>(
+          callback: (connection: Connection) => Promise<T>,
+        ): Promise<T> => callback(connection),
+      };
+      const template = new JsdbcTemplate(dataSource);
+
+      await expect(
+        TransactionSynchronizationManager.withResourceContext(
+          dataSource,
+          connection,
+          async () => template.update(sql`update users set name = 'Ada'`),
+        ),
+      ).resolves.toBe(3);
+
+      expect(getConnection).not.toHaveBeenCalled();
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("transaction", () => {
+    it("runs multiple template calls within one transaction context", async () => {
+      const close = vi.fn(async () => {});
+      const update = vi.fn(async () => 1);
+      const query = vi.fn(async () => [{ id: 1 }]);
+      const connection = createConnection({ query, update, close });
+      const getConnection = vi.fn(async () => {
+        throw new Error(
+          "should not fetch a new connection inside a transaction",
+        );
+      });
+      const dataSource: DataSource = {
+        getConnection,
+        getDialect: vi.fn(async () => DatabaseDialect.POSTGRESQL),
+        transaction: async <T>(
+          callback: (connection: Connection) => Promise<T>,
+        ): Promise<T> =>
+          TransactionSynchronizationManager.withResourceContext(
+            dataSource,
+            connection,
+            () => callback(connection),
+          ),
+      };
+      const template = new JsdbcTemplate(dataSource);
+
+      await expect(
+        template.transaction(async () => {
+          await template.update(sql`update users set name = 'Ada'`);
+          await template.queryForList(sql`select * from users`);
+          return "done";
+        }),
+      ).resolves.toBe("done");
+
+      expect(getConnection).not.toHaveBeenCalled();
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(close).not.toHaveBeenCalled();
     });
   });
 

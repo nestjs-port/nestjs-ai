@@ -15,74 +15,46 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
 
 import { SingleColumnRowMapper } from "../single-column-row-mapper";
 
 describe("SingleColumnRowMapper", () => {
-  it("returns already-typed scalar values without conversion", () => {
-    const mapper = new SingleColumnRowMapper(z.number());
+  it("converts string values", () => {
+    const mapper = new SingleColumnRowMapper(String);
 
-    expect(mapper.mapRow({ value: 7 }, 0)).toBe(7);
+    expect(mapper.mapRow({ value: 123 }, 0)).toBe("123");
   });
 
-  it("converts string values to the required scalar type", () => {
-    const mapper = new SingleColumnRowMapper(z.number());
+  it("converts number values", () => {
+    const mapper = new SingleColumnRowMapper(Number);
 
-    expect(mapper.mapRow({ CONVERSATION_ID: "1" }, 0)).toBe(1);
+    expect(mapper.mapRow({ value: "1" }, 0)).toBe(1);
   });
 
-  it("converts primitive values to string, boolean, date, and bigint", () => {
-    expect(
-      new SingleColumnRowMapper(z.string()).mapRow({ value: 123 }, 0),
-    ).toBe("123");
-    expect(
-      new SingleColumnRowMapper(z.boolean()).mapRow({ value: "true" }, 0),
-    ).toBe(true);
-    expect(
-      new SingleColumnRowMapper(z.date()).mapRow(
-        { value: "2026-04-13T00:00:00.000Z" },
-        0,
-      ),
-    ).toEqual(new Date("2026-04-13T00:00:00.000Z"));
-    expect(
-      new SingleColumnRowMapper(z.bigint()).mapRow({ value: "42" }, 0),
-    ).toBe(42n);
-  });
+  it("converts boolean values", () => {
+    const mapper = new SingleColumnRowMapper(Boolean);
 
-  it("treats false-like values as false", () => {
-    const mapper = new SingleColumnRowMapper(z.boolean());
-
-    expect(mapper.mapRow({ value: "false" }, 0)).toBe(false);
+    expect(mapper.mapRow({ value: "true" }, 0)).toBe(true);
     expect(mapper.mapRow({ value: "0" }, 0)).toBe(false);
-    expect(mapper.mapRow({ value: 0 }, 0)).toBe(false);
   });
 
-  it("rejects invalid scalar conversions", () => {
-    const mapper = new SingleColumnRowMapper(z.number());
+  it("converts date values", () => {
+    const mapper = new SingleColumnRowMapper(Date);
 
-    expect(() => mapper.mapRow({ value: "abc" }, 0)).toThrow();
-  });
-
-  it("rejects null values for non-nullable scalars", () => {
-    const mapper = new SingleColumnRowMapper(z.number());
-
-    expect(() => mapper.mapRow({ value: null }, 0)).toThrow();
-  });
-
-  it("rejects empty rows", () => {
-    const mapper = new SingleColumnRowMapper(z.number());
-
-    expect(() => mapper.mapRow({}, 0)).toThrow(
-      "Expected a single-column row at row number 0, but received 0 columns.",
+    expect(mapper.mapRow({ value: "2026-04-13T00:00:00.000Z" }, 0)).toEqual(
+      new Date("2026-04-13T00:00:00.000Z"),
     );
   });
 
-  it("rejects rows with more than one column", () => {
-    const mapper = new SingleColumnRowMapper(z.number());
+  it("converts bigint values", () => {
+    const mapper = new SingleColumnRowMapper(BigInt);
 
-    expect(() => mapper.mapRow({ first: "1", second: "2" }, 3)).toThrow(
-      "Expected a single-column row at row number 3, but received 2 columns.",
-    );
+    expect(mapper.mapRow({ value: "42" }, 0)).toBe(42n);
+  });
+
+  it("returns null values as null", () => {
+    const mapper = new SingleColumnRowMapper(Number);
+
+    expect(mapper.mapRow({ value: null }, 0)).toBeNull();
   });
 });

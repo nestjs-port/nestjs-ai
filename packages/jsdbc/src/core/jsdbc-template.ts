@@ -27,7 +27,7 @@ interface ConnectionHandle {
 export class JsdbcTemplate {
   private readonly logger = LoggerFactory.getLogger(JsdbcTemplate.name);
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(public readonly dataSource: DataSource) {}
 
   async transaction<T>(callback: () => Promise<T>): Promise<T> {
     return this.dataSource.transaction(async () => callback());

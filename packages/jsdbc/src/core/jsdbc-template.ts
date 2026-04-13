@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
+import { LoggerFactory } from "@nestjs-ai/commons";
 import type { z } from "zod";
-
-import type { DataSource, SqlFragment } from "../api";
+import { type DataSource, type SqlFragment, toSql } from "../api";
 import type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
 import { SingleColumnRowMapper } from "./single-column-row-mapper";
 
 export class JsdbcTemplate {
+  private readonly logger = LoggerFactory.getLogger(JsdbcTemplate.name);
+
   constructor(private readonly dataSource: DataSource) {}
+
+  async update(fragment: SqlFragment): Promise<number> {
+    this.logger.debug(`Executing SQL update [${toSql(fragment)}]`);
+
+    const connection = await this.dataSource.getConnection();
+
+    try {
+      const updatedRows = await connection.update(fragment);
+      this.logger.trace("SQL update affected {} rows", updatedRows);
+      return updatedRows;
+    } finally {
+      await connection.close();
+    }
+  }
 
   async queryForList<T>(
     fragment: SqlFragment,
@@ -42,6 +58,8 @@ export class JsdbcTemplate {
     fragment: SqlFragment,
     rowMapperOrSchema: RowMapperFunction<T> | RowMapper<T> | z.ZodTypeAny,
   ): Promise<T[]> {
+    this.logger.debug(`Executing SQL query [${toSql(fragment)}]`);
+
     const connection = await this.dataSource.getConnection();
 
     try {

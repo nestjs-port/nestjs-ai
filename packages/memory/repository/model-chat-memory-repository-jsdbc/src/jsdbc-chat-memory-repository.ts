@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import { LoggerFactory, StringUtils } from "@nestjs-ai/commons";
-import type { DataSource } from "@nestjs-ai/jsdbc";
+import { type DataSource, JsdbcTemplate } from "@nestjs-ai/jsdbc";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -30,27 +30,22 @@ import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository
 
 export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly template: JsdbcTemplate,
     private readonly dialect: JsdbcChatMemoryRepositoryDialect,
   ) {
-    assert(dataSource, "dataSource cannot be null");
+    assert(template, "template cannot be null");
     assert(dialect, "dialect cannot be null");
   }
 
   async findConversationIds(): Promise<string[]> {
-    const connection = await this.dataSource.getConnection();
-    try {
-      const rows = await connection.query(
-        this.dialect.getSelectConversationIdsSql(),
+    const rows = await this.template.queryForList(
+      this.dialect.getSelectConversationIdsSql(),
+    );
+    return rows
+      .map((row) => this.readConversationId(row))
+      .filter((conversationId): conversationId is string =>
+        StringUtils.hasText(conversationId),
       );
-      return rows
-        .map((row) => this.readConversationId(row))
-        .filter((conversationId): conversationId is string =>
-          StringUtils.hasText(conversationId),
-        );
-    } finally {
-      await connection.close();
-    }
   }
 
   async findByConversationId(conversationId: string): Promise<Message[]> {
@@ -59,15 +54,10 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       "conversationId cannot be null or empty",
     );
 
-    const connection = await this.dataSource.getConnection();
-    try {
-      const rows = await connection.query(
-        this.dialect.getSelectMessagesSql(conversationId),
-      );
-      return rows.map((row) => this.toMessage(row));
-    } finally {
-      await connection.close();
-    }
+    const rows = await this.template.queryForList(
+      this.dialect.getSelectMessagesSql(conversationId),
+    );
+    return rows.map((row) => this.toMessage(row));
   }
 
   async saveAll(conversationId: string, messages: Message[]): Promise<void> {
@@ -80,8 +70,8 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       assert(message != null, "messages cannot contain null elements");
     }
 
-    await this.dataSource.transaction(async (connection) => {
-      await connection.update(
+    await this.template.transaction(async () => {
+      await this.template.update(
         this.dialect.getDeleteMessagesSql(conversationId),
       );
 
@@ -91,7 +81,7 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       let sequenceId = Math.floor(Date.now() / 1000);
       for (const message of messages) {
         const messageType = String(message.messageType.getName());
-        await connection.update(
+        await this.template.update(
           this.dialect.getInsertMessageSql(
             conversationId,
             message.text,
@@ -109,14 +99,9 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
       "conversationId cannot be null or empty",
     );
 
-    const connection = await this.dataSource.getConnection();
-    try {
-      await connection.update(
-        this.dialect.getDeleteMessagesSql(conversationId),
-      );
-    } finally {
-      await connection.close();
-    }
+    await this.template.update(
+      this.dialect.getDeleteMessagesSql(conversationId),
+    );
   }
 
   static builder(): JsdbcChatMemoryRepositoryBuilder {
@@ -221,8 +206,9 @@ export class JsdbcChatMemoryRepositoryBuilder {
 
   async build(): Promise<JsdbcChatMemoryRepository> {
     const dataSource = this.resolveDataSource();
-    const dialect = await this.resolveDialect(dataSource);
-    return new JsdbcChatMemoryRepository(dataSource, dialect);
+    const template = new JsdbcTemplate(dataSource);
+    const dialect = await this.resolveDialect(template);
+    return new JsdbcChatMemoryRepository(template, dialect);
   }
 
   private resolveDataSource(): DataSource {
@@ -234,22 +220,23 @@ export class JsdbcChatMemoryRepositoryBuilder {
   }
 
   private async resolveDialect(
-    dataSource: DataSource,
+    template: JsdbcTemplate,
   ): Promise<JsdbcChatMemoryRepositoryDialect> {
     if (this._dialect != null) {
-      await this.warnIfDialectMismatch(dataSource, this._dialect);
+      await this.warnIfDialectMismatch(template, this._dialect);
       return this._dialect;
     }
 
-    return JsdbcChatMemoryRepositoryDialect.from(dataSource);
+    return JsdbcChatMemoryRepositoryDialect.from(template.dataSource);
   }
 
   private async warnIfDialectMismatch(
-    dataSource: DataSource,
+    template: JsdbcTemplate,
     explicitDialect: JsdbcChatMemoryRepositoryDialect,
   ): Promise<void> {
-    const detectedDialect =
-      await JsdbcChatMemoryRepositoryDialect.from(dataSource);
+    const detectedDialect = await JsdbcChatMemoryRepositoryDialect.from(
+      template.dataSource,
+    );
     if (detectedDialect.constructor !== explicitDialect.constructor) {
       LoggerFactory.getLogger(JsdbcChatMemoryRepositoryBuilder.name).warn(
         "Explicitly set dialect {} will be used instead of detected dialect {} from datasource",

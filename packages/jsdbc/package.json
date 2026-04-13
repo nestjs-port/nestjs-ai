@@ -26,14 +26,6 @@
     "./prisma": {
       "types": "./dist/prisma/index.d.ts",
       "require": "./dist/prisma/index.js"
-    },
-    "./class-transformer-row-mapper": {
-      "types": "./dist/core/class-transformer-row-mapper.d.ts",
-      "require": "./dist/core/class-transformer-row-mapper.js"
-    },
-    "./zod-row-mapper": {
-      "types": "./dist/core/zod-row-mapper.d.ts",
-      "require": "./dist/core/zod-row-mapper.js"
     }
   },
   "scripts": {

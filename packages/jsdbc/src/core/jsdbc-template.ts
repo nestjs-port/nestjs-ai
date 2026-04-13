@@ -20,7 +20,7 @@ import type { DataSource, SqlFragment } from "../api";
 import type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
 import { SingleColumnRowMapper } from "./single-column-row-mapper";
 
-export class JdbcTemplate {
+export class JsdbcTemplate {
   constructor(private readonly dataSource: DataSource) {}
 
   async queryForList<T>(

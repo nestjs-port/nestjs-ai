@@ -26,6 +26,14 @@
     "./prisma": {
       "types": "./dist/prisma/index.d.ts",
       "require": "./dist/prisma/index.js"
+    },
+    "./class-transformer-row-mapper": {
+      "types": "./dist/core/class-transformer-row-mapper.d.ts",
+      "require": "./dist/core/class-transformer-row-mapper.js"
+    },
+    "./zod-row-mapper": {
+      "types": "./dist/core/zod-row-mapper.d.ts",
+      "require": "./dist/core/zod-row-mapper.js"
     }
   },
   "scripts": {
@@ -41,6 +49,7 @@
     "@nestjs/sequelize": "^11.0.0",
     "@nestjs/typeorm": "^10.0.0 || ^11.0.0",
     "@prisma/client": "^6.18.0",
+    "class-transformer": "^0.4.0 || ^0.5.0",
     "sequelize": "^6.37.0",
     "typeorm": "^0.3.0",
     "zod": "^4.0.0"
@@ -56,6 +65,9 @@
       "optional": true
     },
     "@prisma/client": {
+      "optional": true
+    },
+    "class-transformer": {
       "optional": true
     },
     "zod": {
@@ -75,6 +87,7 @@
     "@nestjs/sequelize": "^11.0.1",
     "@nestjs/typeorm": "^11.0.1",
     "@prisma/client": "^6.18.0",
+    "class-transformer": "^0.5.1",
     "sequelize": "^6.37.7",
     "typeorm": "^0.3.28",
     "zod": "4.3.6"

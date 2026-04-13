@@ -16,5 +16,5 @@ export { ClassTransformerRowMapper } from "./class-transformer-row-mapper";
 export { JsdbcTemplate } from "./jsdbc-template";
 export type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
 export { SingleColumnRowMapper } from "./single-column-row-mapper";
-export { TransactionSynchronizationManager } from "./transaction-context";
+export { TransactionSynchronizationManager } from "./transaction-synchronization-manager";
 export { ZodRowMapper } from "./zod-row-mapper";

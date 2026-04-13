@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./api";
-export * from "./core";
-export * from "./custom";
+export {
+  CustomJsdbcModule,
+  type CustomJsdbcModuleAsyncOptions,
+  type CustomJsdbcModuleOptions,
+} from "./custom.module";

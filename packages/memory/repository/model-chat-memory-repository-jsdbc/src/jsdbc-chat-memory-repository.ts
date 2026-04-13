@@ -16,7 +16,11 @@
 
 import assert from "node:assert/strict";
 import { LoggerFactory, StringUtils } from "@nestjs-ai/commons";
-import { type DataSource, JsdbcTemplate } from "@nestjs-ai/jsdbc";
+import {
+  type DataSource,
+  JsdbcTemplate,
+  SingleColumnRowMapper,
+} from "@nestjs-ai/jsdbc";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -38,14 +42,10 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
   }
 
   async findConversationIds(): Promise<string[]> {
-    const rows = await this.template.queryForList(
+    return await this.template.queryForList(
       this.dialect.getSelectConversationIdsSql(),
+      new SingleColumnRowMapper(String, { nullable: false }),
     );
-    return rows
-      .map((row) => this.readConversationId(row))
-      .filter((conversationId): conversationId is string =>
-        StringUtils.hasText(conversationId),
-      );
   }
 
   async findByConversationId(conversationId: string): Promise<Message[]> {
@@ -106,17 +106,6 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
 
   static builder(): JsdbcChatMemoryRepositoryBuilder {
     return new JsdbcChatMemoryRepositoryBuilder();
-  }
-
-  private readConversationId(row: Record<string, unknown>): string {
-    const value =
-      this.getRowValue(row, [
-        "conversation_id",
-        "conversationId",
-        "CONVERSATION_ID",
-      ]) ?? this.firstRowValue(row);
-
-    return typeof value === "string" ? value : String(value ?? "");
   }
 
   private toMessage(row: Record<string, unknown>): Message {
@@ -182,11 +171,6 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
     }
 
     return undefined;
-  }
-
-  private firstRowValue(row: Record<string, unknown>): unknown {
-    const values = Object.values(row);
-    return values.length > 0 ? values[0] : undefined;
   }
 }
 

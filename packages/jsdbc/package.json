@@ -58,6 +58,9 @@
     "@prisma/client": {
       "optional": true
     },
+    "zod": {
+      "optional": true
+    },
     "sequelize": {
       "optional": true
     },

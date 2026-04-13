@@ -25,6 +25,8 @@ import {
 } from "../../api";
 import { JsdbcTemplate } from "../jsdbc-template";
 import type { RowMapper, RowMapperFunction } from "../row-mapper.interface";
+import { SingleColumnRowMapper } from "../single-column-row-mapper";
+import { ZodRowMapper } from "../zod-row-mapper";
 
 describe("JsdbcTemplate", () => {
   describe("update", () => {
@@ -60,8 +62,8 @@ describe("JsdbcTemplate", () => {
   });
 
   describe("queryForList", () => {
-    it("maps single-column rows using a scalar zod schema", async () => {
-      const rows = [{ CONVERSATION_ID: "1" }];
+    it("returns raw rows when no mapper is provided", async () => {
+      const rows = [{ conversation_id: "1" }];
       const close = vi.fn(async () => {});
       const query = vi.fn(async () => rows);
       const connection = createConnection({ query, close });
@@ -69,16 +71,32 @@ describe("JsdbcTemplate", () => {
       const template = new JsdbcTemplate(dataSource);
 
       await expect(
+        template.queryForList(sql`select conversation_id from chat`),
+      ).resolves.toEqual(rows);
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it("maps single-column rows using a scalar zod mapper", async () => {
+      const rows = [{ CONVERSATION_ID: "1" }];
+      const close = vi.fn(async () => {});
+      const query = vi.fn(async () => rows);
+      const connection = createConnection({ query, close });
+      const dataSource = createDataSource(connection);
+      const template = new JsdbcTemplate(dataSource);
+      const rowMapper = new SingleColumnRowMapper(z.number());
+
+      await expect(
         template.queryForList(
           sql`select distinct conversation_id from chat`,
-          z.number(),
+          rowMapper,
         ),
       ).resolves.toEqual([1]);
       expect(query).toHaveBeenCalledTimes(1);
       expect(close).toHaveBeenCalledTimes(1);
     });
 
-    it("maps rows using a zod schema", async () => {
+    it("maps rows using a zod row mapper", async () => {
       const rows = [{ CONVERSATION_ID: "1", DISPLAY_NAME: "Grace" }];
       const close = vi.fn(async () => {});
       const query = vi.fn(async () => rows);
@@ -89,9 +107,10 @@ describe("JsdbcTemplate", () => {
         conversationId: z.coerce.number(),
         displayName: z.string(),
       });
+      const rowMapper = new ZodRowMapper(schema);
 
       await expect(
-        template.queryForList(sql`select * from users`, schema),
+        template.queryForList(sql`select * from users`, rowMapper),
       ).resolves.toEqual([{ conversationId: 1, displayName: "Grace" }]);
       expect(query).toHaveBeenCalledTimes(1);
       expect(close).toHaveBeenCalledTimes(1);
@@ -104,12 +123,10 @@ describe("JsdbcTemplate", () => {
       const connection = createConnection({ query, close });
       const dataSource = createDataSource(connection);
       const template = new JsdbcTemplate(dataSource);
+      const rowMapper = new SingleColumnRowMapper(z.number().nullable());
 
       await expect(
-        template.queryForList(
-          sql`select value from items`,
-          z.number().nullable(),
-        ),
+        template.queryForList(sql`select value from items`, rowMapper),
       ).resolves.toEqual([null]);
       expect(query).toHaveBeenCalledTimes(1);
       expect(close).toHaveBeenCalledTimes(1);

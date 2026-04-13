@@ -15,10 +15,8 @@
  */
 
 import { LoggerFactory } from "@nestjs-ai/commons";
-import type { z } from "zod";
 import { type DataSource, type SqlFragment, toSql } from "../api";
 import type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
-import { SingleColumnRowMapper } from "./single-column-row-mapper";
 
 export class JsdbcTemplate {
   private readonly logger = LoggerFactory.getLogger(JsdbcTemplate.name);
@@ -49,15 +47,12 @@ export class JsdbcTemplate {
     rowMapper: RowMapper<T>,
   ): Promise<T[]>;
 
-  async queryForList<TSchema extends z.ZodTypeAny>(
-    fragment: SqlFragment,
-    schema: TSchema,
-  ): Promise<Array<z.output<TSchema>>>;
+  async queryForList(fragment: SqlFragment): Promise<Record<string, unknown>[]>;
 
   async queryForList<T>(
     fragment: SqlFragment,
-    rowMapperOrSchema: RowMapperFunction<T> | RowMapper<T> | z.ZodTypeAny,
-  ): Promise<T[]> {
+    rowMapper?: RowMapperFunction<T> | RowMapper<T>,
+  ): Promise<T[] | Record<string, unknown>[]> {
     this.logger.debug(`Executing SQL query [${toSql(fragment)}]`);
 
     const connection = await this.dataSource.getConnection();
@@ -65,87 +60,31 @@ export class JsdbcTemplate {
     try {
       const rows = await connection.query(fragment);
 
-      if (typeof rowMapperOrSchema === "function") {
-        return rows.map((row, rowNum) => rowMapperOrSchema(row, rowNum)) as T[];
+      if (!rowMapper) {
+        return rows;
       }
 
-      if (isRowMapperInstance(rowMapperOrSchema)) {
-        return rows.map((row, rowNum) =>
-          rowMapperOrSchema.mapRow(row, rowNum),
-        ) as T[];
+      if (typeof rowMapper === "function") {
+        return rows.map((row, rowNum) => rowMapper(row, rowNum)) as T[];
       }
 
-      if (!isObjectSchema(rowMapperOrSchema)) {
-        const rowMapper = new SingleColumnRowMapper(rowMapperOrSchema);
+      if (isRowMapperInstance(rowMapper)) {
         return rows.map((row, rowNum) => rowMapper.mapRow(row, rowNum)) as T[];
       }
 
-      return rows.map((row) =>
-        this.mapWithSchema(rowMapperOrSchema, row),
-      ) as T[];
+      return rows;
     } finally {
       await connection.close();
     }
   }
-
-  private mapWithSchema<T>(
-    schema: z.ZodType<T>,
-    row: Record<string, unknown>,
-  ): T {
-    return schema.parse(mapRowToSchemaShape(schema, row));
-  }
-}
-
-function isObjectSchema(schema: z.ZodTypeAny): boolean {
-  const schemaType = (
-    schema as {
-      _zod?: { def?: { type?: string } };
-    }
-  )._zod?.def?.type;
-
-  return schemaType === "object";
 }
 
 function isRowMapperInstance<T>(
-  value: RowMapper<T> | z.ZodTypeAny,
+  value: RowMapper<T> | RowMapperFunction<T>,
 ): value is RowMapper<T> {
   return (
     typeof value === "object" &&
     value !== null &&
     typeof (value as { mapRow?: unknown }).mapRow === "function"
   );
-}
-
-function mapRowToSchemaShape<T>(
-  schema: z.ZodType<T>,
-  row: Record<string, unknown>,
-): Record<string, unknown> {
-  const shape = (
-    schema as {
-      _zod?: { def?: { shape?: Record<string, z.ZodTypeAny> } };
-    }
-  )._zod?.def?.shape;
-
-  if (!shape) {
-    return row;
-  }
-
-  const rowEntries = Object.entries(row);
-  const mappedRow: Record<string, unknown> = {};
-
-  for (const key of Object.keys(shape)) {
-    const entry = rowEntries.find(
-      ([rowKey]) => normalizeKey(rowKey) === normalizeKey(key),
-    );
-
-    if (entry) {
-      mappedRow[key] = entry[1];
-    }
-  }
-
-  return mappedRow;
-}
-
-function normalizeKey(key: string): string {
-  return key.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 }

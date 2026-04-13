@@ -12,6 +12,6 @@
  * limitations under the License.
  */
 
-export { JdbcTemplate } from "./jdbc-template";
+export { JsdbcTemplate } from "./jsdbc-template";
 export type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
 export { SingleColumnRowMapper } from "./single-column-row-mapper";

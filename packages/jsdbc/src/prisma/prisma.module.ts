@@ -21,9 +21,9 @@ import type {
   Provider,
 } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import type { PrismaClient } from "@prisma/client";
 
 import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
+import type { PrismaClientLike } from "./prisma";
 import {
   PrismaDataSource,
   type PrismaJsdbcOptions,
@@ -57,7 +57,7 @@ function createPrismaProvider(options: PrismaJsdbcModuleOptions): Provider {
 
   return {
     provide: JSDBC_DATA_SOURCE,
-    useFactory: (prisma: PrismaClient): DataSource =>
+    useFactory: (prisma: PrismaClientLike): DataSource =>
       new PrismaDataSource(prisma, options),
     inject: [prismaToken],
   };

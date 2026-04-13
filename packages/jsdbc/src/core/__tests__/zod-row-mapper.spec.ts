@@ -20,6 +20,34 @@ import { z } from "zod";
 import { ZodRowMapper } from "../zod-row-mapper";
 
 describe("ZodRowMapper", () => {
+  it("maps single-column scalar rows", () => {
+    const mapper = new ZodRowMapper(z.number());
+
+    expect(mapper.mapRow({ CONVERSATION_ID: "1" }, 0)).toBe(1);
+  });
+
+  it("converts primitive scalar values when needed", () => {
+    expect(new ZodRowMapper(z.string()).mapRow({ value: 123 }, 0)).toBe("123");
+    expect(new ZodRowMapper(z.boolean()).mapRow({ value: "true" }, 0)).toBe(
+      true,
+    );
+    expect(
+      new ZodRowMapper(z.date()).mapRow(
+        { value: "2026-04-13T00:00:00.000Z" },
+        0,
+      ),
+    ).toEqual(new Date("2026-04-13T00:00:00.000Z"));
+    expect(new ZodRowMapper(z.bigint()).mapRow({ value: "42" }, 0)).toBe(42n);
+  });
+
+  it("rejects rows with more than one column for scalar schemas", () => {
+    const mapper = new ZodRowMapper(z.number());
+
+    expect(() => mapper.mapRow({ first: "1", second: "2" }, 3)).toThrow(
+      "Expected a single-column row at row number 3, but received 2 columns.",
+    );
+  });
+
   it("maps normalized column names to schema keys", () => {
     const mapper = new ZodRowMapper(
       z.object({
@@ -29,7 +57,7 @@ describe("ZodRowMapper", () => {
     );
 
     expect(
-      mapper.mapRow({ CONVERSATION_ID: "1", DISPLAY_NAME: "Grace" }),
+      mapper.mapRow({ CONVERSATION_ID: "1", DISPLAY_NAME: "Grace" }, 0),
     ).toEqual({
       conversationId: 1,
       displayName: "Grace",
@@ -44,10 +72,13 @@ describe("ZodRowMapper", () => {
     );
 
     expect(
-      mapper.mapRow({
-        CONVERSATION_ID: "1",
-        IGNORED_COLUMN: "value",
-      }),
+      mapper.mapRow(
+        {
+          CONVERSATION_ID: "1",
+          IGNORED_COLUMN: "value",
+        },
+        0,
+      ),
     ).toEqual({
       conversationId: 1,
     });
@@ -60,6 +91,8 @@ describe("ZodRowMapper", () => {
       }),
     );
 
-    expect(() => mapper.mapRow({ CONVERSATION_ID: "not-a-number" })).toThrow();
+    expect(() =>
+      mapper.mapRow({ CONVERSATION_ID: "not-a-number" }, 0),
+    ).toThrow();
   });
 });

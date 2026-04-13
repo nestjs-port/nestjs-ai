@@ -30,6 +30,15 @@ import { TransactionSynchronizationManager } from "../transaction-context";
 import { ZodRowMapper } from "../zod-row-mapper";
 
 describe("JsdbcTemplate", () => {
+  describe("dataSource", () => {
+    it("returns the underlying data source", () => {
+      const dataSource = createDataSource(createConnection());
+      const template = new JsdbcTemplate(dataSource);
+
+      expect(template.dataSource).toBe(dataSource);
+    });
+  });
+
   describe("update", () => {
     it("executes an update statement and closes the connection", async () => {
       const close = vi.fn(async () => {});
@@ -156,7 +165,7 @@ describe("JsdbcTemplate", () => {
       const connection = createConnection({ query, close });
       const dataSource = createDataSource(connection);
       const template = new JsdbcTemplate(dataSource);
-      const rowMapper = new SingleColumnRowMapper(z.number());
+      const rowMapper = new SingleColumnRowMapper(Number);
 
       await expect(
         template.queryForList(
@@ -195,7 +204,7 @@ describe("JsdbcTemplate", () => {
       const connection = createConnection({ query, close });
       const dataSource = createDataSource(connection);
       const template = new JsdbcTemplate(dataSource);
-      const rowMapper = new SingleColumnRowMapper(z.number().nullable());
+      const rowMapper = new SingleColumnRowMapper(Number);
 
       await expect(
         template.queryForList(sql`select value from items`, rowMapper),
@@ -289,15 +298,17 @@ describe("JsdbcTemplate", () => {
   });
 });
 
-function createConnection(connection: {
-  query: (fragment: SqlFragment) => Promise<Record<string, unknown>[]>;
-  update?: (fragment: SqlFragment) => Promise<number>;
-  close: () => Promise<void>;
-}): Connection {
+function createConnection(
+  connection: {
+    query?: (fragment: SqlFragment) => Promise<Record<string, unknown>[]>;
+    update?: (fragment: SqlFragment) => Promise<number>;
+    close?: () => Promise<void>;
+  } = {},
+): Connection {
   return {
-    query: connection.query,
+    query: connection.query ?? vi.fn(async () => []),
     update: connection.update ?? vi.fn(async () => 0),
-    close: connection.close,
+    close: connection.close ?? vi.fn(async () => {}),
   };
 }
 

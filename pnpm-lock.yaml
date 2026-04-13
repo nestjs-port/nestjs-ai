@@ -282,6 +282,9 @@ importers:
       '@prisma/client':
         specifier: ^6.18.0
         version: 6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2)
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
       sequelize:
         specifier: ^6.37.7
         version: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(pg@8.20.0)

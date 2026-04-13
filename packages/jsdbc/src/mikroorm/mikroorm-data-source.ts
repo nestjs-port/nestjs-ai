@@ -16,7 +16,7 @@
 
 import type { MikroORM, Platform } from "@mikro-orm/core";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-context";
+import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
 import { MikroOrmConnection } from "./mikroorm-connection";
 
 type MikroOrmExecutor = MikroORM["em"] & {

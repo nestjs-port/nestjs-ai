@@ -15,7 +15,7 @@
  */
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-context";
+import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
 import type { PrismaClientLike, PrismaDialectInfo } from "./prisma";
 import { PrismaConnection } from "./prisma-connection";
 

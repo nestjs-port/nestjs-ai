@@ -30,3 +30,7 @@ export function sql(
     expressions,
   };
 }
+
+export function toSql(fragment: SqlFragment): string {
+  return fragment.strings.join("?");
+}

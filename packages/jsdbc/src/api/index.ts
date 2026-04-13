@@ -18,7 +18,7 @@ export type { Connection } from "./connection.interface";
 export type { DataSource } from "./data-source.interface";
 export { DatabaseDialect } from "./database-dialect.enum";
 export type { SqlFragment } from "./sql-tag";
-export { sql } from "./sql-tag";
+export { sql, toSql } from "./sql-tag";
 export {
   InjectJsdbcDataSource,
   JSDBC_DATA_SOURCE,

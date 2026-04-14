@@ -16,33 +16,23 @@
 
 import "reflect-metadata";
 
-import { existsSync } from "node:fs";
-import type { DynamicModule } from "@nestjs/common";
+import { MikroORM } from "@mikro-orm/core";
+import { MikroOrmModule } from "@mikro-orm/nestjs";
+import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { Test, type TestingModule } from "@nestjs/testing";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
 import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
-import { PrismaJsdbcModule } from "@nestjs-ai/jsdbc/prisma";
+import { MikroOrmJsdbcModule } from "@nestjs-ai/jsdbc/mikroorm";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-type PrismaClientLike = {
-  $connect(): Promise<void>;
-  $disconnect(): Promise<void>;
-  $executeRawUnsafe(query: string, ...values: unknown[]): Promise<unknown>;
-};
-
-const prismaClientModulePath = "./generated/client";
-const hasGeneratedPrismaClient = existsSync(
-  `${__dirname}/generated/client/index.js`,
-);
-
-describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
+describe("MikroOrmJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let prisma!: PrismaClientLike;
+  let mikroorm!: MikroORM;
   let jsdbcDataSource!: JsdbcDataSource;
 
   beforeAll(async () => {
@@ -52,43 +42,31 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
       .withPassword("jsdbc")
       .start();
 
-    const { PrismaClient } = (await import(prismaClientModulePath)) as {
-      PrismaClient: new (options: {
-        datasourceUrl: string;
-      }) => PrismaClientLike;
-    };
-
-    prisma = new PrismaClient({
-      datasourceUrl: postgresContainer.getConnectionUri(),
-    });
-    await prisma.$connect();
-
-    const prismaClientModule: DynamicModule = {
-      module: class PrismaClientModule {},
-      providers: [
-        {
-          provide: "PRISMA_CLIENT",
-          useValue: prisma,
-        },
-      ],
-      exports: ["PRISMA_CLIENT"],
-    };
-
     moduleRef = await Test.createTestingModule({
       imports: [
-        prismaClientModule,
-        PrismaJsdbcModule.forRoot({
-          imports: [prismaClientModule],
-          prismaToken: "PRISMA_CLIENT",
+        MikroOrmModule.forRoot({
+          driver: PostgreSqlDriver,
+          host: postgresContainer.getHost(),
+          port: postgresContainer.getMappedPort(5432),
+          dbName: postgresContainer.getDatabase(),
+          user: postgresContainer.getUsername(),
+          password: postgresContainer.getPassword(),
+          entities: [],
+          allowGlobalContext: true,
+          discovery: {
+            warnWhenNoEntities: false,
+          },
         }),
+        MikroOrmJsdbcModule.forRoot(),
       ],
     }).compile();
     await moduleRef.init();
 
+    mikroorm = moduleRef.get(MikroORM);
     jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
 
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS jsdbc_prisma_items (
+    await mikroorm.em.getConnection().execute(`
+      CREATE TABLE IF NOT EXISTS jsdbc_mikroorm_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
       )
@@ -96,14 +74,13 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await prisma.$executeRawUnsafe(
-      "TRUNCATE TABLE jsdbc_prisma_items RESTART IDENTITY",
-    );
+    await mikroorm.em
+      .getConnection()
+      .execute("TRUNCATE TABLE jsdbc_mikroorm_items RESTART IDENTITY");
   });
 
   afterAll(async () => {
     await moduleRef?.close();
-    await prisma?.$disconnect();
     await postgresContainer?.stop();
   });
 
@@ -113,11 +90,11 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"alpha"})`,
+      sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"alpha"})`,
     );
 
     const rows = await connection.query(
-      sql`SELECT id, name FROM jsdbc_prisma_items WHERE name = ${"alpha"}`,
+      sql`SELECT id, name FROM jsdbc_mikroorm_items WHERE name = ${"alpha"}`,
     );
 
     expect(rows).toEqual([
@@ -134,11 +111,11 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"inside-transaction"})`,
+          sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"inside-transaction"})`,
         );
 
         const rows = await connection.query(
-          sql`SELECT name FROM jsdbc_prisma_items WHERE name = ${"inside-transaction"}`,
+          sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"inside-transaction"}`,
         );
 
         expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -147,7 +124,7 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      sql`SELECT name FROM jsdbc_prisma_items ORDER BY id`,
+      sql`SELECT name FROM jsdbc_mikroorm_items ORDER BY id`,
     );
 
     expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -157,7 +134,7 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"rollback-me"})`,
+          sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
@@ -165,7 +142,7 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      sql`SELECT name FROM jsdbc_prisma_items WHERE name = ${"rollback-me"}`,
+      sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"rollback-me"}`,
     );
 
     expect(rows).toEqual([]);

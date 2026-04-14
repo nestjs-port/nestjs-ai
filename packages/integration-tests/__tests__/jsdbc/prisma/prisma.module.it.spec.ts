@@ -16,22 +16,39 @@
 
 import "reflect-metadata";
 
+import { existsSync } from "node:fs";
+import type { DynamicModule } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
 import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
-import { TypeOrmJsdbcModule } from "@nestjs-ai/jsdbc/typeorm";
+import { PrismaJsdbcModule } from "@nestjs-ai/jsdbc/prisma";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
-import type { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-describe("TypeOrmJsdbcDataSourceIT", () => {
+type PrismaClientLike = {
+  $connect(): Promise<void>;
+  $disconnect(): Promise<void>;
+  $executeRawUnsafe(query: string, ...values: unknown[]): Promise<unknown>;
+};
+
+type PrismaRuntimeLike = {
+  raw(value: string): unknown;
+  join(values: readonly unknown[]): unknown;
+  sql(strings: TemplateStringsArray, ...values: readonly unknown[]): unknown;
+};
+
+const prismaClientModulePath = "./generated/client";
+const hasGeneratedPrismaClient = existsSync(
+  `${__dirname}/generated/client/index.js`,
+);
+
+describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let typeormDataSource!: DataSource;
+  let prisma!: PrismaClientLike;
   let jsdbcDataSource!: JsdbcDataSource;
 
   beforeAll(async () => {
@@ -41,23 +58,45 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
       .withPassword("jsdbc")
       .start();
 
-    const typeormModule = TypeOrmModule.forRoot({
-      type: "postgres",
-      url: postgresContainer.getConnectionUri(),
-      synchronize: false,
-      logging: false,
+    const { PrismaClient, Prisma } = (await import(prismaClientModulePath)) as {
+      PrismaClient: new (options: {
+        datasourceUrl: string;
+      }) => PrismaClientLike;
+      Prisma: PrismaRuntimeLike;
+    };
+
+    prisma = new PrismaClient({
+      datasourceUrl: postgresContainer.getConnectionUri(),
     });
+    await prisma.$connect();
+
+    const prismaClientModule: DynamicModule = {
+      module: class PrismaClientModule {},
+      providers: [
+        {
+          provide: "PRISMA_CLIENT",
+          useValue: prisma,
+        },
+      ],
+      exports: ["PRISMA_CLIENT"],
+    };
 
     moduleRef = await Test.createTestingModule({
-      imports: [typeormModule, TypeOrmJsdbcModule.forRoot()],
+      imports: [
+        prismaClientModule,
+        PrismaJsdbcModule.forRoot({
+          imports: [prismaClientModule],
+          prismaToken: "PRISMA_CLIENT",
+          prismaRuntime: Prisma,
+        }),
+      ],
     }).compile();
     await moduleRef.init();
 
-    typeormDataSource = moduleRef.get<DataSource>(getDataSourceToken());
     jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
 
-    await typeormDataSource.query(`
-      CREATE TABLE IF NOT EXISTS jsdbc_typeorm_items (
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS jsdbc_prisma_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
       )
@@ -65,13 +104,14 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await typeormDataSource.query(
-      "TRUNCATE TABLE jsdbc_typeorm_items RESTART IDENTITY",
+    await prisma.$executeRawUnsafe(
+      "TRUNCATE TABLE jsdbc_prisma_items RESTART IDENTITY",
     );
   });
 
   afterAll(async () => {
     await moduleRef?.close();
+    await prisma?.$disconnect();
     await postgresContainer?.stop();
   });
 
@@ -81,11 +121,11 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"alpha"})`,
+      sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"alpha"})`,
     );
 
     const rows = await connection.query(
-      sql`SELECT id, name FROM jsdbc_typeorm_items WHERE name = ${"alpha"}`,
+      sql`SELECT id, name FROM jsdbc_prisma_items WHERE name = ${"alpha"}`,
     );
 
     expect(rows).toEqual([
@@ -102,19 +142,20 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"inside-transaction"})`,
+          sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"inside-transaction"})`,
         );
 
         const rows = await connection.query(
-          sql`SELECT name FROM jsdbc_typeorm_items WHERE name = ${"inside-transaction"}`,
+          sql`SELECT name FROM jsdbc_prisma_items WHERE name = ${"inside-transaction"}`,
         );
 
         expect(rows).toEqual([{ name: "inside-transaction" }]);
       }),
     ).resolves.toBeUndefined();
 
-    const rows = await typeormDataSource.query(
-      "SELECT name FROM jsdbc_typeorm_items ORDER BY id",
+    const connection = await jsdbcDataSource.getConnection();
+    const rows = await connection.query(
+      sql`SELECT name FROM jsdbc_prisma_items ORDER BY id`,
     );
 
     expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -124,15 +165,15 @@ describe("TypeOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"rollback-me"})`,
+          sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
     ).rejects.toThrow("boom");
 
-    const rows = await typeormDataSource.query(
-      "SELECT name FROM jsdbc_typeorm_items WHERE name = $1",
-      ["rollback-me"],
+    const connection = await jsdbcDataSource.getConnection();
+    const rows = await connection.query(
+      sql`SELECT name FROM jsdbc_prisma_items WHERE name = ${"rollback-me"}`,
     );
 
     expect(rows).toEqual([]);

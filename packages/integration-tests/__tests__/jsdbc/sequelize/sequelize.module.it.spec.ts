@@ -16,23 +16,22 @@
 
 import "reflect-metadata";
 
-import { MikroORM } from "@mikro-orm/core";
-import { MikroOrmModule } from "@mikro-orm/nestjs";
-import { PostgreSqlDriver } from "@mikro-orm/postgresql";
+import { getConnectionToken, SequelizeModule } from "@nestjs/sequelize";
 import { Test, type TestingModule } from "@nestjs/testing";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
 import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
-import { MikroOrmJsdbcModule } from "@nestjs-ai/jsdbc/mikroorm";
+import { SequelizeJsdbcModule } from "@nestjs-ai/jsdbc/sequelize";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
+import type { Sequelize } from "sequelize";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-describe("MikroOrmJsdbcDataSourceIT", () => {
+describe("SequelizeJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let mikroorm!: MikroORM;
+  let sequelize!: Sequelize;
   let jsdbcDataSource!: JsdbcDataSource;
 
   beforeAll(async () => {
@@ -44,29 +43,25 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
 
     moduleRef = await Test.createTestingModule({
       imports: [
-        MikroOrmModule.forRoot({
-          driver: PostgreSqlDriver,
+        SequelizeModule.forRoot({
+          dialect: "postgres",
           host: postgresContainer.getHost(),
           port: postgresContainer.getMappedPort(5432),
-          dbName: postgresContainer.getDatabase(),
-          user: postgresContainer.getUsername(),
+          database: postgresContainer.getDatabase(),
+          username: postgresContainer.getUsername(),
           password: postgresContainer.getPassword(),
-          entities: [],
-          allowGlobalContext: true,
-          discovery: {
-            warnWhenNoEntities: false,
-          },
+          logging: false,
         }),
-        MikroOrmJsdbcModule.forRoot(),
+        SequelizeJsdbcModule.forRoot(),
       ],
     }).compile();
     await moduleRef.init();
 
-    mikroorm = moduleRef.get(MikroORM);
+    sequelize = moduleRef.get<Sequelize>(getConnectionToken());
     jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
 
-    await mikroorm.em.getConnection().execute(`
-      CREATE TABLE IF NOT EXISTS jsdbc_mikroorm_items (
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS jsdbc_sequelize_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
       )
@@ -74,9 +69,9 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await mikroorm.em
-      .getConnection()
-      .execute("TRUNCATE TABLE jsdbc_mikroorm_items RESTART IDENTITY");
+    await sequelize.query(
+      "TRUNCATE TABLE jsdbc_sequelize_items RESTART IDENTITY",
+    );
   });
 
   afterAll(async () => {
@@ -90,11 +85,11 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"alpha"})`,
+      sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"alpha"})`,
     );
 
     const rows = await connection.query(
-      sql`SELECT id, name FROM jsdbc_mikroorm_items WHERE name = ${"alpha"}`,
+      sql`SELECT id, name FROM jsdbc_sequelize_items WHERE name = ${"alpha"}`,
     );
 
     expect(rows).toEqual([
@@ -111,11 +106,11 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"inside-transaction"})`,
+          sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"inside-transaction"})`,
         );
 
         const rows = await connection.query(
-          sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"inside-transaction"}`,
+          sql`SELECT name FROM jsdbc_sequelize_items WHERE name = ${"inside-transaction"}`,
         );
 
         expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -124,7 +119,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      sql`SELECT name FROM jsdbc_mikroorm_items ORDER BY id`,
+      sql`SELECT name FROM jsdbc_sequelize_items ORDER BY id`,
     );
 
     expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -134,7 +129,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"rollback-me"})`,
+          sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
@@ -142,7 +137,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
 
     const connection = await jsdbcDataSource.getConnection();
     const rows = await connection.query(
-      sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"rollback-me"}`,
+      sql`SELECT name FROM jsdbc_sequelize_items WHERE name = ${"rollback-me"}`,
     );
 
     expect(rows).toEqual([]);

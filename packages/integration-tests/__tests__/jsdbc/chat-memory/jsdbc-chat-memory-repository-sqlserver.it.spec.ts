@@ -21,41 +21,52 @@ import { TypeOrmDataSource } from "@nestjs-ai/jsdbc/typeorm";
 import { MessageType } from "@nestjs-ai/model";
 import {
   JsdbcChatMemoryRepository,
-  POSTGRESQL_CHAT_MEMORY_SCHEMA,
+  SQL_SERVER_CHAT_MEMORY_SCHEMA,
 } from "@nestjs-ai/model-chat-memory-repository-jsdbc";
 import {
-  PostgreSqlContainer,
-  type StartedPostgreSqlContainer,
-} from "@testcontainers/postgresql";
+  MSSQLServerContainer,
+  type StartedMSSQLServerContainer,
+} from "@testcontainers/mssqlserver";
 import { DataSource } from "typeorm";
 import { afterAll, beforeAll, describe, it } from "vitest";
+
 import { AbstractJdbcChatMemoryRepositoryIT } from "./abstract-jdbc-chat-memory-repository.it-shared";
 
-describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
-  let postgresContainer: StartedPostgreSqlContainer;
+describe("JsdbcChatMemoryRepositorySqlServerIT", () => {
+  let sqlServerContainer: StartedMSSQLServerContainer;
   let typeormDataSource: DataSource;
   let jsdbcDataSource: TypeOrmDataSource;
   let jsdbcTemplate: JsdbcTemplate;
   let integration: AbstractJdbcChatMemoryRepositoryIT;
 
   beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
-      .withDatabase("jsdbc_integration")
-      .withUsername("jsdbc")
-      .withPassword("jsdbc")
+    sqlServerContainer = await new MSSQLServerContainer(
+      "mcr.microsoft.com/mssql/server:2022-latest",
+    )
+      .acceptLicense()
+      .withPassword("Jsdbc!12345")
+      .withEnvironment({ MSSQL_PID: "Developer" })
       .start();
 
     typeormDataSource = new DataSource({
-      type: "postgres",
-      url: postgresContainer.getConnectionUri(),
+      type: "mssql",
+      host: sqlServerContainer.getHost(),
+      port: sqlServerContainer.getPort(),
+      username: sqlServerContainer.getUsername(),
+      password: sqlServerContainer.getPassword(),
+      database: sqlServerContainer.getDatabase(),
       synchronize: false,
       logging: false,
+      options: {
+        encrypt: false,
+        trustServerCertificate: true,
+      },
     });
     await typeormDataSource.initialize();
 
     jsdbcDataSource = new TypeOrmDataSource(typeormDataSource);
     jsdbcTemplate = new JsdbcTemplate(jsdbcDataSource);
-    for (const fragment of POSTGRESQL_CHAT_MEMORY_SCHEMA) {
+    for (const fragment of SQL_SERVER_CHAT_MEMORY_SCHEMA) {
       await jsdbcTemplate.update(fragment);
     }
 
@@ -67,11 +78,11 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
       chatMemoryRepository,
       jsdbcTemplate,
     );
-  }, 120_000);
+  }, 180_000);
 
   afterAll(async () => {
     await typeormDataSource?.destroy();
-    await postgresContainer?.stop();
+    await sqlServerContainer?.stop();
   }, 60_000);
 
   it.each([

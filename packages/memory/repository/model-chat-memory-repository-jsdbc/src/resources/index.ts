@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export { H2_CHAT_MEMORY_SCHEMA } from "./h2-chat-memory-repository-schema";
-export { HSQLDB_CHAT_MEMORY_SCHEMA } from "./hsqldb-chat-memory-repository-schema";
 export { MARIADB_CHAT_MEMORY_SCHEMA } from "./mariadb-chat-memory-repository-schema";
 export { MYSQL_CHAT_MEMORY_SCHEMA } from "./mysql-chat-memory-repository-schema";
 export { ORACLE_CHAT_MEMORY_SCHEMA } from "./oracle-chat-memory-repository-schema";

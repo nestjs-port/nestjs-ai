@@ -23,7 +23,8 @@ import type {
 } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 
-import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
+import { type DataSource, JSDBC_DATA_SOURCE, JSDBC_TEMPLATE } from "../api";
+import { JsdbcTemplate } from "../core";
 import { MikroOrmDataSource } from "./mikroorm-data-source";
 
 export interface MikroOrmJsdbcModuleOptions {
@@ -38,11 +39,15 @@ export class MikroOrmJsdbcModule {
     return {
       module: MikroOrmJsdbcModule,
       imports: options.imports ?? [],
-      providers: [createMikroOrmProvider(options.ormToken)],
-      exports: [JSDBC_DATA_SOURCE],
+      providers: createProviders(options.ormToken),
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: options.global ?? false,
     };
   }
+}
+
+function createProviders(ormToken?: InjectionToken): Provider[] {
+  return [createMikroOrmProvider(ormToken), createTemplateProvider()];
 }
 
 function createMikroOrmProvider(ormToken?: InjectionToken): Provider {
@@ -50,5 +55,13 @@ function createMikroOrmProvider(ormToken?: InjectionToken): Provider {
     provide: JSDBC_DATA_SOURCE,
     useFactory: (orm: MikroORM): DataSource => new MikroOrmDataSource(orm),
     inject: [ormToken ?? MikroORM],
+  };
+}
+
+function createTemplateProvider(): Provider {
+  return {
+    provide: JSDBC_TEMPLATE,
+    useFactory: (dataSource: DataSource) => new JsdbcTemplate(dataSource),
+    inject: [JSDBC_DATA_SOURCE],
   };
 }

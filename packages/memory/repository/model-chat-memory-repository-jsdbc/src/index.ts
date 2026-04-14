@@ -23,5 +23,6 @@ export { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-rep
 export { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
 export { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";
 export { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect";
+export * from "./resources";
 export { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect";
 export { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect";

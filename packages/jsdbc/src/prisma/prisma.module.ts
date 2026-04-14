@@ -22,7 +22,8 @@ import type {
 } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 
-import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
+import { type DataSource, JSDBC_DATA_SOURCE, JSDBC_TEMPLATE } from "../api";
+import { JsdbcTemplate } from "../core";
 import type { PrismaClientLike, PrismaRuntime } from "./prisma";
 import {
   PrismaDataSource,
@@ -42,11 +43,15 @@ export class PrismaJsdbcModule {
     return {
       module: PrismaJsdbcModule,
       imports: options.imports ?? [],
-      providers: [createPrismaProvider(options)],
-      exports: [JSDBC_DATA_SOURCE],
+      providers: createProviders(options),
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: options.global ?? false,
     };
   }
+}
+
+function createProviders(options: PrismaJsdbcModuleOptions): Provider[] {
+  return [createPrismaProvider(options), createTemplateProvider()];
 }
 
 function createPrismaProvider(options: PrismaJsdbcModuleOptions): Provider {
@@ -65,5 +70,13 @@ function createPrismaProvider(options: PrismaJsdbcModuleOptions): Provider {
     useFactory: (prisma: PrismaClientLike): DataSource =>
       new PrismaDataSource(prisma, options.prismaRuntime, options),
     inject: [prismaToken],
+  };
+}
+
+function createTemplateProvider(): Provider {
+  return {
+    provide: JSDBC_TEMPLATE,
+    useFactory: (dataSource: DataSource) => new JsdbcTemplate(dataSource),
+    inject: [JSDBC_DATA_SOURCE],
   };
 }

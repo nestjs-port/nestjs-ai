@@ -16,12 +16,11 @@
 
 import "reflect-metadata";
 
-import { MikroORM } from "@mikro-orm/core";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { Test, type TestingModule } from "@nestjs/testing";
-import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
+import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
 import { MikroOrmJsdbcModule } from "@nestjs-ai/jsdbc/mikroorm";
 import {
   PostgreSqlContainer,
@@ -32,8 +31,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 describe("MikroOrmJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let mikroorm!: MikroORM;
-  let jsdbcDataSource!: JsdbcDataSource;
+  let jsdbcTemplate!: JsdbcTemplate;
 
   beforeAll(async () => {
     postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
@@ -62,10 +60,9 @@ describe("MikroOrmJsdbcModuleIT", () => {
     }).compile();
     await moduleRef.init();
 
-    mikroorm = moduleRef.get(MikroORM);
-    jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
+    jsdbcTemplate = moduleRef.get<JsdbcTemplate>(JSDBC_TEMPLATE);
 
-    await mikroorm.em.getConnection().execute(`
+    await jsdbcTemplate.update(sql`
       CREATE TABLE IF NOT EXISTS jsdbc_mikroorm_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
@@ -74,9 +71,9 @@ describe("MikroOrmJsdbcModuleIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await mikroorm.em
-      .getConnection()
-      .execute("TRUNCATE TABLE jsdbc_mikroorm_items RESTART IDENTITY");
+    await jsdbcTemplate.update(
+      sql`TRUNCATE TABLE jsdbc_mikroorm_items RESTART IDENTITY`,
+    );
   });
 
   afterAll(async () => {
@@ -85,15 +82,15 @@ describe("MikroOrmJsdbcModuleIT", () => {
   });
 
   it("exposes the postgres dialect and executes queries", async () => {
-    expect(await jsdbcDataSource.getDialect()).toBe(DatabaseDialect.POSTGRESQL);
+    expect(await jsdbcTemplate.dataSource.getDialect()).toBe(
+      DatabaseDialect.POSTGRESQL,
+    );
 
-    const connection = await jsdbcDataSource.getConnection();
-
-    await connection.update(
+    await jsdbcTemplate.update(
       sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"alpha"})`,
     );
 
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT id, name FROM jsdbc_mikroorm_items WHERE name = ${"alpha"}`,
     );
 
@@ -103,18 +100,16 @@ describe("MikroOrmJsdbcModuleIT", () => {
         name: "alpha",
       },
     ]);
-
-    await connection.close();
   });
 
   it("runs transaction callbacks against the same datasource", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"inside-transaction"})`,
         );
 
-        const rows = await connection.query(
+        const rows = await jsdbcTemplate.queryForList(
           sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"inside-transaction"}`,
         );
 
@@ -122,8 +117,7 @@ describe("MikroOrmJsdbcModuleIT", () => {
       }),
     ).resolves.toBeUndefined();
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT name FROM jsdbc_mikroorm_items ORDER BY id`,
     );
 
@@ -132,16 +126,15 @@ describe("MikroOrmJsdbcModuleIT", () => {
 
   it("rolls back failed transactions", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_mikroorm_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
     ).rejects.toThrow("boom");
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT name FROM jsdbc_mikroorm_items WHERE name = ${"rollback-me"}`,
     );
 

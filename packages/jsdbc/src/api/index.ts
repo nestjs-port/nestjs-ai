@@ -21,5 +21,7 @@ export type { SqlFragment } from "./sql-tag";
 export { sql, toSql } from "./sql-tag";
 export {
   InjectJsdbcDataSource,
+  InjectJsdbcTemplate,
   JSDBC_DATA_SOURCE,
+  JSDBC_TEMPLATE,
 } from "./tokens";

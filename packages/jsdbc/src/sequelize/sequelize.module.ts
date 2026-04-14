@@ -24,7 +24,8 @@ import { Module } from "@nestjs/common";
 import { getConnectionToken } from "@nestjs/sequelize";
 import type { Sequelize } from "sequelize";
 
-import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
+import { type DataSource, JSDBC_DATA_SOURCE, JSDBC_TEMPLATE } from "../api";
+import { JsdbcTemplate } from "../core";
 import { SequelizeDataSource } from "./sequelize-data-source";
 
 export interface SequelizeJsdbcModuleOptions {
@@ -40,13 +41,24 @@ export class SequelizeJsdbcModule {
     return {
       module: SequelizeJsdbcModule,
       imports: options.imports ?? [],
-      providers: [
-        createSequelizeProvider(options.connectionName, options.sequelizeToken),
-      ],
-      exports: [JSDBC_DATA_SOURCE],
+      providers: createProviders(
+        options.connectionName,
+        options.sequelizeToken,
+      ),
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: options.global ?? false,
     };
   }
+}
+
+function createProviders(
+  connectionName?: string,
+  sequelizeToken?: InjectionToken,
+): Provider[] {
+  return [
+    createSequelizeProvider(connectionName, sequelizeToken),
+    createTemplateProvider(),
+  ];
 }
 
 function createSequelizeProvider(
@@ -58,5 +70,13 @@ function createSequelizeProvider(
     useFactory: (sequelize: Sequelize): DataSource =>
       new SequelizeDataSource(sequelize),
     inject: [sequelizeToken ?? getConnectionToken(connectionName)],
+  };
+}
+
+function createTemplateProvider(): Provider {
+  return {
+    provide: JSDBC_TEMPLATE,
+    useFactory: (dataSource: DataSource) => new JsdbcTemplate(dataSource),
+    inject: [JSDBC_DATA_SOURCE],
   };
 }

@@ -23,7 +23,8 @@ import type {
 import { Module } from "@nestjs/common";
 
 import type { DataSource } from "../api";
-import { JSDBC_DATA_SOURCE } from "../api";
+import { JSDBC_DATA_SOURCE, JSDBC_TEMPLATE } from "../api";
+import { JsdbcTemplate } from "../core";
 
 export interface CustomJsdbcModuleAsyncOptions {
   global?: boolean;
@@ -44,8 +45,8 @@ export class CustomJsdbcModule {
     return {
       module: CustomJsdbcModule,
       imports: options.imports ?? [],
-      providers: [createDataSourceProvider(options.dataSource)],
-      exports: [JSDBC_DATA_SOURCE],
+      providers: createProviders(options.dataSource),
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: options.global ?? false,
     };
   }
@@ -54,11 +55,21 @@ export class CustomJsdbcModule {
     return {
       module: CustomJsdbcModule,
       imports: options.imports ?? [],
-      providers: [createAsyncDataSourceProvider(options)],
-      exports: [JSDBC_DATA_SOURCE],
+      providers: createAsyncProviders(options),
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: options.global ?? false,
     };
   }
+}
+
+function createProviders(dataSource: DataSource): Provider[] {
+  return [createDataSourceProvider(dataSource), createTemplateProvider()];
+}
+
+function createAsyncProviders(
+  options: CustomJsdbcModuleAsyncOptions,
+): Provider[] {
+  return [createAsyncDataSourceProvider(options), createTemplateProvider()];
 }
 
 function createDataSourceProvider(dataSource: DataSource): Provider {
@@ -75,5 +86,13 @@ function createAsyncDataSourceProvider(
     provide: JSDBC_DATA_SOURCE,
     useFactory: async (...args: never[]) => options.useFactory(...args),
     inject: options.inject ?? [],
+  };
+}
+
+function createTemplateProvider(): Provider {
+  return {
+    provide: JSDBC_TEMPLATE,
+    useFactory: (dataSource: DataSource) => new JsdbcTemplate(dataSource),
+    inject: [JSDBC_DATA_SOURCE],
   };
 }

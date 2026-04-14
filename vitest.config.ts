@@ -27,6 +27,10 @@ export default defineConfig({
         __dirname,
         "packages/memory/repository/model-chat-memory-repository-redis/src",
       ),
+      "@nestjs-ai/model-chat-memory-repository-jsdbc": path.resolve(
+        __dirname,
+        "packages/memory/repository/model-chat-memory-repository-jsdbc/src",
+      ),
       "@nestjs-ai/observation": path.resolve(
         __dirname,
         "packages/observation/src",

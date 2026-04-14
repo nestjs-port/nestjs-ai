@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ import {
   SystemMessage,
   UserMessage,
 } from "@nestjs-ai/model";
+import {
+  type JsdbcChatMemoryRepositoryDialect,
+  JsdbcChatMemoryRepositoryDialectFactory,
+} from "@nestjs-ai/model-chat-memory-repository-jsdbc";
 import { expect } from "vitest";
-import type { JsdbcChatMemoryRepositoryDialect } from "../jsdbc-chat-memory-repository-dialect";
-import { JsdbcChatMemoryRepositoryDialectFactory } from "../jsdbc-chat-memory-repository-dialect-factory";
 
 /**
  * Shared base suite for JDBC chat memory repository integration tests.

@@ -36,7 +36,7 @@ describe("MikroOrmJsdbcDataSourceIT", () => {
   let jsdbcDataSource!: JsdbcDataSource;
 
   beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer("postgres:16-alpine")
+    postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
       .withDatabase("jsdbc_integration")
       .withUsername("jsdbc")
       .withPassword("jsdbc")

@@ -30,10 +30,6 @@
     "@nestjs-ai/jsdbc": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs/common": "^11.1.11",
-    "@testcontainers/postgresql": "^11.13.0",
-    "@types/pg": "^8.20.0",
-    "pg": "^8.20.0",
-    "testcontainers": "^11.13.0",
     "zod": "4.3.6"
   },
   "files": [

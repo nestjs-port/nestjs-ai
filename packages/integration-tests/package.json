@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
+    "postinstall": "pnpm prisma:generate",
     "prisma:generate": "DATABASE_URL=postgresql://jsdbc:jsdbc@localhost:5432/jsdbc_integration pnpm exec prisma generate --schema __tests__/jsdbc/prisma/schema.prisma",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

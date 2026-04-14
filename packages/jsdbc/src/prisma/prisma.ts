@@ -8,6 +8,8 @@ export interface PrismaDialectInfo {
 export interface PrismaRawClient {
   $queryRaw<T = unknown>(query: PrismaSql): Promise<T>;
   $executeRaw(query: PrismaSql): Promise<number>;
+  $queryRawUnsafe<T = unknown>(query: string, ...values: unknown[]): Promise<T>;
+  $executeRawUnsafe(query: string, ...values: unknown[]): Promise<number>;
 }
 
 export interface PrismaClientLike extends PrismaRawClient, PrismaDialectInfo {

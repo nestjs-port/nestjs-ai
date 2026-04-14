@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import { Inject } from "@nestjs/common";
+export {
+  JSDBC_CHAT_MEMORY_PROPERTIES_TOKEN,
+  JsdbcChatMemoryRepositoryModule,
+  type JsdbcChatMemoryRepositoryModuleAsyncOptions,
+} from "./jsdbc-chat-memory-repository.module";
 
-export const JSDBC_DATA_SOURCE = Symbol.for("JSDBC_DATA_SOURCE");
-export const JSDBC_TEMPLATE = Symbol.for("JSDBC_TEMPLATE");
-
-export function InjectJsdbcDataSource(): ParameterDecorator {
-  return Inject(JSDBC_DATA_SOURCE);
-}
-
-export function InjectJsdbcTemplate(): ParameterDecorator {
-  return Inject(JSDBC_TEMPLATE);
-}
+export type { JsdbcChatMemoryRepositoryProperties } from "./jsdbc-chat-memory-repository-properties";

@@ -22,6 +22,7 @@ import {
   DatabaseDialect,
   type DataSource,
   JSDBC_DATA_SOURCE,
+  JSDBC_TEMPLATE,
 } from "../../api";
 import {
   CustomJsdbcModule,
@@ -39,13 +40,17 @@ describe("CustomJsdbcModule", () => {
 
     expect(module).toMatchObject<DynamicModule>({
       module: CustomJsdbcModule,
-      exports: [JSDBC_DATA_SOURCE],
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: true,
     });
-    expect(module.providers).toHaveLength(1);
+    expect(module.providers).toHaveLength(2);
     expect(module.providers?.[0]).toMatchObject({
       provide: JSDBC_DATA_SOURCE,
       useValue: dataSource,
+    });
+    expect(module.providers?.[1]).toMatchObject({
+      provide: JSDBC_TEMPLATE,
+      inject: [JSDBC_DATA_SOURCE],
     });
   });
 
@@ -61,13 +66,17 @@ describe("CustomJsdbcModule", () => {
 
     expect(module).toMatchObject<DynamicModule>({
       module: CustomJsdbcModule,
-      exports: [JSDBC_DATA_SOURCE],
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: false,
     });
-    expect(module.providers).toHaveLength(1);
+    expect(module.providers).toHaveLength(2);
     expect(module.providers?.[0]).toMatchObject({
       provide: JSDBC_DATA_SOURCE,
       inject: ["CONFIG"],
+    });
+    expect(module.providers?.[1]).toMatchObject({
+      provide: JSDBC_TEMPLATE,
+      inject: [JSDBC_DATA_SOURCE],
     });
   });
 });

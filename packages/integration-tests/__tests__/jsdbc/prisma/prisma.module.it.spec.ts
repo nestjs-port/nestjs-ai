@@ -18,8 +18,8 @@ import "reflect-metadata";
 
 import type { DynamicModule } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
+import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
 import { PrismaJsdbcModule } from "@nestjs-ai/jsdbc/prisma";
 import {
   PostgreSqlContainer,
@@ -32,7 +32,7 @@ describe("PrismaJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
   let prisma!: PrismaClient;
-  let jsdbcDataSource!: JsdbcDataSource;
+  let jsdbcTemplate!: JsdbcTemplate;
 
   beforeAll(async () => {
     postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
@@ -69,9 +69,9 @@ describe("PrismaJsdbcModuleIT", () => {
     }).compile();
     await moduleRef.init();
 
-    jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
+    jsdbcTemplate = moduleRef.get<JsdbcTemplate>(JSDBC_TEMPLATE);
 
-    await prisma.$executeRawUnsafe(`
+    await jsdbcTemplate.update(sql`
       CREATE TABLE IF NOT EXISTS jsdbc_prisma_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
@@ -80,8 +80,8 @@ describe("PrismaJsdbcModuleIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await prisma.$executeRawUnsafe(
-      "TRUNCATE TABLE jsdbc_prisma_items RESTART IDENTITY",
+    await jsdbcTemplate.update(
+      sql`TRUNCATE TABLE jsdbc_prisma_items RESTART IDENTITY`,
     );
   });
 
@@ -92,15 +92,15 @@ describe("PrismaJsdbcModuleIT", () => {
   });
 
   it("exposes the postgres dialect and executes queries", async () => {
-    expect(await jsdbcDataSource.getDialect()).toBe(DatabaseDialect.POSTGRESQL);
+    expect(await jsdbcTemplate.dataSource.getDialect()).toBe(
+      DatabaseDialect.POSTGRESQL,
+    );
 
-    const connection = await jsdbcDataSource.getConnection();
-
-    await connection.update(
+    await jsdbcTemplate.update(
       sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"alpha"})`,
     );
 
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT id, name FROM jsdbc_prisma_items WHERE name = ${"alpha"}`,
     );
 
@@ -110,18 +110,16 @@ describe("PrismaJsdbcModuleIT", () => {
         name: "alpha",
       },
     ]);
-
-    await connection.close();
   });
 
   it("runs transaction callbacks against the same datasource", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"inside-transaction"})`,
         );
 
-        const rows = await connection.query(
+        const rows = await jsdbcTemplate.queryForList(
           sql`SELECT name FROM jsdbc_prisma_items WHERE name = ${"inside-transaction"}`,
         );
 
@@ -129,8 +127,7 @@ describe("PrismaJsdbcModuleIT", () => {
       }),
     ).resolves.toBeUndefined();
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT name FROM jsdbc_prisma_items ORDER BY id`,
     );
 
@@ -139,16 +136,15 @@ describe("PrismaJsdbcModuleIT", () => {
 
   it("rolls back failed transactions", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_prisma_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
     ).rejects.toThrow("boom");
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT name FROM jsdbc_prisma_items WHERE name = ${"rollback-me"}`,
     );
 

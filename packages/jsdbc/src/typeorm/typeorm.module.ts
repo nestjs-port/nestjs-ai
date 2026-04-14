@@ -19,7 +19,8 @@ import { Module } from "@nestjs/common";
 import { getDataSourceToken } from "@nestjs/typeorm";
 import type { DataSource as TypeOrmDataSource } from "typeorm";
 
-import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
+import { type DataSource, JSDBC_DATA_SOURCE, JSDBC_TEMPLATE } from "../api";
+import { JsdbcTemplate } from "../core";
 import { TypeOrmDataSource as JsdbcTypeOrmDataSource } from "./typeorm-data-source";
 
 export interface TypeOrmJsdbcModuleOptions {
@@ -34,11 +35,15 @@ export class TypeOrmJsdbcModule {
     return {
       module: TypeOrmJsdbcModule,
       imports: options.imports ?? [],
-      providers: [createTypeOrmProvider(options.dataSourceName)],
-      exports: [JSDBC_DATA_SOURCE],
+      providers: createProviders(options.dataSourceName),
+      exports: [JSDBC_DATA_SOURCE, JSDBC_TEMPLATE],
       global: options.global ?? false,
     };
   }
+}
+
+function createProviders(dataSourceName?: string): Provider[] {
+  return [createTypeOrmProvider(dataSourceName), createTemplateProvider()];
 }
 
 function createTypeOrmProvider(dataSourceName?: string): Provider {
@@ -47,5 +52,13 @@ function createTypeOrmProvider(dataSourceName?: string): Provider {
     useFactory: (typeormDataSource: TypeOrmDataSource): DataSource =>
       new JsdbcTypeOrmDataSource(typeormDataSource),
     inject: [getDataSourceToken(dataSourceName)],
+  };
+}
+
+function createTemplateProvider(): Provider {
+  return {
+    provide: JSDBC_TEMPLATE,
+    useFactory: (dataSource: DataSource) => new JsdbcTemplate(dataSource),
+    inject: [JSDBC_DATA_SOURCE],
   };
 }

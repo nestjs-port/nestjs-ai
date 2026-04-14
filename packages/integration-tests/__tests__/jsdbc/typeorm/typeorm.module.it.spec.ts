@@ -17,22 +17,20 @@
 import "reflect-metadata";
 
 import { Test, type TestingModule } from "@nestjs/testing";
-import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
-import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
 import { TypeOrmJsdbcModule } from "@nestjs-ai/jsdbc/typeorm";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
-import type { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 describe("TypeOrmJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let typeormDataSource!: DataSource;
-  let jsdbcDataSource!: JsdbcDataSource;
+  let jsdbcTemplate!: JsdbcTemplate;
 
   beforeAll(async () => {
     postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
@@ -53,10 +51,9 @@ describe("TypeOrmJsdbcModuleIT", () => {
     }).compile();
     await moduleRef.init();
 
-    typeormDataSource = moduleRef.get<DataSource>(getDataSourceToken());
-    jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
+    jsdbcTemplate = moduleRef.get<JsdbcTemplate>(JSDBC_TEMPLATE);
 
-    await typeormDataSource.query(`
+    await jsdbcTemplate.update(sql`
       CREATE TABLE IF NOT EXISTS jsdbc_typeorm_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
@@ -65,8 +62,8 @@ describe("TypeOrmJsdbcModuleIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await typeormDataSource.query(
-      "TRUNCATE TABLE jsdbc_typeorm_items RESTART IDENTITY",
+    await jsdbcTemplate.update(
+      sql`TRUNCATE TABLE jsdbc_typeorm_items RESTART IDENTITY`,
     );
   });
 
@@ -76,15 +73,15 @@ describe("TypeOrmJsdbcModuleIT", () => {
   });
 
   it("exposes the postgres dialect and executes queries", async () => {
-    expect(await jsdbcDataSource.getDialect()).toBe(DatabaseDialect.POSTGRESQL);
+    expect(await jsdbcTemplate.dataSource.getDialect()).toBe(
+      DatabaseDialect.POSTGRESQL,
+    );
 
-    const connection = await jsdbcDataSource.getConnection();
-
-    await connection.update(
+    await jsdbcTemplate.update(
       sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"alpha"})`,
     );
 
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT id, name FROM jsdbc_typeorm_items WHERE name = ${"alpha"}`,
     );
 
@@ -94,18 +91,16 @@ describe("TypeOrmJsdbcModuleIT", () => {
         name: "alpha",
       },
     ]);
-
-    await connection.close();
   });
 
   it("runs transaction callbacks against the same datasource", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"inside-transaction"})`,
         );
 
-        const rows = await connection.query(
+        const rows = await jsdbcTemplate.queryForList(
           sql`SELECT name FROM jsdbc_typeorm_items WHERE name = ${"inside-transaction"}`,
         );
 
@@ -113,8 +108,8 @@ describe("TypeOrmJsdbcModuleIT", () => {
       }),
     ).resolves.toBeUndefined();
 
-    const rows = await typeormDataSource.query(
-      "SELECT name FROM jsdbc_typeorm_items ORDER BY id",
+    const rows = await jsdbcTemplate.queryForList(
+      sql`SELECT name FROM jsdbc_typeorm_items ORDER BY id`,
     );
 
     expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -122,17 +117,16 @@ describe("TypeOrmJsdbcModuleIT", () => {
 
   it("rolls back failed transactions", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
     ).rejects.toThrow("boom");
 
-    const rows = await typeormDataSource.query(
-      "SELECT name FROM jsdbc_typeorm_items WHERE name = $1",
-      ["rollback-me"],
+    const rows = await jsdbcTemplate.queryForList(
+      sql`SELECT name FROM jsdbc_typeorm_items WHERE name = ${"rollback-me"}`,
     );
 
     expect(rows).toEqual([]);

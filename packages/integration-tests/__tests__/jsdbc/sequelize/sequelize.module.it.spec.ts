@@ -16,23 +16,21 @@
 
 import "reflect-metadata";
 
-import { getConnectionToken, SequelizeModule } from "@nestjs/sequelize";
+import { SequelizeModule } from "@nestjs/sequelize";
 import { Test, type TestingModule } from "@nestjs/testing";
-import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
+import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
 import { SequelizeJsdbcModule } from "@nestjs-ai/jsdbc/sequelize";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
-import type { Sequelize } from "sequelize";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 describe("SequelizeJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let sequelize!: Sequelize;
-  let jsdbcDataSource!: JsdbcDataSource;
+  let jsdbcTemplate!: JsdbcTemplate;
 
   beforeAll(async () => {
     postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
@@ -57,10 +55,9 @@ describe("SequelizeJsdbcModuleIT", () => {
     }).compile();
     await moduleRef.init();
 
-    sequelize = moduleRef.get<Sequelize>(getConnectionToken());
-    jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
+    jsdbcTemplate = moduleRef.get<JsdbcTemplate>(JSDBC_TEMPLATE);
 
-    await sequelize.query(`
+    await jsdbcTemplate.update(sql`
       CREATE TABLE IF NOT EXISTS jsdbc_sequelize_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
@@ -69,8 +66,8 @@ describe("SequelizeJsdbcModuleIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await sequelize.query(
-      "TRUNCATE TABLE jsdbc_sequelize_items RESTART IDENTITY",
+    await jsdbcTemplate.update(
+      sql`TRUNCATE TABLE jsdbc_sequelize_items RESTART IDENTITY`,
     );
   });
 
@@ -80,15 +77,15 @@ describe("SequelizeJsdbcModuleIT", () => {
   });
 
   it("exposes the postgres dialect and executes queries", async () => {
-    expect(await jsdbcDataSource.getDialect()).toBe(DatabaseDialect.POSTGRESQL);
+    expect(await jsdbcTemplate.dataSource.getDialect()).toBe(
+      DatabaseDialect.POSTGRESQL,
+    );
 
-    const connection = await jsdbcDataSource.getConnection();
-
-    await connection.update(
+    await jsdbcTemplate.update(
       sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"alpha"})`,
     );
 
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT id, name FROM jsdbc_sequelize_items WHERE name = ${"alpha"}`,
     );
 
@@ -98,18 +95,16 @@ describe("SequelizeJsdbcModuleIT", () => {
         name: "alpha",
       },
     ]);
-
-    await connection.close();
   });
 
   it("runs transaction callbacks against the same datasource", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"inside-transaction"})`,
         );
 
-        const rows = await connection.query(
+        const rows = await jsdbcTemplate.queryForList(
           sql`SELECT name FROM jsdbc_sequelize_items WHERE name = ${"inside-transaction"}`,
         );
 
@@ -117,8 +112,7 @@ describe("SequelizeJsdbcModuleIT", () => {
       }),
     ).resolves.toBeUndefined();
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT name FROM jsdbc_sequelize_items ORDER BY id`,
     );
 
@@ -127,16 +121,15 @@ describe("SequelizeJsdbcModuleIT", () => {
 
   it("rolls back failed transactions", async () => {
     await expect(
-      jsdbcDataSource.transaction(async (connection) => {
-        await connection.update(
+      jsdbcTemplate.transaction(async () => {
+        await jsdbcTemplate.update(
           sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
     ).rejects.toThrow("boom");
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
+    const rows = await jsdbcTemplate.queryForList(
       sql`SELECT name FROM jsdbc_sequelize_items WHERE name = ${"rollback-me"}`,
     );
 

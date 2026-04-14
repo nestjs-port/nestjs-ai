@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
-import {
-  DatabaseDialect,
-  type DataSource,
-  type SqlFragment,
-} from "@nestjs-ai/jsdbc";
-import { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
-import { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";
-import { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect";
-import { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect";
-import { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect";
+import type { SqlFragment } from "@nestjs-ai/jsdbc";
 
 /**
  * Abstraction for database-specific SQL for chat memory repository.
  */
 export abstract class JsdbcChatMemoryRepositoryDialect {
-  private static readonly logger: Logger = LoggerFactory.getLogger(
-    JsdbcChatMemoryRepositoryDialect.name,
-  );
-
   abstract getSelectMessagesSql(conversationId: string): SqlFragment;
 
   abstract getInsertMessageSql(
@@ -46,42 +32,4 @@ export abstract class JsdbcChatMemoryRepositoryDialect {
   abstract getSelectConversationIdsSql(): SqlFragment;
 
   abstract getDeleteMessagesSql(conversationId: string): SqlFragment;
-
-  static async from(
-    dataSource: DataSource,
-  ): Promise<JsdbcChatMemoryRepositoryDialect> {
-    let dialect: DatabaseDialect | null = null;
-
-    try {
-      dialect = await dataSource.getDialect();
-    } catch (error) {
-      JsdbcChatMemoryRepositoryDialect.logger.warn(
-        "Due to failure in resolving the JSDBC dialect, the chat memory repository dialect could not be determined",
-        error as Error,
-      );
-    }
-
-    if (dialect == null || String(dialect).trim().length === 0) {
-      JsdbcChatMemoryRepositoryDialect.logger.warn(
-        "Database product name is null or empty, defaulting to Postgres dialect.",
-      );
-      return new PostgresChatMemoryRepositoryDialect();
-    }
-
-    switch (dialect) {
-      case DatabaseDialect.POSTGRESQL:
-        return new PostgresChatMemoryRepositoryDialect();
-      case DatabaseDialect.MYSQL:
-      case DatabaseDialect.MARIADB:
-        return new MysqlChatMemoryRepositoryDialect();
-      case DatabaseDialect.MICROSOFT_SQL_SERVER:
-        return new SqlServerChatMemoryRepositoryDialect();
-      case DatabaseDialect.SQLITE:
-        return new SqliteChatMemoryRepositoryDialect();
-      case DatabaseDialect.ORACLE:
-        return new OracleChatMemoryRepositoryDialect();
-      default:
-        return new PostgresChatMemoryRepositoryDialect();
-    }
-  }
 }

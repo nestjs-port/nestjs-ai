@@ -1,0 +1,24 @@
+/*
+ * Copyright 2026-present the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+export { H2_CHAT_MEMORY_SCHEMA } from "./h2-chat-memory-repository-schema";
+export { HSQLDB_CHAT_MEMORY_SCHEMA } from "./hsqldb-chat-memory-repository-schema";
+export { MARIADB_CHAT_MEMORY_SCHEMA } from "./mariadb-chat-memory-repository-schema";
+export { MYSQL_CHAT_MEMORY_SCHEMA } from "./mysql-chat-memory-repository-schema";
+export { ORACLE_CHAT_MEMORY_SCHEMA } from "./oracle-chat-memory-repository-schema";
+export { POSTGRESQL_CHAT_MEMORY_SCHEMA } from "./postgresql-chat-memory-repository-schema";
+export { SQL_SERVER_CHAT_MEMORY_SCHEMA } from "./sql-server-chat-memory-repository-schema";
+export { SQLITE_CHAT_MEMORY_SCHEMA } from "./sqlite-chat-memory-repository-schema";

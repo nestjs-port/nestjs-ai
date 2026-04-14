@@ -16,22 +16,22 @@
 
 import "reflect-metadata";
 
-import { getConnectionToken, SequelizeModule } from "@nestjs/sequelize";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
 import { DatabaseDialect, JSDBC_DATA_SOURCE, sql } from "@nestjs-ai/jsdbc";
-import { SequelizeJsdbcModule } from "@nestjs-ai/jsdbc/sequelize";
+import { TypeOrmJsdbcModule } from "@nestjs-ai/jsdbc/typeorm";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
-import type { Sequelize } from "sequelize";
+import type { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-describe("SequelizeJsdbcDataSourceIT", () => {
+describe("TypeOrmJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let sequelize!: Sequelize;
+  let typeormDataSource!: DataSource;
   let jsdbcDataSource!: JsdbcDataSource;
 
   beforeAll(async () => {
@@ -41,27 +41,23 @@ describe("SequelizeJsdbcDataSourceIT", () => {
       .withPassword("jsdbc")
       .start();
 
+    const typeormModule = TypeOrmModule.forRoot({
+      type: "postgres",
+      url: postgresContainer.getConnectionUri(),
+      synchronize: false,
+      logging: false,
+    });
+
     moduleRef = await Test.createTestingModule({
-      imports: [
-        SequelizeModule.forRoot({
-          dialect: "postgres",
-          host: postgresContainer.getHost(),
-          port: postgresContainer.getMappedPort(5432),
-          database: postgresContainer.getDatabase(),
-          username: postgresContainer.getUsername(),
-          password: postgresContainer.getPassword(),
-          logging: false,
-        }),
-        SequelizeJsdbcModule.forRoot(),
-      ],
+      imports: [typeormModule, TypeOrmJsdbcModule.forRoot()],
     }).compile();
     await moduleRef.init();
 
-    sequelize = moduleRef.get<Sequelize>(getConnectionToken());
+    typeormDataSource = moduleRef.get<DataSource>(getDataSourceToken());
     jsdbcDataSource = moduleRef.get<JsdbcDataSource>(JSDBC_DATA_SOURCE);
 
-    await sequelize.query(`
-      CREATE TABLE IF NOT EXISTS jsdbc_sequelize_items (
+    await typeormDataSource.query(`
+      CREATE TABLE IF NOT EXISTS jsdbc_typeorm_items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
       )
@@ -69,8 +65,8 @@ describe("SequelizeJsdbcDataSourceIT", () => {
   }, 120_000);
 
   beforeEach(async () => {
-    await sequelize.query(
-      "TRUNCATE TABLE jsdbc_sequelize_items RESTART IDENTITY",
+    await typeormDataSource.query(
+      "TRUNCATE TABLE jsdbc_typeorm_items RESTART IDENTITY",
     );
   });
 
@@ -85,11 +81,11 @@ describe("SequelizeJsdbcDataSourceIT", () => {
     const connection = await jsdbcDataSource.getConnection();
 
     await connection.update(
-      sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"alpha"})`,
+      sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"alpha"})`,
     );
 
     const rows = await connection.query(
-      sql`SELECT id, name FROM jsdbc_sequelize_items WHERE name = ${"alpha"}`,
+      sql`SELECT id, name FROM jsdbc_typeorm_items WHERE name = ${"alpha"}`,
     );
 
     expect(rows).toEqual([
@@ -106,20 +102,19 @@ describe("SequelizeJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"inside-transaction"})`,
+          sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"inside-transaction"})`,
         );
 
         const rows = await connection.query(
-          sql`SELECT name FROM jsdbc_sequelize_items WHERE name = ${"inside-transaction"}`,
+          sql`SELECT name FROM jsdbc_typeorm_items WHERE name = ${"inside-transaction"}`,
         );
 
         expect(rows).toEqual([{ name: "inside-transaction" }]);
       }),
     ).resolves.toBeUndefined();
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
-      sql`SELECT name FROM jsdbc_sequelize_items ORDER BY id`,
+    const rows = await typeormDataSource.query(
+      "SELECT name FROM jsdbc_typeorm_items ORDER BY id",
     );
 
     expect(rows).toEqual([{ name: "inside-transaction" }]);
@@ -129,15 +124,15 @@ describe("SequelizeJsdbcDataSourceIT", () => {
     await expect(
       jsdbcDataSource.transaction(async (connection) => {
         await connection.update(
-          sql`INSERT INTO jsdbc_sequelize_items (name) VALUES (${"rollback-me"})`,
+          sql`INSERT INTO jsdbc_typeorm_items (name) VALUES (${"rollback-me"})`,
         );
         throw new Error("boom");
       }),
     ).rejects.toThrow("boom");
 
-    const connection = await jsdbcDataSource.getConnection();
-    const rows = await connection.query(
-      sql`SELECT name FROM jsdbc_sequelize_items WHERE name = ${"rollback-me"}`,
+    const rows = await typeormDataSource.query(
+      "SELECT name FROM jsdbc_typeorm_items WHERE name = $1",
+      ["rollback-me"],
     );
 
     expect(rows).toEqual([]);

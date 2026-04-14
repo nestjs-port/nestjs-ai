@@ -33,7 +33,8 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { z } from "zod";
-import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
+import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
+import { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory";
 
 export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
   constructor(
@@ -136,11 +137,11 @@ class MessageRowMapper implements RowMapper<Message> {
 
     switch (MessageType.valueOf(row.type)) {
       case MessageType.USER:
-        return new UserMessage({ content: row.content, properties: {} });
+        return new UserMessage({ content: row.content });
       case MessageType.ASSISTANT:
-        return new AssistantMessage({ content: row.content, properties: {} });
+        return new AssistantMessage({ content: row.content });
       case MessageType.SYSTEM:
-        return new SystemMessage({ content: row.content, properties: {} });
+        return new SystemMessage({ content: row.content });
       case MessageType.TOOL:
         // The content is always stored empty for ToolResponseMessages.
         // If we want to capture the actual content, we need to extend
@@ -154,7 +155,13 @@ class MessageRowMapper implements RowMapper<Message> {
 
 export class JsdbcChatMemoryRepositoryBuilder {
   private _dataSource: DataSource | null = null;
+  private _jsdbcTemplate: JsdbcTemplate | null = null;
   private _dialect: JsdbcChatMemoryRepositoryDialect | null = null;
+
+  jsdbcTemplate(jsdbcTemplate: JsdbcTemplate): this {
+    this._jsdbcTemplate = jsdbcTemplate;
+    return this;
+  }
 
   dialect(dialect: JsdbcChatMemoryRepositoryDialect): this {
     this._dialect = dialect;
@@ -168,9 +175,17 @@ export class JsdbcChatMemoryRepositoryBuilder {
 
   async build(): Promise<JsdbcChatMemoryRepository> {
     const dataSource = this.resolveDataSource();
-    const template = new JsdbcTemplate(dataSource);
-    const dialect = await this.resolveDialect(template);
+    const template = this.resolveJdbcTemplate(dataSource);
+    const dialect = await this.resolveDialect(dataSource);
     return new JsdbcChatMemoryRepository(template, dialect);
+  }
+
+  private resolveJdbcTemplate(dataSource: DataSource): JsdbcTemplate {
+    if (this._jsdbcTemplate != null) {
+      return this._jsdbcTemplate;
+    }
+
+    return new JsdbcTemplate(dataSource);
   }
 
   private resolveDataSource(): DataSource {
@@ -178,27 +193,32 @@ export class JsdbcChatMemoryRepositoryBuilder {
       return this._dataSource;
     }
 
-    throw new Error("DataSource must be set via dataSource()");
+    if (this._jsdbcTemplate != null) {
+      return this._jsdbcTemplate.dataSource;
+    }
+
+    throw new Error(
+      "DataSource must be set via dataSource() or jsdbcTemplate()",
+    );
   }
 
   private async resolveDialect(
-    template: JsdbcTemplate,
+    dataSource: DataSource,
   ): Promise<JsdbcChatMemoryRepositoryDialect> {
     if (this._dialect != null) {
-      await this.warnIfDialectMismatch(template, this._dialect);
+      await this.warnIfDialectMismatch(dataSource, this._dialect);
       return this._dialect;
     }
 
-    return JsdbcChatMemoryRepositoryDialect.from(template.dataSource);
+    return JsdbcChatMemoryRepositoryDialectFactory.from(dataSource);
   }
 
   private async warnIfDialectMismatch(
-    template: JsdbcTemplate,
+    dataSource: DataSource,
     explicitDialect: JsdbcChatMemoryRepositoryDialect,
   ): Promise<void> {
-    const detectedDialect = await JsdbcChatMemoryRepositoryDialect.from(
-      template.dataSource,
-    );
+    const detectedDialect =
+      await JsdbcChatMemoryRepositoryDialectFactory.from(dataSource);
     if (detectedDialect.constructor !== explicitDialect.constructor) {
       LoggerFactory.getLogger(JsdbcChatMemoryRepositoryBuilder.name).warn(
         "Explicitly set dialect {} will be used instead of detected dialect {} from datasource",

@@ -1,0 +1,119 @@
+/*
+ * Copyright 2026-present the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import "reflect-metadata";
+
+import { JsdbcTemplate, toSql } from "@nestjs-ai/jsdbc";
+import { TypeOrmDataSource } from "@nestjs-ai/jsdbc/typeorm";
+import { MessageType } from "@nestjs-ai/model";
+import {
+  JsdbcChatMemoryRepository,
+  POSTGRESQL_CHAT_MEMORY_SCHEMA,
+} from "@nestjs-ai/model-chat-memory-repository-jsdbc";
+import {
+  PostgreSqlContainer,
+  type StartedPostgreSqlContainer,
+} from "@testcontainers/postgresql";
+import { DataSource } from "typeorm";
+import { afterAll, beforeAll, describe, it } from "vitest";
+import { AbstractJdbcChatMemoryRepositoryIT } from "./abstract-jdbc-chat-memory-repository.it-shared";
+
+describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
+  let postgresContainer: StartedPostgreSqlContainer;
+  let typeormDataSource: DataSource;
+  let jsdbcDataSource: TypeOrmDataSource;
+  let integration: AbstractJdbcChatMemoryRepositoryIT;
+
+  beforeAll(async () => {
+    postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
+      .withDatabase("jsdbc_integration")
+      .withUsername("jsdbc")
+      .withPassword("jsdbc")
+      .start();
+
+    typeormDataSource = new DataSource({
+      type: "postgres",
+      url: postgresContainer.getConnectionUri(),
+      synchronize: false,
+      logging: false,
+    });
+    await typeormDataSource.initialize();
+
+    for (const statement of splitStatements(POSTGRESQL_CHAT_MEMORY_SCHEMA)) {
+      await typeormDataSource.query(statement);
+    }
+
+    jsdbcDataSource = new TypeOrmDataSource(typeormDataSource);
+    const chatMemoryRepository = await JsdbcChatMemoryRepository.builder()
+      .dataSource(jsdbcDataSource)
+      .build();
+
+    integration = new AbstractJdbcChatMemoryRepositoryIT(
+      chatMemoryRepository,
+      new JsdbcTemplate(jsdbcDataSource),
+    );
+  }, 120_000);
+
+  afterAll(async () => {
+    await typeormDataSource?.destroy();
+    await postgresContainer?.stop();
+  }, 60_000);
+
+  it.each([
+    [
+      "saves a single assistant message",
+      "Message from assistant",
+      MessageType.ASSISTANT,
+    ],
+    ["saves a single user message", "Message from user", MessageType.USER],
+    [
+      "saves a single system message",
+      "Message from system",
+      MessageType.SYSTEM,
+    ],
+  ])("%s", async (_title, content, messageType) => {
+    await integration.saveMessagesSingleMessage(content, messageType);
+  });
+
+  it("saves multiple messages", async () => {
+    await integration.saveMessagesMultipleMessages();
+  });
+
+  it("finds messages by conversation id", async () => {
+    await integration.findMessagesByConversationId();
+  });
+
+  it("deletes messages by conversation id", async () => {
+    await integration.deleteMessagesByConversationId();
+  });
+
+  it("preserves message order", async () => {
+    await integration.testMessageOrder();
+  });
+
+  it("preserves message order for large batches", async () => {
+    await integration.testMessageOrderWithLargeBatch();
+  });
+});
+
+function splitStatements(
+  fragment: typeof POSTGRESQL_CHAT_MEMORY_SCHEMA,
+): string[] {
+  return toSql(fragment)
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter(Boolean);
+}

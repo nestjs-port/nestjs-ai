@@ -183,6 +183,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
+      '@nestjs-ai/model-chat-memory-repository-jsdbc':
+        specifier: workspace:*
+        version: link:../memory/repository/model-chat-memory-repository-jsdbc
       '@nestjs-ai/model-chat-memory-repository-redis':
         specifier: workspace:*
         version: link:../memory/repository/model-chat-memory-repository-redis
@@ -324,18 +327,6 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@testcontainers/postgresql':
-        specifier: ^11.13.0
-        version: 11.14.0
-      '@types/pg':
-        specifier: ^8.20.0
-        version: 8.20.0
-      pg:
-        specifier: ^8.20.0
-        version: 8.20.0
-      testcontainers:
-        specifier: ^11.13.0
-        version: 11.14.0
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -1595,9 +1586,6 @@ packages:
 
   '@types/node@25.5.0':
     resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
-
-  '@types/pg@8.20.0':
-    resolution: {integrity: sha512-bEPFOaMAHTEP1EzpvHTbmwR8UsFyHSKsRisLIHVMXnpNefSbGA1bD6CVy+qKjGSqmZqNqBDV2azOBo8TgkcVow==}
 
   '@types/retry@0.12.0':
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
@@ -5497,12 +5485,6 @@ snapshots:
   '@types/node@25.5.0':
     dependencies:
       undici-types: 7.18.2
-
-  '@types/pg@8.20.0':
-    dependencies:
-      '@types/node': 25.5.0
-      pg-protocol: 1.13.0
-      pg-types: 2.2.0
 
   '@types/retry@0.12.0': {}
 

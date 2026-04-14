@@ -16,7 +16,7 @@
 
 import "reflect-metadata";
 
-import { JsdbcTemplate, toSql } from "@nestjs-ai/jsdbc";
+import { JsdbcTemplate } from "@nestjs-ai/jsdbc";
 import { TypeOrmDataSource } from "@nestjs-ai/jsdbc/typeorm";
 import { MessageType } from "@nestjs-ai/model";
 import {
@@ -35,6 +35,7 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
   let postgresContainer: StartedPostgreSqlContainer;
   let typeormDataSource: DataSource;
   let jsdbcDataSource: TypeOrmDataSource;
+  let jsdbcTemplate: JsdbcTemplate;
   let integration: AbstractJdbcChatMemoryRepositoryIT;
 
   beforeAll(async () => {
@@ -52,18 +53,17 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
     });
     await typeormDataSource.initialize();
 
-    for (const statement of splitStatements(POSTGRESQL_CHAT_MEMORY_SCHEMA)) {
-      await typeormDataSource.query(statement);
-    }
-
     jsdbcDataSource = new TypeOrmDataSource(typeormDataSource);
+    jsdbcTemplate = new JsdbcTemplate(jsdbcDataSource);
+    await jsdbcTemplate.update(POSTGRESQL_CHAT_MEMORY_SCHEMA);
+
     const chatMemoryRepository = await JsdbcChatMemoryRepository.builder()
       .dataSource(jsdbcDataSource)
       .build();
 
     integration = new AbstractJdbcChatMemoryRepositoryIT(
       chatMemoryRepository,
-      new JsdbcTemplate(jsdbcDataSource),
+      jsdbcTemplate,
     );
   }, 120_000);
 
@@ -108,12 +108,3 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
     await integration.testMessageOrderWithLargeBatch();
   });
 });
-
-function splitStatements(
-  fragment: typeof POSTGRESQL_CHAT_MEMORY_SCHEMA,
-): string[] {
-  return toSql(fragment)
-    .split(";")
-    .map((statement) => statement.trim())
-    .filter(Boolean);
-}

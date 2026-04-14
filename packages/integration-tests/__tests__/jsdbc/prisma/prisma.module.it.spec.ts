@@ -16,7 +16,6 @@
 
 import "reflect-metadata";
 
-import { existsSync } from "node:fs";
 import type { DynamicModule } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import type { DataSource as JsdbcDataSource } from "@nestjs-ai/jsdbc";
@@ -27,28 +26,12 @@ import {
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { Prisma, PrismaClient } from "./generated/client";
 
-type PrismaClientLike = {
-  $connect(): Promise<void>;
-  $disconnect(): Promise<void>;
-  $executeRawUnsafe(query: string, ...values: unknown[]): Promise<unknown>;
-};
-
-type PrismaRuntimeLike = {
-  raw(value: string): unknown;
-  join(values: readonly unknown[]): unknown;
-  sql(strings: TemplateStringsArray, ...values: readonly unknown[]): unknown;
-};
-
-const prismaClientModulePath = "./generated/client";
-const hasGeneratedPrismaClient = existsSync(
-  `${__dirname}/generated/client/index.js`,
-);
-
-describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcModuleIT", () => {
+describe("PrismaJsdbcModuleIT", () => {
   let postgresContainer!: StartedPostgreSqlContainer;
   let moduleRef!: TestingModule;
-  let prisma!: PrismaClientLike;
+  let prisma!: PrismaClient;
   let jsdbcDataSource!: JsdbcDataSource;
 
   beforeAll(async () => {
@@ -57,13 +40,6 @@ describe.skipIf(!hasGeneratedPrismaClient)("PrismaJsdbcModuleIT", () => {
       .withUsername("jsdbc")
       .withPassword("jsdbc")
       .start();
-
-    const { PrismaClient, Prisma } = (await import(prismaClientModulePath)) as {
-      PrismaClient: new (options: {
-        datasourceUrl: string;
-      }) => PrismaClientLike;
-      Prisma: PrismaRuntimeLike;
-    };
 
     prisma = new PrismaClient({
       datasourceUrl: postgresContainer.getConnectionUri(),

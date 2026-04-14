@@ -15,13 +15,15 @@
  */
 
 import type { Connection, SqlFragment } from "../api";
-import type { PrismaRawClient, PrismaSql } from "./prisma";
-import { Prisma } from "./prisma-runtime";
+import type { PrismaRawClient, PrismaRuntime, PrismaSql } from "./prisma";
 
 export class PrismaConnection implements Connection {
   #closed = false;
 
-  constructor(private readonly prisma: PrismaRawClient) {}
+  constructor(
+    private readonly prisma: PrismaRawClient,
+    private readonly prismaRuntime: PrismaRuntime,
+  ) {}
 
   async query(fragment: SqlFragment): Promise<Record<string, unknown>[]> {
     this.assertOpen();
@@ -48,14 +50,14 @@ export class PrismaConnection implements Connection {
   private toPrismaSql(fragment: SqlFragment): PrismaSql {
     const expressions = fragment.expressions.map((expression, index) => {
       if (expression === null) {
-        return Prisma.raw("NULL");
+        return this.prismaRuntime.raw("NULL");
       }
 
       if (typeof expression === "function") {
         const value = expression();
 
         if (typeof value === "string") {
-          return Prisma.raw(value);
+          return this.prismaRuntime.raw(value);
         }
 
         if (Array.isArray(value)) {
@@ -65,7 +67,7 @@ export class PrismaConnection implements Connection {
             );
           }
 
-          return Prisma.join(value);
+          return this.prismaRuntime.join(value);
         }
 
         throw new Error(
@@ -76,6 +78,6 @@ export class PrismaConnection implements Connection {
       return expression;
     });
 
-    return Prisma.sql(fragment.strings, ...expressions);
+    return this.prismaRuntime.sql(fragment.strings, ...expressions);
   }
 }

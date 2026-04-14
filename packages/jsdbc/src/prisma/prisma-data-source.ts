@@ -16,7 +16,11 @@
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
 import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
-import type { PrismaClientLike, PrismaDialectInfo } from "./prisma";
+import type {
+  PrismaClientLike,
+  PrismaDialectInfo,
+  PrismaRuntime,
+} from "./prisma";
 import { PrismaConnection } from "./prisma-connection";
 
 export interface PrismaJsdbcOptions {
@@ -58,13 +62,14 @@ export class PrismaDataSource implements DataSource {
 
   constructor(
     private readonly prisma: PrismaClientLike & PrismaDialectInfo,
+    private readonly prismaRuntime: PrismaRuntime,
     options: PrismaJsdbcOptions = {},
   ) {
     this.dialect = resolveDialect(this.prisma, options.dialect);
   }
 
   async getConnection(): Promise<Connection> {
-    return new PrismaConnection(this.prisma);
+    return new PrismaConnection(this.prisma, this.prismaRuntime);
   }
 
   async getDialect(): Promise<DatabaseDialect> {
@@ -81,7 +86,7 @@ export class PrismaDataSource implements DataSource {
     }
 
     return this.prisma.$transaction(async (prisma) => {
-      const connection = new PrismaConnection(prisma);
+      const connection = new PrismaConnection(prisma, this.prismaRuntime);
       return TransactionSynchronizationManager.withResourceContext(
         this,
         connection,

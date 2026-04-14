@@ -23,7 +23,7 @@ import type {
 import { Module } from "@nestjs/common";
 
 import { type DataSource, JSDBC_DATA_SOURCE } from "../api";
-import type { PrismaClientLike } from "./prisma";
+import type { PrismaClientLike, PrismaRuntime } from "./prisma";
 import {
   PrismaDataSource,
   type PrismaJsdbcOptions,
@@ -33,6 +33,7 @@ export interface PrismaJsdbcModuleOptions extends PrismaJsdbcOptions {
   global?: boolean;
   imports?: ModuleMetadata["imports"];
   prismaToken: InjectionToken;
+  prismaRuntime: PrismaRuntime;
 }
 
 @Module({})
@@ -55,10 +56,14 @@ function createPrismaProvider(options: PrismaJsdbcModuleOptions): Provider {
     throw new Error("PrismaJsdbcModule requires prismaToken.");
   }
 
+  if (options.prismaRuntime == null) {
+    throw new Error("PrismaJsdbcModule requires prismaRuntime.");
+  }
+
   return {
     provide: JSDBC_DATA_SOURCE,
     useFactory: (prisma: PrismaClientLike): DataSource =>
-      new PrismaDataSource(prisma, options),
+      new PrismaDataSource(prisma, options.prismaRuntime, options),
     inject: [prismaToken],
   };
 }

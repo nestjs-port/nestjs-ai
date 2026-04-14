@@ -31,7 +31,7 @@ export class SqliteChatMemoryRepositoryDialect extends JsdbcChatMemoryRepository
     type: string,
     timestamp: Date,
   ) {
-    return sql`INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp) VALUES (${conversationId}, ${content}, ${type}, ${timestamp})`;
+    return sql`INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp) VALUES (${conversationId}, ${content}, ${type}, ${timestamp.getTime()})`;
   }
 
   getSelectConversationIdsSql() {

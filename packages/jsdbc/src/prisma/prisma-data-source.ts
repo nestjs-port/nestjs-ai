@@ -15,7 +15,7 @@
  */
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
+import { TransactionSynchronizationManager } from "../core";
 import type {
   PrismaClientLike,
   PrismaDialectInfo,
@@ -41,6 +41,7 @@ function resolveDialect(
   switch (activeProvider) {
     case "postgresql":
     case "postgres":
+    case "cockroachdb":
       return DatabaseDialect.POSTGRESQL;
     case "mysql":
       return DatabaseDialect.MYSQL;

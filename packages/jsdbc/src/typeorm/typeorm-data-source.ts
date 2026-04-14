@@ -17,7 +17,7 @@
 import type { DataSourceOptions, DataSource as TypeOrmSource } from "typeorm";
 
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
+import { TransactionSynchronizationManager } from "../core";
 import { TypeOrmConnection } from "./typeorm-connection";
 
 export class TypeOrmDataSource implements DataSource {
@@ -66,9 +66,19 @@ function toDialectFromTypeOrmType(
     case "mariadb":
       return DatabaseDialect.MARIADB;
     case "mysql":
+    case "aurora-mysql":
       return DatabaseDialect.MYSQL;
     case "postgres":
+    case "aurora-postgres":
+    case "cockroachdb":
       return DatabaseDialect.POSTGRESQL;
+    case "better-sqlite3":
+    case "capacitor":
+    case "cordova":
+    case "expo":
+    case "nativescript":
+    case "react-native":
+    case "sqljs":
     case "sqlite":
       return DatabaseDialect.SQLITE;
     case "mssql":

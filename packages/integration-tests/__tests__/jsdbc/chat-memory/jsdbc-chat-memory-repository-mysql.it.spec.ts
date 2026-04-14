@@ -21,33 +21,34 @@ import { TypeOrmDataSource } from "@nestjs-ai/jsdbc/typeorm";
 import { MessageType } from "@nestjs-ai/model";
 import {
   JsdbcChatMemoryRepository,
-  POSTGRESQL_CHAT_MEMORY_SCHEMA,
+  MYSQL_CHAT_MEMORY_SCHEMA,
 } from "@nestjs-ai/model-chat-memory-repository-jsdbc";
 import {
-  PostgreSqlContainer,
-  type StartedPostgreSqlContainer,
-} from "@testcontainers/postgresql";
+  MySqlContainer,
+  type StartedMySqlContainer,
+} from "@testcontainers/mysql";
 import { DataSource } from "typeorm";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { AbstractJdbcChatMemoryRepositoryIT } from "./abstract-jdbc-chat-memory-repository.it-shared";
 
-describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
-  let postgresContainer: StartedPostgreSqlContainer;
+describe("JsdbcChatMemoryRepositoryMysqlIT", () => {
+  let mysqlContainer: StartedMySqlContainer;
   let typeormDataSource: DataSource;
   let jsdbcDataSource: TypeOrmDataSource;
   let jsdbcTemplate: JsdbcTemplate;
   let integration: AbstractJdbcChatMemoryRepositoryIT;
 
   beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
+    mysqlContainer = await new MySqlContainer("mysql:8.0.42")
       .withDatabase("jsdbc_integration")
       .withUsername("jsdbc")
-      .withPassword("jsdbc")
+      .withUserPassword("jsdbc")
+      .withRootPassword("jsdbc")
       .start();
 
     typeormDataSource = new DataSource({
-      type: "postgres",
-      url: postgresContainer.getConnectionUri(),
+      type: "mysql",
+      url: mysqlContainer.getConnectionUri(),
       synchronize: false,
       logging: false,
     });
@@ -55,7 +56,7 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
 
     jsdbcDataSource = new TypeOrmDataSource(typeormDataSource);
     jsdbcTemplate = new JsdbcTemplate(jsdbcDataSource);
-    for (const fragment of POSTGRESQL_CHAT_MEMORY_SCHEMA) {
+    for (const fragment of MYSQL_CHAT_MEMORY_SCHEMA) {
       await jsdbcTemplate.update(fragment);
     }
 
@@ -71,7 +72,7 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
 
   afterAll(async () => {
     await typeormDataSource?.destroy();
-    await postgresContainer?.stop();
+    await mysqlContainer?.stop();
   }, 60_000);
 
   it.each([

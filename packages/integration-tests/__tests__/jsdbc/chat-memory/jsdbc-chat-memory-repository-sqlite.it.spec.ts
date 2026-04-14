@@ -21,33 +21,24 @@ import { TypeOrmDataSource } from "@nestjs-ai/jsdbc/typeorm";
 import { MessageType } from "@nestjs-ai/model";
 import {
   JsdbcChatMemoryRepository,
-  POSTGRESQL_CHAT_MEMORY_SCHEMA,
+  SQLITE_CHAT_MEMORY_SCHEMA,
 } from "@nestjs-ai/model-chat-memory-repository-jsdbc";
-import {
-  PostgreSqlContainer,
-  type StartedPostgreSqlContainer,
-} from "@testcontainers/postgresql";
 import { DataSource } from "typeorm";
 import { afterAll, beforeAll, describe, it } from "vitest";
+
 import { AbstractJdbcChatMemoryRepositoryIT } from "./abstract-jdbc-chat-memory-repository.it-shared";
 
-describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
-  let postgresContainer: StartedPostgreSqlContainer;
+describe("JsdbcChatMemoryRepositorySqliteIT", () => {
   let typeormDataSource: DataSource;
   let jsdbcDataSource: TypeOrmDataSource;
   let jsdbcTemplate: JsdbcTemplate;
   let integration: AbstractJdbcChatMemoryRepositoryIT;
 
   beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
-      .withDatabase("jsdbc_integration")
-      .withUsername("jsdbc")
-      .withPassword("jsdbc")
-      .start();
-
     typeormDataSource = new DataSource({
-      type: "postgres",
-      url: postgresContainer.getConnectionUri(),
+      type: "sqljs",
+      location: ":memory:",
+      autoSave: false,
       synchronize: false,
       logging: false,
     });
@@ -55,7 +46,7 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
 
     jsdbcDataSource = new TypeOrmDataSource(typeormDataSource);
     jsdbcTemplate = new JsdbcTemplate(jsdbcDataSource);
-    for (const fragment of POSTGRESQL_CHAT_MEMORY_SCHEMA) {
+    for (const fragment of SQLITE_CHAT_MEMORY_SCHEMA) {
       await jsdbcTemplate.update(fragment);
     }
 
@@ -67,12 +58,11 @@ describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
       chatMemoryRepository,
       jsdbcTemplate,
     );
-  }, 120_000);
+  }, 60_000);
 
   afterAll(async () => {
     await typeormDataSource?.destroy();
-    await postgresContainer?.stop();
-  }, 60_000);
+  }, 30_000);
 
   it.each([
     [

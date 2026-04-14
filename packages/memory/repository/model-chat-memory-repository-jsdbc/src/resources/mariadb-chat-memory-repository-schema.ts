@@ -16,8 +16,9 @@
 
 import { sql } from "@nestjs-ai/jsdbc";
 
-// language=SQL
-export const MARIADB_CHAT_MEMORY_SCHEMA = sql`
+export const MARIADB_CHAT_MEMORY_SCHEMA = [
+  // language=SQL
+  sql`
 CREATE TABLE IF NOT EXISTS SPRING_AI_CHAT_MEMORY (
     conversation_id VARCHAR(36) NOT NULL,
     content TEXT NOT NULL,
@@ -25,7 +26,10 @@ CREATE TABLE IF NOT EXISTS SPRING_AI_CHAT_MEMORY (
     \`timestamp\` TIMESTAMP NOT NULL,
     CONSTRAINT TYPE_CHECK CHECK (type IN ('USER', 'ASSISTANT', 'SYSTEM', 'TOOL'))
 );
-
+`,
+  // language=SQL
+  sql`
 CREATE INDEX IF NOT EXISTS SPRING_AI_CHAT_MEMORY_CONVERSATION_ID_TIMESTAMP_IDX
 ON SPRING_AI_CHAT_MEMORY(conversation_id, \`timestamp\`);
-`;
+`,
+];

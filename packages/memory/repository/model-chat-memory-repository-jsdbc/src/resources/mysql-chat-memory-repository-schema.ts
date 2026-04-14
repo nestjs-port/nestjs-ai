@@ -16,8 +16,9 @@
 
 import { sql } from "@nestjs-ai/jsdbc";
 
-// language=SQL
-export const MYSQL_CHAT_MEMORY_SCHEMA = sql`
+export const MYSQL_CHAT_MEMORY_SCHEMA = [
+  // language=SQL
+  sql`
 CREATE TABLE IF NOT EXISTS SPRING_AI_CHAT_MEMORY (
     \`conversation_id\` VARCHAR(36) NOT NULL,
     \`content\` TEXT NOT NULL,
@@ -26,4 +27,5 @@ CREATE TABLE IF NOT EXISTS SPRING_AI_CHAT_MEMORY (
 
     INDEX \`SPRING_AI_CHAT_MEMORY_CONVERSATION_ID_TIMESTAMP_IDX\` (\`conversation_id\`, \`timestamp\`)
 );
-`;
+`,
+];

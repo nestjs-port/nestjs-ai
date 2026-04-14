@@ -16,7 +16,7 @@
 
 import type { MikroORM, Platform } from "@mikro-orm/core";
 import { type Connection, DatabaseDialect, type DataSource } from "../api";
-import { TransactionSynchronizationManager } from "../core/transaction-synchronization-manager";
+import { TransactionSynchronizationManager } from "../core";
 import { MikroOrmConnection } from "./mikroorm-connection";
 
 type MikroOrmExecutor = MikroORM["em"] & {
@@ -74,7 +74,7 @@ function resolveDialect(platform: Platform): DatabaseDialect {
   if (platformName.includes("Postgre")) {
     return DatabaseDialect.POSTGRESQL;
   }
-  if (platformName.includes("Sqlite") || platformName.includes("LibSql")) {
+  if (platformName.includes("Sqlite")) {
     return DatabaseDialect.SQLITE;
   }
   if (platformName.includes("MsSql")) {
@@ -82,12 +82,6 @@ function resolveDialect(platform: Platform): DatabaseDialect {
   }
   if (platformName.includes("Oracle")) {
     return DatabaseDialect.ORACLE;
-  }
-  if (platformName.includes("H2")) {
-    return DatabaseDialect.H2;
-  }
-  if (platformName.includes("HSQL")) {
-    return DatabaseDialect.HSQLDB;
   }
 
   return DatabaseDialect.POSTGRESQL;

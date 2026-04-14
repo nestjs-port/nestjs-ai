@@ -62,7 +62,7 @@ export class AbstractJdbcChatMemoryRepositoryIT {
     );
 
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({
+    expect(this.normalizeRow(result[0])).toEqual({
       conversation_id: conversationId,
       content: message.text,
       type: messageType.getName(),
@@ -94,12 +94,14 @@ export class AbstractJdbcChatMemoryRepositoryIT {
     expect(results).toHaveLength(messages.length);
 
     for (const [index, message] of messages.entries()) {
-      expect(results[index]).toMatchObject({
+      const row = this.normalizeRow(results[index]);
+
+      expect(row).toMatchObject({
         conversation_id: conversationId,
         content: message.text,
         type: message.messageType.getName(),
       });
-      expect(results[index]?.timestamp).toBeDefined();
+      expect(row.timestamp).toBeDefined();
     }
 
     expect(
@@ -230,5 +232,17 @@ export class AbstractJdbcChatMemoryRepositoryIT {
       ] as unknown as TemplateStringsArray,
       expressions: fragment.expressions,
     };
+  }
+
+  private normalizeRow(
+    row: Record<string, unknown> | undefined,
+  ): Record<string, unknown> {
+    if (!row) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [key.toLowerCase(), value]),
+    );
   }
 }

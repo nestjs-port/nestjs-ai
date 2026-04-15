@@ -2,20 +2,22 @@
 
 ## Package Identity
 - Provider implementations for external model vendors.
-- Current providers: OpenAI and Google GenAI.
+- Current providers: OpenAI, OpenAI SDK, and Google GenAI.
 
 ## Setup & Run
-- Build providers: `pnpm --filter @nestjs-ai/model-openai build && pnpm --filter @nestjs-ai/model-google-genai build`
-- Typecheck providers: `pnpm --filter @nestjs-ai/model-openai typecheck && pnpm --filter @nestjs-ai/model-google-genai typecheck`
+- Build providers: `pnpm --filter @nestjs-ai/model-openai build && pnpm --filter @nestjs-ai/model-openai-sdk build && pnpm --filter @nestjs-ai/model-google-genai build`
+- Typecheck providers: `pnpm --filter @nestjs-ai/model-openai typecheck && pnpm --filter @nestjs-ai/model-openai-sdk typecheck && pnpm --filter @nestjs-ai/model-google-genai typecheck`
 - Test OpenAI package scope: `pnpm test packages/models/openai/src`
+- Test OpenAI SDK package scope: `pnpm test packages/models/openai-sdk/src`
 - Test Google GenAI package scope: `pnpm test packages/models/google-genai/src`
 
 ## Patterns & Conventions
 - DO: keep OpenAI API translation under `packages/models/openai/src/api/`.
-- DO: keep factory entry points in `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts` and `packages/models/google-genai/src/autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`.
-- DO: keep metadata extraction in `packages/models/openai/src/metadata/` and `packages/models/google-genai/src/metadata/`.
-- DO: preserve shared `ChatModel` contract usage as seen in `packages/models/openai/src/open-ai-chat-model.ts` and `packages/models/google-genai/src/google-gen-ai-chat-model.ts`.
-- DON'T: mix OpenAI DTOs from `packages/models/openai/src/api/open-ai-api.types.ts` into Google provider files like `packages/models/google-genai/src/google-gen-ai-chat-model.ts`.
+- DO: keep OpenAI SDK translation under `packages/models/openai-sdk/src/`.
+- DO: keep factory entry points in `packages/models/openai/src/autoconfigure/open-ai-chat-model-auto-configuration.ts`, `packages/models/openai-sdk/src/autoconfigure/open-ai-sdk-chat-model-auto-configuration.ts`, and `packages/models/google-genai/src/autoconfigure/google-gen-ai-chat-model-auto-configuration.ts`.
+- DO: keep metadata extraction in `packages/models/openai/src/metadata/`, `packages/models/openai-sdk/src/metadata/`, and `packages/models/google-genai/src/metadata/`.
+- DO: preserve shared `ChatModel` contract usage as seen in `packages/models/openai/src/open-ai-chat-model.ts`, `packages/models/openai-sdk/src/open-ai-sdk-chat-model.ts`, and `packages/models/google-genai/src/google-gen-ai-chat-model.ts`.
+- DON'T: mix OpenAI DTOs from `packages/models/openai/src/api/open-ai-api.types.ts` into OpenAI SDK or Google provider files.
 - DON'T: edit generated artifacts in `packages/models/*/dist/**`.
 
 ## Key Files

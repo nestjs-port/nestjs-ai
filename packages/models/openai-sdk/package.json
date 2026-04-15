@@ -1,0 +1,38 @@
+{
+  "name": "@nestjs-ai/model-openai-sdk",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/model": "*",
+    "@nestjs-ai/retry": "*",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/retry": "workspace:*",
+    "@nestjs/common": "^11.1.11",
+    "rxjs": "^7.0.0"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
+}

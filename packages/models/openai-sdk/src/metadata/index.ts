@@ -14,19 +14,4 @@
  * limitations under the License.
  */
 
-/**
- * @nestjs-ai/model-openai-sdk
- *
- * Scaffold for the OpenAI SDK-based provider implementation.
- */
-
-export * from "./abstract-open-ai-sdk-options";
-export * from "./metadata";
-export * from "./module";
-export * from "./open-ai-sdk-chat-model";
-export * from "./open-ai-sdk-chat-options";
-export {
-  type OpenAiSdkEmbeddingCreateParams,
-  OpenAiSdkEmbeddingOptions,
-  type OpenAiSdkEmbeddingOptionsProps,
-} from "./open-ai-sdk-embedding-options";
+export * from "./open-ai-sdk-image-generation-metadata";

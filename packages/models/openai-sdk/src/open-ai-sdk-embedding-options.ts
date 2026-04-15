@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { TokenCredential } from "@azure/identity";
 import type { EmbeddingCreateParams } from "openai/resources/embeddings";
 
 import {
@@ -107,7 +106,7 @@ export namespace OpenAiSdkEmbeddingOptions {
       if (value instanceof OpenAiSdkEmbeddingOptions) {
         this.options.baseUrl = value.baseUrl;
         this.options.apiKey = value.apiKey;
-        this.options.credential = value.credential;
+        this.options.azureADTokenProvider = value.azureADTokenProvider;
         this.options.model = value.model;
         this.options.deploymentName = value.deploymentName;
         this.options.microsoftFoundryServiceVersion =
@@ -141,8 +140,8 @@ export namespace OpenAiSdkEmbeddingOptions {
         if (from.apiKey != null) {
           this.options.apiKey = from.apiKey;
         }
-        if (from.credential != null) {
-          this.options.credential = from.credential;
+        if (from.azureADTokenProvider != null) {
+          this.options.azureADTokenProvider = from.azureADTokenProvider;
         }
         if (from.model != null) {
           this.options.model = from.model;
@@ -206,8 +205,10 @@ export namespace OpenAiSdkEmbeddingOptions {
       return this;
     }
 
-    credential(credential: TokenCredential | null): this {
-      this.options.credential = credential;
+    azureADTokenProvider(
+      azureADTokenProvider: (() => Promise<string>) | null,
+    ): this {
+      this.options.azureADTokenProvider = azureADTokenProvider;
       return this;
     }
 

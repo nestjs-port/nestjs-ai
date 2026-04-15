@@ -14,5 +14,26 @@
  * limitations under the License.
  */
 
-export * from "./open-ai-sdk-image-generation-metadata";
-export * from "./open-ai-sdk-image-response-metadata";
+import assert from "node:assert/strict";
+
+/**
+ * Represents a message used for image generation.
+ */
+export class ImageMessage {
+  private readonly _text: string;
+  private readonly _weight: number | null;
+
+  constructor(text: string, weight?: number | null) {
+    assert(text != null, "text must not be null");
+    this._text = text;
+    this._weight = weight ?? null;
+  }
+
+  get text(): string {
+    return this._text;
+  }
+
+  get weight(): number | null {
+    return this._weight;
+  }
+}

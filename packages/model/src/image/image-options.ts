@@ -14,5 +14,21 @@
  * limitations under the License.
  */
 
-export * from "./open-ai-sdk-image-generation-metadata";
-export * from "./open-ai-sdk-image-response-metadata";
+import type { ModelOptions } from "../model";
+
+/**
+ * Image options represent the common options portable across different image generation models.
+ */
+export interface ImageOptions extends ModelOptions {
+  get n(): number | null;
+
+  get model(): string | null;
+
+  get width(): number | null;
+
+  get height(): number | null;
+
+  get responseFormat(): string | null;
+
+  get style(): string | null;
+}

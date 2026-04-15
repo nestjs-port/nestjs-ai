@@ -30,3 +30,4 @@ export {
   OpenAiSdkEmbeddingOptions,
   type OpenAiSdkEmbeddingOptionsProps,
 } from "./open-ai-sdk-embedding-options";
+export * from "./open-ai-sdk-image-options";

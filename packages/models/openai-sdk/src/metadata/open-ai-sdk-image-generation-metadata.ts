@@ -15,18 +15,21 @@
  */
 
 /**
- * @nestjs-ai/model-openai-sdk
- *
- * Scaffold for the OpenAI SDK-based provider implementation.
+ * Represents the metadata for image generation using the OpenAI Java SDK.
  */
+export class OpenAiSdkImageGenerationMetadata {
+  private readonly _revisedPrompt: string | null;
 
-export * from "./abstract-open-ai-sdk-options";
-export * from "./metadata";
-export * from "./module";
-export * from "./open-ai-sdk-chat-model";
-export * from "./open-ai-sdk-chat-options";
-export {
-  type OpenAiSdkEmbeddingCreateParams,
-  OpenAiSdkEmbeddingOptions,
-  type OpenAiSdkEmbeddingOptionsProps,
-} from "./open-ai-sdk-embedding-options";
+  constructor(revisedPrompt?: string | null) {
+    this._revisedPrompt = revisedPrompt ?? null;
+  }
+
+  /**
+   * Gets the revised prompt that was used for image generation.
+   *
+   * @returns the revised prompt, or null if not available
+   */
+  get revisedPrompt(): string | null {
+    return this._revisedPrompt;
+  }
+}

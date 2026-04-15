@@ -18,17 +18,23 @@
     "test": "vitest run"
   },
   "peerDependencies": {
+    "@azure/identity": "^4.13.1",
+    "@azure/openai": "^2.0.0",
     "@nestjs-ai/commons": "*",
     "@nestjs-ai/model": "*",
     "@nestjs-ai/retry": "*",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "openai": "^6.34.0",
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
+    "@azure/identity": "4.13.1",
+    "@azure/openai": "2.0.0",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/retry": "workspace:*",
     "@nestjs/common": "^11.1.11",
+    "openai": "6.34.0",
     "rxjs": "^7.0.0"
   },
   "files": [

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { TokenCredential } from "@azure/identity";
-
 export interface AbstractOpenAiSdkOptionsProps {
   /**
    * The deployment URL to connect to OpenAI.
@@ -28,9 +26,9 @@ export interface AbstractOpenAiSdkOptionsProps {
   apiKey?: string | null;
 
   /**
-   * Credentials used to connect to Microsoft Foundry.
+   * Azure Active Directory token provider used to connect to Microsoft Foundry.
    */
-  credential?: TokenCredential | null;
+  azureADTokenProvider?: (() => Promise<string>) | null;
 
   /**
    * The model name used. When using Microsoft Foundry, this is also used as the
@@ -89,7 +87,7 @@ export interface AbstractOpenAiSdkOptionsProps {
 export class AbstractOpenAiSdkOptions {
   private _baseUrl: string | null = null;
   private _apiKey: string | null = null;
-  private _credential: TokenCredential | null = null;
+  private _azureADTokenProvider: (() => Promise<string>) | null = null;
   private _model: string | null = null;
   private _deploymentName: string | null = null;
   private _microsoftFoundryServiceVersion: unknown = null;
@@ -104,7 +102,7 @@ export class AbstractOpenAiSdkOptions {
   constructor(props: AbstractOpenAiSdkOptionsProps = {}) {
     this._baseUrl = props.baseUrl ?? null;
     this._apiKey = props.apiKey ?? null;
-    this._credential = props.credential ?? null;
+    this._azureADTokenProvider = props.azureADTokenProvider ?? null;
     this._model = props.model ?? null;
     this._deploymentName = props.deploymentName ?? null;
     this._microsoftFoundryServiceVersion =
@@ -134,12 +132,14 @@ export class AbstractOpenAiSdkOptions {
     this._apiKey = apiKey ?? null;
   }
 
-  get credential(): TokenCredential | null {
-    return this._credential;
+  get azureADTokenProvider(): (() => Promise<string>) | null {
+    return this._azureADTokenProvider;
   }
 
-  set credential(credential: TokenCredential | null) {
-    this._credential = credential;
+  set azureADTokenProvider(azureADTokenProvider:
+    | (() => Promise<string>)
+    | null,) {
+    this._azureADTokenProvider = azureADTokenProvider;
   }
 
   get model(): string | null {

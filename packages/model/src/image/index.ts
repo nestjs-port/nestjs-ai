@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./open-ai-sdk-image-generation-metadata";
-export * from "./open-ai-sdk-image-response-metadata";
+export { ImageMessage } from "./image-message";
+export type { ImageOptions } from "./image-options";
+export { ImageOptionsBuilder } from "./image-options-builder";
+export { ImagePrompt } from "./image-prompt";

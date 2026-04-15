@@ -17,6 +17,7 @@
 export * from "./chat";
 export * from "./converter";
 export * from "./embedding";
+export * from "./image";
 export * from "./model";
 export * from "./module";
 export * from "./support";

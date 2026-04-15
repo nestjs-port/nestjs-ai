@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-openai-sdk",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "license": "Apache-2.0",
   "private": false,
   "main": "./dist/index.js",
@@ -19,7 +19,6 @@
   },
   "peerDependencies": {
     "@azure/identity": "^4.13.1",
-    "@azure/openai": "^2.0.0",
     "@nestjs-ai/commons": "*",
     "@nestjs-ai/model": "*",
     "@nestjs-ai/retry": "*",
@@ -27,9 +26,13 @@
     "openai": "^6.34.0",
     "rxjs": "^7.0.0"
   },
+  "peerDependenciesMeta": {
+    "@azure/identity": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@azure/identity": "4.13.1",
-    "@azure/openai": "2.0.0",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/retry": "workspace:*",

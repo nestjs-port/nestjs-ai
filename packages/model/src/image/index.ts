@@ -16,5 +16,8 @@
 
 export { ImageMessage } from "./image-message";
 export type { ImageOptions } from "./image-options";
-export { ImageOptionsBuilder } from "./image-options-builder";
+export {
+  ImageOptionsBuilder,
+  type ImageOptionsProps,
+} from "./image-options-builder";
 export { ImagePrompt } from "./image-prompt";

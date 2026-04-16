@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 
-import type { ImagePrompt } from "@nestjs-ai/model";
+import type { ImageOptions, ImagePrompt } from "@nestjs-ai/model";
 import type { ImageGenerateParams, ImageModel } from "openai/resources/images";
 
 import {
@@ -41,7 +41,10 @@ export interface OpenAiSdkImageOptionsProps
 /**
  * Configuration information for the Image Model implementation using the OpenAI Java SDK.
  */
-export class OpenAiSdkImageOptions extends AbstractOpenAiSdkOptions {
+export class OpenAiSdkImageOptions
+  extends AbstractOpenAiSdkOptions
+  implements ImageOptions
+{
   static readonly DEFAULT_IMAGE_MODEL: ImageModel = "dall-e-3";
 
   private _n: number | null = null;

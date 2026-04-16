@@ -26,20 +26,68 @@ export interface ImageOptionsProps {
 }
 
 class DefaultImageModelOptions implements ImageOptions {
-  n: number | null = null;
-  model: string | null = null;
-  width: number | null = null;
-  height: number | null = null;
-  responseFormat: string | null = null;
-  style: string | null = null;
+  private _n: number | null = null;
+  private _model: string | null = null;
+  private _width: number | null = null;
+  private _height: number | null = null;
+  private _responseFormat: string | null = null;
+  private _style: string | null = null;
 
   constructor(props: ImageOptionsProps = {}) {
-    this.n = props.n ?? null;
-    this.model = props.model ?? null;
-    this.width = props.width ?? null;
-    this.height = props.height ?? null;
-    this.responseFormat = props.responseFormat ?? null;
-    this.style = props.style ?? null;
+    this.setN(props.n ?? null);
+    this.setModel(props.model ?? null);
+    this.setWidth(props.width ?? null);
+    this.setHeight(props.height ?? null);
+    this.setResponseFormat(props.responseFormat ?? null);
+    this.setStyle(props.style ?? null);
+  }
+
+  get n(): number | null {
+    return this._n;
+  }
+
+  setN(n: number | null): void {
+    this._n = n;
+  }
+
+  get model(): string | null {
+    return this._model;
+  }
+
+  setModel(model: string | null): void {
+    this._model = model;
+  }
+
+  get width(): number | null {
+    return this._width;
+  }
+
+  setWidth(width: number | null): void {
+    this._width = width;
+  }
+
+  get height(): number | null {
+    return this._height;
+  }
+
+  setHeight(height: number | null): void {
+    this._height = height;
+  }
+
+  get responseFormat(): string | null {
+    return this._responseFormat;
+  }
+
+  setResponseFormat(responseFormat: string | null): void {
+    this._responseFormat = responseFormat;
+  }
+
+  get style(): string | null {
+    return this._style;
+  }
+
+  setStyle(style: string | null): void {
+    this._style = style;
   }
 }
 
@@ -61,32 +109,32 @@ export class ImageOptionsBuilder {
   }
 
   N(n: number): ImageOptionsBuilder {
-    this.options.n = n;
+    this.options.setN(n);
     return this;
   }
 
   model(model: string): ImageOptionsBuilder {
-    this.options.model = model;
+    this.options.setModel(model);
     return this;
   }
 
   responseFormat(responseFormat: string): ImageOptionsBuilder {
-    this.options.responseFormat = responseFormat;
+    this.options.setResponseFormat(responseFormat);
     return this;
   }
 
   width(width: number): ImageOptionsBuilder {
-    this.options.width = width;
+    this.options.setWidth(width);
     return this;
   }
 
   height(height: number): ImageOptionsBuilder {
-    this.options.height = height;
+    this.options.setHeight(height);
     return this;
   }
 
   style(style: string): ImageOptionsBuilder {
-    this.options.style = style;
+    this.options.setStyle(style);
     return this;
   }
 

@@ -32,3 +32,4 @@ export {
   OpenAiSdkImageOptions,
   type OpenAiSdkImageOptionsProps,
 } from "./open-ai-sdk-image-options";
+export * from "./setup";

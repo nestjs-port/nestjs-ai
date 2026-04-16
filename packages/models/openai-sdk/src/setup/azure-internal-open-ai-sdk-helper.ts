@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  DefaultAzureCredential,
-  getBearerTokenProvider,
-} from "@azure/identity";
-
 /**
  * Specific configuration for authenticating on Azure. This is in a separate class to
  * avoid needing the Azure SDK dependencies when not using Azure as a platform.
@@ -27,6 +22,11 @@ import {
  * `dev.langchain4j.model.openaiofficial.AzureInternalOpenAiOfficialHelper` class, which
  * is coded by the same author (Julien Dubois, from Microsoft).
  */
+import {
+  DefaultAzureCredential,
+  getBearerTokenProvider,
+} from "@azure/identity";
+
 export abstract class AzureInternalOpenAiSdkHelper {
   private constructor() {}
 

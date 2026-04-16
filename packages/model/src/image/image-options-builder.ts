@@ -16,70 +16,48 @@
 
 import type { ImageOptions } from "./image-options";
 
+export interface ImageOptionsProps {
+  n?: number | null;
+  model?: string | null;
+  width?: number | null;
+  height?: number | null;
+  responseFormat?: string | null;
+  style?: string | null;
+}
+
 class DefaultImageModelOptions implements ImageOptions {
-  private _n: number | null = null;
-  private _model: string | null = null;
-  private _width: number | null = null;
-  private _height: number | null = null;
-  private _responseFormat: string | null = null;
-  private _style: string | null = null;
+  n: number | null = null;
+  model: string | null = null;
+  width: number | null = null;
+  height: number | null = null;
+  responseFormat: string | null = null;
+  style: string | null = null;
 
-  get n(): number | null {
-    return this._n;
-  }
-
-  set n(n: number | null) {
-    this._n = n ?? null;
-  }
-
-  get model(): string | null {
-    return this._model;
-  }
-
-  set model(model: string | null) {
-    this._model = model ?? null;
-  }
-
-  get width(): number | null {
-    return this._width;
-  }
-
-  set width(width: number | null) {
-    this._width = width ?? null;
-  }
-
-  get height(): number | null {
-    return this._height;
-  }
-
-  set height(height: number | null) {
-    this._height = height ?? null;
-  }
-
-  get responseFormat(): string | null {
-    return this._responseFormat;
-  }
-
-  set responseFormat(responseFormat: string | null) {
-    this._responseFormat = responseFormat ?? null;
-  }
-
-  get style(): string | null {
-    return this._style;
-  }
-
-  set style(style: string | null) {
-    this._style = style ?? null;
+  constructor(props: ImageOptionsProps = {}) {
+    this.n = props.n ?? null;
+    this.model = props.model ?? null;
+    this.width = props.width ?? null;
+    this.height = props.height ?? null;
+    this.responseFormat = props.responseFormat ?? null;
+    this.style = props.style ?? null;
   }
 }
 
 export class ImageOptionsBuilder {
-  private readonly options = new DefaultImageModelOptions();
+  private readonly options: DefaultImageModelOptions;
 
-  private constructor() {}
+  private constructor(props: ImageOptionsProps = {}) {
+    this.options = new DefaultImageModelOptions(props);
+  }
 
-  static builder(): ImageOptionsBuilder {
-    return new ImageOptionsBuilder();
+  static builder(): ImageOptionsBuilder;
+  static builder(props: ImageOptionsProps): ImageOptionsBuilder;
+  static builder(props: ImageOptionsProps = {}): ImageOptionsBuilder {
+    return new ImageOptionsBuilder(props);
+  }
+
+  static from(props: ImageOptionsProps): ImageOptions {
+    return new DefaultImageModelOptions(props);
   }
 
   N(n: number): ImageOptionsBuilder {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert/strict";
-
 /**
  * Represents a message used for image generation.
  */
@@ -24,7 +22,6 @@ export class ImageMessage {
   private readonly _weight: number | null;
 
   constructor(text: string, weight?: number | null) {
-    assert(text != null, "text must not be null");
     this._text = text;
     this._weight = weight ?? null;
   }

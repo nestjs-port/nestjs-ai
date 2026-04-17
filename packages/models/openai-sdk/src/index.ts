@@ -28,7 +28,10 @@ export {
   type OpenAiSdkEmbeddingOptionsProps,
 } from "./open-ai-sdk-embedding-options";
 export {
-  type OpenAiSdkImageGenerateParams,
+  OpenAiSdkImageModel,
+  type OpenAiSdkImageModelProps,
+} from "./open-ai-sdk-image-model";
+export {
   OpenAiSdkImageOptions,
   type OpenAiSdkImageOptionsProps,
 } from "./open-ai-sdk-image-options";

@@ -37,7 +37,7 @@ export interface OpenAiSdkImageOptionsProps
     ImageGenerateParamsNonStreaming["response_format"]
   > | null;
   size?: NonNullable<ImageGenerateParamsNonStreaming["size"]> | null;
-  style?: string | null;
+  style?: NonNullable<ImageGenerateParamsNonStreaming["style"]> | null;
   user?: string | null;
 }
 

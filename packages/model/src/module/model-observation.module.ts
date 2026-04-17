@@ -26,6 +26,7 @@ import {
   ChatModelMeterObservationHandler,
 } from "../chat";
 import { EmbeddingModelMeterObservationHandler } from "../embedding";
+import { ImageModelPromptContentObservationHandler } from "../image";
 
 const modelObservationHandlerProvider: Provider = {
   provide: Symbol.for("MODEL_OBSERVATION_HANDLER_PROVIDER"),
@@ -44,6 +45,17 @@ const modelObservationHandlerProvider: Provider = {
     ) {
       observationHandlers.addHandler(
         new ChatModelCompletionObservationHandler(),
+      );
+    }
+
+    if (
+      !observationHandlers.handlers.some(
+        (handler) =>
+          handler instanceof ImageModelPromptContentObservationHandler,
+      )
+    ) {
+      observationHandlers.addHandler(
+        new ImageModelPromptContentObservationHandler(),
       );
     }
 

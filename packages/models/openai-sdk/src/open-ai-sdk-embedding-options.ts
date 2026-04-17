@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Milliseconds } from "@nestjs-ai/commons";
+import type { ClientOptions } from "openai";
 import type { EmbeddingCreateParams } from "openai/resources/embeddings";
 
 import {
@@ -116,7 +118,7 @@ export namespace OpenAiSdkEmbeddingOptions {
         this.options.gitHubModels = value.gitHubModels;
         this.options.timeout = value.timeout;
         this.options.maxRetries = value.maxRetries;
-        this.options.proxy = value.proxy;
+        this.options.fetchOptions = value.fetchOptions;
         this.options.customHeaders = { ...value.customHeaders };
         this.options.user = value.user;
         this.options.dimensions = value.dimensions;
@@ -164,8 +166,8 @@ export namespace OpenAiSdkEmbeddingOptions {
         if (from.maxRetries != null) {
           this.options.maxRetries = from.maxRetries;
         }
-        if (from.proxy != null) {
-          this.options.proxy = from.proxy;
+        if (from.fetchOptions != null) {
+          this.options.fetchOptions = from.fetchOptions;
         }
         if (from.customHeaders != null) {
           this.options.customHeaders = { ...from.customHeaders };
@@ -232,7 +234,7 @@ export namespace OpenAiSdkEmbeddingOptions {
       return this;
     }
 
-    timeout(timeout: unknown): this {
+    timeout(timeout: Milliseconds | null): this {
       this.options.timeout = timeout;
       return this;
     }
@@ -242,8 +244,8 @@ export namespace OpenAiSdkEmbeddingOptions {
       return this;
     }
 
-    proxy(proxy: unknown): this {
-      this.options.proxy = proxy;
+    fetchOptions(fetchOptions: ClientOptions["fetchOptions"] | null): this {
+      this.options.fetchOptions = fetchOptions;
       return this;
     }
 

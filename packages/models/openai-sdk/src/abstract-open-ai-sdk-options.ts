@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { Milliseconds } from "@nestjs-ai/commons";
+import type { ClientOptions } from "openai";
+
 export interface AbstractOpenAiSdkOptionsProps {
   /**
    * The deployment URL to connect to OpenAI.
@@ -66,7 +69,7 @@ export interface AbstractOpenAiSdkOptionsProps {
   /**
    * Request timeout for OpenAI client.
    */
-  timeout?: unknown;
+  timeout?: Milliseconds;
 
   /**
    * Maximum number of retries for OpenAI client.
@@ -76,7 +79,7 @@ export interface AbstractOpenAiSdkOptionsProps {
   /**
    * Proxy settings for OpenAI client.
    */
-  proxy?: unknown;
+  fetchOptions?: ClientOptions["fetchOptions"] | null;
 
   /**
    * Custom HTTP headers to add to OpenAI client requests.
@@ -94,9 +97,9 @@ export class AbstractOpenAiSdkOptions {
   private _organizationId: string | null = null;
   private _microsoftFoundry = false;
   private _gitHubModels = false;
-  private _timeout: unknown = null;
+  private _timeout: Milliseconds | null = null;
   private _maxRetries: number | null = null;
-  private _proxy: unknown = null;
+  private _fetchOptions: ClientOptions["fetchOptions"] | null = null;
   private _customHeaders: Record<string, string> = {};
 
   constructor(props: AbstractOpenAiSdkOptionsProps = {}) {
@@ -112,7 +115,7 @@ export class AbstractOpenAiSdkOptions {
     this._gitHubModels = props.gitHubModels ?? false;
     this._timeout = props.timeout ?? null;
     this._maxRetries = props.maxRetries ?? null;
-    this._proxy = props.proxy ?? null;
+    this._fetchOptions = props.fetchOptions ?? null;
     this._customHeaders = { ...(props.customHeaders ?? {}) };
   }
 
@@ -190,11 +193,11 @@ export class AbstractOpenAiSdkOptions {
     this._gitHubModels = gitHubModels;
   }
 
-  get timeout(): unknown {
+  get timeout(): Milliseconds | null {
     return this._timeout;
   }
 
-  set timeout(timeout: unknown) {
+  set timeout(timeout: Milliseconds | null) {
     this._timeout = timeout;
   }
 
@@ -206,12 +209,12 @@ export class AbstractOpenAiSdkOptions {
     this._maxRetries = maxRetries ?? null;
   }
 
-  get proxy(): unknown {
-    return this._proxy;
+  get fetchOptions(): ClientOptions["fetchOptions"] | null {
+    return this._fetchOptions;
   }
 
-  set proxy(proxy: unknown) {
-    this._proxy = proxy;
+  set fetchOptions(fetchOptions: ClientOptions["fetchOptions"] | null) {
+    this._fetchOptions = fetchOptions;
   }
 
   get customHeaders(): Record<string, string> {

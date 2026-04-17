@@ -16,18 +16,13 @@
 
 import assert from "node:assert/strict";
 
+import { ImageResponseMetadata } from "@nestjs-ai/model";
 import type { ImagesResponse } from "openai/resources/images";
 
 /**
  * Represents the metadata for image response using the OpenAI Java SDK.
  */
-export class OpenAiSdkImageResponseMetadata {
-  private readonly _created: number | null;
-
-  protected constructor(created?: number | null) {
-    this._created = created ?? null;
-  }
-
+export class OpenAiSdkImageResponseMetadata extends ImageResponseMetadata {
   /**
    * Creates metadata from an ImagesResponse.
    *
@@ -39,9 +34,5 @@ export class OpenAiSdkImageResponseMetadata {
   ): OpenAiSdkImageResponseMetadata {
     assert(imagesResponse != null, "imagesResponse must not be null");
     return new OpenAiSdkImageResponseMetadata(imagesResponse.created);
-  }
-
-  get created(): number | null {
-    return this._created;
   }
 }

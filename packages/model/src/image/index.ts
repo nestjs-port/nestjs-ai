@@ -30,3 +30,4 @@ export {
 export { ImagePrompt } from "./image-prompt";
 export { ImageResponse, type ImageResponseProps } from "./image-response";
 export { ImageResponseMetadata } from "./image-response-metadata";
+export * from "./observation";

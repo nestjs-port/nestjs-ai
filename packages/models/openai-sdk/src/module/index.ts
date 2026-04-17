@@ -15,3 +15,20 @@
  */
 
 export * from "./open-ai-sdk-chat-model.module";
+export type { OpenAiSdkChatProperties } from "./open-ai-sdk-chat-properties";
+export {
+  OPEN_AI_SDK_CHAT_DEFAULT_MODEL,
+  OPEN_AI_SDK_CHAT_PROPERTIES_PREFIX,
+} from "./open-ai-sdk-chat-properties";
+export type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
+export { OPEN_AI_SDK_CONNECTION_PROPERTIES_PREFIX } from "./open-ai-sdk-connection-properties";
+export type { OpenAiSdkEmbeddingProperties } from "./open-ai-sdk-embedding-properties";
+export {
+  OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL,
+  OPEN_AI_SDK_EMBEDDING_PROPERTIES_PREFIX,
+} from "./open-ai-sdk-embedding-properties";
+export type { OpenAiSdkImageProperties } from "./open-ai-sdk-image-properties";
+export {
+  OPEN_AI_SDK_IMAGE_DEFAULT_MODEL,
+  OPEN_AI_SDK_IMAGE_PROPERTIES_PREFIX,
+} from "./open-ai-sdk-image-properties";

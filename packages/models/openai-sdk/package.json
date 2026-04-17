@@ -36,6 +36,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/retry": "workspace:*",
+    "@nestjs-ai/testing": "workspace:*",
     "@nestjs/common": "^11.1.11",
     "openai": "6.34.0",
     "rxjs": "^7.0.0"

@@ -94,9 +94,7 @@ export class OpenAiSdkImageModel implements ImageModel {
 
     if (this.logger.isTraceEnabled()) {
       this.logger.trace(
-        "OpenAiSdkImageOptions call {} with the following options : {} ",
-        options.model,
-        imageGenerateParams,
+        `OpenAiSdkImageOptions call ${options.model} with the following options: ${JSON.stringify(imageGenerateParams)}`,
       );
     }
 

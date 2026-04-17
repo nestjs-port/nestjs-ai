@@ -28,7 +28,7 @@ export interface OpenAiSdkSetupProps {
   isAzure?: boolean;
   isGitHubModels?: boolean;
   modelName?: string | null;
-  timeout?: Milliseconds;
+  timeout?: Milliseconds | null;
   maxRetries?: number | null;
   fetchOptions?: ClientOptions["fetchOptions"] | null;
   customHeaders?: Record<string, string> | null;

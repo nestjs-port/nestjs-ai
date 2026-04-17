@@ -19,37 +19,29 @@ import {
   ObservabilityHelper,
   type ObservationContext,
   type ObservationHandler,
-  StringUtils,
 } from "@nestjs-ai/commons";
-import { ChatClientObservationContext } from "./chat-client-observation-context";
+import { ImageModelObservationContext } from "./image-model-observation-context";
 
-export class ChatClientCompletionObservationHandler
-  implements ObservationHandler<ChatClientObservationContext>
+export class ImageModelPromptContentObservationHandler
+  implements ObservationHandler<ImageModelObservationContext>
 {
   private readonly logger = LoggerFactory.getLogger(
-    ChatClientCompletionObservationHandler.name,
+    ImageModelPromptContentObservationHandler.name,
   );
 
-  onStop(context: ChatClientObservationContext): void {
-    this.logger.info(
-      `Chat Client Completion:\n${ObservabilityHelper.concatenateStrings(this.completion(context))}`,
-    );
-  }
-
-  private completion(context: ChatClientObservationContext): string[] {
-    const chatResponse = context.response?.chatResponse;
-    if (chatResponse == null) {
-      return [];
+  onStop(context: ImageModelObservationContext): void {
+    if (context.request.instructions.length === 0) {
+      return;
     }
 
-    return chatResponse.results
-      .map((generation) => generation.output.text)
-      .filter(StringUtils.hasText);
+    this.logger.info(
+      `Image Model Prompt Content:\n${ObservabilityHelper.concatenateStrings(context.request.instructions.map((message) => message.text))}`,
+    );
   }
 
   supportsContext(
     context: ObservationContext,
-  ): context is ChatClientObservationContext {
-    return context instanceof ChatClientObservationContext;
+  ): context is ImageModelObservationContext {
+    return context instanceof ImageModelObservationContext;
   }
 }

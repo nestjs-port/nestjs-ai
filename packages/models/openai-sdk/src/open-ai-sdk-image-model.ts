@@ -32,10 +32,8 @@ import {
   ImageModelObservationDocumentation,
   type ImagePrompt,
   ImageResponse,
-  type ImageResponseMetadata,
 } from "@nestjs-ai/model";
 import type { AzureOpenAI, OpenAI } from "openai";
-import type { ImagesResponse } from "openai/resources/images";
 
 import {
   OpenAiSdkImageGenerationMetadata,
@@ -111,9 +109,8 @@ export class OpenAiSdkImageModel implements ImageModel {
         this._observationRegistry,
       )
       .observe(async () => {
-        const images = (await this._openAiClient.images.generate(
-          imageGenerateParams,
-        )) as ImagesResponse;
+        const images =
+          await this._openAiClient.images.generate(imageGenerateParams);
 
         if (images.data == null || images.data.length === 0) {
           throw new Error("Image generation failed: no image returned");
@@ -140,9 +137,8 @@ export class OpenAiSdkImageModel implements ImageModel {
           });
         });
 
-        const imageResponseMetadata = OpenAiSdkImageResponseMetadata.from(
-          images,
-        ) as unknown as ImageResponseMetadata;
+        const imageResponseMetadata =
+          OpenAiSdkImageResponseMetadata.from(images);
         const imageResponse = new ImageResponse({
           generations: imageGenerations,
           imageResponseMetadata,
@@ -170,9 +166,9 @@ export class OpenAiSdkImageModel implements ImageModel {
       isAzure: options.microsoftFoundry,
       isGitHubModels: options.gitHubModels,
       modelName: options.model,
-      timeout: options.timeout ?? undefined,
+      timeout: options.timeout,
       maxRetries: options.maxRetries,
-      fetchOptions: options.fetchOptions ?? undefined,
+      fetchOptions: options.fetchOptions,
       customHeaders: options.customHeaders,
     };
   }

@@ -127,7 +127,7 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
     this._observationConvention = observationConvention;
   }
 
-  protected getEmbeddingContent(document: Document): string {
+  override getEmbeddingContent(document: Document): string {
     assert(document, "document cannot be null");
     return document.getFormattedContent(this._metadataMode);
   }
@@ -135,7 +135,8 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
   protected override async embedDocument(
     document: Document,
   ): Promise<number[]> {
-    return await this.embed(this.getEmbeddingContent(document));
+    assert(document, "document cannot be null");
+    return this.embed(document.getFormattedContent(this._metadataMode));
   }
 
   async onModuleInit(): Promise<void> {

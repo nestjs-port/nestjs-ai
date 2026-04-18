@@ -23,6 +23,10 @@ export * from "./module";
 export { OpenAiSdkChatModel } from "./open-ai-sdk-chat-model";
 export { OpenAiSdkChatOptions } from "./open-ai-sdk-chat-options";
 export {
+  OpenAiSdkEmbeddingModel,
+  type OpenAiSdkEmbeddingModelProps,
+} from "./open-ai-sdk-embedding-model";
+export {
   type OpenAiSdkEmbeddingCreateParams,
   OpenAiSdkEmbeddingOptions,
   type OpenAiSdkEmbeddingOptionsProps,

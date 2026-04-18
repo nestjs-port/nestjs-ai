@@ -23,10 +23,7 @@ export {
 export type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
 export { OPEN_AI_SDK_CONNECTION_PROPERTIES_PREFIX } from "./open-ai-sdk-connection-properties";
 export type { OpenAiSdkEmbeddingProperties } from "./open-ai-sdk-embedding-properties";
-export {
-  OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL,
-  OPEN_AI_SDK_EMBEDDING_PROPERTIES_PREFIX,
-} from "./open-ai-sdk-embedding-properties";
+export { OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL } from "./open-ai-sdk-embedding-properties";
 export * from "./open-ai-sdk-image-model.module";
 export type { OpenAiSdkImageProperties } from "./open-ai-sdk-image-properties";
 export { OPEN_AI_SDK_IMAGE_DEFAULT_MODEL } from "./open-ai-sdk-image-properties";

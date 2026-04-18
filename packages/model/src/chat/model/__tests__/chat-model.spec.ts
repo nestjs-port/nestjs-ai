@@ -26,7 +26,7 @@ import { Generation } from "../generation";
  * This is a common pattern for testing abstract classes in vitest.
  */
 class TestChatModel extends ChatModel {
-  protected async chatPrompt(_prompt: Prompt): Promise<ChatResponse> {
+  protected async callPrompt(_prompt: Prompt): Promise<ChatResponse> {
     // Default implementation - `call` is mocked using vi.spyOn()
     throw new Error("chatPrompt method should not be called directly");
   }

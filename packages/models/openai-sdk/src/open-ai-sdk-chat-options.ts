@@ -18,6 +18,7 @@ import assert from "node:assert/strict";
 
 import { LoggerFactory, type Milliseconds } from "@nestjs-ai/commons";
 import {
+  type ChatOptions,
   DefaultToolCallingChatOptions,
   type StructuredOutputChatOptions,
   type ToolCallback,
@@ -30,6 +31,10 @@ import {
   type AbstractOpenAiSdkOptionsProps,
 } from "./abstract-open-ai-sdk-options";
 import { OpenAiSdkChatModel } from "./open-ai-sdk-chat-model";
+
+type StructuredOutputChatOptionsBuilder = ChatOptions.Builder & {
+  outputSchema(outputSchema: string | null): ChatOptions.Builder;
+};
 
 type ChatCompletionAudioParam = {
   voice?: string;
@@ -408,27 +413,31 @@ export class OpenAiSdkChatOptions
   }
 
   get toolContext(): Record<string, unknown> {
-    return { ...this._toolContext };
+    return this._toolContext;
   }
 
   setToolContext(toolContext: Record<string, unknown>): void {
     assert(toolContext, "toolContext cannot be null");
-    this._toolContext = { ...toolContext };
+    this._toolContext = toolContext;
   }
 
   get topK(): null {
     return null;
   }
 
-  get outputSchema(): string {
-    return this._responseFormat?.jsonSchema ?? "";
+  get outputSchema(): string | null {
+    return this._responseFormat?.jsonSchema ?? null;
   }
 
-  setOutputSchema(outputSchema: string): void {
-    this._responseFormat = OpenAiSdkChatModel.ResponseFormat.builder()
-      .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
-      .jsonSchema(outputSchema)
-      .build();
+  setOutputSchema(outputSchema: string | null): void {
+    if (outputSchema != null) {
+      this._responseFormat = OpenAiSdkChatModel.ResponseFormat.builder()
+        .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
+        .jsonSchema(outputSchema)
+        .build();
+      return;
+    }
+    this._responseFormat = null;
   }
 
   toString(): string {
@@ -513,7 +522,10 @@ export class OpenAiSdkChatOptions
 }
 
 export namespace OpenAiSdkChatOptions {
-  export class Builder extends DefaultToolCallingChatOptions.Builder {
+  export class Builder
+    extends DefaultToolCallingChatOptions.Builder
+    implements StructuredOutputChatOptionsBuilder
+  {
     private static readonly logger = LoggerFactory.getLogger(
       OpenAiSdkChatOptions.name,
     );
@@ -524,8 +536,8 @@ export namespace OpenAiSdkChatOptions {
     private _deploymentName: string | null = null;
     private _microsoftFoundryServiceVersion: unknown = null;
     private _organizationId: string | null = null;
-    private _microsoftFoundry = false;
-    private _gitHubModels = false;
+    private _microsoftFoundry: boolean | null = null;
+    private _gitHubModels: boolean | null = null;
     private _timeout: Milliseconds | null = null;
     private _maxRetries: number | null = null;
     private _fetchOptions: ClientOptions["fetchOptions"] | null = null;
@@ -605,8 +617,12 @@ export namespace OpenAiSdkChatOptions {
         if (other._organizationId != null) {
           this._organizationId = other._organizationId;
         }
-        this._microsoftFoundry = other._microsoftFoundry;
-        this._gitHubModels = other._gitHubModels;
+        if (other._microsoftFoundry != null) {
+          this._microsoftFoundry = other._microsoftFoundry;
+        }
+        if (other._gitHubModels != null) {
+          this._gitHubModels = other._gitHubModels;
+        }
         if (other._timeout != null) {
           this._timeout = other._timeout;
         }
@@ -616,7 +632,7 @@ export namespace OpenAiSdkChatOptions {
         if (other._fetchOptions != null) {
           this._fetchOptions = other._fetchOptions;
         }
-        if (other._customHeaders != null) {
+        if (Object.keys(other._customHeaders).length > 0) {
           this._customHeaders = { ...other._customHeaders };
         }
         if (other._logitBias != null) {
@@ -795,6 +811,18 @@ export namespace OpenAiSdkChatOptions {
       return this;
     }
 
+    outputSchema(outputSchema: string | null): this {
+      if (outputSchema != null) {
+        this._responseFormat = OpenAiSdkChatModel.ResponseFormat.builder()
+          .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
+          .jsonSchema(outputSchema)
+          .build();
+        return this;
+      }
+      this._responseFormat = null;
+      return this;
+    }
+
     streamOptions(
       streamOptions: OpenAiSdkChatOptions.StreamOptions | null,
     ): this {
@@ -807,6 +835,73 @@ export namespace OpenAiSdkChatOptions {
         .from(this._streamOptions)
         .includeUsage(streamUsage)
         .build();
+      return this;
+    }
+
+    toolCallbacks(toolCallbacks: ToolCallback[] | null): this;
+    toolCallbacks(...toolCallbacks: ToolCallback[]): this;
+    toolCallbacks(...toolCallbacks: unknown[]): this {
+      if (toolCallbacks.length === 1) {
+        const [singleValue] = toolCallbacks;
+        if (singleValue == null) {
+          this._toolCallbacks = null;
+          return this;
+        }
+        if (Array.isArray(singleValue)) {
+          this._toolCallbacks = [...singleValue];
+          return this;
+        }
+      }
+      this._toolCallbacks = toolCallbacks as ToolCallback[];
+      return this;
+    }
+
+    toolNames(toolNames: Set<string> | null): this;
+    toolNames(...toolNames: string[]): this;
+    toolNames(...toolNames: unknown[]): this {
+      if (toolNames.length === 1) {
+        const [singleValue] = toolNames;
+        if (singleValue == null) {
+          this._toolNames = null;
+          return this;
+        }
+        if (singleValue instanceof Set) {
+          this._toolNames = new Set(singleValue);
+          return this;
+        }
+      }
+      this._toolNames = new Set(toolNames as string[]);
+      return this;
+    }
+
+    toolContext(context: Record<string, unknown> | null): this;
+    toolContext(key: string, value: unknown): this;
+    toolContext(...args: unknown[]): this {
+      if (args.length === 1) {
+        const [singleValue] = args;
+        if (singleValue == null) {
+          this._toolContext = null;
+          return this;
+        }
+        this._toolContext = { ...(singleValue as Record<string, unknown>) };
+        return this;
+      }
+
+      if (args.length === 2) {
+        const [key, value] = args;
+        assert(
+          typeof key === "string" && key.trim().length > 0,
+          "key cannot be null",
+        );
+        assert(value != null, "value cannot be null");
+        this._toolContext = {
+          ...this._toolContext,
+          [key]: value,
+        };
+        return this;
+      }
+
+      this._toolContext = {};
       return this;
     }
 
@@ -842,80 +937,6 @@ export namespace OpenAiSdkChatOptions {
 
     parallelToolCalls(parallelToolCalls: boolean | null): this {
       this._parallelToolCalls = parallelToolCalls;
-      return this;
-    }
-
-    toolCallbacks(toolCallbacks: ToolCallback[] | null): this;
-    toolCallbacks(...toolCallbacks: ToolCallback[]): this;
-    toolCallbacks(...toolCallbacks: unknown[]): this {
-      if (toolCallbacks.length === 1) {
-        const [singleValue] = toolCallbacks;
-        if (singleValue == null) {
-          this._toolCallbacks = [];
-          return this;
-        }
-        if (Array.isArray(singleValue)) {
-          this._toolCallbacks = [...singleValue];
-          return this;
-        }
-      }
-      this._toolCallbacks = toolCallbacks as ToolCallback[];
-      return this;
-    }
-
-    toolNames(toolNames: Set<string> | null): this;
-    toolNames(...toolNames: string[]): this;
-    toolNames(...toolNames: unknown[]): this {
-      if (toolNames.length === 1) {
-        const [singleValue] = toolNames;
-        if (singleValue == null) {
-          this._toolNames = new Set();
-          return this;
-        }
-        if (singleValue instanceof Set) {
-          this._toolNames = new Set(singleValue);
-          return this;
-        }
-      }
-      this._toolNames = new Set(toolNames as string[]);
-      return this;
-    }
-
-    internalToolExecutionEnabled(
-      internalToolExecutionEnabled: boolean | null,
-    ): this {
-      this._internalToolExecutionEnabled = internalToolExecutionEnabled;
-      return this;
-    }
-
-    toolContext(context: Record<string, unknown> | null): this;
-    toolContext(key: string, value: unknown): this;
-    toolContext(...args: unknown[]): this {
-      if (args.length === 1) {
-        const [singleValue] = args;
-        if (singleValue == null) {
-          this._toolContext = {};
-          return this;
-        }
-        this._toolContext = { ...(singleValue as Record<string, unknown>) };
-        return this;
-      }
-
-      if (args.length === 2) {
-        const [key, value] = args;
-        assert(
-          typeof key === "string" && key.trim().length > 0,
-          "key cannot be null",
-        );
-        assert(value != null, "value cannot be null");
-        this._toolContext = {
-          ...this._toolContext,
-          [key]: value,
-        };
-        return this;
-      }
-
-      this._toolContext = {};
       return this;
     }
 
@@ -958,8 +979,8 @@ export namespace OpenAiSdkChatOptions {
         deploymentName: this._deploymentName,
         microsoftFoundryServiceVersion: this._microsoftFoundryServiceVersion,
         organizationId: this._organizationId,
-        microsoftFoundry: this._microsoftFoundry,
-        gitHubModels: this._gitHubModels,
+        microsoftFoundry: this._microsoftFoundry ?? false,
+        gitHubModels: this._gitHubModels ?? false,
         timeout: this._timeout ?? AbstractOpenAiSdkOptions.DEFAULT_TIMEOUT,
         maxRetries:
           this._maxRetries ?? AbstractOpenAiSdkOptions.DEFAULT_MAX_RETRIES,

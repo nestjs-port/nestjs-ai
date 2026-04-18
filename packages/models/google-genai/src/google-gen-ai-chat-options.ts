@@ -273,7 +273,10 @@ export class GoogleGenAiChatOptions
 }
 
 export namespace GoogleGenAiChatOptions {
-  export class Builder extends DefaultToolCallingChatOptions.Builder {
+  export class Builder
+    extends DefaultToolCallingChatOptions.Builder
+    implements StructuredOutputChatOptions.Builder
+  {
     protected _candidateCount: number | null = null;
     protected _responseMimeType: string | null = null;
     protected _responseSchema: string | null = null;

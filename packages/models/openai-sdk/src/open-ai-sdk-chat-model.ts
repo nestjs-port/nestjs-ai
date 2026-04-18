@@ -21,6 +21,7 @@ import {
   Media,
   NoopObservationRegistry,
   type ObservationRegistry,
+  StringUtils,
 } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -41,6 +42,7 @@ import {
   type Message,
   MessageType,
   Prompt,
+  type ToolCall,
   ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolDefinition,
@@ -60,16 +62,19 @@ import type {
   ChatCompletionCreateParams,
   ChatCompletionCreateParamsBase,
   ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   ChatCompletionTool,
 } from "openai/resources/chat/completions/completions";
 import type { FunctionParameters } from "openai/resources/shared";
-import { Observable } from "rxjs";
+import { defer, EMPTY, from, Observable } from "rxjs";
+import { bufferCount, map, switchMap, toArray } from "rxjs/operators";
 import { OpenAiSdkChatOptions } from "./open-ai-sdk-chat-options";
 import { OpenAiSdkSetup } from "./setup";
 
 type OpenAiSdkClient = OpenAI | AzureOpenAI;
+type ChatCompletionChunkChoice = ChatCompletionChunk["choices"][number];
 
 export interface OpenAiSdkChatModelProps {
   client?: OpenAiSdkClient | null;
@@ -160,7 +165,7 @@ export class OpenAiSdkChatModel extends ChatModel {
       this._observationRegistry,
     );
 
-    return observation.observe(async () => {
+    const response = await observation.observe(async () => {
       const chatCompletion = await this._client.chat.completions.create(
         request as ChatCompletionCreateParamsNonStreaming,
       );
@@ -185,50 +190,54 @@ export class OpenAiSdkChatModel extends ChatModel {
 
       const usage = chatCompletion.usage ?? null;
       const currentUsage = usage
-        ? this.getDefaultUsage(usage as any)
+        ? this.getDefaultUsage(usage)
         : new EmptyUsage();
       const accumulatedUsage = UsageCalculator.getCumulativeUsage(
         currentUsage,
         previousChatResponse,
       );
-      const response = new ChatResponse({
+      const chatResponse = new ChatResponse({
         generations,
         chatResponseMetadata: this.fromCompletion(
-          chatCompletion as any,
+          chatCompletion,
           accumulatedUsage,
         ),
       });
-      observationContext.setResponse(response);
 
-      if (
-        this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
-          prompt.options ?? this._options,
-          response,
-        )
-      ) {
-        const toolExecutionResult =
-          await this._toolCallingManager.executeToolCalls(prompt, response);
+      observationContext.setResponse(chatResponse);
 
-        if (toolExecutionResult.returnDirect()) {
-          return ChatResponse.builder()
-            .from(response)
-            .generations(
-              ToolExecutionResult.buildGenerations(toolExecutionResult),
-            )
-            .build();
-        }
+      return chatResponse;
+    });
 
-        return this.internalCall(
-          new Prompt(
-            toolExecutionResult.conversationHistory(),
-            prompt.options ?? null,
-          ),
-          response,
-        );
+    assert(prompt.options != null, "Prompt options must not be null");
+    assert(response != null, "Chat response must not be null");
+
+    if (
+      this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
+        prompt.options,
+        response,
+      )
+    ) {
+      const toolExecutionResult =
+        await this._toolCallingManager.executeToolCalls(prompt, response);
+      if (toolExecutionResult.returnDirect()) {
+        // Return tool execution result directly to the client.
+        return ChatResponse.builder()
+          .from(response)
+          .generations(
+            ToolExecutionResult.buildGenerations(toolExecutionResult),
+          )
+          .build();
       }
 
-      return response;
-    });
+      // Send the tool execution result back to the model.
+      return this.internalCall(
+        new Prompt(toolExecutionResult.conversationHistory(), prompt.options),
+        response,
+      );
+    }
+
+    return response;
   }
 
   protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
@@ -250,162 +259,218 @@ export class OpenAiSdkChatModel extends ChatModel {
     prompt: Prompt,
     previousChatResponse: ChatResponse | null,
   ): Observable<ChatResponse> {
-    const observationContext = new ChatModelObservationContext(
-      prompt,
-      AiProvider.OPENAI_SDK.value,
-    );
-    const observation = new ChatModelObservationDocumentation().observation(
-      this._observationConvention,
-      OpenAiSdkChatModel.DEFAULT_OBSERVATION_CONVENTION,
-      () => observationContext,
-      this._observationRegistry,
-    );
+    return defer(() => {
+      const request = this.createRequest(prompt, true);
+      const observationContext = new ChatModelObservationContext(
+        prompt,
+        AiProvider.OPENAI_SDK.value,
+      );
+      const observation = new ChatModelObservationDocumentation().observation(
+        this._observationConvention,
+        OpenAiSdkChatModel.DEFAULT_OBSERVATION_CONVENTION,
+        () => observationContext,
+        this._observationRegistry,
+      );
 
-    return observation.observeStream(
-      () =>
+      return observation.observeStream(() =>
         new Observable<ChatResponse>((subscriber) => {
           void (async () => {
             try {
-              const request = this.createRequest(prompt, true);
-              const stream = (await this._client.chat.completions.create(
-                request as ChatCompletionCreateParams,
-              )) as unknown as AsyncIterable<ChatCompletionChunk>;
-              const responses: ChatResponse[] = [];
+              const stream = await this._client.chat.completions.create(
+                request as ChatCompletionCreateParamsStreaming,
+              );
               for await (const chunk of stream) {
-                const response = this.chunkToChatResponse(
-                  chunk,
-                  request as ChatCompletionCreateParams,
+                const chatCompletion = this.chunkToChatCompletion(chunk);
+                const generations = chatCompletion.choices.map(
+                  (choice, index) => {
+                    const metadata: Record<string, unknown> = {
+                      id: chatCompletion.id,
+                      role: choice.message.role,
+                      index: choice.index,
+                      finishReason: choice.finish_reason,
+                      refusal: choice.message.refusal ?? "",
+                      annotations: choice.message.annotations ?? [],
+                      chunkChoice: chunk.choices[index],
+                    };
+                    return this.buildGeneration(choice, metadata, request);
+                  },
+                );
+
+                const usage = chatCompletion.usage ?? null;
+                const currentUsage = usage
+                  ? this.getDefaultUsage(usage)
+                  : new EmptyUsage();
+                const accumulatedUsage = UsageCalculator.getCumulativeUsage(
+                  currentUsage,
                   previousChatResponse,
                 );
-                responses.push(response);
-              }
-
-              if (responses.length === 0) {
-                subscriber.complete();
-                return;
-              }
-
-              const aggregated = this.aggregateStreamResponses(responses);
-              if (!aggregated) {
-                for (const response of responses) {
-                  subscriber.next(response);
-                }
-                subscriber.complete();
-                return;
-              }
-
-              observationContext.setResponse(aggregated);
-
-              if (
-                this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
-                  prompt.options ?? this._options,
-                  aggregated,
-                )
-              ) {
-                const toolExecutionResult =
-                  await this._toolCallingManager.executeToolCalls(
-                    prompt,
-                    aggregated,
-                  );
-
-                if (toolExecutionResult.returnDirect()) {
-                  subscriber.next(
-                    ChatResponse.builder()
-                      .from(aggregated)
-                      .generations(
-                        ToolExecutionResult.buildGenerations(
-                          toolExecutionResult,
-                        ),
-                      )
-                      .build(),
-                  );
-                  subscriber.complete();
-                  return;
-                }
-
-                const nested = this.internalStream(
-                  new Prompt(
-                    toolExecutionResult.conversationHistory(),
-                    prompt.options ?? null,
-                  ),
-                  aggregated,
+                subscriber.next(
+                  new ChatResponse({
+                    generations,
+                    chatResponseMetadata: this.fromCompletion(
+                      chatCompletion,
+                      accumulatedUsage,
+                    ),
+                  }),
                 );
-                nested.subscribe({
-                  next: (value) => subscriber.next(value),
-                  error: (error) => subscriber.error(error),
-                  complete: () => subscriber.complete(),
-                });
-                return;
               }
 
-              for (const response of responses) {
-                subscriber.next(response);
-              }
               subscriber.complete();
             } catch (error) {
               subscriber.error(error);
             }
           })();
-        }),
-    );
+        }).pipe(
+          bufferCount(2, 1),
+          map((bufferList) => {
+            const firstResponse = bufferList[0];
+            if (request.stream_options != null && bufferList.length === 2) {
+              const secondResponse = bufferList[1];
+              const usage = secondResponse.metadata.usage;
+              return new ChatResponse({
+                generations: firstResponse.results,
+                chatResponseMetadata: this.fromResponseMetadata(
+                  firstResponse.metadata,
+                  usage,
+                ),
+              });
+            }
+            return firstResponse;
+          }),
+          toArray(),
+          switchMap((responses) => {
+            if (responses.length === 0) {
+              return EMPTY;
+            }
+
+            const hasToolCalls = responses.some(
+              (response) =>
+                (this.safeAssistantMessage(response)?.toolCalls.length ?? 0) >
+                0,
+            );
+
+            if (!hasToolCalls) {
+              if (responses.length > 2) {
+                // Get the finish reason
+                const penultimateResponse = responses[responses.length - 2];
+                // Get the usage
+                const lastResponse = responses[responses.length - 1];
+                const usage = lastResponse.metadata.usage;
+                observationContext.setResponse(
+                  new ChatResponse({
+                    generations: penultimateResponse.results,
+                    chatResponseMetadata: this.fromResponseMetadata(
+                      penultimateResponse.metadata,
+                      usage,
+                    ),
+                  }),
+                );
+              }
+              return from(responses);
+            }
+
+            const aggregated = this.aggregateStreamResponses(responses);
+
+            observationContext.setResponse(aggregated);
+
+            if (
+              this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
+                prompt.options ?? this._options,
+                aggregated,
+              )
+            ) {
+              return from(
+                this._toolCallingManager.executeToolCalls(prompt, aggregated),
+              ).pipe(
+                switchMap((toolExecutionResult) => {
+                  if (toolExecutionResult.returnDirect()) {
+                    return from([
+                      ChatResponse.builder()
+                        .from(aggregated)
+                        .generations(
+                          ToolExecutionResult.buildGenerations(
+                            toolExecutionResult,
+                          ),
+                        )
+                        .build(),
+                    ]);
+                  }
+
+                  return this.internalStream(
+                    new Prompt(
+                      toolExecutionResult.conversationHistory(),
+                      prompt.options,
+                    ),
+                    aggregated,
+                  );
+                }),
+              );
+            }
+
+            return from([aggregated]);
+          }),
+        ),
+      );
+    });
   }
 
   private buildGeneration(
-    choice: any,
-    metadata: Record<string, unknown>,
+    choice: ChatCompletion.Choice,
+    metadata: Record<string, unknown> & {
+      chunkChoice?: ChatCompletionChunkChoice;
+    },
     request: ChatCompletionCreateParams,
   ): Generation {
     const message = choice.message;
-    let toolCalls: Array<{
-      id: string;
-      type: string;
-      name: string;
-      arguments: string;
-    }> = [];
+    let toolCalls: ToolCall[] = [];
 
-    if (
-      metadata.chunkChoice &&
-      (metadata.chunkChoice as any).delta?.tool_calls
-    ) {
-      toolCalls = (metadata.chunkChoice as any).delta.tool_calls
-        .filter((toolCall: any) => toolCall.function != null)
-        .map((toolCall: any) => ({
-          id: toolCall.id ?? "",
-          type: "function",
-          name: toolCall.function?.name ?? "",
-          arguments: toolCall.function?.arguments ?? "",
-        }));
+    if (metadata.chunkChoice?.delta?.tool_calls) {
+      toolCalls = metadata.chunkChoice.delta.tool_calls.flatMap((toolCall) =>
+        toolCall.function == null
+          ? []
+          : [
+              {
+                id: toolCall.id ?? "",
+                type: "function",
+                name: toolCall.function.name ?? "",
+                arguments: toolCall.function.arguments ?? "",
+              },
+            ],
+      );
     } else if (message.tool_calls) {
-      toolCalls = message.tool_calls
-        .filter((toolCall: any) => toolCall.function != null)
-        .map((toolCall: any) => ({
-          id: toolCall.id ?? "",
-          type: "function",
-          name: toolCall.function.name ?? "",
-          arguments: toolCall.function.arguments ?? "",
-        }));
+      toolCalls = message.tool_calls.flatMap((toolCall) =>
+        toolCall.type !== "function"
+          ? []
+          : [
+              {
+                id: toolCall.id,
+                type: "function",
+                name: toolCall.function.name,
+                arguments: toolCall.function.arguments,
+              },
+            ],
+      );
     }
 
     const generationMetadataBuilder =
-      ChatGenerationMetadata.builder().finishReason(choice.finish_reason ?? "");
+      ChatGenerationMetadata.builder().finishReason(choice.finish_reason);
 
     let textContent = message.content ?? "";
+
     const media: Media[] = [];
 
     if (message.audio?.data && request.audio) {
-      const audioFormat = String(
-        (request.audio as { format?: string }).format ?? "mp3",
-      ).toLowerCase();
+      const audioFormat = request.audio.format;
       const audioData = Buffer.from(message.audio.data, "base64");
       media.push(
         new Media({
           mimeType: `audio/${audioFormat}`,
           data: audioData,
-          id: message.audio.id ?? null,
+          id: message.audio.id,
         }),
       );
-      if (!textContent) {
-        textContent = message.audio.transcript ?? "";
+      if (!StringUtils.hasText(textContent)) {
+        textContent = message.audio.transcript;
       }
       generationMetadataBuilder.metadata("audioId", message.audio.id);
       generationMetadataBuilder.metadata(
@@ -417,7 +482,7 @@ export class OpenAiSdkChatModel extends ChatModel {
       content: textContent,
       properties: metadata,
       toolCalls,
-      media: media.length > 0 ? media : undefined,
+      media,
     });
 
     return new Generation({
@@ -432,93 +497,61 @@ export class OpenAiSdkChatModel extends ChatModel {
   ): ChatResponseMetadata {
     assert(result, "OpenAI ChatCompletion must not be null");
     return ChatResponseMetadata.builder()
-      .id(result.id ?? "")
+      .id(result.id)
       .usage(usage)
-      .model(result.model ?? "")
+      .model(result.model)
       .keyValue("created", result.created)
+      .build();
+  }
+
+  private fromResponseMetadata(
+    metadata: ChatResponseMetadata,
+    usage: Usage,
+  ): ChatResponseMetadata {
+    assert(metadata, "OpenAI ChatResponseMetadata must not be null");
+    return ChatResponseMetadata.builder()
+      .id(metadata.id)
+      .usage(usage)
+      .model(metadata.model)
       .build();
   }
 
   private chunkToChatCompletion(chunk: ChatCompletionChunk): ChatCompletion {
     return {
       id: chunk.id,
-      choices: chunk.choices.map((choice: any) => ({
-        finish_reason: choice.finish_reason ?? "stop",
+      choices: chunk.choices.map((choice) => ({
+        finish_reason: choice.finish_reason ?? ("" as "stop"),
         index: choice.index,
         message: {
-          role: choice.delta.role ?? "assistant",
+          role: "assistant",
           content: choice.delta.content ?? null,
           refusal: choice.delta.refusal ?? null,
-          annotations: choice.delta.annotations ?? [],
-          tool_calls: choice.delta.tool_calls ?? undefined,
-          audio: undefined,
-          function_call: choice.delta.function_call ?? undefined,
-        } as any,
-        logprobs: choice.logprobs ?? undefined,
+        },
+        logprobs: choice.logprobs ?? null,
       })),
       created: chunk.created,
       model: chunk.model,
       object: "chat.completion",
-      service_tier: chunk.service_tier ?? undefined,
-      system_fingerprint: chunk.system_fingerprint ?? undefined,
-      usage: chunk.usage ?? undefined,
+      usage: chunk.usage ?? {
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+      },
     };
   }
 
-  private getDefaultUsage(usage: any): DefaultUsage {
+  private getDefaultUsage(
+    usage: NonNullable<ChatCompletion["usage"]>,
+  ): DefaultUsage {
     return new DefaultUsage({
-      promptTokens: usage.prompt_tokens ?? 0,
-      completionTokens: usage.completion_tokens ?? 0,
-      totalTokens: usage.total_tokens ?? 0,
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens,
       nativeUsage: usage,
     });
   }
 
-  private chunkToChatResponse(
-    chunk: ChatCompletionChunk,
-    request: ChatCompletionCreateParams,
-    previousChatResponse: ChatResponse | null,
-  ): ChatResponse {
-    const chatCompletion = this.chunkToChatCompletion(chunk);
-    const choices = chatCompletion.choices ?? [];
-    const generations = choices.map((choice: any) => {
-      const metadata: Record<string, unknown> = {
-        id: chatCompletion.id ?? "",
-        role: choice.message.role ?? "",
-        index: choice.index ?? 0,
-        finishReason: choice.finish_reason ?? "",
-        refusal: choice.message.refusal ?? "",
-        annotations: choice.message.annotations ?? [],
-        chunkChoice: choice,
-      };
-      return this.buildGeneration(choice as any, metadata, request);
-    });
-
-    const usage = chatCompletion.usage ?? null;
-    const currentUsage = usage
-      ? this.getDefaultUsage(usage as any)
-      : new EmptyUsage();
-    const accumulatedUsage = UsageCalculator.getCumulativeUsage(
-      currentUsage,
-      previousChatResponse,
-    );
-
-    return new ChatResponse({
-      generations,
-      chatResponseMetadata: this.fromCompletion(
-        chatCompletion,
-        accumulatedUsage,
-      ),
-    });
-  }
-
-  private aggregateStreamResponses(
-    responses: ChatResponse[],
-  ): ChatResponse | null {
-    if (responses.length === 0) {
-      return null;
-    }
-
+  private aggregateStreamResponses(responses: ChatResponse[]): ChatResponse {
     const builders = new Map<string, ToolCallBuilder>();
     let text = "";
     let props: Record<string, unknown> = {};
@@ -537,7 +570,9 @@ export class OpenAiSdkChatModel extends ChatModel {
       props = { ...props, ...(assistantMessage.metadata ?? {}) };
 
       if (assistantMessage.toolCalls.length > 0) {
-        const chunkChoice = assistantMessage.metadata?.chunkChoice as any;
+        const chunkChoice = assistantMessage.metadata?.chunkChoice as
+          | ChatCompletionChunkChoice
+          | undefined;
 
         if (chunkChoice?.delta?.tool_calls) {
           for (
@@ -547,9 +582,7 @@ export class OpenAiSdkChatModel extends ChatModel {
             i += 1
           ) {
             const toolCall = assistantMessage.toolCalls[i];
-            const deltaCall = chunkChoice.delta.tool_calls[i] as {
-              index: number;
-            };
+            const deltaCall = chunkChoice.delta.tool_calls[i];
             const key = `${chunkChoice.index ?? 0}-${deltaCall.index}`;
             const toolCallBuilder = builders.get(key) ?? new ToolCallBuilder();
             toolCallBuilder.merge(toolCall);
@@ -566,7 +599,7 @@ export class OpenAiSdkChatModel extends ChatModel {
       }
 
       const generation = chatResponse.result;
-      if (generation && generation.metadata && !generation.metadata.isEmpty) {
+      if (generation?.metadata && !generation.metadata.isEmpty) {
         finalGenMetadata = generation.metadata;
       }
       finalMetadata = chatResponse.metadata;
@@ -582,7 +615,7 @@ export class OpenAiSdkChatModel extends ChatModel {
       toolCalls: mergedToolCalls.length > 0 ? mergedToolCalls : undefined,
     });
 
-    const aggregated = new ChatResponse({
+    return new ChatResponse({
       generations: [
         new Generation({
           assistantMessage,
@@ -593,8 +626,6 @@ export class OpenAiSdkChatModel extends ChatModel {
       chatResponseMetadata:
         finalMetadata ?? ChatResponseMetadata.builder().build(),
     });
-
-    return aggregated;
   }
 
   buildRequestPrompt(prompt: Prompt): Prompt {
@@ -606,7 +637,9 @@ export class OpenAiSdkChatModel extends ChatModel {
           "The topK option is not supported by OpenAI chat models. Ignoring.",
         );
       }
-      requestBuilder.combineWith(prompt.options.mutate() as any);
+      requestBuilder.combineWith(
+        prompt.options.mutate() as OpenAiSdkChatOptions.Builder,
+      );
     }
 
     const requestOptions = requestBuilder.build();

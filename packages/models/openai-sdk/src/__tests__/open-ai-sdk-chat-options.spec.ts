@@ -15,8 +15,12 @@
  */
 
 import { ToolCallback, type ToolDefinition } from "@nestjs-ai/model";
+import type {
+  ChatCompletionAudioParam,
+  ChatCompletionStreamOptions,
+} from "openai/resources/chat/completions";
+import type { ResponseFormatJSONSchema } from "openai/resources/shared";
 import { describe, expect, it } from "vitest";
-import { OpenAiSdkChatModel } from "../open-ai-sdk-chat-model";
 import { OpenAiSdkChatOptions } from "../open-ai-sdk-chat-options";
 
 class TestToolCallback extends ToolCallback {
@@ -48,10 +52,21 @@ describe("OpenAiSdkChatOptions", () => {
     const toolContext = { keyA: "valueA" };
     const customHeaders = { header1: "value1" };
     const extraBody = { custom_flag: true };
-    const responseFormat = OpenAiSdkChatModel.ResponseFormat.builder()
-      .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
-      .jsonSchema('{"type":"object"}')
-      .build();
+    const outputAudio: ChatCompletionAudioParam = {
+      voice: "alloy",
+      format: "wav",
+    };
+    const streamOptions: ChatCompletionStreamOptions = {
+      include_usage: true,
+    };
+    const responseFormat: ResponseFormatJSONSchema = {
+      type: "json_schema",
+      json_schema: {
+        name: "json_schema",
+        strict: true,
+        schema: { type: "object" },
+      },
+    };
 
     const options = OpenAiSdkChatOptions.builder()
       .model("test-model")
@@ -63,11 +78,10 @@ describe("OpenAiSdkChatOptions", () => {
       .maxTokens(100)
       .maxCompletionTokens(50)
       .N(2)
+      .outputAudio(outputAudio)
       .presencePenalty(0.8)
       .responseFormat(responseFormat)
-      .streamOptions(
-        OpenAiSdkChatOptions.StreamOptions.builder().includeUsage(true).build(),
-      )
+      .streamOptions(streamOptions)
       .seed(12345)
       .stop(stop)
       .temperature(0.7)
@@ -95,8 +109,9 @@ describe("OpenAiSdkChatOptions", () => {
     expect(options.maxTokens).toBeNull();
     expect(options.maxCompletionTokens).toBe(50);
     expect(options.n).toBe(2);
+    expect(options.outputAudio).toEqual(outputAudio);
     expect(options.presencePenalty).toBe(0.8);
-    expect(options.streamOptions?.includeUsage).toBe(true);
+    expect(options.streamOptions).toEqual(streamOptions);
     expect(options.seed).toBe(12345);
     expect(options.stop).toEqual(stop);
     expect(options.stopSequences).toEqual(stop);
@@ -132,11 +147,7 @@ describe("OpenAiSdkChatOptions", () => {
       .maxCompletionTokens(50)
       .N(2)
       .presencePenalty(0.8)
-      .streamOptions(
-        OpenAiSdkChatOptions.StreamOptions.builder()
-          .includeUsage(false)
-          .build(),
-      )
+      .streamOptions({ include_usage: false })
       .seed(12345)
       .stop(stop)
       .temperature(0.7)
@@ -191,9 +202,7 @@ describe("OpenAiSdkChatOptions", () => {
     options.setMaxCompletionTokens(50);
     options.setN(2);
     options.setPresencePenalty(0.8);
-    options.setStreamOptions(
-      OpenAiSdkChatOptions.StreamOptions.builder().includeUsage(true).build(),
-    );
+    options.setStreamOptions({ include_usage: true });
     options.setSeed(12345);
     options.setStop(stop);
     options.setTemperature(0.7);
@@ -219,7 +228,7 @@ describe("OpenAiSdkChatOptions", () => {
     expect(options.maxCompletionTokens).toBe(50);
     expect(options.n).toBe(2);
     expect(options.presencePenalty).toBe(0.8);
-    expect(options.streamOptions?.includeUsage).toBe(true);
+    expect(options.streamOptions).toEqual({ include_usage: true });
     expect(options.seed).toBe(12345);
     expect(options.stop).toEqual(stop);
     expect(options.stopSequences).toEqual(stop);
@@ -584,11 +593,25 @@ describe("OpenAiSdkChatOptions", () => {
     options.setOutputSchema(schema);
 
     expect(options.responseFormat).not.toBeNull();
-    expect(options.responseFormat?.type).toBe(
-      OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA,
-    );
-    expect(options.responseFormat?.jsonSchema).toBe(schema);
-    expect(options.outputSchema).toBe(schema);
+    expect(options.responseFormat?.type).toBe("json_schema");
+    if (options.responseFormat?.type === "json_schema") {
+      expect(options.responseFormat.json_schema.schema).toEqual({
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+          },
+        },
+      });
+    }
+    expect(JSON.parse(options.outputSchema ?? "{}")).toEqual({
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+        },
+      },
+    });
 
     options.setOutputSchema(null);
     expect(options.responseFormat).toBeNull();

@@ -25,20 +25,64 @@ import {
   type ToolCallingChatOptions,
 } from "@nestjs-ai/model";
 import type { ClientOptions } from "openai";
-
+import type {
+  ChatCompletionAudioParam,
+  ChatCompletionStreamOptions,
+} from "openai/resources/chat/completions";
+import type {
+  ChatCompletionCreateParamsBase,
+  ChatCompletionToolChoiceOption,
+} from "openai/resources/chat/completions/completions";
+import type {
+  ReasoningEffort,
+  ResponseFormatJSONObject,
+  ResponseFormatJSONSchema,
+  ResponseFormatText,
+} from "openai/resources/shared";
 import {
   AbstractOpenAiSdkOptions,
   type AbstractOpenAiSdkOptionsProps,
 } from "./abstract-open-ai-sdk-options";
-import { OpenAiSdkChatModel } from "./open-ai-sdk-chat-model";
+
+type OpenAiSdkResponseFormat =
+  | ResponseFormatText
+  | ResponseFormatJSONObject
+  | ResponseFormatJSONSchema;
+
+function cloneResponseFormat(
+  responseFormat: OpenAiSdkResponseFormat,
+): OpenAiSdkResponseFormat {
+  if (responseFormat.type === "json_schema") {
+    return {
+      type: "json_schema",
+      json_schema: {
+        ...responseFormat.json_schema,
+        schema:
+          responseFormat.json_schema.schema != null
+            ? { ...responseFormat.json_schema.schema }
+            : undefined,
+      },
+    };
+  }
+
+  return { ...responseFormat };
+}
+
+function createJsonSchemaResponseFormat(
+  outputSchema: string,
+): ResponseFormatJSONSchema {
+  return {
+    type: "json_schema",
+    json_schema: {
+      name: "json_schema",
+      strict: true,
+      schema: JSON.parse(outputSchema) as Record<string, unknown>,
+    },
+  };
+}
 
 type StructuredOutputChatOptionsBuilder = ChatOptions.Builder & {
   outputSchema(outputSchema: string | null): ChatOptions.Builder;
-};
-
-type ChatCompletionAudioParam = {
-  voice?: string;
-  format?: string;
 };
 
 export interface OpenAiSdkChatOptionsProps
@@ -50,23 +94,23 @@ export interface OpenAiSdkChatOptionsProps
   maxTokens?: number | null;
   maxCompletionTokens?: number | null;
   n?: number | null;
-  outputModalities?: string[] | null;
-  outputAudio?: OpenAiSdkChatOptions.AudioParameters | null;
+  outputModalities?: ChatCompletionCreateParamsBase["modalities"] | null;
+  outputAudio?: ChatCompletionAudioParam | null;
   presencePenalty?: number | null;
-  responseFormat?: OpenAiSdkChatModel.ResponseFormat | null;
-  streamOptions?: OpenAiSdkChatOptions.StreamOptions | null;
+  responseFormat?: OpenAiSdkResponseFormat | null;
+  streamOptions?: ChatCompletionStreamOptions | null;
   seed?: number | null;
   stop?: string[] | null;
   temperature?: number | null;
   topP?: number | null;
-  toolChoice?: unknown | null;
+  toolChoice?: ChatCompletionToolChoiceOption | null;
   user?: string | null;
   parallelToolCalls?: boolean | null;
   store?: boolean | null;
   metadata?: Record<string, string> | null;
-  reasoningEffort?: string | null;
-  verbosity?: string | null;
-  serviceTier?: string | null;
+  reasoningEffort?: ReasoningEffort | null;
+  verbosity?: ChatCompletionCreateParamsBase["verbosity"] | null;
+  serviceTier?: ChatCompletionCreateParamsBase["service_tier"] | null;
   extraBody?: Record<string, unknown> | null;
   toolCallbacks?: ToolCallback[] | null;
   toolNames?: Set<string> | null;
@@ -91,23 +135,26 @@ export class OpenAiSdkChatOptions
   private _maxTokens: number | null = null;
   private _maxCompletionTokens: number | null = null;
   private _n: number | null = null;
-  private _outputModalities: string[] | null = null;
-  private _outputAudio: OpenAiSdkChatOptions.AudioParameters | null = null;
+  private _outputModalities:
+    | ChatCompletionCreateParamsBase["modalities"]
+    | null = null;
+  private _outputAudio: ChatCompletionAudioParam | null = null;
   private _presencePenalty: number | null = null;
-  private _responseFormat: OpenAiSdkChatModel.ResponseFormat | null = null;
-  private _streamOptions: OpenAiSdkChatOptions.StreamOptions | null = null;
+  private _responseFormat: OpenAiSdkResponseFormat | null = null;
+  private _streamOptions: ChatCompletionStreamOptions | null = null;
   private _seed: number | null = null;
   private _stop: string[] | null = null;
   private _temperature: number | null = null;
   private _topP: number | null = null;
-  private _toolChoice: unknown | null = null;
+  private _toolChoice: ChatCompletionToolChoiceOption | null = null;
   private _user: string | null = null;
   private _parallelToolCalls: boolean | null = null;
   private _store: boolean | null = null;
   private _metadata: Record<string, string> | null = null;
-  private _reasoningEffort: string | null = null;
-  private _verbosity: string | null = null;
-  private _serviceTier: string | null = null;
+  private _reasoningEffort: ReasoningEffort | null = null;
+  private _verbosity: ChatCompletionCreateParamsBase["verbosity"] | null = null;
+  private _serviceTier: ChatCompletionCreateParamsBase["service_tier"] | null =
+    null;
   private _extraBody: Record<string, unknown> | null = null;
   private _toolCallbacks: ToolCallback[] = [];
   private _toolNames: Set<string> = new Set();
@@ -211,23 +258,23 @@ export class OpenAiSdkChatOptions
     this._n = n ?? null;
   }
 
-  get outputModalities(): string[] | null {
+  get outputModalities(): ChatCompletionCreateParamsBase["modalities"] | null {
     return this._outputModalities != null ? [...this._outputModalities] : null;
   }
 
-  setOutputModalities(outputModalities: string[] | null): void {
+  setOutputModalities(
+    outputModalities: ChatCompletionCreateParamsBase["modalities"] | null,
+  ): void {
     this._outputModalities =
       outputModalities != null ? [...outputModalities] : null;
   }
 
-  get outputAudio(): OpenAiSdkChatOptions.AudioParameters | null {
-    return this._outputAudio;
+  get outputAudio(): ChatCompletionAudioParam | null {
+    return this._outputAudio != null ? { ...this._outputAudio } : null;
   }
 
-  setOutputAudio(
-    outputAudio: OpenAiSdkChatOptions.AudioParameters | null,
-  ): void {
-    this._outputAudio = outputAudio;
+  setOutputAudio(outputAudio: ChatCompletionAudioParam | null): void {
+    this._outputAudio = outputAudio != null ? { ...outputAudio } : null;
   }
 
   get presencePenalty(): number | null {
@@ -238,24 +285,23 @@ export class OpenAiSdkChatOptions
     this._presencePenalty = presencePenalty ?? null;
   }
 
-  get responseFormat(): OpenAiSdkChatModel.ResponseFormat | null {
-    return this._responseFormat;
+  get responseFormat(): OpenAiSdkResponseFormat | null {
+    return this._responseFormat != null
+      ? cloneResponseFormat(this._responseFormat)
+      : null;
   }
 
-  setResponseFormat(
-    responseFormat: OpenAiSdkChatModel.ResponseFormat | null,
-  ): void {
-    this._responseFormat = responseFormat;
+  setResponseFormat(responseFormat: OpenAiSdkResponseFormat | null): void {
+    this._responseFormat =
+      responseFormat != null ? cloneResponseFormat(responseFormat) : null;
   }
 
-  get streamOptions(): OpenAiSdkChatOptions.StreamOptions | null {
-    return this._streamOptions;
+  get streamOptions(): ChatCompletionStreamOptions | null {
+    return this._streamOptions != null ? { ...this._streamOptions } : null;
   }
 
-  setStreamOptions(
-    streamOptions: OpenAiSdkChatOptions.StreamOptions | null,
-  ): void {
-    this._streamOptions = streamOptions;
+  setStreamOptions(streamOptions: ChatCompletionStreamOptions | null): void {
+    this._streamOptions = streamOptions != null ? { ...streamOptions } : null;
   }
 
   get seed(): number | null {
@@ -298,11 +344,11 @@ export class OpenAiSdkChatOptions
     this._topP = topP ?? null;
   }
 
-  get toolChoice(): unknown | null {
+  get toolChoice(): ChatCompletionToolChoiceOption | null {
     return this._toolChoice;
   }
 
-  setToolChoice(toolChoice: unknown | null): void {
+  setToolChoice(toolChoice: ChatCompletionToolChoiceOption | null): void {
     this._toolChoice = toolChoice ?? null;
   }
 
@@ -338,27 +384,31 @@ export class OpenAiSdkChatOptions
     this._metadata = metadata != null ? { ...metadata } : null;
   }
 
-  get reasoningEffort(): string | null {
+  get reasoningEffort(): ReasoningEffort | null {
     return this._reasoningEffort;
   }
 
-  setReasoningEffort(reasoningEffort: string | null): void {
+  setReasoningEffort(reasoningEffort: ReasoningEffort | null): void {
     this._reasoningEffort = reasoningEffort ?? null;
   }
 
-  get verbosity(): string | null {
+  get verbosity(): ChatCompletionCreateParamsBase["verbosity"] | null {
     return this._verbosity;
   }
 
-  setVerbosity(verbosity: string | null): void {
+  setVerbosity(
+    verbosity: ChatCompletionCreateParamsBase["verbosity"] | null,
+  ): void {
     this._verbosity = verbosity ?? null;
   }
 
-  get serviceTier(): string | null {
+  get serviceTier(): ChatCompletionCreateParamsBase["service_tier"] | null {
     return this._serviceTier;
   }
 
-  setServiceTier(serviceTier: string | null): void {
+  setServiceTier(
+    serviceTier: ChatCompletionCreateParamsBase["service_tier"] | null,
+  ): void {
     this._serviceTier = serviceTier ?? null;
   }
 
@@ -426,17 +476,17 @@ export class OpenAiSdkChatOptions
   }
 
   get outputSchema(): string | null {
-    return this._responseFormat?.jsonSchema ?? null;
+    if (this._responseFormat?.type !== "json_schema") {
+      return null;
+    }
+    return this._responseFormat.json_schema.schema != null
+      ? JSON.stringify(this._responseFormat.json_schema.schema)
+      : null;
   }
 
   setOutputSchema(outputSchema: string | null): void {
     if (outputSchema != null) {
-      this.setResponseFormat(
-        OpenAiSdkChatModel.ResponseFormat.builder()
-          .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
-          .jsonSchema(outputSchema)
-          .build(),
-      );
+      this.setResponseFormat(createJsonSchemaResponseFormat(outputSchema));
       return;
     }
 
@@ -551,19 +601,24 @@ export namespace OpenAiSdkChatOptions {
     private _topLogprobs: number | null = null;
     private _maxCompletionTokens: number | null = null;
     private _n: number | null = null;
-    private _outputModalities: string[] | null = null;
-    private _outputAudio: OpenAiSdkChatOptions.AudioParameters | null = null;
-    private _responseFormat: OpenAiSdkChatModel.ResponseFormat | null = null;
-    private _streamOptions: OpenAiSdkChatOptions.StreamOptions | null = null;
+    private _outputModalities:
+      | ChatCompletionCreateParamsBase["modalities"]
+      | null = null;
+    private _outputAudio: ChatCompletionAudioParam | null = null;
+    private _responseFormat: OpenAiSdkResponseFormat | null = null;
+    private _streamOptions: ChatCompletionStreamOptions | null = null;
     private _seed: number | null = null;
-    private _toolChoice: unknown | null = null;
+    private _toolChoice: ChatCompletionToolChoiceOption | null = null;
     private _user: string | null = null;
     private _parallelToolCalls: boolean | null = null;
     private _store: boolean | null = null;
     private _metadata: Record<string, string> | null = null;
-    private _reasoningEffort: string | null = null;
-    private _verbosity: string | null = null;
-    private _serviceTier: string | null = null;
+    private _reasoningEffort: ReasoningEffort | null = null;
+    private _verbosity: ChatCompletionCreateParamsBase["verbosity"] | null =
+      null;
+    private _serviceTier:
+      | ChatCompletionCreateParamsBase["service_tier"]
+      | null = null;
     private _extraBody: Record<string, unknown> | null = null;
 
     baseUrl(baseUrl: string | null): this {
@@ -660,16 +715,16 @@ export namespace OpenAiSdkChatOptions {
           this._outputModalities = [...other._outputModalities];
         }
         if (other._outputAudio != null) {
-          this._outputAudio = other._outputAudio;
+          this._outputAudio = { ...other._outputAudio };
         }
         if (other._presencePenalty != null) {
           this._presencePenalty = other._presencePenalty;
         }
         if (other._responseFormat != null) {
-          this._responseFormat = other._responseFormat;
+          this._responseFormat = cloneResponseFormat(other._responseFormat);
         }
         if (other._streamOptions != null) {
-          this._streamOptions = other._streamOptions;
+          this._streamOptions = { ...other._streamOptions };
         }
         if (other._seed != null) {
           this._seed = other._seed;
@@ -791,13 +846,15 @@ export namespace OpenAiSdkChatOptions {
       return this;
     }
 
-    outputModalities(outputModalities: string[] | null): this {
+    outputModalities(
+      outputModalities: ChatCompletionCreateParamsBase["modalities"] | null,
+    ): this {
       this._outputModalities =
         outputModalities != null ? [...outputModalities] : null;
       return this;
     }
 
-    outputAudio(audio: OpenAiSdkChatOptions.AudioParameters | null): this {
+    outputAudio(audio: ChatCompletionAudioParam | null): this {
       this._outputAudio = audio;
       return this;
     }
@@ -807,37 +864,31 @@ export namespace OpenAiSdkChatOptions {
       return this;
     }
 
-    responseFormat(
-      responseFormat: OpenAiSdkChatModel.ResponseFormat | null,
-    ): this {
-      this._responseFormat = responseFormat;
+    responseFormat(responseFormat: OpenAiSdkResponseFormat | null): this {
+      this._responseFormat =
+        responseFormat != null ? cloneResponseFormat(responseFormat) : null;
       return this;
     }
 
     outputSchema(outputSchema: string | null): this {
       if (outputSchema != null) {
-        this._responseFormat = OpenAiSdkChatModel.ResponseFormat.builder()
-          .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
-          .jsonSchema(outputSchema)
-          .build();
+        this._responseFormat = createJsonSchemaResponseFormat(outputSchema);
         return this;
       }
       this._responseFormat = null;
       return this;
     }
 
-    streamOptions(
-      streamOptions: OpenAiSdkChatOptions.StreamOptions | null,
-    ): this {
-      this._streamOptions = streamOptions;
+    streamOptions(streamOptions: ChatCompletionStreamOptions | null): this {
+      this._streamOptions = streamOptions != null ? { ...streamOptions } : null;
       return this;
     }
 
     streamUsage(streamUsage: boolean): this {
-      this._streamOptions = OpenAiSdkChatOptions.StreamOptions.builder()
-        .from(this._streamOptions)
-        .includeUsage(streamUsage)
-        .build();
+      this._streamOptions = {
+        ...(this._streamOptions ?? {}),
+        include_usage: streamUsage,
+      };
       return this;
     }
 
@@ -928,7 +979,7 @@ export namespace OpenAiSdkChatOptions {
       return this;
     }
 
-    toolChoice(toolChoice: unknown | null): this {
+    toolChoice(toolChoice: ChatCompletionToolChoiceOption | null): this {
       this._toolChoice = toolChoice;
       return this;
     }
@@ -953,17 +1004,21 @@ export namespace OpenAiSdkChatOptions {
       return this;
     }
 
-    reasoningEffort(reasoningEffort: string | null): this {
+    reasoningEffort(reasoningEffort: ReasoningEffort | null): this {
       this._reasoningEffort = reasoningEffort;
       return this;
     }
 
-    verbosity(verbosity: string | null): this {
+    verbosity(
+      verbosity: ChatCompletionCreateParamsBase["verbosity"] | null,
+    ): this {
       this._verbosity = verbosity;
       return this;
     }
 
-    serviceTier(serviceTier: string | null): this {
+    serviceTier(
+      serviceTier: ChatCompletionCreateParamsBase["service_tier"] | null,
+    ): this {
       this._serviceTier = serviceTier;
       return this;
     }
@@ -1000,7 +1055,10 @@ export namespace OpenAiSdkChatOptions {
           this._outputModalities != null ? [...this._outputModalities] : null,
         outputAudio: this._outputAudio,
         presencePenalty: this._presencePenalty,
-        responseFormat: this._responseFormat,
+        responseFormat:
+          this._responseFormat != null
+            ? cloneResponseFormat(this._responseFormat)
+            : null,
         streamOptions: this._streamOptions,
         seed: this._seed,
         stop: this._stopSequences != null ? [...this._stopSequences] : null,
@@ -1026,124 +1084,4 @@ export namespace OpenAiSdkChatOptions {
   }
 }
 
-export namespace OpenAiSdkChatOptions {
-  export class AudioParameters {
-    constructor(
-      private readonly _voice: AudioParameters.Voice | null = null,
-      private readonly _format: AudioParameters.AudioResponseFormat | null = null,
-    ) {}
-
-    get voice(): AudioParameters.Voice | null {
-      return this._voice;
-    }
-
-    get format(): AudioParameters.AudioResponseFormat | null {
-      return this._format;
-    }
-
-    toChatCompletionAudioParam(): ChatCompletionAudioParam {
-      const param: ChatCompletionAudioParam = {};
-      if (this._voice != null) {
-        param.voice = this._voice.toLowerCase();
-      }
-      if (this._format != null) {
-        param.format = this._format.toLowerCase();
-      }
-      return param;
-    }
-  }
-
-  export namespace AudioParameters {
-    export enum Voice {
-      ALLOY = "ALLOY",
-      ASH = "ASH",
-      BALLAD = "BALLAD",
-      CORAL = "CORAL",
-      ECHO = "ECHO",
-      FABLE = "FABLE",
-      ONYX = "ONYX",
-      NOVA = "NOVA",
-      SAGE = "SAGE",
-      SHIMMER = "SHIMMER",
-    }
-
-    export enum AudioResponseFormat {
-      MP3 = "MP3",
-      FLAC = "FLAC",
-      OPUS = "OPUS",
-      PCM16 = "PCM16",
-      WAV = "WAV",
-      AAC = "AAC",
-    }
-  }
-
-  export class StreamOptions {
-    constructor(
-      private readonly _includeObfuscation: boolean | null = null,
-      private readonly _includeUsage: boolean | null = null,
-      private readonly _additionalProperties: Record<string, unknown> = {},
-    ) {}
-
-    get includeObfuscation(): boolean | null {
-      return this._includeObfuscation;
-    }
-
-    get includeUsage(): boolean | null {
-      return this._includeUsage;
-    }
-
-    get additionalProperties(): Record<string, unknown> {
-      return { ...this._additionalProperties };
-    }
-
-    static builder(): StreamOptions.Builder {
-      return new StreamOptions.Builder();
-    }
-  }
-
-  export namespace StreamOptions {
-    export class Builder {
-      private _includeObfuscation: boolean | null = null;
-      private _includeUsage: boolean | null = null;
-      private _additionalProperties: Record<string, unknown> = {};
-
-      from(fromOptions: StreamOptions | null): this {
-        if (fromOptions != null) {
-          this._includeObfuscation = fromOptions.includeObfuscation;
-          this._includeUsage = fromOptions.includeUsage;
-          this._additionalProperties = { ...fromOptions.additionalProperties };
-        }
-        return this;
-      }
-
-      includeObfuscation(includeObfuscation: boolean | null): this {
-        this._includeObfuscation = includeObfuscation;
-        return this;
-      }
-
-      includeUsage(includeUsage: boolean | null): this {
-        this._includeUsage = includeUsage;
-        return this;
-      }
-
-      additionalProperties(
-        additionalProperties: Record<string, unknown> | null,
-      ): this {
-        this._additionalProperties =
-          additionalProperties != null ? { ...additionalProperties } : {};
-        return this;
-      }
-
-      additionalProperty(key: string, value: unknown): this {
-        this._additionalProperties[key] = value;
-        return this;
-      }
-
-      build(): StreamOptions {
-        return new StreamOptions(this._includeObfuscation, this._includeUsage, {
-          ...this._additionalProperties,
-        });
-      }
-    }
-  }
-}
+export namespace OpenAiSdkChatOptions {}

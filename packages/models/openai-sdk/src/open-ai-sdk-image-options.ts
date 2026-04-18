@@ -231,20 +231,21 @@ export namespace OpenAiSdkImageOptions {
     private readonly options = new OpenAiSdkImageOptions();
 
     from(fromOptions: OpenAiSdkImageOptions): this {
-      this.options.baseUrl = fromOptions.baseUrl;
-      this.options.apiKey = fromOptions.apiKey;
-      this.options.azureADTokenProvider = fromOptions.azureADTokenProvider;
-      this.options.model = fromOptions.model;
-      this.options.deploymentName = fromOptions.deploymentName;
-      this.options.microsoftFoundryServiceVersion =
-        fromOptions.microsoftFoundryServiceVersion;
-      this.options.organizationId = fromOptions.organizationId;
-      this.options.microsoftFoundry = fromOptions.microsoftFoundry;
-      this.options.gitHubModels = fromOptions.gitHubModels;
-      this.options.timeout = fromOptions.timeout;
-      this.options.maxRetries = fromOptions.maxRetries;
-      this.options.fetchOptions = fromOptions.fetchOptions;
-      this.options.customHeaders = fromOptions.customHeaders;
+      this.options.setBaseUrl(fromOptions.baseUrl);
+      this.options.setApiKey(fromOptions.apiKey);
+      this.options.setAzureADTokenProvider(fromOptions.azureADTokenProvider);
+      this.options.setModel(fromOptions.model);
+      this.options.setDeploymentName(fromOptions.deploymentName);
+      this.options.setMicrosoftFoundryServiceVersion(
+        fromOptions.microsoftFoundryServiceVersion,
+      );
+      this.options.setOrganizationId(fromOptions.organizationId);
+      this.options.setMicrosoftFoundry(fromOptions.microsoftFoundry);
+      this.options.setGitHubModels(fromOptions.gitHubModels);
+      this.options.setTimeout(fromOptions.timeout);
+      this.options.setMaxRetries(fromOptions.maxRetries);
+      this.options.setFetchOptions(fromOptions.fetchOptions);
+      this.options.setCustomHeaders(fromOptions.customHeaders);
       this.options.setN(fromOptions.n);
       this.options.setWidth(fromOptions.width);
       this.options.setHeight(fromOptions.height);
@@ -259,39 +260,40 @@ export namespace OpenAiSdkImageOptions {
     merge(from: ImageOptions | null | undefined): this {
       if (from instanceof OpenAiSdkImageOptions) {
         if (from.baseUrl != null) {
-          this.options.baseUrl = from.baseUrl;
+          this.options.setBaseUrl(from.baseUrl);
         }
         if (from.apiKey != null) {
-          this.options.apiKey = from.apiKey;
+          this.options.setApiKey(from.apiKey);
         }
         if (from.azureADTokenProvider != null) {
-          this.options.azureADTokenProvider = from.azureADTokenProvider;
+          this.options.setAzureADTokenProvider(from.azureADTokenProvider);
         }
         if (from.model != null) {
-          this.options.model = from.model;
+          this.options.setModel(from.model);
         }
         if (from.deploymentName != null) {
-          this.options.deploymentName = from.deploymentName;
+          this.options.setDeploymentName(from.deploymentName);
         }
         if (from.microsoftFoundryServiceVersion != null) {
-          this.options.microsoftFoundryServiceVersion =
-            from.microsoftFoundryServiceVersion;
+          this.options.setMicrosoftFoundryServiceVersion(
+            from.microsoftFoundryServiceVersion,
+          );
         }
         if (from.organizationId != null) {
-          this.options.organizationId = from.organizationId;
+          this.options.setOrganizationId(from.organizationId);
         }
-        this.options.microsoftFoundry = from.microsoftFoundry;
-        this.options.gitHubModels = from.gitHubModels;
+        this.options.setMicrosoftFoundry(from.microsoftFoundry);
+        this.options.setGitHubModels(from.gitHubModels);
         if (from.timeout != null) {
-          this.options.timeout = from.timeout;
+          this.options.setTimeout(from.timeout);
         }
         if (from.maxRetries != null) {
-          this.options.maxRetries = from.maxRetries;
+          this.options.setMaxRetries(from.maxRetries);
         }
         if (from.fetchOptions != null) {
-          this.options.fetchOptions = from.fetchOptions;
+          this.options.setFetchOptions(from.fetchOptions);
         }
-        this.options.customHeaders = from.customHeaders;
+        this.options.setCustomHeaders(from.customHeaders);
         if (from.n != null) {
           this.options.setN(from.n);
         }
@@ -326,71 +328,71 @@ export namespace OpenAiSdkImageOptions {
     }
 
     model(model: string): this {
-      this.options.model = model;
+      this.options.setModel(model);
       return this;
     }
 
     deploymentName(deploymentName: string): this {
-      this.options.deploymentName = deploymentName;
+      this.options.setDeploymentName(deploymentName);
       return this;
     }
 
     baseUrl(baseUrl: string): this {
-      this.options.baseUrl = baseUrl;
+      this.options.setBaseUrl(baseUrl);
       return this;
     }
 
     apiKey(apiKey: string): this {
-      this.options.apiKey = apiKey;
+      this.options.setApiKey(apiKey);
       return this;
     }
 
     azureADTokenProvider(
       azureADTokenProvider: (() => Promise<string>) | null,
     ): this {
-      this.options.azureADTokenProvider = azureADTokenProvider;
+      this.options.setAzureADTokenProvider(azureADTokenProvider);
       return this;
     }
 
     azureOpenAIServiceVersion(azureOpenAIServiceVersion: unknown): this {
-      this.options.microsoftFoundryServiceVersion = azureOpenAIServiceVersion;
+      this.options.setMicrosoftFoundryServiceVersion(azureOpenAIServiceVersion);
       return this;
     }
 
     organizationId(organizationId: string): this {
-      this.options.organizationId = organizationId;
+      this.options.setOrganizationId(organizationId);
       return this;
     }
 
     azure(azure: boolean): this {
-      this.options.microsoftFoundry = azure;
+      this.options.setMicrosoftFoundry(azure);
       return this;
     }
 
     gitHubModels(gitHubModels: boolean): this {
-      this.options.gitHubModels = gitHubModels;
+      this.options.setGitHubModels(gitHubModels);
       return this;
     }
 
     timeout(timeout: OpenAiSdkImageOptionsProps["timeout"]): this {
-      this.options.timeout = timeout ?? null;
+      this.options.setTimeout(timeout ?? null);
       return this;
     }
 
     maxRetries(maxRetries: number | null): this {
-      this.options.maxRetries = maxRetries;
+      this.options.setMaxRetries(maxRetries);
       return this;
     }
 
     fetchOptions(
       fetchOptions: OpenAiSdkImageOptionsProps["fetchOptions"],
     ): this {
-      this.options.fetchOptions = fetchOptions;
+      this.options.setFetchOptions(fetchOptions);
       return this;
     }
 
     customHeaders(customHeaders: Record<string, string>): this {
-      this.options.customHeaders = { ...customHeaders };
+      this.options.setCustomHeaders({ ...customHeaders });
       return this;
     }
 

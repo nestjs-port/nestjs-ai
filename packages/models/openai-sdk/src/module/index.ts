@@ -16,12 +16,7 @@
 
 export * from "./open-ai-sdk-chat-model.module";
 export type { OpenAiSdkChatProperties } from "./open-ai-sdk-chat-properties";
-export {
-  OPEN_AI_SDK_CHAT_DEFAULT_MODEL,
-  OPEN_AI_SDK_CHAT_PROPERTIES_PREFIX,
-} from "./open-ai-sdk-chat-properties";
-export type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
-export { OPEN_AI_SDK_CONNECTION_PROPERTIES_PREFIX } from "./open-ai-sdk-connection-properties";
+export { OPEN_AI_SDK_CHAT_DEFAULT_MODEL } from "./open-ai-sdk-chat-properties";
 export * from "./open-ai-sdk-embedding-model.module";
 export type { OpenAiSdkEmbeddingProperties } from "./open-ai-sdk-embedding-properties";
 export { OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL } from "./open-ai-sdk-embedding-properties";

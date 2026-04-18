@@ -882,6 +882,9 @@ export class OpenAiChatModel extends ChatModel {
     if (mediaContentData instanceof Uint8Array) {
       return `data:${mimeType};base64,${Buffer.from(mediaContentData).toString("base64")}`;
     }
+    if (mediaContentData instanceof URL) {
+      return mediaContentData.toString();
+    }
     if (typeof mediaContentData === "string") {
       // Assume the text is a URL or a base64 encoded image prefixed by the user.
       return mediaContentData;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Prompt } from "@nestjs-ai/model";
+import { Media, MediaFormat } from "@nestjs-ai/commons";
+import { Prompt, UserMessage } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
 import { describe, expect, it } from "vitest";
 import { OpenAiSdkChatModel } from "../open-ai-sdk-chat-model";
@@ -28,7 +29,7 @@ function createChatModel(options: OpenAiSdkChatOptions): OpenAiSdkChatModel {
 }
 
 describe("OpenAiSdkChatModel", () => {
-  it("toolChoiceAuto", () => {
+  it("tool choice auto", () => {
     const options = OpenAiSdkChatOptions.builder()
       .model("test-model")
       .toolChoice("auto")
@@ -39,7 +40,7 @@ describe("OpenAiSdkChatModel", () => {
     expect(request.tool_choice).toBe("auto");
   });
 
-  it("toolChoiceNone", () => {
+  it("tool choice none", () => {
     const options = OpenAiSdkChatOptions.builder()
       .model("test-model")
       .toolChoice("none")
@@ -50,7 +51,7 @@ describe("OpenAiSdkChatModel", () => {
     expect(request.tool_choice).toBe("none");
   });
 
-  it("toolChoiceRequired", () => {
+  it("tool choice required", () => {
     const options = OpenAiSdkChatOptions.builder()
       .model("test-model")
       .toolChoice("required")
@@ -61,7 +62,7 @@ describe("OpenAiSdkChatModel", () => {
     expect(request.tool_choice).toBe("required");
   });
 
-  it("toolChoiceFunction", () => {
+  it("tool choice function", () => {
     const toolChoice = {
       type: "function",
       function: {
@@ -88,7 +89,7 @@ describe("OpenAiSdkChatModel", () => {
     ).toBe("my_function");
   });
 
-  it("toolChoiceInvalidJson", () => {
+  it("tool choice invalid json", () => {
     const options = OpenAiSdkChatOptions.builder()
       .model("test-model")
       .toolChoice("invalid-json" as never)
@@ -97,5 +98,39 @@ describe("OpenAiSdkChatModel", () => {
 
     const request = chatModel.createRequest(new Prompt("test", options), false);
     expect(request.tool_choice).toBe("invalid-json");
+  });
+
+  it("image media url object is converted to string", () => {
+    const options = OpenAiSdkChatOptions.builder().model("test-model").build();
+    const chatModel = createChatModel(options);
+    const userMessage = new UserMessage({
+      content: "Explain what do you see on this picture?",
+      media: [
+        new Media({
+          mimeType: MediaFormat.IMAGE_PNG,
+          data: new URL(
+            "https://docs.spring.io/spring-ai/reference/_images/multimodal.test.png",
+          ),
+        }),
+      ],
+    });
+
+    const request = chatModel.createRequest(
+      new Prompt([userMessage], options),
+      false,
+    );
+    const content = request.messages[0]?.content;
+
+    expect(Array.isArray(content)).toBe(true);
+    const contentParts = content as Array<{
+      type: string;
+      image_url?: { url?: string };
+    }>;
+    const imagePart = contentParts.find((part) => part.type === "image_url") as
+      | { image_url?: { url?: string } }
+      | undefined;
+    expect(imagePart?.image_url?.url).toBe(
+      "https://docs.spring.io/spring-ai/reference/_images/multimodal.test.png",
+    );
   });
 });

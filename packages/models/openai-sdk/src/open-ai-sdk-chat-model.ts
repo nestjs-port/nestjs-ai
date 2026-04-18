@@ -790,6 +790,13 @@ export class OpenAiSdkChatModel extends ChatModel {
                   url: `data:${mimeType};base64,${media.data.toString("base64")}`,
                 },
               });
+            } else if (media.data instanceof URL) {
+              parts.push({
+                type: "image_url",
+                image_url: {
+                  url: media.data.toString(),
+                },
+              });
             } else if (typeof media.data === "string") {
               // The org.springframework.ai.content.Media object
               // should store the URL as a java.net.URI but it
@@ -921,6 +928,9 @@ export class OpenAiSdkChatModel extends ChatModel {
       // Assume the bytes are an image. So, convert the bytes to a base64 encoded
       // following the prefix pattern.
       return `data:${mimeType};base64,${Buffer.from(mediaContentData).toString("base64")}`;
+    }
+    if (mediaContentData instanceof URL) {
+      return mediaContentData.toString();
     }
     if (typeof mediaContentData === "string") {
       // Assume the text is a URLs or a base64 encoded image prefixed by the user.

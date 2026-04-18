@@ -31,13 +31,15 @@
     }
   },
   "devDependencies": {
-    "@azure/identity": "4.13.1",
+    "@azure/identity": "^4.13.1",
+    "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/testing": "workspace:*",
     "@nestjs/common": "^11.1.11",
-    "openai": "6.34.0",
-    "rxjs": "^7.0.0"
+    "openai": "^6.34.0",
+    "rxjs": "^7.0.0",
+    "zod": "^4.3.6"
   },
   "files": [
     "dist",

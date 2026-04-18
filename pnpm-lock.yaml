@@ -456,17 +456,17 @@ importers:
   packages/models/openai-sdk:
     devDependencies:
       '@azure/identity':
-        specifier: 4.13.1
+        specifier: ^4.13.1
         version: 4.13.1
+      '@nestjs-ai/client-chat':
+        specifier: workspace:*
+        version: link:../../client-chat
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../commons
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/retry':
-        specifier: workspace:*
-        version: link:../../retry
       '@nestjs-ai/testing':
         specifier: workspace:*
         version: link:../../testing
@@ -474,11 +474,14 @@ importers:
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       openai:
-        specifier: 6.34.0
+        specifier: ^6.34.0
         version: 6.34.0(ws@8.19.0)(zod@4.3.6)
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
 
   packages/models/transformers:
     dependencies:

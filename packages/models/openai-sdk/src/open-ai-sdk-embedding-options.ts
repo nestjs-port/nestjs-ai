@@ -66,14 +66,6 @@ export class OpenAiSdkEmbeddingOptions extends AbstractOpenAiSdkOptions {
     this._dimensions = dimensions ?? null;
   }
 
-  toString(): string {
-    return (
-      "OpenAiSdkEmbeddingOptions{" +
-      `user='${this.user}', model='${this.model}', deploymentName='${this.deploymentName}', dimensions=${this.dimensions}` +
-      "}"
-    );
-  }
-
   toOpenAiCreateParams(instructions: string[]): OpenAiSdkEmbeddingCreateParams {
     const params: OpenAiSdkEmbeddingCreateParams = {
       input: instructions,

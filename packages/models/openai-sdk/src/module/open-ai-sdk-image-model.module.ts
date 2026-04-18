@@ -27,7 +27,10 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
-import { ImageModelObservationConvention } from "@nestjs-ai/model";
+import {
+  ImageModelObservationConvention,
+  ModelObservationModule,
+} from "@nestjs-ai/model";
 import { OpenAiSdkImageModel } from "../open-ai-sdk-image-model";
 import { OpenAiSdkImageOptions } from "../open-ai-sdk-image-options";
 import { OpenAiSdkSetup } from "../setup";
@@ -69,7 +72,7 @@ export class OpenAiSdkImageModelModule {
 
     return {
       module: OpenAiSdkImageModelModule,
-      imports: options.imports ?? [],
+      imports: [ModelObservationModule, ...(options.imports ?? [])],
       providers: [
         {
           provide: OPEN_AI_SDK_IMAGE_PROPERTIES_TOKEN,

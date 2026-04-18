@@ -3,31 +3,6 @@
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "bundler",
-    "paths": {
-      "@nestjs-ai/client-chat": ["./packages/client-chat/src"],
-      "@nestjs-ai/commons": ["./packages/commons/src"],
-      "@nestjs-ai/jsdbc": ["./packages/jsdbc/src"],
-      "@nestjs-ai/model": ["./packages/model/src"],
-      "@nestjs-ai/model-openai": ["./packages/models/openai/src"],
-      "@nestjs-ai/model-openai-sdk": ["./packages/models/openai-sdk/src"],
-      "@nestjs-ai/model-google-genai": ["./packages/models/google-genai/src"],
-      "@nestjs-ai/model-transformers": ["./packages/models/transformers/src"],
-      "@nestjs-ai/model-chat-memory-repository-redis": [
-        "./packages/memory/repository/model-chat-memory-repository-redis/src"
-      ],
-      "@nestjs-ai/model-chat-memory-repository-jsdbc": [
-        "./packages/memory/repository/model-chat-memory-repository-jsdbc/src"
-      ],
-      "@nestjs-ai/observation": ["./packages/observation/src"],
-      "@nestjs-ai/platform": ["./packages/platform/src"],
-      "@nestjs-ai/retry": ["./packages/retry/src"],
-      "@nestjs-ai/testing": ["./packages/testing/src"],
-      "@nestjs-ai/template-st": ["./packages/template-st/src"],
-      "@nestjs-ai/vector-store": ["./packages/vector-store/src"],
-      "@nestjs-ai/vector-store-redis": [
-        "./packages/vector-stores/redis-store/src"
-      ]
-    },
     "types": ["node"],
     "declaration": true,
     "declarationMap": true,

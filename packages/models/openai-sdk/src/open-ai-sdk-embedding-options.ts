@@ -98,20 +98,21 @@ export namespace OpenAiSdkEmbeddingOptions {
       value: OpenAiSdkEmbeddingOptions | OpenAiSdkEmbeddingCreateParams,
     ): this {
       if (value instanceof OpenAiSdkEmbeddingOptions) {
-        this.options.baseUrl = value.baseUrl;
-        this.options.apiKey = value.apiKey;
-        this.options.azureADTokenProvider = value.azureADTokenProvider;
-        this.options.model = value.model;
-        this.options.deploymentName = value.deploymentName;
-        this.options.microsoftFoundryServiceVersion =
-          value.microsoftFoundryServiceVersion;
-        this.options.organizationId = value.organizationId;
-        this.options.microsoftFoundry = value.microsoftFoundry;
-        this.options.gitHubModels = value.gitHubModels;
-        this.options.timeout = value.timeout;
-        this.options.maxRetries = value.maxRetries;
-        this.options.fetchOptions = value.fetchOptions;
-        this.options.customHeaders = { ...value.customHeaders };
+        this.options.setBaseUrl(value.baseUrl);
+        this.options.setApiKey(value.apiKey);
+        this.options.setAzureADTokenProvider(value.azureADTokenProvider);
+        this.options.setModel(value.model);
+        this.options.setDeploymentName(value.deploymentName);
+        this.options.setMicrosoftFoundryServiceVersion(
+          value.microsoftFoundryServiceVersion,
+        );
+        this.options.setOrganizationId(value.organizationId);
+        this.options.setMicrosoftFoundry(value.microsoftFoundry);
+        this.options.setGitHubModels(value.gitHubModels);
+        this.options.setTimeout(value.timeout);
+        this.options.setMaxRetries(value.maxRetries);
+        this.options.setFetchOptions(value.fetchOptions);
+        this.options.setCustomHeaders({ ...value.customHeaders });
         this.options.user = value.user;
         this.options.dimensions = value.dimensions;
         return this;
@@ -129,40 +130,41 @@ export namespace OpenAiSdkEmbeddingOptions {
     merge(from: unknown): this {
       if (from instanceof OpenAiSdkEmbeddingOptions) {
         if (from.baseUrl != null) {
-          this.options.baseUrl = from.baseUrl;
+          this.options.setBaseUrl(from.baseUrl);
         }
         if (from.apiKey != null) {
-          this.options.apiKey = from.apiKey;
+          this.options.setApiKey(from.apiKey);
         }
         if (from.azureADTokenProvider != null) {
-          this.options.azureADTokenProvider = from.azureADTokenProvider;
+          this.options.setAzureADTokenProvider(from.azureADTokenProvider);
         }
         if (from.model != null) {
-          this.options.model = from.model;
+          this.options.setModel(from.model);
         }
         if (from.deploymentName != null) {
-          this.options.deploymentName = from.deploymentName;
+          this.options.setDeploymentName(from.deploymentName);
         }
         if (from.microsoftFoundryServiceVersion != null) {
-          this.options.microsoftFoundryServiceVersion =
-            from.microsoftFoundryServiceVersion;
+          this.options.setMicrosoftFoundryServiceVersion(
+            from.microsoftFoundryServiceVersion,
+          );
         }
         if (from.organizationId != null) {
-          this.options.organizationId = from.organizationId;
+          this.options.setOrganizationId(from.organizationId);
         }
-        this.options.microsoftFoundry = from.microsoftFoundry;
-        this.options.gitHubModels = from.gitHubModels;
+        this.options.setMicrosoftFoundry(from.microsoftFoundry);
+        this.options.setGitHubModels(from.gitHubModels);
         if (from.timeout != null) {
-          this.options.timeout = from.timeout;
+          this.options.setTimeout(from.timeout);
         }
         if (from.maxRetries != null) {
-          this.options.maxRetries = from.maxRetries;
+          this.options.setMaxRetries(from.maxRetries);
         }
         if (from.fetchOptions != null) {
-          this.options.fetchOptions = from.fetchOptions;
+          this.options.setFetchOptions(from.fetchOptions);
         }
         if (from.customHeaders != null) {
-          this.options.customHeaders = { ...from.customHeaders };
+          this.options.setCustomHeaders({ ...from.customHeaders });
         }
         if (from.user != null) {
           this.options.user = from.user;
@@ -180,69 +182,69 @@ export namespace OpenAiSdkEmbeddingOptions {
     }
 
     deploymentName(deploymentName: string): this {
-      this.options.deploymentName = deploymentName;
+      this.options.setDeploymentName(deploymentName);
       return this;
     }
 
     model(model: string): this {
-      this.options.model = model;
+      this.options.setModel(model);
       return this;
     }
 
     baseUrl(baseUrl: string): this {
-      this.options.baseUrl = baseUrl;
+      this.options.setBaseUrl(baseUrl);
       return this;
     }
 
     apiKey(apiKey: string): this {
-      this.options.apiKey = apiKey;
+      this.options.setApiKey(apiKey);
       return this;
     }
 
     azureADTokenProvider(
       azureADTokenProvider: (() => Promise<string>) | null,
     ): this {
-      this.options.azureADTokenProvider = azureADTokenProvider;
+      this.options.setAzureADTokenProvider(azureADTokenProvider);
       return this;
     }
 
     azureOpenAIServiceVersion(azureOpenAIServiceVersion: unknown): this {
-      this.options.microsoftFoundryServiceVersion = azureOpenAIServiceVersion;
+      this.options.setMicrosoftFoundryServiceVersion(azureOpenAIServiceVersion);
       return this;
     }
 
     organizationId(organizationId: string): this {
-      this.options.organizationId = organizationId;
+      this.options.setOrganizationId(organizationId);
       return this;
     }
 
     azure(azure: boolean): this {
-      this.options.microsoftFoundry = azure;
+      this.options.setMicrosoftFoundry(azure);
       return this;
     }
 
     gitHubModels(gitHubModels: boolean): this {
-      this.options.gitHubModels = gitHubModels;
+      this.options.setGitHubModels(gitHubModels);
       return this;
     }
 
     timeout(timeout: Milliseconds | null): this {
-      this.options.timeout = timeout;
+      this.options.setTimeout(timeout);
       return this;
     }
 
     maxRetries(maxRetries: number): this {
-      this.options.maxRetries = maxRetries;
+      this.options.setMaxRetries(maxRetries);
       return this;
     }
 
     fetchOptions(fetchOptions: ClientOptions["fetchOptions"] | null): this {
-      this.options.fetchOptions = fetchOptions;
+      this.options.setFetchOptions(fetchOptions);
       return this;
     }
 
     customHeaders(customHeaders: Record<string, string>): this {
-      this.options.customHeaders = { ...customHeaders };
+      this.options.setCustomHeaders({ ...customHeaders });
       return this;
     }
 

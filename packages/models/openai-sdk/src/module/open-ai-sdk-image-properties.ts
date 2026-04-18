@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { OpenAiSdkImageOptions } from "../open-ai-sdk-image-options";
-
-import type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
+import type { AbstractOpenAiSdkOptionsProps } from "../abstract-open-ai-sdk-options";
+import type { OpenAiSdkImageOptionsProps } from "../open-ai-sdk-image-options";
 
 export const OPEN_AI_SDK_IMAGE_PROPERTIES_PREFIX = "spring.ai.openai-sdk.image";
 export const OPEN_AI_SDK_IMAGE_DEFAULT_MODEL = "dall-e-3";
 
 export interface OpenAiSdkImageProperties
-  extends OpenAiSdkConnectionProperties {
-  options?: Partial<OpenAiSdkImageOptions>;
+  extends AbstractOpenAiSdkOptionsProps {
+  options?: Partial<OpenAiSdkImageOptionsProps>;
 }

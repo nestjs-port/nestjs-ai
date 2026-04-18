@@ -27,6 +27,7 @@ export {
   OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL,
   OPEN_AI_SDK_EMBEDDING_PROPERTIES_PREFIX,
 } from "./open-ai-sdk-embedding-properties";
+export * from "./open-ai-sdk-image-model.module";
 export type { OpenAiSdkImageProperties } from "./open-ai-sdk-image-properties";
 export {
   OPEN_AI_SDK_IMAGE_DEFAULT_MODEL,

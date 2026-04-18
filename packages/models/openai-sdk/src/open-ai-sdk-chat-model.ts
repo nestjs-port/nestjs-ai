@@ -21,3 +21,57 @@
  * package structure or workspace wiring.
  */
 export class OpenAiSdkChatModel {}
+
+export namespace OpenAiSdkChatModel {
+  export class ResponseFormat {
+    private _type: ResponseFormat.Type = ResponseFormat.Type.TEXT;
+    private _jsonSchema: string | null = null;
+
+    get type(): ResponseFormat.Type {
+      return this._type;
+    }
+
+    set type(type: ResponseFormat.Type) {
+      this._type = type;
+    }
+
+    get jsonSchema(): string | null {
+      return this._jsonSchema;
+    }
+
+    set jsonSchema(jsonSchema: string | null) {
+      this._jsonSchema = jsonSchema;
+    }
+
+    static builder(): ResponseFormat.Builder {
+      return new ResponseFormat.Builder();
+    }
+  }
+
+  export namespace ResponseFormat {
+    export enum Type {
+      TEXT = "TEXT",
+      JSON_OBJECT = "JSON_OBJECT",
+      JSON_SCHEMA = "JSON_SCHEMA",
+    }
+
+    export class Builder {
+      private readonly responseFormat = new ResponseFormat();
+
+      type(type: Type): this {
+        this.responseFormat.type = type;
+        return this;
+      }
+
+      jsonSchema(jsonSchema: string): this {
+        this.responseFormat.type = Type.JSON_SCHEMA;
+        this.responseFormat.jsonSchema = jsonSchema;
+        return this;
+      }
+
+      build(): ResponseFormat {
+        return this.responseFormat;
+      }
+    }
+  }
+}

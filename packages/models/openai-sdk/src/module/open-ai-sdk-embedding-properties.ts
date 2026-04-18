@@ -15,16 +15,13 @@
  */
 
 import type { MetadataMode } from "@nestjs-ai/commons";
-import type { OpenAiSdkEmbeddingOptions } from "../open-ai-sdk-embedding-options";
+import type { AbstractOpenAiSdkOptionsProps } from "../abstract-open-ai-sdk-options";
+import type { OpenAiSdkEmbeddingOptionsProps } from "../open-ai-sdk-embedding-options";
 
-import type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
-
-export const OPEN_AI_SDK_EMBEDDING_PROPERTIES_PREFIX =
-  "spring.ai.openai-sdk.embedding";
 export const OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL = "text-embedding-ada-002";
 
 export interface OpenAiSdkEmbeddingProperties
-  extends OpenAiSdkConnectionProperties {
-  options?: Partial<OpenAiSdkEmbeddingOptions>;
+  extends AbstractOpenAiSdkOptionsProps {
+  options?: Partial<OpenAiSdkEmbeddingOptionsProps>;
   metadataMode?: MetadataMode;
 }

@@ -39,7 +39,7 @@ export abstract class EmbeddingModel
    * Extracts the text content from a {@link Document} to be used for embedding.
    * Implementations that support metadata-aware embedding should override this method.
    */
-  protected getEmbeddingContent(document: Document): string {
+  getEmbeddingContent(document: Document): string {
     assert(document != null, "Document must not be null");
     return document.text ?? "";
   }

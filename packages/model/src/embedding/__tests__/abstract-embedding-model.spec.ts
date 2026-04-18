@@ -80,7 +80,7 @@ class DummyEmbeddingModel extends AbstractEmbeddingModel {
     super();
   }
 
-  protected override getEmbeddingContent(document: Document): string {
+  override getEmbeddingContent(document: Document): string {
     if (this.metadataMode != null) {
       return document.getFormattedContent(this.metadataMode);
     }

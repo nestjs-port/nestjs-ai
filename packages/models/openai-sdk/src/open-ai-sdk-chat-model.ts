@@ -19,7 +19,6 @@ import {
   AiProvider,
   LoggerFactory,
   Media,
-  MediaFormat,
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -39,8 +38,10 @@ import {
   DefaultUsage,
   EmptyUsage,
   Generation,
+  type Message,
   MessageType,
   Prompt,
+  ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolDefinition,
   type ToolExecutionEligibilityPredicate,
@@ -48,31 +49,35 @@ import {
   type ToolResponseMessage,
   type Usage,
   UsageCalculator,
-  type UserMessage,
+  UserMessage,
 } from "@nestjs-ai/model";
-import type OpenAI from "openai";
-import type { AzureOpenAI } from "openai";
+import type { AzureOpenAI, OpenAI } from "openai";
 import type {
   ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
+  ChatCompletionContentPart,
   ChatCompletionCreateParams,
   ChatCompletionCreateParamsBase,
+  ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
   ChatCompletionTool,
 } from "openai/resources/chat/completions/completions";
+import type { FunctionParameters } from "openai/resources/shared";
 import { Observable } from "rxjs";
 import { OpenAiSdkChatOptions } from "./open-ai-sdk-chat-options";
 import { OpenAiSdkSetup } from "./setup";
 
+type OpenAiSdkClient = OpenAI | AzureOpenAI;
+
 export interface OpenAiSdkChatModelProps {
-  client?: OpenAI | AzureOpenAI | null;
+  client?: OpenAiSdkClient | null;
   options?: OpenAiSdkChatOptions | null;
   toolCallingManager?: ToolCallingManager | null;
   observationRegistry?: ObservationRegistry | null;
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate | null;
 }
-
-type OpenAiSdkClient = OpenAI | AzureOpenAI;
 
 export class OpenAiSdkChatModel extends ChatModel {
   private static readonly DEFAULT_MODEL_NAME =
@@ -129,54 +134,13 @@ export class OpenAiSdkChatModel extends ChatModel {
       new DefaultToolExecutionEligibilityPredicate();
   }
 
-  static builder(): OpenAiSdkChatModel.Builder {
-    return new OpenAiSdkChatModel.Builder();
-  }
-
-  get defaultOptions(): ChatOptions {
-    return this._options.copy();
-  }
-
-  getOptions(): OpenAiSdkChatOptions {
+  get options(): OpenAiSdkChatOptions {
     return this._options;
   }
 
-  mutate(): OpenAiSdkChatModel.Builder {
-    return new OpenAiSdkChatModel.Builder({
-      client: this._client,
-      options: this._options,
-      toolCallingManager: this._toolCallingManager,
-      observationRegistry: this._observationRegistry,
-      toolExecutionEligibilityPredicate:
-        this._toolExecutionEligibilityPredicate,
-    });
-  }
-
-  setObservationConvention(
-    observationConvention: ChatModelObservationConvention,
-  ): void {
-    assert(observationConvention, "observationConvention cannot be null");
-    this._observationConvention = observationConvention;
-  }
-
-  protected override async chatPrompt(prompt: Prompt): Promise<ChatResponse> {
+  protected override async callPrompt(prompt: Prompt): Promise<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
     return this.internalCall(requestPrompt, null);
-  }
-
-  protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
-    const requestPrompt = this.buildRequestPrompt(prompt);
-    return this.internalStream(requestPrompt, null);
-  }
-
-  public safeAssistantMessage(
-    response: ChatResponse | null,
-  ): AssistantMessage | null {
-    if (!response) {
-      return null;
-    }
-    const generation = response.result;
-    return generation ? generation.output : null;
   }
 
   private async internalCall(
@@ -188,6 +152,7 @@ export class OpenAiSdkChatModel extends ChatModel {
       prompt,
       AiProvider.OPENAI_SDK.value,
     );
+
     const observation = new ChatModelObservationDocumentation().observation(
       this._observationConvention,
       OpenAiSdkChatModel.DEFAULT_OBSERVATION_CONVENTION,
@@ -196,9 +161,9 @@ export class OpenAiSdkChatModel extends ChatModel {
     );
 
     return observation.observe(async () => {
-      const chatCompletion = (await this._client.chat.completions.create(
-        request as ChatCompletionCreateParams,
-      )) as unknown as ChatCompletion;
+      const chatCompletion = await this._client.chat.completions.create(
+        request as ChatCompletionCreateParamsNonStreaming,
+      );
 
       const choices = chatCompletion.choices ?? [];
       if (choices.length === 0) {
@@ -206,7 +171,7 @@ export class OpenAiSdkChatModel extends ChatModel {
         return new ChatResponse({ generations: [] });
       }
 
-      const generations = choices.map((choice: any) => {
+      const generations = choices.map((choice) => {
         const metadata: Record<string, unknown> = {
           id: chatCompletion.id ?? "",
           role: choice.message.role ?? "",
@@ -215,7 +180,7 @@ export class OpenAiSdkChatModel extends ChatModel {
           refusal: choice.message.refusal ?? "",
           annotations: choice.message.annotations ?? [],
         };
-        return this.buildGeneration(choice as any, metadata, request);
+        return this.buildGeneration(choice, metadata, request);
       });
 
       const usage = chatCompletion.usage ?? null;
@@ -264,6 +229,21 @@ export class OpenAiSdkChatModel extends ChatModel {
 
       return response;
     });
+  }
+
+  protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
+    const requestPrompt = this.buildRequestPrompt(prompt);
+    return this.internalStream(requestPrompt, null);
+  }
+
+  public safeAssistantMessage(
+    response: ChatResponse | null,
+  ): AssistantMessage | null {
+    if (!response) {
+      return null;
+    }
+    const generation = response.result;
+    return generation ? generation.output : null;
   }
 
   private internalStream(
@@ -370,314 +350,6 @@ export class OpenAiSdkChatModel extends ChatModel {
     );
   }
 
-  buildRequestPrompt(prompt: Prompt): Prompt {
-    const requestBuilder = this._options.mutate();
-
-    if (prompt.options != null) {
-      if (prompt.options.topK != null) {
-        this.logger.warn(
-          "The topK option is not supported by OpenAI chat models. Ignoring.",
-        );
-      }
-      requestBuilder.combineWith(prompt.options.mutate() as any);
-    }
-
-    const requestOptions = requestBuilder.build();
-    if (requestOptions.toolCallbacks.length > 0) {
-      // Validate eagerly so we fail before the SDK request is made.
-      for (const toolCallback of requestOptions.toolCallbacks) {
-        assert(toolCallback, "toolCallback cannot be null");
-      }
-    }
-    return new Prompt(prompt.instructions, requestOptions);
-  }
-
-  createRequest(prompt: Prompt, stream: boolean): ChatCompletionCreateParams {
-    const chatCompletionMessageParams = prompt.instructions.flatMap((message) =>
-      this.toMessageParams(message),
-    );
-
-    const requestOptions = prompt.options as OpenAiSdkChatOptions;
-    const request: ChatCompletionCreateParamsBase = {
-      messages: chatCompletionMessageParams,
-      model: requestOptions.model ?? OpenAiSdkChatOptions.DEFAULT_CHAT_MODEL,
-      stream,
-    };
-
-    if (requestOptions.frequencyPenalty != null) {
-      request.frequency_penalty = requestOptions.frequencyPenalty;
-    }
-    if (requestOptions.logitBias != null) {
-      request.logit_bias = requestOptions.logitBias;
-    }
-    if (requestOptions.logprobs != null) {
-      request.logprobs = requestOptions.logprobs;
-    }
-    if (requestOptions.topLogprobs != null) {
-      request.top_logprobs = requestOptions.topLogprobs;
-    }
-    if (requestOptions.maxTokens != null) {
-      request.max_tokens = requestOptions.maxTokens;
-    }
-    if (requestOptions.maxCompletionTokens != null) {
-      request.max_completion_tokens = requestOptions.maxCompletionTokens;
-    }
-    if (requestOptions.n != null) {
-      request.n = requestOptions.n;
-    }
-    if (requestOptions.outputModalities != null) {
-      request.modalities = requestOptions.outputModalities;
-    }
-    if (requestOptions.outputAudio != null) {
-      request.audio = requestOptions.outputAudio;
-    }
-    if (requestOptions.presencePenalty != null) {
-      request.presence_penalty = requestOptions.presencePenalty;
-    }
-    if (requestOptions.responseFormat != null) {
-      request.response_format = requestOptions.responseFormat;
-    }
-    if (requestOptions.streamOptions != null) {
-      request.stream_options = requestOptions.streamOptions;
-    }
-    if (requestOptions.seed != null) {
-      request.seed = requestOptions.seed;
-    }
-    if (requestOptions.stop != null) {
-      request.stop = requestOptions.stop;
-    }
-    if (requestOptions.temperature != null) {
-      request.temperature = requestOptions.temperature;
-    }
-    if (requestOptions.topP != null) {
-      request.top_p = requestOptions.topP;
-    }
-    if (requestOptions.toolChoice != null) {
-      request.tool_choice = requestOptions.toolChoice;
-    }
-    if (requestOptions.parallelToolCalls != null) {
-      request.parallel_tool_calls = requestOptions.parallelToolCalls;
-    }
-    if (requestOptions.user != null) {
-      request.user = requestOptions.user;
-    }
-    if (requestOptions.store != null) {
-      request.store = requestOptions.store;
-    }
-    if (requestOptions.metadata != null) {
-      request.metadata = requestOptions.metadata;
-    }
-    if (requestOptions.reasoningEffort != null) {
-      request.reasoning_effort = requestOptions.reasoningEffort;
-    }
-    if (requestOptions.verbosity != null) {
-      request.verbosity = requestOptions.verbosity;
-    }
-    if (requestOptions.serviceTier != null) {
-      request.service_tier = requestOptions.serviceTier;
-    }
-    if (requestOptions.extraBody != null) {
-      Object.assign(request, requestOptions.extraBody);
-    }
-
-    const toolDefinitions =
-      this._toolCallingManager.resolveToolDefinitions(requestOptions);
-    if (toolDefinitions.length > 0) {
-      request.tools = this.getFunctionTools(toolDefinitions);
-    }
-
-    if (request.stream_options && !stream) {
-      this.logger.warn(
-        "Removing streamOptions from the request as it is not a streaming request!",
-      );
-      delete request.stream_options;
-    }
-
-    return request;
-  }
-
-  private toMessageParams(message: any): ChatCompletionMessageParam[] {
-    if (
-      message.messageType.getValue() === MessageType.USER.getValue() ||
-      message.messageType.getValue() === MessageType.SYSTEM.getValue()
-    ) {
-      const userOrSystemMessage = message as UserMessage;
-      const content = userOrSystemMessage.text ?? "";
-      const media = userOrSystemMessage.media ?? [];
-
-      if (media.length === 0) {
-        return [
-          {
-            role:
-              message.messageType.getValue() === MessageType.SYSTEM.getValue()
-                ? "system"
-                : "user",
-            content,
-          } as ChatCompletionMessageParam,
-        ];
-      }
-
-      const parts: any[] = [];
-      if (content.trim().length > 0) {
-        parts.push({ type: "text", text: content });
-      }
-      for (const item of media) {
-        const mapped = this.mapMediaToContentPart(item);
-        if (mapped != null) {
-          parts.push(mapped);
-        }
-      }
-
-      return [
-        {
-          role:
-            message.messageType.getValue() === MessageType.SYSTEM.getValue()
-              ? "system"
-              : "user",
-          content: parts,
-        } as unknown as ChatCompletionMessageParam,
-      ];
-    }
-
-    if (message.messageType.getValue() === MessageType.ASSISTANT.getValue()) {
-      const assistantMessage = message as AssistantMessage;
-      const toolCalls = assistantMessage.toolCalls.map((toolCall) => ({
-        id: toolCall.id,
-        type: "function" as const,
-        function: {
-          name: toolCall.name,
-          arguments: toolCall.arguments,
-        },
-      }));
-      return [
-        {
-          role: "assistant",
-          content: assistantMessage.text,
-          tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-        } as unknown as ChatCompletionMessageParam,
-      ];
-    }
-
-    if (message.messageType.getValue() === MessageType.TOOL.getValue()) {
-      const toolMessage = message as ToolResponseMessage;
-      return toolMessage.responses.map((response) => ({
-        role: "tool",
-        content: response.responseData,
-        tool_call_id: response.id,
-        name: response.name,
-      })) as ChatCompletionMessageParam[];
-    }
-
-    throw new Error(`Unsupported message type: ${message.messageType}`);
-  }
-
-  private mapMediaToContentPart(media: Media): any {
-    const mimeType = media.mimeType.toString().toLowerCase();
-    if (mimeType.startsWith("image/")) {
-      return {
-        type: "image_url",
-        image_url: {
-          url: this.fromMediaData(mimeType, media.data),
-        },
-      };
-    }
-    if (
-      mimeType === MediaFormat.AUDIO_MP3 ||
-      mimeType === MediaFormat.AUDIO_MPEG
-    ) {
-      return {
-        type: "input_audio",
-        input_audio: {
-          data: this.fromAudioData(media.data),
-          format: "mp3",
-        },
-      };
-    }
-    if (mimeType === MediaFormat.AUDIO_WAV) {
-      return {
-        type: "input_audio",
-        input_audio: {
-          data: this.fromAudioData(media.data),
-          format: "wav",
-        },
-      };
-    }
-    if (mimeType === MediaFormat.DOC_PDF) {
-      return {
-        type: "file",
-        file: {
-          filename: media.name ?? "",
-          file_data: this.fromMediaData(mimeType, media.data),
-        },
-      };
-    }
-    return null;
-  }
-
-  private chunkToChatCompletion(chunk: ChatCompletionChunk): ChatCompletion {
-    return {
-      id: chunk.id,
-      choices: chunk.choices.map((choice: any) => ({
-        finish_reason: choice.finish_reason ?? "stop",
-        index: choice.index,
-        message: {
-          role: choice.delta.role ?? "assistant",
-          content: choice.delta.content ?? null,
-          refusal: choice.delta.refusal ?? null,
-          annotations: choice.delta.annotations ?? [],
-          tool_calls: choice.delta.tool_calls ?? undefined,
-          audio: undefined,
-          function_call: choice.delta.function_call ?? undefined,
-        } as any,
-        logprobs: choice.logprobs ?? undefined,
-      })),
-      created: chunk.created,
-      model: chunk.model,
-      object: "chat.completion",
-      service_tier: chunk.service_tier ?? undefined,
-      system_fingerprint: chunk.system_fingerprint ?? undefined,
-      usage: chunk.usage ?? undefined,
-    };
-  }
-
-  private chunkToChatResponse(
-    chunk: ChatCompletionChunk,
-    request: ChatCompletionCreateParams,
-    previousChatResponse: ChatResponse | null,
-  ): ChatResponse {
-    const chatCompletion = this.chunkToChatCompletion(chunk);
-    const choices = chatCompletion.choices ?? [];
-    const generations = choices.map((choice: any) => {
-      const metadata: Record<string, unknown> = {
-        id: chatCompletion.id ?? "",
-        role: choice.message.role ?? "",
-        index: choice.index ?? 0,
-        finishReason: choice.finish_reason ?? "",
-        refusal: choice.message.refusal ?? "",
-        annotations: choice.message.annotations ?? [],
-        chunkChoice: choice,
-      };
-      return this.buildGeneration(choice as any, metadata, request);
-    });
-
-    const usage = chatCompletion.usage ?? null;
-    const currentUsage = usage
-      ? this.getDefaultUsage(usage as any)
-      : new EmptyUsage();
-    const accumulatedUsage = UsageCalculator.getCumulativeUsage(
-      currentUsage,
-      previousChatResponse,
-    );
-
-    return new ChatResponse({
-      generations,
-      chatResponseMetadata: this.fromCompletion(
-        chatCompletion,
-        accumulatedUsage,
-      ),
-    });
-  }
-
   private buildGeneration(
     choice: any,
     metadata: Record<string, unknown>,
@@ -767,12 +439,76 @@ export class OpenAiSdkChatModel extends ChatModel {
       .build();
   }
 
+  private chunkToChatCompletion(chunk: ChatCompletionChunk): ChatCompletion {
+    return {
+      id: chunk.id,
+      choices: chunk.choices.map((choice: any) => ({
+        finish_reason: choice.finish_reason ?? "stop",
+        index: choice.index,
+        message: {
+          role: choice.delta.role ?? "assistant",
+          content: choice.delta.content ?? null,
+          refusal: choice.delta.refusal ?? null,
+          annotations: choice.delta.annotations ?? [],
+          tool_calls: choice.delta.tool_calls ?? undefined,
+          audio: undefined,
+          function_call: choice.delta.function_call ?? undefined,
+        } as any,
+        logprobs: choice.logprobs ?? undefined,
+      })),
+      created: chunk.created,
+      model: chunk.model,
+      object: "chat.completion",
+      service_tier: chunk.service_tier ?? undefined,
+      system_fingerprint: chunk.system_fingerprint ?? undefined,
+      usage: chunk.usage ?? undefined,
+    };
+  }
+
   private getDefaultUsage(usage: any): DefaultUsage {
     return new DefaultUsage({
       promptTokens: usage.prompt_tokens ?? 0,
       completionTokens: usage.completion_tokens ?? 0,
       totalTokens: usage.total_tokens ?? 0,
       nativeUsage: usage,
+    });
+  }
+
+  private chunkToChatResponse(
+    chunk: ChatCompletionChunk,
+    request: ChatCompletionCreateParams,
+    previousChatResponse: ChatResponse | null,
+  ): ChatResponse {
+    const chatCompletion = this.chunkToChatCompletion(chunk);
+    const choices = chatCompletion.choices ?? [];
+    const generations = choices.map((choice: any) => {
+      const metadata: Record<string, unknown> = {
+        id: chatCompletion.id ?? "",
+        role: choice.message.role ?? "",
+        index: choice.index ?? 0,
+        finishReason: choice.finish_reason ?? "",
+        refusal: choice.message.refusal ?? "",
+        annotations: choice.message.annotations ?? [],
+        chunkChoice: choice,
+      };
+      return this.buildGeneration(choice as any, metadata, request);
+    });
+
+    const usage = chatCompletion.usage ?? null;
+    const currentUsage = usage
+      ? this.getDefaultUsage(usage as any)
+      : new EmptyUsage();
+    const accumulatedUsage = UsageCalculator.getCumulativeUsage(
+      currentUsage,
+      previousChatResponse,
+    );
+
+    return new ChatResponse({
+      generations,
+      chatResponseMetadata: this.fromCompletion(
+        chatCompletion,
+        accumulatedUsage,
+      ),
     });
   }
 
@@ -861,17 +597,275 @@ export class OpenAiSdkChatModel extends ChatModel {
     return aggregated;
   }
 
-  private getFunctionTools(
-    toolDefinitions: ToolDefinition[],
-  ): ChatCompletionTool[] {
-    return toolDefinitions.map((toolDefinition) => ({
-      type: "function",
-      function: {
-        description: toolDefinition.description,
-        name: toolDefinition.name,
-        parameters: JSON.parse(toolDefinition.inputSchema),
-      },
-    }));
+  buildRequestPrompt(prompt: Prompt): Prompt {
+    const requestBuilder = this._options.mutate();
+
+    if (prompt.options != null) {
+      if (prompt.options.topK != null) {
+        this.logger.warn(
+          "The topK option is not supported by OpenAI chat models. Ignoring.",
+        );
+      }
+      requestBuilder.combineWith(prompt.options.mutate() as any);
+    }
+
+    const requestOptions = requestBuilder.build();
+
+    ToolCallingChatOptions.validateToolCallbacks(requestOptions.toolCallbacks);
+
+    return new Prompt(prompt.instructions, requestOptions);
+  }
+
+  createRequest(prompt: Prompt, stream: boolean): ChatCompletionCreateParams {
+    const chatCompletionMessageParams = prompt.instructions.flatMap((message) =>
+      this.toMessageParams(message),
+    );
+
+    const requestOptions = prompt.options as OpenAiSdkChatOptions;
+    const request: ChatCompletionCreateParamsBase = {
+      messages: chatCompletionMessageParams,
+      // Use deployment name if available (for Microsoft Foundry), otherwise use model name
+      model:
+        requestOptions.deploymentName ??
+        requestOptions.model ??
+        OpenAiSdkChatOptions.DEFAULT_CHAT_MODEL,
+      stream,
+    };
+
+    if (requestOptions.frequencyPenalty != null) {
+      request.frequency_penalty = requestOptions.frequencyPenalty;
+    }
+    if (requestOptions.logitBias != null) {
+      request.logit_bias = requestOptions.logitBias;
+    }
+    if (requestOptions.logprobs != null) {
+      request.logprobs = requestOptions.logprobs;
+    }
+    if (requestOptions.topLogprobs != null) {
+      request.top_logprobs = requestOptions.topLogprobs;
+    }
+    if (requestOptions.maxTokens != null) {
+      request.max_tokens = requestOptions.maxTokens;
+    }
+    if (requestOptions.maxCompletionTokens != null) {
+      request.max_completion_tokens = requestOptions.maxCompletionTokens;
+    }
+    if (requestOptions.n != null) {
+      request.n = requestOptions.n;
+    }
+    if (requestOptions.outputModalities != null) {
+      request.modalities = requestOptions.outputModalities;
+    }
+    if (requestOptions.outputAudio != null) {
+      request.audio = requestOptions.outputAudio;
+    }
+    if (requestOptions.presencePenalty != null) {
+      request.presence_penalty = requestOptions.presencePenalty;
+    }
+    if (requestOptions.responseFormat != null) {
+      request.response_format = requestOptions.responseFormat;
+    }
+    if (requestOptions.streamOptions != null) {
+      request.stream_options = requestOptions.streamOptions;
+    }
+    if (requestOptions.seed != null) {
+      request.seed = requestOptions.seed;
+    }
+    if (requestOptions.stop != null) {
+      request.stop = requestOptions.stop;
+    }
+    if (requestOptions.temperature != null) {
+      request.temperature = requestOptions.temperature;
+    }
+    if (requestOptions.topP != null) {
+      request.top_p = requestOptions.topP;
+    }
+    if (requestOptions.toolChoice != null) {
+      request.tool_choice = requestOptions.toolChoice;
+    }
+    if (requestOptions.parallelToolCalls != null) {
+      request.parallel_tool_calls = requestOptions.parallelToolCalls;
+    }
+    if (requestOptions.user != null) {
+      request.user = requestOptions.user;
+    }
+    if (requestOptions.store != null) {
+      request.store = requestOptions.store;
+    }
+    if (requestOptions.metadata != null) {
+      request.metadata = requestOptions.metadata;
+    }
+    if (requestOptions.reasoningEffort != null) {
+      request.reasoning_effort = requestOptions.reasoningEffort;
+    }
+    if (requestOptions.verbosity != null) {
+      request.verbosity = requestOptions.verbosity;
+    }
+    if (requestOptions.serviceTier != null) {
+      request.service_tier = requestOptions.serviceTier;
+    }
+
+    if (request.stream_options && !stream) {
+      this.logger.warn(
+        "Removing streamOptions from the request as it is not a streaming request!",
+      );
+      delete request.stream_options;
+    }
+
+    // Add the tool definitions to the request's tools parameter.
+    const toolDefinitions =
+      this._toolCallingManager.resolveToolDefinitions(requestOptions);
+    if (toolDefinitions.length > 0) {
+      request.tools = this.getChatCompletionTools(toolDefinitions);
+    }
+
+    // Add extraBody parameters as additional body properties for OpenAI-compatible
+    // providers
+    if (requestOptions.extraBody != null) {
+      Object.assign(request, requestOptions.extraBody);
+    }
+
+    return request;
+  }
+
+  private toMessageParams(message: Message): ChatCompletionMessageParam[] {
+    if (
+      message.messageType === MessageType.USER ||
+      message.messageType === MessageType.SYSTEM
+    ) {
+      // Handle simple text content for user and system messages
+      const builder: ChatCompletionMessageParam =
+        {} as ChatCompletionMessageParam;
+
+      if (message instanceof UserMessage && message.media.length > 0) {
+        // Handle media content (images, audio, files)
+        const parts: ChatCompletionContentPart[] = [];
+
+        const messageText = message.text;
+        if (messageText != null && messageText !== "") {
+          parts.push({ type: "text", text: messageText });
+        }
+
+        // Add media content parts
+        message.media.forEach((media) => {
+          const mimeType = media.mimeType.toString();
+          if (mimeType.startsWith("image/")) {
+            if (Buffer.isBuffer(media.data)) {
+              parts.push({
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${media.data.toString("base64")}`,
+                },
+              });
+            } else if (typeof media.data === "string") {
+              // The org.springframework.ai.content.Media object
+              // should store the URL as a java.net.URI but it
+              // transforms it to String somewhere along the way,
+              // for example in its Builder class. So, we accept
+              // String as well here for image URLs.
+              parts.push({
+                type: "image_url",
+                image_url: {
+                  url: media.data,
+                },
+              });
+            } else if (media.data instanceof Uint8Array) {
+              // Assume the bytes are an image. So, convert the
+              // bytes to a base64 encoded
+              parts.push({
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${Buffer.from(media.data).toString("base64")}`,
+                },
+              });
+            } else {
+              this.logger.info(
+                `Could not process image media with data of type: ${this.describeDataType(media.data)}. Only Buffer, Uint8Array, and string are supported for image URLs.`,
+              );
+            }
+          } else if (mimeType.startsWith("audio/")) {
+            parts.push({
+              type: "input_audio",
+              input_audio: {
+                data: this.fromAudioData(media.data),
+                format: mimeType.includes("mp3") ? "mp3" : "wav",
+              },
+            });
+          } else {
+            // Assume it's a file or other media type represented as a
+            // data URL
+            parts.push({
+              type: "text",
+              text: this.fromMediaData(media.mimeType.toString(), media.data),
+            });
+          }
+        });
+        builder.content = parts;
+      } else {
+        // Simple text message
+        const messageText = message.text;
+        if (messageText != null) {
+          builder.content = messageText;
+        }
+      }
+
+      if (message.messageType === MessageType.USER) {
+        builder.role = "user";
+      } else {
+        builder.role = "system";
+      }
+
+      return [builder];
+    }
+
+    if (message.messageType === MessageType.ASSISTANT) {
+      const assistantMessage = message as AssistantMessage;
+      const builder: ChatCompletionAssistantMessageParam = {
+        role: "assistant",
+      };
+
+      if (assistantMessage.text != null) {
+        builder.content = assistantMessage.text;
+      }
+
+      const toolCalls =
+        assistantMessage.toolCalls.map<ChatCompletionMessageToolCall>(
+          (toolCall) => ({
+            id: toolCall.id,
+            type: "function",
+            function: {
+              name: toolCall.name,
+              arguments: toolCall.arguments,
+            },
+          }),
+        );
+      if (toolCalls.length > 0) {
+        builder.tool_calls = toolCalls;
+      }
+
+      return [builder];
+    }
+
+    if (message.messageType === MessageType.TOOL) {
+      const toolMessage = message as ToolResponseMessage;
+
+      if (toolMessage.responses.length === 0) {
+        // The Java implementation calls `builder.build()` here, but that fails because
+        // `toolCallId` is required and is not set for an empty response list.
+        throw new Error(`No tool responses for tool message`);
+      }
+      return toolMessage.responses.map<ChatCompletionMessageParam>(
+        (response) => {
+          return {
+            role: "tool",
+            content: response.responseData,
+            tool_call_id: response.id,
+          };
+        },
+      );
+    }
+
+    throw new Error(`Unsupported message type: ${message.messageType}`);
   }
 
   private fromAudioData(audioData: unknown): string {
@@ -881,10 +875,9 @@ export class OpenAiSdkChatModel extends ChatModel {
     if (audioData instanceof Uint8Array) {
       return Buffer.from(audioData).toString("base64");
     }
-    if (typeof audioData === "string") {
-      return audioData;
-    }
-    throw new Error(`Unsupported audio data type: ${typeof audioData}`);
+    throw new Error(
+      `Unsupported audio data type: ${this.describeDataType(audioData)}`,
+    );
   }
 
   private fromMediaData(mimeType: string, mediaContentData: unknown): string {
@@ -892,12 +885,83 @@ export class OpenAiSdkChatModel extends ChatModel {
       return `data:${mimeType};base64,${mediaContentData.toString("base64")}`;
     }
     if (mediaContentData instanceof Uint8Array) {
+      // Assume the bytes are an image. So, convert the bytes to a base64 encoded
+      // following the prefix pattern.
       return `data:${mimeType};base64,${Buffer.from(mediaContentData).toString("base64")}`;
     }
     if (typeof mediaContentData === "string") {
+      // Assume the text is a URLs or a base64 encoded image prefixed by the user.
       return mediaContentData;
     }
-    throw new Error(`Unsupported media data type: ${typeof mediaContentData}`);
+    throw new Error(
+      `Unsupported media data type: ${this.describeDataType(mediaContentData)}`,
+    );
+  }
+
+  private describeDataType(data: unknown): string {
+    if (data == null) {
+      return String(data);
+    }
+    if (Buffer.isBuffer(data)) {
+      return "Buffer";
+    }
+    if (data instanceof Uint8Array) {
+      return data.constructor.name;
+    }
+    if (typeof data === "object") {
+      const constructorName = (data as { constructor?: { name?: string } })
+        .constructor?.name;
+      return constructorName ?? "Object";
+    }
+    return typeof data;
+  }
+
+  private getChatCompletionTools(
+    toolDefinitions: ToolDefinition[],
+  ): ChatCompletionTool[] {
+    return toolDefinitions.map((toolDefinition) => {
+      const parameters: FunctionParameters = {};
+
+      if (toolDefinition.inputSchema.length > 0) {
+        // Parse the schema and add its properties directly
+        try {
+          const schemaMap = JSON.parse(toolDefinition.inputSchema) as Record<
+            string,
+            unknown
+          >;
+
+          // Add each property from the schema directly.
+          Object.entries(schemaMap).forEach(([key, value]) => {
+            parameters[key] = value;
+          });
+
+          // Add strict mode.
+          parameters.strict = true;
+        } catch (error) {
+          this.logger.error("Failed to parse tool schema", error);
+        }
+      }
+
+      return {
+        type: "function",
+        function: {
+          description: toolDefinition.description,
+          name: toolDefinition.name,
+          parameters,
+        },
+      };
+    });
+  }
+
+  get defaultOptions(): ChatOptions {
+    return this._options.copy();
+  }
+
+  setObservationConvention(
+    observationConvention: ChatModelObservationConvention,
+  ): void {
+    assert(observationConvention, "observationConvention cannot be null");
+    this._observationConvention = observationConvention;
   }
 }
 

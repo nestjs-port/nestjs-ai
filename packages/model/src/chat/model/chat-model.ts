@@ -33,7 +33,7 @@ export abstract class ChatModel
     ...messages: Message[]
   ): Promise<ChatResponse | string | null> {
     if (promptOrMessage instanceof Prompt) {
-      return this.chatPrompt(promptOrMessage);
+      return this.callPrompt(promptOrMessage);
     }
 
     const prompt =
@@ -41,7 +41,7 @@ export abstract class ChatModel
         ? new Prompt(promptOrMessage)
         : new Prompt([promptOrMessage, ...messages]);
 
-    const generation = (await this.chatPrompt(prompt)).result;
+    const generation = (await this.callPrompt(prompt)).result;
     if (!generation) {
       return "";
     }
@@ -49,7 +49,7 @@ export abstract class ChatModel
     return generation.output.text;
   }
 
-  protected abstract chatPrompt(prompt: Prompt): Promise<ChatResponse>;
+  protected abstract callPrompt(prompt: Prompt): Promise<ChatResponse>;
 
   get defaultOptions(): ChatOptions {
     return new DefaultChatOptions();

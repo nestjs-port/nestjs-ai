@@ -39,7 +39,7 @@ class TestChatModel extends ChatModel {
 
   lastCallPrompt: Prompt | null = null;
 
-  protected override async chatPrompt(prompt: Prompt): Promise<ChatResponse> {
+  protected override async callPrompt(prompt: Prompt): Promise<ChatResponse> {
     return this.chatPromptMock(prompt);
   }
 }

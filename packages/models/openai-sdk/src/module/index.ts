@@ -22,6 +22,7 @@ export {
 } from "./open-ai-sdk-chat-properties";
 export type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
 export { OPEN_AI_SDK_CONNECTION_PROPERTIES_PREFIX } from "./open-ai-sdk-connection-properties";
+export * from "./open-ai-sdk-embedding-model.module";
 export type { OpenAiSdkEmbeddingProperties } from "./open-ai-sdk-embedding-properties";
 export { OPEN_AI_SDK_EMBEDDING_DEFAULT_MODEL } from "./open-ai-sdk-embedding-properties";
 export * from "./open-ai-sdk-image-model.module";

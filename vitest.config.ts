@@ -19,6 +19,10 @@ export default defineConfig({
         __dirname,
         "packages/models/google-genai/src",
       ),
+      "@nestjs-ai/model-openai-sdk": path.resolve(
+        __dirname,
+        "packages/models/openai-sdk/src",
+      ),
       "@nestjs-ai/model-transformers": path.resolve(
         __dirname,
         "packages/models/transformers/src",

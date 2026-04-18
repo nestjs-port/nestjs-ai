@@ -52,12 +52,7 @@ function createMockResponse(responseText: string | null): ChatResponse {
 
 describe("ChatModel", () => {
   function spyOnChatPrompt(chatModel: TestChatModel) {
-    return vi.spyOn(
-      chatModel as unknown as {
-        chatPrompt(prompt: Prompt): Promise<ChatResponse>;
-      },
-      "chatPrompt",
-    );
+    return vi.spyOn(chatModel, "callPrompt" as "call");
   }
 
   it("generate with string calls generate with prompt and returns response correctly", async () => {

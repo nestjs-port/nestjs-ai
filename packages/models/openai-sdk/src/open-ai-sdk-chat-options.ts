@@ -431,13 +431,16 @@ export class OpenAiSdkChatOptions
 
   setOutputSchema(outputSchema: string | null): void {
     if (outputSchema != null) {
-      this._responseFormat = OpenAiSdkChatModel.ResponseFormat.builder()
-        .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
-        .jsonSchema(outputSchema)
-        .build();
+      this.setResponseFormat(
+        OpenAiSdkChatModel.ResponseFormat.builder()
+          .type(OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA)
+          .jsonSchema(outputSchema)
+          .build(),
+      );
       return;
     }
-    this._responseFormat = null;
+
+    this.setResponseFormat(null);
   }
 
   toString(): string {

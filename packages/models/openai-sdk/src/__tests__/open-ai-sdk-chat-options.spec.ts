@@ -158,9 +158,9 @@ describe("OpenAiSdkChatOptions", () => {
     expect(copiedOptions).not.toBe(originalOptions);
     expect(copiedOptions).toEqual(originalOptions);
 
-    originalOptions.model = "modified-model";
+    originalOptions.setModel("modified-model");
     originalOptions.setStop(["stop2"]);
-    originalOptions.customHeaders = { header2: "value2" };
+    originalOptions.setCustomHeaders({ header2: "value2" });
     originalOptions.setToolCallbacks([new TestToolCallback("tool", "result")]);
     originalOptions.setToolNames(new Set(["tool2"]));
     originalOptions.setToolContext({ key: "value2" });
@@ -181,8 +181,8 @@ describe("OpenAiSdkChatOptions", () => {
     const metadata = { key2: "value2" };
 
     const options = new OpenAiSdkChatOptions();
-    options.model = "test-model";
-    options.deploymentName = "test-deployment";
+    options.setModel("test-model");
+    options.setDeploymentName("test-deployment");
     options.setFrequencyPenalty(0.5);
     options.setLogitBias(logitBias);
     options.setLogprobs(true);
@@ -207,7 +207,7 @@ describe("OpenAiSdkChatOptions", () => {
     options.setServiceTier("auto");
     options.setExtraBody({});
     options.setInternalToolExecutionEnabled(false);
-    options.customHeaders = { header2: "value2" };
+    options.setCustomHeaders({ header2: "value2" });
 
     expect(options.model).toBe("test-model");
     expect(options.deploymentName).toBe("test-deployment");
@@ -311,7 +311,7 @@ describe("OpenAiSdkChatOptions", () => {
     options.setLogitBias(null);
     options.setStop(null);
     options.setMetadata(null);
-    options.customHeaders = null;
+    options.setCustomHeaders(null);
 
     expect(options.logitBias).toBeNull();
     expect(options.stop).toBeNull();
@@ -321,7 +321,7 @@ describe("OpenAiSdkChatOptions", () => {
     options.setLogitBias({});
     options.setStop([]);
     options.setMetadata({});
-    options.customHeaders = {};
+    options.setCustomHeaders({});
 
     expect(options.logitBias).toEqual({});
     expect(options.stop).toEqual([]);
@@ -351,7 +351,7 @@ describe("OpenAiSdkChatOptions", () => {
 
     const copied = original.copy();
 
-    original.model = "modified-model";
+    original.setModel("modified-model");
     original.setTemperature(0.9);
 
     expect(copied.model).toBe("original-model");

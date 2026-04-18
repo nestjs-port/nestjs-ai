@@ -126,7 +126,7 @@ export class AbstractOpenAiSdkOptions {
     return this._baseUrl;
   }
 
-  set baseUrl(baseUrl: string | null) {
+  setBaseUrl(baseUrl: string | null): void {
     this._baseUrl = baseUrl ?? null;
   }
 
@@ -134,7 +134,7 @@ export class AbstractOpenAiSdkOptions {
     return this._apiKey;
   }
 
-  set apiKey(apiKey: string | null) {
+  setApiKey(apiKey: string | null): void {
     this._apiKey = apiKey ?? null;
   }
 
@@ -142,9 +142,9 @@ export class AbstractOpenAiSdkOptions {
     return this._azureADTokenProvider;
   }
 
-  set azureADTokenProvider(azureADTokenProvider:
-    | (() => Promise<string>)
-    | null,) {
+  setAzureADTokenProvider(
+    azureADTokenProvider: (() => Promise<string>) | null,
+  ): void {
     this._azureADTokenProvider = azureADTokenProvider;
   }
 
@@ -152,7 +152,7 @@ export class AbstractOpenAiSdkOptions {
     return this._model;
   }
 
-  set model(model: string | null) {
+  setModel(model: string | null): void {
     this._model = model ?? null;
   }
 
@@ -160,7 +160,7 @@ export class AbstractOpenAiSdkOptions {
     return this._deploymentName;
   }
 
-  set deploymentName(deploymentName: string | null) {
+  setDeploymentName(deploymentName: string | null): void {
     this._deploymentName = deploymentName ?? null;
   }
 
@@ -168,7 +168,9 @@ export class AbstractOpenAiSdkOptions {
     return this._microsoftFoundryServiceVersion;
   }
 
-  set microsoftFoundryServiceVersion(microsoftFoundryServiceVersion: unknown) {
+  setMicrosoftFoundryServiceVersion(
+    microsoftFoundryServiceVersion: unknown,
+  ): void {
     this._microsoftFoundryServiceVersion = microsoftFoundryServiceVersion;
   }
 
@@ -176,7 +178,7 @@ export class AbstractOpenAiSdkOptions {
     return this._organizationId;
   }
 
-  set organizationId(organizationId: string | null) {
+  setOrganizationId(organizationId: string | null): void {
     this._organizationId = organizationId ?? null;
   }
 
@@ -184,7 +186,7 @@ export class AbstractOpenAiSdkOptions {
     return this._microsoftFoundry;
   }
 
-  set microsoftFoundry(microsoftFoundry: boolean) {
+  setMicrosoftFoundry(microsoftFoundry: boolean): void {
     this._microsoftFoundry = microsoftFoundry;
   }
 
@@ -192,7 +194,7 @@ export class AbstractOpenAiSdkOptions {
     return this._gitHubModels;
   }
 
-  set gitHubModels(gitHubModels: boolean) {
+  setGitHubModels(gitHubModels: boolean): void {
     this._gitHubModels = gitHubModels;
   }
 
@@ -200,7 +202,7 @@ export class AbstractOpenAiSdkOptions {
     return this._timeout;
   }
 
-  set timeout(timeout: Milliseconds | null) {
+  setTimeout(timeout: Milliseconds | null): void {
     this._timeout = timeout;
   }
 
@@ -208,7 +210,7 @@ export class AbstractOpenAiSdkOptions {
     return this._maxRetries;
   }
 
-  set maxRetries(maxRetries: number | null) {
+  setMaxRetries(maxRetries: number | null): void {
     this._maxRetries = maxRetries ?? null;
   }
 
@@ -216,7 +218,7 @@ export class AbstractOpenAiSdkOptions {
     return this._fetchOptions;
   }
 
-  set fetchOptions(fetchOptions: ClientOptions["fetchOptions"] | null) {
+  setFetchOptions(fetchOptions: ClientOptions["fetchOptions"] | null): void {
     this._fetchOptions = fetchOptions;
   }
 
@@ -224,7 +226,7 @@ export class AbstractOpenAiSdkOptions {
     return this._customHeaders;
   }
 
-  set customHeaders(customHeaders: Record<string, string> | null) {
+  setCustomHeaders(customHeaders: Record<string, string> | null): void {
     this._customHeaders = { ...(customHeaders ?? {}) };
   }
 }

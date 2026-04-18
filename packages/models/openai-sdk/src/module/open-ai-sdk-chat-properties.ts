@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { OpenAiSdkChatOptions } from "../open-ai-sdk-chat-options";
+import type { AbstractOpenAiSdkOptionsProps } from "../abstract-open-ai-sdk-options";
+import type { OpenAiSdkChatOptionsProps } from "../open-ai-sdk-chat-options";
 
-import type { OpenAiSdkConnectionProperties } from "./open-ai-sdk-connection-properties";
-
-export const OPEN_AI_SDK_CHAT_PROPERTIES_PREFIX = "spring.ai.openai-sdk.chat";
 export const OPEN_AI_SDK_CHAT_DEFAULT_MODEL = "gpt-5-mini";
 
-export interface OpenAiSdkChatProperties extends OpenAiSdkConnectionProperties {
-  options?: Partial<OpenAiSdkChatOptions>;
+export interface OpenAiSdkChatProperties extends AbstractOpenAiSdkOptionsProps {
+  options?: Partial<OpenAiSdkChatOptionsProps>;
 }

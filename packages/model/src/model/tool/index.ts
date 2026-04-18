@@ -24,7 +24,7 @@ export {
 } from "./default-tool-calling-manager";
 export { DefaultToolExecutionEligibilityPredicate } from "./default-tool-execution-eligibility-predicate";
 export { DefaultToolExecutionResult } from "./default-tool-execution-result";
-export type { StructuredOutputChatOptions } from "./structured-output-chat-options.interface";
+export { StructuredOutputChatOptions } from "./structured-output-chat-options.interface";
 export { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
 export { ToolCallingManager } from "./tool-calling-manager.interface";
 export { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate";

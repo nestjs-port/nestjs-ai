@@ -16,7 +16,6 @@
 
 import { ToolCallback, type ToolDefinition } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { AbstractOpenAiSdkOptions } from "../abstract-open-ai-sdk-options";
 import { OpenAiSdkChatModel } from "../open-ai-sdk-chat-model";
 import { OpenAiSdkChatOptions } from "../open-ai-sdk-chat-options";
 
@@ -274,16 +273,24 @@ describe("OpenAiSdkChatOptions", () => {
     expect(options.internalToolExecutionEnabled).toBeNull();
     expect(options.customHeaders).toEqual({});
     expect(options.toolContext).toEqual({});
-    expect(options.outputSchema).toBe("");
+    expect(options.outputSchema).toBeNull();
   });
 
-  it("test builder uses default timeout and retries", () => {
-    const options = OpenAiSdkChatOptions.builder().build();
+  it("test builder with null values", () => {
+    const options = OpenAiSdkChatOptions.builder()
+      .temperature(null)
+      .logitBias(null)
+      .stop(null)
+      .metadata(null)
+      .extraBody(null)
+      .build();
 
-    expect(options.timeout).toBe(AbstractOpenAiSdkOptions.DEFAULT_TIMEOUT);
-    expect(options.maxRetries).toBe(
-      AbstractOpenAiSdkOptions.DEFAULT_MAX_RETRIES,
-    );
+    expect(options.model).toBeNull();
+    expect(options.temperature).toBeNull();
+    expect(options.logitBias).toBeNull();
+    expect(options.stop).toBeNull();
+    expect(options.metadata).toBeNull();
+    expect(options.extraBody).toBeNull();
   });
 
   it("test builder chaining", () => {
@@ -561,5 +568,30 @@ describe("OpenAiSdkChatOptions", () => {
   it("test topK returns null", () => {
     const options = new OpenAiSdkChatOptions();
     expect(options.topK).toBeNull();
+  });
+
+  it("test set output schema", () => {
+    const options = new OpenAiSdkChatOptions();
+    const schema = `{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    }
+  }
+}`;
+
+    options.setOutputSchema(schema);
+
+    expect(options.responseFormat).not.toBeNull();
+    expect(options.responseFormat?.type).toBe(
+      OpenAiSdkChatModel.ResponseFormat.Type.JSON_SCHEMA,
+    );
+    expect(options.responseFormat?.jsonSchema).toBe(schema);
+    expect(options.outputSchema).toBe(schema);
+
+    options.setOutputSchema(null);
+    expect(options.responseFormat).toBeNull();
+    expect(options.outputSchema).toBeNull();
   });
 });

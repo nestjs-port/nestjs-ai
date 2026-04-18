@@ -21,7 +21,13 @@ import type { ChatOptions } from "../../chat";
  * to set and get the output JSON schema.
  */
 export interface StructuredOutputChatOptions extends ChatOptions {
-  get outputSchema(): string;
+  get outputSchema(): string | null;
 
-  setOutputSchema(outputSchema: string): void;
+  setOutputSchema(outputSchema: string | null): void;
+}
+
+export namespace StructuredOutputChatOptions {
+  export interface Builder extends ChatOptions.Builder {
+    outputSchema(outputSchema: string | null): this;
+  }
 }

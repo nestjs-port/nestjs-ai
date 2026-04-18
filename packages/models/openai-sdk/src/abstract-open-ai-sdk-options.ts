@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Milliseconds } from "@nestjs-ai/commons";
+import { type Milliseconds, ms } from "@nestjs-ai/commons";
 import type { ClientOptions } from "openai";
 
 export interface AbstractOpenAiSdkOptionsProps {
@@ -77,7 +77,7 @@ export interface AbstractOpenAiSdkOptionsProps {
   maxRetries?: number | null;
 
   /**
-   * Proxy settings for OpenAI client.
+   * Fetch options for OpenAI client requests.
    */
   fetchOptions?: ClientOptions["fetchOptions"] | null;
 
@@ -88,6 +88,9 @@ export interface AbstractOpenAiSdkOptionsProps {
 }
 
 export class AbstractOpenAiSdkOptions {
+  static readonly DEFAULT_TIMEOUT: Milliseconds = ms(60_000);
+  static readonly DEFAULT_MAX_RETRIES = 3;
+
   private _baseUrl: string | null = null;
   private _apiKey: string | null = null;
   private _azureADTokenProvider: (() => Promise<string>) | null = null;

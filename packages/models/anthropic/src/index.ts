@@ -26,6 +26,7 @@ export {
   AnthropicServiceTier,
   toSdkServiceTier,
 } from "./anthropic-service-tier";
+export { AnthropicSetup } from "./anthropic-setup";
 export { AnthropicSkill } from "./anthropic-skill";
 export { AnthropicSkillContainer } from "./anthropic-skill-container";
 export { AnthropicSkillRecord } from "./anthropic-skill-record";

@@ -1,13 +1,28 @@
 {
   "name": "@nestjs-ai/integration-tests",
   "version": "0.0.0",
-  "license": "Apache-2.0",
   "private": true,
+  "description": "Integration tests for NestJS AI",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/integration-tests"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "integration",
+    "tests"
+  ],
+  "license": "Apache-2.0",
   "scripts": {
     "postinstall": "pnpm prisma:generate",
     "prisma:generate": "DATABASE_URL=postgresql://jsdbc:jsdbc@localhost:5432/jsdbc_integration pnpm exec prisma generate --schema __tests__/jsdbc/prisma/schema.prisma",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepack": "node -e \"const fs=require('fs');const path=require('path');let dir=process.cwd();let root=null;while(true){const pkg=path.join(dir,'package.json');if(fs.existsSync(pkg)){try{const json=JSON.parse(fs.readFileSync(pkg,'utf8'));if(json.name==='nestjs-ai'){root=dir;break;}}catch{} }const parent=path.dirname(dir);if(parent===dir) throw new Error('Unable to locate NestJS AI repo root');dir=parent;}fs.copyFileSync(path.join(root,'README.md'),path.join(process.cwd(),'README.md'));\"",
+    "postpack": "node -e \"const fs=require('fs');const path=require('path');const file=path.join(process.cwd(),'README.md');if(fs.existsSync(file)) fs.unlinkSync(file);\""
   },
   "devDependencies": {
     "@google/genai": "^1.49.0",

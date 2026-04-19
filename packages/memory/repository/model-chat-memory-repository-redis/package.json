@@ -1,9 +1,24 @@
 {
   "name": "@nestjs-ai/model-chat-memory-repository-redis",
   "version": "0.0.1",
-  "license": "Apache-2.0",
-  "description": "Redis-backed Chat Memory Repository for NestJS AI",
   "private": false,
+  "description": "Redis-backed Chat Memory Repository for NestJS AI",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/memory/repository/model-chat-memory-repository-redis"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "model",
+    "chat",
+    "memory",
+    "repository",
+    "redis"
+  ],
+  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -16,7 +31,9 @@
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepack": "node -e \"const fs=require('fs');const path=require('path');let dir=process.cwd();let root=null;while(true){const pkg=path.join(dir,'package.json');if(fs.existsSync(pkg)){try{const json=JSON.parse(fs.readFileSync(pkg,'utf8'));if(json.name==='nestjs-ai'){root=dir;break;}}catch{} }const parent=path.dirname(dir);if(parent===dir) throw new Error('Unable to locate NestJS AI repo root');dir=parent;}fs.copyFileSync(path.join(root,'README.md'),path.join(process.cwd(),'README.md'));\"",
+    "postpack": "node -e \"const fs=require('fs');const path=require('path');const file=path.join(process.cwd(),'README.md');if(fs.existsSync(file)) fs.unlinkSync(file);\""
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "*",

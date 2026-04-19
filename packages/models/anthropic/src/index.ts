@@ -15,6 +15,7 @@
  */
 
 export { AbstractAnthropicOptions } from "./abstract-anthropic-options";
+export { AnthropicCacheOptions } from "./anthropic-cache-options";
 export { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
 export {
   AnthropicCacheTtl,
@@ -32,4 +33,5 @@ export { AnthropicSkillType } from "./anthropic-skill-type";
 export type { AnthropicWebSearchResult } from "./anthropic-web-search-result";
 export { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
 export { CacheBreakpointTracker } from "./cache-breakpoint-tracker";
+export { CacheEligibilityResolver } from "./cache-eligibility-resolver";
 export { Citation } from "./citation";

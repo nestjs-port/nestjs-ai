@@ -1083,5 +1083,3 @@ export namespace OpenAiSdkChatOptions {
     }
   }
 }
-
-export namespace OpenAiSdkChatOptions {}

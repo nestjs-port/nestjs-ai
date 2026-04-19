@@ -23,6 +23,15 @@ export {
   toSdkCacheTtl,
 } from "./anthropic-cache-ttl";
 export {
+  AnthropicChatModel,
+  AnthropicChatModelBuilder,
+  type AnthropicChatModelProps,
+} from "./anthropic-chat-model";
+export {
+  AnthropicChatOptions,
+  AnthropicChatOptionsBuilder,
+} from "./anthropic-chat-options";
+export {
   AnthropicCitationDocument,
   DocumentType,
 } from "./anthropic-citation-document";

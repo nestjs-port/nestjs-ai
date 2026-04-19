@@ -35,6 +35,7 @@ export { AnthropicSkill } from "./anthropic-skill";
 export { AnthropicSkillContainer } from "./anthropic-skill-container";
 export { AnthropicSkillRecord } from "./anthropic-skill-record";
 export { AnthropicSkillType } from "./anthropic-skill-type";
+export { AnthropicSkillsResponseHelper } from "./anthropic-skills-response-helper";
 export type { AnthropicWebSearchResult } from "./anthropic-web-search-result";
 export { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
 export { CacheBreakpointTracker } from "./cache-breakpoint-tracker";

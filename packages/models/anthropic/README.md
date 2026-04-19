@@ -153,8 +153,6 @@ pnpm format
 The list below reflects the direct `import` count for the Spring AI Anthropic Java files, sorted from the fewest dependencies to the most dependencies.
 
 | Imports | Java File |
-| 12 | `AnthropicSetup.java` |
-| 14 | `AnthropicCitationDocument.java` |
 | 18 | `AnthropicSkillsResponseHelper.java` |
 | 29 | `AnthropicChatOptions.java` |
 | 85 | `AnthropicChatModel.java` |

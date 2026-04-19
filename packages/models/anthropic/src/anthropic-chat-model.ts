@@ -36,11 +36,8 @@ import type {
   MessageCreateParamsStreaming,
   MessageParam,
   RawMessageStreamEvent,
-  RedactedThinkingBlock,
-  TextBlock,
   TextBlockParam,
   TextCitation,
-  ThinkingBlock,
   Tool,
   ToolChoice,
   ToolResultBlockParam,
@@ -49,7 +46,6 @@ import type {
   UserLocation,
   WebSearchResultBlock,
   WebSearchTool20260209,
-  WebSearchToolResultBlock,
 } from "@anthropic-ai/sdk/resources/messages";
 import {
   AiProvider,
@@ -211,7 +207,7 @@ export class AnthropicChatModel extends ChatModel {
     prompt: Prompt,
     previousChatResponse: ChatResponse | null,
   ): Promise<ChatResponse> {
-    const { request, headers } = this.createRequest(prompt, false);
+    const { request, headers } = this.createRequest(prompt);
 
     const observationContext = new ChatModelObservationContext(
       prompt,
@@ -244,6 +240,7 @@ export class AnthropicChatModel extends ChatModel {
         webSearchResults,
       );
 
+      // Current usage
       const currentUsage = this.getDefaultUsage(message.usage);
       const accumulatedUsage = UsageCalculator.getCumulativeUsage(
         currentUsage,
@@ -275,6 +272,7 @@ export class AnthropicChatModel extends ChatModel {
       const toolExecutionResult =
         await this._toolCallingManager.executeToolCalls(prompt, response);
       if (toolExecutionResult.returnDirect()) {
+        // Return tool execution result directly to the client.
         return ChatResponse.builder()
           .from(response)
           .generations(
@@ -282,6 +280,7 @@ export class AnthropicChatModel extends ChatModel {
           )
           .build();
       }
+      // Send the tool execution result back to the model.
       return this.internalCall(
         new Prompt(toolExecutionResult.conversationHistory(), promptOptions),
         response,
@@ -301,10 +300,7 @@ export class AnthropicChatModel extends ChatModel {
     previousChatResponse: ChatResponse | null,
   ): Observable<ChatResponse> {
     return defer(() => {
-      const { request: baseRequest, headers } = this.createRequest(
-        prompt,
-        true,
-      );
+      const { request: baseRequest, headers } = this.createRequest(prompt);
       const request: MessageCreateParamsStreaming = {
         ...baseRequest,
         stream: true,
@@ -604,10 +600,10 @@ export class AnthropicChatModel extends ChatModel {
    * {@link ToolResultBlockParam}, and ASSISTANT messages with tool calls become
    * {@link ToolUseBlockParam} blocks.
    */
-  createRequest(
-    prompt: Prompt,
-    _stream: boolean,
-  ): { request: MessageCreateParams; headers: Record<string, string> } {
+  createRequest(prompt: Prompt): {
+    request: MessageCreateParams;
+    headers: Record<string, string>;
+  } {
     const requestOptions =
       prompt.options instanceof AnthropicChatOptions
         ? prompt.options
@@ -978,14 +974,16 @@ export class AnthropicChatModel extends ChatModel {
       .finishReason(finishReason)
       .build();
 
+    // Collect text and tool calls from content blocks
     let textContent = "";
     const toolCalls: ToolCall[] = [];
 
     for (const block of message.content) {
       if (block.type === "text") {
-        const textBlock = block as TextBlock;
+        const textBlock = block;
         textContent += textBlock.text;
 
+        // Extract citations from text blocks if present
         if (textBlock.citations != null) {
           for (const tc of textBlock.citations) {
             const citation = this.convertTextCitation(tc);
@@ -1005,7 +1003,7 @@ export class AnthropicChatModel extends ChatModel {
       } else if (block.type === "thinking") {
         // ThinkingBlock: stored as a separate Generation with the thinking text as
         // content and signature in metadata properties.
-        const thinkingBlock = block as ThinkingBlock;
+        const thinkingBlock = block;
         generations.push(
           new Generation({
             assistantMessage: new AssistantMessage({
@@ -1017,19 +1015,18 @@ export class AnthropicChatModel extends ChatModel {
         );
       } else if (block.type === "redacted_thinking") {
         // RedactedThinkingBlock: safety-redacted reasoning with a data marker.
-        const redactedBlock = block as RedactedThinkingBlock;
         generations.push(
           new Generation({
             assistantMessage: new AssistantMessage({
-              properties: { data: redactedBlock.data },
+              properties: { data: block.data },
             }),
             chatGenerationMetadata: generationMetadata,
           }),
         );
       } else if (block.type === "web_search_tool_result") {
-        const wsBlock = block as WebSearchToolResultBlock;
+        const wsBlock = block;
         if (Array.isArray(wsBlock.content)) {
-          for (const r of wsBlock.content as WebSearchResultBlock[]) {
+          for (const r of wsBlock.content) {
             webSearchAccumulator.push({
               title: r.title,
               url: r.url,
@@ -1107,17 +1104,13 @@ export class AnthropicChatModel extends ChatModel {
   private convertTextCitation(textCitation: TextCitation): Citation | null {
     switch (textCitation.type) {
       case "char_location":
-        return this.fromCharLocation(textCitation as CitationCharLocation);
+        return this.fromCharLocation(textCitation);
       case "page_location":
-        return this.fromPageLocation(textCitation as CitationPageLocation);
+        return this.fromPageLocation(textCitation);
       case "content_block_location":
-        return this.fromContentBlockLocation(
-          textCitation as CitationContentBlockLocation,
-        );
+        return this.fromContentBlockLocation(textCitation);
       case "web_search_result_location":
-        return this.fromWebSearchResultLocation(
-          textCitation as CitationsWebSearchResultLocation,
-        );
+        return this.fromWebSearchResultLocation(textCitation);
       default:
         return null;
     }

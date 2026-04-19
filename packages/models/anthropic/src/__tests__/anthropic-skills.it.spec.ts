@@ -18,8 +18,7 @@ import { mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { Anthropic } from "@anthropic-ai/sdk";
-import type { ToolChoice } from "@anthropic-ai/sdk/resources/messages";
+import type { Anthropic } from "@anthropic-ai/sdk";
 import { LoggerFactory } from "@nestjs-ai/commons";
 import { Prompt, UserMessage } from "@nestjs-ai/model";
 import { beforeAll, describe, expect, it } from "vitest";

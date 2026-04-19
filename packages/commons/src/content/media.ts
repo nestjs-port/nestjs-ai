@@ -99,7 +99,7 @@ export interface MediaOptionsProps {
    */
   mimeType: MimeType;
   /**
-   * The media data as binary array or string.
+   * The media data as binary array, string, or URL.
    */
   data: unknown;
   /**
@@ -175,7 +175,7 @@ export class Media {
     assert(data, "Data must not be null");
 
     this._mimeType = mimeType;
-    this._data = data;
+    this._data = data instanceof URL ? data.toString() : data;
     this._id = id ?? null;
     this._name = name ?? Media.generateDefaultName(mimeType);
   }

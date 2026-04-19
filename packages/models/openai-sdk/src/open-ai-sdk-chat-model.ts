@@ -790,19 +790,9 @@ export class OpenAiSdkChatModel extends ChatModel {
                   url: `data:${mimeType};base64,${media.data.toString("base64")}`,
                 },
               });
-            } else if (media.data instanceof URL) {
-              parts.push({
-                type: "image_url",
-                image_url: {
-                  url: media.data.toString(),
-                },
-              });
             } else if (typeof media.data === "string") {
-              // The org.springframework.ai.content.Media object
-              // should store the URL as a java.net.URI but it
-              // transforms it to String somewhere along the way,
-              // for example in its Builder class. So, we accept
-              // String as well here for image URLs.
+              // The Media object stores URL-like inputs as strings,
+              // so we accept string as well here for image URLs.
               parts.push({
                 type: "image_url",
                 image_url: {
@@ -810,8 +800,8 @@ export class OpenAiSdkChatModel extends ChatModel {
                 },
               });
             } else if (media.data instanceof Uint8Array) {
-              // Assume the bytes are an image. So, convert the
-              // bytes to a base64 encoded
+              // Assume the bytes are an image. So, convert the bytes to a base64 encoded
+              // image URL.
               parts.push({
                 type: "image_url",
                 image_url: {

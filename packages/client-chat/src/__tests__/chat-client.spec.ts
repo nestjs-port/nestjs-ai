@@ -686,7 +686,7 @@ describe("ChatClient", () => {
     expect(userMessage.messageType).toBe(MessageType.USER);
     expect(userMessage.media).toHaveLength(1);
     expect(userMessage.media[0]?.mimeType).toBe(MediaFormat.IMAGE_PNG);
-    expect(userMessage.media[0]?.data).toBe(url);
+    expect(userMessage.media[0]?.data).toBe(url.toString());
     expect(userMessage.metadata.messageType).toBe(MessageType.USER);
     expect(userMessage.metadata.umetadata1).toBe("udata1");
 

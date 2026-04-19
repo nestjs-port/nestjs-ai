@@ -29,9 +29,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run",
-    "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 src/filter/antlr4/Filters.g4",
-    "prepack": "node -e \"const fs=require('fs');const path=require('path');let dir=process.cwd();let root=null;while(true){const pkg=path.join(dir,'package.json');if(fs.existsSync(pkg)){try{const json=JSON.parse(fs.readFileSync(pkg,'utf8'));if(json.name==='nestjs-ai'){root=dir;break;}}catch{} }const parent=path.dirname(dir);if(parent===dir) throw new Error('Unable to locate NestJS AI repo root');dir=parent;}fs.copyFileSync(path.join(root,'README.md'),path.join(process.cwd(),'README.md'));\"",
-    "postpack": "node -e \"const fs=require('fs');const path=require('path');const file=path.join(process.cwd(),'README.md');if(fs.existsSync(file)) fs.unlinkSync(file);\""
+    "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 src/filter/antlr4/Filters.g4"
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "*",

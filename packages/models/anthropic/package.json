@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-anthropic",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "description": "Anthropic model integration for NestJS AI",
   "homepage": "https://nestjs-port.github.io/nestjs-ai",

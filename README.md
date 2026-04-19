@@ -54,7 +54,7 @@ Spring AI module porting status to NestJS AI. (~520 source files, ~180 test file
 | | spring-ai-openai-sdk | `@nestjs-ai/model-openai-sdk` | 100% |
 | | spring-ai-google-genai | `@nestjs-ai/model-google-genai` | 100% |
 | | spring-ai-transformers | `@nestjs-ai/model-transformers` | 100% |
-| | spring-ai-anthropic | — | 0% |
+| | spring-ai-anthropic | `@nestjs-ai/model-anthropic` | 100% |
 | | spring-ai-azure-openai | — | 0% |
 | | spring-ai-bedrock | — | 0% |
 | | spring-ai-mistral-ai | — | 0% |

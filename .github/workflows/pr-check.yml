@@ -41,5 +41,37 @@ jobs:
       - name: Run typecheck
         run: pnpm typecheck
 
-      - name: Run tests
-        run: pnpm exec turbo run test --concurrency=1
+      - name: Run unit tests
+        run: |
+          pnpm exec turbo run test \
+            --filter=@nestjs-ai/advisors-vector-store \
+            --filter=@nestjs-ai/client-chat \
+            --filter=@nestjs-ai/commons \
+            --filter=@nestjs-ai/document-reader-cheerio \
+            --filter=@nestjs-ai/document-reader-markdown \
+            --filter=@nestjs-ai/document-reader-pdf \
+            --filter=@nestjs-ai/jsdbc \
+            --filter=@nestjs-ai/mcp-common \
+            --filter=@nestjs-ai/model \
+            --filter=@nestjs-ai/model-anthropic \
+            --filter=@nestjs-ai/model-chat-memory-repository-jsdbc \
+            --filter=@nestjs-ai/model-google-genai \
+            --filter=@nestjs-ai/model-openai \
+            --filter=@nestjs-ai/model-openai-sdk \
+            --filter=@nestjs-ai/model-transformers \
+            --filter=@nestjs-ai/observation \
+            --filter=@nestjs-ai/platform \
+            --filter=@nestjs-ai/rag \
+            --filter=@nestjs-ai/retry \
+            --filter=@nestjs-ai/template-st \
+            --filter=@nestjs-ai/testing \
+            --filter=@nestjs-ai/vector-store
+
+      - name: Run container-backed tests
+        run: |
+          pnpm exec turbo run test \
+            --filter=@nestjs-ai/document-reader-tika \
+            --filter=@nestjs-ai/integration-tests \
+            --filter=@nestjs-ai/model-chat-memory-repository-redis \
+            --filter=@nestjs-ai/vector-store-redis \
+            --concurrency=1

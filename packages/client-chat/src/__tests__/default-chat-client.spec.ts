@@ -358,7 +358,7 @@ describe("DefaultChatClient", () => {
       spec.media(MediaFormat.IMAGE_PNG, mediaUrl);
       expect(spec.mediaValue).toHaveLength(1);
       expect(spec.mediaValue[0]?.mimeType).toBe(MediaFormat.IMAGE_PNG);
-      expect(spec.mediaValue[0]?.data).toBe(mediaUrl);
+      expect(spec.mediaValue[0]?.data).toBe(mediaUrl.toString());
     });
 
     it("when user media mime type is null with resource then throw", () => {

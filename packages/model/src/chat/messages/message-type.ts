@@ -91,6 +91,18 @@ export class MessageType {
   static readonly TOOL = new MessageType("TOOL", "tool");
 
   /**
+   * Return all message types in their canonical declaration order.
+   */
+  static values(): readonly MessageType[] {
+    return [
+      MessageType.USER,
+      MessageType.ASSISTANT,
+      MessageType.SYSTEM,
+      MessageType.TOOL,
+    ];
+  }
+
+  /**
    * Resolve a message type from its uppercase name.
    * @param name the message type name, such as USER or ASSISTANT
    * @returns the matching message type

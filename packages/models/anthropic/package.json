@@ -1,0 +1,49 @@
+{
+  "name": "@nestjs-ai/model-anthropic",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Anthropic model integration for NestJS AI",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/models/anthropic"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "model",
+    "anthropic"
+  ],
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/model": "*",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs/common": "^11.1.11",
+    "rxjs": "^7.0.0"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ]
+}

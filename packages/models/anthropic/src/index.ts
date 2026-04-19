@@ -49,3 +49,4 @@ export { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
 export { CacheBreakpointTracker } from "./cache-breakpoint-tracker";
 export { CacheEligibilityResolver } from "./cache-eligibility-resolver";
 export { Citation } from "./citation";
+export * from "./module";

@@ -23,6 +23,10 @@ export default defineConfig({
         __dirname,
         "packages/models/openai-sdk/src",
       ),
+      "@nestjs-ai/model-anthropic": path.resolve(
+        __dirname,
+        "packages/models/anthropic/src",
+      ),
       "@nestjs-ai/model-transformers": path.resolve(
         __dirname,
         "packages/models/transformers/src",

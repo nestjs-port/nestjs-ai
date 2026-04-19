@@ -33,6 +33,7 @@
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/model-chat-memory-repository-jsdbc": "workspace:*",
     "@nestjs-ai/model-chat-memory-repository-redis": "workspace:*",
+    "@nestjs-ai/model-anthropic": "workspace:*",
     "@nestjs-ai/model-google-genai": "workspace:*",
     "@nestjs-ai/model-openai": "workspace:*",
     "@nestjs-ai/model-openai-sdk": "workspace:*",

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { AbstractAnthropicOptions } from "./abstract-anthropic-options";
 export { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
 export {
   AnthropicCacheTtl,
@@ -24,6 +25,8 @@ export {
   AnthropicServiceTier,
   toSdkServiceTier,
 } from "./anthropic-service-tier";
+export { AnthropicSkill } from "./anthropic-skill";
+export { AnthropicSkillContainer } from "./anthropic-skill-container";
 export { AnthropicSkillRecord } from "./anthropic-skill-record";
 export { AnthropicSkillType } from "./anthropic-skill-type";
 export type { AnthropicWebSearchResult } from "./anthropic-web-search-result";

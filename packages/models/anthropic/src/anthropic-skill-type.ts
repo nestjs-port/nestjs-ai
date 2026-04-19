@@ -14,5 +14,17 @@
  * limitations under the License.
  */
 
-export { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
-export { AnthropicSkillType } from "./anthropic-skill-type";
+/**
+ * Enum representing the type of a Claude Skill.
+ */
+export enum AnthropicSkillType {
+  /**
+   * Pre-built skills provided by Anthropic (xlsx, pptx, docx, pdf).
+   */
+  ANTHROPIC = "anthropic",
+
+  /**
+   * Custom skills uploaded to the workspace.
+   */
+  CUSTOM = "custom",
+}

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import {
+  Anthropic,
+  type ClientOptions as AnthropicClientOptions,
+} from "@anthropic-ai/sdk";
 import {
   type Logger,
   LoggerFactory,
@@ -22,19 +25,13 @@ import {
   ms,
 } from "@nestjs-ai/commons";
 
-type AnthropicClient = InstanceType<typeof Anthropic>;
-
 export interface AnthropicSetupProps {
   baseUrl?: string | null;
   apiKey?: string | null;
   timeout?: Milliseconds | null;
   maxRetries?: number | null;
-  fetch?:
-    | NonNullable<ConstructorParameters<typeof Anthropic>[0]>["fetch"]
-    | null;
-  fetchOptions?:
-    | NonNullable<ConstructorParameters<typeof Anthropic>[0]>["fetchOptions"]
-    | null;
+  fetch?: AnthropicClientOptions["fetch"] | null;
+  fetchOptions?: AnthropicClientOptions["fetchOptions"] | null;
   customHeaders?: Record<string, string> | null;
 }
 
@@ -84,7 +81,7 @@ export abstract class AnthropicSetup {
    * @param props the client configuration properties
    * @returns a configured Anthropic client
    */
-  static setupClient(props: AnthropicSetupProps): AnthropicClient {
+  static setupClient(props: AnthropicSetupProps): Anthropic {
     const resolvedBaseUrl = AnthropicSetup.detectBaseUrlFromEnv(props.baseUrl);
     const resolvedTimeout = props.timeout ?? AnthropicSetup.DEFAULT_TIMEOUT;
     const resolvedMaxRetries =

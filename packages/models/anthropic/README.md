@@ -147,3 +147,30 @@ pnpm test
 pnpm lint
 pnpm format
 ```
+
+## Java File Dependency Order
+
+The list below reflects the direct `import` count for the Spring AI Anthropic Java files, sorted from the fewest dependencies to the most dependencies.
+
+| Imports | Java File |
+|---|---|
+| 0 | `AnthropicCacheStrategy.java` |
+| 0 | `AnthropicSkillType.java` |
+| 1 | `AnthropicCacheTtl.java` |
+| 1 | `AnthropicServiceTier.java` |
+| 1 | `AnthropicWebSearchResult.java` |
+| 1 | `package-info.java` |
+| 2 | `CacheBreakpointTracker.java` |
+| 2 | `Citation.java` |
+| 3 | `AnthropicSkillRecord.java` |
+| 3 | `AnthropicWebSearchTool.java` |
+| 4 | `AnthropicSkill.java` |
+| 5 | `AbstractAnthropicOptions.java` |
+| 5 | `AnthropicSkillContainer.java` |
+| 8 | `AnthropicCacheOptions.java` |
+| 9 | `CacheEligibilityResolver.java` |
+| 12 | `AnthropicSetup.java` |
+| 14 | `AnthropicCitationDocument.java` |
+| 18 | `AnthropicSkillsResponseHelper.java` |
+| 29 | `AnthropicChatOptions.java` |
+| 85 | `AnthropicChatModel.java` |

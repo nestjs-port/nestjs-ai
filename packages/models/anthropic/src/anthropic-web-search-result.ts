@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-export { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
-export {
-  AnthropicCacheTtl,
-  type AnthropicCacheTtlSdkValue,
-  toSdkCacheTtl,
-} from "./anthropic-cache-ttl";
-export {
-  AnthropicServiceTier,
-  toSdkServiceTier,
-} from "./anthropic-service-tier";
-export { AnthropicSkillType } from "./anthropic-skill-type";
-export type { AnthropicWebSearchResult } from "./anthropic-web-search-result";
+/**
+ * Represents an individual web search result returned by Anthropic's built-in web
+ * search tool. Accessible via `chatResponse.getMetadata().get("web-search-results")`.
+ */
+export interface AnthropicWebSearchResult {
+  title: string;
+  url: string;
+  pageAge?: string | null;
+}

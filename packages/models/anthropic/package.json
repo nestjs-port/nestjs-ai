@@ -31,12 +31,14 @@
     "test": "vitest run"
   },
   "peerDependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "@nestjs-ai/commons": "*",
     "@nestjs-ai/model": "*",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs/common": "^11.1.11",

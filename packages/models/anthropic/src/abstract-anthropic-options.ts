@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ClientOptions as AnthropicClientOptions } from "@anthropic-ai/sdk";
 import type { Milliseconds } from "@nestjs-ai/commons";
 
 /**
@@ -55,14 +56,19 @@ export class AbstractAnthropicOptions {
   private _maxRetries: number | null = null;
 
   /**
-   * Proxy settings for the Anthropic client.
+   * Custom fetch implementation for the Anthropic client.
    */
-  private _proxy: unknown | null = null;
+  private _fetch: AnthropicClientOptions["fetch"] | null = null;
+
+  /**
+   * Additional options to pass through to the underlying fetch call.
+   */
+  private _fetchOptions: AnthropicClientOptions["fetchOptions"] | null = null;
 
   /**
    * Custom HTTP headers to add to Anthropic client requests.
    */
-  private _customHeaders: Map<string, string> = new Map();
+  private _customHeaders: Record<string, string> = {};
 
   get baseUrl(): string | null {
     return this._baseUrl;
@@ -104,19 +110,29 @@ export class AbstractAnthropicOptions {
     this._maxRetries = maxRetries ?? null;
   }
 
-  get proxy(): unknown | null {
-    return this._proxy;
+  get fetch(): AnthropicClientOptions["fetch"] | null {
+    return this._fetch;
   }
 
-  setProxy(proxy: unknown | null): void {
-    this._proxy = proxy ?? null;
+  setFetch(fetch: AnthropicClientOptions["fetch"] | null): void {
+    this._fetch = fetch ?? null;
   }
 
-  get customHeaders(): Map<string, string> {
+  get fetchOptions(): AnthropicClientOptions["fetchOptions"] | null {
+    return this._fetchOptions;
+  }
+
+  setFetchOptions(
+    fetchOptions: AnthropicClientOptions["fetchOptions"] | null,
+  ): void {
+    this._fetchOptions = fetchOptions ?? null;
+  }
+
+  get customHeaders(): Record<string, string> {
     return this._customHeaders;
   }
 
-  setCustomHeaders(customHeaders: Map<string, string>): void {
-    this._customHeaders = new Map(customHeaders);
+  setCustomHeaders(customHeaders: Record<string, string>): void {
+    this._customHeaders = { ...customHeaders };
   }
 }

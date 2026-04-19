@@ -52,6 +52,7 @@ import type {
   WebSearchToolResultBlock,
 } from "@anthropic-ai/sdk/resources/messages";
 import {
+  AiProvider,
   type Logger,
   LoggerFactory,
   type Media,
@@ -103,12 +104,6 @@ import type { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
 import { CacheEligibilityResolver } from "./cache-eligibility-resolver";
 import { Citation } from "./citation";
 
-const ANTHROPIC_PROVIDER_NAME = "anthropic";
-
-const BETA_SKILLS = "skills-2025-10-02";
-const BETA_CODE_EXECUTION = "code-execution-2025-08-25";
-const BETA_FILES_API = "files-api-2025-04-14";
-
 export interface AnthropicChatModelProps {
   anthropicClient?: Anthropic;
   defaultOptions?: AnthropicChatOptions;
@@ -132,6 +127,10 @@ export class AnthropicChatModel extends ChatModel {
 
   private static readonly DEFAULT_TOOL_CALLING_MANAGER =
     new DefaultToolCallingManager();
+
+  private static readonly BETA_SKILLS = "skills-2025-10-02";
+  private static readonly BETA_CODE_EXECUTION = "code-execution-2025-08-25";
+  private static readonly BETA_FILES_API = "files-api-2025-04-14";
 
   private readonly logger: Logger = LoggerFactory.getLogger(
     AnthropicChatModel.name,
@@ -177,10 +176,6 @@ export class AnthropicChatModel extends ChatModel {
       props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
   }
 
-  static builder(): AnthropicChatModelBuilder {
-    return new AnthropicChatModelBuilder();
-  }
-
   /**
    * Gets the chat options for this model.
    */
@@ -216,14 +211,11 @@ export class AnthropicChatModel extends ChatModel {
     prompt: Prompt,
     previousChatResponse: ChatResponse | null,
   ): Promise<ChatResponse> {
-    const request: MessageCreateParamsNonStreaming = {
-      ...this.createRequest(prompt, false),
-      stream: false,
-    };
+    const { request, headers } = this.createRequest(prompt, false);
 
     const observationContext = new ChatModelObservationContext(
       prompt,
-      ANTHROPIC_PROVIDER_NAME,
+      AiProvider.ANTHROPIC.value,
     );
 
     const observation = new ChatModelObservationDocumentation().observation(
@@ -234,7 +226,10 @@ export class AnthropicChatModel extends ChatModel {
     );
 
     const response = await observation.observe(async () => {
-      const message = await this._anthropicClient.messages.create(request);
+      const message = await this._anthropicClient.messages.create(
+        request as MessageCreateParamsNonStreaming,
+        { headers },
+      );
 
       if (message.content.length === 0) {
         this.logger.warn(`No content blocks returned for prompt: ${prompt}`);
@@ -306,7 +301,10 @@ export class AnthropicChatModel extends ChatModel {
     previousChatResponse: ChatResponse | null,
   ): Observable<ChatResponse> {
     return defer(() => {
-      const baseRequest = this.createRequest(prompt, true);
+      const { request: baseRequest, headers } = this.createRequest(
+        prompt,
+        true,
+      );
       const request: MessageCreateParamsStreaming = {
         ...baseRequest,
         stream: true,
@@ -314,7 +312,7 @@ export class AnthropicChatModel extends ChatModel {
 
       const observationContext = new ChatModelObservationContext(
         prompt,
-        ANTHROPIC_PROVIDER_NAME,
+        AiProvider.ANTHROPIC.value,
       );
 
       const observation = new ChatModelObservationDocumentation().observation(
@@ -326,7 +324,9 @@ export class AnthropicChatModel extends ChatModel {
 
       const streamingState = new StreamingState();
 
-      const events$ = from(this._anthropicClient.messages.create(request)).pipe(
+      const events$ = from(
+        this._anthropicClient.messages.create(request, { headers }),
+      ).pipe(
         mergeMap(
           (stream) =>
             new Observable<RawMessageStreamEvent>((subscriber) => {
@@ -604,20 +604,26 @@ export class AnthropicChatModel extends ChatModel {
    * {@link ToolResultBlockParam}, and ASSISTANT messages with tool calls become
    * {@link ToolUseBlockParam} blocks.
    */
-  createRequest(prompt: Prompt, _stream: boolean): MessageCreateParams {
+  createRequest(
+    prompt: Prompt,
+    _stream: boolean,
+  ): { request: MessageCreateParams; headers: Record<string, string> } {
     const requestOptions =
       prompt.options instanceof AnthropicChatOptions
         ? prompt.options
         : AnthropicChatOptions.builder().build();
 
+    // Set required fields
     const model = requestOptions.model ?? AnthropicChatOptions.DEFAULT_MODEL;
     const maxTokens =
       requestOptions.maxTokens ?? AnthropicChatOptions.DEFAULT_MAX_TOKENS;
 
+    // Create cache resolver
     const cacheResolver = CacheEligibilityResolver.from(
       requestOptions.cacheOptions,
     );
 
+    // Prepare citation documents for inclusion in the first user message
     const citationDocuments = requestOptions.citationDocuments;
     let citationDocsAdded = false;
 
@@ -637,6 +643,7 @@ export class AnthropicChatModel extends ChatModel {
 
     let system: string | TextBlockParam[] | undefined;
 
+    // Process system messages with cache support
     if (systemTexts.length > 0) {
       if (!cacheResolver.isCachingEnabled()) {
         // No caching: join all system texts and use simple string format
@@ -692,6 +699,7 @@ export class AnthropicChatModel extends ChatModel {
       }
     }
 
+    // Process non-system messages
     const messages: MessageParam[] = [];
 
     for (let i = 0; i < nonSystemMessages.length; i++) {
@@ -707,6 +715,7 @@ export class AnthropicChatModel extends ChatModel {
         const applyCacheToUser =
           isLastUserMessage && cacheResolver.isCachingEnabled();
 
+        // Compute cache control for last user message
         let userCacheControl: CacheControlEphemeral | null = null;
         if (applyCacheToUser) {
           const combinedText = this.combineEligibleMessagesText(
@@ -793,10 +802,13 @@ export class AnthropicChatModel extends ChatModel {
       max_tokens: maxTokens,
       messages,
     };
+    const headers: Record<string, string> = { ...requestOptions.httpHeaders };
 
     if (system != null) {
       request.system = system;
     }
+
+    // Set optional parameters
     if (requestOptions.temperature != null) {
       request.temperature = requestOptions.temperature;
     }
@@ -824,6 +836,8 @@ export class AnthropicChatModel extends ChatModel {
     if (requestOptions.serviceTier != null) {
       request.service_tier = toSdkServiceTier(requestOptions.serviceTier);
     }
+
+    // Add output configuration if specified (structured output / effort)
     if (requestOptions.outputConfig != null) {
       request.output_config = requestOptions.outputConfig;
     }
@@ -831,6 +845,7 @@ export class AnthropicChatModel extends ChatModel {
     // Build combined tool list (user-defined tools + built-in tools)
     const allTools: ToolUnion[] = [];
 
+    // Add user-defined tool definitions
     const toolDefinitions =
       this._toolCallingManager.resolveToolDefinitions(requestOptions);
     if (toolDefinitions.length > 0) {
@@ -885,18 +900,18 @@ export class AnthropicChatModel extends ChatModel {
         request,
         skillContainer,
         toolDefinitions,
-        requestOptions.httpHeaders,
+        headers,
       );
     }
 
-    return request;
+    return { request, headers };
   }
 
   private applySkillContainer(
     request: MessageCreateParams,
     skillContainer: AnthropicSkillContainer,
     toolDefinitions: ToolDefinition[],
-    httpHeaders: Record<string, string>,
+    headers: Record<string, string>,
   ): void {
     const requestRecord = request as unknown as Record<string, unknown>;
     requestRecord.container = { skills: skillContainer.toSkillsList() };
@@ -914,15 +929,19 @@ export class AnthropicChatModel extends ChatModel {
     }
 
     // Add beta headers, merging with any existing anthropic-beta value
-    const existingBeta = httpHeaders["anthropic-beta"];
-    const betaParts = [BETA_SKILLS, BETA_CODE_EXECUTION, BETA_FILES_API];
+    const existingBeta = headers["anthropic-beta"];
+    const betaParts = [
+      AnthropicChatModel.BETA_SKILLS,
+      AnthropicChatModel.BETA_CODE_EXECUTION,
+      AnthropicChatModel.BETA_FILES_API,
+    ];
     let merged = existingBeta ?? "";
     for (const part of betaParts) {
       if (!merged.includes(part)) {
         merged = merged.length > 0 ? `${merged},${part}` : part;
       }
     }
-    requestRecord["anthropic-beta"] = merged;
+    headers["anthropic-beta"] = merged;
   }
 
   /**
@@ -1427,55 +1446,5 @@ class StreamingState {
 
   getWebSearchResults(): AnthropicWebSearchResult[] {
     return [...this._webSearchResults];
-  }
-}
-
-/**
- * Builder for creating {@link AnthropicChatModel} instances.
- */
-export class AnthropicChatModelBuilder {
-  private _anthropicClient: Anthropic | null = null;
-  private _options: AnthropicChatOptions | null = null;
-  private _toolCallingManager: ToolCallingManager | null = null;
-  private _observationRegistry: ObservationRegistry | null = null;
-  private _toolExecutionEligibilityPredicate: ToolExecutionEligibilityPredicate | null =
-    null;
-
-  anthropicClient(anthropicClient: Anthropic): this {
-    this._anthropicClient = anthropicClient;
-    return this;
-  }
-
-  options(options: AnthropicChatOptions): this {
-    this._options = options;
-    return this;
-  }
-
-  toolCallingManager(toolCallingManager: ToolCallingManager): this {
-    this._toolCallingManager = toolCallingManager;
-    return this;
-  }
-
-  observationRegistry(observationRegistry: ObservationRegistry): this {
-    this._observationRegistry = observationRegistry;
-    return this;
-  }
-
-  toolExecutionEligibilityPredicate(
-    predicate: ToolExecutionEligibilityPredicate,
-  ): this {
-    this._toolExecutionEligibilityPredicate = predicate;
-    return this;
-  }
-
-  build(): AnthropicChatModel {
-    return new AnthropicChatModel({
-      anthropicClient: this._anthropicClient ?? undefined,
-      defaultOptions: this._options ?? undefined,
-      toolCallingManager: this._toolCallingManager ?? undefined,
-      toolExecutionEligibilityPredicate:
-        this._toolExecutionEligibilityPredicate ?? undefined,
-      observationRegistry: this._observationRegistry ?? undefined,
-    });
   }
 }

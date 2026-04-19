@@ -23,6 +23,10 @@ export {
   toSdkCacheTtl,
 } from "./anthropic-cache-ttl";
 export {
+  AnthropicCitationDocument,
+  DocumentType,
+} from "./anthropic-citation-document";
+export {
   AnthropicServiceTier,
   toSdkServiceTier,
 } from "./anthropic-service-tier";

@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/platform",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "description": "NestJS platform integration for NestJS AI",
   "homepage": "https://nestjs-port.github.io/nestjs-ai",

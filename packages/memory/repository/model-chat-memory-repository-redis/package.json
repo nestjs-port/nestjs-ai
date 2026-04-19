@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-chat-memory-repository-redis",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "description": "Redis-backed Chat Memory Repository for NestJS AI",
   "homepage": "https://nestjs-port.github.io/nestjs-ai",

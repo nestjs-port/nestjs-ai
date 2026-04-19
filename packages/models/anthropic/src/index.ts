@@ -24,7 +24,6 @@ export {
 } from "./anthropic-cache-ttl";
 export {
   AnthropicChatModel,
-  AnthropicChatModelBuilder,
   type AnthropicChatModelProps,
 } from "./anthropic-chat-model";
 export {

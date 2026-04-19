@@ -88,8 +88,8 @@ import {
   UsageCalculator,
   type UserMessage,
 } from "@nestjs-ai/model";
-import { defer, EMPTY, from, Observable, of, switchMap } from "rxjs";
-import { map, mergeMap } from "rxjs/operators";
+import { defer, EMPTY, from, Observable, of } from "rxjs";
+import { mergeMap } from "rxjs/operators";
 
 import { AnthropicChatOptions } from "./anthropic-chat-options";
 import { toSdkServiceTier } from "./anthropic-service-tier";
@@ -318,97 +318,97 @@ export class AnthropicChatModel extends ChatModel {
         this._observationRegistry,
       );
 
-      const streamingState = new StreamingState();
+      return observation.observeStream(() => {
+        // Track streaming state for usage accumulation and tool calls
+        const streamingState = new StreamingState();
 
-      const events$ = from(
-        this._anthropicClient.messages.create(request, { headers }),
-      ).pipe(
-        mergeMap(
-          (stream) =>
-            new Observable<RawMessageStreamEvent>((subscriber) => {
+        const chatResponseFlux = new Observable<ChatResponse>((subscriber) => {
+          this._anthropicClient.messages
+            .create(request, { headers })
+            .then((stream) => {
               (async () => {
                 try {
                   for await (const event of stream) {
-                    subscriber.next(event);
+                    const chatResponse = this.convertStreamEventToChatResponse(
+                      event,
+                      previousChatResponse,
+                      streamingState,
+                    );
+                    if (chatResponse != null) {
+                      subscriber.next(chatResponse);
+                    }
                   }
                   subscriber.complete();
                 } catch (error) {
                   subscriber.error(error);
                 }
               })();
-            }),
-        ),
-      );
+            })
+            .catch((error) => subscriber.error(error));
+        });
 
-      const chatResponse$ = events$.pipe(
-        map((event) =>
-          this.convertStreamEventToChatResponse(
-            event,
-            previousChatResponse,
-            streamingState,
-          ),
-        ),
-        mergeMap((response) => (response != null ? of(response) : EMPTY)),
-      );
+        // Aggregate streaming responses and handle tool execution on final response
+        return new MessageAggregator()
+          .aggregate(chatResponseFlux, (chatResponse) => {
+            observationContext.setResponse(chatResponse);
+          })
+          .pipe(
+            mergeMap((chatResponse) =>
+              this.handleStreamingToolExecution(prompt, chatResponse),
+            ),
+          );
+      });
+    });
+  }
 
-      const promptOptions = prompt.options;
-
-      const flux = chatResponse$.pipe(
-        switchMap((response) => {
-          if (
-            promptOptions != null &&
-            this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
-              promptOptions,
-              response,
-            )
-          ) {
-            // Only execute tools when the model's turn is complete and its stated
-            // reason for stopping is that it wants to use a tool.
-            if (response.hasFinishReasons("tool_use")) {
-              return from(
-                this._toolCallingManager.executeToolCalls(prompt, response),
-              ).pipe(
-                switchMap((toolExecutionResult) => {
-                  if (toolExecutionResult.returnDirect()) {
-                    // Return tool execution result directly to the client
-                    return of(
-                      ChatResponse.builder()
-                        .from(response)
-                        .generations(
-                          ToolExecutionResult.buildGenerations(
-                            toolExecutionResult,
-                          ),
-                        )
-                        .build(),
-                    );
-                  }
-                  // RECURSIVE CALL: Return a *new stream* by calling internalStream
-                  // again. The new prompt contains the full history, including the
-                  // tool results.
-                  return this.internalStream(
-                    new Prompt(
-                      toolExecutionResult.conversationHistory(),
-                      promptOptions,
-                    ),
-                    response,
-                  );
-                }),
+  private handleStreamingToolExecution(
+    prompt: Prompt,
+    chatResponse: ChatResponse,
+  ): Observable<ChatResponse> {
+    const promptOptions = prompt.options;
+    if (
+      promptOptions != null &&
+      this._toolExecutionEligibilityPredicate.isToolExecutionRequired(
+        promptOptions,
+        chatResponse,
+      )
+    ) {
+      // Only execute tools when the model's turn is complete and its stated
+      // reason for stopping is that it wants to use a tool.
+      if (chatResponse.hasFinishReasons("tool_use")) {
+        return from(
+          this._toolCallingManager.executeToolCalls(prompt, chatResponse),
+        ).pipe(
+          mergeMap((toolExecutionResult) => {
+            if (toolExecutionResult.returnDirect()) {
+              // Return tool execution result directly to the client
+              return of(
+                ChatResponse.builder()
+                  .from(chatResponse)
+                  .generations(
+                    ToolExecutionResult.buildGenerations(toolExecutionResult),
+                  )
+                  .build(),
               );
             }
-            // Tool execution required but not at tool_use finish - skip this response
-            return EMPTY;
-          }
-          // No tool execution needed - pass through the response
-          return of(response);
-        }),
-      );
-
-      return observation.observeStream(() =>
-        new MessageAggregator().aggregate(flux, (chatResponse) => {
-          observationContext.setResponse(chatResponse);
-        }),
-      );
-    });
+            // RECURSIVE CALL: Return a *new stream* by calling internalStream
+            // again. The new prompt contains the full history, including the
+            // tool results.
+            return this.internalStream(
+              new Prompt(
+                toolExecutionResult.conversationHistory(),
+                promptOptions,
+              ),
+              chatResponse,
+            );
+          }),
+        );
+      }
+      // Tool execution required but not at tool_use finish - skip this response
+      return EMPTY;
+    }
+    // No tool execution needed - pass through the response
+    return of(chatResponse);
   }
 
   /**
@@ -1204,29 +1204,38 @@ export class AnthropicChatModel extends ChatModel {
    * JSON string is parsed into an input schema object.
    */
   private toAnthropicTool(toolDefinition: ToolDefinition): Tool {
-    let schema: { properties?: Record<string, unknown>; required?: string[] };
     try {
-      schema = JSON.parse(toolDefinition.inputSchema);
+      const schema = JSON.parse(toolDefinition.inputSchema) as {
+        properties?: Record<string, unknown>;
+        required?: string[];
+      };
+
+      const properties: Record<string, unknown> = {};
+      if (schema.properties != null) {
+        for (const [key, value] of Object.entries(schema.properties)) {
+          properties[key] = value;
+        }
+      }
+
+      const inputSchema: Tool.InputSchema = {
+        type: "object",
+        properties,
+      };
+      if (Array.isArray(schema.required)) {
+        inputSchema.required = [...schema.required];
+      }
+
+      return {
+        name: toolDefinition.name,
+        description: toolDefinition.description,
+        input_schema: inputSchema,
+      };
     } catch (error) {
       throw new Error(
         `Failed to parse tool input schema: ${toolDefinition.inputSchema}`,
         { cause: error },
       );
     }
-
-    const inputSchema: Tool.InputSchema = {
-      type: "object",
-      properties: schema.properties ?? {},
-    };
-    if (Array.isArray(schema.required)) {
-      inputSchema.required = schema.required;
-    }
-
-    return {
-      name: toolDefinition.name,
-      description: toolDefinition.description,
-      input_schema: inputSchema,
-    };
   }
 
   /**
@@ -1367,6 +1376,7 @@ class StreamingState {
   private _model = "";
   private _inputTokens = 0;
 
+  // Tool calling state - tracks the current tool being streamed
   private _currentToolId = "";
   private _currentToolName = "";
   private _currentToolJson = "";

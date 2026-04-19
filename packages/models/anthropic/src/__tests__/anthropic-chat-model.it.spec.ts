@@ -16,11 +16,13 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { inspect } from "node:util";
 import type {
   Model as AnthropicModel,
   OutputConfig,
   ToolChoice,
 } from "@anthropic-ai/sdk/resources/messages";
+import { ChatClient } from "@nestjs-ai/client-chat";
 import { LoggerFactory, Media, MediaFormat } from "@nestjs-ai/commons";
 import {
   BeanOutputConverter,
@@ -110,7 +112,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatModelIT", () => {
     const generation = response.results[0];
     expect(generation.output.text ?? "").toContain("Blackbeard");
     expect(generation.metadata.finishReason).toBe("end_turn");
-    logger.info("%o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
   });
 
   it("test message history", async () => {
@@ -217,22 +219,24 @@ Generate the filmography of 5 movies for Tom Hanks.
     const actorsFilms = beanOutputConverter.convert(
       generation?.output.text ?? "",
     );
-    logger.info("%o", actorsFilms);
+    logger.info(`Actors films: ${inspect(actorsFilms, { depth: null })}`);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
 
   it("validate call response metadata", async () => {
     const model = TEST_MODEL_4_20250514;
-    const response = await chatModel.call(
-      new Prompt(
+    const response = await ChatClient.create(chatModel)
+      .prompt()
+      .options(AnthropicChatOptions.builder().model(model))
+      .user(
         "Tell me about 3 famous pirates from the Golden Age of Piracy and what they did",
-        AnthropicChatOptions.builder().model(model).build(),
-      ),
-    );
+      )
+      .call()
+      .chatResponse();
 
-    logger.info("%o", response);
-    validateChatResponseMetadata(response, model);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
+    validateChatResponseMetadata(response as ChatResponse, model);
   });
 
   it("streaming basic test", async () => {
@@ -251,7 +255,7 @@ Generate the filmography of 5 movies for Tom Hanks.
       .join("");
 
     expect(fullResponse).not.toBe("");
-    logger.info("Streaming response: %s", fullResponse);
+    logger.info(`Streaming response: ${fullResponse}`);
   });
 
   it("streaming with token usage", async () => {
@@ -272,10 +276,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     }
     const usage = lastResponseWithUsage.metadata.usage;
     logger.info(
-      "Streaming usage - Input: {}, Output: {}, Total: {}",
-      usage.promptTokens,
-      usage.completionTokens,
-      usage.totalTokens,
+      `Streaming usage - Input: ${usage.promptTokens}, Output: ${usage.completionTokens}, Total: ${usage.totalTokens}`,
     );
 
     // Verify both input and output tokens are captured
@@ -303,7 +304,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
-    logger.info("Response: %o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
 
     const generation = response.result;
     expect(generation).not.toBeNull();
@@ -333,7 +334,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const content = collectGenerationText(await collectResponses(responseFlux));
 
-    logger.info("Streaming Response: %s", content);
+    logger.info(`Streaming Response: ${content}`);
     expect(content).toContain("30");
     expect(content).toContain("10");
     expect(content).toContain("15");
@@ -356,7 +357,9 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const lastResponse = await collectLastResponseWithUsage(responseFlux);
 
-    logger.info("Streaming Response with usage: %o", lastResponse);
+    logger.info(
+      `Streaming Response with usage: ${inspect(lastResponse, { depth: null })}`,
+    );
 
     expect(lastResponse).not.toBeNull();
     if (!lastResponse?.metadata?.usage) {
@@ -390,7 +393,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     );
 
     const actorsFilms = beanOutputConverter.convert(generationTextFromStream);
-    logger.info("%o", actorsFilms);
+    logger.info(`Actors films: ${inspect(actorsFilms, { depth: null })}`);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -398,16 +401,18 @@ Generate the filmography of 5 movies for Tom Hanks.
   it("validate stream call response metadata", async () => {
     const model = TEST_MODEL_4_20250514;
     const response = await collectLastResponse(
-      chatModel.stream(
-        new Prompt(
+      ChatClient.create(chatModel)
+        .prompt()
+        .options(AnthropicChatOptions.builder().model(model))
+        .user(
           "Tell me about 3 famous pirates from the Golden Age of Piracy and what they did",
-          AnthropicChatOptions.builder().model(model).build(),
-        ),
-      ),
+        )
+        .stream()
+        .chatResponse(),
     );
 
     expect(response).not.toBeNull();
-    logger.info("%o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
     if (!response) {
       throw new Error("Expected streaming response");
     }
@@ -430,7 +435,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
-    logger.info("Response: %o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
     for (const generation of response.results) {
       const message = generation.output;
       if (message.toolCalls.length > 0) {
@@ -458,7 +463,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
-    logger.info("Response: %o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
     expect(response.results).not.toBeNull();
     // When tool choice is "any", the model MUST use at least one tool
     const hasToolCalls = response.results.some(
@@ -490,7 +495,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
-    logger.info("Response: %o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
     expect(response.results).not.toBeNull();
     // When tool choice is a specific tool, the model MUST use that specific tool
     const allToolCalls = response.results.flatMap(
@@ -516,7 +521,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
-    logger.info("Response: %o", response);
+    logger.info(`Response: ${inspect(response, { depth: null })}`);
     expect(response.results).not.toBeNull();
     // When tool choice is "none", the model MUST NOT use any tools
     const allToolCalls = response.results.flatMap(
@@ -535,7 +540,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt([userMessage]));
 
-    logger.info("%s", response.result?.output.text ?? "");
+    logger.info(`Response text: ${response.result?.output.text ?? ""}`);
     expect(response.result?.output.text ?? "").toMatch(
       /bananas|apple|bowl|basket|fruit/,
     );
@@ -554,7 +559,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt([userMessage]));
 
-    logger.info("%s", response.result?.output.text ?? "");
+    logger.info(`Response text: ${response.result?.output.text ?? ""}`);
     expect(response.result?.output.text ?? "").toMatch(
       /Spring AI|portable API/,
     );
@@ -593,7 +598,7 @@ Generate the filmography of 5 movies for Tom Hanks.
         expect(message.metadata.data).not.toBeNull();
       }
     }
-  });
+  }, 60_000);
 
   it("thinking with streaming test", async () => {
     const userMessage = new UserMessage({
@@ -615,7 +620,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     // Verify we got text content
     const content = collectGenerationText(responses);
 
-    logger.info("Thinking streaming response: %s", content);
+    logger.info(`Thinking streaming response: ${content}`);
     expect(content).not.toBe("");
 
     // Verify signature was captured in the stream
@@ -628,7 +633,7 @@ Generate the filmography of 5 movies for Tom Hanks.
       );
 
     expect(hasSignature).toBe(true);
-  });
+  }, 60_000);
 
   it("test plain text citation", async () => {
     const document = AnthropicCitationDocument.builder()
@@ -847,7 +852,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     expect(response).not.toBeNull();
     const text = response.result?.output.text ?? "";
     expect(text).not.toBe("");
-    logger.info("Structured output response: %s", text);
+    logger.info(`Structured output response: ${text}`);
     // The response should contain JSON with the expected fields
     expect(text).toContain("name");
     expect(text).toContain("capital");
@@ -881,7 +886,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     expect(response).not.toBeNull();
     const text = response.result?.output.text ?? "";
     expect(text).not.toBe("");
-    logger.info("Structured output with effort response: %s", text);
+    logger.info(`Structured output with effort response: ${text}`);
     expect(text).toContain("answer");
   });
 
@@ -898,7 +903,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     );
 
     expect(response.result?.output.text ?? "").not.toBe("");
-    logger.info("Web search response: %s", response.result?.output.text ?? "");
+    logger.info(`Web search response: ${response.result?.output.text ?? ""}`);
 
     // Verify web search results are surfaced in metadata
     const results =
@@ -913,7 +918,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     // Verify web search citations if present
     const citations = response.metadata?.get<Citation[]>("citations") ?? [];
     if (citations != null && citations.length > 0) {
-      logger.info("Web search citations received: %d", citations.length);
+      logger.info(`Web search citations received: ${citations.length}`);
       citations
         .filter(
           (citation) =>
@@ -921,9 +926,7 @@ Generate the filmography of 5 movies for Tom Hanks.
         )
         .forEach((citation) => {
           logger.info(
-            "Web search citation: url=%s, title=%s",
-            citation.url,
-            citation.documentTitle,
+            `Web search citation: url=${citation.url}, title=${citation.documentTitle}`,
           );
         });
       expect(
@@ -935,7 +938,7 @@ Generate the filmography of 5 movies for Tom Hanks.
         ),
       ).toBe(true);
     }
-  });
+  }, 60_000);
 });
 
 class ActorsFilmsRecord {

@@ -186,6 +186,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
+      '@nestjs-ai/model-anthropic':
+        specifier: workspace:*
+        version: link:../models/anthropic
       '@nestjs-ai/model-chat-memory-repository-jsdbc':
         specifier: workspace:*
         version: link:../memory/repository/model-chat-memory-repository-jsdbc

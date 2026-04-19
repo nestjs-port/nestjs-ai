@@ -1,5 +1,16 @@
 # @nestjs-ai/rag
 
+## 0.0.2
+
+### Patch Changes
+
+- add description for npm
+- Updated dependencies
+  - @nestjs-ai/vector-store@0.0.2
+  - @nestjs-ai/client-chat@0.0.2
+  - @nestjs-ai/commons@0.0.2
+  - @nestjs-ai/model@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes

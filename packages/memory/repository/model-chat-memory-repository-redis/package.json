@@ -1,9 +1,24 @@
 {
   "name": "@nestjs-ai/model-chat-memory-repository-redis",
-  "version": "0.0.1",
-  "license": "Apache-2.0",
-  "description": "Redis-backed Chat Memory Repository for NestJS AI",
+  "version": "0.0.2",
   "private": false,
+  "description": "Redis-backed Chat Memory Repository for NestJS AI",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/memory/repository/model-chat-memory-repository-redis"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "model",
+    "chat",
+    "memory",
+    "repository",
+    "redis"
+  ],
+  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

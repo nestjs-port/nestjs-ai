@@ -1,8 +1,21 @@
 {
   "name": "@nestjs-ai/client-chat",
-  "version": "0.0.1",
-  "license": "Apache-2.0",
+  "version": "0.0.2",
   "private": false,
+  "description": "Chat client support for NestJS AI",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/client-chat"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "client",
+    "chat"
+  ],
+  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

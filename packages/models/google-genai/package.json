@@ -1,8 +1,22 @@
 {
   "name": "@nestjs-ai/model-google-genai",
-  "version": "0.0.1",
-  "license": "Apache-2.0",
+  "version": "0.0.2",
   "private": false,
+  "description": "Google GenAI model integration for NestJS AI",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/models/google-genai"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "model",
+    "google",
+    "genai"
+  ],
+  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

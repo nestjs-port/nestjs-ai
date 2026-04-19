@@ -1,9 +1,20 @@
 {
   "name": "@nestjs-ai/retry",
-  "version": "0.0.1",
-  "license": "Apache-2.0",
-  "description": "Retry utilities for NestJS AI - provides transient/non-transient exceptions and retry configuration",
+  "version": "0.0.2",
   "private": false,
+  "description": "Retry utilities for NestJS AI - provides transient/non-transient exceptions and retry configuration",
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/retry"
+  },
+  "keywords": [
+    "nestjs",
+    "ai",
+    "retry"
+  ],
+  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

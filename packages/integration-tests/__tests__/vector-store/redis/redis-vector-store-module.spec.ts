@@ -27,57 +27,32 @@ import {
 } from "@nestjs-ai/vector-store-redis";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("redis", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("redis")>();
-  return {
-    ...actual,
-    createClient: vi.fn(() => ({
-      isOpen: false,
-      connect: vi.fn(async () => undefined),
-      ft: {
-        _list: vi.fn(async () => []),
-        create: vi.fn(async () => "OK"),
-      },
-    })),
-  };
-});
-
 const REDIS_CONFIG_TOKEN = Symbol("REDIS_CONFIG_TOKEN");
-
-@Module({
-  providers: [
-    {
-      provide: REDIS_CONFIG_TOKEN,
-      useValue: {
-        clientOptions: { url: "redis://localhost:6379" },
-        indexName: "test-index",
-      },
-    },
-  ],
-  exports: [REDIS_CONFIG_TOKEN],
-})
-class RedisConfigModule {}
 
 describe("RedisVectorStoreModule", () => {
   describe("forFeature", () => {
     it("should resolve VECTOR_STORE_TOKEN via NestJS DI with embedding model", async () => {
+      const client = createMockRedisClient();
+
       const moduleRef = await Test.createTestingModule({
         imports: [
           NestAiModule.forRoot(),
           TransformersEmbeddingModelModule.forFeature({}, { global: true }),
           RedisVectorStoreModule.forFeature({
-            clientOptions: { url: "redis://localhost:6379" },
+            client: client as never,
           }),
         ],
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should not export properties token", async () => {
+      const client = createMockRedisClient();
       const featureModule = RedisVectorStoreModule.forFeature({
-        clientOptions: { url: "redis://localhost:6379" },
+        client: client as never,
       });
 
       const moduleRef = await Test.createTestingModule({
@@ -90,6 +65,7 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
 
       const exports = featureModule.exports as symbol[];
       expect(exports).toContain(VECTOR_STORE_TOKEN);
@@ -97,8 +73,9 @@ describe("RedisVectorStoreModule", () => {
     });
 
     it("should default global to false", async () => {
+      const client = createMockRedisClient();
       const featureModule = RedisVectorStoreModule.forFeature({
-        clientOptions: { url: "redis://localhost:6379" },
+        client: client as never,
       });
 
       const moduleRef = await Test.createTestingModule({
@@ -111,12 +88,14 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(false);
     });
 
     it("should support global option", async () => {
+      const client = createMockRedisClient();
       const featureModule = RedisVectorStoreModule.forFeature(
-        { clientOptions: { url: "redis://localhost:6379" } },
+        { client: client as never },
         { global: true },
       );
 
@@ -130,19 +109,22 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(true);
     });
   });
 
   describe("forFeatureAsync", () => {
     it("should resolve VECTOR_STORE_TOKEN from async factory via NestJS DI", async () => {
+      const client = createMockRedisClient();
+
       const moduleRef = await Test.createTestingModule({
         imports: [
           NestAiModule.forRoot(),
           TransformersEmbeddingModelModule.forFeature({}, { global: true }),
           RedisVectorStoreModule.forFeatureAsync({
             useFactory: () => ({
-              clientOptions: { url: "redis://localhost:6379" },
+              client: client as never,
             }),
           }),
         ],
@@ -150,9 +132,25 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should support imports and inject for async factory", async () => {
+      const client = createMockRedisClient();
+      @Module({
+        providers: [
+          {
+            provide: REDIS_CONFIG_TOKEN,
+            useValue: {
+              client: client as never,
+              indexName: "test-index",
+            },
+          },
+        ],
+        exports: [REDIS_CONFIG_TOKEN],
+      })
+      class RedisConfigModule {}
+
       const moduleRef = await Test.createTestingModule({
         imports: [
           NestAiModule.forRoot(),
@@ -160,25 +158,26 @@ describe("RedisVectorStoreModule", () => {
           RedisVectorStoreModule.forFeatureAsync({
             imports: [RedisConfigModule],
             inject: [REDIS_CONFIG_TOKEN],
-            useFactory: (
-              config: RedisVectorStoreProperties,
-            ): RedisVectorStoreProperties => config,
+            useFactory: (config: RedisVectorStoreProperties) => config,
           }),
         ],
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should support async factory returning a Promise", async () => {
+      const client = createMockRedisClient();
+
       const moduleRef = await Test.createTestingModule({
         imports: [
           NestAiModule.forRoot(),
           TransformersEmbeddingModelModule.forFeature({}, { global: true }),
           RedisVectorStoreModule.forFeatureAsync({
             useFactory: async () => ({
-              clientOptions: { url: "redis://localhost:6379" },
+              client: client as never,
             }),
           }),
         ],
@@ -186,12 +185,14 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should default global to false for async", async () => {
+      const client = createMockRedisClient();
       const featureModule = RedisVectorStoreModule.forFeatureAsync({
         useFactory: () => ({
-          clientOptions: { url: "redis://localhost:6379" },
+          client: client as never,
         }),
       });
 
@@ -205,13 +206,15 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(false);
     });
 
     it("should support global option for async", async () => {
+      const client = createMockRedisClient();
       const featureModule = RedisVectorStoreModule.forFeatureAsync({
         useFactory: () => ({
-          clientOptions: { url: "redis://localhost:6379" },
+          client: client as never,
         }),
         global: true,
       });
@@ -226,7 +229,29 @@ describe("RedisVectorStoreModule", () => {
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
       expect(vectorStore).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(true);
     });
   });
 });
+
+function createMockRedisClient() {
+  return {
+    isOpen: false,
+    connect: vi.fn(async () => undefined),
+    close: vi.fn(async () => undefined),
+    ft: {
+      _list: vi.fn(async () => []),
+      create: vi.fn(async () => "OK"),
+      info: vi.fn(async () => ({})),
+      search: vi.fn(async () => ({ documents: [] })),
+      aggregate: vi.fn(async () => ({ results: [] })),
+    },
+    json: {
+      set: vi.fn(async () => "OK"),
+      get: vi.fn(async () => null),
+    },
+    expire: vi.fn(async () => 1),
+    del: vi.fn(async () => 1),
+  };
+}

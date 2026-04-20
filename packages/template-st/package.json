@@ -32,19 +32,19 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "dependencies": {
-    "@nestjs-ai/commons": "workspace:*",
-    "stringtemplate4ts": "^2.0.1"
-  },
   "peerDependencies": {
     "@nestjs-ai/commons": "*",
     "@nestjs-port/core": "^0.0.2"
+  },
+  "dependencies": {
+    "stringtemplate4ts": "^2.0.1"
   },
   "files": [
     "dist",
     "CHANGELOG.md"
   ],
   "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
     "@nestjs-port/core": "^0.0.2"
   }
 }

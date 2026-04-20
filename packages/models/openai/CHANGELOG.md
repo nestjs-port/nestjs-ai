@@ -1,5 +1,11 @@
 # @nestjs-ai/model-openai
 
+## 0.0.3
+
+### Patch Changes
+
+- a2d0d7b: migrate to open ai sdk
+
 ## 0.0.2
 
 ### Patch Changes

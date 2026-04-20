@@ -168,15 +168,6 @@ importers:
       '@google/genai':
         specifier: ^1.49.0
         version: 1.49.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
-      '@mikro-orm/core':
-        specifier: ^7.0.10
-        version: 7.0.10
-      '@mikro-orm/nestjs':
-        specifier: ^7.0.1
-        version: 7.0.1(@mikro-orm/core@7.0.10)(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)
-      '@mikro-orm/postgresql':
-        specifier: ^7.0.10
-        version: 7.0.10(@mikro-orm/core@7.0.10)
       '@nestjs-ai/client-chat':
         specifier: workspace:*
         version: link:../client-chat
@@ -225,27 +216,15 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core':
-        specifier: ^11.1.11
-        version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/sequelize':
-        specifier: ^11.0.1
-        version: 11.0.1(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(sequelize-typescript@2.1.6(@types/node@25.5.0)(@types/validator@13.15.10)(reflect-metadata@0.2.2)(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)))(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7))
       '@nestjs/testing':
         specifier: ^11.1.11
         version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
-      '@nestjs/typeorm':
-        specifier: ^11.0.1
-        version: 11.0.1(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7))
       '@opentelemetry/sdk-metrics':
         specifier: ^2.6.1
         version: 2.6.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base':
         specifier: ^2.6.1
         version: 2.6.1(@opentelemetry/api@1.9.0)
-      '@prisma/client':
-        specifier: ^6.18.0
-        version: 6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2)
       '@testcontainers/mariadb':
         specifier: ^11.13.0
         version: 11.14.0
@@ -261,21 +240,12 @@ importers:
       '@testcontainers/postgresql':
         specifier: ^11.13.0
         version: 11.14.0
-      drizzle-orm:
-        specifier: ^0.45.2
-        version: 0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2))(kysely@0.28.15)(mysql2@3.22.0(@types/node@25.5.0))(pg@8.20.0)(prisma@6.19.3(typescript@6.0.2))(sql.js@1.14.1)(sqlite3@5.1.7)
       mssql:
         specifier: ^11.0.1
         version: 11.0.1(@azure/core-client@1.10.1)
-      oracledb:
-        specifier: ^6.9.0
-        version: 6.10.0
       pg:
         specifier: ^8.20.0
         version: 8.20.0
-      prisma:
-        specifier: ^6.18.0
-        version: 6.19.3(typescript@6.0.2)
       redis:
         specifier: ^5.11.0
         version: 5.11.0
@@ -285,12 +255,6 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
-      sequelize:
-        specifier: ^6.37.7
-        version: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
-      sql.js:
-        specifier: ^1.13.0
-        version: 1.14.1
       testcontainers:
         specifier: ^11.13.0
         version: 11.13.0
@@ -1229,27 +1193,6 @@ packages:
     peerDependenciesMeta:
       dataloader:
         optional: true
-
-  '@mikro-orm/nestjs@7.0.1':
-    resolution: {integrity: sha512-0VWaGIsVLMI6XDrrblX5om5lyf4msjlRu405jtuUYQ+nULK+XU2gb2mvzo7UvYZd//eEoXtMlkY5oEykm5Hriw==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      '@mikro-orm/core': ^7.0.0 || ^7.0.0-dev.0
-      '@nestjs/common': ^11.0.5
-      '@nestjs/core': ^11.0.5
-      reflect-metadata: ^0.1.0 || ^0.2.0
-
-  '@mikro-orm/postgresql@7.0.10':
-    resolution: {integrity: sha512-q9EIeIzBiteJrVlqcxdzPV6sNfyqiIOuCdULC4EBDp+x2ig2i5a+88lPrfAZAbMp5BR0mDtkl64n67oJmYwluw==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      '@mikro-orm/core': 7.0.10
-
-  '@mikro-orm/sql@7.0.10':
-    resolution: {integrity: sha512-LAa5YbcTDNv4C6X21c+kdnMRBLjvFAVXWn9ev+JqO0g5C5nWnsHV7j/KXhJJwQFUCC6EXi2Gw24j4nTOe4HiVQ==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      '@mikro-orm/core': 7.0.10
 
   '@modelcontextprotocol/sdk@1.28.0':
     resolution: {integrity: sha512-gmloF+i+flI8ouQK7MWW4mOwuMh4RePBuPFAEPC6+pdqyWOUMDOixb6qZ69owLJpz6XmyllCouc4t8YWO+E2Nw==}
@@ -3903,11 +3846,6 @@ packages:
   pg-connection-string@2.12.0:
     resolution: {integrity: sha512-U7qg+bpswf3Cs5xLzRqbXbQl85ng0mfSV/J0nnA31MCLgvEaAo7CIhmeyrmJpOr7o+zm0rXK+hNnT5l9RHkCkQ==}
 
-  pg-cursor@2.19.0:
-    resolution: {integrity: sha512-J5cF1MUz7LRJ9emOqF/06QjabMHMZy587rSPF0UuA8rCwKeeYl2co8Pp+6k5UU9YrAYHMzWkLxilfZB0hqsWWw==}
-    peerDependencies:
-      pg: ^8
-
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
@@ -4008,10 +3946,6 @@ packages:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
 
-  postgres-array@3.0.4:
-    resolution: {integrity: sha512-nAUSGfSDGOaOAEGwqsRY27GPOea7CNipJPOA7lPbdEpx5Kg3qzdP0AaWC5MlhTWV9s4hFX39nomVZ+C4tnGOJQ==}
-    engines: {node: '>=12'}
-
   postgres-bytea@1.0.1:
     resolution: {integrity: sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ==}
     engines: {node: '>=0.10.0'}
@@ -4020,17 +3954,9 @@ packages:
     resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
     engines: {node: '>=0.10.0'}
 
-  postgres-date@2.1.0:
-    resolution: {integrity: sha512-K7Juri8gtgXVcDfZttFKVmhglp7epKb1K4pgrkLxehjqkrgPhfG6OO8LHLkfaqkbpjNRnra018XwAr1yQFWGcA==}
-    engines: {node: '>=12'}
-
   postgres-interval@1.2.0:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
-
-  postgres-interval@4.0.2:
-    resolution: {integrity: sha512-EMsphSQ1YkQqKZL2cuG0zHkmjCCzQqQ71l2GXITqRwjhRleCdv00bDk/ktaSi0LnlaPzAc3535KTrjXsTdtx7A==}
-    engines: {node: '>=12'}
 
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
@@ -5855,32 +5781,8 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@mikro-orm/core@7.0.10': {}
-
-  '@mikro-orm/nestjs@7.0.1(@mikro-orm/core@7.0.10)(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)':
-    dependencies:
-      '@mikro-orm/core': 7.0.10
-      '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      reflect-metadata: 0.2.2
-
-  '@mikro-orm/postgresql@7.0.10(@mikro-orm/core@7.0.10)':
-    dependencies:
-      '@mikro-orm/core': 7.0.10
-      '@mikro-orm/sql': 7.0.10(@mikro-orm/core@7.0.10)
-      kysely: 0.28.15
-      pg: 8.20.0
-      pg-cursor: 2.19.0(pg@8.20.0)
-      postgres-array: 3.0.4
-      postgres-date: 2.1.0
-      postgres-interval: 4.0.2
-    transitivePeerDependencies:
-      - pg-native
-
-  '@mikro-orm/sql@7.0.10(@mikro-orm/core@7.0.10)':
-    dependencies:
-      '@mikro-orm/core': 7.0.10
-      kysely: 0.28.15
+  '@mikro-orm/core@7.0.10':
+    optional: true
 
   '@modelcontextprotocol/sdk@1.28.0(zod@4.3.6)':
     dependencies:
@@ -6021,6 +5923,7 @@ snapshots:
       rxjs: 7.8.2
       sequelize: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
       sequelize-typescript: 2.1.6(@types/node@25.5.0)(@types/validator@13.15.10)(reflect-metadata@0.2.2)(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7))
+    optional: true
 
   '@nestjs/testing@11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)':
     dependencies:
@@ -6037,6 +5940,7 @@ snapshots:
       reflect-metadata: 0.2.2
       rxjs: 7.8.2
       typeorm: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
+    optional: true
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -6101,6 +6005,7 @@ snapshots:
     optionalDependencies:
       prisma: 6.19.3(typescript@6.0.2)
       typescript: 6.0.2
+    optional: true
 
   '@prisma/config@6.19.3':
     dependencies:
@@ -6110,10 +6015,13 @@ snapshots:
       empathic: 2.0.0
     transitivePeerDependencies:
       - magicast
+    optional: true
 
-  '@prisma/debug@6.19.3': {}
+  '@prisma/debug@6.19.3':
+    optional: true
 
-  '@prisma/engines-version@7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7': {}
+  '@prisma/engines-version@7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7':
+    optional: true
 
   '@prisma/engines@6.19.3':
     dependencies:
@@ -6121,16 +6029,19 @@ snapshots:
       '@prisma/engines-version': 7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7
       '@prisma/fetch-engine': 6.19.3
       '@prisma/get-platform': 6.19.3
+    optional: true
 
   '@prisma/fetch-engine@6.19.3':
     dependencies:
       '@prisma/debug': 6.19.3
       '@prisma/engines-version': 7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7
       '@prisma/get-platform': 6.19.3
+    optional: true
 
   '@prisma/get-platform@6.19.3':
     dependencies:
       '@prisma/debug': 6.19.3
+    optional: true
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -6351,6 +6262,7 @@ snapshots:
   '@types/debug@4.1.13':
     dependencies:
       '@types/ms': 2.1.0
+    optional: true
 
   '@types/deep-eql@4.0.2': {}
 
@@ -6369,7 +6281,8 @@ snapshots:
 
   '@types/long@4.0.2': {}
 
-  '@types/ms@2.1.0': {}
+  '@types/ms@2.1.0':
+    optional: true
 
   '@types/node@12.20.55': {}
 
@@ -6400,7 +6313,8 @@ snapshots:
     dependencies:
       '@types/node': 18.19.130
 
-  '@types/validator@13.15.10': {}
+  '@types/validator@13.15.10':
+    optional: true
 
   '@typespec/ts-http-runtime@0.3.5':
     dependencies:
@@ -6850,6 +6764,7 @@ snapshots:
       perfect-debounce: 1.0.0
       pkg-types: 2.3.0
       rc9: 2.1.2
+    optional: true
 
   cac@6.7.14: {}
 
@@ -6938,6 +6853,7 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
+    optional: true
 
   chownr@1.1.4: {}
 
@@ -6949,8 +6865,10 @@ snapshots:
   citty@0.1.6:
     dependencies:
       consola: 3.4.2
+    optional: true
 
-  citty@0.2.2: {}
+  citty@0.2.2:
+    optional: true
 
   class-transformer@0.5.1: {}
 
@@ -7045,7 +6963,8 @@ snapshots:
       typedarray: 0.0.6
     optional: true
 
-  confbox@0.2.4: {}
+  confbox@0.2.4:
+    optional: true
 
   consola@3.4.2: {}
 
@@ -7166,7 +7085,8 @@ snapshots:
 
   deep-extend@0.6.0: {}
 
-  deepmerge-ts@7.1.5: {}
+  deepmerge-ts@7.1.5:
+    optional: true
 
   default-browser-id@5.0.1: {}
 
@@ -7183,7 +7103,8 @@ snapshots:
 
   define-lazy-prop@3.0.0: {}
 
-  defu@6.1.7: {}
+  defu@6.1.7:
+    optional: true
 
   delegates@1.0.0:
     optional: true
@@ -7193,7 +7114,8 @@ snapshots:
 
   depd@2.0.0: {}
 
-  destr@2.0.5: {}
+  destr@2.0.5:
+    optional: true
 
   detect-indent@6.1.0: {}
 
@@ -7275,7 +7197,8 @@ snapshots:
 
   dotenv@16.6.1: {}
 
-  dottie@2.0.7: {}
+  dottie@2.0.7:
+    optional: true
 
   drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2))(kysely@0.28.15)(mysql2@3.22.0(@types/node@25.5.0))(pg@8.20.0)(prisma@6.19.3(typescript@6.0.2))(sql.js@1.14.1)(sqlite3@5.1.7):
     optionalDependencies:
@@ -7287,6 +7210,7 @@ snapshots:
       prisma: 6.19.3(typescript@6.0.2)
       sql.js: 1.14.1
       sqlite3: 5.1.7
+    optional: true
 
   dunder-proto@1.0.1:
     dependencies:
@@ -7306,6 +7230,7 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 3.23.2
+    optional: true
 
   emoji-regex@10.6.0: {}
 
@@ -7313,7 +7238,8 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  empathic@2.0.0: {}
+  empathic@2.0.0:
+    optional: true
 
   encodeurl@2.0.0: {}
 
@@ -7465,7 +7391,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  exsolve@1.0.8: {}
+  exsolve@1.0.8:
+    optional: true
 
   extend@3.0.2: {}
 
@@ -7474,6 +7401,7 @@ snapshots:
   fast-check@3.23.2:
     dependencies:
       pure-rand: 6.1.0
+    optional: true
 
   fast-copy@3.0.2: {}
 
@@ -7674,6 +7602,7 @@ snapshots:
       node-fetch-native: 1.6.7
       nypm: 0.6.5
       pathe: 2.0.3
+    optional: true
 
   github-from-package@0.0.0: {}
 
@@ -7713,6 +7642,7 @@ snapshots:
       minimatch: 3.1.5
       once: 1.4.0
       path-is-absolute: 1.0.1
+    optional: true
 
   glob@7.2.3:
     dependencies:
@@ -7874,7 +7804,8 @@ snapshots:
   infer-owner@1.0.4:
     optional: true
 
-  inflection@1.13.4: {}
+  inflection@1.13.4:
+    optional: true
 
   inflight@1.0.6:
     dependencies:
@@ -7973,7 +7904,8 @@ snapshots:
     dependencies:
       '@isaacs/cliui': 9.0.0
 
-  jiti@2.6.1: {}
+  jiti@2.6.1:
+    optional: true
 
   jose@6.2.2: {}
 
@@ -8035,7 +7967,8 @@ snapshots:
       jwa: 2.0.1
       safe-buffer: 5.2.1
 
-  kysely@0.28.15: {}
+  kysely@0.28.15:
+    optional: true
 
   lazystream@1.0.1:
     dependencies:
@@ -8287,8 +8220,10 @@ snapshots:
   moment-timezone@0.5.48:
     dependencies:
       moment: 2.30.1
+    optional: true
 
-  moment@2.30.1: {}
+  moment@2.30.1:
+    optional: true
 
   mri@1.2.0: {}
 
@@ -8365,7 +8300,8 @@ snapshots:
 
   node-domexception@1.0.0: {}
 
-  node-fetch-native@1.6.7: {}
+  node-fetch-native@1.6.7:
+    optional: true
 
   node-fetch@3.3.2:
     dependencies:
@@ -8419,6 +8355,7 @@ snapshots:
       citty: 0.2.2
       pathe: 2.0.3
       tinyexec: 1.0.2
+    optional: true
 
   object-assign@4.1.1: {}
 
@@ -8426,7 +8363,8 @@ snapshots:
 
   obug@2.1.1: {}
 
-  ohash@2.0.11: {}
+  ohash@2.0.11:
+    optional: true
 
   on-exit-leak-free@2.1.2: {}
 
@@ -8474,7 +8412,8 @@ snapshots:
       ws: 8.19.0
       zod: 4.3.6
 
-  oracledb@6.10.0: {}
+  oracledb@6.10.0:
+    optional: true
 
   outdent@0.5.0: {}
 
@@ -8560,16 +8499,13 @@ snapshots:
 
   pend@1.2.0: {}
 
-  perfect-debounce@1.0.0: {}
+  perfect-debounce@1.0.0:
+    optional: true
 
   pg-cloudflare@1.3.0:
     optional: true
 
   pg-connection-string@2.12.0: {}
-
-  pg-cursor@2.19.0(pg@8.20.0):
-    dependencies:
-      pg: 8.20.0
 
   pg-int8@1.0.1: {}
 
@@ -8666,6 +8602,7 @@ snapshots:
       confbox: 0.2.4
       exsolve: 1.0.8
       pathe: 2.0.3
+    optional: true
 
   platform@1.3.6: {}
 
@@ -8679,19 +8616,13 @@ snapshots:
 
   postgres-array@2.0.0: {}
 
-  postgres-array@3.0.4: {}
-
   postgres-bytea@1.0.1: {}
 
   postgres-date@1.0.7: {}
 
-  postgres-date@2.1.0: {}
-
   postgres-interval@1.2.0:
     dependencies:
       xtend: 4.0.2
-
-  postgres-interval@4.0.2: {}
 
   prebuild-install@7.1.3:
     dependencies:
@@ -8718,6 +8649,7 @@ snapshots:
       typescript: 6.0.2
     transitivePeerDependencies:
       - magicast
+    optional: true
 
   process-nextick-args@2.0.1: {}
 
@@ -8790,7 +8722,8 @@ snapshots:
       end-of-stream: 1.4.5
       once: 1.4.0
 
-  pure-rand@6.1.0: {}
+  pure-rand@6.1.0:
+    optional: true
 
   qs@6.15.0:
     dependencies:
@@ -8815,6 +8748,7 @@ snapshots:
     dependencies:
       defu: 6.1.7
       destr: 2.0.5
+    optional: true
 
   rc@1.2.8:
     dependencies:
@@ -8858,7 +8792,8 @@ snapshots:
     dependencies:
       minimatch: 5.1.9
 
-  readdirp@4.1.2: {}
+  readdirp@4.1.2:
+    optional: true
 
   real-require@0.2.0: {}
 
@@ -8889,7 +8824,8 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-as-promised@7.1.1: {}
+  retry-as-promised@7.1.1:
+    optional: true
 
   retry@0.12.0: {}
 
@@ -8993,7 +8929,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  sequelize-pool@7.1.0: {}
+  sequelize-pool@7.1.0:
+    optional: true
 
   sequelize-typescript@2.1.6(@types/node@25.5.0)(@types/validator@13.15.10)(reflect-metadata@0.2.2)(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)):
     dependencies:
@@ -9002,6 +8939,7 @@ snapshots:
       glob: 7.2.0
       reflect-metadata: 0.2.2
       sequelize: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
+    optional: true
 
   sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7):
     dependencies:
@@ -9028,6 +8966,7 @@ snapshots:
       sqlite3: 5.1.7
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   seroval-plugins@1.5.0(seroval@1.5.0):
     dependencies:
@@ -9208,7 +9147,8 @@ snapshots:
 
   sql-highlight@6.1.0: {}
 
-  sql.js@1.14.1: {}
+  sql.js@1.14.1:
+    optional: true
 
   sqlite3@5.1.7:
     dependencies:
@@ -9524,7 +9464,8 @@ snapshots:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
-  toposort-class@1.0.1: {}
+  toposort-class@1.0.1:
+    optional: true
 
   tree-dump@1.1.0(tslib@2.8.1):
     dependencies:
@@ -9665,7 +9606,8 @@ snapshots:
 
   uuid@8.3.2: {}
 
-  validator@13.15.26: {}
+  validator@13.15.26:
+    optional: true
 
   vary@1.1.2: {}
 
@@ -9832,6 +9774,7 @@ snapshots:
   wkx@0.5.0:
     dependencies:
       '@types/node': 25.5.0
+    optional: true
 
   wordwrap@1.0.0: {}
 

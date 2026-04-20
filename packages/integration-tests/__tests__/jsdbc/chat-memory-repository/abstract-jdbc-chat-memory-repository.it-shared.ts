@@ -15,7 +15,6 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type { JsdbcTemplate, SqlFragment } from "@nestjs-ai/jsdbc";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -28,6 +27,7 @@ import {
   type JsdbcChatMemoryRepositoryDialect,
   JsdbcChatMemoryRepositoryDialectFactory,
 } from "@nestjs-ai/model-chat-memory-repository-jsdbc";
+import type { JsdbcTemplate, SqlFragment } from "@nestjs-port/jsdbc";
 import { expect } from "vitest";
 
 /**

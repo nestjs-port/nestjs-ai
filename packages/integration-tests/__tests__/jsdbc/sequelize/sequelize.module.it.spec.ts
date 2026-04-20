@@ -18,9 +18,9 @@ import "reflect-metadata";
 
 import { SequelizeModule } from "@nestjs/sequelize";
 import { Test, type TestingModule } from "@nestjs/testing";
-import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
-import { SequelizeJsdbcModule } from "@nestjs-ai/jsdbc/sequelize";
+import type { JsdbcTemplate } from "@nestjs-port/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-port/jsdbc";
+import { SequelizeJsdbcModule } from "@nestjs-port/jsdbc/sequelize";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,

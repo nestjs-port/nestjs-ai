@@ -23,12 +23,12 @@ import type {
 } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
-import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
+import type { JsdbcTemplate } from "@nestjs-port/jsdbc";
 import {
   DatabaseDialect,
   JSDBC_TEMPLATE,
   type SqlFragment,
-} from "@nestjs-ai/jsdbc";
+} from "@nestjs-port/jsdbc";
 
 import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository";
 import {

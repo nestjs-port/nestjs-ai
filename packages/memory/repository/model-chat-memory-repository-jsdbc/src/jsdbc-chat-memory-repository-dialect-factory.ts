@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DatabaseDialect, type DataSource } from "@nestjs-ai/jsdbc";
 import { LoggerFactory } from "@nestjs-port/core";
+import { DatabaseDialect, type DataSource } from "@nestjs-port/jsdbc";
 import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
 import { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
 import { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";

@@ -149,6 +149,3 @@ vite.config.ts.timestamp-*
 # Docs
 docs/antora/site
 docs/antora/docs
-
-# Prisma generated client for integration tests
-packages/integration-tests/__tests__/jsdbc/prisma/generated/

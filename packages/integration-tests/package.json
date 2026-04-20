@@ -36,7 +36,6 @@
     "@nestjs-ai/model-anthropic": "workspace:*",
     "@nestjs-ai/model-google-genai": "workspace:*",
     "@nestjs-ai/model-openai": "workspace:*",
-    "@nestjs-ai/model-openai-sdk": "workspace:*",
     "@nestjs-ai/model-transformers": "workspace:*",
     "@nestjs-ai/observation": "workspace:*",
     "@nestjs-ai/platform": "workspace:*",

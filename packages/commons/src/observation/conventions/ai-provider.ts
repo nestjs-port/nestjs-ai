@@ -77,11 +77,6 @@ export class AiProvider {
   static readonly OPENAI = new AiProvider("openai");
 
   /**
-   * AI system provided by the official OpenAI SDK.
-   */
-  static readonly OPENAI_SDK = new AiProvider("openai_sdk");
-
-  /**
    * AI system provided by Spring AI.
    */
   static readonly SPRING_AI = new AiProvider("spring_ai");

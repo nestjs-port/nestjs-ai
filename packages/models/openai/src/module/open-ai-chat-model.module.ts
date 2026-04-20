@@ -24,23 +24,25 @@ import type {
 import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
-  HTTP_CLIENT_TOKEN,
-  type HttpClient,
+  NoopObservationRegistry,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
   ChatModelObservationConvention,
+  DefaultToolExecutionEligibilityPredicate,
   ModelObservationModule,
   TOOL_CALLING_MANAGER_TOKEN,
   type ToolCallingManager,
   ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
-import { OpenAiApi } from "../api";
 import { OpenAiChatModel } from "../open-ai-chat-model";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
-import type { OpenAiChatProperties } from "./open-ai-properties";
+import {
+  OPEN_AI_CHAT_DEFAULT_MODEL,
+  type OpenAiChatProperties,
+} from "./open-ai-chat-properties";
 
 export const OPEN_AI_CHAT_PROPERTIES_TOKEN = Symbol.for(
   "OPEN_AI_CHAT_PROPERTIES_TOKEN",
@@ -97,16 +99,9 @@ export class OpenAiChatModelModule {
 function createProviders(): Provider[] {
   return [
     {
-      provide: OpenAiApi,
-      useFactory: (properties: OpenAiChatProperties, httpClient: HttpClient) =>
-        createOpenAiApi(properties, httpClient),
-      inject: [OPEN_AI_CHAT_PROPERTIES_TOKEN, HTTP_CLIENT_TOKEN],
-    },
-    {
       provide: CHAT_MODEL_TOKEN,
       useFactory: (
         properties: OpenAiChatProperties,
-        openAiApi: OpenAiApi,
         toolCallingManager: ToolCallingManager,
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
@@ -114,7 +109,6 @@ function createProviders(): Provider[] {
       ) =>
         createOpenAiChatModel(
           properties,
-          openAiApi,
           toolCallingManager,
           observationRegistry,
           observationConvention,
@@ -122,7 +116,6 @@ function createProviders(): Provider[] {
         ),
       inject: [
         OPEN_AI_CHAT_PROPERTIES_TOKEN,
-        OpenAiApi,
         TOOL_CALLING_MANAGER_TOKEN,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
@@ -134,63 +127,34 @@ function createProviders(): Provider[] {
 
 function createOpenAiChatModel(
   properties: OpenAiChatProperties,
-  openAiApi: OpenAiApi,
-  toolCallingManager: ToolCallingManager,
+  toolCallingManager?: ToolCallingManager,
   observationRegistry?: ObservationRegistry,
   observationConvention?: ChatModelObservationConvention,
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
 ): OpenAiChatModel {
-  const builder = OpenAiChatModel.builder().openAiApi(openAiApi);
+  const { options, ...connectionProperties } = properties;
+  const defaultOptions = new OpenAiChatOptions({
+    ...connectionProperties,
+    ...options,
+    model:
+      options?.model ??
+      connectionProperties.model ??
+      OPEN_AI_CHAT_DEFAULT_MODEL,
+  });
 
-  if (properties.options) {
-    builder.defaultOptions(new OpenAiChatOptions(properties.options));
-  }
-  if (observationRegistry) {
-    builder.observationRegistry(observationRegistry);
-  }
-  if (toolCallingManager) {
-    builder.toolCallingManager(toolCallingManager);
-  }
-  if (toolExecutionEligibilityPredicate) {
-    builder.toolExecutionEligibilityPredicate(
-      toolExecutionEligibilityPredicate,
-    );
-  }
+  const model = new OpenAiChatModel({
+    options: defaultOptions,
+    toolCallingManager,
+    observationRegistry:
+      observationRegistry ?? NoopObservationRegistry.INSTANCE,
+    toolExecutionEligibilityPredicate:
+      toolExecutionEligibilityPredicate ??
+      new DefaultToolExecutionEligibilityPredicate(),
+  });
 
-  const model = builder.build();
   if (observationConvention) {
     model.setObservationConvention(observationConvention);
   }
 
   return model;
-}
-
-function createOpenAiApi(
-  properties: OpenAiChatProperties,
-  httpClient: HttpClient,
-): OpenAiApi {
-  const headers = new Headers();
-  if (properties.projectId) {
-    headers.set("OpenAI-Project", properties.projectId);
-  }
-  if (properties.organizationId) {
-    headers.set("OpenAI-Organization", properties.organizationId);
-  }
-
-  const builder = OpenAiApi.builder();
-
-  if (properties.apiKey) {
-    builder.apiKey(properties.apiKey);
-  }
-  if (properties.baseUrl) {
-    builder.baseUrl(properties.baseUrl);
-  }
-  if (properties.completionsPath) {
-    builder.completionsPath(properties.completionsPath);
-  }
-
-  builder.headers(headers);
-  builder.httpClient(httpClient);
-
-  return builder.build();
 }

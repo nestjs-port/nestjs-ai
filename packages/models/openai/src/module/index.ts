@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-export {
-  OPEN_AI_CHAT_PROPERTIES_TOKEN,
-  OpenAiChatModelModule,
-  OpenAiChatModelModuleAsyncOptions,
-} from "./open-ai-chat-model.module";
-export * from "./open-ai-properties";
+export * from "./open-ai-chat-model.module";
+export type { OpenAiChatProperties } from "./open-ai-chat-properties";
+export { OPEN_AI_CHAT_DEFAULT_MODEL } from "./open-ai-chat-properties";
+export * from "./open-ai-embedding-model.module";
+export type { OpenAiEmbeddingProperties } from "./open-ai-embedding-properties";
+export { OPEN_AI_EMBEDDING_DEFAULT_MODEL } from "./open-ai-embedding-properties";
+export * from "./open-ai-image-model.module";
+export type { OpenAiImageProperties } from "./open-ai-image-properties";
+export { OPEN_AI_IMAGE_DEFAULT_MODEL } from "./open-ai-image-properties";

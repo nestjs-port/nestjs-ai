@@ -19,9 +19,9 @@ import "reflect-metadata";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { Test, type TestingModule } from "@nestjs/testing";
-import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
-import { MikroOrmJsdbcModule } from "@nestjs-ai/jsdbc/mikroorm";
+import type { JsdbcTemplate } from "@nestjs-port/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-port/jsdbc";
+import { MikroOrmJsdbcModule } from "@nestjs-port/jsdbc/mikroorm";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,

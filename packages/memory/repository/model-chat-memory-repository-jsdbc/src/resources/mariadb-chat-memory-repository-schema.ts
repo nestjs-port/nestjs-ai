@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { sql } from "@nestjs-ai/jsdbc";
+import { sql } from "@nestjs-port/jsdbc";
 
 export const MARIADB_CHAT_MEMORY_SCHEMA = [
   // language=SQL

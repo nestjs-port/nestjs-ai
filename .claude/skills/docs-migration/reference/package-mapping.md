@@ -51,7 +51,7 @@ These Spring AI artifacts have NestJS AI equivalents.
 | Spring AI Artifact | npm Package | Required Deps | Source Dir |
 |-------------------|-------------|---------------|-----------|
 | (observation) | `@nestjs-ai/observation` | — | `packages/observation/` |
-| (JSDBC) | `@nestjs-ai/jsdbc` | An ORM module | `packages/jsdbc/` |
+| (JSDBC) | `@nestjs-port/jsdbc` | An ORM module | — |
 
 ### MCP Packages
 
@@ -163,7 +163,7 @@ pnpm add @nestjs-ai/model-chat-memory-repository-redis
 ### Chat memory (JSDBC — requires ORM)
 
 ```bash
-pnpm add @nestjs-ai/model-chat-memory-repository-jsdbc @nestjs-ai/jsdbc
+pnpm add @nestjs-ai/model-chat-memory-repository-jsdbc @nestjs-port/jsdbc
 ```
 
 ### Observation

@@ -183,9 +183,6 @@ importers:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
-      '@nestjs-ai/jsdbc':
-        specifier: workspace:*
-        version: link:../jsdbc
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
@@ -301,45 +298,6 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
-  packages/jsdbc:
-    devDependencies:
-      '@mikro-orm/core':
-        specifier: ^7.0.10
-        version: 7.0.10
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../commons
-      '@nestjs-port/core':
-        specifier: ^0.0.2
-        version: 0.0.2(rxjs@7.8.2)
-      '@nestjs/common':
-        specifier: ^11.1.11
-        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/sequelize':
-        specifier: ^11.0.1
-        version: 11.0.1(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(sequelize-typescript@2.1.6(@types/node@25.5.0)(@types/validator@13.15.10)(reflect-metadata@0.2.2)(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)))(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7))
-      '@nestjs/typeorm':
-        specifier: ^11.0.1
-        version: 11.0.1(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7))
-      '@prisma/client':
-        specifier: ^6.18.0
-        version: 6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2)
-      class-transformer:
-        specifier: ^0.5.1
-        version: 0.5.1
-      drizzle-orm:
-        specifier: ^0.45.2
-        version: 0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2))(kysely@0.28.15)(mysql2@3.22.0(@types/node@25.5.0))(pg@8.20.0)(prisma@6.19.3(typescript@6.0.2))(sql.js@1.14.1)(sqlite3@5.1.7)
-      sequelize:
-        specifier: ^6.37.7
-        version: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
-      typeorm:
-        specifier: ^0.3.28
-        version: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
-
   packages/mcp/annotations: {}
 
   packages/mcp/common:
@@ -363,15 +321,15 @@ importers:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../../commons
-      '@nestjs-ai/jsdbc':
-        specifier: workspace:*
-        version: link:../../../jsdbc
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../../model
       '@nestjs-port/core':
         specifier: ^0.0.2
         version: 0.0.2(rxjs@7.8.2)
+      '@nestjs-port/jsdbc':
+        specifier: ^0.0.2
+        version: 0.0.2(33f0c851be02cd9673a5a79512a8508c)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1379,6 +1337,40 @@ packages:
     resolution: {integrity: sha512-8MXfBdP/viZkq2jbcA7gJb1LO99ymyaCgwjgdF/7rmrgX4oNXYbI42mplbs3miZjjiSalE7XyEpOJv/bsLc58g==}
     peerDependencies:
       rxjs: ^7.0.0
+
+  '@nestjs-port/jsdbc@0.0.2':
+    resolution: {integrity: sha512-XYkV7NKDrsETGCqZJEGbLmpRaYqmzlFtrIgMlon5iNWKhPrbQvDZvDXfYI+U3PUnRTjvOZgNqf/leMYZI+7MaA==}
+    peerDependencies:
+      '@mikro-orm/core': ^7.0.0
+      '@nestjs-port/core': 0.0.2
+      '@nestjs/common': ^10.0.0 || ^11.0.0
+      '@nestjs/sequelize': ^11.0.0
+      '@nestjs/typeorm': ^10.0.0 || ^11.0.0
+      '@prisma/client': ^6.18.0
+      class-transformer: ^0.4.0 || ^0.5.0
+      drizzle-orm: ^0.45.0
+      sequelize: ^6.37.0
+      typeorm: ^0.3.0
+      zod: ^4.0.0
+    peerDependenciesMeta:
+      '@mikro-orm/core':
+        optional: true
+      '@nestjs/sequelize':
+        optional: true
+      '@nestjs/typeorm':
+        optional: true
+      '@prisma/client':
+        optional: true
+      class-transformer:
+        optional: true
+      drizzle-orm:
+        optional: true
+      sequelize:
+        optional: true
+      typeorm:
+        optional: true
+      zod:
+        optional: true
 
   '@nestjs/common@11.1.11':
     resolution: {integrity: sha512-R/+A8XFqLgN8zNs2twhrOaE7dJbRQhdPX3g46am4RT/x8xGLqDphrXkUIno4cGUZHxbczChBAaAPTdPv73wDZA==}
@@ -5960,6 +5952,21 @@ snapshots:
   '@nestjs-port/core@0.0.2(rxjs@7.8.2)':
     dependencies:
       rxjs: 7.8.2
+
+  '@nestjs-port/jsdbc@0.0.2(33f0c851be02cd9673a5a79512a8508c)':
+    dependencies:
+      '@nestjs-port/core': 0.0.2(rxjs@7.8.2)
+      '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+    optionalDependencies:
+      '@mikro-orm/core': 7.0.10
+      '@nestjs/sequelize': 11.0.1(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(sequelize-typescript@2.1.6(@types/node@25.5.0)(@types/validator@13.15.10)(reflect-metadata@0.2.2)(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)))(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7))
+      '@nestjs/typeorm': 11.0.1(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7))
+      '@prisma/client': 6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2)
+      class-transformer: 0.5.1
+      drizzle-orm: 0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.2))(typescript@6.0.2))(kysely@0.28.15)(mysql2@3.22.0(@types/node@25.5.0))(pg@8.20.0)(prisma@6.19.3(typescript@6.0.2))(sql.js@1.14.1)(sqlite3@5.1.7)
+      sequelize: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
+      typeorm: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
+      zod: 4.3.6
 
   '@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     dependencies:

@@ -16,8 +16,9 @@
 
 import assert from "node:assert/strict";
 import type { ChatClient } from "@nestjs-ai/client-chat";
-import { type Logger, LoggerFactory, StringUtils } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-ai/commons";
 import { PromptTemplate } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Query } from "../../../query";
 import { PromptAssert } from "../../../util";
 import { QueryExpander } from "./query-expander";

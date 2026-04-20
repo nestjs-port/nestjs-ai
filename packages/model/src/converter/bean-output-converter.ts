@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import { EOL } from "node:os";
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import { type ClassConstructor, plainToInstance } from "class-transformer";
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 import { z } from "zod";

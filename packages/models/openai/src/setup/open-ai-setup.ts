@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { LoggerFactory, type Milliseconds, ms } from "@nestjs-ai/commons";
+import { type Milliseconds, ms } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import type { ClientOptions } from "openai";
 import OpenAI, { AzureOpenAI } from "openai";
 

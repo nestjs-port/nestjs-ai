@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
 import type { ChatResponse } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 
 import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";

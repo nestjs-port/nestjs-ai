@@ -19,8 +19,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { Anthropic } from "@anthropic-ai/sdk";
-import { LoggerFactory } from "@nestjs-ai/commons";
 import { Prompt, UserMessage } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import {

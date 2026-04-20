@@ -20,7 +20,6 @@ import type {
   Model as AnthropicModel,
   Usage as AnthropicSdkUsage,
 } from "@anthropic-ai/sdk/resources/messages";
-import { LoggerFactory } from "@nestjs-ai/commons";
 import type { ChatResponse, Message } from "@nestjs-ai/model";
 import {
   FunctionToolCallback,
@@ -29,6 +28,7 @@ import {
   SystemMessage,
   UserMessage,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 import {

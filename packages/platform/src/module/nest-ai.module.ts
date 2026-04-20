@@ -19,9 +19,9 @@ import { Module } from "@nestjs/common";
 import {
   FetchHttpClient,
   HTTP_CLIENT_TOKEN,
-  LoggerFactory,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import { NestLoggerFactory } from "../logging";
 import { NestProviderInstanceExplorer } from "../provider";
 import type {

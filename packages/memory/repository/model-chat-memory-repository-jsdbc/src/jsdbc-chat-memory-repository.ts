@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import { LoggerFactory, StringUtils } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-ai/commons";
 import {
   type DataSource,
   JsdbcTemplate,
@@ -32,6 +32,7 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { z } from "zod";
 import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
 import { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory";

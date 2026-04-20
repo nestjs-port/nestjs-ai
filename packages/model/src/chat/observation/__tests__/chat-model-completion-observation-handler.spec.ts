@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { LoggerFactory, ObservationContext } from "@nestjs-ai/commons";
+import { ObservationContext } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AssistantMessage } from "../../messages";
 import { ChatResponse, Generation } from "../../model";

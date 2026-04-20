@@ -17,8 +17,8 @@
 import assert from "node:assert/strict";
 
 import type { CacheControlEphemeral } from "@anthropic-ai/sdk/resources/messages";
-import { LoggerFactory } from "@nestjs-ai/commons";
 import { MessageType } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 
 import type { AnthropicCacheOptions } from "./anthropic-cache-options";
 import { AnthropicCacheStrategy } from "./anthropic-cache-strategy";

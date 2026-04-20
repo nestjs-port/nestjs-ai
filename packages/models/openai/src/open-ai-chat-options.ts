@@ -15,8 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-
-import { LoggerFactory, type Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-ai/commons";
 import {
   type ChatOptions,
   DefaultToolCallingChatOptions,
@@ -24,6 +23,7 @@ import {
   type ToolCallback,
   type ToolCallingChatOptions,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import type { ClientOptions } from "openai";
 import type {
   ChatCompletionAudioParam,

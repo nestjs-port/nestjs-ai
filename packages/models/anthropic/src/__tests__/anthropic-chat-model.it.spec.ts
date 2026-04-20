@@ -23,7 +23,7 @@ import type {
   ToolChoice,
 } from "@anthropic-ai/sdk/resources/messages";
 import { ChatClient } from "@nestjs-ai/client-chat";
-import { LoggerFactory, Media, MediaFormat } from "@nestjs-ai/commons";
+import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
   BeanOutputConverter,
   type ChatResponse,
@@ -37,6 +37,7 @@ import {
   SystemPromptTemplate,
   UserMessage,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { firstValueFrom, type Observable, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { defer } from "rxjs";
 import { finalize, tap } from "rxjs/operators";

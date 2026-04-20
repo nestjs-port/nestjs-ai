@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Logger } from "@nestjs-ai/commons";
+import type { Logger } from "@nestjs-port/core";
 import {
   ErrorType,
   type STErrorListener,

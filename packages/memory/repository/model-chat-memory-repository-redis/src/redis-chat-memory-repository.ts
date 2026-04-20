@@ -15,12 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  type Logger,
-  LoggerFactory,
-  Media,
-  type MediaContent,
-} from "@nestjs-ai/commons";
+import { Media, type MediaContent } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -32,6 +27,7 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import {
   createClient,
   FT_AGGREGATE_GROUP_BY_REDUCERS,

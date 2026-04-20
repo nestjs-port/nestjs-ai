@@ -34,11 +34,13 @@
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "*",
-    "@nestjs-ai/model": "*"
+    "@nestjs-ai/model": "*",
+    "@nestjs-port/core": "^0.0.2"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
-    "@nestjs-ai/model": "workspace:*"
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-port/core": "^0.0.2"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0"

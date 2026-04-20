@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LoggerFactory } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import { type DataSource, type SqlFragment, toSql } from "../api";
 import type { RowMapper, RowMapperFunction } from "./row-mapper.interface";
 import { TransactionSynchronizationManager } from "./transaction-synchronization-manager";

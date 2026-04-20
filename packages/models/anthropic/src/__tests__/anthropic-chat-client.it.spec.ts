@@ -23,7 +23,7 @@ import {
   ChatClient,
   SimpleLoggerAdvisor,
 } from "@nestjs-ai/client-chat";
-import { LoggerFactory, MediaFormat } from "@nestjs-ai/commons";
+import { MediaFormat } from "@nestjs-ai/commons";
 import {
   BeanOutputConverter,
   FunctionToolCallback,
@@ -31,6 +31,7 @@ import {
   MapOutputConverter,
   Tool,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { firstValueFrom, map, type Observable, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";

@@ -16,13 +16,14 @@
 
 import assert from "node:assert/strict";
 import { EOL } from "node:os";
-import { type Logger, LoggerFactory, StringUtils } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-ai/commons";
 import {
   ChatMemory,
   type Message,
   MessageType,
   PromptTemplate,
 } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable, SchedulerLike } from "rxjs";
 import { mergeMap, observeOn, of } from "rxjs";
 

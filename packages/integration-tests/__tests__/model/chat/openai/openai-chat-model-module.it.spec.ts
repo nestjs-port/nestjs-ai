@@ -17,13 +17,14 @@
 import "reflect-metadata";
 
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN, LoggerFactory } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import { type ChatModel, type ChatResponse, Prompt } from "@nestjs-ai/model";
 import {
   OpenAiChatModelModule,
   OpenAiChatOptions,
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";
+import { LoggerFactory } from "@nestjs-port/core";
 import { lastValueFrom, type Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { describe, expect, it } from "vitest";

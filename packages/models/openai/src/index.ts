@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
-/**
- * @nestjs-ai/model-openai
- *
- * OpenAI model implementation for NestJS AI
- */
-
-export * from "./api";
+export {
+  AbstractOpenAiOptions,
+  type AbstractOpenAiOptionsProps,
+} from "./abstract-open-ai-options";
 export * from "./metadata";
 export * from "./module";
-export * from "./open-ai-chat-model";
-export * from "./open-ai-chat-options";
+export { OpenAiChatModel } from "./open-ai-chat-model";
+export { OpenAiChatOptions } from "./open-ai-chat-options";
+export {
+  OpenAiEmbeddingModel,
+  type OpenAiEmbeddingModelProps,
+} from "./open-ai-embedding-model";
+export {
+  type OpenAiEmbeddingCreateParams,
+  OpenAiEmbeddingOptions,
+  type OpenAiEmbeddingOptionsProps,
+} from "./open-ai-embedding-options";
+export {
+  OpenAiImageModel,
+  type OpenAiImageModelProps,
+} from "./open-ai-image-model";
+export {
+  OpenAiImageOptions,
+  type OpenAiImageOptionsProps,
+} from "./open-ai-image-options";
+export * from "./setup";

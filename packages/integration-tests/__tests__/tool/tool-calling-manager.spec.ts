@@ -27,11 +27,7 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
-import {
-  OpenAiApi,
-  OpenAiChatModel,
-  OpenAiChatOptions,
-} from "@nestjs-ai/model-openai";
+import { OpenAiChatModel, OpenAiChatOptions } from "@nestjs-ai/model-openai";
 import { firstValueFrom, from, of } from "rxjs";
 import { map, mergeMap, toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
@@ -44,17 +40,12 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
   const tools = new Tools();
   const toolCallingManager = new DefaultToolCallingManager();
-  const openAiApi = OpenAiApi.builder()
-    .apiKey(OPENAI_API_KEY ?? "")
-    .build();
-  const openAiChatModel = OpenAiChatModel.builder()
-    .openAiApi(openAiApi)
-    .defaultOptions(
-      new OpenAiChatOptions({
-        model: "gpt-4o-mini",
-      }),
-    )
-    .build();
+  const openAiChatModel = new OpenAiChatModel({
+    options: new OpenAiChatOptions({
+      apiKey: OPENAI_API_KEY ?? "",
+      model: "gpt-4o-mini",
+    }),
+  });
 
   it("explicitToolCallingExecutionWithNewOptions", async () => {
     const chatOptions = new OpenAiChatOptions({

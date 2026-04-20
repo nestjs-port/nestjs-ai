@@ -15,208 +15,211 @@
  */
 
 import { ToolCallback, type ToolDefinition } from "@nestjs-ai/model";
+import type {
+  ChatCompletionAudioParam,
+  ChatCompletionStreamOptions,
+} from "openai/resources/chat/completions";
+import type { ResponseFormatJSONSchema } from "openai/resources/shared";
 import { describe, expect, it } from "vitest";
-import {
-  type AudioParameters,
-  AudioResponseFormat,
-  type FunctionTool,
-  type ResponseFormat,
-  SearchContextSize,
-  ServiceTier,
-  Voice,
-  type WebSearchOptions,
-} from "../api";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
 
 class TestToolCallback extends ToolCallback {
+  constructor(
+    private readonly name: string,
+    private readonly result: string,
+  ) {
+    super();
+  }
+
   get toolDefinition(): ToolDefinition {
     return {
-      name: "test-tool",
-      description: "test tool",
+      name: this.name,
+      description: `${this.name} description`,
       inputSchema: "{}",
     };
   }
 
-  async call(toolInput: string): Promise<string> {
-    return toolInput;
+  async call(): Promise<string> {
+    return this.result;
   }
 }
 
 describe("OpenAiChatOptions", () => {
   it("test builder with all fields", () => {
-    const logitBias: Record<string, number> = { token1: 1, token2: -1 };
-    const outputModalities = ["text", "audio"];
-    const outputAudio: AudioParameters = {
-      voice: Voice.ALLOY,
-      format: AudioResponseFormat.MP3,
-    };
-    const responseFormat: ResponseFormat = { type: "text" };
-    const stopSequences = ["stop1", "stop2"];
-    const tools: FunctionTool[] = [];
-    const toolChoice = "auto";
+    const logitBias = { token1: 1, token2: -1 };
+    const stop = ["stop1", "stop2"];
     const metadata = { key1: "value1" };
     const toolContext = { keyA: "valueA" };
+    const customHeaders = { header1: "value1" };
+    const extraBody = { custom_flag: true };
+    const outputAudio: ChatCompletionAudioParam = {
+      voice: "alloy",
+      format: "wav",
+    };
+    const streamOptions: ChatCompletionStreamOptions = {
+      include_usage: true,
+    };
+    const responseFormat: ResponseFormatJSONSchema = {
+      type: "json_schema",
+      json_schema: {
+        name: "json_schema",
+        strict: true,
+        schema: { type: "object" },
+      },
+    };
 
-    const options = new OpenAiChatOptions({
-      model: "test-model",
-      frequencyPenalty: 0.5,
-      logitBias,
-      logprobs: true,
-      topLogprobs: 5,
-      maxCompletionTokens: 50,
-      n: 2,
-      outputModalities,
-      outputAudio,
-      presencePenalty: 0.8,
-      responseFormat,
-      seed: 12345,
-      stop: stopSequences,
-      temperature: 0.7,
-      topP: 0.9,
-      tools,
-      toolChoice,
-      user: "test-user",
-      parallelToolCalls: true,
-      store: false,
-      metadata,
-      reasoningEffort: "medium",
-      internalToolExecutionEnabled: false,
-      httpHeaders: { header1: "value1" },
-      toolContext,
-      serviceTier: ServiceTier.PRIORITY,
-      promptCacheKey: "test-cache-key",
-      safetyIdentifier: "test-safety-id",
-    });
-
-    // streamUsage set separately since it's a derived property
-    options.setStreamUsage(true);
+    const options = OpenAiChatOptions.builder()
+      .model("test-model")
+      .deploymentName("test-deployment")
+      .frequencyPenalty(0.5)
+      .logitBias(logitBias)
+      .logprobs(true)
+      .topLogprobs(5)
+      .maxTokens(100)
+      .maxCompletionTokens(50)
+      .N(2)
+      .outputAudio(outputAudio)
+      .presencePenalty(0.8)
+      .responseFormat(responseFormat)
+      .streamOptions(streamOptions)
+      .seed(12345)
+      .stop(stop)
+      .temperature(0.7)
+      .topP(0.9)
+      .toolChoice("auto")
+      .user("test-user")
+      .parallelToolCalls(true)
+      .store(false)
+      .metadata(metadata)
+      .reasoningEffort("medium")
+      .verbosity("low")
+      .serviceTier("auto")
+      .extraBody(extraBody)
+      .internalToolExecutionEnabled(false)
+      .customHeaders(customHeaders)
+      .toolContext(toolContext)
+      .build();
 
     expect(options.model).toBe("test-model");
+    expect(options.deploymentName).toBe("test-deployment");
     expect(options.frequencyPenalty).toBe(0.5);
     expect(options.logitBias).toEqual(logitBias);
     expect(options.logprobs).toBe(true);
     expect(options.topLogprobs).toBe(5);
-    expect(options.maxTokens).toBeUndefined();
+    expect(options.maxTokens).toBeNull();
     expect(options.maxCompletionTokens).toBe(50);
     expect(options.n).toBe(2);
-    expect(options.outputModalities).toEqual(outputModalities);
     expect(options.outputAudio).toEqual(outputAudio);
     expect(options.presencePenalty).toBe(0.8);
-    expect(options.responseFormat).toEqual(responseFormat);
-    expect(options.streamOptions).toEqual({ include_usage: true });
+    expect(options.streamOptions).toEqual(streamOptions);
     expect(options.seed).toBe(12345);
-    expect(options.stop).toEqual(stopSequences);
+    expect(options.stop).toEqual(stop);
+    expect(options.stopSequences).toEqual(stop);
     expect(options.temperature).toBe(0.7);
     expect(options.topP).toBe(0.9);
-    expect(options.tools).toEqual(tools);
-    expect(options.toolChoice).toBe(toolChoice);
     expect(options.user).toBe("test-user");
     expect(options.parallelToolCalls).toBe(true);
     expect(options.store).toBe(false);
     expect(options.metadata).toEqual(metadata);
     expect(options.reasoningEffort).toBe("medium");
+    expect(options.verbosity).toBe("low");
+    expect(options.serviceTier).toBe("auto");
+    expect(options.extraBody).toEqual(extraBody);
     expect(options.internalToolExecutionEnabled).toBe(false);
-    expect(options.httpHeaders).toEqual({ header1: "value1" });
+    expect(options.customHeaders).toEqual(customHeaders);
     expect(options.toolContext).toEqual(toolContext);
-    expect(options.serviceTier).toBe(ServiceTier.PRIORITY);
-    expect(options.promptCacheKey).toBe("test-cache-key");
-    expect(options.safetyIdentifier).toBe("test-safety-id");
-
-    expect(options.streamUsage).toBe(true);
-    expect(options.streamOptions).toEqual({ include_usage: true });
+    expect(options.responseFormat).toEqual(responseFormat);
   });
 
   it("test copy", () => {
-    const logitBias: Record<string, number> = { token1: 1 };
-    const outputModalities = ["text"];
-    const outputAudio: AudioParameters = {
-      voice: Voice.ALLOY,
-      format: AudioResponseFormat.MP3,
-    };
-    const responseFormat: ResponseFormat = { type: "text" };
-    const stopSequences = ["stop1"];
-    const tools: FunctionTool[] = [];
-    const toolChoice = "none";
+    const logitBias = { token1: 1 };
+    const stop = ["stop1"];
     const metadata = { key1: "value1" };
+    const extraBody = { custom_flag: true };
 
-    const originalOptions = new OpenAiChatOptions({
-      model: "test-model",
-      frequencyPenalty: 0.5,
-      logitBias,
-      logprobs: true,
-      topLogprobs: 5,
-      maxCompletionTokens: 50,
-      n: 2,
-      outputModalities,
-      outputAudio,
-      presencePenalty: 0.8,
-      responseFormat,
-      seed: 12345,
-      stop: stopSequences,
-      temperature: 0.7,
-      topP: 0.9,
-      tools,
-      toolChoice,
-      user: "test-user",
-      parallelToolCalls: false,
-      store: true,
-      metadata,
-      reasoningEffort: "low",
-      internalToolExecutionEnabled: true,
-      httpHeaders: { header1: "value1" },
-      serviceTier: ServiceTier.DEFAULT,
-      promptCacheKey: "copy-test-cache",
-      safetyIdentifier: "copy-test-safety",
-    });
+    const originalOptions = OpenAiChatOptions.builder()
+      .model("test-model")
+      .deploymentName("test-deployment")
+      .frequencyPenalty(0.5)
+      .logitBias(logitBias)
+      .logprobs(true)
+      .topLogprobs(5)
+      .maxCompletionTokens(50)
+      .N(2)
+      .presencePenalty(0.8)
+      .streamOptions({ include_usage: false })
+      .seed(12345)
+      .stop(stop)
+      .temperature(0.7)
+      .topP(0.9)
+      .user("test-user")
+      .parallelToolCalls(false)
+      .store(true)
+      .metadata(metadata)
+      .reasoningEffort("low")
+      .verbosity("high")
+      .serviceTier("default")
+      .extraBody(extraBody)
+      .internalToolExecutionEnabled(true)
+      .customHeaders({ header1: "value1" })
+      .build();
 
     const copiedOptions = originalOptions.copy();
+
     expect(copiedOptions).not.toBe(originalOptions);
     expect(copiedOptions).toEqual(originalOptions);
+
+    originalOptions.setModel("modified-model");
+    originalOptions.setStop(["stop2"]);
+    originalOptions.setCustomHeaders({ header2: "value2" });
+    originalOptions.setToolCallbacks([new TestToolCallback("tool", "result")]);
+    originalOptions.setToolNames(new Set(["tool2"]));
+    originalOptions.setToolContext({ key: "value2" });
+    originalOptions.setExtraBody({ custom_flag: false });
+
+    expect(copiedOptions.model).toBe("test-model");
+    expect(copiedOptions.stop).toEqual(stop);
+    expect(copiedOptions.customHeaders).toEqual({ header1: "value1" });
+    expect(copiedOptions.extraBody).toEqual(extraBody);
+    expect(copiedOptions.toolCallbacks).toEqual([]);
+    expect(copiedOptions.toolNames).toEqual(new Set<string>());
+    expect(copiedOptions.toolContext).toEqual({});
   });
 
   it("test setters", () => {
-    const logitBias: Record<string, number> = { token1: 1 };
-    const outputModalities = ["audio"];
-    const outputAudio: AudioParameters = {
-      voice: Voice.ALLOY,
-      format: AudioResponseFormat.MP3,
-    };
-    const responseFormat: ResponseFormat = { type: "text" };
-    const stopSequences = ["stop1", "stop2"];
-    const tools: FunctionTool[] = [];
-    const toolChoice = "auto";
+    const logitBias = { token1: 1 };
+    const stop = ["stop1", "stop2"];
     const metadata = { key2: "value2" };
 
     const options = new OpenAiChatOptions();
-    options.model = "test-model";
-    options.frequencyPenalty = 0.5;
-    options.logitBias = logitBias;
-    options.logprobs = true;
-    options.topLogprobs = 5;
-    options.maxTokens = 100;
-    options.maxCompletionTokens = 50;
-    options.n = 2;
-    options.outputModalities = outputModalities;
-    options.outputAudio = outputAudio;
-    options.presencePenalty = 0.8;
-    options.responseFormat = responseFormat;
-    options.streamOptions = { include_usage: true };
-    options.seed = 12345;
-    options.stop = stopSequences;
-    options.temperature = 0.7;
-    options.topP = 0.9;
-    options.tools = tools;
-    options.toolChoice = toolChoice;
-    options.user = "test-user";
-    options.parallelToolCalls = true;
-    options.store = false;
-    options.metadata = metadata;
-    options.reasoningEffort = "high";
-    options.internalToolExecutionEnabled = false;
-    options.httpHeaders = { header2: "value2" };
-    options.serviceTier = ServiceTier.DEFAULT;
+    options.setModel("test-model");
+    options.setDeploymentName("test-deployment");
+    options.setFrequencyPenalty(0.5);
+    options.setLogitBias(logitBias);
+    options.setLogprobs(true);
+    options.setTopLogprobs(5);
+    options.setMaxTokens(100);
+    options.setMaxCompletionTokens(50);
+    options.setN(2);
+    options.setPresencePenalty(0.8);
+    options.setStreamOptions({ include_usage: true });
+    options.setSeed(12345);
+    options.setStop(stop);
+    options.setTemperature(0.7);
+    options.setTopP(0.9);
+    options.setUser("test-user");
+    options.setParallelToolCalls(true);
+    options.setStore(false);
+    options.setMetadata(metadata);
+    options.setReasoningEffort("high");
+    options.setVerbosity("medium");
+    options.setServiceTier("auto");
+    options.setExtraBody({});
+    options.setInternalToolExecutionEnabled(false);
+    options.setCustomHeaders({ header2: "value2" });
 
     expect(options.model).toBe("test-model");
+    expect(options.deploymentName).toBe("test-deployment");
     expect(options.frequencyPenalty).toBe(0.5);
     expect(options.logitBias).toEqual(logitBias);
     expect(options.logprobs).toBe(true);
@@ -224,321 +227,394 @@ describe("OpenAiChatOptions", () => {
     expect(options.maxTokens).toBe(100);
     expect(options.maxCompletionTokens).toBe(50);
     expect(options.n).toBe(2);
-    expect(options.outputModalities).toEqual(outputModalities);
-    expect(options.outputAudio).toEqual(outputAudio);
     expect(options.presencePenalty).toBe(0.8);
-    expect(options.responseFormat).toEqual(responseFormat);
     expect(options.streamOptions).toEqual({ include_usage: true });
     expect(options.seed).toBe(12345);
-    expect(options.stop).toEqual(stopSequences);
+    expect(options.stop).toEqual(stop);
+    expect(options.stopSequences).toEqual(stop);
     expect(options.temperature).toBe(0.7);
     expect(options.topP).toBe(0.9);
-    expect(options.tools).toEqual(tools);
-    expect(options.toolChoice).toBe(toolChoice);
     expect(options.user).toBe("test-user");
     expect(options.parallelToolCalls).toBe(true);
     expect(options.store).toBe(false);
     expect(options.metadata).toEqual(metadata);
     expect(options.reasoningEffort).toBe("high");
+    expect(options.verbosity).toBe("medium");
+    expect(options.serviceTier).toBe("auto");
+    expect(options.extraBody).toEqual({});
     expect(options.internalToolExecutionEnabled).toBe(false);
-    expect(options.httpHeaders).toEqual({ header2: "value2" });
-    expect(options.streamUsage).toBe(true);
-    options.setStreamUsage(false);
-    expect(options.streamUsage).toBe(false);
-    expect(options.streamOptions).toBeUndefined();
-    options.setStopSequences(["s1", "s2"]);
-    expect(options.stopSequences).toEqual(["s1", "s2"]);
-    expect(options.stop).toEqual(["s1", "s2"]);
-    expect(options.serviceTier).toBe("default");
+    expect(options.customHeaders).toEqual({ header2: "value2" });
   });
 
   it("test default values", () => {
     const options = new OpenAiChatOptions();
-    expect(options.model).toBeUndefined();
-    expect(options.frequencyPenalty).toBeUndefined();
-    expect(options.logitBias).toBeUndefined();
-    expect(options.logprobs).toBeUndefined();
-    expect(options.topLogprobs).toBeUndefined();
-    expect(options.maxTokens).toBeUndefined();
-    expect(options.maxCompletionTokens).toBeUndefined();
-    expect(options.n).toBeUndefined();
-    expect(options.outputModalities).toBeUndefined();
-    expect(options.outputAudio).toBeUndefined();
-    expect(options.presencePenalty).toBeUndefined();
-    expect(options.responseFormat).toBeUndefined();
-    expect(options.outputSchema).toBe("");
-    expect(options.streamOptions).toBeUndefined();
-    expect(options.seed).toBeUndefined();
-    expect(options.stop).toBeUndefined();
-    expect(options.temperature).toBeUndefined();
-    expect(options.topP).toBeUndefined();
-    expect(options.tools).toBeUndefined();
-    expect(options.toolChoice).toBeUndefined();
-    expect(options.user).toBeUndefined();
-    expect(options.parallelToolCalls).toBeUndefined();
-    expect(options.store).toBeUndefined();
-    expect(options.metadata).toBeUndefined();
-    expect(options.reasoningEffort).toBeUndefined();
+
+    expect(options.model).toBeNull();
+    expect(options.deploymentName).toBeNull();
+    expect(options.frequencyPenalty).toBeNull();
+    expect(options.logitBias).toBeNull();
+    expect(options.logprobs).toBeNull();
+    expect(options.topLogprobs).toBeNull();
+    expect(options.maxTokens).toBeNull();
+    expect(options.maxCompletionTokens).toBeNull();
+    expect(options.n).toBeNull();
+    expect(options.outputAudio).toBeNull();
+    expect(options.presencePenalty).toBeNull();
+    expect(options.responseFormat).toBeNull();
+    expect(options.streamOptions).toBeNull();
+    expect(options.seed).toBeNull();
+    expect(options.stop).toBeNull();
+    expect(options.stopSequences).toBeNull();
+    expect(options.temperature).toBeNull();
+    expect(options.topP).toBeNull();
+    expect(options.topK).toBeNull();
+    expect(options.toolChoice).toBeNull();
+    expect(options.user).toBeNull();
+    expect(options.parallelToolCalls).toBeNull();
+    expect(options.store).toBeNull();
+    expect(options.metadata).toBeNull();
+    expect(options.reasoningEffort).toBeNull();
+    expect(options.verbosity).toBeNull();
+    expect(options.serviceTier).toBeNull();
+    expect(options.extraBody).toBeNull();
     expect(options.toolCallbacks).toEqual([]);
+    expect(options.toolNames).toEqual(new Set<string>());
     expect(options.internalToolExecutionEnabled).toBeNull();
-    expect(options.httpHeaders).toEqual({});
+    expect(options.customHeaders).toEqual({});
     expect(options.toolContext).toEqual({});
-    expect(options.streamUsage).toBe(false);
-    expect(options.stopSequences).toBeUndefined();
-    expect(options.serviceTier).toBeUndefined();
+    expect(options.outputSchema).toBeNull();
   });
 
-  it("test from options web search options", () => {
-    const webSearchOptions: WebSearchOptions = {
-      search_context_size: SearchContextSize.MEDIUM,
-      user_location: {
-        type: "type",
-        approximate: {
-          city: "beijing",
-          country: "china",
-          region: "region",
-          timezone: "UTC+8",
-        },
-      },
-    };
+  it("test builder with null values", () => {
+    const options = OpenAiChatOptions.builder()
+      .temperature(null)
+      .logitBias(null)
+      .stop(null)
+      .metadata(null)
+      .extraBody(null)
+      .build();
 
-    const chatOptions = new OpenAiChatOptions({ webSearchOptions });
-    const target = chatOptions.copy();
-
-    expect(target.webSearchOptions).not.toBeUndefined();
-    expect(target.webSearchOptions?.search_context_size).toBe(
-      SearchContextSize.MEDIUM,
-    );
-    expect(target.webSearchOptions?.user_location).not.toBeUndefined();
-    expect(target.webSearchOptions?.user_location?.type).toBe("type");
-    expect(
-      target.webSearchOptions?.user_location?.approximate,
-    ).not.toBeUndefined();
-    expect(target.webSearchOptions?.user_location?.approximate?.city).toBe(
-      "beijing",
-    );
-    expect(target.webSearchOptions?.user_location?.approximate?.country).toBe(
-      "china",
-    );
-    expect(target.webSearchOptions?.user_location?.approximate?.region).toBe(
-      "region",
-    );
-    expect(target.webSearchOptions?.user_location?.approximate?.timezone).toBe(
-      "UTC+8",
-    );
+    expect(options.model).toBeNull();
+    expect(options.temperature).toBeNull();
+    expect(options.logitBias).toBeNull();
+    expect(options.stop).toBeNull();
+    expect(options.metadata).toBeNull();
+    expect(options.extraBody).toBeNull();
   });
 
-  it("test output schema setter preserves the original schema string", () => {
-    const schema = `{
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      }
-    }`;
+  it("test builder chaining", () => {
+    const builder = OpenAiChatOptions.builder();
+    const result = builder.model("test-model").temperature(0.7).maxTokens(100);
 
-    const options = new OpenAiChatOptions();
-    options.setOutputSchema(schema);
+    expect(result).toBe(builder);
 
-    expect(options.responseFormat).toEqual({
-      type: "json_schema",
-      json_schema: JSON.parse(schema),
-    });
-    expect(options.outputSchema).toBe(schema);
-  });
-
-  it("test output schema falls back to response format json schema", () => {
-    const schema = {
-      type: "object",
-      properties: {
-        name: {
-          type: "string",
-        },
-      },
-    };
-
-    const options = new OpenAiChatOptions({
-      responseFormat: {
-        type: "json_schema",
-        json_schema: schema,
-      },
-    });
-
-    expect(options.outputSchema).toBe(JSON.stringify(schema));
+    const options = result.build();
+    expect(options.model).toBe("test-model");
+    expect(options.temperature).toBe(0.7);
+    expect(options.maxTokens).toBe(100);
   });
 
   it("test null and empty collections", () => {
     const options = new OpenAiChatOptions();
 
-    // Test setting undefined (null equivalent)
-    options.logitBias = undefined;
-    options.stop = undefined;
-    options.tools = undefined;
-    options.metadata = undefined;
-    options.outputModalities = undefined;
+    options.setLogitBias(null);
+    options.setStop(null);
+    options.setMetadata(null);
+    options.setCustomHeaders(null);
 
-    expect(options.logitBias).toBeUndefined();
-    expect(options.stop).toBeUndefined();
-    expect(options.tools).toBeUndefined();
-    expect(options.metadata).toBeUndefined();
-    expect(options.outputModalities).toBeUndefined();
+    expect(options.logitBias).toBeNull();
+    expect(options.stop).toBeNull();
+    expect(options.metadata).toBeNull();
+    expect(options.customHeaders).toEqual({});
 
-    // Test setting empty collections
-    options.logitBias = {};
-    options.stop = [];
-    options.tools = [];
-    options.metadata = {};
-    options.outputModalities = [];
+    options.setLogitBias({});
+    options.setStop([]);
+    options.setMetadata({});
+    options.setCustomHeaders({});
 
-    expect(Object.keys(options.logitBias)).toHaveLength(0);
-    expect(options.stop).toHaveLength(0);
-    expect(options.tools).toHaveLength(0);
-    expect(Object.keys(options.metadata)).toHaveLength(0);
-    expect(options.outputModalities).toHaveLength(0);
-  });
-
-  it("test stream usage stream options interaction", () => {
-    const options = new OpenAiChatOptions();
-
-    // Initially false
-    expect(options.streamUsage).toBe(false);
-    expect(options.streamOptions).toBeUndefined();
-
-    // Setting streamUsage to true should set streamOptions
-    options.setStreamUsage(true);
-    expect(options.streamUsage).toBe(true);
-    expect(options.streamOptions).toEqual({ include_usage: true });
-
-    // Setting streamUsage to false should clear streamOptions
-    options.setStreamUsage(false);
-    expect(options.streamUsage).toBe(false);
-    expect(options.streamOptions).toBeUndefined();
-
-    // Setting streamOptions directly should update streamUsage
-    options.streamOptions = { include_usage: true };
-    expect(options.streamUsage).toBe(true);
-    expect(options.streamOptions).toEqual({ include_usage: true });
-
-    // Setting streamOptions to undefined should set streamUsage to false
-    options.streamOptions = undefined;
-    expect(options.streamUsage).toBe(false);
-    expect(options.streamOptions).toBeUndefined();
+    expect(options.logitBias).toEqual({});
+    expect(options.stop).toEqual([]);
+    expect(options.metadata).toEqual({});
+    expect(options.customHeaders).toEqual({});
   });
 
   it("test stop sequences alias", () => {
     const options = new OpenAiChatOptions();
     const stopSequences = ["stop1", "stop2"];
 
-    // Setting stopSequences should also set stop
     options.setStopSequences(stopSequences);
     expect(options.stopSequences).toEqual(stopSequences);
     expect(options.stop).toEqual(stopSequences);
 
-    // Setting stop should also update stopSequences
     const newStop = ["stop3", "stop4"];
-    options.stop = newStop;
+    options.setStop(newStop);
     expect(options.stop).toEqual(newStop);
     expect(options.stopSequences).toEqual(newStop);
   });
 
-  it("test from options with web search options null", () => {
-    const source = new OpenAiChatOptions({
-      model: "test-model",
-      temperature: 0.7,
-    });
-
-    const result = source.copy();
-    expect(result.model).toBe("test-model");
-    expect(result.temperature).toBe(0.7);
-    expect(result.webSearchOptions).toBeUndefined();
-  });
-
   it("test copy change independence", () => {
-    const original = new OpenAiChatOptions({
-      model: "original-model",
-      temperature: 0.5,
-    });
+    const original = OpenAiChatOptions.builder()
+      .model("original-model")
+      .temperature(0.5)
+      .build();
 
     const copied = original.copy();
 
-    // Modify original
-    original.model = "modified-model";
-    original.temperature = 0.9;
+    original.setModel("modified-model");
+    original.setTemperature(0.9);
 
-    // Verify copy is unchanged
     expect(copied.model).toBe("original-model");
     expect(copied.temperature).toBe(0.5);
   });
 
-  it("test setters mutual exclusivity not enforced", () => {
-    // Direct property assignment does NOT enforce mutual exclusivity
-    const options = new OpenAiChatOptions();
-    options.maxTokens = 50;
-    options.maxCompletionTokens = 100;
+  it("test maxTokens is deprecated", () => {
+    const options = OpenAiChatOptions.builder()
+      .maxCompletionTokens(100)
+      .maxTokens(50)
+      .build();
 
-    // Both should be set when using direct assignment
+    expect(options.maxTokens).toBeNull();
+    expect(options.maxCompletionTokens).toBe(100);
+  });
+
+  it("test maxCompletionTokens mutual exclusivity validation", () => {
+    const options = OpenAiChatOptions.builder()
+      .maxTokens(50)
+      .maxCompletionTokens(100)
+      .build();
+
+    expect(options.maxTokens).toBeNull();
+    expect(options.maxCompletionTokens).toBe(100);
+  });
+
+  it("test maxTokens with null does not clear maxCompletionTokens", () => {
+    const options = OpenAiChatOptions.builder()
+      .maxCompletionTokens(100)
+      .maxTokens(null)
+      .build();
+
+    expect(options.maxTokens).toBeNull();
+    expect(options.maxCompletionTokens).toBe(100);
+  });
+
+  it("test maxCompletionTokens with null does not clear maxTokens", () => {
+    const options = OpenAiChatOptions.builder()
+      .maxTokens(50)
+      .maxCompletionTokens(null)
+      .build();
+
+    expect(options.maxTokens).toBe(50);
+    expect(options.maxCompletionTokens).toBeNull();
+  });
+
+  it("test builder can set only maxTokens", () => {
+    const options = OpenAiChatOptions.builder().maxTokens(100).build();
+
+    expect(options.maxTokens).toBe(100);
+    expect(options.maxCompletionTokens).toBeNull();
+  });
+
+  it("test builder can set only maxCompletionTokens", () => {
+    const options = OpenAiChatOptions.builder()
+      .maxCompletionTokens(150)
+      .build();
+
+    expect(options.maxTokens).toBeNull();
+    expect(options.maxCompletionTokens).toBe(150);
+  });
+
+  it("test setters mutual exclusivity not enforced", () => {
+    const options = new OpenAiChatOptions();
+    options.setMaxTokens(50);
+    options.setMaxCompletionTokens(100);
+
     expect(options.maxTokens).toBe(50);
     expect(options.maxCompletionTokens).toBe(100);
   });
 
-  it("test tool callback setter", () => {
-    const options = new OpenAiChatOptions();
-    const callbacks = [new TestToolCallback()];
+  it("test tool callbacks and names", () => {
+    const callback1 = new TestToolCallback("tool1", "result1");
+    const callback2 = new TestToolCallback("tool2", "result2");
 
-    options.setToolCallbacks(callbacks);
+    const options = OpenAiChatOptions.builder()
+      .toolCallbacks(callback1, callback2)
+      .toolNames("tool1", "tool2")
+      .build();
 
-    expect(options.toolCallbacks).toBe(callbacks);
-    callbacks.push(new TestToolCallback());
     expect(options.toolCallbacks).toHaveLength(2);
-    expect(() => {
-      options.setToolCallbacks(null as unknown as ToolCallback[]);
-    }).toThrow("toolCallbacks cannot be null");
-    expect(() => {
-      options.setToolCallbacks([
-        new TestToolCallback(),
-        null as unknown as ToolCallback,
-      ]);
-    }).toThrow("toolCallbacks cannot contain null elements");
+    expect(options.toolCallbacks[0]).toBe(callback1);
+    expect(options.toolCallbacks[1]).toBe(callback2);
+    expect(options.toolNames).toEqual(new Set(["tool1", "tool2"]));
   });
 
-  it("test tool names setter", () => {
-    const options = new OpenAiChatOptions();
-    const toolNames = new Set(["tool1"]);
+  it("test toolCallbacks list", () => {
+    const callback = new TestToolCallback("tool", "result");
+    const callbacks = [callback];
 
-    options.setToolNames(toolNames);
+    const options = OpenAiChatOptions.builder()
+      .toolCallbacks(callbacks)
+      .build();
 
-    expect(options.toolNames).toBe(toolNames);
-    toolNames.add("tool2");
-    expect(options.toolNames.has("tool2")).toBe(true);
-    expect(() => {
-      options.setToolNames(null as unknown as Set<string>);
-    }).toThrow("toolNames cannot be null");
-    expect(() => {
-      options.setToolNames(new Set(["tool1", null as unknown as string]));
-    }).toThrow("toolNames cannot contain null elements");
-    expect(() => {
-      options.setToolNames(new Set(["", "tool1"]));
-    }).toThrow("toolNames cannot contain empty elements");
+    expect(options.toolCallbacks).toHaveLength(1);
+    expect(options.toolCallbacks[0]).toBe(callback);
   });
 
-  it("test internal tool execution enabled setter", () => {
-    const options = new OpenAiChatOptions();
+  it("test toolNames set", () => {
+    const toolNames = new Set(["tool1", "tool2", "tool3"]);
 
-    options.setInternalToolExecutionEnabled(true);
-    expect(options.internalToolExecutionEnabled).toBe(true);
-    options.setInternalToolExecutionEnabled(null);
-    expect(options.internalToolExecutionEnabled).toBeNull();
+    const options = OpenAiChatOptions.builder().toolNames(toolNames).build();
+
+    expect(options.toolNames).toEqual(toolNames);
   });
 
-  it("test tool context setter", () => {
+  it("test setToolCallbacks validation", () => {
     const options = new OpenAiChatOptions();
-    const toolContext = { key: "value" };
 
-    options.setToolContext(toolContext);
+    expect(() =>
+      options.setToolCallbacks(null as unknown as ToolCallback[]),
+    ).toThrow("toolCallbacks cannot be null");
+    expect(() =>
+      options.setToolCallbacks([null as unknown as ToolCallback]),
+    ).toThrow("toolCallbacks cannot contain null elements");
+  });
 
-    expect(options.toolContext).toBe(toolContext);
-    toolContext.key = "updated";
-    expect(options.toolContext.key).toBe("updated");
+  it("test setToolNames validation", () => {
+    const options = new OpenAiChatOptions();
+
+    expect(() => options.setToolNames(null as unknown as Set<string>)).toThrow(
+      "toolNames cannot be null",
+    );
+    expect(() =>
+      options.setToolNames(new Set([null as unknown as string])),
+    ).toThrow("toolNames cannot contain null elements");
+    expect(() => options.setToolNames(new Set([""]))).toThrow(
+      "toolNames cannot contain empty elements",
+    );
+    expect(() => options.setToolNames(new Set(["   "]))).toThrow(
+      "toolNames cannot contain empty elements",
+    );
+  });
+
+  it("test copy", () => {
+    const logitBias = { token: 1 };
+    const stop = ["stop"];
+    const metadata = { key: "value" };
+
+    const source = OpenAiChatOptions.builder()
+      .model("source-model")
+      .temperature(0.7)
+      .maxTokens(100)
+      .logitBias(logitBias)
+      .stop(stop)
+      .metadata(metadata)
+      .build();
+
+    const copy = source.copy();
+
+    expect(copy.model).toBe("source-model");
+    expect(copy.temperature).toBe(0.7);
+    expect(copy.maxTokens).toBe(100);
+    expect(copy.logitBias).toEqual(logitBias);
+    expect(copy.stop).toEqual(stop);
+    expect(copy.metadata).toEqual(metadata);
+    expect(copy.stop).not.toBe(source.stop);
+  });
+
+  it("test mutate", () => {
+    const options = OpenAiChatOptions.builder()
+      .model("source-model")
+      .temperature(0.7)
+      .maxTokens(100)
+      .build();
+
+    const mutated = options.mutate().topP(0.9).build();
+
+    expect(mutated.model).toBe("source-model");
+    expect(mutated.temperature).toBe(0.7);
+    expect(mutated.maxTokens).toBe(100);
+    expect(mutated.topP).toBe(0.9);
+  });
+
+  it("test builder combineWith", () => {
+    const callback = new TestToolCallback("tool", "result");
+
+    const base = OpenAiChatOptions.builder()
+      .model("base-model")
+      .temperature(0.5)
+      .toolCallbacks(callback)
+      .customHeaders({ base: "header" });
+
+    const override = OpenAiChatOptions.builder()
+      .deploymentName("override-deployment")
+      .topP(0.9)
+      .toolContext({ key: "value" })
+      .customHeaders({ override: "header" });
+
+    const combined = base.combineWith(override).build();
+
+    expect(combined.model).toBe("base-model");
+    expect(combined.deploymentName).toBe("override-deployment");
+    expect(combined.temperature).toBe(0.5);
+    expect(combined.topP).toBe(0.9);
+    expect(combined.toolCallbacks).toHaveLength(1);
+    expect(combined.toolCallbacks[0]).toBe(callback);
+    expect(combined.toolContext).toEqual({ key: "value" });
+    expect(combined.customHeaders).toEqual({ override: "header" });
+  });
+
+  it("test toString", () => {
+    const options = OpenAiChatOptions.builder()
+      .model("test-model")
+      .temperature(0.7)
+      .build();
+
+    const text = options.toString();
+    expect(text).toContain("OpenAiChatOptions");
+    expect(text).toContain("test-model");
+    expect(text).toContain("0.7");
+  });
+
+  it("test topK returns null", () => {
+    const options = new OpenAiChatOptions();
+    expect(options.topK).toBeNull();
+  });
+
+  it("test set output schema", () => {
+    const options = new OpenAiChatOptions();
+    const schema = `{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    }
+  }
+}`;
+
+    options.setOutputSchema(schema);
+
+    expect(options.responseFormat).not.toBeNull();
+    expect(options.responseFormat?.type).toBe("json_schema");
+    if (options.responseFormat?.type === "json_schema") {
+      expect(options.responseFormat.json_schema.schema).toEqual({
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+          },
+        },
+      });
+    }
+    expect(JSON.parse(options.outputSchema ?? "{}")).toEqual({
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+        },
+      },
+    });
+
+    options.setOutputSchema(null);
+    expect(options.responseFormat).toBeNull();
+    expect(options.outputSchema).toBeNull();
   });
 });

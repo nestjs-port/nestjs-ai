@@ -2,7 +2,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `da8db657` (Remove Anthropic IT that no longer makes sense)
+**Last synced Spring AI commit:** `75fa84486` (Migrate spring-ai-openai to official openai-java SDK)
 
 ## Overview
 
@@ -51,10 +51,10 @@ Spring AI module porting status to NestJS AI. (~520 source files, ~180 test file
 | | spring-ai-observation | `@nestjs-ai/observation` | 100% |
 | | spring-ai-test | `@nestjs-ai/testing` | 100% |
 | **Model Providers** | spring-ai-openai | `@nestjs-ai/model-openai` | 100% |
-| | spring-ai-openai-sdk | `@nestjs-ai/model-openai-sdk` | 100% |
+| | spring-ai-openai | `@nestjs-ai/model-openai` | 100% |
 | | spring-ai-google-genai | `@nestjs-ai/model-google-genai` | 100% |
 | | spring-ai-transformers | `@nestjs-ai/model-transformers` | 100% |
-| | spring-ai-anthropic | — | 0% |
+| | spring-ai-anthropic | `@nestjs-ai/model-anthropic` | 100% |
 | | spring-ai-azure-openai | — | 0% |
 | | spring-ai-bedrock | — | 0% |
 | | spring-ai-mistral-ai | — | 0% |

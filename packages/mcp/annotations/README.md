@@ -2,7 +2,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `da8db657` (Remove Anthropic IT that no longer makes sense)
+**Last synced Spring AI commit:** `75fa84486` (Migrate spring-ai-openai to official openai-java SDK)
 
 ## Overview
 

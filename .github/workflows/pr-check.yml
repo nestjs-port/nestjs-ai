@@ -50,7 +50,6 @@ jobs:
             --filter=@nestjs-ai/document-reader-cheerio \
             --filter=@nestjs-ai/document-reader-markdown \
             --filter=@nestjs-ai/document-reader-pdf \
-            --filter=@nestjs-ai/jsdbc \
             --filter=@nestjs-ai/mcp-common \
             --filter=@nestjs-ai/model \
             --filter=@nestjs-ai/model-anthropic \

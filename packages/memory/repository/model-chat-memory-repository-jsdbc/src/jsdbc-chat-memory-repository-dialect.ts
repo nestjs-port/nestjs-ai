@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { SqlFragment } from "@nestjs-ai/jsdbc";
+import type { SqlFragment } from "@nestjs-port/jsdbc";
 
 /**
  * Abstraction for database-specific SQL for chat memory repository.

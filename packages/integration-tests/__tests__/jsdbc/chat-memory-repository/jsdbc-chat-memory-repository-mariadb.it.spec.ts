@@ -16,13 +16,13 @@
 
 import "reflect-metadata";
 
-import { JsdbcTemplate } from "@nestjs-ai/jsdbc";
-import { TypeOrmDataSource } from "@nestjs-ai/jsdbc/typeorm";
 import { MessageType } from "@nestjs-ai/model";
 import {
   JsdbcChatMemoryRepository,
   MARIADB_CHAT_MEMORY_SCHEMA,
 } from "@nestjs-ai/model-chat-memory-repository-jsdbc";
+import { JsdbcTemplate } from "@nestjs-port/jsdbc";
+import { TypeOrmDataSource } from "@nestjs-port/jsdbc/typeorm";
 import {
   MariaDbContainer,
   type StartedMariaDbContainer,

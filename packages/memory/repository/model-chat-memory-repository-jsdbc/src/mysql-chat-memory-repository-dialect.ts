@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { sql } from "@nestjs-ai/jsdbc";
+import { sql } from "@nestjs-port/jsdbc";
 import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
 
 /**

@@ -18,9 +18,9 @@ import "reflect-metadata";
 
 import { Test, type TestingModule } from "@nestjs/testing";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import type { JsdbcTemplate } from "@nestjs-ai/jsdbc";
-import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-ai/jsdbc";
-import { TypeOrmJsdbcModule } from "@nestjs-ai/jsdbc/typeorm";
+import type { JsdbcTemplate } from "@nestjs-port/jsdbc";
+import { DatabaseDialect, JSDBC_TEMPLATE, sql } from "@nestjs-port/jsdbc";
+import { TypeOrmJsdbcModule } from "@nestjs-port/jsdbc/typeorm";
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,

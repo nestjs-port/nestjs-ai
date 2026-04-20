@@ -17,13 +17,6 @@
 import assert from "node:assert/strict";
 import { StringUtils } from "@nestjs-ai/commons";
 import {
-  type DataSource,
-  JsdbcTemplate,
-  type RowMapper,
-  SingleColumnRowMapper,
-  ZodRowMapper,
-} from "@nestjs-ai/jsdbc";
-import {
   AssistantMessage,
   type ChatMemoryRepository,
   type Message,
@@ -33,6 +26,13 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { LoggerFactory } from "@nestjs-port/core";
+import {
+  type DataSource,
+  JsdbcTemplate,
+  type RowMapper,
+  SingleColumnRowMapper,
+  ZodRowMapper,
+} from "@nestjs-port/jsdbc";
 import { z } from "zod";
 import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
 import { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory";

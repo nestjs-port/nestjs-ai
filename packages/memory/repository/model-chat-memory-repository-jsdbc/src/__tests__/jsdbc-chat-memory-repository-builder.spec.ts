@@ -18,7 +18,7 @@ import {
   DatabaseDialect,
   type DataSource,
   JsdbcTemplate,
-} from "@nestjs-ai/jsdbc";
+} from "@nestjs-port/jsdbc";
 import { describe, expect, it, vi } from "vitest";
 import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository";
 import { JsdbcChatMemoryRepositoryDialectFactory } from "../jsdbc-chat-memory-repository-dialect-factory";

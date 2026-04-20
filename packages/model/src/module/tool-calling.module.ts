@@ -18,10 +18,8 @@ import type { Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import {
   OBSERVATION_REGISTRY_TOKEN,
-  ObservationFilters,
+  type ObservationFilters,
   type ObservationRegistry,
-  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
-  type ToolCallingObservationProperties,
 } from "@nestjs-ai/commons";
 import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
 import {
@@ -38,13 +36,12 @@ import {
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
   TOOL_CALLBACK_RESOLVER_TOKEN,
   TOOL_CALLBACKS_TOKEN,
-  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
-  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
   TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
   TOOL_CALLING_MANAGER_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
 } from "./tool-calling.tokens";
+import type { ToolCallingObservationProperties } from "./tool-calling-observation-properties";
 
 const toolCallbackResolverProvider: Provider = {
   provide: TOOL_CALLBACK_RESOLVER_TOKEN,
@@ -107,33 +104,6 @@ const toolCallingManagerProvider: Provider = {
   ],
 };
 
-const toolCallingContentObservationFilterProvider: Provider = {
-  provide: TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
-  useFactory: (
-    toolCallingContentObservationFilter: ToolCallingContentObservationFilter | null,
-    observationProperties: ToolCallingObservationProperties | null,
-    observationFilters: ObservationFilters | null,
-  ) => {
-    if (toolCallingContentObservationFilter != null) {
-      return toolCallingContentObservationFilter;
-    }
-
-    const filter = new ToolCallingContentObservationFilter();
-    if (observationProperties?.includeContent && observationFilters != null) {
-      observationFilters.addFilter(filter);
-    }
-    return filter;
-  },
-  inject: [
-    {
-      token: TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
-      optional: true,
-    },
-    { token: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN, optional: true },
-    { token: ObservationFilters, optional: true },
-  ],
-};
-
 /**
  * Module that registers tool calling providers.
  */
@@ -142,13 +112,31 @@ const toolCallingContentObservationFilterProvider: Provider = {
     toolCallbackResolverProvider,
     toolExecutionExceptionProcessorProvider,
     toolCallingManagerProvider,
-    toolCallingContentObservationFilterProvider,
   ],
   exports: [
     TOOL_CALLBACK_RESOLVER_TOKEN,
     TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
     TOOL_CALLING_MANAGER_TOKEN,
-    TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
   ],
 })
 export class ToolCallingModule {}
+
+export function addToolCallingContentObservationFilter(
+  observationFilters: ObservationFilters | null | undefined,
+  toolCalling: ToolCallingObservationProperties | null | undefined,
+): ToolCallingContentObservationFilter | undefined {
+  if (!toolCalling?.includeContent || observationFilters == null) {
+    return undefined;
+  }
+
+  const existingFilter = observationFilters.filters.find(
+    (filter) => filter instanceof ToolCallingContentObservationFilter,
+  );
+  if (existingFilter instanceof ToolCallingContentObservationFilter) {
+    return existingFilter;
+  }
+
+  const filter = new ToolCallingContentObservationFilter();
+  observationFilters.addFilter(filter);
+  return filter;
+}

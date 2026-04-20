@@ -29,7 +29,6 @@ import {
   ObservationFilters,
   ObservationHandlers,
   type ObservationRegistry,
-  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
 } from "@nestjs-ai/commons";
 import {
   OtelMeterObservationHandler,
@@ -101,14 +100,6 @@ function createAsyncProviders(): Provider[] {
     },
     ...createObservationContainerProviders(),
     ...createObservationRegistryProviders(),
-    {
-      provide: TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
-      useFactory: (properties: ObservationConfigurationProperties) =>
-        properties.toolCalling?.includeContent
-          ? properties.toolCalling
-          : undefined,
-      inject: [OBSERVATION_PROPERTIES_TOKEN],
-    },
     {
       provide: ObservationProviderPostProcessor,
       useFactory: (

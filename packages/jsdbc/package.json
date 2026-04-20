@@ -26,22 +26,27 @@
     },
     "./typeorm": {
       "types": "./dist/typeorm/index.d.ts",
+      "import": "./dist/typeorm/index.js",
       "require": "./dist/typeorm/index.js"
     },
     "./mikroorm": {
       "types": "./dist/mikroorm/index.d.ts",
+      "import": "./dist/mikroorm/index.js",
       "require": "./dist/mikroorm/index.js"
     },
     "./sequelize": {
       "types": "./dist/sequelize/index.d.ts",
+      "import": "./dist/sequelize/index.js",
       "require": "./dist/sequelize/index.js"
     },
     "./prisma": {
       "types": "./dist/prisma/index.d.ts",
+      "import": "./dist/prisma/index.js",
       "require": "./dist/prisma/index.js"
     },
     "./drizzle": {
       "types": "./dist/drizzle/index.d.ts",
+      "import": "./dist/drizzle/index.js",
       "require": "./dist/drizzle/index.js"
     }
   },

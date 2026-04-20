@@ -29,23 +29,10 @@ import { NestAiModule } from "@nestjs-ai/platform";
 import { RedisVectorStoreModule } from "@nestjs-ai/vector-store-redis";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("redis", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("redis")>();
-  return {
-    ...actual,
-    createClient: vi.fn(() => ({
-      isOpen: false,
-      connect: vi.fn(async () => undefined),
-      ft: {
-        _list: vi.fn(async () => []),
-        create: vi.fn(async () => "OK"),
-      },
-    })),
-  };
-});
-
 describe("Combined module registration", () => {
   it("should resolve all tokens when platform + chat model + embedding + vector store are registered together", async () => {
+    const redisClient = createMockRedisClient();
+
     const moduleRef = await Test.createTestingModule({
       imports: [
         NestAiModule.forRoot(),
@@ -55,7 +42,7 @@ describe("Combined module registration", () => {
         }),
         TransformersEmbeddingModelModule.forFeature({}, { global: true }),
         RedisVectorStoreModule.forFeature({
-          clientOptions: { url: "redis://localhost:6379" },
+          client: redisClient as never,
         }),
       ],
     }).compile();
@@ -69,6 +56,8 @@ describe("Combined module registration", () => {
   });
 
   it("should resolve all tokens when using forRootAsync + forFeatureAsync pattern", async () => {
+    const redisClient = createMockRedisClient();
+
     const moduleRef = await Test.createTestingModule({
       imports: [
         NestAiModule.forRootAsync({
@@ -86,7 +75,7 @@ describe("Combined module registration", () => {
         }),
         RedisVectorStoreModule.forFeatureAsync({
           useFactory: async () => ({
-            clientOptions: { url: "redis://localhost:6379" },
+            client: redisClient as never,
           }),
         }),
       ],
@@ -101,6 +90,8 @@ describe("Combined module registration", () => {
   });
 
   it("should resolve tokens when mixing sync forRoot with async forFeature", async () => {
+    const redisClient = createMockRedisClient();
+
     const moduleRef = await Test.createTestingModule({
       imports: [
         NestAiModule.forRoot(),
@@ -113,7 +104,7 @@ describe("Combined module registration", () => {
         TransformersEmbeddingModelModule.forFeature({}, { global: true }),
         RedisVectorStoreModule.forFeatureAsync({
           useFactory: () => ({
-            clientOptions: { url: "redis://localhost:6379" },
+            client: redisClient as never,
           }),
         }),
       ],
@@ -127,3 +118,15 @@ describe("Combined module registration", () => {
     expect(vectorStore).toBeDefined();
   });
 });
+
+function createMockRedisClient() {
+  return {
+    isOpen: false,
+    connect: vi.fn(async () => undefined),
+    close: vi.fn(async () => undefined),
+    ft: {
+      _list: vi.fn(async () => []),
+      create: vi.fn(async () => "OK"),
+    },
+  };
+}

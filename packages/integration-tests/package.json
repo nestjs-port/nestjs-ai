@@ -38,7 +38,7 @@
     "@nestjs-ai/platform": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-ai/vector-store-redis": "workspace:*",
-    "@nestjs-port/core": "^0.0.2",
+    "@nestjs-port/core": "^0.0.3",
     "@nestjs-port/jsdbc": "^0.0.3",
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",

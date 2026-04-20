@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import { Injectable } from "@nestjs/common";
-import type { ModulesContainer } from "@nestjs/core";
+import { Inject, Injectable } from "@nestjs/common";
+import { ModulesContainer } from "@nestjs/core";
 import type { ProviderInstanceExplorer } from "@nestjs-ai/commons";
 
 @Injectable()
 export class NestProviderInstanceExplorer implements ProviderInstanceExplorer {
-  constructor(private readonly modulesContainer: ModulesContainer) {}
+  constructor(
+    @Inject(ModulesContainer)
+    private readonly modulesContainer: ModulesContainer,
+  ) {}
 
   getProviderInstances(): object[] {
     const providerInstances: object[] = [];

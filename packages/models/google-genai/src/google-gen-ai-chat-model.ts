@@ -34,8 +34,6 @@ import {
   type Tool,
 } from "@google/genai";
 import {
-  type Logger,
-  LoggerFactory,
   type Media,
   NoopObservationRegistry,
   type ObservationRegistry,
@@ -71,6 +69,7 @@ import {
   type UserMessage,
 } from "@nestjs-ai/model";
 import { RetryUtils } from "@nestjs-ai/retry";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import { defer, from, Observable, switchMap } from "rxjs";
 import { GoogleGenAiCachedContentService } from "./cache";
 import {

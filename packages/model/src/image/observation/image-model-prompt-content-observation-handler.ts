@@ -15,11 +15,11 @@
  */
 
 import {
-  LoggerFactory,
   ObservabilityHelper,
   type ObservationContext,
   type ObservationHandler,
 } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import { ImageModelObservationContext } from "./image-model-observation-context";
 
 export class ImageModelPromptContentObservationHandler

@@ -19,7 +19,6 @@ import {
   MessageChatMemoryAdvisor,
   ToolCallAdvisor,
 } from "@nestjs-ai/client-chat";
-import { LoggerFactory } from "@nestjs-ai/commons";
 import {
   type ChatModel,
   FunctionToolCallback,
@@ -27,6 +26,7 @@ import {
   MessageWindowChatMemory,
   ToolMetadata,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { firstValueFrom } from "rxjs";
 import { toArray as toArrayOperator } from "rxjs/operators";
 import { expect } from "vitest";

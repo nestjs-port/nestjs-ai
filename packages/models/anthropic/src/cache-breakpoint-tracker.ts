@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LoggerFactory } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 
 export class CacheBreakpointTracker {
   private readonly logger = LoggerFactory.getLogger(

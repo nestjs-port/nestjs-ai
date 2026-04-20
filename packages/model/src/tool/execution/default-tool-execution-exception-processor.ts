@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { ToolExecutionException } from "./tool-execution-exception";
 import type { ToolExecutionExceptionProcessor } from "./tool-execution-exception-processor.interface";
 

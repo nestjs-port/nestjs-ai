@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import { LoggerFactory } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import { AbstractResponseMetadata, type ResponseMetadata } from "../../model";
 import { EmptyRateLimit } from "./empty-rate-limit";
 import { EmptyUsage } from "./empty-usage";

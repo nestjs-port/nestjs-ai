@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LoggerFactory } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper";
 
 export class Character {

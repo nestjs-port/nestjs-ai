@@ -49,8 +49,6 @@ import type {
 } from "@anthropic-ai/sdk/resources/messages";
 import {
   AiProvider,
-  type Logger,
-  LoggerFactory,
   type Media,
   MediaFormat,
   type MimeType,
@@ -88,6 +86,7 @@ import {
   UsageCalculator,
   type UserMessage,
 } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import { defer, EMPTY, from, Observable, of } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 

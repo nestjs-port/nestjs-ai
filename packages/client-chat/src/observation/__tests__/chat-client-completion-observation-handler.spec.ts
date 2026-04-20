@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { type Logger, ObservationContext } from "@nestjs-ai/commons";
+import { ObservationContext } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   ChatResponse,
   Generation,
   Prompt,
 } from "@nestjs-ai/model";
+import type { Logger } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request";

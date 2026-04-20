@@ -18,12 +18,8 @@ import {
   Anthropic,
   type ClientOptions as AnthropicClientOptions,
 } from "@anthropic-ai/sdk";
-import {
-  type Logger,
-  LoggerFactory,
-  type Milliseconds,
-  ms,
-} from "@nestjs-ai/commons";
+import { type Milliseconds, ms } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 
 export interface AnthropicSetupProps {
   baseUrl?: string | null;

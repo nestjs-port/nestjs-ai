@@ -56,9 +56,6 @@ importers:
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
-      vite-tsconfig-paths:
-        specifier: ^5.1.4
-        version: 5.1.4(typescript@6.0.2)(vite@7.3.0(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2))
       vitest:
         specifier: ^4.0.16
         version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2)
@@ -95,6 +92,9 @@ importers:
       '@nestjs-ai/testing':
         specifier: workspace:*
         version: link:../testing
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -150,6 +150,9 @@ importers:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../commons
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
 
   packages/document-readers/tika-reader:
     devDependencies:
@@ -216,6 +219,9 @@ importers:
       '@nestjs-ai/vector-store-redis':
         specifier: workspace:*
         version: link:../vector-stores/redis-store
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -303,6 +309,9 @@ importers:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -345,6 +354,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
 
   packages/memory/repository/model-chat-memory-repository-jsdbc:
     devDependencies:
@@ -357,6 +369,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../../model
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -372,6 +387,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../../model
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -397,6 +415,9 @@ importers:
       '@nestjs-ai/template-st':
         specifier: workspace:*
         version: link:../template-st
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -430,6 +451,9 @@ importers:
       '@nestjs-ai/testing':
         specifier: workspace:*
         version: link:../../testing
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -458,6 +482,9 @@ importers:
       '@nestjs-ai/retry':
         specifier: workspace:*
         version: link:../../retry
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -482,6 +509,9 @@ importers:
       '@nestjs-ai/testing':
         specifier: workspace:*
         version: link:../../testing
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -538,6 +568,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -562,12 +595,18 @@ importers:
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../vector-store
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
 
   packages/retry:
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2)
@@ -580,6 +619,10 @@ importers:
       stringtemplate4ts:
         specifier: ^2.0.1
         version: 2.0.1
+    devDependencies:
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
 
   packages/testing:
     devDependencies:
@@ -599,6 +642,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../model
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
 
   packages/vector-stores/redis-store:
     devDependencies:
@@ -617,6 +663,9 @@ importers:
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
+      '@nestjs-port/core':
+        specifier: ^0.0.2
+        version: 0.0.2(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1327,6 +1376,11 @@ packages:
   '@napi-rs/canvas@0.1.95':
     resolution: {integrity: sha512-lkg23ge+rgyhgUwXmlbkPEhuhHq/hUi/gXKH+4I7vO+lJrbNfEYcQdJLIGjKyXLQzgFiiyDAwh5vAe/tITAE+w==}
     engines: {node: '>= 10'}
+
+  '@nestjs-port/core@0.0.2':
+    resolution: {integrity: sha512-8MXfBdP/viZkq2jbcA7gJb1LO99ymyaCgwjgdF/7rmrgX4oNXYbI42mplbs3miZjjiSalE7XyEpOJv/bsLc58g==}
+    peerDependencies:
+      rxjs: ^7.0.0
 
   '@nestjs/common@11.1.11':
     resolution: {integrity: sha512-R/+A8XFqLgN8zNs2twhrOaE7dJbRQhdPX3g46am4RT/x8xGLqDphrXkUIno4cGUZHxbczChBAaAPTdPv73wDZA==}
@@ -3012,9 +3066,6 @@ packages:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
 
-  globrex@0.1.2:
-    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
-
   google-auth-library@10.5.0:
     resolution: {integrity: sha512-7ABviyMOlX5hIVD60YOfHw4/CxOfBhyduaYB+wbFWCWoni4N7SLcV46hrVRktuBbZjFC9ONyqamZITN7q3n32w==}
     engines: {node: '>=18'}
@@ -4644,16 +4695,6 @@ packages:
   ts-algebra@2.0.0:
     resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
 
-  tsconfck@3.1.6:
-    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-    peerDependencies:
-      typescript: ^5.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -4851,14 +4892,6 @@ packages:
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
-
-  vite-tsconfig-paths@5.1.4:
-    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
-    peerDependencies:
-      vite: '*'
-    peerDependenciesMeta:
-      vite:
-        optional: true
 
   vite@7.3.0:
     resolution: {integrity: sha512-dZwN5L1VlUBewiP6H9s2+B3e3Jg96D0vzN+Ry73sOefebhYr9f94wwkMNN/9ouoU8pV1BqA1d1zGk8928cx0rg==}
@@ -5925,6 +5958,10 @@ snapshots:
       '@napi-rs/canvas-win32-arm64-msvc': 0.1.95
       '@napi-rs/canvas-win32-x64-msvc': 0.1.95
     optional: true
+
+  '@nestjs-port/core@0.0.2(rxjs@7.8.2)':
+    dependencies:
+      rxjs: 7.8.2
 
   '@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     dependencies:
@@ -7686,8 +7723,6 @@ snapshots:
       ignore: 5.3.2
       merge2: 1.4.1
       slash: 3.0.0
-
-  globrex@0.1.2: {}
 
   google-auth-library@10.5.0:
     dependencies:
@@ -9489,10 +9524,6 @@ snapshots:
 
   ts-algebra@2.0.0: {}
 
-  tsconfck@3.1.6(typescript@6.0.2):
-    optionalDependencies:
-      typescript: 6.0.2
-
   tslib@2.8.1: {}
 
   tunnel-agent@0.6.0:
@@ -9660,17 +9691,6 @@ snapshots:
       - terser
       - tsx
       - yaml
-
-  vite-tsconfig-paths@5.1.4(typescript@6.0.2)(vite@7.3.0(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2)):
-    dependencies:
-      debug: 4.4.3
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@6.0.2)
-    optionalDependencies:
-      vite: 7.3.0(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   vite@7.3.0(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2):
     dependencies:

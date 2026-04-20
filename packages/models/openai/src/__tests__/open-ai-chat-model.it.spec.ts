@@ -18,7 +18,7 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
-import { LoggerFactory, Media, MediaFormat } from "@nestjs-ai/commons";
+import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
   BeanOutputConverter,
   DefaultToolCallingManager,
@@ -35,6 +35,7 @@ import {
   SystemPromptTemplate,
   UserMessage,
 } from "@nestjs-ai/model";
+import { LoggerFactory } from "@nestjs-port/core";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";

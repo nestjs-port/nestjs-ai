@@ -219,6 +219,9 @@ importers:
       '@nestjs-port/core':
         specifier: ^0.0.2
         version: 0.0.2(rxjs@7.8.2)
+      '@nestjs-port/jsdbc':
+        specifier: ^0.0.3
+        version: 0.0.3(33f0c851be02cd9673a5a79512a8508c)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -328,8 +331,8 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2(rxjs@7.8.2)
       '@nestjs-port/jsdbc':
-        specifier: ^0.0.2
-        version: 0.0.2(33f0c851be02cd9673a5a79512a8508c)
+        specifier: ^0.0.3
+        version: 0.0.3(33f0c851be02cd9673a5a79512a8508c)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1338,8 +1341,8 @@ packages:
     peerDependencies:
       rxjs: ^7.0.0
 
-  '@nestjs-port/jsdbc@0.0.2':
-    resolution: {integrity: sha512-XYkV7NKDrsETGCqZJEGbLmpRaYqmzlFtrIgMlon5iNWKhPrbQvDZvDXfYI+U3PUnRTjvOZgNqf/leMYZI+7MaA==}
+  '@nestjs-port/jsdbc@0.0.3':
+    resolution: {integrity: sha512-Sovv90U4kORdbBl25ZVwu9iClv3QVXrgwmdi1HbJuYJC0Efi1QlUFAzNyl0H1BVv69Evy8iUo2aAjQjl6NeO6Q==}
     peerDependencies:
       '@mikro-orm/core': ^7.0.0
       '@nestjs-port/core': 0.0.2
@@ -5953,7 +5956,7 @@ snapshots:
     dependencies:
       rxjs: 7.8.2
 
-  '@nestjs-port/jsdbc@0.0.2(33f0c851be02cd9673a5a79512a8508c)':
+  '@nestjs-port/jsdbc@0.0.3(33f0c851be02cd9673a5a79512a8508c)':
     dependencies:
       '@nestjs-port/core': 0.0.2(rxjs@7.8.2)
       '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)

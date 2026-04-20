@@ -16,13 +16,9 @@
 
 import assert from "node:assert/strict";
 import { EOL } from "node:os";
-import {
-  HIGHEST_PRECEDENCE,
-  LOWEST_PRECEDENCE,
-  type Logger,
-  LoggerFactory,
-} from "@nestjs-ai/commons";
+import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-ai/commons";
 import { UserMessage } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { throwError } from "rxjs";
 import type { ZodType } from "zod";

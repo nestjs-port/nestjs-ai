@@ -37,10 +37,14 @@
     "stringtemplate4ts": "^2.0.1"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "*"
+    "@nestjs-ai/commons": "*",
+    "@nestjs-port/core": "^0.0.2"
   },
   "files": [
     "dist",
     "CHANGELOG.md"
-  ]
+  ],
+  "devDependencies": {
+    "@nestjs-port/core": "^0.0.2"
+  }
 }

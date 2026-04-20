@@ -17,7 +17,7 @@
 import "reflect-metadata";
 
 import { Test } from "@nestjs/testing";
-import { IMAGE_MODEL_TOKEN, LoggerFactory } from "@nestjs-ai/commons";
+import { IMAGE_MODEL_TOKEN } from "@nestjs-ai/commons";
 import { ImagePrompt } from "@nestjs-ai/model";
 import {
   OPEN_AI_IMAGE_DEFAULT_MODEL,
@@ -25,6 +25,7 @@ import {
   OpenAiImageModelModule,
   type OpenAiImageProperties,
 } from "@nestjs-ai/model-openai";
+import { LoggerFactory } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;

@@ -16,8 +16,9 @@
 
 import assert from "node:assert/strict";
 import os from "node:os";
-import { type Document, type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import type { Document } from "@nestjs-ai/commons";
 import { PromptTemplate } from "@nestjs-ai/model";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import { Query } from "../../query";
 import { PromptAssert } from "../../util";
 import { QueryAugmenter } from "./query-augmenter";

@@ -18,7 +18,6 @@ import assert from "node:assert/strict";
 import {
   Document,
   DocumentMetadata,
-  LoggerFactory,
   VectorStoreProvider,
   VectorStoreSimilarityMetric,
 } from "@nestjs-ai/commons";
@@ -31,6 +30,7 @@ import {
   SearchRequest,
   VectorStoreObservationContext,
 } from "@nestjs-ai/vector-store";
+import { LoggerFactory } from "@nestjs-port/core";
 import type {
   RediSearchSchema,
   RedisClientType,

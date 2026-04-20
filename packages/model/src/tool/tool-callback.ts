@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { ToolContext } from "../chat";
 import type { ToolDefinition } from "./definition";
 import { ToolMetadata } from "./metadata";

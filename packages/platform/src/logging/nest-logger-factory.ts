@@ -15,7 +15,7 @@
  */
 
 import { Logger as NestLogger } from "@nestjs/common";
-import type { ILoggerFactory, Logger } from "@nestjs-ai/commons";
+import type { ILoggerFactory, Logger } from "@nestjs-port/core";
 
 /**
  * NestJS Logger adapter implementing the Logger interface.
@@ -73,7 +73,7 @@ class NestLoggerAdapter implements Logger {
  *
  * @example
  * ```typescript
- * import { LoggerFactory } from '@nestjs-ai/commons/logging';
+ * import { LoggerFactory } from '@nestjs-port/core/logging';
  * import { NestLoggerFactory } from '@nestjs-ai/platform';
  *
  * // At application bootstrap

@@ -19,7 +19,7 @@ import type {
   InitializeResult,
   Tool as McpTool,
 } from "@modelcontextprotocol/sdk/spec.types.js";
-import { type Logger, LoggerFactory } from "@nestjs-ai/commons";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { McpConnectionInfo } from "./mcp-connection-info";
 import { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator";
 import { McpToolUtils } from "./mcp-tool-utils";

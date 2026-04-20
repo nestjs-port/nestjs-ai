@@ -15,13 +15,9 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  type Logger,
-  LoggerFactory,
-  type Media,
-  type TemplateRenderer,
-} from "@nestjs-ai/commons";
+import type { Media, TemplateRenderer } from "@nestjs-ai/commons";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
+import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Message } from "../messages";
 import { UserMessage } from "../messages";
 import type { ChatOptions } from "./chat-options.interface";

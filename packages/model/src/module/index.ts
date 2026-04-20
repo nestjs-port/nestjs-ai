@@ -15,16 +15,18 @@
  */
 
 export { ModelObservationModule } from "./model-observation.module";
-export { ToolCallingModule } from "./tool-calling.module";
+export {
+  addToolCallingContentObservationFilter,
+  ToolCallingModule,
+} from "./tool-calling.module";
 export {
   TOOL_CALLBACK_PROVIDER_TOKEN,
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
   TOOL_CALLBACK_RESOLVER_TOKEN,
   TOOL_CALLBACKS_TOKEN,
-  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_OVERRIDE_TOKEN,
-  TOOL_CALLING_CONTENT_OBSERVATION_FILTER_TOKEN,
   TOOL_CALLING_MANAGER_OVERRIDE_TOKEN,
   TOOL_CALLING_MANAGER_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
 } from "./tool-calling.tokens";
+export type { ToolCallingObservationProperties } from "./tool-calling-observation-properties";

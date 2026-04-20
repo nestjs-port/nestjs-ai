@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ToolCallingObservationProperties } from "@nestjs-ai/commons";
 import type { Meter, Tracer } from "@opentelemetry/api";
 import type { IgnoredMeters } from "../handlers";
 
@@ -22,5 +21,4 @@ export interface ObservationConfigurationProperties {
   meter?: Meter;
   tracer?: Tracer;
   ignoredMeters?: IgnoredMeters[];
-  toolCalling?: ToolCallingObservationProperties;
 }

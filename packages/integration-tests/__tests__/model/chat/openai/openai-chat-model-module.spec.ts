@@ -17,7 +17,7 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN, ObservationFilters } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
 import {
   OPEN_AI_CHAT_DEFAULT_MODEL,
@@ -25,6 +25,7 @@ import {
   OpenAiChatModelModule,
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";
+import { ObservationModule } from "@nestjs-ai/observation";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
@@ -106,6 +107,22 @@ describe("OpenAiChatModelModule", () => {
       };
 
       expect(chatModel.options.model).toBe(OPEN_AI_CHAT_DEFAULT_MODEL);
+    });
+
+    it("adds the tool call content filter when enabled", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          ObservationModule.forRoot(),
+          OpenAiChatModelModule.forFeature({
+            apiKey: "test-key",
+            toolCalling: { includeContent: true },
+          }),
+        ],
+      }).compile();
+
+      moduleRef.get(CHAT_MODEL_TOKEN);
+
+      expect(moduleRef.get(ObservationFilters).filters).toHaveLength(1);
     });
 
     it("should not export the properties token", async () => {

@@ -22,7 +22,6 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   ObservationFilters,
   ObservationHandlers,
-  TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN,
 } from "@nestjs-ai/commons";
 import {
   ObservationModule,
@@ -43,7 +42,6 @@ const OBSERVATION_CONFIG_TOKEN = Symbol("OBSERVATION_CONFIG_TOKEN");
             add: () => undefined,
           }),
         },
-        toolCalling: { includeContent: true },
       },
     },
   ],
@@ -64,9 +62,6 @@ describe("ObservationModule", () => {
       expect(moduleRef.get(ObservationProviderPostProcessor)).toBeDefined();
       expect(moduleRef.get(OtelMeterRegistry)).toBeNull();
       expect(moduleRef.get(METER_REGISTRY_TOKEN)).toBeNull();
-      expect(
-        moduleRef.get(TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN),
-      ).toBeUndefined();
     });
 
     it("creates a meter registry when meter is provided", async () => {
@@ -92,34 +87,6 @@ describe("ObservationModule", () => {
       );
     });
 
-    it("exposes tool calling observation properties when content logging is enabled", async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [
-          ObservationModule.forRoot({
-            toolCalling: { includeContent: true },
-          }),
-        ],
-      }).compile();
-
-      expect(moduleRef.get(TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN)).toEqual({
-        includeContent: true,
-      });
-    });
-
-    it("keeps tool calling observation properties undefined when content logging is disabled", async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [
-          ObservationModule.forRoot({
-            toolCalling: { includeContent: false },
-          }),
-        ],
-      }).compile();
-
-      expect(
-        moduleRef.get(TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN),
-      ).toBeUndefined();
-    });
-
     it("is global by default", () => {
       expect(ObservationModule.forRoot({}).global).toBe(true);
     });
@@ -136,10 +103,7 @@ describe("ObservationModule", () => {
           ObservationModule.forRootAsync({
             imports: [ObservationConfigModule],
             inject: [OBSERVATION_CONFIG_TOKEN],
-            useFactory: (config: {
-              meter: never;
-              toolCalling: { includeContent: boolean };
-            }) => config,
+            useFactory: (config: { meter: never }) => config,
           }),
         ],
       }).compile();
@@ -150,25 +114,18 @@ describe("ObservationModule", () => {
       expect(moduleRef.get(METER_REGISTRY_TOKEN)).toBeInstanceOf(
         OtelMeterRegistry,
       );
-      expect(moduleRef.get(TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN)).toEqual({
-        includeContent: true,
-      });
     });
 
     it("supports async factory returning a Promise", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
           ObservationModule.forRootAsync({
-            useFactory: async () => ({
-              toolCalling: { includeContent: true },
-            }),
+            useFactory: async () => ({}),
           }),
         ],
       }).compile();
 
-      expect(moduleRef.get(TOOL_CALLING_OBSERVATION_PROPERTIES_TOKEN)).toEqual({
-        includeContent: true,
-      });
+      expect(moduleRef.get(ObservationFilters)).toBeDefined();
     });
 
     it("defaults global to true for async", () => {

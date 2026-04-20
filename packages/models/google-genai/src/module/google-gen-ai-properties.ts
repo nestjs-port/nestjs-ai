@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ToolCallingObservationProperties } from "@nestjs-ai/model";
 import type { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options";
 
 export interface GoogleGenAiConnectionProperties {
@@ -28,4 +29,5 @@ export interface GoogleGenAiChatProperties
   extends GoogleGenAiConnectionProperties {
   options?: Partial<GoogleGenAiChatOptions>;
   enableCachedContent?: boolean;
+  toolCalling?: ToolCallingObservationProperties;
 }

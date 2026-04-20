@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "*",
-    "@nestjs-port/core": "^0.0.2"
+    "@nestjs-port/core": "^0.0.3"
   },
   "dependencies": {
     "stringtemplate4ts": "^2.0.1"
@@ -45,6 +45,6 @@
   ],
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
-    "@nestjs-port/core": "^0.0.2"
+    "@nestjs-port/core": "^0.0.3"
   }
 }

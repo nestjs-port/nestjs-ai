@@ -201,7 +201,7 @@ importers:
       '@nestjs-ai/model-openai':
         specifier: workspace:*
         version: link:../models/openai
-      '@nestjs-ai/model-openai-sdk':
+      '@nestjs-ai/model-openai':
         specifier: workspace:*
         version: link:../models/openai-sdk
       '@nestjs-ai/model-transformers':

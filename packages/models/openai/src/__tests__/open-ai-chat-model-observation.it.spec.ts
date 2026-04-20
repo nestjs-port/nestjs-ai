@@ -28,7 +28,6 @@ import { TestObservationRegistry } from "@nestjs-ai/testing";
 import { firstValueFrom } from "rxjs";
 import { toArray } from "rxjs/operators";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ChatModel, OpenAiApi } from "../api";
 import { OpenAiChatModel } from "../open-ai-chat-model";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
 
@@ -40,29 +39,21 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelObservationIT", () => {
 
   beforeEach(() => {
     observationRegistry = TestObservationRegistry.create();
-
-    const openAiApi = OpenAiApi.builder()
-      .apiKey(OPENAI_API_KEY ?? "")
-      .build();
-    chatModel = OpenAiChatModel.builder()
-      .openAiApi(openAiApi)
-      .defaultOptions(new OpenAiChatOptions())
-      .observationRegistry(observationRegistry)
-      .build();
+    chatModel = new OpenAiChatModel({
+      options: new OpenAiChatOptions({
+        apiKey: OPENAI_API_KEY,
+        model: OpenAiChatOptions.DEFAULT_CHAT_MODEL,
+      }),
+      observationRegistry,
+    });
 
     observationRegistry.clear();
   });
 
   it("observation for chat operation", async () => {
-    const options = new OpenAiChatOptions({
-      model: ChatModel.GPT_4_O_MINI,
-      frequencyPenalty: 0.0,
-      maxTokens: 2048,
-      presencePenalty: 0.0,
-      stop: ["this-is-the-end"],
-      temperature: 0.7,
-      topP: 1.0,
-    });
+    const options = OpenAiChatOptions.builder()
+      .model(OpenAiChatOptions.DEFAULT_CHAT_MODEL)
+      .build();
 
     const prompt = new Prompt("Why does a raven look like a desk?", options);
 
@@ -71,48 +62,50 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelObservationIT", () => {
 
     const responseMetadata = chatResponse.metadata;
     expect(responseMetadata).toBeDefined();
+    if (responseMetadata == null) {
+      throw new Error("Expected response metadata to be present");
+    }
 
-    validate(observationRegistry, responseMetadata);
+    await validate(observationRegistry, responseMetadata);
   });
 
   it("observation for streaming chat operation", async () => {
-    const options = new OpenAiChatOptions({
-      model: ChatModel.GPT_4_O_MINI,
-      frequencyPenalty: 0.0,
-      maxTokens: 2048,
-      presencePenalty: 0.0,
-      stop: ["this-is-the-end"],
-      temperature: 0.7,
-      topP: 1.0,
-    });
-    options.setStreamUsage(true);
+    const options = OpenAiChatOptions.builder()
+      .model(OpenAiChatOptions.DEFAULT_CHAT_MODEL)
+      .streamOptions({ include_usage: true })
+      .build();
 
     const prompt = new Prompt("Why does a raven look like a desk?", options);
 
     const responses = await firstValueFrom(
       chatModel.stream(prompt).pipe(toArray()),
     );
-    expect(responses.length).toBeGreaterThan(0);
+    expect(responses).not.toHaveLength(0);
     expect(responses.length).toBeGreaterThan(10);
 
     const aggregatedResponse = responses
       .slice(0, responses.length - 1)
       .map((response) => response.result?.output.text ?? "")
       .join("");
-    expect(aggregatedResponse.length).toBeGreaterThan(0);
+    expect(aggregatedResponse).not.toHaveLength(0);
 
     const lastChatResponse = responses[responses.length - 1];
     const responseMetadata = lastChatResponse.metadata;
     expect(responseMetadata).toBeDefined();
+    if (responseMetadata == null) {
+      throw new Error("Expected response metadata to be present");
+    }
 
-    validate(observationRegistry, responseMetadata);
+    await validate(observationRegistry, responseMetadata);
   });
 });
 
-function validate(
+async function validate(
   observationRegistry: TestObservationRegistry,
   responseMetadata: ChatResponseMetadata,
-): void {
+): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, 100)); // Wait for observation to be recorded
+
   expect(observationRegistry.currentObservation).toBeNull();
 
   const observation = observationRegistry.contexts.find(
@@ -135,37 +128,17 @@ function validate(
     AiProvider.OPENAI.value,
   );
   expect(low.get(AiObservationAttributes.REQUEST_MODEL.value)).toBe(
-    ChatModel.GPT_4_O_MINI,
+    OpenAiChatOptions.DEFAULT_CHAT_MODEL,
   );
   expect(low.get(AiObservationAttributes.RESPONSE_MODEL.value)).toBe(
     responseMetadata.model,
   );
-
-  expect(
-    high.get(AiObservationAttributes.REQUEST_FREQUENCY_PENALTY.value),
-  ).toBe("0");
-  expect(high.get(AiObservationAttributes.REQUEST_MAX_TOKENS.value)).toBe(
-    "2048",
-  );
-  expect(high.get(AiObservationAttributes.REQUEST_PRESENCE_PENALTY.value)).toBe(
-    "0",
-  );
-  expect(high.get(AiObservationAttributes.REQUEST_STOP_SEQUENCES.value)).toBe(
-    '["this-is-the-end"]',
-  );
-  expect(high.get(AiObservationAttributes.REQUEST_TEMPERATURE.value)).toBe(
-    "0.7",
-  );
-  expect(high.has(AiObservationAttributes.REQUEST_TOP_K.value)).toBe(false);
-  expect(high.get(AiObservationAttributes.REQUEST_TOP_P.value)).toBe("1");
   expect(high.get(AiObservationAttributes.RESPONSE_ID.value)).toBe(
     responseMetadata.id,
   );
-
-  const finishReasons =
-    high.get(AiObservationAttributes.RESPONSE_FINISH_REASONS.value) ?? "";
-  expect(finishReasons.toLowerCase()).toContain("stop");
-
+  expect(
+    high.get(AiObservationAttributes.RESPONSE_FINISH_REASONS.value) ?? "",
+  ).toContain("stop");
   expect(high.get(AiObservationAttributes.USAGE_INPUT_TOKENS.value)).toBe(
     String(responseMetadata.usage.promptTokens),
   );

@@ -24,48 +24,33 @@ import {
 } from "@nestjs-ai/model-chat-memory-repository-redis";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("redis", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("redis")>();
-  return {
-    ...actual,
-    createClient: vi.fn(() => ({
-      isOpen: false,
-      connect: vi.fn(async () => undefined),
-      ft: {
-        _list: vi.fn(async () => []),
-        create: vi.fn(async () => "OK"),
-        info: vi.fn(async () => ({})),
-      },
-      json: {
-        set: vi.fn(async () => "OK"),
-        get: vi.fn(async () => null),
-      },
-    })),
-  };
-});
-
 describe("RedisChatMemoryModule", () => {
   describe("forFeature", () => {
     it("should resolve CHAT_MEMORY_TOKEN via NestJS DI", async () => {
+      const client = createMockRedisClient();
+
       const moduleRef = await Test.createTestingModule({
         providers: [
           ...RedisChatMemoryModule.forFeature({
-            clientOptions: { url: "redis://localhost:6379" },
+            client: client as never,
+            initializeSchema: false,
           }),
         ],
       }).compile();
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
       expect(chatMemory).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should resolve properties with custom configuration", async () => {
+      const client = createMockRedisClient();
       const properties: RedisChatMemoryProperties = {
-        clientOptions: { url: "redis://localhost:6379" },
+        client: client as never,
         indexName: "custom-index",
         keyPrefix: "mem:",
         timeToLive: 3600,
-        initializeSchema: true,
+        initializeSchema: false,
         maxConversationIds: 100,
         maxMessagesPerConversation: 50,
       };
@@ -81,16 +66,20 @@ describe("RedisChatMemoryModule", () => {
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
       expect(chatMemory).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("forFeatureAsync", () => {
     it("should resolve CHAT_MEMORY_TOKEN from async factory via NestJS DI", async () => {
+      const client = createMockRedisClient();
+
       const moduleRef = await Test.createTestingModule({
         providers: [
           ...RedisChatMemoryModule.forFeatureAsync({
             useFactory: () => ({
-              clientOptions: { url: "redis://localhost:6379" },
+              client: client as never,
+              initializeSchema: false,
             }),
           }),
         ],
@@ -98,21 +87,24 @@ describe("RedisChatMemoryModule", () => {
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
       expect(chatMemory).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should support inject tokens for async factory", async () => {
       const EXTERNAL_TOKEN = Symbol("EXTERNAL_TOKEN");
+      const client = createMockRedisClient();
 
       const moduleRef = await Test.createTestingModule({
         providers: [
           {
             provide: EXTERNAL_TOKEN,
-            useValue: { url: "redis://localhost:6379" },
+            useValue: { client },
           },
           ...RedisChatMemoryModule.forFeatureAsync({
             inject: [EXTERNAL_TOKEN],
-            useFactory: (config: { url: string }) => ({
-              clientOptions: { url: config.url },
+            useFactory: (config: { client: unknown }) => ({
+              client: config.client as never,
+              initializeSchema: false,
             }),
           }),
         ],
@@ -120,15 +112,19 @@ describe("RedisChatMemoryModule", () => {
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
       expect(chatMemory).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
     it("should support async factory returning a Promise", async () => {
+      const client = createMockRedisClient();
+
       const moduleRef = await Test.createTestingModule({
         providers: [
           ...RedisChatMemoryModule.forFeatureAsync({
             useFactory: async () => ({
-              clientOptions: { url: "redis://localhost:6379" },
+              client: client as never,
               indexName: "async-index",
+              initializeSchema: false,
             }),
           }),
         ],
@@ -136,6 +132,28 @@ describe("RedisChatMemoryModule", () => {
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
       expect(chatMemory).toBeDefined();
+      expect(client.connect).toHaveBeenCalledTimes(1);
     });
   });
 });
+
+function createMockRedisClient() {
+  return {
+    isOpen: false,
+    connect: vi.fn(async () => undefined),
+    close: vi.fn(async () => undefined),
+    ft: {
+      _list: vi.fn(async () => []),
+      create: vi.fn(async () => "OK"),
+      info: vi.fn(async () => ({})),
+      search: vi.fn(async () => ({ documents: [] })),
+      aggregate: vi.fn(async () => ({ results: [] })),
+    },
+    json: {
+      set: vi.fn(async () => "OK"),
+      get: vi.fn(async () => null),
+    },
+    expire: vi.fn(async () => 1),
+    del: vi.fn(async () => 1),
+  };
+}

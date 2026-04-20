@@ -468,11 +468,10 @@ importers:
         version: 4.3.6
 
   packages/models/google-genai:
-    dependencies:
+    devDependencies:
       '@google/genai':
         specifier: ^1.49.0
         version: 1.49.0(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))
-    devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../commons
@@ -526,10 +525,6 @@ importers:
         version: 4.3.6
 
   packages/models/transformers:
-    dependencies:
-      '@xenova/transformers':
-        specifier: ^2.17.2
-        version: 2.17.2
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -543,6 +538,9 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@xenova/transformers':
+        specifier: ^2.17.2
+        version: 2.17.2
 
   packages/observation:
     dependencies:
@@ -613,13 +611,13 @@ importers:
 
   packages/template-st:
     dependencies:
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../commons
       stringtemplate4ts:
         specifier: ^2.0.1
         version: 2.0.1
     devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../commons
       '@nestjs-port/core':
         specifier: ^0.0.2
         version: 0.0.2(rxjs@7.8.2)

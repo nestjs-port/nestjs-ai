@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ToolCallingObservationProperties } from "@nestjs-ai/model";
 import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
 import type { OpenAiChatOptionsProps } from "../open-ai-chat-options";
 
@@ -21,4 +22,5 @@ export const OPEN_AI_CHAT_DEFAULT_MODEL = "gpt-5-mini";
 
 export interface OpenAiChatProperties extends AbstractOpenAiOptionsProps {
   options?: Partial<OpenAiChatOptionsProps>;
+  toolCalling?: ToolCallingObservationProperties;
 }

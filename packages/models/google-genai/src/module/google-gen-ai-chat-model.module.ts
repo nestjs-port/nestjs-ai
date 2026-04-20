@@ -27,9 +27,11 @@ import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
+  ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
+  addToolCallingContentObservationFilter,
   ChatModelObservationConvention,
   ModelObservationModule,
   TOOL_CALLING_MANAGER_TOKEN,
@@ -128,6 +130,7 @@ function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
         toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
+        observationFilters?: ObservationFilters,
       ) =>
         createGoogleGenAiChatModel(
           props,
@@ -136,6 +139,7 @@ function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
           observationRegistry,
           observationConvention,
           toolExecutionEligibilityPredicate,
+          observationFilters,
         ),
       inject: [
         GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -144,6 +148,7 @@ function createProviders(properties?: GoogleGenAiChatProperties): Provider[] {
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
         { token: ToolExecutionEligibilityPredicate, optional: true },
+        { token: ObservationFilters, optional: true },
       ],
     },
     ...createCachedContentProviders(properties),
@@ -174,12 +179,13 @@ function createGoogleGenAiChatModel(
   observationRegistry?: ObservationRegistry,
   observationConvention?: ChatModelObservationConvention,
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
+  observationFilters?: ObservationFilters,
 ): GoogleGenAiChatModel {
   const defaultOptions = properties.options
     ? new GoogleGenAiChatOptions(properties.options)
     : undefined;
 
-  return new GoogleGenAiChatModel({
+  const model = new GoogleGenAiChatModel({
     genAiClient,
     defaultOptions,
     toolCallingManager,
@@ -187,6 +193,13 @@ function createGoogleGenAiChatModel(
     observationConvention,
     toolExecutionEligibilityPredicate,
   });
+
+  addToolCallingContentObservationFilter(
+    observationFilters,
+    properties.toolCalling,
+  );
+
+  return model;
 }
 
 function createGoogleGenAiClient(

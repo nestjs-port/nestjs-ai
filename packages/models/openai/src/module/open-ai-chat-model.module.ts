@@ -26,9 +26,11 @@ import {
   CHAT_MODEL_TOKEN,
   NoopObservationRegistry,
   OBSERVATION_REGISTRY_TOKEN,
+  ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
+  addToolCallingContentObservationFilter,
   ChatModelObservationConvention,
   DefaultToolExecutionEligibilityPredicate,
   ModelObservationModule,
@@ -106,6 +108,7 @@ function createProviders(): Provider[] {
         observationRegistry?: ObservationRegistry,
         observationConvention?: ChatModelObservationConvention,
         toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
+        observationFilters?: ObservationFilters,
       ) =>
         createOpenAiChatModel(
           properties,
@@ -113,6 +116,7 @@ function createProviders(): Provider[] {
           observationRegistry,
           observationConvention,
           toolExecutionEligibilityPredicate,
+          observationFilters,
         ),
       inject: [
         OPEN_AI_CHAT_PROPERTIES_TOKEN,
@@ -120,6 +124,7 @@ function createProviders(): Provider[] {
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
         { token: ChatModelObservationConvention, optional: true },
         { token: ToolExecutionEligibilityPredicate, optional: true },
+        { token: ObservationFilters, optional: true },
       ],
     },
   ];
@@ -131,6 +136,7 @@ function createOpenAiChatModel(
   observationRegistry?: ObservationRegistry,
   observationConvention?: ChatModelObservationConvention,
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
+  observationFilters?: ObservationFilters,
 ): OpenAiChatModel {
   const { options, ...connectionProperties } = properties;
   const defaultOptions = new OpenAiChatOptions({
@@ -155,6 +161,11 @@ function createOpenAiChatModel(
   if (observationConvention) {
     model.setObservationConvention(observationConvention);
   }
+
+  addToolCallingContentObservationFilter(
+    observationFilters,
+    properties.toolCalling,
+  );
 
   return model;
 }

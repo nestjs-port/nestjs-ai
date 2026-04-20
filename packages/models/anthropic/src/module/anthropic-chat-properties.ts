@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ToolCallingObservationProperties } from "@nestjs-ai/model";
 import type { AnthropicChatOptionsProps } from "../anthropic-chat-options";
 import type { AnthropicSetupProps } from "../anthropic-setup";
 
@@ -21,4 +22,5 @@ export const ANTHROPIC_CHAT_DEFAULT_MODEL = "claude-haiku-4-5";
 
 export interface AnthropicChatProperties extends AnthropicSetupProps {
   options?: Partial<AnthropicChatOptionsProps>;
+  toolCalling?: ToolCallingObservationProperties;
 }

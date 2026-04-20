@@ -17,12 +17,13 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN, ObservationFilters } from "@nestjs-ai/commons";
 import {
   GoogleGenAiCachedContentService,
   GoogleGenAiChatModelModule,
   type GoogleGenAiChatProperties,
 } from "@nestjs-ai/model-google-genai";
+import { ObservationModule } from "@nestjs-ai/observation";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
@@ -171,6 +172,22 @@ describe("GoogleGenAiChatModelModule", () => {
       expect(chatModel._defaultOptions.temperature).toBe(0.2);
       expect(chatModel._defaultOptions.topP).toBe(0.7);
       expect(chatModel._defaultOptions.maxOutputTokens).toBe(128);
+    });
+
+    it("adds the tool call content filter when enabled", async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [
+          ObservationModule.forRoot(),
+          GoogleGenAiChatModelModule.forFeature({
+            apiKey: "test-google-api-key",
+            toolCalling: { includeContent: true },
+          }),
+        ],
+      }).compile();
+
+      moduleRef.get(CHAT_MODEL_TOKEN);
+
+      expect(moduleRef.get(ObservationFilters).filters).toHaveLength(1);
     });
 
     it("resolves cached content service by default", async () => {

@@ -23,7 +23,7 @@ import {
   DefaultEmbeddingModelObservationConvention,
   EmbeddingRequest,
 } from "@nestjs-ai/model";
-import { TestObservationRegistry } from "@nestjs-ai/testing";
+import { TestObservationRegistry } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { OpenAiEmbeddingModel } from "../open-ai-embedding-model";
@@ -42,7 +42,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingModelObservationIT", () => {
         apiKey: OPENAI_API_KEY,
         model: OpenAiEmbeddingOptions.DEFAULT_EMBEDDING_MODEL,
       }),
-      observationRegistry,
+      observationRegistry: observationRegistry as never,
     });
 
     observationRegistry.clear();

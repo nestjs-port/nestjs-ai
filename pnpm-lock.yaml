@@ -89,12 +89,12 @@ importers:
       '@nestjs-ai/template-st':
         specifier: workspace:*
         version: link:../template-st
-      '@nestjs-ai/testing':
-        specifier: workspace:*
-        version: link:../testing
       '@nestjs-port/core':
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)
+      '@nestjs-port/testing':
+        specifier: ^0.0.2
+        version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -218,7 +218,7 @@ importers:
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/testing':
         specifier: ^11.1.11
-        version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
+        version: 11.1.19(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
       '@opentelemetry/sdk-metrics':
         specifier: ^2.6.1
         version: 2.6.1(@opentelemetry/api@1.9.0)
@@ -373,12 +373,12 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/testing':
-        specifier: workspace:*
-        version: link:../../testing
       '@nestjs-port/core':
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)
+      '@nestjs-port/testing':
+        specifier: ^0.0.2
+        version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -430,12 +430,12 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/testing':
-        specifier: workspace:*
-        version: link:../../testing
       '@nestjs-port/core':
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)
+      '@nestjs-port/testing':
+        specifier: ^0.0.2
+        version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -457,9 +457,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/testing':
-        specifier: workspace:*
-        version: link:../../testing
+      '@nestjs-port/testing':
+        specifier: ^0.0.2
+        version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -500,9 +500,6 @@ importers:
       '@nestjs/core':
         specifier: ^11.1.11
         version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/testing':
-        specifier: ^11.1.11
-        version: 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
 
   packages/rag:
     devDependencies:
@@ -547,12 +544,6 @@ importers:
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)
 
-  packages/testing:
-    devDependencies:
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../commons
-
   packages/vector-store:
     dependencies:
       antlr4ng:
@@ -580,15 +571,15 @@ importers:
       '@nestjs-ai/model-transformers':
         specifier: workspace:*
         version: link:../../models/transformers
-      '@nestjs-ai/testing':
-        specifier: workspace:*
-        version: link:../../testing
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)
+      '@nestjs-port/testing':
+        specifier: ^0.0.2
+        version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1318,6 +1309,11 @@ packages:
       zod:
         optional: true
 
+  '@nestjs-port/testing@0.0.2':
+    resolution: {integrity: sha512-peFEncBq3czbXRFrd3owfitd64XuOKbYpTJ0lPYULfapLSrTpYc4hH5CYAvVXT+BuI4eYV5ACpbdmO6ZURKYbA==}
+    peerDependencies:
+      '@nestjs-port/core': '*'
+
   '@nestjs/common@11.1.11':
     resolution: {integrity: sha512-R/+A8XFqLgN8zNs2twhrOaE7dJbRQhdPX3g46am4RT/x8xGLqDphrXkUIno4cGUZHxbczChBAaAPTdPv73wDZA==}
     peerDependencies:
@@ -1365,8 +1361,8 @@ packages:
       sequelize: ^6.3.5
       sequelize-typescript: ^2.0.0
 
-  '@nestjs/testing@11.1.11':
-    resolution: {integrity: sha512-Po2aZKXlxuySDEh3Gi05LJ7/BtfTAPRZ3KPTrbpNrTmgGr3rFgEGYpQwN50wXYw0pywoICiFLZSZ/qXsplf6NA==}
+  '@nestjs/testing@11.1.19':
+    resolution: {integrity: sha512-/UFNWXvPEdu4v4DlC5oWLbGKmD27LehLK06b8oLzs6D6lf4vAQTdST8LRAXBadyMUQnVEQWMuBo3CtAVtlfXtQ==}
     peerDependencies:
       '@nestjs/common': ^11.0.0
       '@nestjs/core': ^11.0.0
@@ -5873,6 +5869,10 @@ snapshots:
       typeorm: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
       zod: 4.3.6
 
+  '@nestjs-port/testing@0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))':
+    dependencies:
+      '@nestjs-port/core': 0.0.3(rxjs@7.8.2)
+
   '@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     dependencies:
       file-type: 21.2.0
@@ -5925,7 +5925,7 @@ snapshots:
       sequelize-typescript: 2.1.6(@types/node@25.5.0)(@types/validator@13.15.10)(reflect-metadata@0.2.2)(sequelize@6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7))
     optional: true
 
-  '@nestjs/testing@11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)':
+  '@nestjs/testing@11.1.19(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)':
     dependencies:
       '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.11(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)

@@ -43,8 +43,7 @@
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-port/core": "^0.0.3",
     "@nestjs/common": "^11.1.11",
-    "@nestjs/core": "^11.1.11",
-    "@nestjs/testing": "^11.1.11"
+    "@nestjs/core": "^11.1.11"
   },
   "files": [
     "dist",

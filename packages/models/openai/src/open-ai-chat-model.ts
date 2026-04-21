@@ -572,7 +572,7 @@ export class OpenAiChatModel extends ChatModel {
       if (assistantMessage.text) {
         text += assistantMessage.text;
       }
-      props = { ...props, ...(assistantMessage.metadata ?? {}) };
+      props = { ...props, ...assistantMessage.metadata };
 
       if (assistantMessage.toolCalls.length > 0) {
         const chunkChoice = assistantMessage.metadata?.chunkChoice as

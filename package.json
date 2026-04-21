@@ -21,10 +21,7 @@
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt --write .",
-    "lint:oxlint": "oxlint .",
-    "lint:oxlint:fix": "oxlint --fix .",
-    "format:oxfmt": "oxfmt .",
-    "format:oxfmt:check": "oxfmt --check .",
+    "format:check": "oxfmt --check .",
     "test": "turbo run test",
     "changeset": "changeset",
     "changeset:status": "changeset status --since=main",
@@ -56,7 +53,8 @@
     "vitest": "^4.0.16"
   },
   "lint-staged": {
-    "*": "oxfmt --no-error-on-unmatched-pattern"
+    "*": "oxfmt --write --no-error-on-unmatched-pattern",
+    "*.{js,jsx,ts,tsx,mjs,cjs}": "oxlint --fix"
   },
   "engines": {
     "node": ">=20.0.0",

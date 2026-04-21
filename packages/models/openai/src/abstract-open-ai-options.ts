@@ -119,7 +119,7 @@ export class AbstractOpenAiOptions {
     this._timeout = props.timeout ?? null;
     this._maxRetries = props.maxRetries ?? null;
     this._fetchOptions = props.fetchOptions ?? null;
-    this._customHeaders = { ...(props.customHeaders ?? {}) };
+    this._customHeaders = { ...props.customHeaders };
   }
 
   get baseUrl(): string | null {
@@ -227,6 +227,6 @@ export class AbstractOpenAiOptions {
   }
 
   setCustomHeaders(customHeaders: Record<string, string> | null): void {
-    this._customHeaders = { ...(customHeaders ?? {}) };
+    this._customHeaders = { ...customHeaders };
   }
 }

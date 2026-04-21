@@ -182,7 +182,7 @@ export class DefaultChatGenerationMetadata extends ChatGenerationMetadata {
     super();
     assert(props.metadata != null, "Metadata must not be null");
     assert(props.contentFilters != null, "Content filters must not be null");
-    this._metadata = { ...(props.metadata ?? {}) };
+    this._metadata = { ...props.metadata };
     this._finishReason = props.finishReason ?? null;
     this._contentFilters = [...(props.contentFilters ?? [])];
   }

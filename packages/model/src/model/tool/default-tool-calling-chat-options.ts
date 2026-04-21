@@ -376,7 +376,7 @@ export namespace DefaultToolCallingChatOptions {
           "key cannot be null",
         );
         assert(value != null, "value cannot be null");
-        const updatedContext = { ...(this._toolContext ?? {}) };
+        const updatedContext = { ...this._toolContext };
         updatedContext[keyOrContext as string] = value;
         this._toolContext = updatedContext;
         return this.self();

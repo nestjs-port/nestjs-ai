@@ -24,7 +24,7 @@ import {
   DefaultChatModelObservationConvention,
   Prompt,
 } from "@nestjs-ai/model";
-import { TestObservationRegistry } from "@nestjs-ai/testing";
+import { TestObservationRegistry } from "@nestjs-port/testing";
 import { firstValueFrom } from "rxjs";
 import { toArray } from "rxjs/operators";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -41,7 +41,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatModelObservationIT", () => {
   beforeEach(() => {
     observationRegistry = TestObservationRegistry.create();
     chatModel = new AnthropicChatModel({
-      observationRegistry,
+      observationRegistry: observationRegistry as never,
     });
 
     observationRegistry.clear();

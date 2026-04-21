@@ -19,8 +19,8 @@ import { resolve } from "node:path";
 import type { Document } from "@nestjs-ai/commons";
 import { Document as VectorDocument } from "@nestjs-ai/commons";
 import { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
-import { TestObservationRegistry } from "@nestjs-ai/testing";
 import { SearchRequest } from "@nestjs-ai/vector-store";
+import { TestObservationRegistry } from "@nestjs-port/testing";
 import {
   RedisContainer,
   type StartedRedisContainer,
@@ -69,7 +69,7 @@ describe("RedisVectorStoreObservationIT", () => {
     observationRegistry = TestObservationRegistry.create();
 
     vectorStore = RedisVectorStore.builder(client, embeddingModel)
-      .observationRegistry(observationRegistry)
+      .observationRegistry(observationRegistry as never)
       .customObservationConvention(null)
       .initializeSchema(true)
       .metadataFields(

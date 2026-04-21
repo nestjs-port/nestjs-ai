@@ -23,7 +23,7 @@ import {
   DefaultImageModelObservationConvention,
   ImagePrompt,
 } from "@nestjs-ai/model";
-import { TestObservationRegistry } from "@nestjs-ai/testing";
+import { TestObservationRegistry } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { OpenAiImageModel } from "../open-ai-image-model";
 import { OpenAiImageOptions } from "../open-ai-image-options";
@@ -41,7 +41,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelObservationIT", () => {
         apiKey: OPENAI_API_KEY,
         model: OpenAiImageOptions.DEFAULT_IMAGE_MODEL,
       }),
-      observationRegistry,
+      observationRegistry: observationRegistry as never,
     });
 
     observationRegistry.clear();

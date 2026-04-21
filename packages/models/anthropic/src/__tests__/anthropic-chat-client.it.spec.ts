@@ -32,6 +32,7 @@ import {
   Tool,
 } from "@nestjs-ai/model";
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom, map, type Observable, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -47,6 +48,7 @@ import {
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory());
   const logger = LoggerFactory.getLogger("AnthropicChatClientIT");
   const systemTextResource = readFileSync(
     resolve(__dirname, "resources", "system-message.st"),

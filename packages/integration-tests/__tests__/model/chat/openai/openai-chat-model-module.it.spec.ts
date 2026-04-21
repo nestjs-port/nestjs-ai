@@ -25,6 +25,7 @@ import {
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
@@ -32,6 +33,7 @@ import { describe, expect, it } from "vitest";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelModuleIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory());
   const logger = LoggerFactory.getLogger("OpenAiChatModelModuleIT");
 
   it("chat call", async () => {

@@ -43,11 +43,11 @@ export type MockWeatherResponse = {
   unit: "C" | "F";
 };
 
-const logger = LoggerFactory.getLogger("MockWeatherService");
-
 export class MockWeatherService {
+  private readonly logger = LoggerFactory.getLogger(MockWeatherService.name);
+
   apply(request: MockWeatherRequest): MockWeatherResponse {
-    logger.info(
+    this.logger.info(
       "Received weather request for location: %s, lat: %s, lon: %s, unit: %s",
       request.location,
       request.lat,

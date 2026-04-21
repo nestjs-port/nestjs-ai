@@ -26,10 +26,10 @@ import {
   type OpenAiImageProperties,
 } from "@nestjs-ai/model-openai";
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { describe, expect, it } from "vitest";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const logger = LoggerFactory.getLogger("OpenAiImageModelModuleIT");
 
 async function createImageModel(
   properties: OpenAiImageProperties,
@@ -42,6 +42,9 @@ async function createImageModel(
 }
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelModuleIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory());
+  const logger = LoggerFactory.getLogger("OpenAiImageModelModuleIT");
+
   it("generate image", async () => {
     const imageModel = await createImageModel({
       apiKey: OPENAI_API_KEY ?? "",

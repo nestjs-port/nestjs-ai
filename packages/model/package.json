@@ -45,6 +45,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/template-st": "workspace:*",
     "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/testing": "^0.0.2",
     "@nestjs/common": "^11.1.11",
     "class-transformer": "^0.5.1",
     "reflect-metadata": "^0.2.2",

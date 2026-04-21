@@ -25,6 +25,7 @@ import {
   type AnthropicChatProperties,
 } from "@nestjs-ai/model-anthropic";
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
@@ -32,6 +33,7 @@ import { describe, expect, it } from "vitest";
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatModelModuleIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory());
   const logger = LoggerFactory.getLogger("AnthropicChatModelModuleIT");
 
   it("chat call", async () => {

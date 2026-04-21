@@ -15,33 +15,22 @@
  */
 
 import { Document, ObservationContext } from "@nestjs-ai/commons";
-import { LoggerFactory } from "@nestjs-port/core";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
+import { RecordingLogger } from "@nestjs-port/testing";
+import { beforeEach, describe, expect, it } from "vitest";
 import { VectorStoreObservationContext } from "../vector-store-observation-context";
 import { VectorStoreQueryResponseObservationHandler } from "../vector-store-query-response-observation-handler";
 
 describe("VectorStoreQueryResponseObservationHandler", () => {
-  let infoMock: (message: string, ...args: unknown[]) => void;
+  let recordingLogger: RecordingLogger;
 
   beforeEach(() => {
-    infoMock = vi.fn<(message: string, ...args: unknown[]) => void>();
-    vi.spyOn(LoggerFactory, "getLogger").mockReturnValue({
-      name: "VectorStoreQueryResponseObservationHandler",
-      info: infoMock,
-      warn: vi.fn(),
-      debug: vi.fn(),
-      trace: vi.fn(),
-      error: vi.fn(),
-      isDebugEnabled: () => false,
-      isTraceEnabled: () => false,
-      isInfoEnabled: () => true,
-      isWarnEnabled: () => true,
-      isErrorEnabled: () => true,
+    recordingLogger = new RecordingLogger(
+      "VectorStoreQueryResponseObservationHandler",
+    );
+    LoggerFactory.bind({
+      getLogger: () => recordingLogger,
     });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   function createContext(
@@ -74,7 +63,12 @@ describe("VectorStoreQueryResponseObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith("Vector Store Query Response:\n[]");
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: "Vector Store Query Response:\n[]",
+      args: [],
+    });
   });
 
   it("when non-empty query response then output it", () => {
@@ -83,8 +77,11 @@ describe("VectorStoreQueryResponseObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith(
-      'Vector Store Query Response:\n["doc1", "doc2"]',
-    );
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: 'Vector Store Query Response:\n["doc1", "doc2"]',
+      args: [],
+    });
   });
 });

@@ -27,6 +27,7 @@ import {
   ToolMetadata,
 } from "@nestjs-ai/model";
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom } from "rxjs";
 import { toArray as toArrayOperator } from "rxjs/operators";
 import { expect } from "vitest";
@@ -41,6 +42,8 @@ import {
  * Abstract base suite for tool call advisor integration tests.
  * Contains common test logic to avoid duplication between advisor implementations.
  */
+LoggerFactory.bind(new ConsoleLoggerFactory());
+
 export class AbstractToolCallAdvisorIT {
   private readonly logger = LoggerFactory.getLogger(
     AbstractToolCallAdvisorIT.name,

@@ -15,34 +15,23 @@
  */
 
 import { ObservationContext } from "@nestjs-ai/commons";
-import { LoggerFactory } from "@nestjs-port/core";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
+import { RecordingLogger } from "@nestjs-port/testing";
+import { beforeEach, describe, expect, it } from "vitest";
 import { ImageMessage, ImageOptionsBuilder, ImagePrompt } from "../../";
 import { ImageModelObservationContext } from "../image-model-observation-context";
 import { ImageModelPromptContentObservationHandler } from "../image-model-prompt-content-observation-handler";
 
 describe("ImageModelPromptContentObservationHandler", () => {
-  let infoMock: (message: string, ...args: unknown[]) => void;
+  let recordingLogger: RecordingLogger;
 
   beforeEach(() => {
-    infoMock = vi.fn<(message: string, ...args: unknown[]) => void>();
-    vi.spyOn(LoggerFactory, "getLogger").mockReturnValue({
-      name: "ImageModelPromptContentObservationHandler",
-      info: infoMock,
-      warn: vi.fn(),
-      debug: vi.fn(),
-      trace: vi.fn(),
-      error: vi.fn(),
-      isDebugEnabled: () => false,
-      isTraceEnabled: () => false,
-      isInfoEnabled: () => true,
-      isWarnEnabled: () => true,
-      isErrorEnabled: () => true,
+    recordingLogger = new RecordingLogger(
+      "ImageModelPromptContentObservationHandler",
+    );
+    LoggerFactory.bind({
+      getLogger: () => recordingLogger,
     });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   it("when not supported observation context then return false", () => {
@@ -70,7 +59,12 @@ describe("ImageModelPromptContentObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith('Image Model Prompt Content:\n[""]');
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: 'Image Model Prompt Content:\n[""]',
+      args: [],
+    });
   });
 
   it("when prompt with text then output it", () => {
@@ -84,9 +78,13 @@ describe("ImageModelPromptContentObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith(
-      'Image Model Prompt Content:\n["supercalifragilisticexpialidocious"]',
-    );
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message:
+        'Image Model Prompt Content:\n["supercalifragilisticexpialidocious"]',
+      args: [],
+    });
   });
 
   it("when prompt with messages then output it", () => {
@@ -103,9 +101,12 @@ describe("ImageModelPromptContentObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith(
-      `Image Model Prompt Content:\n["you're a chimney sweep", "supercalifragilisticexpialidocious"]`,
-    );
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: `Image Model Prompt Content:\n["you're a chimney sweep", "supercalifragilisticexpialidocious"]`,
+      args: [],
+    });
   });
 });
 

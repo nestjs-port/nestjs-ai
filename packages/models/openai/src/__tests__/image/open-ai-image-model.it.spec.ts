@@ -16,9 +16,9 @@
 
 import { ImagePrompt } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { OpenAiImageGenerationMetadata } from "../metadata";
-import { OpenAiImageModel } from "../open-ai-image-model";
-import { OpenAiImageOptions } from "../open-ai-image-options";
+import { OpenAiImageGenerationMetadata } from "../../metadata";
+import { OpenAiImageModel } from "../../open-ai-image-model";
+import { OpenAiImageOptions } from "../../open-ai-image-options";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

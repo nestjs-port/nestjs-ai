@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import type { ImageGenerationMetadata } from "@nestjs-ai/model";
+
 /**
  * Represents the metadata for image generation using the OpenAI Java SDK.
  */
-export class OpenAiImageGenerationMetadata {
+export class OpenAiImageGenerationMetadata implements ImageGenerationMetadata {
   private readonly _revisedPrompt: string | null;
 
+  /**
+   * Creates a new OpenAiImageGenerationMetadata.
+   * @param revisedPrompt the revised prompt used for generation
+   */
   constructor(revisedPrompt?: string | null) {
     this._revisedPrompt = revisedPrompt ?? null;
   }

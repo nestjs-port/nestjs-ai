@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./open-ai-image-generation-metadata";
-export * from "./open-ai-image-response-metadata";
+export { OpenAiImageGenerationMetadata } from "./open-ai-image-generation-metadata";
+export { OpenAiRateLimit } from "./open-ai-rate-limit";
+export { OpenAiAudioSpeechResponseMetadata } from "./open-ai-audio-speech-response-metadata";
+export { OpenAiImageResponseMetadata } from "./open-ai-image-response-metadata";

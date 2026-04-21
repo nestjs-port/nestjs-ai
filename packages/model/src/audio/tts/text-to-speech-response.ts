@@ -25,7 +25,7 @@ export interface TextToSpeechResponseProps {
 }
 
 /**
- * Response returned by a text-to-speech model.
+ * Implementation of the {@link ModelResponse} interface for the text to speech response.
  */
 export class TextToSpeechResponse implements ModelResponse<Speech> {
   private readonly _results: Speech[];

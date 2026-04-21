@@ -21,6 +21,9 @@ import type { TextToSpeechOptions } from "./text-to-speech-options.interface";
 import { TextToSpeechPrompt } from "./text-to-speech-prompt";
 import type { TextToSpeechResponse } from "./text-to-speech-response";
 
+/**
+ * Interface for the streaming text to speech model.
+ */
 export abstract class StreamingTextToSpeechModel
   implements StreamingModel<TextToSpeechPrompt, TextToSpeechResponse>
 {

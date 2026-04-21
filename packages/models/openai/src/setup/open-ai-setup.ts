@@ -217,14 +217,16 @@ export class OpenAiSetup {
     let credentialProviderPromise: Promise<() => Promise<string>> | null = null;
 
     return async () => {
-      credentialProviderPromise ??= import(
-        "./azure-internal-open-ai-helper"
-      ).then(({ AzureInternalOpenAiHelper }) =>
-        AzureInternalOpenAiHelper.getAzureCredential(),
-      );
+      credentialProviderPromise ??=
+        import("./azure-internal-open-ai-helper").then(
+          ({ AzureInternalOpenAiHelper }) =>
+            AzureInternalOpenAiHelper.getAzureCredential(),
+        );
 
       try {
-        return await (await credentialProviderPromise)();
+        return await (
+          await credentialProviderPromise
+        )();
       } catch {
         throw new Error(
           "Microsoft Foundry was detected, but no credential was provided. If you want to use passwordless authentication, add the @azure/identity dependency to your project.",

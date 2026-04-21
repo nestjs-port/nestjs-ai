@@ -84,14 +84,17 @@ describe("JsdbcChatMemoryRepositoryBuilder", () => {
     ],
     [DatabaseDialect.SQLITE, SqliteChatMemoryRepositoryDialect],
     [DatabaseDialect.ORACLE, OracleChatMemoryRepositoryDialect],
-  ])("resolves the dialect factory from the data source: %s", async (dialect, expectedDialect) => {
-    const dataSource = createDataSource(dialect);
+  ])(
+    "resolves the dialect factory from the data source: %s",
+    async (dialect, expectedDialect) => {
+      const dataSource = createDataSource(dialect);
 
-    const resolvedDialect =
-      await JsdbcChatMemoryRepositoryDialectFactory.from(dataSource);
+      const resolvedDialect =
+        await JsdbcChatMemoryRepositoryDialectFactory.from(dataSource);
 
-    expect(resolvedDialect).toBeInstanceOf(expectedDialect);
-  });
+      expect(resolvedDialect).toBeInstanceOf(expectedDialect);
+    },
+  );
 
   it.each([
     [DatabaseDialect.POSTGRESQL, PostgresChatMemoryRepositoryDialect],
@@ -103,16 +106,21 @@ describe("JsdbcChatMemoryRepositoryBuilder", () => {
     ],
     [DatabaseDialect.SQLITE, SqliteChatMemoryRepositoryDialect],
     [DatabaseDialect.ORACLE, OracleChatMemoryRepositoryDialect],
-  ])("resolves the dialect from the data source: %s", async (dialect, expectedDialect) => {
-    const dataSource = createDataSource(dialect);
+  ])(
+    "resolves the dialect from the data source: %s",
+    async (dialect, expectedDialect) => {
+      const dataSource = createDataSource(dialect);
 
-    const repository = await JsdbcChatMemoryRepository.builder()
-      .dataSource(dataSource)
-      .build();
+      const repository = await JsdbcChatMemoryRepository.builder()
+        .dataSource(dataSource)
+        .build();
 
-    expect(repository).toBeInstanceOf(JsdbcChatMemoryRepository);
-    expect(Reflect.get(repository, "dialect")).toBeInstanceOf(expectedDialect);
-  });
+      expect(repository).toBeInstanceOf(JsdbcChatMemoryRepository);
+      expect(Reflect.get(repository, "dialect")).toBeInstanceOf(
+        expectedDialect,
+      );
+    },
+  );
 
   it("defaults to Postgres when the dialect is unknown", async () => {
     const dataSource = createDataSource(

@@ -122,54 +122,57 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     ["Message from assistant", MessageType.ASSISTANT],
     ["Message from user", MessageType.USER],
     ["Message from system", MessageType.SYSTEM],
-  ])("should store and retrieve single message (%s, %s)", async (content, messageType) => {
-    const conversationId = randomUUID();
+  ])(
+    "should store and retrieve single message (%s, %s)",
+    async (content, messageType) => {
+      const conversationId = randomUUID();
 
-    // Create a message of the specified type
-    const message =
-      messageType === MessageType.ASSISTANT
-        ? new AssistantMessage({ content: `${content} - ${conversationId}` })
-        : messageType === MessageType.USER
-          ? new UserMessage({ content: `${content} - ${conversationId}` })
-          : messageType === MessageType.SYSTEM
-            ? new SystemMessage({ content: `${content} - ${conversationId}` })
-            : (() => {
-                throw new TypeError(
-                  `Type not supported: ${messageType.toString()}`,
-                );
-              })();
+      // Create a message of the specified type
+      const message =
+        messageType === MessageType.ASSISTANT
+          ? new AssistantMessage({ content: `${content} - ${conversationId}` })
+          : messageType === MessageType.USER
+            ? new UserMessage({ content: `${content} - ${conversationId}` })
+            : messageType === MessageType.SYSTEM
+              ? new SystemMessage({ content: `${content} - ${conversationId}` })
+              : (() => {
+                  throw new TypeError(
+                    `Type not supported: ${messageType.toString()}`,
+                  );
+                })();
 
-    // Store the message
-    await chatMemory.add(conversationId, message);
+      // Store the message
+      await chatMemory.add(conversationId, message);
 
-    // Retrieve messages
-    const messages = await chatMemory.get(conversationId, 10);
+      // Retrieve messages
+      const messages = await chatMemory.get(conversationId, 10);
 
-    // Verify message was stored and retrieved correctly
-    expect(messages).toHaveLength(1);
-    const retrievedMessage = messages[0];
-    expect(retrievedMessage).toBeDefined();
-    if (!retrievedMessage) {
-      return;
-    }
+      // Verify message was stored and retrieved correctly
+      expect(messages).toHaveLength(1);
+      const retrievedMessage = messages[0];
+      expect(retrievedMessage).toBeDefined();
+      if (!retrievedMessage) {
+        return;
+      }
 
-    // Verify the message type
-    expect(retrievedMessage.messageType).toBe(messageType);
+      // Verify the message type
+      expect(retrievedMessage.messageType).toBe(messageType);
 
-    // Verify the content
-    expect(retrievedMessage.text).toBe(`${content} - ${conversationId}`);
+      // Verify the content
+      expect(retrievedMessage.text).toBe(`${content} - ${conversationId}`);
 
-    // Verify the correct class type
-    if (messageType === MessageType.ASSISTANT) {
-      expect(retrievedMessage).toBeInstanceOf(AssistantMessage);
-    } else if (messageType === MessageType.USER) {
-      expect(retrievedMessage).toBeInstanceOf(UserMessage);
-    } else if (messageType === MessageType.SYSTEM) {
-      expect(retrievedMessage).toBeInstanceOf(SystemMessage);
-    } else {
-      throw new TypeError(`Type not supported: ${messageType.toString()}`);
-    }
-  });
+      // Verify the correct class type
+      if (messageType === MessageType.ASSISTANT) {
+        expect(retrievedMessage).toBeInstanceOf(AssistantMessage);
+      } else if (messageType === MessageType.USER) {
+        expect(retrievedMessage).toBeInstanceOf(UserMessage);
+      } else if (messageType === MessageType.SYSTEM) {
+        expect(retrievedMessage).toBeInstanceOf(SystemMessage);
+      } else {
+        throw new TypeError(`Type not supported: ${messageType.toString()}`);
+      }
+    },
+  );
 
   it("should handle system message with metadata", async () => {
     const conversationId = "test-conversation-system";
@@ -280,49 +283,52 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     [MessageType.ASSISTANT, "model=gpt-4;temperature=0.7;api_version=1.0"],
     [MessageType.USER, "source=web;user_id=12345;client=mobile"],
     [MessageType.SYSTEM, "domain=legal;version=2.0;restricted=true"],
-  ])("should store and retrieve message with metadata (%s)", async (messageType, metadataString) => {
-    const conversationId = randomUUID();
-    const content = `Message with metadata - ${messageType.toString()}`;
+  ])(
+    "should store and retrieve message with metadata (%s)",
+    async (messageType, metadataString) => {
+      const conversationId = randomUUID();
+      const content = `Message with metadata - ${messageType.toString()}`;
 
-    // Parse metadata from string
-    const metadata = parseMetadata(metadataString);
+      // Parse metadata from string
+      const metadata = parseMetadata(metadataString);
 
-    // Create a message with metadata
-    const message =
-      messageType === MessageType.ASSISTANT
-        ? new AssistantMessage({ content, properties: metadata })
-        : messageType === MessageType.USER
-          ? new UserMessage({ content, properties: metadata })
-          : messageType === MessageType.SYSTEM
-            ? new SystemMessage({ content, properties: metadata })
-            : (() => {
-                throw new TypeError(
-                  `Type not supported: ${messageType.toString()}`,
-                );
-              })();
+      // Create a message with metadata
+      const message =
+        messageType === MessageType.ASSISTANT
+          ? new AssistantMessage({ content, properties: metadata })
+          : messageType === MessageType.USER
+            ? new UserMessage({ content, properties: metadata })
+            : messageType === MessageType.SYSTEM
+              ? new SystemMessage({ content, properties: metadata })
+              : (() => {
+                  throw new TypeError(
+                    `Type not supported: ${messageType.toString()}`,
+                  );
+                })();
 
-    // Store the message
-    await chatMemory.add(conversationId, message);
+      // Store the message
+      await chatMemory.add(conversationId, message);
 
-    // Retrieve the message
-    const messages = await chatMemory.get(conversationId, 10);
+      // Retrieve the message
+      const messages = await chatMemory.get(conversationId, 10);
 
-    // Verify message was stored correctly
-    expect(messages).toHaveLength(1);
-    const retrievedMessage = messages[0];
-    expect(retrievedMessage).toBeDefined();
-    if (!retrievedMessage) {
-      return;
-    }
+      // Verify message was stored correctly
+      expect(messages).toHaveLength(1);
+      const retrievedMessage = messages[0];
+      expect(retrievedMessage).toBeDefined();
+      if (!retrievedMessage) {
+        return;
+      }
 
-    // Verify message type
-    expect(retrievedMessage.messageType).toBe(messageType);
+      // Verify message type
+      expect(retrievedMessage.messageType).toBe(messageType);
 
-    // Verify all metadata entries are present
-    for (const [key, value] of Object.entries(metadata)) {
-      expect(retrievedMessage.metadata).toHaveProperty(key, value);
-    }
-  });
+      // Verify all metadata entries are present
+      for (const [key, value] of Object.entries(metadata)) {
+        expect(retrievedMessage.metadata).toHaveProperty(key, value);
+      }
+    },
+  );
 
   it("should handle assistant message with tool calls", async () => {
     const conversationId = "test-conversation";

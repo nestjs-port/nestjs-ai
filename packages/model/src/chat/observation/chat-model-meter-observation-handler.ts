@@ -22,9 +22,7 @@ import type {
 import { ModelUsageMetricsGenerator } from "../../model";
 import { ChatModelObservationContext } from "./chat-model-observation-context";
 
-export class ChatModelMeterObservationHandler
-  implements ObservationHandler<ChatModelObservationContext>
-{
+export class ChatModelMeterObservationHandler implements ObservationHandler<ChatModelObservationContext> {
   private readonly _meterRegistry: MeterRegistry;
 
   constructor(meterRegistry: MeterRegistry) {

@@ -3,19 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "description": "Integration tests for NestJS AI",
+  "keywords": [
+    "ai",
+    "integration",
+    "nestjs",
+    "tests"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/integration-tests"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "integration",
-    "tests"
-  ],
-  "license": "Apache-2.0",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

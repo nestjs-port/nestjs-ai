@@ -22,9 +22,7 @@ import type {
 
 import { AdvisorObservationContext } from "./advisor-observation-context";
 
-export abstract class AdvisorObservationConvention
-  implements ObservationConvention<AdvisorObservationContext>
-{
+export abstract class AdvisorObservationConvention implements ObservationConvention<AdvisorObservationContext> {
   abstract getName(): string;
 
   abstract getContextualName(context: AdvisorObservationContext): string;

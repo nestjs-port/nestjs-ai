@@ -25,9 +25,10 @@ import type { EmbeddingResponse } from "./embedding-response";
 /**
  * EmbeddingModel is a generic interface for embedding models.
  */
-export abstract class EmbeddingModel
-  implements Model<EmbeddingRequest, EmbeddingResponse>
-{
+export abstract class EmbeddingModel implements Model<
+  EmbeddingRequest,
+  EmbeddingResponse
+> {
   abstract call(request: EmbeddingRequest): Promise<EmbeddingResponse>;
 
   /**

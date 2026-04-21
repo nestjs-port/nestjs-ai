@@ -3,19 +3,23 @@
   "version": "0.0.2",
   "private": false,
   "description": "Transformers model integration for NestJS AI",
+  "keywords": [
+    "ai",
+    "model",
+    "nestjs",
+    "transformers"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/models/transformers"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "model",
-    "transformers"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -32,23 +36,19 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/testing": "^0.0.2",
+    "@nestjs/common": "^11.1.11",
+    "@xenova/transformers": "^2.17.2"
+  },
   "peerDependencies": {
-    "@xenova/transformers": "^2.17.2",
     "@nestjs-ai/commons": "workspace:^",
     "@nestjs-ai/model": "workspace:^",
     "@nestjs-port/core": "^0.0.3",
-    "@nestjs/common": "^10.0.0 || ^11.0.0"
-  },
-  "devDependencies": {
-    "@xenova/transformers": "^2.17.2",
-    "@nestjs-ai/commons": "workspace:*",
-    "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/testing": "^0.0.2",
-    "@nestjs-port/core": "^0.0.3",
-    "@nestjs/common": "^11.1.11"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@xenova/transformers": "^2.17.2"
+  }
 }

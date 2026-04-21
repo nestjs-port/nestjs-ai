@@ -3,19 +3,23 @@
   "version": "0.0.2",
   "private": false,
   "description": "Shared MCP primitives for NestJS AI",
+  "keywords": [
+    "ai",
+    "common",
+    "mcp",
+    "nestjs"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/mcp/common"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "mcp",
-    "common"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -32,21 +36,17 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-port/core": "^0.0.3"
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-port/core": "^0.0.3"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-port/core": "^0.0.3"
+  }
 }

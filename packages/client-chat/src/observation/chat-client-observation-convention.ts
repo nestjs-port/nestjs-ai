@@ -22,9 +22,7 @@ import type {
 
 import { ChatClientObservationContext } from "./chat-client-observation-context";
 
-export abstract class ChatClientObservationConvention
-  implements ObservationConvention<ChatClientObservationContext>
-{
+export abstract class ChatClientObservationConvention implements ObservationConvention<ChatClientObservationContext> {
   abstract getName(): string;
 
   abstract getContextualName(context: ChatClientObservationContext): string;

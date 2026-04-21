@@ -3,22 +3,26 @@
   "version": "0.0.2",
   "private": false,
   "description": "Redis-backed Chat Memory Repository for NestJS AI",
+  "keywords": [
+    "ai",
+    "chat",
+    "memory",
+    "model",
+    "nestjs",
+    "redis",
+    "repository"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/memory/repository/model-chat-memory-repository-redis"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "model",
-    "chat",
-    "memory",
-    "repository",
-    "redis"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -35,13 +39,6 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-port/core": "^0.0.3",
-    "@nestjs/common": "^10.0.0 || ^11.0.0",
-    "redis": "^5.0.0"
-  },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
@@ -51,8 +48,11 @@
     "redis": "^5.11.0",
     "testcontainers": "^11.13.0"
   },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-port/core": "^0.0.3",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "redis": "^5.0.0"
+  }
 }

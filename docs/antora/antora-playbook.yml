@@ -12,7 +12,7 @@ site:
   url: https://nestjs-port.github.io/nestjs-ai
   robots: allow
 git:
-  ensure_git_suffix: false  
+  ensure_git_suffix: false
 content:
   sources:
     - url: ./../..

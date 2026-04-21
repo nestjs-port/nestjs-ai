@@ -26,7 +26,7 @@ export interface TextToSpeechPromptProps {
 }
 
 /**
- * Text-to-speech request prompt.
+ * Implementation of the {@link ModelRequest} interface for the text to speech prompt.
  */
 export class TextToSpeechPrompt implements ModelRequest<TextToSpeechMessage> {
   private readonly _message: TextToSpeechMessage;

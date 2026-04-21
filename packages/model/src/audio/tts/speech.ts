@@ -17,7 +17,7 @@
 import type { ModelResult, ResultMetadata } from "../../model";
 
 /**
- * Represents a generated speech payload.
+ * Implementation of the {@link ModelResult} interface for the speech model.
  */
 export class Speech implements ModelResult<Uint8Array> {
   private readonly _speech: Uint8Array;

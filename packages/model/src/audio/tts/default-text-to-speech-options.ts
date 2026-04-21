@@ -24,7 +24,7 @@ export interface DefaultTextToSpeechOptionsProps {
 }
 
 /**
- * Default implementation for text-to-speech options.
+ * Default implementation of the {@link TextToSpeechOptions} interface.
  */
 export class DefaultTextToSpeechOptions implements TextToSpeechOptions {
   private readonly _model: string | null;

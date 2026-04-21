@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./moderation";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+/**
+ * Represents a single message intended for moderation, encapsulating the text content.
+ * This class provides a basic structure for messages that can be submitted to moderation
+ * processes.
+ */
+export class ModerationMessage {
+  private _text: string;
+
+  constructor(text: string) {
+    this._text = text;
+  }
+
+  get text(): string {
+    return this._text;
+  }
+
+  setText(text: string): void {
+    this._text = text;
+  }
+}

@@ -19,12 +19,12 @@ import { Test } from "@nestjs/testing";
 import {
   KeyValue,
   KeyValues,
-  OBSERVATION_REGISTRY_TOKEN,
   ObservationContext,
   type ObservationConvention,
   SimpleObservation,
 } from "@nestjs-ai/commons";
-import { ObservationModule } from "@nestjs-ai/observation";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
+import { ObservationModule } from "@nestjs-port/observation";
 import {
   BasicTracerProvider,
   InMemorySpanExporter,

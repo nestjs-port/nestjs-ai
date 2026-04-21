@@ -26,10 +26,10 @@ import {
   CHAT_CLIENT_CUSTOMIZER_TOKEN,
   CHAT_MODEL_TOKEN,
   NoopObservationRegistry,
-  OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { AdvisorObservationConvention } from "../advisor";
 import { ChatClient } from "../chat-client";
 import type { ChatClientCustomizer } from "../chat-client-customizer.interface";

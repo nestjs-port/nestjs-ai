@@ -15,9 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-
+import { StringUtils } from "@nestjs-port/core";
 import type { Content, Media } from "../content";
-import { StringUtils } from "../util";
 import type { ContentFormatter } from "./content-formatter.interface";
 import { DefaultContentFormatter } from "./default-content-formatter";
 import type { IdGenerator } from "./id";

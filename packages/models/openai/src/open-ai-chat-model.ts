@@ -20,7 +20,6 @@ import {
   Media,
   NoopObservationRegistry,
   type ObservationRegistry,
-  StringUtils,
 } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -52,7 +51,7 @@ import {
   UsageCalculator,
   UserMessage,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import type { AzureOpenAI, OpenAI } from "openai";
 import type {
   ChatCompletion,

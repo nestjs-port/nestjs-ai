@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import type {
-  ObservationContext,
-  ObservationFilter,
-  Ordered,
-} from "@nestjs-ai/commons";
+import type { ObservationContext, ObservationFilter } from "@nestjs-ai/commons";
 import { KeyValue } from "@nestjs-ai/commons";
+import type { Ordered } from "@nestjs-port/core";
 import { ToolCallingObservationContext } from "./tool-calling-observation-context";
 
 const TOOL_CALL_ARGUMENTS = "spring.ai.tool.call.arguments";

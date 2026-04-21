@@ -15,7 +15,7 @@
  */
 
 import { EOL } from "node:os";
-import { StringUtils } from "../util";
+import { StringUtils } from "@nestjs-port/core";
 
 export class ExtractedTextFormatter {
   private readonly _leftAlignment: boolean;

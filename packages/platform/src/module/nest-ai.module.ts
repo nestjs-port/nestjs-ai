@@ -17,11 +17,10 @@
 import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import {
-  FetchHttpClient,
   HTTP_CLIENT_TOKEN,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
-import { LoggerFactory } from "@nestjs-port/core";
+import { FetchHttpClient, LoggerFactory } from "@nestjs-port/core";
 import { NestLoggerFactory } from "../logging";
 import { NestProviderInstanceExplorer } from "../provider";
 import type {

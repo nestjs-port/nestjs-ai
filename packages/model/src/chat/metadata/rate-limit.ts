@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
 
 /**
  * Abstract Data Type (ADT) encapsulating metadata from an AI provider's API rate limits

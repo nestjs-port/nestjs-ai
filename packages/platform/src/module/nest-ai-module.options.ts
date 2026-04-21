@@ -15,7 +15,7 @@
  */
 
 import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
-import type { HttpClient } from "@nestjs-ai/commons";
+import type { HttpClient } from "@nestjs-port/core";
 
 export interface NestAiRootModuleOptions {
   imports?: ModuleMetadata["imports"];

@@ -20,9 +20,9 @@ import {
   KeyValue,
   KeyValues,
   SpringAiKind,
-  StringUtils,
 } from "@nestjs-ai/commons";
 import { ChatMemory, type ToolCallingChatOptions } from "@nestjs-ai/model";
+import { StringUtils } from "@nestjs-port/core";
 import type { ChatClientObservationContext } from "./chat-client-observation-context";
 import { ChatClientObservationConvention } from "./chat-client-observation-convention";
 

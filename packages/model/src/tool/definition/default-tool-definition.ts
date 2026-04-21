@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ParsingUtils } from "@nestjs-ai/commons";
+import { ParsingUtils } from "@nestjs-port/core";
 import type { ToolDefinition } from "./tool-definition";
 
 /**

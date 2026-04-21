@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-import { StringUtils } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatMemoryRepository,
@@ -25,7 +24,7 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import {
   type DataSource,
   JsdbcTemplate,

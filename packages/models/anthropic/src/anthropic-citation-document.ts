@@ -26,7 +26,7 @@ import type {
   PlainTextSource,
   TextBlockParam,
 } from "@anthropic-ai/sdk/resources/messages";
-import { StringUtils } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 
 interface AnthropicCitationDocumentProps {
   type: DocumentType;

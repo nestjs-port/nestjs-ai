@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { LOWEST_PRECEDENCE } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
+import { LOWEST_PRECEDENCE } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { asyncScheduler, map, observeOn } from "rxjs";
 

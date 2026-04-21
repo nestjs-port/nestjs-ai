@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { StringUtils } from "@nestjs-ai/commons";
 import type { Message } from "@nestjs-ai/model";
+import { StringUtils } from "@nestjs-port/core";
 
 export class Query {
   readonly text: string;

@@ -15,7 +15,7 @@
  */
 
 import "reflect-metadata";
-import type { ProviderInstanceExplorer } from "@nestjs-ai/commons";
+import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { Tool } from "../../annotation";

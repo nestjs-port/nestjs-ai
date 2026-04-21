@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import type { Content } from "@google/genai";
-import type { Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
 
 export interface CachedContentRequestProps {
   model: string;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { HIGHEST_PRECEDENCE, type Ordered } from "@nestjs-ai/commons";
+import type { Ordered } from "@nestjs-port/core";
+import { HIGHEST_PRECEDENCE } from "@nestjs-port/core";
 
 /**
  * Parent advisor interface for all advisors.

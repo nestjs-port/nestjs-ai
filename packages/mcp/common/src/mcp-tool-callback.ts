@@ -20,10 +20,9 @@ import type {
   CallToolRequest,
   Tool as McpTool,
 } from "@modelcontextprotocol/sdk/spec.types.js";
-import { StringUtils } from "@nestjs-ai/commons";
 import type { ToolContext, ToolDefinition } from "@nestjs-ai/model";
 import { ToolCallback, ToolExecutionException } from "@nestjs-ai/model";
-import { type Logger, LoggerFactory } from "@nestjs-port/core";
+import { type Logger, LoggerFactory, StringUtils } from "@nestjs-port/core";
 import { McpToolUtils } from "./mcp-tool-utils";
 
 export class McpToolCallback extends ToolCallback {

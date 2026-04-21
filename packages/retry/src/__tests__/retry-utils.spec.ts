@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { RetryException } from "@nestjs-ai/commons";
+import { RetryException } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { NonTransientAiException } from "../non-transient-ai-exception";
 import { RetryUtils } from "../retry-utils";

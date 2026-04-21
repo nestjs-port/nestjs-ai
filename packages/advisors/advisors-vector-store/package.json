@@ -45,6 +45,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
+    "@nestjs-port/core": "^0.0.3",
     "rxjs": "^7.0.0"
   },
   "files": [

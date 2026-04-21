@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
 import type { ClientOptions } from "openai";
 import type { EmbeddingCreateParams } from "openai/resources/embeddings";
 

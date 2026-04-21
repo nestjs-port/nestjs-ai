@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-ai/commons";
 import {
   ChatResponse,
   DefaultToolCallingManager,
@@ -25,6 +24,7 @@ import {
   type ToolCallingManager,
   ToolExecutionResult,
 } from "@nestjs-ai/model";
+import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { concatWith, defer, EMPTY, filter, from, mergeMap, of } from "rxjs";
 

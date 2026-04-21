@@ -25,14 +25,14 @@ import type {
   ThinkingConfigParam,
   ToolChoice,
 } from "@anthropic-ai/sdk/resources/messages";
-import type { Milliseconds } from "@nestjs-ai/commons";
-import { StringUtils } from "@nestjs-ai/commons";
 import {
   DefaultToolCallingChatOptions,
   type StructuredOutputChatOptions,
   type ToolCallback,
   type ToolCallingChatOptions,
 } from "@nestjs-ai/model";
+import type { Milliseconds } from "@nestjs-port/core";
+import { StringUtils } from "@nestjs-port/core";
 
 import { AbstractAnthropicOptions } from "./abstract-anthropic-options";
 import { AnthropicCacheOptions } from "./anthropic-cache-options";

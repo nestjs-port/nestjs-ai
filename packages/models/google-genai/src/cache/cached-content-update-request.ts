@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
 
 export interface CachedContentUpdateRequestProps {
   ttl?: Milliseconds;

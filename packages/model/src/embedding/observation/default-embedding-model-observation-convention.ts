@@ -18,8 +18,8 @@ import {
   AiObservationAttributes,
   KeyValue,
   KeyValues,
-  StringUtils,
 } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 import type { EmbeddingOptions } from "../embedding-options.interface";
 import type { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
 import { EmbeddingModelObservationConvention } from "./embedding-model-observation-convention";

@@ -15,7 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { Document, type DocumentReader, StringUtils } from "@nestjs-ai/commons";
+import { Document, type DocumentReader } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 import type {
   PDFDocumentProxy,
   PDFPageProxy,

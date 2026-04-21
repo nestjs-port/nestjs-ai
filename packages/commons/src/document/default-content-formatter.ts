@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 import { EOL } from "node:os";
 
-import { StringUtils } from "../util";
+import { StringUtils } from "@nestjs-port/core";
 import type { ContentFormatter } from "./content-formatter.interface";
 import type { Document } from "./document";
 import { MetadataMode } from "./metadata-mode";

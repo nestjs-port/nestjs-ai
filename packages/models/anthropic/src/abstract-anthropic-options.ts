@@ -15,7 +15,7 @@
  */
 
 import type { ClientOptions as AnthropicClientOptions } from "@anthropic-ai/sdk";
-import type { Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
 
 /**
  * Base class for common Anthropic SDK configuration options, extended by

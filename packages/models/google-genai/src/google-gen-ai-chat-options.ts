@@ -15,13 +15,13 @@
  */
 
 import assert from "node:assert/strict";
-import { StringUtils } from "@nestjs-ai/commons";
 import {
   DefaultToolCallingChatOptions,
   type StructuredOutputChatOptions,
   type ToolCallback,
   type ToolCallingChatOptions,
 } from "@nestjs-ai/model";
+import { StringUtils } from "@nestjs-port/core";
 import type {
   GoogleGenAiSafetySetting,
   GoogleGenAiThinkingLevel,

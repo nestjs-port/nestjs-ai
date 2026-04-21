@@ -17,7 +17,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { Document, type DocumentReader, StringUtils } from "@nestjs-ai/commons";
+import { Document, type DocumentReader } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 import type {
   PDFDocumentProxy,
   PDFPageProxy,

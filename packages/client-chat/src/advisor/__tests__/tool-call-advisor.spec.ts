@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  HIGHEST_PRECEDENCE,
-  LOWEST_PRECEDENCE,
-  NoopObservationRegistry,
-} from "@nestjs-ai/commons";
+import { NoopObservationRegistry } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatOptions,
@@ -33,6 +29,7 @@ import {
   ToolResponseMessage,
   UserMessage,
 } from "@nestjs-ai/model";
+import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-port/core";
 import { firstValueFrom, type Observable, of, toArray } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 

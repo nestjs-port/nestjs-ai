@@ -18,9 +18,8 @@ import assert from "node:assert/strict";
 import { createWriteStream } from "node:fs";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-
+import { StringUtils } from "@nestjs-port/core";
 import { type Document, type DocumentWriter, MetadataMode } from "../document";
-import { StringUtils } from "../util";
 
 export interface FileDocumentWriterProps {
   fileName: string;

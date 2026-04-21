@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Milliseconds } from "@nestjs-ai/commons";
-import { ms } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
+import { ms } from "@nestjs-port/core";
 import type { RateLimit } from "./rate-limit";
 
 /**

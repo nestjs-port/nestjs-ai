@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { StringUtils } from "@nestjs-ai/commons";
 import { ChatMemory } from "@nestjs-ai/model";
+import { StringUtils } from "@nestjs-port/core";
 import { BaseAdvisor } from "./base-advisor";
 
 export abstract class BaseChatMemoryAdvisor extends BaseAdvisor {

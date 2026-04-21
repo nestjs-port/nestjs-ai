@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Milliseconds } from "@nestjs-ai/commons";
+import type { Milliseconds } from "@nestjs-port/core";
 import type { CachedContentRequest } from "../cached-content-request";
 import { CachedContentUpdateRequest } from "../cached-content-update-request";
 import { GoogleGenAiCachedContent } from "../google-gen-ai-cached-content";

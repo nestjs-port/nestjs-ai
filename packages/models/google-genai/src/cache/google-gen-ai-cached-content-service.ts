@@ -21,8 +21,7 @@ import type {
   GoogleGenAI,
   UpdateCachedContentConfig,
 } from "@google/genai";
-import type { Milliseconds } from "@nestjs-ai/commons";
-import type { Logger } from "@nestjs-port/core";
+import type { Logger, Milliseconds } from "@nestjs-port/core";
 import { LoggerFactory } from "@nestjs-port/core";
 import type { CachedContentRequest } from "./cached-content-request";
 import { CachedContentUpdateRequest } from "./cached-content-update-request";

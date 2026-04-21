@@ -19,9 +19,9 @@ import {
   KeyValue,
   KeyValues,
   SpringAiKind,
-  StringUtils,
   VectorStoreObservationAttributes,
 } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 import type { VectorStoreObservationContext } from "./vector-store-observation-context";
 import { VectorStoreObservationConvention } from "./vector-store-observation-convention";
 

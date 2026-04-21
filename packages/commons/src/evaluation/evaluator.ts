@@ -16,7 +16,7 @@
 
 import { EOL } from "node:os";
 
-import { StringUtils } from "../util";
+import { StringUtils } from "@nestjs-port/core";
 import type { EvaluationRequest } from "./evaluation-request";
 import type { EvaluationResponse } from "./evaluation-response";
 

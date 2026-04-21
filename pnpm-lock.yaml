@@ -74,6 +74,9 @@ importers:
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
+      '@nestjs-port/core':
+        specifier: ^0.0.3
+        version: 0.0.3(rxjs@7.8.2)
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2
@@ -107,6 +110,9 @@ importers:
 
   packages/commons:
     dependencies:
+      '@nestjs-port/core':
+        specifier: ^0.0.3
+        version: 0.0.3(rxjs@7.8.2)
       tiktoken:
         specifier: ^1.0.22
         version: 1.0.22
@@ -527,9 +533,6 @@ importers:
 
   packages/retry:
     devDependencies:
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../commons
       '@nestjs-port/core':
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)

@@ -18,8 +18,8 @@ import {
   AiObservationAttributes,
   KeyValue,
   KeyValues,
-  StringUtils,
 } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 import type { ImageModelObservationContext } from "./image-model-observation-context";
 import { ImageModelObservationConvention } from "./image-model-observation-convention";
 

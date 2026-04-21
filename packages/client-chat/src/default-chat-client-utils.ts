@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-import { StringUtils } from "@nestjs-ai/commons";
 import {
   DefaultToolCallingChatOptions,
   type Message,
@@ -25,6 +24,7 @@ import {
   ToolCallingChatOptions,
   UserMessage,
 } from "@nestjs-ai/model";
+import { StringUtils } from "@nestjs-port/core";
 import { ChatClientRequest } from "./chat-client-request";
 import type { DefaultChatClient } from "./default-chat-client";
 

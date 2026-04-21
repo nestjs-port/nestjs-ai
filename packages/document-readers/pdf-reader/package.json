@@ -34,7 +34,7 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "*",
+    "@nestjs-ai/commons": "workspace:^",
     "@nestjs-port/core": "^0.0.3"
   },
   "devDependencies": {

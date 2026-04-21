@@ -73,7 +73,6 @@ import { OpenAiChatOptions } from "./open-ai-chat-options";
 import { OpenAiSetup } from "./setup";
 
 type OpenAiClient = OpenAI | AzureOpenAI;
-type ChatCompletionChunkChoice = ChatCompletionChunk["choices"][number];
 
 export interface OpenAiChatModelProps {
   client?: OpenAiClient | null;
@@ -151,6 +150,9 @@ export class OpenAiChatModel extends ChatModel {
     previousChatResponse: ChatResponse | null,
   ): Promise<ChatResponse> {
     const request = this.createRequest(prompt, false);
+    const requestOptions = this.createRequestOptions(
+      prompt.options as OpenAiChatOptions,
+    );
     const observationContext = new ChatModelObservationContext(
       prompt,
       AiProvider.OPENAI.value,
@@ -166,6 +168,7 @@ export class OpenAiChatModel extends ChatModel {
     const response = await observation.observe(async () => {
       const chatCompletion = await this._client.chat.completions.create(
         request as ChatCompletionCreateParamsNonStreaming,
+        requestOptions,
       );
 
       const choices = chatCompletion.choices ?? [];
@@ -259,6 +262,9 @@ export class OpenAiChatModel extends ChatModel {
   ): Observable<ChatResponse> {
     return defer(() => {
       const request = this.createRequest(prompt, true);
+      const requestOptions = this.createRequestOptions(
+        prompt.options as OpenAiChatOptions,
+      );
       const observationContext = new ChatModelObservationContext(
         prompt,
         AiProvider.OPENAI.value,
@@ -276,6 +282,7 @@ export class OpenAiChatModel extends ChatModel {
             try {
               const stream = await this._client.chat.completions.create(
                 request as ChatCompletionCreateParamsStreaming,
+                requestOptions,
               );
               for await (const chunk of stream) {
                 const chatCompletion = this.chunkToChatCompletion(chunk);
@@ -415,7 +422,7 @@ export class OpenAiChatModel extends ChatModel {
   private buildGeneration(
     choice: ChatCompletion.Choice,
     metadata: Record<string, unknown> & {
-      chunkChoice?: ChatCompletionChunkChoice;
+      chunkChoice?: ChatCompletionChunk.Choice;
     },
     request: ChatCompletionCreateParams,
   ): Generation {
@@ -569,7 +576,7 @@ export class OpenAiChatModel extends ChatModel {
 
       if (assistantMessage.toolCalls.length > 0) {
         const chunkChoice = assistantMessage.metadata?.chunkChoice as
-          | ChatCompletionChunkChoice
+          | ChatCompletionChunk.Choice
           | undefined;
 
         if (chunkChoice?.delta?.tool_calls) {
@@ -757,6 +764,18 @@ export class OpenAiChatModel extends ChatModel {
     }
 
     return request;
+  }
+
+  private createRequestOptions(
+    requestOptions: OpenAiChatOptions,
+  ): OpenAI.RequestOptions | undefined {
+    if (Object.keys(requestOptions.customHeaders).length === 0) {
+      return undefined;
+    }
+
+    return {
+      headers: { ...requestOptions.customHeaders },
+    };
   }
 
   private toMessageParams(message: Message): ChatCompletionMessageParam[] {

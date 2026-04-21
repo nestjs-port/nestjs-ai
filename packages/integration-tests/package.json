@@ -40,8 +40,6 @@
     "@nestjs-port/testing": "^0.0.2",
     "@nestjs/common": "^11.1.11",
     "@nestjs/testing": "^11.1.11",
-    "@opentelemetry/sdk-metrics": "^2.6.1",
-    "@opentelemetry/sdk-trace-base": "^2.6.1",
     "@testcontainers/mariadb": "^11.13.0",
     "@testcontainers/mssqlserver": "^11.13.0",
     "@testcontainers/mysql": "^11.13.0",

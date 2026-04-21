@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./moderation";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+import { AbstractResponseMetadata, type ResponseMetadata } from "../model";
+
+/**
+ * Defines the metadata associated with a moderation response, extending a base response
+ * interface. This interface is intended to provide additional context or data about the
+ * moderation process result.
+ */
+export class ModerationResponseMetadata
+  extends AbstractResponseMetadata
+  implements ResponseMetadata {}

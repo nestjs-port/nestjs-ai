@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./moderation";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+import type { ModelOptions } from "../model";
+
+/**
+ * Represents the options for moderation.
+ */
+export interface ModerationOptions extends ModelOptions {
+  get model(): string | null;
+}

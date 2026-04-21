@@ -19,9 +19,7 @@ import type { ObservationContext, ObservationHandler } from "@nestjs-port/core";
 import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import { ChatModelObservationContext } from "./chat-model-observation-context";
 
-export class ChatModelCompletionObservationHandler
-  implements ObservationHandler<ChatModelObservationContext>
-{
+export class ChatModelCompletionObservationHandler implements ObservationHandler<ChatModelObservationContext> {
   private readonly logger = LoggerFactory.getLogger(
     ChatModelCompletionObservationHandler.name,
   );

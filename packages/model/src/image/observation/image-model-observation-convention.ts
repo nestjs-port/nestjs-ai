@@ -22,9 +22,7 @@ import type {
 
 import { ImageModelObservationContext } from "./image-model-observation-context";
 
-export abstract class ImageModelObservationConvention
-  implements ObservationConvention<ImageModelObservationContext>
-{
+export abstract class ImageModelObservationConvention implements ObservationConvention<ImageModelObservationContext> {
   abstract getName(): string;
 
   abstract getContextualName(context: ImageModelObservationContext): string;

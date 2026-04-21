@@ -18,17 +18,17 @@ To use the MCP server functionality, add the following dependency to your projec
 
 The MCP server can be configured using the following properties under the `spring.ai.mcp.server` prefix:
 
-| Property | Default | Description |
-|----------|---------|-------------|
-| `enabled` | `false` | Enable/disable the MCP server |
-| `name` | `"mcp-server"` | Name of the MCP server |
-| `version` | `"1.0.0"` | Version of the MCP server |
-| `type` | `SYNC` | Server type (`SYNC` or `ASYNC`) |
-| `resource-change-notification` | `true` | Enable/disable resource change notifications |
-| `tool-change-notification` | `true` | Enable/disable tool change notifications |
-| `prompt-change-notification` | `true` | Enable/disable prompt change notifications |
-| `transport` | `STDIO` | Transport type (`STDIO`, `WEBMVC`, or `WEBFLUX`) |
-| `sse-message-endpoint` | `"/mcp/message"` | Server-Sent Events (SSE) message endpoint for web transports |
+| Property                       | Default          | Description                                                  |
+| ------------------------------ | ---------------- | ------------------------------------------------------------ |
+| `enabled`                      | `false`          | Enable/disable the MCP server                                |
+| `name`                         | `"mcp-server"`   | Name of the MCP server                                       |
+| `version`                      | `"1.0.0"`        | Version of the MCP server                                    |
+| `type`                         | `SYNC`           | Server type (`SYNC` or `ASYNC`)                              |
+| `resource-change-notification` | `true`           | Enable/disable resource change notifications                 |
+| `tool-change-notification`     | `true`           | Enable/disable tool change notifications                     |
+| `prompt-change-notification`   | `true`           | Enable/disable prompt change notifications                   |
+| `transport`                    | `STDIO`          | Transport type (`STDIO`, `WEBMVC`, or `WEBFLUX`)             |
+| `sse-message-endpoint`         | `"/mcp/message"` | Server-Sent Events (SSE) message endpoint for web transports |
 
 ## Server Types
 
@@ -84,10 +84,11 @@ spring:
     mcp:
       server:
         transport: WEBMVC
-        sse-message-endpoint: /mcp/message  # Optional, defaults to /mcp/message
+        sse-message-endpoint: /mcp/message # Optional, defaults to /mcp/message
 ```
 
 Required dependencies:
+
 ```xml
 <dependency>
     <groupId>org.springframework.ai</groupId>
@@ -109,10 +110,11 @@ spring:
     mcp:
       server:
         transport: WEBFLUX
-        sse-message-endpoint: /mcp/message  # Optional, defaults to /mcp/message
+        sse-message-endpoint: /mcp/message # Optional, defaults to /mcp/message
 ```
 
 Required dependencies:
+
 ```xml
 <dependency>
     <groupId>org.springframework.ai</groupId>
@@ -181,6 +183,7 @@ The auto-configuration will automatically set up the appropriate server type and
 To expose your Spring AI tools and resources through the MCP server:
 
 1. Implement the `ToolCallback` interface for your AI tools:
+
 ```java
 @Component
 public class MyAiTool implements ToolCallback {
@@ -193,6 +196,7 @@ public class MyAiTool implements ToolCallback {
 ## Monitoring
 
 The MCP server provides notifications for changes in:
+
 - Tools (when tools are added or removed)
 - Resources (when resources are updated)
 - Prompts (when prompt templates change)

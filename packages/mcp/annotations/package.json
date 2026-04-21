@@ -3,19 +3,23 @@
   "version": "0.0.2",
   "private": false,
   "description": "MCP annotations for NestJS AI",
+  "keywords": [
+    "ai",
+    "annotations",
+    "mcp",
+    "nestjs"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/mcp/annotations"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "mcp",
-    "annotations"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,9 +34,5 @@
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  }
 }

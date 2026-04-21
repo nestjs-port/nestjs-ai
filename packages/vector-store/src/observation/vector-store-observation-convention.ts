@@ -22,9 +22,7 @@ import type {
 
 import { VectorStoreObservationContext } from "./vector-store-observation-context";
 
-export abstract class VectorStoreObservationConvention
-  implements ObservationConvention<VectorStoreObservationContext>
-{
+export abstract class VectorStoreObservationConvention implements ObservationConvention<VectorStoreObservationContext> {
   abstract getName(): string;
 
   abstract getContextualName(context: VectorStoreObservationContext): string;

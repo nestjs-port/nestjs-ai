@@ -22,10 +22,7 @@ export {
   type ChatResponseProps,
 } from "./chat-response";
 
-export {
-  Generation,
-  type GenerationProps,
-} from "./generation";
+export { Generation, type GenerationProps } from "./generation";
 
 export { MessageAggregator } from "./message-aggregator";
 export { StreamingChatModel } from "./streaming-chat-model";

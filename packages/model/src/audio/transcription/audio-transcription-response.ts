@@ -23,9 +23,7 @@ import { AudioTranscriptionResponseMetadata } from "./audio-transcription-respon
 /**
  * A response containing an audio transcription result.
  */
-export class AudioTranscriptionResponse
-  implements ModelResponse<AudioTranscription>
-{
+export class AudioTranscriptionResponse implements ModelResponse<AudioTranscription> {
   private readonly _transcript: AudioTranscription;
   private readonly _transcriptionResponseMetadata: AudioTranscriptionResponseMetadata;
 

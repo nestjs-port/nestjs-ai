@@ -19,9 +19,7 @@ import type { ObservationContext, ObservationHandler } from "@nestjs-port/core";
 import { LoggerFactory } from "@nestjs-port/core";
 import { ImageModelObservationContext } from "./image-model-observation-context";
 
-export class ImageModelPromptContentObservationHandler
-  implements ObservationHandler<ImageModelObservationContext>
-{
+export class ImageModelPromptContentObservationHandler implements ObservationHandler<ImageModelObservationContext> {
   private readonly logger = LoggerFactory.getLogger(
     ImageModelPromptContentObservationHandler.name,
   );

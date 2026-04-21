@@ -18,9 +18,7 @@ import { Filter } from "../filter";
 import type { FilterExpressionConverter } from "../filter-expression-converter";
 import { FilterHelper } from "../filter-helper";
 
-export abstract class AbstractFilterExpressionConverter
-  implements FilterExpressionConverter
-{
+export abstract class AbstractFilterExpressionConverter implements FilterExpressionConverter {
   convertExpression(expression: Filter.Expression): string {
     return this.convertOperand(expression);
   }

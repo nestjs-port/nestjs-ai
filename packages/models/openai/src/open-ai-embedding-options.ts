@@ -25,8 +25,7 @@ import {
 
 export type OpenAiEmbeddingCreateParams = EmbeddingCreateParams;
 
-export interface OpenAiEmbeddingOptionsProps
-  extends AbstractOpenAiOptionsProps {
+export interface OpenAiEmbeddingOptionsProps extends AbstractOpenAiOptionsProps {
   user?: string | null;
   dimensions?: number | null;
 }

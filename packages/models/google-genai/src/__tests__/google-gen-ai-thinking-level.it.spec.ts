@@ -32,43 +32,43 @@ describe.skipIf(!GOOGLE_API_KEY)("GoogleGenAiThinkingLevelIT", () => {
     });
   });
 
-  it.each([
-    GoogleGenAiThinkingLevel.MINIMAL,
-    GoogleGenAiThinkingLevel.MEDIUM,
-  ])("test Gemini 3 Pro rejects unsupported levels %s", async (level) => {
-    const chatModel = new GoogleGenAiChatModel({
-      genAiClient,
-      defaultOptions: new GoogleGenAiChatOptions({
-        model: GoogleGenAiChatModel.ChatModel.GEMINI_3_PRO_PREVIEW,
-        thinkingLevel: level,
-      }),
-    });
+  it.each([GoogleGenAiThinkingLevel.MINIMAL, GoogleGenAiThinkingLevel.MEDIUM])(
+    "test Gemini 3 Pro rejects unsupported levels %s",
+    async (level) => {
+      const chatModel = new GoogleGenAiChatModel({
+        genAiClient,
+        defaultOptions: new GoogleGenAiChatOptions({
+          model: GoogleGenAiChatModel.ChatModel.GEMINI_3_PRO_PREVIEW,
+          thinkingLevel: level,
+        }),
+      });
 
-    await expect(
-      chatModel.call(new Prompt("What is 2+2? Answer with just the number.")),
-    ).rejects.toThrow(new RegExp(`ThinkingLevel\\.${level}.*Gemini 3 Pro`));
-  });
+      await expect(
+        chatModel.call(new Prompt("What is 2+2? Answer with just the number.")),
+      ).rejects.toThrow(new RegExp(`ThinkingLevel\\.${level}.*Gemini 3 Pro`));
+    },
+  );
 
-  it.each([
-    GoogleGenAiThinkingLevel.LOW,
-    GoogleGenAiThinkingLevel.HIGH,
-  ])("test Gemini 3 Pro accepts supported levels %s", async (level) => {
-    const chatModel = new GoogleGenAiChatModel({
-      genAiClient,
-      defaultOptions: new GoogleGenAiChatOptions({
-        model: GoogleGenAiChatModel.ChatModel.GEMINI_3_PRO_PREVIEW,
-        thinkingLevel: level,
-      }),
-    });
+  it.each([GoogleGenAiThinkingLevel.LOW, GoogleGenAiThinkingLevel.HIGH])(
+    "test Gemini 3 Pro accepts supported levels %s",
+    async (level) => {
+      const chatModel = new GoogleGenAiChatModel({
+        genAiClient,
+        defaultOptions: new GoogleGenAiChatOptions({
+          model: GoogleGenAiChatModel.ChatModel.GEMINI_3_PRO_PREVIEW,
+          thinkingLevel: level,
+        }),
+      });
 
-    const response = await chatModel.call(
-      new Prompt("What is 2+2? Answer with just the number."),
-    );
+      const response = await chatModel.call(
+        new Prompt("What is 2+2? Answer with just the number."),
+      );
 
-    expect(response).not.toBeNull();
-    expect(response.result).not.toBeNull();
-    expect(response.result?.output.text).toMatch(/\S/);
-  });
+      expect(response).not.toBeNull();
+      expect(response.result).not.toBeNull();
+      expect(response.result?.output.text).toMatch(/\S/);
+    },
+  );
 
   it.each([
     GoogleGenAiThinkingLevel.MINIMAL,

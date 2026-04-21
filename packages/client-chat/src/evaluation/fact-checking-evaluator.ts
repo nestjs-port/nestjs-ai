@@ -28,8 +28,7 @@ export interface FactCheckingEvaluatorProps {
 }
 
 export class FactCheckingEvaluator extends Evaluator {
-  static readonly DEFAULT_EVALUATION_PROMPT_TEXT =
-    `Evaluate whether or not the following claim is supported by the provided document.
+  static readonly DEFAULT_EVALUATION_PROMPT_TEXT = `Evaluate whether or not the following claim is supported by the provided document.
 Respond with "yes" if the claim is supported, or "no" if it is not.
 
 Document:

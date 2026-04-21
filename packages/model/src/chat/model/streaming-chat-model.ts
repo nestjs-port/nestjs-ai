@@ -21,9 +21,10 @@ import type { Message } from "../messages";
 import { Prompt } from "../prompt";
 import type { ChatResponse } from "./chat-response";
 
-export abstract class StreamingChatModel
-  implements StreamingModel<Prompt, ChatResponse>
-{
+export abstract class StreamingChatModel implements StreamingModel<
+  Prompt,
+  ChatResponse
+> {
   stream(message: string): Observable<string>;
   stream(...messages: Message[]): Observable<string>;
   stream(prompt: Prompt): Observable<ChatResponse>;

@@ -23,9 +23,7 @@ import { DefaultChatGenerationMetadata } from "./chat-generation-metadata.interf
 /**
  * Default implementation of {@link ChatGenerationMetadataBuilder}.
  */
-export class DefaultChatGenerationMetadataBuilder
-  implements ChatGenerationMetadataBuilder
-{
+export class DefaultChatGenerationMetadataBuilder implements ChatGenerationMetadataBuilder {
   private _finishReason: string | null = null;
   private readonly _metadata: Record<string, unknown> = {};
   private readonly _contentFilters: string[] = [];

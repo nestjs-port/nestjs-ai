@@ -26,8 +26,7 @@ import type { VectorStore } from "./vector-store";
 
 export abstract class AbstractVectorStoreBuilder<
   T extends AbstractVectorStoreBuilder<T>,
-> implements VectorStore.Builder<T>
-{
+> implements VectorStore.Builder<T> {
   protected readonly _embeddingModel: EmbeddingModel;
   protected _observationRegistry: ObservationRegistry =
     NoopObservationRegistry.INSTANCE;

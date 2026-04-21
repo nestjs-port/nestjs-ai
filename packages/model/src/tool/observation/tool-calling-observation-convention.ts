@@ -22,9 +22,7 @@ import type {
 
 import { ToolCallingObservationContext } from "./tool-calling-observation-context";
 
-export abstract class ToolCallingObservationConvention
-  implements ObservationConvention<ToolCallingObservationContext>
-{
+export abstract class ToolCallingObservationConvention implements ObservationConvention<ToolCallingObservationContext> {
   abstract getName(): string;
 
   abstract getContextualName(context: ToolCallingObservationContext): string;

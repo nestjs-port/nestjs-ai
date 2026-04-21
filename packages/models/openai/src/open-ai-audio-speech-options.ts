@@ -21,8 +21,7 @@ import {
   type AbstractOpenAiOptionsProps,
 } from "./abstract-open-ai-options";
 
-export interface OpenAiAudioSpeechOptionsProps
-  extends AbstractOpenAiOptionsProps {
+export interface OpenAiAudioSpeechOptionsProps extends AbstractOpenAiOptionsProps {
   input?: string | null;
   voice?: string | null;
   responseFormat?: string | null;

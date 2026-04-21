@@ -3,18 +3,22 @@
   "version": "0.0.2",
   "private": false,
   "description": "Retrieval Augmented Generation (RAG) support for NestJS AI",
+  "keywords": [
+    "ai",
+    "nestjs",
+    "rag"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/rag"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "rag"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -31,13 +35,6 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "@nestjs-ai/client-chat": "workspace:^",
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-ai/vector-store": "workspace:^",
-    "@nestjs-port/core": "^0.0.3"
-  },
   "devDependencies": {
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
@@ -45,8 +42,11 @@
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-port/core": "^0.0.3"
   },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/client-chat": "workspace:^",
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-ai/vector-store": "workspace:^",
+    "@nestjs-port/core": "^0.0.3"
+  }
 }

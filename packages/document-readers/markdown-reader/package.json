@@ -3,20 +3,24 @@
   "version": "0.0.2",
   "private": false,
   "description": "Markdown document reader for NestJS AI",
+  "keywords": [
+    "ai",
+    "document",
+    "markdown",
+    "nestjs",
+    "reader"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/document-readers/markdown-reader"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "document",
-    "reader",
-    "markdown"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -33,19 +37,15 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^"
+  "dependencies": {
+    "commonmark": "^0.31.2",
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@types/commonmark": "^0.27.10"
   },
-  "dependencies": {
-    "commonmark": "^0.31.2",
-    "fast-glob": "^3.3.3"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^"
+  }
 }

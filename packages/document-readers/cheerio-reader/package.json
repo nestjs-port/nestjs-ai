@@ -3,20 +3,24 @@
   "version": "0.0.2",
   "private": false,
   "description": "Cheerio-based document reader for NestJS AI",
+  "keywords": [
+    "ai",
+    "cheerio",
+    "document",
+    "nestjs",
+    "reader"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/document-readers/cheerio-reader"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "document",
-    "reader",
-    "cheerio"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -33,17 +37,13 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^"
+  "dependencies": {
+    "cheerio": "^1.2.0"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*"
   },
-  "dependencies": {
-    "cheerio": "^1.2.0"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^"
+  }
 }

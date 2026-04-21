@@ -3,19 +3,23 @@
   "version": "0.0.2",
   "private": false,
   "description": "Vector Store support for NestJS AI",
+  "keywords": [
+    "ai",
+    "nestjs",
+    "store",
+    "vector"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/vector-store"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "vector",
-    "store"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -33,10 +37,8 @@
     "test": "vitest run",
     "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 src/filter/antlr4/Filters.g4"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-port/core": "^0.0.3"
+  "dependencies": {
+    "antlr4ng": "^3.0.16"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
@@ -44,11 +46,9 @@
     "@nestjs-port/core": "^0.0.3",
     "@nestjs-port/testing": "^0.0.2"
   },
-  "dependencies": {
-    "antlr4ng": "^3.0.16"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-port/core": "^0.0.3"
+  }
 }

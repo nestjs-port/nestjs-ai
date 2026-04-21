@@ -554,62 +554,64 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     expect(content).toMatch(/bananas|apple|bowl|basket|fruit stand/);
   });
 
-  it.each([
-    "gpt-4o-audio-preview",
-  ])("multi modality output audio", async (modelName) => {
-    const userMessage = new UserMessage({
-      content: "Tell me joke about Spring Framework",
-    });
+  it.each(["gpt-4o-audio-preview"])(
+    "multi modality output audio",
+    async (modelName) => {
+      const userMessage = new UserMessage({
+        content: "Tell me joke about Spring Framework",
+      });
 
-    const response = await chatModel.call(
-      new Prompt(
-        [userMessage],
-        OpenAiChatOptions.builder()
-          .model(modelName)
-          .outputModalities(["text", "audio"])
-          .outputAudio({ voice: "alloy", format: "wav" })
-          .build(),
-      ),
-    );
+      const response = await chatModel.call(
+        new Prompt(
+          [userMessage],
+          OpenAiChatOptions.builder()
+            .model(modelName)
+            .outputModalities(["text", "audio"])
+            .outputAudio({ voice: "alloy", format: "wav" })
+            .build(),
+        ),
+      );
 
-    logger.info("%s", response.result?.output.text ?? "");
-    expect(response.result?.output.text).not.toBe("");
+      logger.info("%s", response.result?.output.text ?? "");
+      expect(response.result?.output.text).not.toBe("");
 
-    const audio = response.result?.output.media[0]?.dataAsByteArray;
-    expect(audio).toBeDefined();
-    if (audio == null) {
-      throw new Error("Expected audio data to be present");
-    }
-    expect(audio.length).toBeGreaterThan(0);
-  });
+      const audio = response.result?.output.media[0]?.dataAsByteArray;
+      expect(audio).toBeDefined();
+      if (audio == null) {
+        throw new Error("Expected audio data to be present");
+      }
+      expect(audio.length).toBeGreaterThan(0);
+    },
+  );
 
-  it.each([
-    "gpt-4o-audio-preview",
-  ])("streaming multi modality output audio", async (modelName) => {
-    const userMessage = new UserMessage({
-      content: "Tell me joke about Spring Framework",
-    });
+  it.each(["gpt-4o-audio-preview"])(
+    "streaming multi modality output audio",
+    async (modelName) => {
+      const userMessage = new UserMessage({
+        content: "Tell me joke about Spring Framework",
+      });
 
-    await expect(
-      withTimeout(
-        lastValueFrom(
-          chatModel.stream(
-            new Prompt(
-              [userMessage],
-              OpenAiChatOptions.builder()
-                .model(modelName)
-                .outputModalities(["text", "audio"])
-                .outputAudio({ voice: "alloy", format: "wav" })
-                .build(),
+      await expect(
+        withTimeout(
+          lastValueFrom(
+            chatModel.stream(
+              new Prompt(
+                [userMessage],
+                OpenAiChatOptions.builder()
+                  .model(modelName)
+                  .outputModalities(["text", "audio"])
+                  .outputAudio({ voice: "alloy", format: "wav" })
+                  .build(),
+              ),
             ),
           ),
+          120_000,
         ),
-        120_000,
-      ),
-    ).rejects.toThrow(
-      /audio\.format.*wav.*stream=true.*Supported values are: 'pcm16/i,
-    );
-  });
+      ).rejects.toThrow(
+        /audio\.format.*wav.*stream=true.*Supported values are: 'pcm16/i,
+      );
+    },
+  );
 
   it("validate call response metadata", async () => {
     const model = OpenAiChatOptions.DEFAULT_CHAT_MODEL;

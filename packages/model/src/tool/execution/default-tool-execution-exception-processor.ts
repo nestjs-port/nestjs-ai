@@ -24,9 +24,7 @@ import type { ToolExecutionExceptionProcessor } from "./tool-execution-exception
  * with an allowlist of exceptions that will be unwrapped from the
  * {@link ToolExecutionException} and rethrown as is.
  */
-export class DefaultToolExecutionExceptionProcessor
-  implements ToolExecutionExceptionProcessor
-{
+export class DefaultToolExecutionExceptionProcessor implements ToolExecutionExceptionProcessor {
   private readonly logger: Logger = LoggerFactory.getLogger(
     DefaultToolExecutionExceptionProcessor.name,
   );

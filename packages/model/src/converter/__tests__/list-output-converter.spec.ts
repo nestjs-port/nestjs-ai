@@ -60,16 +60,14 @@ describe("ListOutputConverter", () => {
     expect(converter.convert("   \t\n   ")).toEqual([""]);
   });
 
-  it.each([
-    "a,b,c",
-    "1,2,3",
-    "X,Y,Z",
-    "alpha,beta,gamma",
-  ])("csv with various inputs: %s", (csvString) => {
-    const result = converter.convert(csvString);
-    expect(result).toHaveLength(3);
-    expect(result.every((v) => v != null)).toBe(true);
-  });
+  it.each(["a,b,c", "1,2,3", "X,Y,Z", "alpha,beta,gamma"])(
+    "csv with various inputs: %s",
+    (csvString) => {
+      const result = converter.convert(csvString);
+      expect(result).toHaveLength(3);
+      expect(result.every((v) => v != null)).toBe(true);
+    },
+  );
 
   it("csv with tabs and special whitespace", () => {
     const list = converter.convert("A\t, \tB\r, \nC ");

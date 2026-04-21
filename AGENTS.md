@@ -1,6 +1,7 @@
 # nestjs-ai
 
 ## Project Snapshot
+
 - Repository type: pnpm + Turborepo monorepo (`packages/*`, `packages/models/*`)
 - Primary stack: TypeScript, Node.js, NestJS ecosystem packages
 - Tooling: Turbo (build graph), Biome (format/lint), Vitest (tests), Husky + lint-staged (pre-commit)
@@ -8,6 +9,7 @@
 - This root file is intentionally lightweight; use nearest sub-folder `AGENTS.md` for package-specific rules.
 
 ## Root Setup Commands
+
 - Install: `pnpm install`
 - Build all: `pnpm build`
 - Typecheck all: `pnpm typecheck`
@@ -17,6 +19,7 @@
 - Clean all artifacts: `pnpm clean`
 
 ## Universal Conventions
+
 - Language/style: strict TypeScript, Biome formatting, tabs + double quotes.
 - Keep package public APIs in `src/index.ts` barrels (ex: `packages/model/src/index.ts`).
 - Prefer package imports (`@nestjs-ai/...`) instead of relative cross-package imports.
@@ -27,13 +30,16 @@
 - Open focused PRs with passing build/typecheck/tests before review.
 
 ## Security & Secrets
+
 - Never commit API keys, tokens, credentials, or `.env` files.
 - Keep provider secrets in environment variables, not source or tests.
 - Avoid logging sensitive prompt/user payloads in production code.
 - Remove or redact real identifiers from fixtures before commit.
 
 ## JIT Index
+
 ### Package Structure
+
 - Package overview: `packages/` -> [see packages/AGENTS.md](packages/AGENTS.md)
 - Core model abstractions: `packages/model/` -> [see packages/model/AGENTS.md](packages/model/AGENTS.md)
 - Chat client orchestration: `packages/client-chat/` -> [see packages/client-chat/AGENTS.md](packages/client-chat/AGENTS.md)
@@ -47,6 +53,7 @@
 - Google GenAI provider: `packages/models/google-genai/` -> [see packages/models/google-genai/AGENTS.md](packages/models/google-genai/AGENTS.md)
 
 ### Quick Find Commands
+
 - Find exported symbols: `rg -n "^export" packages/**/src`
 - Find classes/interfaces: `rg -n "^(export )?(class|interface) " packages/**/src`
 - Find builder/factory patterns: `rg -n "builder\(|Factory" packages/**/src`
@@ -55,6 +62,7 @@
 - Find TODO/FIXME: `rg -n "TODO|FIXME" packages/**/src`
 
 ## Definition of Done
+
 - Changed package(s) build successfully.
 - Changed package(s) typecheck cleanly.
 - Relevant tests pass (or new tests added for behavior changes).

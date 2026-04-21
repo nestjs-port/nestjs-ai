@@ -15,10 +15,7 @@
  */
 
 export { Image, type ImageProps } from "./image";
-export {
-  ImageGeneration,
-  type ImageGenerationProps,
-} from "./image-generation";
+export { ImageGeneration, type ImageGenerationProps } from "./image-generation";
 export type { ImageGenerationMetadata } from "./image-generation-metadata";
 export { ImageMessage } from "./image-message";
 export type { ImageModel } from "./image-model.interface";

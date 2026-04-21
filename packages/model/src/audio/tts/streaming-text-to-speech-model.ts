@@ -24,9 +24,10 @@ import type { TextToSpeechResponse } from "./text-to-speech-response";
 /**
  * Interface for the streaming text to speech model.
  */
-export abstract class StreamingTextToSpeechModel
-  implements StreamingModel<TextToSpeechPrompt, TextToSpeechResponse>
-{
+export abstract class StreamingTextToSpeechModel implements StreamingModel<
+  TextToSpeechPrompt,
+  TextToSpeechResponse
+> {
   stream(text: string): Observable<Uint8Array>;
   stream(text: string, options: TextToSpeechOptions): Observable<Uint8Array>;
   stream(prompt: TextToSpeechPrompt): Observable<TextToSpeechResponse>;

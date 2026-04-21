@@ -35,9 +35,7 @@ export type ToolObjectInstance<T extends object = object> = T extends (
   ...args: never[]
 ) => unknown
   ? never
-  : T extends abstract new (
-        ...args: never[]
-      ) => unknown
+  : T extends abstract new (...args: never[]) => unknown
     ? never
     : T;
 

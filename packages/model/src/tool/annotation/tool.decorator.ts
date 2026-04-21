@@ -110,14 +110,16 @@ export interface ToolSchemaAnnotationMetadata<
   returns: R;
 }
 
-export interface ToolInputOnlyAnnotationMetadata<P extends AnyZodObjectSchema>
-  extends ToolBaseMetadata {
+export interface ToolInputOnlyAnnotationMetadata<
+  P extends AnyZodObjectSchema,
+> extends ToolBaseMetadata {
   parameters: P;
   returns?: never;
 }
 
-export interface ToolReturnsOnlyAnnotationMetadata<R extends AnyZodSchema>
-  extends ToolBaseMetadata {
+export interface ToolReturnsOnlyAnnotationMetadata<
+  R extends AnyZodSchema,
+> extends ToolBaseMetadata {
   parameters?: never;
   returns: R;
 }

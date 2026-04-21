@@ -57,9 +57,9 @@ export interface BeanOutputConverterProps<
   outputType?: ClassConstructor<OutputTypeTarget<TSchema>>;
 }
 
-export class BeanOutputConverter<TSchema extends JsonOrJsonArraySchema>
-  implements StructuredOutputConverter<SchemaOutput<TSchema>>
-{
+export class BeanOutputConverter<
+  TSchema extends JsonOrJsonArraySchema,
+> implements StructuredOutputConverter<SchemaOutput<TSchema>> {
   private readonly logger: Logger = LoggerFactory.getLogger(
     BeanOutputConverter.name,
   );

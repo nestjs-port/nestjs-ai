@@ -32,8 +32,7 @@ export interface MessageWithConversation {
 /**
  * Redis-specific extension of ChatMemoryRepository with advanced query capabilities.
  */
-export interface AdvancedRedisChatMemoryRepository
-  extends ChatMemoryRepository {
+export interface AdvancedRedisChatMemoryRepository extends ChatMemoryRepository {
   findByContent(
     contentPattern: string,
     limit: number,

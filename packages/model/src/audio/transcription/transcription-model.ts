@@ -26,9 +26,10 @@ import type { AudioTranscriptionResponse } from "./audio-transcription-response"
  * A transcription model is a type of AI model that converts audio to text. This is also
  * known as Speech-to-Text.
  */
-export abstract class TranscriptionModel
-  implements Model<AudioTranscriptionPrompt, AudioTranscriptionResponse>
-{
+export abstract class TranscriptionModel implements Model<
+  AudioTranscriptionPrompt,
+  AudioTranscriptionResponse
+> {
   /**
    * Transcribes the audio from the given prompt.
    * @param transcriptionPrompt The prompt containing the audio resource and options.

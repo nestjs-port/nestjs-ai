@@ -18,4 +18,12 @@ export default defineConfig({
     "packages/vector-store/src/filter/antlr4/**/*",
     "!packages/vector-store/src/filter/antlr4/index.ts",
   ],
+  overrides: [
+    {
+      files: ["**/*.yml", "**/*.yaml"],
+      options: {
+        singleQuote: true,
+      },
+    },
+  ],
 });

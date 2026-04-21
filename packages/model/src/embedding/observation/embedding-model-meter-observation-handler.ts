@@ -23,9 +23,7 @@ import type {
 import { ModelUsageMetricsGenerator } from "../../model";
 import { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
 
-export class EmbeddingModelMeterObservationHandler
-  implements ObservationHandler<EmbeddingModelObservationContext>
-{
+export class EmbeddingModelMeterObservationHandler implements ObservationHandler<EmbeddingModelObservationContext> {
   private readonly _meterRegistry: MeterRegistry;
 
   constructor(meterRegistry: MeterRegistry) {

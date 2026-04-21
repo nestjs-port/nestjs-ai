@@ -3,19 +3,23 @@
   "version": "0.0.3",
   "private": false,
   "description": "OpenAI model integration for NestJS AI",
+  "keywords": [
+    "ai",
+    "model",
+    "nestjs",
+    "openai"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/models/openai"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "model",
-    "openai"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -32,6 +36,18 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
+  "devDependencies": {
+    "@azure/identity": "^4.13.1",
+    "@nestjs-ai/client-chat": "workspace:*",
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/testing": "^0.0.2",
+    "@nestjs/common": "^11.1.11",
+    "openai": "^6.34.0",
+    "rxjs": "^7.0.0",
+    "zod": "^4.3.6"
+  },
   "peerDependencies": {
     "@azure/identity": "^4.13.1",
     "@nestjs-ai/commons": "workspace:^",
@@ -45,21 +61,5 @@
     "@azure/identity": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "@azure/identity": "^4.13.1",
-    "@nestjs-ai/client-chat": "workspace:*",
-    "@nestjs-ai/commons": "workspace:*",
-    "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/testing": "^0.0.2",
-    "@nestjs-port/core": "^0.0.3",
-    "@nestjs/common": "^11.1.11",
-    "openai": "^6.34.0",
-    "rxjs": "^7.0.0",
-    "zod": "^4.3.6"
-  },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  }
 }

@@ -25,8 +25,7 @@ export interface GoogleGenAiConnectionProperties {
   vertexAi?: boolean;
 }
 
-export interface GoogleGenAiChatProperties
-  extends GoogleGenAiConnectionProperties {
+export interface GoogleGenAiChatProperties extends GoogleGenAiConnectionProperties {
   options?: Partial<GoogleGenAiChatOptions>;
   enableCachedContent?: boolean;
   toolCalling?: ToolCallingObservationProperties;

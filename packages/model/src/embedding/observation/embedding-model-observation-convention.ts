@@ -22,9 +22,7 @@ import type {
 
 import { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
 
-export abstract class EmbeddingModelObservationConvention
-  implements ObservationConvention<EmbeddingModelObservationContext>
-{
+export abstract class EmbeddingModelObservationConvention implements ObservationConvention<EmbeddingModelObservationContext> {
   abstract getName(): string;
 
   abstract getContextualName(context: EmbeddingModelObservationContext): string;

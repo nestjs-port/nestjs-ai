@@ -16,9 +16,9 @@
 
 import type { StructuredOutputConverter } from "./structured-output-converter";
 
-export class MapOutputConverter
-  implements StructuredOutputConverter<Record<string, unknown>>
-{
+export class MapOutputConverter implements StructuredOutputConverter<
+  Record<string, unknown>
+> {
   get format(): string {
     return `Your response should be in JSON format.
 The data structure for the JSON should be an object with string keys.

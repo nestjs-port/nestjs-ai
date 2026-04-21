@@ -3,20 +3,24 @@
   "version": "0.0.2",
   "private": false,
   "description": "Tika-based document reader for NestJS AI",
+  "keywords": [
+    "ai",
+    "document",
+    "nestjs",
+    "reader",
+    "tika"
+  ],
   "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/document-readers/tika-reader"
   },
-  "keywords": [
-    "nestjs",
-    "ai",
-    "document",
-    "reader",
-    "tika"
+  "files": [
+    "dist",
+    "CHANGELOG.md"
   ],
-  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -33,15 +37,11 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^"
-  },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "testcontainers": "^11.13.0"
   },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ]
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^"
+  }
 }

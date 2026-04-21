@@ -20,10 +20,14 @@ import type {
   ObservationFilters,
   ObservationRegistry,
 } from "@nestjs-ai/commons";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
 import {
   DefaultToolExecutionExceptionProcessor,
+  DelegatingToolCallbackResolver,
+  NestProviderToolCallbackResolver,
   StaticToolCallbackResolver,
   type ToolCallback,
   type ToolCallbackProvider,
@@ -49,16 +53,26 @@ const toolCallbackResolverProvider: Provider = {
     toolCallbackResolver?: ToolCallbackResolver | null,
     toolCallbacks?: ToolCallback[] | null,
     toolCallbackProvider?: ToolCallbackProvider | null,
+    providerInstanceExplorer?: ProviderInstanceExplorer | null,
   ) =>
     toolCallbackResolver ??
-    new StaticToolCallbackResolver([
-      ...(toolCallbacks ?? []),
-      ...(toolCallbackProvider?.toolCallbacks ?? []),
-    ]),
+    (providerInstanceExplorer == null
+      ? new StaticToolCallbackResolver([
+          ...(toolCallbacks ?? []),
+          ...(toolCallbackProvider?.toolCallbacks ?? []),
+        ])
+      : new DelegatingToolCallbackResolver([
+          new StaticToolCallbackResolver([
+            ...(toolCallbacks ?? []),
+            ...(toolCallbackProvider?.toolCallbacks ?? []),
+          ]),
+          new NestProviderToolCallbackResolver(providerInstanceExplorer),
+        ])),
   inject: [
     { token: TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN, optional: true },
     { token: TOOL_CALLBACKS_TOKEN, optional: true },
     { token: TOOL_CALLBACK_PROVIDER_TOKEN, optional: true },
+    { token: PROVIDER_INSTANCE_EXPLORER_TOKEN, optional: true },
   ],
 };
 

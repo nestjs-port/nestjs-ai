@@ -15,14 +15,31 @@
  */
 
 import "reflect-metadata";
+import { Global, Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import {
+  DelegatingToolCallbackResolver,
   TOOL_CALLBACK_RESOLVER_TOKEN,
   TOOL_CALLING_MANAGER_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
   ToolCallingModule,
 } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
+
+@Global()
+@Module({
+  providers: [
+    {
+      provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+      useValue: {
+        getProviderInstances: () => [],
+      },
+    },
+  ],
+  exports: [PROVIDER_INSTANCE_EXPLORER_TOKEN],
+})
+class ProviderExplorerModule {}
 
 describe("ToolCallingModule", () => {
   it("resolves the default tool callback resolver and manager via NestJS DI", async () => {
@@ -35,5 +52,15 @@ describe("ToolCallingModule", () => {
       moduleRef.get(TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN),
     ).toBeDefined();
     expect(moduleRef.get(TOOL_CALLING_MANAGER_TOKEN)).toBeDefined();
+  });
+
+  it("uses a delegating resolver when a provider instance explorer is available", async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [ProviderExplorerModule, ToolCallingModule],
+    }).compile();
+
+    expect(moduleRef.get(TOOL_CALLBACK_RESOLVER_TOKEN)).toBeInstanceOf(
+      DelegatingToolCallbackResolver,
+    );
   });
 });

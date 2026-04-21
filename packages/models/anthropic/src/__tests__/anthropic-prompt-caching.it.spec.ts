@@ -29,6 +29,7 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -49,6 +50,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const TEST_MODEL: AnthropicModel = "claude-sonnet-4-20250514";
 
 describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory());
   const logger = LoggerFactory.getLogger("AnthropicPromptCachingIT");
   const chatModel = new AnthropicChatModel();
 

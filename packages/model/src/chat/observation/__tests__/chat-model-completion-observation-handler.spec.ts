@@ -15,8 +15,9 @@
  */
 
 import { ObservationContext } from "@nestjs-ai/commons";
-import { LoggerFactory } from "@nestjs-port/core";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
+import { RecordingLogger } from "@nestjs-port/testing";
+import { beforeEach, describe, expect, it } from "vitest";
 import { AssistantMessage } from "../../messages";
 import { ChatResponse, Generation } from "../../model";
 import { DefaultChatOptions, Prompt } from "../../prompt";
@@ -24,27 +25,15 @@ import { ChatModelCompletionObservationHandler } from "../chat-model-completion-
 import { ChatModelObservationContext } from "../chat-model-observation-context";
 
 describe("ChatModelCompletionObservationHandler", () => {
-  let infoMock: (message: string, ...args: unknown[]) => void;
+  let recordingLogger: RecordingLogger;
 
   beforeEach(() => {
-    infoMock = vi.fn<(message: string, ...args: unknown[]) => void>();
-    vi.spyOn(LoggerFactory, "getLogger").mockReturnValue({
-      name: "ChatModelCompletionObservationHandler",
-      info: infoMock,
-      warn: vi.fn(),
-      debug: vi.fn(),
-      trace: vi.fn(),
-      error: vi.fn(),
-      isDebugEnabled: () => false,
-      isTraceEnabled: () => false,
-      isInfoEnabled: () => true,
-      isWarnEnabled: () => true,
-      isErrorEnabled: () => true,
+    recordingLogger = new RecordingLogger(
+      "ChatModelCompletionObservationHandler",
+    );
+    LoggerFactory.bind({
+      getLogger: () => recordingLogger,
     });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   function createContext(): ChatModelObservationContext {
@@ -77,7 +66,12 @@ describe("ChatModelCompletionObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith("Chat Model Completion:\n[]");
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: "Chat Model Completion:\n[]",
+      args: [],
+    });
   });
 
   it("when empty completion then output nothing", () => {
@@ -95,7 +89,12 @@ describe("ChatModelCompletionObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith("Chat Model Completion:\n[]");
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: "Chat Model Completion:\n[]",
+      args: [],
+    });
   });
 
   it("when completion with text then output it", () => {
@@ -116,8 +115,12 @@ describe("ChatModelCompletionObservationHandler", () => {
 
     observationHandler.onStop(context);
 
-    expect(infoMock).toHaveBeenCalledWith(
-      'Chat Model Completion:\n["say please", "seriously, say please"]',
-    );
+    expect(recordingLogger.entries).toHaveLength(1);
+    expect(recordingLogger.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message:
+        'Chat Model Completion:\n["say please", "seriously, say please"]',
+      args: [],
+    });
   });
 });

@@ -25,7 +25,6 @@ import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
   NoopObservationRegistry,
-  OBSERVATION_REGISTRY_TOKEN,
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -39,6 +38,7 @@ import {
   ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { OpenAiChatModel } from "../open-ai-chat-model";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
 import {

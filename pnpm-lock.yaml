@@ -201,9 +201,6 @@ importers:
       '@nestjs-ai/model-transformers':
         specifier: workspace:*
         version: link:../models/transformers
-      '@nestjs-ai/observation':
-        specifier: workspace:*
-        version: link:../observation
       '@nestjs-ai/platform':
         specifier: workspace:*
         version: link:../platform
@@ -219,6 +216,9 @@ importers:
       '@nestjs-port/jsdbc':
         specifier: ^0.0.3
         version: 0.0.3(4b9cb6d91bc3dd836b01920782190f55)
+      '@nestjs-port/observation':
+        specifier: ^0.0.1
+        version: 0.0.1(@nestjs-port/core@0.0.3(rxjs@7.8.2))(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)
       '@nestjs-port/testing':
         specifier: ^0.0.2
         version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
@@ -469,6 +469,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-port/core':
+        specifier: ^0.0.3
+        version: 0.0.3(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.0.2
         version: 0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))
@@ -478,22 +481,6 @@ importers:
       '@xenova/transformers':
         specifier: ^2.17.2
         version: 2.17.2
-
-  packages/observation:
-    dependencies:
-      '@opentelemetry/api':
-        specifier: ^1.9.0
-        version: 1.9.0
-    devDependencies:
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../commons
-      '@nestjs-ai/model':
-        specifier: workspace:*
-        version: link:../model
-      '@nestjs/common':
-        specifier: ^11.1.11
-        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
 
   packages/platform:
     devDependencies:
@@ -1320,6 +1307,13 @@ packages:
         optional: true
       zod:
         optional: true
+
+  '@nestjs-port/observation@0.0.1':
+    resolution: {integrity: sha512-WTEXKk8Bz76F1f1xeaQFJ/RdX3CYvdUfh7i+e3Us0Gut8XjxO9+rs1jNfkQphuNOgNls9I1GHrw+RHU8KB3BGg==}
+    peerDependencies:
+      '@nestjs-port/core': '*'
+      '@nestjs/common': ^10.0.0 || ^11.0.0
+      '@opentelemetry/api': ^1.9.0
 
   '@nestjs-port/testing@0.0.2':
     resolution: {integrity: sha512-peFEncBq3czbXRFrd3owfitd64XuOKbYpTJ0lPYULfapLSrTpYc4hH5CYAvVXT+BuI4eYV5ACpbdmO6ZURKYbA==}
@@ -5880,6 +5874,12 @@ snapshots:
       sequelize: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
       typeorm: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
       zod: 4.3.6
+
+  '@nestjs-port/observation@0.0.1(@nestjs-port/core@0.0.3(rxjs@7.8.2))(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@nestjs-port/core': 0.0.3(rxjs@7.8.2)
+      '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@opentelemetry/api': 1.9.0
 
   '@nestjs-port/testing@0.0.2(@nestjs-port/core@0.0.3(rxjs@7.8.2))':
     dependencies:

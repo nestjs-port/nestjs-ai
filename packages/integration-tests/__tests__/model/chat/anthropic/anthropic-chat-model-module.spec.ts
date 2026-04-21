@@ -25,8 +25,8 @@ import {
   AnthropicChatModelModule,
   type AnthropicChatProperties,
 } from "@nestjs-ai/model-anthropic";
-import { ObservationModule } from "@nestjs-ai/observation";
 import { ms } from "@nestjs-port/core";
+import { ObservationModule } from "@nestjs-port/observation";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");

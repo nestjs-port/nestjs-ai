@@ -25,14 +25,13 @@ import { Module } from "@nestjs/common";
 import {
   EMBEDDING_MODEL_TOKEN,
   NoopObservationRegistry,
-  OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
   EmbeddingModelObservationConvention,
   ModelObservationModule,
 } from "@nestjs-ai/model";
-
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { OpenAiEmbeddingModel } from "../open-ai-embedding-model";
 import { OpenAiEmbeddingOptions } from "../open-ai-embedding-options";
 import { OpenAiSetup, type OpenAiSetupProps } from "../setup";

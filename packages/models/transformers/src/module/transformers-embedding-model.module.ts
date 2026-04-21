@@ -24,13 +24,13 @@ import type {
 import { Module } from "@nestjs/common";
 import {
   EMBEDDING_MODEL_TOKEN,
-  OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
   EmbeddingModelObservationConvention,
   ModelObservationModule,
 } from "@nestjs-ai/model";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { TransformersEmbeddingModel } from "../transformers-embedding-model";
 import type { TransformersEmbeddingModelProperties } from "./transformers-embedding-model-properties";
 

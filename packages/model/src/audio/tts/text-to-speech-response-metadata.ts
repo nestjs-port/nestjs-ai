@@ -17,6 +17,6 @@
 import { AbstractResponseMetadata } from "../../model";
 
 /**
- * Metadata associated with a text-to-speech response.
+ * Metadata associated with an audio transcription response.
  */
 export class TextToSpeechResponseMetadata extends AbstractResponseMetadata {}

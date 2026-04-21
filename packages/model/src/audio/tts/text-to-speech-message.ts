@@ -15,7 +15,8 @@
  */
 
 /**
- * Represents the text input for a text-to-speech request.
+ * Implementation of the {@link TextToSpeechMessage} interface for the text to speech
+ * message.
  */
 export class TextToSpeechMessage {
   private readonly _text: string | null;

@@ -439,16 +439,19 @@ Generate the filmography of 5 movies for Tom Hanks.
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
     logger.info(`Response: ${inspect(response, { depth: null })}`);
-    for (const generation of response.results) {
-      const message = generation.output;
-      if (message.toolCalls.length > 0) {
-        expect(message.toolCalls).not.toHaveLength(0);
-        const toolCall = message.toolCalls[0];
-        expect(toolCall?.id ?? "").not.toBe("");
-        expect(toolCall?.name ?? "").not.toBe("");
-        expect(toolCall?.arguments ?? "").not.toBe("");
-      }
-    }
+    const toolCallChecks = response.results.map((generation) => {
+      const toolCall = generation.output.toolCalls[0];
+      return (
+        generation.output.toolCalls.length === 0 ||
+        (generation.output.toolCalls.length > 0 &&
+          toolCall != null &&
+          (toolCall.id ?? "") !== "" &&
+          (toolCall.name ?? "") !== "" &&
+          (toolCall.arguments ?? "") !== "")
+      );
+    });
+
+    expect(toolCallChecks.every(Boolean)).toBe(true);
   });
 
   it("test tool choice any", async () => {
@@ -588,19 +591,25 @@ Generate the filmography of 5 movies for Tom Hanks.
     expect(response.results).not.toHaveLength(0);
     expect(response.results.length).toBeGreaterThanOrEqual(2);
 
-    for (const generation of response.results) {
+    const blockChecks = response.results.map((generation) => {
       const message = generation.output;
-      if (message.text != null && message.text.trim() !== "") {
-        // Text block
-        expect(message.text).not.toBe("");
-      } else if (message.metadata != null && "signature" in message.metadata) {
-        // Thinking block
-        expect(message.metadata.signature).not.toBeNull();
-      } else if (message.metadata != null && "data" in message.metadata) {
-        // Redacted thinking block
-        expect(message.metadata.data).not.toBeNull();
-      }
-    }
+      const hasTextBlock = message.text != null && message.text.trim() !== "";
+      const hasThinkingSignature =
+        message.metadata != null && "signature" in message.metadata;
+      const hasRedactedThinkingData =
+        message.metadata != null && "data" in message.metadata;
+
+      return (
+        [hasTextBlock, hasThinkingSignature, hasRedactedThinkingData].filter(
+          Boolean,
+        ).length === 1 &&
+        (!hasTextBlock || message.text !== "") &&
+        (!hasThinkingSignature || message.metadata?.signature != null) &&
+        (!hasRedactedThinkingData || message.metadata?.data != null)
+      );
+    });
+
+    expect(blockChecks.every(Boolean)).toBe(true);
   }, 60_000);
 
   it("thinking with streaming test", async () => {
@@ -920,6 +929,12 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     // Verify web search citations if present
     const citations = response.metadata?.get<Citation[]>("citations") ?? [];
+    const hasWebSearchCitations = citations.some(
+      (citation) =>
+        citation.type === Citation.LocationType.WEB_SEARCH_RESULT_LOCATION &&
+        (citation.url ?? "") !== "",
+    );
+
     if (citations != null && citations.length > 0) {
       logger.info(`Web search citations received: ${citations.length}`);
       citations
@@ -932,15 +947,9 @@ Generate the filmography of 5 movies for Tom Hanks.
             `Web search citation: url=${citation.url}, title=${citation.documentTitle}`,
           );
         });
-      expect(
-        citations.some(
-          (citation) =>
-            citation.type ===
-              Citation.LocationType.WEB_SEARCH_RESULT_LOCATION &&
-            (citation.url ?? "") !== "",
-        ),
-      ).toBe(true);
     }
+
+    expect(hasWebSearchCitations).toBe(citations.length > 0);
   }, 60_000);
 });
 

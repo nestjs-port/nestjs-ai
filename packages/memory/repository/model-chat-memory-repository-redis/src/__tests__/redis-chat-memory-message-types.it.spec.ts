@@ -119,12 +119,12 @@ describe("RedisChatMemoryMessageTypesIT", () => {
   });
 
   it.each([
-    ["Message from assistant", MessageType.ASSISTANT],
-    ["Message from user", MessageType.USER],
-    ["Message from system", MessageType.SYSTEM],
+    ["Message from assistant", MessageType.ASSISTANT, AssistantMessage],
+    ["Message from user", MessageType.USER, UserMessage],
+    ["Message from system", MessageType.SYSTEM, SystemMessage],
   ])(
     "should store and retrieve single message (%s, %s)",
-    async (content, messageType) => {
+    async (content, messageType, ExpectedMessageType) => {
       const conversationId = randomUUID();
 
       // Create a message of the specified type
@@ -162,15 +162,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
       expect(retrievedMessage.text).toBe(`${content} - ${conversationId}`);
 
       // Verify the correct class type
-      if (messageType === MessageType.ASSISTANT) {
-        expect(retrievedMessage).toBeInstanceOf(AssistantMessage);
-      } else if (messageType === MessageType.USER) {
-        expect(retrievedMessage).toBeInstanceOf(UserMessage);
-      } else if (messageType === MessageType.SYSTEM) {
-        expect(retrievedMessage).toBeInstanceOf(SystemMessage);
-      } else {
-        throw new TypeError(`Type not supported: ${messageType.toString()}`);
-      }
+      expect(retrievedMessage).toBeInstanceOf(ExpectedMessageType);
     },
   );
 
@@ -632,19 +624,76 @@ describe("RedisChatMemoryMessageTypesIT", () => {
       content: "The weather in Paris is currently 24°C and sunny.",
     });
 
-    // Create ordered list of messages
-    const expectedMessages: Message[] = [
-      systemMessage,
-      userMessage1,
-      assistantMessage1,
-      userMessage2,
-      assistantToolCall,
-      toolResponseMessage,
-      assistantFinal,
+    const expectedMessages: Array<{
+      message: Message;
+      assert: (actual: Message) => void;
+    }> = [
+      {
+        message: systemMessage,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(SystemMessage);
+        },
+      },
+      {
+        message: userMessage1,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(UserMessage);
+        },
+      },
+      {
+        message: assistantMessage1,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(AssistantMessage);
+        },
+      },
+      {
+        message: userMessage2,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(UserMessage);
+        },
+      },
+      {
+        message: assistantToolCall,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(AssistantMessage);
+          const actualAssistant = actual as AssistantMessage;
+
+          expect(actualAssistant.hasToolCalls()).toBe(true);
+          expect(actualAssistant.toolCalls).toHaveLength(
+            assistantToolCall.toolCalls.length,
+          );
+          expect(actualAssistant.toolCalls[0]?.name).toBe(
+            assistantToolCall.toolCalls[0]?.name,
+          );
+        },
+      },
+      {
+        message: toolResponseMessage,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(ToolResponseMessage);
+          const actualTool = actual as ToolResponseMessage;
+
+          expect(actualTool.responses).toHaveLength(
+            toolResponseMessage.responses.length,
+          );
+          expect(actualTool.responses[0]?.name).toBe(
+            toolResponseMessage.responses[0]?.name,
+          );
+          expect(actualTool.responses[0]?.id).toBe(
+            toolResponseMessage.responses[0]?.id,
+          );
+        },
+      },
+      {
+        message: assistantFinal,
+        assert: (actual) => {
+          expect(actual).toBeInstanceOf(AssistantMessage);
+        },
+      },
     ];
 
     // Add each message individually with small delays
-    for (const message of expectedMessages) {
+    for (const { message } of expectedMessages) {
       await chatMemory.add(conversationId, message);
       await sleep(10); // Small delay to ensure distinct timestamps
     }
@@ -665,50 +714,11 @@ describe("RedisChatMemoryMessageTypesIT", () => {
       }
 
       // Verify message types match
-      expect(actual.messageType).toBe(expected.messageType);
+      expect(actual.messageType).toBe(expected.message.messageType);
 
       // Verify message content matches
-      expect(actual.text).toBe(expected.text);
-
-      // For each specific message type, verify type-specific properties
-      if (expected instanceof SystemMessage) {
-        expect(actual).toBeInstanceOf(SystemMessage);
-      } else if (expected instanceof UserMessage) {
-        expect(actual).toBeInstanceOf(UserMessage);
-      } else if (expected instanceof AssistantMessage) {
-        expect(actual).toBeInstanceOf(AssistantMessage);
-
-        // If the original had tool calls, verify they're preserved
-        if (expected.hasToolCalls()) {
-          const expectedAssistant = expected as AssistantMessage;
-          const actualAssistant = actual as AssistantMessage;
-
-          expect(actualAssistant.hasToolCalls()).toBe(true);
-          expect(actualAssistant.toolCalls).toHaveLength(
-            expectedAssistant.toolCalls.length,
-          );
-
-          // Check first tool call details
-          expect(actualAssistant.toolCalls[0]?.name).toBe(
-            expectedAssistant.toolCalls[0]?.name,
-          );
-        }
-      } else if (expected instanceof ToolResponseMessage) {
-        expect(actual).toBeInstanceOf(ToolResponseMessage);
-
-        const expectedTool = expected as ToolResponseMessage;
-        const actualTool = actual as ToolResponseMessage;
-
-        expect(actualTool.responses).toHaveLength(
-          expectedTool.responses.length,
-        );
-
-        // Check response details
-        expect(actualTool.responses[0]?.name).toBe(
-          expectedTool.responses[0]?.name,
-        );
-        expect(actualTool.responses[0]?.id).toBe(expectedTool.responses[0]?.id);
-      }
+      expect(actual.text).toBe(expected.message.text);
+      expected.assert(actual);
     }
   });
 

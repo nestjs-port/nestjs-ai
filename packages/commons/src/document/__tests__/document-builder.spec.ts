@@ -131,7 +131,7 @@ describe("DocumentBuilder", () => {
         .text("text")
         .metadata(null as unknown as string, "value")
         .build(),
-    ).toThrow();
+    ).toThrow("metadata cannot be null");
   });
 
   it("test with metadata value null", () => {

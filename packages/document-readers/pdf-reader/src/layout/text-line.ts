@@ -33,7 +33,10 @@ export class TextLine {
       Math.trunc(lineLength) /
         ForkPdfLayoutTextStripper.OUTPUT_SPACE_CHARACTER_WIDTH_IN_PT,
     );
-    this._line = new Array(this._lineLength).fill(TextLine.SPACE_CHARACTER);
+    this._line = Array.from(
+      { length: this._lineLength },
+      () => TextLine.SPACE_CHARACTER,
+    );
   }
 
   writeCharacterAtIndex(character: Character): void {

@@ -19,7 +19,7 @@ import {
   GoogleGenAiChatModel,
   GoogleGenAiChatOptions,
 } from "@nestjs-ai/model-google-genai";
-import { beforeAll, describe, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared";
 
 const GOOGLE_CLOUD_PROJECT = process.env.GOOGLE_CLOUD_PROJECT;
@@ -83,7 +83,8 @@ describe.skipIf(!GOOGLE_CLOUD_PROJECT)("GoogleGenAiToolCallAdvisorIT", () => {
       await abstractIT.testStreamDefaultAdvisorConfigurationWithExternalMemory();
     });
 
-    it.skip("stream with default advisor configuration 1", async () => {
+    it.skipIf(true)("stream with default advisor configuration 1", async () => {
+      expect.hasAssertions();
       await abstractIT.testStreamDefaultAdvisorConfiguration();
     });
 

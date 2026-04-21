@@ -90,7 +90,7 @@ export abstract class AnthropicSetup {
 
     const defaultHeaders = {
       "User-Agent": AnthropicSetup.DEFAULT_USER_AGENT,
-      ...(props.customHeaders ?? {}),
+      ...props.customHeaders,
     };
 
     return new Anthropic({

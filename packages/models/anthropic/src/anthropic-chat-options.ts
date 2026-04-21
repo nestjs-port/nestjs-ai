@@ -326,7 +326,7 @@ export class AnthropicChatOptions
       schema[key] = value;
     }
     this.outputConfig = {
-      ...(this.outputConfig ?? {}),
+      ...this.outputConfig,
       format: { type: "json_schema", schema },
     };
   }
@@ -603,7 +603,7 @@ export class AnthropicChatOptionsBuilder
 
   effort(effort: NonNullable<OutputConfig["effort"]>): this {
     this._outputConfig = {
-      ...(this._outputConfig ?? {}),
+      ...this._outputConfig,
       effort,
     };
     return this;
@@ -623,7 +623,7 @@ export class AnthropicChatOptionsBuilder
       schema[key] = value;
     }
     this._outputConfig = {
-      ...(this._outputConfig ?? {}),
+      ...this._outputConfig,
       format: { type: "json_schema", schema },
     };
     return this;

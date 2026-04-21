@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  AiObservationAttributes,
-  KeyValue,
-  KeyValues,
-  SpringAiKind,
-} from "@nestjs-ai/commons";
+import { AiObservationAttributes, SpringAiKind } from "@nestjs-ai/commons";
+import { KeyValue, KeyValues } from "@nestjs-port/core";
 import type { ToolCallingObservationContext } from "./tool-calling-observation-context";
 import { ToolCallingObservationConvention } from "./tool-calling-observation-convention";
 

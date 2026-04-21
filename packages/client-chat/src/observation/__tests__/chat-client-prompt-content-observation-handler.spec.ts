@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ObservationContext } from "@nestjs-ai/commons";
 import { Prompt, SystemMessage, UserMessage } from "@nestjs-ai/model";
 import type { Logger } from "@nestjs-port/core";
+import { ObservationContext } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request";

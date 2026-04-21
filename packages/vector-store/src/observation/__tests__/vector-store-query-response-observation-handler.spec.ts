@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Document, ObservationContext } from "@nestjs-ai/commons";
-import { LoggerFactory, LogLevel } from "@nestjs-port/core";
+import { Document } from "@nestjs-ai/commons";
+import { LoggerFactory, LogLevel, ObservationContext } from "@nestjs-port/core";
 import { RecordingLogger } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { VectorStoreObservationContext } from "../vector-store-observation-context";

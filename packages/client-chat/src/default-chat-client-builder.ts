@@ -15,8 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ObservationRegistry, TemplateRenderer } from "@nestjs-ai/commons";
-import { NoopObservationRegistry } from "@nestjs-ai/commons";
+import type { TemplateRenderer } from "@nestjs-ai/commons";
 import type {
   ChatModel,
   ChatOptions,
@@ -24,6 +23,10 @@ import type {
   ToolCallback,
   ToolObjectInstance,
 } from "@nestjs-ai/model";
+import {
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import type { Advisor, AdvisorObservationConvention } from "./advisor";
 import type { ChatClient } from "./chat-client";
 import { DefaultChatClient } from "./default-chat-client";

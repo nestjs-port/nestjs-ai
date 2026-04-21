@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  ObservabilityHelper,
-  type ObservationContext,
-  type ObservationHandler,
-} from "@nestjs-ai/commons";
+import { ObservabilityHelper } from "@nestjs-ai/commons";
+import type { ObservationContext, ObservationHandler } from "@nestjs-port/core";
 import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import { VectorStoreObservationContext } from "./vector-store-observation-context";
 

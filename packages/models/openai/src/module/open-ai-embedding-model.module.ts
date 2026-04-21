@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import type {
-  DynamicModule,
-  FactoryProvider,
-  InjectionToken,
-  ModuleMetadata,
-  Provider,
-} from "@nestjs/common";
-import { Module } from "@nestjs/common";
 import {
-  EMBEDDING_MODEL_TOKEN,
-  NoopObservationRegistry,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+  type DynamicModule,
+  type FactoryProvider,
+  type InjectionToken,
+  Module,
+  type ModuleMetadata,
+  type Provider,
+} from "@nestjs/common";
+import { EMBEDDING_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   EmbeddingModelObservationConvention,
   ModelObservationModule,
 } from "@nestjs-ai/model";
-import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
+import {
+  NoopObservationRegistry,
+  OBSERVATION_REGISTRY_TOKEN,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import { OpenAiEmbeddingModel } from "../open-ai-embedding-model";
 import { OpenAiEmbeddingOptions } from "../open-ai-embedding-options";
 import { OpenAiSetup, type OpenAiSetupProps } from "../setup";

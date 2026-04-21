@@ -18,11 +18,13 @@ import {
   AiObservationMetricAttributes,
   AiObservationMetricNames,
   AiTokenType,
+} from "@nestjs-ai/commons";
+import {
   Counter,
   type MeterRegistry,
   type ObservationContext,
   Tag,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 import type { Usage } from "../../chat";
 
 /**

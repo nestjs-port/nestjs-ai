@@ -19,11 +19,9 @@ import {
   AiObservationAttributes,
   AiOperationType,
   AiProvider,
-  KeyValue,
-  KeyValues,
   SpringAiKind,
 } from "@nestjs-ai/commons";
-import { ParsingUtils } from "@nestjs-port/core";
+import { KeyValue, KeyValues, ParsingUtils } from "@nestjs-port/core";
 
 import type { AdvisorObservationContext } from "./advisor-observation-context";
 import { AdvisorObservationConvention } from "./advisor-observation-convention";

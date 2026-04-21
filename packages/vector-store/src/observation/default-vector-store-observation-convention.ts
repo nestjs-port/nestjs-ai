@@ -16,12 +16,10 @@
 
 import assert from "node:assert/strict";
 import {
-  KeyValue,
-  KeyValues,
   SpringAiKind,
   VectorStoreObservationAttributes,
 } from "@nestjs-ai/commons";
-import { StringUtils } from "@nestjs-port/core";
+import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
 import type { VectorStoreObservationContext } from "./vector-store-observation-context";
 import { VectorStoreObservationConvention } from "./vector-store-observation-convention";
 

@@ -16,10 +16,11 @@
 
 import assert from "node:assert/strict";
 import {
+  type Logger,
+  LoggerFactory,
   NoopObservationRegistry,
   type ObservationRegistry,
-} from "@nestjs-ai/commons";
-import { type Logger, LoggerFactory } from "@nestjs-port/core";
+} from "@nestjs-port/core";
 import {
   type AssistantMessage,
   type ChatResponse,

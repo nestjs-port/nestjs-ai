@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ObservationDocumentation } from "@nestjs-ai/commons";
+import { ObservationDocumentation } from "@nestjs-port/core";
 
 import { DefaultAdvisorObservationConvention } from "./default-advisor-observation-convention";
 

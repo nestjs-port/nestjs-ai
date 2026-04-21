@@ -15,14 +15,9 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  AiObservationAttributes,
-  KeyValue,
-  KeyValues,
-  SpringAiKind,
-} from "@nestjs-ai/commons";
+import { AiObservationAttributes, SpringAiKind } from "@nestjs-ai/commons";
 import { ChatMemory, type ToolCallingChatOptions } from "@nestjs-ai/model";
-import { StringUtils } from "@nestjs-port/core";
+import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
 import type { ChatClientObservationContext } from "./chat-client-observation-context";
 import { ChatClientObservationConvention } from "./chat-client-observation-convention";
 

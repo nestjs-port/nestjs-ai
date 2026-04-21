@@ -16,12 +16,7 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import {
-  Media,
-  MediaFormat,
-  NoopObservationRegistry,
-  type TemplateRenderer,
-} from "@nestjs-ai/commons";
+import { Media, MediaFormat, type TemplateRenderer } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatModel,
@@ -37,6 +32,7 @@ import {
   type ToolCallback,
   UserMessage,
 } from "@nestjs-ai/model";
+import { NoopObservationRegistry } from "@nestjs-port/core";
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import { defaultIfEmpty, lastValueFrom, type Observable, of } from "rxjs";
 import { describe, expect, it, vi } from "vitest";

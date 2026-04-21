@@ -37,7 +37,7 @@ import {
   type ToolCallback,
   UserMessage,
 } from "@nestjs-ai/model";
-import { TestObservationRegistry } from "@nestjs-ai/testing";
+import { TestObservationRegistry } from "@nestjs-port/testing";
 import { defaultIfEmpty, lastValueFrom, type Observable, of } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
@@ -930,7 +930,7 @@ describe("DefaultChatClient", () => {
       const observationRegistry = TestObservationRegistry.create();
       const chatClient = new DefaultChatClientBuilder(
         chatModel,
-        observationRegistry,
+        observationRegistry as never,
         null,
         null,
       ).build();
@@ -1278,7 +1278,7 @@ describe("DefaultChatClient", () => {
       const observationRegistry = TestObservationRegistry.create();
       const chatClient = new DefaultChatClientBuilder(
         chatModel,
-        observationRegistry,
+        observationRegistry as never,
         null,
         null,
       ).build();

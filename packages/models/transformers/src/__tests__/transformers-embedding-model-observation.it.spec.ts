@@ -24,7 +24,7 @@ import {
   EmbeddingOptions,
   EmbeddingRequest,
 } from "@nestjs-ai/model";
-import { TestObservationRegistry } from "@nestjs-ai/testing";
+import { TestObservationRegistry } from "@nestjs-port/testing";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { TransformersEmbeddingModel } from "../transformers-embedding-model";
@@ -36,7 +36,7 @@ describe("TransformersEmbeddingModelObservationIT", () => {
   beforeAll(async () => {
     observationRegistry = TestObservationRegistry.create();
     embeddingModel = new TransformersEmbeddingModel({
-      observationRegistry,
+      observationRegistry: observationRegistry as never,
     });
     await embeddingModel.onModuleInit();
   }, 240_000);

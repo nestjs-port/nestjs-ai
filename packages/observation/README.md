@@ -39,8 +39,6 @@ The project faithfully mirrors Spring AI's module structure and API design while
 
 ## Porting Progress
 
-Spring AI module porting status to NestJS AI. (~520 source files, ~180 test files ported across 22 packages)
-
 | Category | Spring AI Module | nestjs-ai Package | Progress |
 |---|---|---|---|
 | **Core** | spring-ai-model | `@nestjs-ai/model` | 100% |
@@ -48,8 +46,6 @@ Spring AI module porting status to NestJS AI. (~520 source files, ~180 test file
 | | spring-ai-commons | `@nestjs-ai/commons` | 100% |
 | | spring-ai-retry | `@nestjs-ai/retry` | 100% |
 | | spring-ai-template-st | `@nestjs-ai/template-st` | 100% |
-| | spring-ai-observation | `@nestjs-ai/observation` | 100% |
-| | spring-ai-test | `@nestjs-ai/testing` | 100% |
 | **Model Providers** | spring-ai-openai | `@nestjs-ai/model-openai` | 100% |
 | | spring-ai-openai | `@nestjs-ai/model-openai` | 100% |
 | | spring-ai-google-genai | `@nestjs-ai/model-google-genai` | 100% |
@@ -76,7 +72,6 @@ Spring AI module porting status to NestJS AI. (~520 source files, ~180 test file
 | | spring-ai-model-chat-memory-cassandra | — | 0% |
 | **Platform** | spring-ai-autoconfigure | `@nestjs-ai/platform` | 100% |
 | | spring-ai-mcp | `@nestjs-ai/mcp-common` | 10% |
-| | spring-ai-jsdbc | `@nestjs-ai/jsdbc` | 30% |
 
 ## Project Structure
 
@@ -92,7 +87,6 @@ nestjs-ai/
 │   ├── observation/              # OpenTelemetry integration
 │   ├── retry/                    # Retry utilities
 │   ├── template-st/             # Prompt templating
-│   ├── testing/                  # Test utilities
 │   ├── jsdbc/                    # JDBC integration layer
 │   ├── models/
 │   │   ├── openai/               # OpenAI provider

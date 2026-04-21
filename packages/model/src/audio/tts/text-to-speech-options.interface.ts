@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+import type { ModelOptions } from "../../model";
+
+/**
+ * Model options shared across text-to-speech providers.
+ */
+export interface TextToSpeechOptions extends ModelOptions {
+  model?: string | null;
+  voice?: string | null;
+  format?: string | null;
+  speed?: number | null;
+
+  copy(): TextToSpeechOptions;
+}

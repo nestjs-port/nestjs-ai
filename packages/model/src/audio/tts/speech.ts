@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+import type { ModelResult, ResultMetadata } from "../../model";
+
+/**
+ * Represents a generated speech payload.
+ */
+export class Speech implements ModelResult<Uint8Array> {
+  private readonly _speech: Uint8Array;
+
+  constructor(speech: Uint8Array) {
+    this._speech = speech;
+  }
+
+  get output(): Uint8Array {
+    return this._speech;
+  }
+
+  get metadata(): ResultMetadata {
+    return new (class implements ResultMetadata {})();
+  }
+}

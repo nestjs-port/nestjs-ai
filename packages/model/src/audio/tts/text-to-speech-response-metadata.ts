@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+import { AbstractResponseMetadata } from "../../model";
+
+/**
+ * Metadata associated with a text-to-speech response.
+ */
+export class TextToSpeechResponseMetadata extends AbstractResponseMetadata {}

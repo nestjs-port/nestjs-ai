@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+/**
+ * Represents the text input for a text-to-speech request.
+ */
+export class TextToSpeechMessage {
+  private readonly _text: string | null;
+
+  constructor(text: string | null = null) {
+    this._text = text;
+  }
+
+  get text(): string | null {
+    return this._text;
+  }
+}

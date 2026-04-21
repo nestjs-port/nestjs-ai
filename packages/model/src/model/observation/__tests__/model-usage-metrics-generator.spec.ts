@@ -18,13 +18,15 @@ import {
   AiObservationMetricAttributes,
   AiObservationMetricNames,
   AiTokenType,
+} from "@nestjs-ai/commons";
+import {
   type Counter,
   KeyValue,
   type MeterId,
   type MeterRegistry,
   ObservationContext,
   type Tag,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { Usage } from "../../../chat/metadata/usage";
 import { ModelUsageMetricsGenerator } from "../model-usage-metrics-generator";

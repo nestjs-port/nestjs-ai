@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { KeyValue, ObservationContext } from "@nestjs-ai/commons";
+import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { ToolDefinition } from "../../definition";
 import { DefaultToolCallingObservationConvention } from "../default-tool-calling-observation-convention";

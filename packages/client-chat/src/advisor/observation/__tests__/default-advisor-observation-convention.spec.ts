@@ -18,11 +18,10 @@ import {
   AiObservationAttributes,
   AiOperationType,
   AiProvider,
-  KeyValue,
-  ObservationContext,
   SpringAiKind,
 } from "@nestjs-ai/commons";
 import { Prompt } from "@nestjs-ai/model";
+import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { ChatClientRequest } from "../../../chat-client-request";
 import { AdvisorObservationContext } from "../advisor-observation-context";

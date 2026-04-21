@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  AiObservationAttributes,
-  KeyValue,
-  ObservationContext,
-} from "@nestjs-ai/commons";
+import { AiObservationAttributes } from "@nestjs-ai/commons";
+import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { ImageOptionsBuilder, ImagePrompt } from "../../";
 import { DefaultImageModelObservationConvention } from "../default-image-model-observation-convention";

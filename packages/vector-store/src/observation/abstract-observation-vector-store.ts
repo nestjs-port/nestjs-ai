@@ -15,10 +15,13 @@
  */
 
 import assert from "node:assert/strict";
-import type { Document, ObservationRegistry } from "@nestjs-ai/commons";
-import { NoopObservationRegistry } from "@nestjs-ai/commons";
+import type { Document } from "@nestjs-ai/commons";
 import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
 import { TokenCountBatchingStrategy } from "@nestjs-ai/model";
+import {
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import type { Filter } from "../filter";
 import type { SearchRequest } from "../search-request";
 import { VectorStore } from "../vector-store";

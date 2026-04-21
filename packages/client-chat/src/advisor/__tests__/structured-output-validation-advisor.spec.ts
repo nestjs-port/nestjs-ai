@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import { NoopObservationRegistry } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   ChatResponse,
   Generation,
   Prompt,
 } from "@nestjs-ai/model";
-import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-port/core";
+import {
+  HIGHEST_PRECEDENCE,
+  LOWEST_PRECEDENCE,
+  NoopObservationRegistry,
+} from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
 import { describe, expect, it, vi } from "vitest";

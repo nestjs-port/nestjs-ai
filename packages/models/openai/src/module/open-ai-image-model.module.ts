@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-import type {
-  DynamicModule,
-  FactoryProvider,
-  InjectionToken,
-  ModuleMetadata,
-  Provider,
-} from "@nestjs/common";
-import { Module } from "@nestjs/common";
 import {
-  IMAGE_MODEL_TOKEN,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+  type DynamicModule,
+  type FactoryProvider,
+  type InjectionToken,
+  Module,
+  type ModuleMetadata,
+  type Provider,
+} from "@nestjs/common";
+import { IMAGE_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   ImageModelObservationConvention,
   ModelObservationModule,
 } from "@nestjs-ai/model";
+import type { ObservationRegistry } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { OpenAiImageModel } from "../open-ai-image-model";
 import { OpenAiImageOptions } from "../open-ai-image-options";

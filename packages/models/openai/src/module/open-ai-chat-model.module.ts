@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import type {
-  DynamicModule,
-  FactoryProvider,
-  InjectionToken,
-  ModuleMetadata,
-  Provider,
-} from "@nestjs/common";
-import { Module } from "@nestjs/common";
 import {
-  CHAT_MODEL_TOKEN,
-  NoopObservationRegistry,
-  ObservationFilters,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+  type DynamicModule,
+  type FactoryProvider,
+  type InjectionToken,
+  Module,
+  type ModuleMetadata,
+  type Provider,
+} from "@nestjs/common";
+import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   addToolCallingContentObservationFilter,
   ChatModelObservationConvention,
@@ -38,7 +33,12 @@ import {
   ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
-import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
+import {
+  NoopObservationRegistry,
+  OBSERVATION_REGISTRY_TOKEN,
+  ObservationFilters,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import { OpenAiChatModel } from "../open-ai-chat-model";
 import { OpenAiChatOptions } from "../open-ai-chat-options";
 import {

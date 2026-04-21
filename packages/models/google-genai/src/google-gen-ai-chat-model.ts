@@ -33,11 +33,7 @@ import {
   ThinkingLevel,
   type Tool,
 } from "@google/genai";
-import {
-  type Media,
-  NoopObservationRegistry,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+import type { Media } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   ChatGenerationMetadata,
@@ -71,6 +67,8 @@ import { RetryUtils } from "@nestjs-ai/retry";
 import {
   type Logger,
   LoggerFactory,
+  NoopObservationRegistry,
+  type ObservationRegistry,
   type RetryTemplate,
 } from "@nestjs-port/core";
 import { defer, from, Observable, switchMap } from "rxjs";

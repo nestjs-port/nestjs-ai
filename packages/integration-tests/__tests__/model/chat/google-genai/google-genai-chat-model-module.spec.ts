@@ -17,12 +17,13 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN, ObservationFilters } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   GoogleGenAiCachedContentService,
   GoogleGenAiChatModelModule,
   type GoogleGenAiChatProperties,
 } from "@nestjs-ai/model-google-genai";
+import { ObservationFilters } from "@nestjs-port/core";
 import { ObservationModule } from "@nestjs-port/observation";
 import { describe, expect, it } from "vitest";
 

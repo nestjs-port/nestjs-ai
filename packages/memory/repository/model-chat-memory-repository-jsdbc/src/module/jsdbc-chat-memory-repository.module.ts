@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type {
-  DynamicModule,
-  FactoryProvider,
-  InjectionToken,
-  ModuleMetadata,
-  Provider,
+import {
+  type DynamicModule,
+  type FactoryProvider,
+  type InjectionToken,
+  Module,
+  type ModuleMetadata,
+  type Provider,
 } from "@nestjs/common";
-import { Module } from "@nestjs/common";
 import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
 import type { JsdbcTemplate } from "@nestjs-port/jsdbc";
 import {

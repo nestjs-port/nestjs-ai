@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import type { DynamicModule, InjectionToken, Provider } from "@nestjs/common";
-import { Module } from "@nestjs/common";
+import {
+  type DynamicModule,
+  type InjectionToken,
+  Module,
+  type Provider,
+} from "@nestjs/common";
 import {
   HTTP_CLIENT_TOKEN,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,

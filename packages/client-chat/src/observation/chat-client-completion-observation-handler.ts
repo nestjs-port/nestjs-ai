@@ -18,9 +18,8 @@ import {
   ObservabilityHelper,
   type ObservationContext,
   type ObservationHandler,
-  StringUtils,
 } from "@nestjs-ai/commons";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import { ChatClientObservationContext } from "./chat-client-observation-context";
 
 export class ChatClientCompletionObservationHandler

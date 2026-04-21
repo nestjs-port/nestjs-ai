@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import type { Content } from "@google/genai";
-import { ms } from "@nestjs-ai/commons";
+import { ms } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CachedContentRequest } from "../cached-content-request";
 import { CachedContentUpdateRequest } from "../cached-content-update-request";

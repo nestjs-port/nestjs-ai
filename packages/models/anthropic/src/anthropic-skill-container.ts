@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 
 import type { BetaManagedAgentsSkillParams } from "@anthropic-ai/sdk/resources/beta";
-import { StringUtils } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 
 import { AnthropicSkill } from "./anthropic-skill";
 import { AnthropicSkillRecord } from "./anthropic-skill-record";

@@ -15,14 +15,14 @@
  */
 
 import {
+  LoggerFactory,
   ms,
   type ResponseErrorHandler,
   type Retryable,
   RetryException,
   RetryPolicy,
   RetryTemplate,
-} from "@nestjs-ai/commons";
-import { LoggerFactory } from "@nestjs-port/core";
+} from "@nestjs-port/core";
 import { NonTransientAiException } from "./non-transient-ai-exception";
 import { TransientAiException } from "./transient-ai-exception";
 

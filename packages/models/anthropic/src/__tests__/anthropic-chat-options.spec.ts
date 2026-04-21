@@ -19,7 +19,7 @@ import type {
   OutputConfig,
   ToolChoice,
 } from "@anthropic-ai/sdk/resources/messages";
-import { ms } from "@nestjs-ai/commons";
+import { ms } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 import {

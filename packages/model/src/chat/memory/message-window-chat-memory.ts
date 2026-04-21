@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import { StringUtils } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 import type { Message } from "../messages";
 import { SystemMessage } from "../messages";
 import { ChatMemory } from "./chat-memory";

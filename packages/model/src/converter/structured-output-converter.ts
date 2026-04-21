@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Converter } from "@nestjs-ai/commons";
+import type { Converter } from "@nestjs-port/core";
 import type { FormatProvider } from "./format-provider";
 
 export interface StructuredOutputConverter<T>

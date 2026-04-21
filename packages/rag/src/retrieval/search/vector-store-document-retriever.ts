@@ -16,13 +16,13 @@
 
 import assert from "node:assert/strict";
 import type { Document } from "@nestjs-ai/commons";
-import { StringUtils } from "@nestjs-ai/commons";
 import {
   Filter,
   FilterExpressionTextParser,
   SearchRequest,
   type VectorStore,
 } from "@nestjs-ai/vector-store";
+import { StringUtils } from "@nestjs-port/core";
 import type { Query } from "../../query";
 import { DocumentRetriever } from "./document-retriever";
 

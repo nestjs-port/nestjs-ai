@@ -22,7 +22,7 @@ import {
   type ChatClientRequest,
   ChatClientResponse,
 } from "@nestjs-ai/client-chat";
-import { type Document, StringUtils } from "@nestjs-ai/commons";
+import type { Document } from "@nestjs-ai/commons";
 import { ChatResponse, PromptTemplate } from "@nestjs-ai/model";
 import {
   type Filter,
@@ -30,6 +30,7 @@ import {
   SearchRequest,
   type VectorStore,
 } from "@nestjs-ai/vector-store";
+import { StringUtils } from "@nestjs-port/core";
 import { queueScheduler, type SchedulerLike } from "rxjs";
 
 export interface QuestionAnswerAdvisorProps {

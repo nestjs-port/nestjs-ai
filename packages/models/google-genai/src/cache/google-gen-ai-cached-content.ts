@@ -20,7 +20,7 @@ import type {
   CachedContentUsageMetadata,
   Content,
 } from "@google/genai";
-import { type Milliseconds, ms } from "@nestjs-ai/commons";
+import { type Milliseconds, ms } from "@nestjs-port/core";
 
 export interface GoogleGenAiCachedContentProps {
   name?: string;

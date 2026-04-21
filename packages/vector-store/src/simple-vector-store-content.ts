@@ -21,8 +21,8 @@ import {
   Document,
   DocumentMetadata,
   RandomIdGenerator,
-  StringUtils,
 } from "@nestjs-ai/commons";
+import { StringUtils } from "@nestjs-port/core";
 
 export interface SimpleVectorStoreContentProps {
   id?: string | null;

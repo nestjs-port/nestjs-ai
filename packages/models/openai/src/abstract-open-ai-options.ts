@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type Milliseconds, ms } from "@nestjs-ai/commons";
+import { type Milliseconds, ms } from "@nestjs-port/core";
 import type { ClientOptions } from "openai";
 
 export interface AbstractOpenAiOptionsProps {

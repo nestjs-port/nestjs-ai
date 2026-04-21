@@ -16,7 +16,7 @@
 
 import { Inject, Injectable } from "@nestjs/common";
 import { ModulesContainer } from "@nestjs/core";
-import type { ProviderInstanceExplorer } from "@nestjs-ai/commons";
+import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 
 @Injectable()
 export class NestProviderInstanceExplorer implements ProviderInstanceExplorer {

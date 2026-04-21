@@ -17,7 +17,7 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN, ms, ObservationFilters } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN, ObservationFilters } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
 import {
   ANTHROPIC_CHAT_DEFAULT_MODEL,
@@ -26,6 +26,7 @@ import {
   type AnthropicChatProperties,
 } from "@nestjs-ai/model-anthropic";
 import { ObservationModule } from "@nestjs-ai/observation";
+import { ms } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");

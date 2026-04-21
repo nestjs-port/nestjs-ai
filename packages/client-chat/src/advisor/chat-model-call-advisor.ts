@@ -16,9 +16,9 @@
 
 import assert from "node:assert/strict";
 import { EOL } from "node:os";
-import { LOWEST_PRECEDENCE, StringUtils } from "@nestjs-ai/commons";
 import type { ChatModel, StructuredOutputChatOptions } from "@nestjs-ai/model";
 import { UserMessage } from "@nestjs-ai/model";
+import { LOWEST_PRECEDENCE, StringUtils } from "@nestjs-port/core";
 
 import { ChatClientAttributes } from "../chat-client-attributes";
 import { ChatClientRequest } from "../chat-client-request";

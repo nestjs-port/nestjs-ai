@@ -15,7 +15,7 @@
  */
 
 import { ChatClient } from "@nestjs-ai/client-chat";
-import { Document, type Milliseconds, ms } from "@nestjs-ai/commons";
+import { Document } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   type ChatModel,
@@ -34,6 +34,7 @@ import {
   SearchRequest,
   type VectorStore,
 } from "@nestjs-ai/vector-store";
+import { type Milliseconds, ms } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QuestionAnswerAdvisor } from "../question-answer-advisor";
 

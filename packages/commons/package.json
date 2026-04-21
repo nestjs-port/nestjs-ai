@@ -35,9 +35,11 @@
     "rxjs": "^7.0.0"
   },
   "peerDependencies": {
+    "@nestjs-port/core": "^0.0.3",
     "rxjs": "^7.0.0"
   },
   "dependencies": {
+    "@nestjs-port/core": "^0.0.3",
     "tiktoken": "^1.0.22"
   },
   "files": [

@@ -19,10 +19,10 @@ import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import {
   HTTP_CLIENT_TOKEN,
-  type HttpClient,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
 import { NestAiModule } from "@nestjs-ai/platform";
+import type { HttpClient } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 const TEST_HTTP_CLIENT: HttpClient = {

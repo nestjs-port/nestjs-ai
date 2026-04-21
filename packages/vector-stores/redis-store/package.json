@@ -34,9 +34,9 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "*",
-    "@nestjs-ai/model": "*",
-    "@nestjs-ai/vector-store": "*",
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-ai/vector-store": "workspace:^",
     "@nestjs-port/core": "^0.0.3",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "redis": "^5.0.0"

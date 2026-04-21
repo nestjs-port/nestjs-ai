@@ -20,6 +20,10 @@ export {
 } from "./abstract-open-ai-options";
 export * from "./metadata";
 export * from "./module";
+export {
+  OpenAiAudioSpeechOptions,
+  type OpenAiAudioSpeechOptionsProps,
+} from "./open-ai-audio-speech-options";
 export { OpenAiChatModel } from "./open-ai-chat-model";
 export { OpenAiChatOptions } from "./open-ai-chat-options";
 export {

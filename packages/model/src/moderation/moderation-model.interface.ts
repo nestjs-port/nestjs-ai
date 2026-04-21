@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./audio";
-export * from "./chat";
-export * from "./converter";
-export * from "./embedding";
-export * from "./image";
-export * from "./moderation";
-export * from "./model";
-export * from "./module";
-export * from "./support";
-export * from "./tool";
-export * from "./util";
+import type { Model } from "../model";
+import type { ModerationPrompt } from "./moderation-prompt";
+import type { ModerationResponse } from "./moderation-response";
+
+/**
+ * The ModerationModel interface defines a generic AI model for moderation. It extends the
+ * Model interface to handle the interaction with various types of AI models. It provides
+ * a single method, call, which takes a ModerationPrompt as input and returns a
+ * ModerationResponse.
+ */
+export interface ModerationModel extends Model<
+  ModerationPrompt,
+  ModerationResponse
+> {
+  call(request: ModerationPrompt): Promise<ModerationResponse>;
+}

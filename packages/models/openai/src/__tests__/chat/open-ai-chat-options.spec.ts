@@ -21,7 +21,7 @@ import type {
 } from "openai/resources/chat/completions";
 import type { ResponseFormatJSONSchema } from "openai/resources/shared";
 import { describe, expect, it } from "vitest";
-import { OpenAiChatOptions } from "../open-ai-chat-options";
+import { OpenAiChatOptions } from "../../open-ai-chat-options";
 
 class TestToolCallback extends ToolCallback {
   constructor(

@@ -127,7 +127,8 @@ describe("CheerioDocumentReader", () => {
     expect(documents[1].text).toBe("Section 2 content");
   });
 
-  it.skip("test wikipedia headlines", async () => {
+  it.skipIf(true)("test wikipedia headlines", async () => {
+    expect.hasAssertions();
     // Use a URL resource instead of classpath:
     const reader = new CheerioDocumentReader({
       htmlResource: "https://en.wikipedia.org/",

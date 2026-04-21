@@ -30,9 +30,9 @@ export abstract class ToolExecutionResult {
   static readonly METADATA_TOOL_ID = "toolId" as const;
   static readonly METADATA_TOOL_NAME = "toolName" as const;
 
-  readonly FINISH_REASON: "returnDirect" = "returnDirect";
-  readonly METADATA_TOOL_ID: "toolId" = "toolId";
-  readonly METADATA_TOOL_NAME: "toolName" = "toolName";
+  readonly FINISH_REASON = "returnDirect" as const;
+  readonly METADATA_TOOL_ID = "toolId" as const;
+  readonly METADATA_TOOL_NAME = "toolName" as const;
 
   /**
    * The history of messages exchanged during the conversation, including the tool

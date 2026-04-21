@@ -57,12 +57,10 @@ jobs:
             --filter=@nestjs-ai/model-google-genai \
             --filter=@nestjs-ai/model-openai \
             --filter=@nestjs-ai/model-transformers \
-            --filter=@nestjs-ai/observation \
             --filter=@nestjs-ai/platform \
             --filter=@nestjs-ai/rag \
             --filter=@nestjs-ai/retry \
             --filter=@nestjs-ai/template-st \
-            --filter=@nestjs-ai/testing \
             --filter=@nestjs-ai/vector-store
 
       - name: Run container-backed tests

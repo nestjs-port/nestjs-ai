@@ -35,9 +35,9 @@
   },
   "peerDependencies": {
     "@google/genai": "^1.49.0",
-    "@nestjs-ai/commons": "*",
-    "@nestjs-ai/model": "*",
-    "@nestjs-ai/retry": "*",
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-ai/retry": "workspace:^",
     "@nestjs-port/core": "^0.0.3",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.0.0"

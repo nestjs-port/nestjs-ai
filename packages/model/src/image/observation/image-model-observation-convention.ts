@@ -18,7 +18,7 @@ import type {
   KeyValues,
   ObservationContext,
   ObservationConvention,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 
 import { ImageModelObservationContext } from "./image-model-observation-context";
 

@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  AiObservationAttributes,
-  KeyValue,
-  KeyValues,
-} from "@nestjs-ai/commons";
-import { StringUtils } from "@nestjs-port/core";
+import { AiObservationAttributes } from "@nestjs-ai/commons";
+import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
 import type { ToolCallingChatOptions } from "../../model";
 import type { ChatOptions } from "../prompt";
 import type { ChatModelObservationContext } from "./chat-model-observation-context";

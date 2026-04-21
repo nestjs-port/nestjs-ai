@@ -15,16 +15,16 @@
  */
 
 import {
-  AlsObservationRegistry,
-  NoopObservationRegistry,
-} from "@nestjs-ai/commons";
-import {
   AssistantMessage,
   ChatGenerationMetadata,
   ChatResponse,
   Generation,
   Prompt,
 } from "@nestjs-ai/model";
+import {
+  AlsObservationRegistry,
+  NoopObservationRegistry,
+} from "@nestjs-port/core";
 import { lastValueFrom, of } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { ChatClientRequest } from "../../chat-client-request";

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { NoopObservationRegistry } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
+import { NoopObservationRegistry } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 import { DefaultChatClient } from "../default-chat-client";

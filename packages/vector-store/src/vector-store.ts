@@ -15,12 +15,9 @@
  */
 
 import assert from "node:assert/strict";
-import type {
-  Document,
-  DocumentWriter,
-  ObservationRegistry,
-} from "@nestjs-ai/commons";
+import type { Document, DocumentWriter } from "@nestjs-ai/commons";
 import type { BatchingStrategy } from "@nestjs-ai/model";
+import type { ObservationRegistry } from "@nestjs-port/core";
 import type { Filter } from "./filter";
 import type { VectorStoreObservationConvention } from "./observation";
 import { SearchRequest } from "./search-request";

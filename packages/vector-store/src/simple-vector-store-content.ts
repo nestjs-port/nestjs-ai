@@ -15,11 +15,11 @@
  */
 
 import assert from "node:assert/strict";
-import type { IdGenerator } from "@nestjs-ai/commons";
 import {
   type Content,
   Document,
   DocumentMetadata,
+  type IdGenerator,
   RandomIdGenerator,
 } from "@nestjs-ai/commons";
 import { StringUtils } from "@nestjs-port/core";

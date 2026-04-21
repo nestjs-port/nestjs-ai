@@ -16,7 +16,6 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { ObservationRegistry } from "@nestjs-ai/commons";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -32,6 +31,7 @@ import {
   type ToolCallingChatOptions,
   UserMessage,
 } from "@nestjs-ai/model";
+import type { ObservationRegistry } from "@nestjs-port/core";
 import { lastValueFrom, type Observable, of, reduce } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";

@@ -15,13 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type {
-  Media,
-  MimeType,
-  ObservationRegistry,
-  TemplateRenderer,
-} from "@nestjs-ai/commons";
-import { NoopObservationRegistry } from "@nestjs-ai/commons";
+import type { Media, MimeType, TemplateRenderer } from "@nestjs-ai/commons";
 import type {
   ChatModel,
   ChatOptions,
@@ -35,6 +29,10 @@ import type {
   ToolCallback,
   ToolObjectInstance,
 } from "@nestjs-ai/model";
+import {
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import type { Advisor, AdvisorObservationConvention } from "./advisor";
 import type { ChatClientResponse } from "./chat-client-response";

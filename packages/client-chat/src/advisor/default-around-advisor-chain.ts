@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ObservationRegistry } from "@nestjs-ai/commons";
+import type { ObservationRegistry } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { defer, throwError } from "rxjs";
 

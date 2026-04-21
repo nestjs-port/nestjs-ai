@@ -18,7 +18,7 @@ import type {
   MeterRegistry,
   ObservationContext,
   ObservationHandler,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 import { ModelUsageMetricsGenerator } from "../../model";
 import { ChatModelObservationContext } from "./chat-model-observation-context";
 

@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-
 import type { Anthropic } from "@anthropic-ai/sdk";
 import type {
   Message as AnthropicMessage,
@@ -52,8 +51,6 @@ import {
   type Media,
   MediaFormat,
   type MimeType,
-  NoopObservationRegistry,
-  type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -86,7 +83,12 @@ import {
   UsageCalculator,
   type UserMessage,
 } from "@nestjs-ai/model";
-import { type Logger, LoggerFactory } from "@nestjs-port/core";
+import {
+  type Logger,
+  LoggerFactory,
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import { defer, EMPTY, from, Observable, of } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 

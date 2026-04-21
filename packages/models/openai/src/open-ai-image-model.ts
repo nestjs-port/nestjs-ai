@@ -15,11 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  AiProvider,
-  NoopObservationRegistry,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+import { AiProvider } from "@nestjs-ai/commons";
 import {
   DefaultImageModelObservationConvention,
   Image,
@@ -31,7 +27,11 @@ import {
   type ImagePrompt,
   ImageResponse,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import {
+  LoggerFactory,
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import type { AzureOpenAI, OpenAI } from "openai";
 
 import {

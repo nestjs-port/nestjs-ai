@@ -19,9 +19,8 @@ import {
   AiOperationMetadata,
   AiOperationType,
   AiProvider,
-  ObservationContext,
 } from "@nestjs-ai/commons";
-import { StringUtils } from "@nestjs-port/core";
+import { ObservationContext, StringUtils } from "@nestjs-port/core";
 import type { Advisor } from "../advisor";
 import { ChatClientAttributes } from "../chat-client-attributes";
 import type { ChatClientRequest } from "../chat-client-request";

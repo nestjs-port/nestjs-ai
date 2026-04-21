@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import type {
-  DynamicModule,
-  FactoryProvider,
-  InjectionToken,
-  ModuleMetadata,
-  Provider,
+import {
+  type DynamicModule,
+  type FactoryProvider,
+  type InjectionToken,
+  Module,
+  type ModuleMetadata,
+  type Provider,
 } from "@nestjs/common";
-import { Module } from "@nestjs/common";
 import {
   BATCHING_STRATEGY_TOKEN,
   EMBEDDING_MODEL_TOKEN,
-  type ObservationRegistry,
   VECTOR_STORE_TOKEN,
 } from "@nestjs-ai/commons";
 import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
 import { VectorStoreObservationConvention } from "@nestjs-ai/vector-store";
+import type { ObservationRegistry } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { createClient, type RedisClientType } from "redis";
 import { RedisVectorStore } from "../redis-vector-store";

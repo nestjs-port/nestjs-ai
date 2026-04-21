@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  ObservabilityHelper,
-  type ObservationContext,
-  type ObservationHandler,
-} from "@nestjs-ai/commons";
+import { ObservabilityHelper } from "@nestjs-ai/commons";
 import type { Message } from "@nestjs-ai/model";
+import type { ObservationContext, ObservationHandler } from "@nestjs-port/core";
 import { LoggerFactory } from "@nestjs-port/core";
 import { ChatClientObservationContext } from "./chat-client-observation-context";
 

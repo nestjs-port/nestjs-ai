@@ -19,8 +19,8 @@ import {
   AiOperationMetadata,
   AiOperationType,
   AiProvider,
-  ObservationContext,
 } from "@nestjs-ai/commons";
+import { ObservationContext } from "@nestjs-port/core";
 import type { ToolDefinition } from "../definition";
 import { ToolMetadata } from "../metadata";
 

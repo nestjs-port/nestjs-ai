@@ -15,11 +15,10 @@
  */
 
 import {
-  KeyValue,
-  ObservationContext,
   SpringAiKind,
   VectorStoreObservationAttributes,
 } from "@nestjs-ai/commons";
+import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { SearchRequest } from "../../search-request";
 import { DefaultVectorStoreObservationConvention } from "../default-vector-store-observation-convention";

@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import { ObservationContext } from "@nestjs-ai/commons";
+import { ObservationContext } from "@nestjs-port/core";
 
 import type { ChatClientRequest } from "../../chat-client-request";
 import type { ChatClientResponse } from "../../chat-client-response";

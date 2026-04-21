@@ -20,13 +20,15 @@ import {
   AiObservationMetricNames,
   AiOperationType,
   AiTokenType,
+} from "@nestjs-ai/commons";
+import {
   AlsObservationRegistry,
   type Counter,
   type MeterId,
   type MeterRegistry,
   SimpleObservation,
   type Tag,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 import { Usage } from "../../../chat";
 import { EmbeddingOptions } from "../../embedding-options.interface";

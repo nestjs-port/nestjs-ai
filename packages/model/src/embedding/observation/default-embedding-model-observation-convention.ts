@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  AiObservationAttributes,
-  KeyValue,
-  KeyValues,
-} from "@nestjs-ai/commons";
-import { StringUtils } from "@nestjs-port/core";
+import { AiObservationAttributes } from "@nestjs-ai/commons";
+import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
 import type { EmbeddingOptions } from "../embedding-options.interface";
 import type { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
 import { EmbeddingModelObservationConvention } from "./embedding-model-observation-convention";

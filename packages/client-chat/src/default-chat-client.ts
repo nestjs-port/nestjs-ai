@@ -18,7 +18,6 @@ import assert from "node:assert/strict";
 import {
   Media,
   type MimeType,
-  type ObservationRegistry,
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
 import {
@@ -37,6 +36,7 @@ import {
   type ToolObjectInstance,
 } from "@nestjs-ai/model";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
+import type { ObservationRegistry } from "@nestjs-port/core";
 import { StringUtils } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { filter, map } from "rxjs";

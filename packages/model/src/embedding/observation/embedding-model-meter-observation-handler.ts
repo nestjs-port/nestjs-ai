@@ -18,7 +18,7 @@ import type {
   MeterRegistry,
   ObservationContext,
   ObservationHandler,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 
 import { ModelUsageMetricsGenerator } from "../../model";
 import { EmbeddingModelObservationContext } from "./embedding-model-observation-context";

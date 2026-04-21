@@ -17,7 +17,7 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN, ObservationFilters } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
 import {
   OPEN_AI_CHAT_DEFAULT_MODEL,
@@ -25,6 +25,7 @@ import {
   OpenAiChatModelModule,
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";
+import { ObservationFilters } from "@nestjs-port/core";
 import { ObservationModule } from "@nestjs-port/observation";
 import { describe, expect, it } from "vitest";
 

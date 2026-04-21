@@ -15,13 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  AiProvider,
-  type Document,
-  MetadataMode,
-  NoopObservationRegistry,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+import { AiProvider, type Document, MetadataMode } from "@nestjs-ai/commons";
 import {
   AbstractEmbeddingModel,
   DefaultEmbeddingModelObservationConvention,
@@ -34,7 +28,11 @@ import {
   EmbeddingResponse,
   EmbeddingResponseMetadata,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import {
+  LoggerFactory,
+  NoopObservationRegistry,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import type { AzureOpenAI, OpenAI } from "openai";
 
 import { OpenAiEmbeddingOptions } from "./open-ai-embedding-options";

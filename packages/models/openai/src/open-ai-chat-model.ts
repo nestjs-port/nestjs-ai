@@ -15,12 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  AiProvider,
-  Media,
-  NoopObservationRegistry,
-  type ObservationRegistry,
-} from "@nestjs-ai/commons";
+import { AiProvider, Media } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
   ChatGenerationMetadata,
@@ -51,7 +46,12 @@ import {
   UsageCalculator,
   UserMessage,
 } from "@nestjs-ai/model";
-import { LoggerFactory, StringUtils } from "@nestjs-port/core";
+import {
+  LoggerFactory,
+  NoopObservationRegistry,
+  type ObservationRegistry,
+  StringUtils,
+} from "@nestjs-port/core";
 import type { AzureOpenAI, OpenAI } from "openai";
 import type {
   ChatCompletion,

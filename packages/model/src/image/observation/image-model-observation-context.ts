@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-
 import { AiOperationMetadata, AiOperationType } from "@nestjs-ai/commons";
 import { ModelObservationContext } from "../../model";
 import type { ImagePrompt } from "../image-prompt";

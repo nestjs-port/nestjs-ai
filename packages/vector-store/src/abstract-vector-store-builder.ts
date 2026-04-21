@@ -15,12 +15,12 @@
  */
 
 import assert from "node:assert/strict";
+import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
+import { TokenCountBatchingStrategy } from "@nestjs-ai/model";
 import {
   NoopObservationRegistry,
   type ObservationRegistry,
-} from "@nestjs-ai/commons";
-import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
-import { TokenCountBatchingStrategy } from "@nestjs-ai/model";
+} from "@nestjs-port/core";
 import type { VectorStoreObservationConvention } from "./observation";
 import type { VectorStore } from "./vector-store";
 

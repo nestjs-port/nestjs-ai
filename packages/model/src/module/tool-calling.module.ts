@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { Provider } from "@nestjs/common";
-import { Module } from "@nestjs/common";
+import { Module, type Provider } from "@nestjs/common";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type {
   ObservationFilters,
-  ObservationRegistry,
-} from "@nestjs-ai/commons";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
-import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
+  ProviderInstanceExplorer,
+} from "@nestjs-port/core";
+import {
+  OBSERVATION_REGISTRY_TOKEN,
+  type ObservationRegistry,
+} from "@nestjs-port/core";
 import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
 import {
   DefaultToolExecutionExceptionProcessor,

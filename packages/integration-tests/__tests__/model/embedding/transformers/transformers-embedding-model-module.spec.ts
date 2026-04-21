@@ -17,15 +17,14 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import {
-  EMBEDDING_MODEL_TOKEN,
-  KeyValues,
-  MetadataMode,
-  NoopObservationRegistry,
-} from "@nestjs-ai/commons";
+import { EMBEDDING_MODEL_TOKEN, MetadataMode } from "@nestjs-ai/commons";
 import { EmbeddingModelObservationConvention } from "@nestjs-ai/model";
 import { TransformersEmbeddingModelModule } from "@nestjs-ai/model-transformers";
-import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
+import {
+  KeyValues,
+  NoopObservationRegistry,
+  OBSERVATION_REGISTRY_TOKEN,
+} from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 const MODEL_CONFIG_TOKEN = Symbol("MODEL_CONFIG_TOKEN");

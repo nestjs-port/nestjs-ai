@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { TemplateRenderer } from "@nestjs-ai/commons";
-import { NoOpTemplateRenderer } from "@nestjs-ai/commons";
+import {
+  NoOpTemplateRenderer,
+  type TemplateRenderer,
+} from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
 import { UserMessage } from "../../messages";
 import { PromptTemplate } from "../prompt-template";

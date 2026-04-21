@@ -17,7 +17,7 @@
 import {
   NoopObservationRegistry,
   type ObservationRegistry,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 
 /**
  * Defines the context for executing a chain of advisors as part of processing a chat

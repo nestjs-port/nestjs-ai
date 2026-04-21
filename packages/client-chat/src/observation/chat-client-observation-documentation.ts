@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ObservationDocumentation } from "@nestjs-ai/commons";
+import { ObservationDocumentation } from "@nestjs-port/core";
 import { DefaultChatClientObservationConvention } from "./default-chat-client-observation-convention";
 
 export class ChatClientObservationDocumentation extends ObservationDocumentation {

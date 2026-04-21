@@ -15,10 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  type AiOperationMetadata,
-  ObservationContext,
-} from "@nestjs-ai/commons";
+import type { AiOperationMetadata } from "@nestjs-ai/commons";
+import { ObservationContext } from "@nestjs-port/core";
 
 export class ModelObservationContext<REQ, RES> extends ObservationContext {
   private readonly _request: REQ;

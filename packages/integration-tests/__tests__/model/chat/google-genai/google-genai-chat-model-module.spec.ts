@@ -23,7 +23,7 @@ import {
   GoogleGenAiChatModelModule,
   type GoogleGenAiChatProperties,
 } from "@nestjs-ai/model-google-genai";
-import { ObservationModule } from "@nestjs-ai/observation";
+import { ObservationModule } from "@nestjs-port/observation";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");

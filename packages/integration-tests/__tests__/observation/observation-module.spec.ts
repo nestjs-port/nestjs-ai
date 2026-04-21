@@ -17,17 +17,16 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
+import { ObservationFilters, ObservationHandlers } from "@nestjs-ai/commons";
 import {
   METER_REGISTRY_TOKEN,
   OBSERVATION_REGISTRY_TOKEN,
-  ObservationFilters,
-  ObservationHandlers,
-} from "@nestjs-ai/commons";
+} from "@nestjs-port/core";
 import {
   ObservationModule,
   ObservationProviderPostProcessor,
   OtelMeterRegistry,
-} from "@nestjs-ai/observation";
+} from "@nestjs-port/observation";
 import { describe, expect, it } from "vitest";
 
 const OBSERVATION_CONFIG_TOKEN = Symbol("OBSERVATION_CONFIG_TOKEN");

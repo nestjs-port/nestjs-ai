@@ -24,13 +24,13 @@ import type {
 import { Module } from "@nestjs/common";
 import {
   IMAGE_MODEL_TOKEN,
-  OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
 import {
   ImageModelObservationConvention,
   ModelObservationModule,
 } from "@nestjs-ai/model";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { OpenAiImageModel } from "../open-ai-image-model";
 import { OpenAiImageOptions } from "../open-ai-image-options";
 import { OpenAiSetup } from "../setup";

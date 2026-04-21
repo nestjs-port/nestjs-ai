@@ -16,11 +16,8 @@
 
 import type { Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import {
-  METER_REGISTRY_TOKEN,
-  type MeterRegistry,
-  ObservationHandlers,
-} from "@nestjs-ai/commons";
+import { type MeterRegistry, ObservationHandlers } from "@nestjs-ai/commons";
+import { METER_REGISTRY_TOKEN } from "@nestjs-port/core";
 import {
   ChatModelCompletionObservationHandler,
   ChatModelMeterObservationHandler,

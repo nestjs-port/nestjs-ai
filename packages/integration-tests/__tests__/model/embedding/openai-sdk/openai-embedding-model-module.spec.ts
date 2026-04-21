@@ -22,7 +22,6 @@ import {
   KeyValues,
   MetadataMode,
   NoopObservationRegistry,
-  OBSERVATION_REGISTRY_TOKEN,
 } from "@nestjs-ai/commons";
 import { EmbeddingModelObservationConvention } from "@nestjs-ai/model";
 import {
@@ -31,6 +30,7 @@ import {
   OpenAiEmbeddingModelModule,
   type OpenAiEmbeddingProperties,
 } from "@nestjs-ai/model-openai";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");

@@ -25,12 +25,12 @@ import { Module } from "@nestjs/common";
 import {
   BATCHING_STRATEGY_TOKEN,
   EMBEDDING_MODEL_TOKEN,
-  OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
   VECTOR_STORE_TOKEN,
 } from "@nestjs-ai/commons";
 import type { BatchingStrategy, EmbeddingModel } from "@nestjs-ai/model";
 import { VectorStoreObservationConvention } from "@nestjs-ai/vector-store";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { createClient, type RedisClientType } from "redis";
 import { RedisVectorStore } from "../redis-vector-store";
 

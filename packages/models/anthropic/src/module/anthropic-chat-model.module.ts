@@ -25,7 +25,6 @@ import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
   NoopObservationRegistry,
-  OBSERVATION_REGISTRY_TOKEN,
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -39,6 +38,7 @@ import {
   ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { AnthropicChatModel } from "../anthropic-chat-model";
 import { AnthropicChatOptions } from "../anthropic-chat-options";
 import {

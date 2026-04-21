@@ -16,11 +16,11 @@
 
 import type { Provider } from "@nestjs/common";
 import { Module } from "@nestjs/common";
-import {
-  OBSERVATION_REGISTRY_TOKEN,
-  type ObservationFilters,
-  type ObservationRegistry,
+import type {
+  ObservationFilters,
+  ObservationRegistry,
 } from "@nestjs-ai/commons";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
 import {
   DefaultToolExecutionExceptionProcessor,

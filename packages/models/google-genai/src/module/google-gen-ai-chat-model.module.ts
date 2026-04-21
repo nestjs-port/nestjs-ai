@@ -26,7 +26,6 @@ import type {
 import { Module } from "@nestjs/common";
 import {
   CHAT_MODEL_TOKEN,
-  OBSERVATION_REGISTRY_TOKEN,
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-ai/commons";
@@ -39,6 +38,7 @@ import {
   ToolCallingModule,
   ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { GoogleGenAiCachedContentService } from "../cache";
 import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model";
 import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options";

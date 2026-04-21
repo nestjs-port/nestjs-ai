@@ -22,9 +22,9 @@ import {
   CHAT_MODEL_TOKEN,
   EMBEDDING_MODEL_TOKEN,
   HTTP_CLIENT_TOKEN,
-  OBSERVATION_REGISTRY_TOKEN,
   VECTOR_STORE_TOKEN,
 } from "@nestjs-ai/commons";
+import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 
 /**
  * Decorator that injects the chat model instance.

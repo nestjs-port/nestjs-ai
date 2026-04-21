@@ -55,7 +55,9 @@ describe("PromptTemplate", () => {
   });
 
   it("create with null resource", () => {
-    expect(() => new PromptTemplate(null as unknown as Buffer)).toThrow();
+    expect(() => new PromptTemplate(null as unknown as Buffer)).toThrow(
+      "template cannot be null or empty",
+    );
   });
 
   it("create with null variables", () => {

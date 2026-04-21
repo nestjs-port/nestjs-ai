@@ -592,18 +592,22 @@ describe("OpenAiChatOptions", () => {
 
     options.setOutputSchema(schema);
 
-    expect(options.responseFormat).not.toBeNull();
-    expect(options.responseFormat?.type).toBe("json_schema");
-    if (options.responseFormat?.type === "json_schema") {
-      expect(options.responseFormat.json_schema.schema).toEqual({
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-          },
-        },
-      });
+    const responseFormat = options.responseFormat;
+    expect(responseFormat).not.toBeNull();
+    if (responseFormat == null) {
+      throw new Error("Expected response format");
     }
+
+    expect(responseFormat.type).toBe("json_schema");
+    const jsonSchemaResponseFormat = responseFormat as ResponseFormatJSONSchema;
+    expect(jsonSchemaResponseFormat.json_schema.schema).toEqual({
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+        },
+      },
+    });
     expect(JSON.parse(options.outputSchema ?? "{}")).toEqual({
       type: "object",
       properties: {

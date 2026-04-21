@@ -59,16 +59,18 @@ describe("BeanOutputConverter", () => {
       const converter = new BeanOutputConverter({ schema: TestSchema });
       const input = "{invalid json";
 
-      expect(() => converter.convert(input)).toThrowError(
-        `Could not parse the given text to the desired target schema: "${input}"`,
-      );
-
+      let caughtError: unknown;
       try {
         converter.convert(input);
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect((error as Error).cause).toBeInstanceOf(SyntaxError);
+        caughtError = error;
       }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect((caughtError as Error).cause).toBeInstanceOf(SyntaxError);
+      expect((caughtError as Error).message).toBe(
+        `Could not parse the given text to the desired target schema: "${input}"`,
+      );
     });
 
     it("converts payload containing array field", () => {
@@ -107,7 +109,15 @@ describe("BeanOutputConverter", () => {
       const converter = new BeanOutputConverter({ schema: TestSchema });
       const input = '{ "someString": 123 }';
 
-      expect(() => converter.convert(input)).toThrowError(
+      let caughtError: unknown;
+      try {
+        converter.convert(input);
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect((caughtError as Error).message).toBe(
         `Could not parse the given text to the desired target schema: "${input}"`,
       );
     });
@@ -214,11 +224,7 @@ Used by some models
       const converter = new BeanOutputConverter({ schema: TestSchema });
       const formatOutput = converter.format;
       expect(formatOutput).toContain(EOL);
-
-      if (EOL === "\n") {
-        expect(formatOutput).not.toContain("\r\n");
-        expect(formatOutput).not.toContain("\r");
-      }
+      expect(formatOutput.includes("\r")).toBe(EOL !== "\n");
     });
 
     it("supports root array json schema", () => {

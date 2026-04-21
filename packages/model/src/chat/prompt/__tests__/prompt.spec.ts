@@ -42,7 +42,9 @@ describe("Prompt", () => {
   });
 
   it("when message is null then throw", () => {
-    expect(() => new Prompt(null as unknown as UserMessage)).toThrow();
+    expect(() => new Prompt(null as unknown as UserMessage)).toThrow(
+      "content or messages cannot be null",
+    );
   });
 
   it("when message list is null then throw", () => {

@@ -92,16 +92,23 @@ describe("RedisVectorStoreDistanceMetricIT", () => {
     expect(results.length).toBeLessThanOrEqual(2); // We asked for topK=2
 
     // The top results should be AI-related documents
-    expect(results[0].metadata).toHaveProperty("category", "AI");
+    const firstResult = results[0];
+    if (firstResult == null) {
+      throw new Error("Expected at least one search result");
+    }
+    const firstScore = firstResult.score ?? Number.NEGATIVE_INFINITY;
+
+    expect(firstResult.metadata).toHaveProperty("category", "AI");
     expect(
-      results[0].text?.includes("artificial intelligence") ||
-        results[0].text?.includes("neural networks"),
+      firstResult.text?.includes("artificial intelligence") ||
+        firstResult.text?.includes("neural networks"),
     ).toBe(true);
 
     // Verify scores are properly ordered (first result should have best score)
-    if (results.length > 1) {
-      expect(results[0].score).toBeGreaterThanOrEqual(results[1].score ?? 0);
-    }
+    const scoresAreOrdered =
+      results.length <= 1 ||
+      firstScore >= (results[1]?.score ?? Number.NEGATIVE_INFINITY);
+    expect(scoresAreOrdered).toBe(true);
 
     // Test filtered search - should only return AI documents
     const filteredResults = await vectorStore.similaritySearch(

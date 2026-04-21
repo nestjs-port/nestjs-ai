@@ -18,9 +18,20 @@
   "categories": {
     "correctness": "error"
   },
-  "rules": {},
+  "rules": {
+    "require-mock-type-parameters": "off",
+    "expect-expect": "off"
+  },
   "env": {
     "builtin": true,
     "node": true
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*it-shared.ts"],
+      "rules": {
+        "no-standalone-expect": "off"
+      }
+    }
+  ]
 }

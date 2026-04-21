@@ -20,8 +20,8 @@ import type {
   ResponseFormatJSONSchema,
 } from "openai/resources/shared";
 import { describe, expect, it } from "vitest";
-import { OpenAiChatModel } from "../open-ai-chat-model";
-import { OpenAiChatOptions } from "../open-ai-chat-options";
+import { OpenAiChatModel } from "../../open-ai-chat-model";
+import { OpenAiChatOptions } from "../../open-ai-chat-options";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

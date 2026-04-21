@@ -21,6 +21,11 @@ export {
 export * from "./metadata";
 export * from "./module";
 export {
+  OpenAiAudioTranscriptionOptions,
+  type OpenAiAudioTranscriptionOptionsProps,
+} from "./open-ai-audio-transcription-options";
+export { OpenAiAudioSpeechModel } from "./open-ai-audio-speech-model";
+export {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
 } from "./open-ai-audio-speech-options";

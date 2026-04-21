@@ -15,7 +15,7 @@
  */
 
 import type { ModelResponse } from "../model";
-import type { Generation } from "./generation";
+import type { ModerationGeneration } from "./moderationGeneration";
 import { ModerationResponseMetadata } from "./moderation-response-metadata";
 
 /**
@@ -25,28 +25,28 @@ import { ModerationResponseMetadata } from "./moderation-response-metadata";
  * moderation response. Designed for flexibility, it allows retrieval of
  * moderation-specific metadata as well as the moderated content.
  */
-export class ModerationResponse implements ModelResponse<Generation> {
+export class ModerationResponse implements ModelResponse<ModerationGeneration> {
   private readonly _moderationResponseMetadata: ModerationResponseMetadata;
-  private readonly _generation: Generation | null;
+  private readonly _generation: ModerationGeneration | null;
 
-  constructor(generation: Generation | null);
+  constructor(generation: ModerationGeneration | null);
   constructor(
-    generation: Generation | null,
+    generation: ModerationGeneration | null,
     moderationResponseMetadata: ModerationResponseMetadata,
   );
   constructor(
-    generation: Generation | null,
+    generation: ModerationGeneration | null,
     moderationResponseMetadata: ModerationResponseMetadata = new ModerationResponseMetadata(),
   ) {
     this._moderationResponseMetadata = moderationResponseMetadata;
     this._generation = generation;
   }
 
-  get result(): Generation | null {
+  get result(): ModerationGeneration | null {
     return this._generation;
   }
 
-  get results(): Generation[] {
+  get results(): ModerationGeneration[] {
     if (this._generation === null) {
       return [];
     }

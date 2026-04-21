@@ -17,9 +17,9 @@
 export { Categories, type CategoriesProps } from "./categories";
 export { CategoryScores, type CategoryScoresProps } from "./category-scores";
 export {
-  Generation as ModerationGeneration,
+  ModerationGeneration,
   type ModerationGenerationProps,
-} from "./generation";
+} from "./moderationGeneration";
 export { Moderation, type ModerationProps } from "./moderation";
 export type { ModerationGenerationMetadata } from "./moderation-generation-metadata";
 export { ModerationMessage } from "./moderation-message";

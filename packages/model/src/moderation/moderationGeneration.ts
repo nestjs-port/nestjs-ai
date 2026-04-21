@@ -27,11 +27,11 @@ export interface ModerationGenerationProps {
  * The Generation class represents a response from a moderation process. It encapsulates
  * the moderation generation metadata and the moderation object.
  */
-export class Generation implements ModelResult<Moderation> {
+export class ModerationGeneration implements ModelResult<Moderation> {
   private static readonly NONE: ModerationGenerationMetadata = {};
 
   private _moderationGenerationMetadata: ModerationGenerationMetadata =
-    Generation.NONE;
+    ModerationGeneration.NONE;
   private readonly _moderation: Moderation;
 
   constructor(props: ModerationGenerationProps) {
@@ -43,7 +43,7 @@ export class Generation implements ModelResult<Moderation> {
 
   generationMetadata(
     moderationGenerationMetadata: ModerationGenerationMetadata,
-  ): Generation {
+  ): ModerationGeneration {
     this._moderationGenerationMetadata = moderationGenerationMetadata;
     return this;
   }

@@ -15,6 +15,7 @@
  */
 
 import { LoggerFactory } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { z } from "zod";
 
 export enum WeatherUnit {
@@ -47,6 +48,8 @@ export interface WeatherResponse {
   humidity: number;
   unit: WeatherUnit;
 }
+
+LoggerFactory.bind(new ConsoleLoggerFactory());
 
 /**
  * Mock weather service for testing tool call functionality.

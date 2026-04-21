@@ -41,7 +41,7 @@ export class EvaluationResponse {
     if (typeof scoreOrFeedback === "number") {
       this._score = scoreOrFeedback;
       this._feedback = feedbackOrMetadata as string;
-      this._metadata = { ...(metadata ?? {}) };
+      this._metadata = { ...metadata };
       return;
     }
 

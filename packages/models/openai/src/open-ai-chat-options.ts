@@ -763,7 +763,7 @@ export namespace OpenAiChatOptions {
         }
         if (other._extraBody != null) {
           this._extraBody = {
-            ...(this._extraBody ?? {}),
+            ...this._extraBody,
             ...other._extraBody,
           };
         }
@@ -885,7 +885,7 @@ export namespace OpenAiChatOptions {
 
     streamUsage(streamUsage: boolean): this {
       this._streamOptions = {
-        ...(this._streamOptions ?? {}),
+        ...this._streamOptions,
         include_usage: streamUsage,
       };
       return this;

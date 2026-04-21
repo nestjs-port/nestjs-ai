@@ -55,7 +55,9 @@ describe("SystemPromptTemplate", () => {
   });
 
   it("create with null resource", () => {
-    expect(() => new SystemPromptTemplate(null as unknown as Buffer)).toThrow();
+    expect(() => new SystemPromptTemplate(null as unknown as Buffer)).toThrow(
+      "template cannot be null or empty",
+    );
   });
 
   it("create with null variables", () => {

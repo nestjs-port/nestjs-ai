@@ -130,7 +130,9 @@ describe("ChatModel", () => {
       null as unknown as ChatResponse,
     );
 
-    await expect(chatModel.call(userMessage)).rejects.toThrow();
+    await expect(chatModel.call(userMessage)).rejects.toThrow(
+      "Cannot read properties of null (reading 'result')",
+    );
 
     expect(callSpy).toHaveBeenCalledTimes(1);
   });

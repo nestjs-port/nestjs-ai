@@ -131,25 +131,17 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
             return from(
               toolCallingManager.executeToolCalls(prompt, response),
             ).pipe(
-              mergeMap((toolExecutionResult: ToolExecutionResult) => {
-                expect(
-                  toolExecutionResult.conversationHistory(),
-                ).not.toHaveLength(0);
-                expect(
-                  toolExecutionResult
-                    .conversationHistory()
-                    .some(
-                      (message: Message) =>
-                        message instanceof ToolResponseMessage,
-                    ),
-                ).toBe(true);
-
-                const secondPrompt = new Prompt(
-                  toolExecutionResult.conversationHistory(),
-                  chatOptions,
-                );
-                return openAiChatModel.stream(secondPrompt);
-              }),
+              mergeMap((toolExecutionResult: ToolExecutionResult) =>
+                from(assertToolExecutionResult(toolExecutionResult)).pipe(
+                  mergeMap(() => {
+                    const secondPrompt = new Prompt(
+                      toolExecutionResult.conversationHistory(),
+                      chatOptions,
+                    );
+                    return openAiChatModel.stream(secondPrompt);
+                  }),
+                ),
+              ),
             );
           }
           return of(response);
@@ -167,6 +159,17 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
     expect(joinedTextResponse).toContain("The Hobbit");
     expect(joinedTextResponse).toContain("The Lord of The Rings");
     expect(joinedTextResponse).toContain("The Silmarillion");
+  }
+
+  async function assertToolExecutionResult(
+    toolExecutionResult: ToolExecutionResult,
+  ): Promise<void> {
+    expect(toolExecutionResult.conversationHistory()).not.toHaveLength(0);
+    expect(
+      toolExecutionResult
+        .conversationHistory()
+        .some((message: Message) => message instanceof ToolResponseMessage),
+    ).toBe(true);
   }
 });
 

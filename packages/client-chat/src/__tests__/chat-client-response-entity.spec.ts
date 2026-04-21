@@ -125,7 +125,9 @@ describe("ChatClient Response Entity Tests", () => {
         .user("test")
         .call()
         .responseEntity(MyBeanSchema),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'Could not parse the given text to the desired target schema: ""',
+    );
   });
 
   it("when invalid json response then throws", async () => {
@@ -140,7 +142,9 @@ describe("ChatClient Response Entity Tests", () => {
         .user("test")
         .call()
         .responseEntity(MyBeanSchema),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'Could not parse the given text to the desired target schema: "invalid json content"',
+    );
   });
 
   it("when parameterized type with map then parse correctly", async () => {

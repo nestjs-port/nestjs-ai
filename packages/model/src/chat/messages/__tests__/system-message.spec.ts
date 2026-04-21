@@ -23,7 +23,7 @@ describe("SystemMessage", () => {
   it("system message with null text", () => {
     expect(
       () => new SystemMessage({ content: null as unknown as string }),
-    ).toThrow();
+    ).toThrow("Content must not be null for SYSTEM or USER messages");
   });
 
   it("system message with text content", () => {
@@ -114,7 +114,7 @@ describe("SystemMessage", () => {
   it("system message builder with null text", () => {
     expect(
       () => new SystemMessage({ content: null as unknown as string }),
-    ).toThrow();
+    ).toThrow("Content must not be null for SYSTEM or USER messages");
   });
 
   it("system message builder with empty metadata", () => {

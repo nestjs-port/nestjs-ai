@@ -449,7 +449,7 @@ describe("QuestionAnswerAdvisorTests", () => {
     // Test that builder validates required parameters
     expect(() =>
       QuestionAnswerAdvisor.builder(null as unknown as VectorStore),
-    ).toThrow();
+    ).toThrow("The vectorStore must not be null!");
 
     // Test successful builder creation
     const advisor = QuestionAnswerAdvisor.builder(vectorStore).build();

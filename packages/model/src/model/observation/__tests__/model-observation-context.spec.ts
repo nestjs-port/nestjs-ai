@@ -110,7 +110,7 @@ describe("ModelObservationContext", () => {
           "test request",
           new AiOperationMetadata("", AiProvider.OLLAMA.value),
         ),
-    ).toThrow();
+    ).toThrow("operationType cannot be null or empty");
   });
 
   it("when empty provider then throw", () => {
@@ -120,7 +120,7 @@ describe("ModelObservationContext", () => {
           "test request",
           new AiOperationMetadata(AiOperationType.CHAT.value, ""),
         ),
-    ).toThrow();
+    ).toThrow("provider cannot be null or empty");
   });
 
   it("when different providers then return", () => {

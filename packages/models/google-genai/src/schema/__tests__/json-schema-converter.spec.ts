@@ -55,7 +55,9 @@ describe("JsonSchemaConverter", () => {
   });
 
   it("should throw on null input with fromJson", () => {
-    expect(() => JsonSchemaConverter.fromJson(null as never)).toThrow();
+    expect(() => JsonSchemaConverter.fromJson(null as never)).toThrow(
+      "Failed to parse JSON: null",
+    );
   });
 
   it("should handle boolean additionalProperties", () => {

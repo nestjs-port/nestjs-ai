@@ -61,10 +61,10 @@ describe("ObservabilityHelper", () => {
       ObservabilityHelper.concatenateEntries(
         null as unknown as Record<string, unknown>,
       ),
-    ).toThrow();
+    ).toThrow("Cannot convert undefined or null to object");
     expect(() =>
       ObservabilityHelper.concatenateStrings(null as unknown as string[]),
-    ).toThrow();
+    ).toThrow("Cannot read properties of null (reading 'map')");
   });
 
   it("should handle null values in map", () => {

@@ -209,7 +209,9 @@ describe("SimpleVectorStoreTests", () => {
 
     await expect(
       vectorStore.load("/definitely/not/found/resource.json"),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      "ENOENT: no such file or directory, open '/definitely/not/found/resource.json'",
+    );
   });
 
   it("shouldHandleSaveToInvalidLocation", async () => {
@@ -219,7 +221,9 @@ describe("SimpleVectorStoreTests", () => {
     const tempDir = mkdtempSync(join(tmpdir(), "simple-vector-store-dir-"));
 
     try {
-      await expect(vectorStore.save(tempDir)).rejects.toThrow();
+      await expect(vectorStore.save(tempDir)).rejects.toThrow(
+        "EISDIR: illegal operation on a directory, open",
+      );
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }

@@ -811,13 +811,14 @@ function expectCloseToPercentage(
   expected: number,
   percentage: number,
 ): void {
-  if (expected === 0) {
-    expect(actual).toBe(expected);
-    return;
-  }
+  const tolerance =
+    expected === 0 ? 0 : Math.abs(expected) * (percentage / 100);
+  const withinTolerance =
+    expected === 0
+      ? actual === expected
+      : Math.abs(actual - expected) <= tolerance;
 
-  const tolerance = Math.abs(expected) * (percentage / 100);
-  expect(Math.abs(actual - expected)).toBeLessThanOrEqual(tolerance);
+  expect(withinTolerance).toBe(true);
 }
 
 async function withTimeout<T>(

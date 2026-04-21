@@ -171,6 +171,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     );
 
     const usage = getSdkUsage(response);
+    expect(response.result?.output.text).toMatch(/\S/);
     if (usage != null) {
       const cacheCreation = usage.cache_creation_input_tokens ?? 0;
       const cacheRead = usage.cache_read_input_tokens ?? 0;
@@ -187,7 +188,6 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       logger.debug(
         "Native usage metadata not available for tool-based interactions - this is expected",
       );
-      expect(response.result?.output.text).toMatch(/\S/);
     }
   });
 

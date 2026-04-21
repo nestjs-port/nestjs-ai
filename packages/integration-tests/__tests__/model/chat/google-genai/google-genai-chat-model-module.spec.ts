@@ -213,7 +213,9 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      expect(() => moduleRef.get(GoogleGenAiCachedContentService)).toThrow();
+      expect(() => moduleRef.get(GoogleGenAiCachedContentService)).toThrow(
+        "Nest could not find GoogleGenAiCachedContentService element (this provider does not exist in the current context)",
+      );
     });
 
     it("uses global false by default", () => {

@@ -78,30 +78,45 @@ export class DefaultChatClient implements ChatClient {
   prompt(): ChatClient.ChatClientRequestSpec;
   prompt(content: string): ChatClient.ChatClientRequestSpec;
   prompt(prompt: Prompt): ChatClient.ChatClientRequestSpec;
-  prompt(contentOrPrompt?: string | Prompt): ChatClient.ChatClientRequestSpec {
-    if (contentOrPrompt == null) {
+  prompt(
+    props: ChatClient.ChatClientRequestProps,
+  ): ChatClient.ChatClientRequestSpec;
+  prompt(
+    contentOrPromptOrProps?:
+      | string
+      | Prompt
+      | ChatClient.ChatClientRequestProps,
+  ): ChatClient.ChatClientRequestSpec {
+    if (contentOrPromptOrProps == null) {
       return new DefaultChatClient.DefaultChatClientRequestSpec(
         this._defaultChatClientRequest,
       );
     }
 
-    if (typeof contentOrPrompt === "string") {
+    if (typeof contentOrPromptOrProps === "string") {
       assert(
-        StringUtils.hasText(contentOrPrompt),
+        StringUtils.hasText(contentOrPromptOrProps),
         "content cannot be null or empty",
       );
-      return this.prompt(new Prompt(contentOrPrompt));
+      return this.prompt(new Prompt(contentOrPromptOrProps));
     }
 
-    assert(contentOrPrompt, "prompt cannot be null");
+    if (contentOrPromptOrProps instanceof Prompt) {
+      const spec = new DefaultChatClient.DefaultChatClientRequestSpec(
+        this._defaultChatClientRequest,
+      );
+
+      if (contentOrPromptOrProps.instructions != null) {
+        spec.messages(contentOrPromptOrProps.instructions);
+      }
+
+      return spec;
+    }
+
     const spec = new DefaultChatClient.DefaultChatClientRequestSpec(
       this._defaultChatClientRequest,
     );
-
-    if (contentOrPrompt.instructions != null) {
-      spec.messages(contentOrPrompt.instructions);
-    }
-
+    DefaultChatClient.applyChatClientRequestProps(spec, contentOrPromptOrProps);
     return spec;
   }
 
@@ -639,6 +654,18 @@ export namespace DefaultChatClient {
         map((response) => response.result?.output?.text ?? ""),
         filter((value) => value.length > 0),
       );
+    }
+
+    chatClientResponseIterable(): AsyncIterable<ChatClientResponse> {
+      return eachValueFrom(this.chatClientResponse());
+    }
+
+    chatResponseIterable(): AsyncIterable<ChatResponse> {
+      return eachValueFrom(this.chatResponse());
+    }
+
+    contentIterable(): AsyncIterable<string> {
+      return eachValueFrom(this.content());
     }
   }
 
@@ -1185,6 +1212,143 @@ export namespace DefaultChatClient {
         .build();
     }
   }
+
+  export function applyChatClientRequestProps(
+    spec: ChatClient.ChatClientRequestSpec,
+    props: ChatClient.ChatClientRequestProps,
+  ): void {
+    if (props.system != null) {
+      applySystemProps(spec, props.system);
+    }
+    if (props.messages != null && props.messages.length > 0) {
+      spec.messages(props.messages);
+    }
+    if (props.user != null) {
+      applyUserProps(spec, props.user);
+    }
+    if (props.advisors != null) {
+      applyAdvisorProps(spec, props.advisors);
+    }
+    if (props.tools != null && props.tools.length > 0) {
+      spec.tools(...props.tools);
+    }
+    if (props.toolCallbacks != null && props.toolCallbacks.length > 0) {
+      spec.toolCallbacks(...(props.toolCallbacks as ToolCallback[]));
+    }
+    if (props.toolNames != null && props.toolNames.length > 0) {
+      spec.toolNames(...props.toolNames);
+    }
+    if (props.toolContext != null) {
+      spec.toolContext(toParamsMap(props.toolContext));
+    }
+    if (props.options != null) {
+      spec.options(props.options);
+    }
+    if (props.templateRenderer != null) {
+      spec.templateRenderer(props.templateRenderer);
+    }
+  }
+
+  function applySystemProps(
+    spec: ChatClient.ChatClientRequestSpec,
+    system: string | Buffer | ChatClient.ChatClientRequestSystemProps,
+  ): void {
+    if (typeof system === "string") {
+      spec.system(system);
+      return;
+    }
+    if (Buffer.isBuffer(system)) {
+      spec.system(system);
+      return;
+    }
+    spec.system((s) => {
+      applySystemSpecProps(s, system);
+    });
+  }
+
+  function applySystemSpecProps(
+    s: ChatClient.PromptSystemSpec,
+    system: ChatClient.ChatClientRequestSystemProps,
+  ): void {
+    if (typeof system.text === "string") {
+      s.text(system.text);
+    } else if (system.charset != null) {
+      s.text(system.text, system.charset);
+    } else {
+      s.text(system.text);
+    }
+    if (system.params != null) {
+      s.params(toParamsMap(system.params));
+    }
+    if (system.metadata != null) {
+      s.metadata(toParamsMap(system.metadata));
+    }
+  }
+
+  function applyUserProps(
+    spec: ChatClient.ChatClientRequestSpec,
+    user: string | Buffer | ChatClient.ChatClientRequestUserProps,
+  ): void {
+    if (typeof user === "string") {
+      spec.user(user);
+      return;
+    }
+    if (Buffer.isBuffer(user)) {
+      spec.user(user);
+      return;
+    }
+    spec.user((u) => {
+      applyUserSpecProps(u, user);
+    });
+  }
+
+  function applyUserSpecProps(
+    u: ChatClient.PromptUserSpec,
+    user: ChatClient.ChatClientRequestUserProps,
+  ): void {
+    if (typeof user.text === "string") {
+      u.text(user.text);
+    } else if (user.charset != null) {
+      u.text(user.text, user.charset);
+    } else {
+      u.text(user.text);
+    }
+    if (user.params != null) {
+      u.params(toParamsMap(user.params));
+    }
+    if (user.media != null && user.media.length > 0) {
+      u.media(...user.media);
+    }
+    if (user.metadata != null) {
+      u.metadata(toParamsMap(user.metadata));
+    }
+  }
+
+  function applyAdvisorProps(
+    spec: ChatClient.ChatClientRequestSpec,
+    advisors: Advisor[] | ChatClient.ChatClientRequestAdvisorProps,
+  ): void {
+    if (Array.isArray(advisors)) {
+      if (advisors.length > 0) {
+        spec.advisors(advisors);
+      }
+      return;
+    }
+    spec.advisors((a) => {
+      if (advisors.advisors != null && advisors.advisors.length > 0) {
+        a.advisors(advisors.advisors);
+      }
+      if (advisors.params != null) {
+        a.params(toParamsMap(advisors.params));
+      }
+    });
+  }
+
+  function toParamsMap(
+    value: ChatClient.ChatClientRequestPropsParams,
+  ): Map<string, unknown> {
+    return value instanceof Map ? value : new Map(Object.entries(value));
+  }
 }
 
 function readBufferText(
@@ -1193,4 +1357,68 @@ function readBufferText(
 ): string {
   assert(charset !== null, "charset cannot be null");
   return text.toString(charset ?? "utf-8");
+}
+
+async function* eachValueFrom<T>(
+  source: Observable<T>,
+): AsyncGenerator<T, void, void> {
+  const pending: {
+    resolve: (result: IteratorResult<T>) => void;
+    reject: (reason: unknown) => void;
+  }[] = [];
+  const buffer: T[] = [];
+  let completed = false;
+  let hasError = false;
+  let error: unknown = null;
+
+  const subscription = source.subscribe({
+    next(value) {
+      const waiter = pending.shift();
+      if (waiter) {
+        waiter.resolve({ value, done: false });
+      } else {
+        buffer.push(value);
+      }
+    },
+    error(err) {
+      hasError = true;
+      error = err;
+      while (pending.length > 0) {
+        pending.shift()?.reject(err);
+      }
+    },
+    complete() {
+      completed = true;
+      while (pending.length > 0) {
+        pending.shift()?.resolve({
+          value: undefined as never,
+          done: true,
+        });
+      }
+    },
+  });
+
+  try {
+    while (true) {
+      if (buffer.length > 0) {
+        yield buffer.shift() as T;
+      } else if (completed) {
+        return;
+      } else if (hasError) {
+        throw error;
+      } else {
+        const result = await new Promise<IteratorResult<T>>(
+          (resolve, reject) => {
+            pending.push({ resolve, reject });
+          },
+        );
+        if (result.done) {
+          return;
+        }
+        yield result.value;
+      }
+    }
+  } finally {
+    subscription.unsubscribe();
+  }
 }

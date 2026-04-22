@@ -85,6 +85,18 @@ export class OpenAiEmbeddingModel extends AbstractEmbeddingModel {
     return this._options;
   }
 
+  get metadataMode(): MetadataMode {
+    return this._metadataMode;
+  }
+
+  get observationRegistry(): ObservationRegistry {
+    return this._observationRegistry;
+  }
+
+  get observationConvention(): EmbeddingModelObservationConvention {
+    return this._observationConvention;
+  }
+
   override getEmbeddingContent(document: Document): string {
     assert(document, "Document must not be null");
     return document.getFormattedContent(this._metadataMode);

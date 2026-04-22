@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-export {
-  BATCHING_STRATEGY_TOKEN,
-  AUDIO_SPEECH_MODEL_TOKEN,
-  AUDIO_TRANSCRIPTION_MODEL_TOKEN,
-  AUDIO_MODERATION_MODEL_TOKEN,
-  CHAT_CLIENT_BUILDER_TOKEN,
-  CHAT_CLIENT_CUSTOMIZER_TOKEN,
-  CHAT_MEMORY_TOKEN,
-  CHAT_MODEL_TOKEN,
-  EMBEDDING_MODEL_TOKEN,
-  HTTP_CLIENT_TOKEN,
-  IMAGE_MODEL_TOKEN,
-  PROVIDER_INSTANCE_EXPLORER_TOKEN,
-  VECTOR_STORE_TOKEN,
-} from "./tokens";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
+import type { OpenAiAudioTranscriptionOptionsProps } from "../open-ai-audio-transcription-options";
+
+export const OPEN_AI_AUDIO_TRANSCRIPTION_DEFAULT_MODEL = "whisper-1" as const;
+
+export interface OpenAiAudioTranscriptionProperties extends AbstractOpenAiOptionsProps {
+  options?: Partial<OpenAiAudioTranscriptionOptionsProps>;
+}

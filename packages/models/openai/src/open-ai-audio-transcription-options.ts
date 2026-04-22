@@ -43,7 +43,14 @@ export class OpenAiAudioTranscriptionOptions
   extends AbstractOpenAiOptions
   implements AudioTranscriptionOptions
 {
+  /**
+   * Default transcription model (Whisper 1).
+   */
   static readonly DEFAULT_TRANSCRIPTION_MODEL = "whisper-1";
+
+  /**
+   * Default response format.
+   */
   static readonly DEFAULT_RESPONSE_FORMAT = "text" as NonNullable<
     TranscriptionCreateParams["response_format"]
   >;

@@ -39,6 +39,11 @@ export interface OpenAiAudioTranscriptionModelProps {
   options?: OpenAiAudioTranscriptionOptions | null;
 }
 
+/**
+ * OpenAI audio transcription model implementation using the OpenAI Java SDK. You provide
+ * as input the audio file you want to transcribe and the desired output file format of
+ * the transcription of the audio.
+ */
 export class OpenAiAudioTranscriptionModel extends TranscriptionModel {
   private readonly logger = LoggerFactory.getLogger(
     OpenAiAudioTranscriptionModel.name,
@@ -59,6 +64,10 @@ export class OpenAiAudioTranscriptionModel extends TranscriptionModel {
       OpenAiSetup.setupClient(this.toSetupProps(this._defaultOptions));
   }
 
+  /**
+   * Gets the transcription options for this model.
+   * @returns the transcription options
+   */
   get defaultOptions(): OpenAiAudioTranscriptionOptions {
     return this._defaultOptions;
   }

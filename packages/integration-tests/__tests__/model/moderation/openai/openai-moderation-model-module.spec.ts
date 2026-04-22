@@ -17,17 +17,14 @@
 import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
-import type { ChatModel } from "@nestjs-ai/model";
+import { AUDIO_MODERATION_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
-  OPEN_AI_CHAT_DEFAULT_MODEL,
-  OPEN_AI_CHAT_PROPERTIES_TOKEN,
-  OpenAiChatModel,
-  OpenAiChatModelModule,
-  type OpenAiChatProperties,
+  OPEN_AI_MODERATION_DEFAULT_MODEL,
+  OPEN_AI_MODERATION_PROPERTIES_TOKEN,
+  OpenAiModerationModel,
+  OpenAiModerationModelModule,
+  type OpenAiModerationProperties,
 } from "@nestjs-ai/model-openai";
-import { ObservationFilters } from "@nestjs-port/core";
-import { ObservationModule } from "@nestjs-port/observation";
 import { describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
@@ -43,79 +40,61 @@ const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 })
 class ApiKeyConfigModule {}
 
-describe("OpenAiChatModelModule", () => {
+describe("OpenAiModerationModelModule", () => {
   describe("forFeature", () => {
-    it("should resolve CHAT_MODEL_TOKEN via NestJS DI", async () => {
+    it("should resolve AUDIO_MODERATION_MODEL_TOKEN via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          OpenAiChatModelModule.forFeature({
+          OpenAiModerationModelModule.forFeature({
             apiKey: "test-key",
           }),
         ],
       }).compile();
 
-      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(moduleRef.get(AUDIO_MODERATION_MODEL_TOKEN)).toBeDefined();
     });
 
-    it("should apply feature properties to the chat model options", async () => {
+    it("should apply feature properties to the moderation model options", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          OpenAiChatModelModule.forFeature({
+          OpenAiModerationModelModule.forFeature({
             apiKey: "test-api-key",
-            model: "gpt-5-pro",
+            model: "text-moderation-stable",
             options: {
-              model: "gpt-5-mini",
-              temperature: 0.2,
-              topP: 0.7,
-              maxTokens: 128,
-              user: "test-user",
+              model: "omni-moderation-latest",
             },
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<OpenAiChatModel>(CHAT_MODEL_TOKEN);
+      const moderationModel = moduleRef.get<OpenAiModerationModel>(
+        AUDIO_MODERATION_MODEL_TOKEN,
+      );
 
-      expect(chatModel.options.apiKey).toBe("test-api-key");
-      expect(chatModel.options.model).toBe("gpt-5-mini");
-      expect(chatModel.options.temperature).toBe(0.2);
-      expect(chatModel.options.topP).toBe(0.7);
-      expect(chatModel.options.maxTokens).toBe(128);
-      expect(chatModel.options.user).toBe("test-user");
+      expect(moderationModel.options.apiKey).toBe("test-api-key");
+      expect(moderationModel.options.model).toBe("omni-moderation-latest");
     });
 
-    it("should fall back to the default chat model", async () => {
+    it("should fall back to the default moderation model", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          OpenAiChatModelModule.forFeature({
+          OpenAiModerationModelModule.forFeature({
             apiKey: "test-key",
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<OpenAiChatModel>(CHAT_MODEL_TOKEN);
+      const moderationModel = moduleRef.get<OpenAiModerationModel>(
+        AUDIO_MODERATION_MODEL_TOKEN,
+      );
 
-      expect(chatModel.options.model).toBe(OPEN_AI_CHAT_DEFAULT_MODEL);
-    });
-
-    it("adds the tool call content filter when enabled", async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [
-          ObservationModule.forRoot(),
-          OpenAiChatModelModule.forFeature({
-            apiKey: "test-key",
-            toolCalling: { includeContent: true },
-          }),
-        ],
-      }).compile();
-
-      moduleRef.get(CHAT_MODEL_TOKEN);
-
-      expect(moduleRef.get(ObservationFilters).filters).toHaveLength(1);
+      expect(moderationModel.options.model).toBe(
+        OPEN_AI_MODERATION_DEFAULT_MODEL,
+      );
     });
 
     it("should not export the properties token", async () => {
-      const featureModule = OpenAiChatModelModule.forFeature({
+      const featureModule = OpenAiModerationModelModule.forFeature({
         apiKey: "test-key",
       });
 
@@ -123,16 +102,16 @@ describe("OpenAiChatModelModule", () => {
         imports: [featureModule],
       }).compile();
 
-      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(moduleRef.get(AUDIO_MODERATION_MODEL_TOKEN)).toBeDefined();
 
       const exports = featureModule.exports as symbol[];
-      expect(exports).toContain(CHAT_MODEL_TOKEN);
-      expect(exports).not.toContain(OPEN_AI_CHAT_PROPERTIES_TOKEN);
+      expect(exports).toContain(AUDIO_MODERATION_MODEL_TOKEN);
+      expect(exports).not.toContain(OPEN_AI_MODERATION_PROPERTIES_TOKEN);
     });
 
     it("should default global to false", () => {
       expect(
-        OpenAiChatModelModule.forFeature({
+        OpenAiModerationModelModule.forFeature({
           apiKey: "test-key",
         }).global,
       ).toBe(false);
@@ -140,7 +119,7 @@ describe("OpenAiChatModelModule", () => {
 
     it("should support global option", () => {
       expect(
-        OpenAiChatModelModule.forFeature(
+        OpenAiModerationModelModule.forFeature(
           { apiKey: "test-key" },
           { global: true },
         ).global,
@@ -149,10 +128,10 @@ describe("OpenAiChatModelModule", () => {
   });
 
   describe("forFeatureAsync", () => {
-    it("should resolve CHAT_MODEL_TOKEN from async factory via NestJS DI", async () => {
+    it("should resolve AUDIO_MODERATION_MODEL_TOKEN from async factory via NestJS DI", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          OpenAiChatModelModule.forFeatureAsync({
+          OpenAiModerationModelModule.forFeatureAsync({
             useFactory: () => ({
               apiKey: "async-test-key",
             }),
@@ -160,37 +139,35 @@ describe("OpenAiChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(moduleRef.get(AUDIO_MODERATION_MODEL_TOKEN)).toBeDefined();
     });
 
     it("should support imports and inject for async factory", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          OpenAiChatModelModule.forFeatureAsync({
+          OpenAiModerationModelModule.forFeatureAsync({
             imports: [ApiKeyConfigModule],
             inject: [API_KEY_TOKEN],
-            useFactory: (apiKey: string): OpenAiChatProperties => ({
+            useFactory: (apiKey: string): OpenAiModerationProperties => ({
               apiKey,
-              model: "gpt-5-pro",
-              options: {
-                user: "async-user",
-              },
+              model: "text-moderation-stable",
             }),
           }),
         ],
       }).compile();
 
-      const chatModel = moduleRef.get<OpenAiChatModel>(CHAT_MODEL_TOKEN);
+      const moderationModel = moduleRef.get<OpenAiModerationModel>(
+        AUDIO_MODERATION_MODEL_TOKEN,
+      );
 
-      expect(chatModel.options.apiKey).toBe("test-api-key-from-config");
-      expect(chatModel.options.model).toBe("gpt-5-pro");
-      expect(chatModel.options.user).toBe("async-user");
+      expect(moderationModel.options.apiKey).toBe("test-api-key-from-config");
+      expect(moderationModel.options.model).toBe("text-moderation-stable");
     });
 
     it("should support async factory returning a Promise", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          OpenAiChatModelModule.forFeatureAsync({
+          OpenAiModerationModelModule.forFeatureAsync({
             useFactory: async () => ({
               apiKey: "promise-key",
             }),
@@ -198,12 +175,12 @@ describe("OpenAiChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      expect(moduleRef.get(AUDIO_MODERATION_MODEL_TOKEN)).toBeDefined();
     });
 
     it("should default global to false for async", () => {
       expect(
-        OpenAiChatModelModule.forFeatureAsync({
+        OpenAiModerationModelModule.forFeatureAsync({
           useFactory: () => ({ apiKey: "key" }),
         }).global,
       ).toBe(false);
@@ -211,7 +188,7 @@ describe("OpenAiChatModelModule", () => {
 
     it("should support global option for async", () => {
       expect(
-        OpenAiChatModelModule.forFeatureAsync({
+        OpenAiModerationModelModule.forFeatureAsync({
           useFactory: () => ({ apiKey: "key" }),
           global: true,
         }).global,

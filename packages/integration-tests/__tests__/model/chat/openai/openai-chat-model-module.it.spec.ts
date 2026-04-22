@@ -18,8 +18,9 @@ import "reflect-metadata";
 
 import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
-import { type ChatModel, type ChatResponse, Prompt } from "@nestjs-ai/model";
+import { type ChatResponse, Prompt } from "@nestjs-ai/model";
 import {
+  OpenAiChatModel,
   OpenAiChatModelModule,
   OpenAiChatOptions,
   type OpenAiChatProperties,
@@ -97,15 +98,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelModuleIT", () => {
       baseUrl: "http://TEST_BASE_URL",
     });
 
-    const defaultOptions = (
-      defaultChatModel as unknown as {
-        options: {
-          apiKey: string | null;
-          baseUrl: string | null;
-          model: string | null;
-        };
-      }
-    ).options;
+    const defaultOptions = defaultChatModel.options;
 
     expect(defaultOptions.apiKey).toBe("API_KEY");
     expect(defaultOptions.baseUrl).toBe("http://TEST_BASE_URL");
@@ -117,26 +110,18 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelModuleIT", () => {
       model: "openai-sdk",
     });
 
-    expect(
-      (
-        explicitChatModel as unknown as {
-          options: {
-            model: string | null;
-          };
-        }
-      ).options.model,
-    ).toBe("openai-sdk");
+    expect(explicitChatModel.options.model).toBe("openai-sdk");
   });
 });
 
 async function createChatModel(
   properties: OpenAiChatProperties,
-): Promise<ChatModel> {
+): Promise<OpenAiChatModel> {
   const moduleRef = await Test.createTestingModule({
     imports: [OpenAiChatModelModule.forFeature(properties)],
   }).compile();
 
-  return moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN);
+  return moduleRef.get<OpenAiChatModel>(CHAT_MODEL_TOKEN);
 }
 
 async function collectChatResponseText(

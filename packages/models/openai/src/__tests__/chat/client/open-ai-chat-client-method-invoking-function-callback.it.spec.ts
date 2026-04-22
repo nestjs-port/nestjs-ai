@@ -21,7 +21,7 @@ import {
   ToolContextSchema,
   ToolDefinitions,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -31,7 +31,7 @@ import { OpenAiChatOptions } from "../../../open-ai-chat-options";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-LoggerFactory.bind(new ConsoleLoggerFactory());
+LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
 
 const logger = LoggerFactory.getLogger(
   "OpenAiChatClientMethodInvokingFunctionCallbackIT",

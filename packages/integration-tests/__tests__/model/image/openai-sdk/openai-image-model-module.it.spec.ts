@@ -25,7 +25,7 @@ import {
   OpenAiImageModelModule,
   type OpenAiImageProperties,
 } from "@nestjs-ai/model-openai";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { describe, expect, it } from "vitest";
 
@@ -42,7 +42,7 @@ async function createImageModel(
 }
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelModuleIT", () => {
-  LoggerFactory.bind(new ConsoleLoggerFactory());
+  LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("OpenAiImageModelModuleIT");
 
   it("generate image", async () => {

@@ -16,7 +16,7 @@
 
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { FunctionToolCallback, type ToolContext } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
@@ -35,7 +35,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 describe.skipIf(!OPENAI_API_KEY)(
   "OpenAiChatClientMultipleFunctionCallsIT",
   () => {
-    LoggerFactory.bind(new ConsoleLoggerFactory());
+    LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
     const logger = LoggerFactory.getLogger(
       "OpenAiChatClientMultipleFunctionCallsIT",
     );

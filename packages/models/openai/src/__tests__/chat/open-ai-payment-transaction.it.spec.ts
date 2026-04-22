@@ -20,7 +20,8 @@ import {
   FunctionToolCallback,
   type ToolCallback,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -101,6 +102,7 @@ function buildChatClient(toolCallback: ToolCallback): ChatClient {
 }
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiPaymentTransaction", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   LoggerFactory.getLogger("OpenAiPaymentTransactionIT");
 
   it.each([

@@ -30,6 +30,9 @@ export class OpenAiModerationOptions
   extends AbstractOpenAiOptions
   implements ModerationOptions
 {
+  /**
+   * Default moderation model.
+   */
   static readonly DEFAULT_MODERATION_MODEL = "omni-moderation-latest";
 
   constructor(props: OpenAiModerationOptionsProps = {}) {

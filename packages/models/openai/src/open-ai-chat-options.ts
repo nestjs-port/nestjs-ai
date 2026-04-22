@@ -110,6 +110,12 @@ export interface OpenAiChatOptionsProps extends AbstractOpenAiOptionsProps {
   reasoningEffort?: ReasoningEffort | null;
   verbosity?: ChatCompletionCreateParamsBase["verbosity"] | null;
   serviceTier?: ChatCompletionCreateParamsBase["service_tier"] | null;
+  /**
+   * Extra parameters that are not part of the standard OpenAI API. These parameters are
+   * passed as additional body properties to support OpenAI-compatible providers like
+   * vLLM, Ollama, Groq, etc. that support custom parameters such as top_k,
+   * repetition_penalty, etc.
+   */
   extraBody?: Record<string, unknown> | null;
   toolCallbacks?: ToolCallback[] | null;
   toolNames?: Set<string> | null;
@@ -201,34 +207,66 @@ export class OpenAiChatOptions
     }
   }
 
+  /**
+   * Gets the frequency penalty parameter.
+   * @returns the frequency penalty
+   */
   get frequencyPenalty(): number | null {
     return this._frequencyPenalty;
   }
 
+  /**
+   * Sets the frequency penalty parameter.
+   * @param frequencyPenalty the frequency penalty to set
+   */
   setFrequencyPenalty(frequencyPenalty: number | null): void {
     this._frequencyPenalty = frequencyPenalty ?? null;
   }
 
+  /**
+   * Gets the logit bias map.
+   * @returns the logit bias map
+   */
   get logitBias(): Record<string, number> | null {
     return this._logitBias != null ? { ...this._logitBias } : null;
   }
 
+  /**
+   * Sets the logit bias map.
+   * @param logitBias the logit bias map to set
+   */
   setLogitBias(logitBias: Record<string, number> | null): void {
     this._logitBias = logitBias != null ? { ...logitBias } : null;
   }
 
+  /**
+   * Gets whether to return log probabilities.
+   * @returns true if log probabilities should be returned
+   */
   get logprobs(): boolean | null {
     return this._logprobs;
   }
 
+  /**
+   * Sets whether to return log probabilities.
+   * @param logprobs whether to return log probabilities
+   */
   setLogprobs(logprobs: boolean | null): void {
     this._logprobs = logprobs ?? null;
   }
 
+  /**
+   * Gets the number of top log probabilities to return.
+   * @returns the number of top log probabilities
+   */
   get topLogprobs(): number | null {
     return this._topLogprobs;
   }
 
+  /**
+   * Sets the number of top log probabilities to return.
+   * @param topLogprobs the number of top log probabilities
+   */
   setTopLogprobs(topLogprobs: number | null): void {
     this._topLogprobs = topLogprobs ?? null;
   }
@@ -237,30 +275,58 @@ export class OpenAiChatOptions
     return this._maxTokens;
   }
 
+  /**
+   * Sets the maximum number of tokens to generate.
+   * @param maxTokens the maximum number of tokens
+   */
   setMaxTokens(maxTokens: number | null): void {
     this._maxTokens = maxTokens ?? null;
   }
 
+  /**
+   * Gets the maximum number of completion tokens.
+   * @returns the maximum number of completion tokens
+   */
   get maxCompletionTokens(): number | null {
     return this._maxCompletionTokens;
   }
 
+  /**
+   * Sets the maximum number of completion tokens.
+   * @param maxCompletionTokens the maximum number of completion tokens
+   */
   setMaxCompletionTokens(maxCompletionTokens: number | null): void {
     this._maxCompletionTokens = maxCompletionTokens ?? null;
   }
 
+  /**
+   * Gets the number of completions to generate.
+   * @returns the number of completions
+   */
   get n(): number | null {
     return this._n;
   }
 
+  /**
+   * Sets the number of completions to generate.
+   * @param n the number of completions
+   */
   setN(n: number | null): void {
     this._n = n ?? null;
   }
 
+  /**
+   * Gets the output modalities.
+   * @returns the output modalities
+   */
   get outputModalities(): ChatCompletionCreateParamsBase["modalities"] | null {
     return this._outputModalities != null ? [...this._outputModalities] : null;
   }
 
+  /**
+   * Sets the output modalities.
+   * @param outputModalities the output modalities
+   */
   setOutputModalities(
     outputModalities: ChatCompletionCreateParamsBase["modalities"] | null,
   ): void {
@@ -268,10 +334,18 @@ export class OpenAiChatOptions
       outputModalities != null ? [...outputModalities] : null;
   }
 
+  /**
+   * Gets the output audio parameters.
+   * @returns the output audio parameters
+   */
   get outputAudio(): ChatCompletionAudioParam | null {
     return this._outputAudio != null ? { ...this._outputAudio } : null;
   }
 
+  /**
+   * Sets the output audio parameters.
+   * @param outputAudio the output audio parameters
+   */
   setOutputAudio(outputAudio: ChatCompletionAudioParam | null): void {
     this._outputAudio = outputAudio != null ? { ...outputAudio } : null;
   }
@@ -280,41 +354,77 @@ export class OpenAiChatOptions
     return this._presencePenalty;
   }
 
+  /**
+   * Sets the presence penalty parameter.
+   * @param presencePenalty the presence penalty to set
+   */
   setPresencePenalty(presencePenalty: number | null): void {
     this._presencePenalty = presencePenalty ?? null;
   }
 
+  /**
+   * Gets the response format configuration.
+   * @returns the response format
+   */
   get responseFormat(): OpenAiResponseFormat | null {
     return this._responseFormat != null
       ? cloneResponseFormat(this._responseFormat)
       : null;
   }
 
+  /**
+   * Sets the response format configuration.
+   * @param responseFormat the response format to set
+   */
   setResponseFormat(responseFormat: OpenAiResponseFormat | null): void {
     this._responseFormat =
       responseFormat != null ? cloneResponseFormat(responseFormat) : null;
   }
 
+  /**
+   * Gets the stream options.
+   * @returns the stream options
+   */
   get streamOptions(): ChatCompletionStreamOptions | null {
     return this._streamOptions != null ? { ...this._streamOptions } : null;
   }
 
+  /**
+   * Sets the stream options.
+   * @param streamOptions the stream options to set
+   */
   setStreamOptions(streamOptions: ChatCompletionStreamOptions | null): void {
     this._streamOptions = streamOptions != null ? { ...streamOptions } : null;
   }
 
+  /**
+   * Gets the random seed for deterministic generation.
+   * @returns the random seed
+   */
   get seed(): number | null {
     return this._seed;
   }
 
+  /**
+   * Sets the random seed for deterministic generation.
+   * @param seed the random seed
+   */
   setSeed(seed: number | null): void {
     this._seed = seed ?? null;
   }
 
+  /**
+   * Gets the stop sequences.
+   * @returns the list of stop sequences
+   */
   get stop(): string[] | null {
     return this._stop != null ? [...this._stop] : null;
   }
 
+  /**
+   * Sets the stop sequences.
+   * @param stop the list of stop sequences
+   */
   setStop(stop: string[] | null): void {
     this._stop = stop != null ? [...stop] : null;
   }
@@ -323,6 +433,10 @@ export class OpenAiChatOptions
     return this.stop;
   }
 
+  /**
+   * Sets the stop sequences.
+   * @param stopSequences the list of stop sequences
+   */
   setStopSequences(stopSequences: string[] | null): void {
     this.setStop(stopSequences);
   }
@@ -331,6 +445,10 @@ export class OpenAiChatOptions
     return this._temperature;
   }
 
+  /**
+   * Sets the temperature for sampling.
+   * @param temperature the temperature value
+   */
   setTemperature(temperature: number | null): void {
     this._temperature = temperature ?? null;
   }
@@ -339,72 +457,140 @@ export class OpenAiChatOptions
     return this._topP;
   }
 
+  /**
+   * Sets the top-p nucleus sampling parameter.
+   * @param topP the top-p value
+   */
   setTopP(topP: number | null): void {
     this._topP = topP ?? null;
   }
 
+  /**
+   * Gets the tool choice configuration.
+   * @returns the tool choice option
+   */
   get toolChoice(): ChatCompletionToolChoiceOption | null {
     return this._toolChoice;
   }
 
+  /**
+   * Sets the tool choice configuration.
+   * @param toolChoice the tool choice option
+   */
   setToolChoice(toolChoice: ChatCompletionToolChoiceOption | null): void {
     this._toolChoice = toolChoice ?? null;
   }
 
+  /**
+   * Gets the user identifier.
+   * @returns the user identifier
+   */
   get user(): string | null {
     return this._user;
   }
 
+  /**
+   * Sets the user identifier.
+   * @param user the user identifier
+   */
   setUser(user: string | null): void {
     this._user = user ?? null;
   }
 
+  /**
+   * Gets whether to enable parallel tool calls.
+   * @returns true if parallel tool calls are enabled
+   */
   get parallelToolCalls(): boolean | null {
     return this._parallelToolCalls;
   }
 
+  /**
+   * Sets whether to enable parallel tool calls.
+   * @param parallelToolCalls whether to enable parallel tool calls
+   */
   setParallelToolCalls(parallelToolCalls: boolean | null): void {
     this._parallelToolCalls = parallelToolCalls ?? null;
   }
 
+  /**
+   * Gets whether to store the conversation.
+   * @returns true if the conversation should be stored
+   */
   get store(): boolean | null {
     return this._store;
   }
 
+  /**
+   * Sets whether to store the conversation.
+   * @param store whether to store the conversation
+   */
   setStore(store: boolean | null): void {
     this._store = store ?? null;
   }
 
+  /**
+   * Gets the metadata map.
+   * @returns the metadata map
+   */
   get metadata(): Record<string, string> | null {
     return this._metadata != null ? { ...this._metadata } : null;
   }
 
+  /**
+   * Sets the metadata map.
+   * @param metadata the metadata map
+   */
   setMetadata(metadata: Record<string, string> | null): void {
     this._metadata = metadata != null ? { ...metadata } : null;
   }
 
+  /**
+   * Gets the reasoning effort level.
+   * @returns the reasoning effort level
+   */
   get reasoningEffort(): ReasoningEffort | null {
     return this._reasoningEffort;
   }
 
+  /**
+   * Sets the reasoning effort level.
+   * @param reasoningEffort the reasoning effort level
+   */
   setReasoningEffort(reasoningEffort: ReasoningEffort | null): void {
     this._reasoningEffort = reasoningEffort ?? null;
   }
 
+  /**
+   * Gets the verbosity level.
+   * @returns the verbosity level
+   */
   get verbosity(): ChatCompletionCreateParamsBase["verbosity"] | null {
     return this._verbosity;
   }
 
+  /**
+   * Sets the verbosity level.
+   * @param verbosity the verbosity level
+   */
   setVerbosity(
     verbosity: ChatCompletionCreateParamsBase["verbosity"] | null,
   ): void {
     this._verbosity = verbosity ?? null;
   }
 
+  /**
+   * Gets the service tier.
+   * @returns the service tier
+   */
   get serviceTier(): ChatCompletionCreateParamsBase["service_tier"] | null {
     return this._serviceTier;
   }
 
+  /**
+   * Sets the service tier.
+   * @param serviceTier the service tier
+   */
   setServiceTier(
     serviceTier: ChatCompletionCreateParamsBase["service_tier"] | null,
   ): void {
@@ -517,9 +703,6 @@ export class OpenAiChatOptions
     return this.mutate().build();
   }
 
-  /**
-   * Create a builder pre-populated with the current option values.
-   */
   mutate(): OpenAiChatOptions.Builder {
     return (
       OpenAiChatOptions.builder()

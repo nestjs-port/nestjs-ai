@@ -42,9 +42,6 @@ export interface MultiQueryExpanderProps {
  * });
  * const queries = await expander.expand(new Query("How to run a Spring Boot app?"));
  * ```
- *
- * @author Thomas Vitale
- * @since 1.0.0
  */
 export class MultiQueryExpander extends QueryExpander {
   private readonly logger: Logger = LoggerFactory.getLogger(

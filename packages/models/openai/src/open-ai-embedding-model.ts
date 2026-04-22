@@ -50,6 +50,9 @@ export interface OpenAiEmbeddingModelProps {
   observationRegistry?: ObservationRegistry | null;
 }
 
+/**
+ * Embedding Model implementation using the OpenAI Java SDK.
+ */
 export class OpenAiEmbeddingModel extends AbstractEmbeddingModel {
   private static readonly DEFAULT_MODEL_NAME =
     OpenAiEmbeddingOptions.DEFAULT_EMBEDDING_MODEL;
@@ -81,6 +84,10 @@ export class OpenAiEmbeddingModel extends AbstractEmbeddingModel {
       props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
   }
 
+  /**
+   * Gets the embedding options for this model.
+   * @returns the embedding options
+   */
   get options(): OpenAiEmbeddingOptions {
     return this._options;
   }
@@ -164,6 +171,10 @@ export class OpenAiEmbeddingModel extends AbstractEmbeddingModel {
       });
   }
 
+  /**
+   * Use the provided convention for reporting observation data
+   * @param observationConvention The provided convention
+   */
   setObservationConvention(
     observationConvention: EmbeddingModelObservationConvention,
   ): void {

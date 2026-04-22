@@ -29,10 +29,6 @@ import { OpenAiChatOptions } from "../../../open-ai-chat-options";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-/**
- * Integration test for https://github.com/spring-projects/spring-ai/issues/2339 Verifies
- * that MessageChatMemoryAdvisor works when Prompt is initialized with List<Message>.
- */
 describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientMemoryAdvisorRepro", () => {
   const chatModel = new OpenAiChatModel({
     options: OpenAiChatOptions.builder()

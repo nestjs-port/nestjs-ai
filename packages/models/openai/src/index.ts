@@ -24,15 +24,15 @@ export {
   OpenAiAudioTranscriptionOptions,
   type OpenAiAudioTranscriptionOptionsProps,
 } from "./open-ai-audio-transcription-options";
+export {
+  OpenAiAudioTranscriptionModel,
+  type OpenAiAudioTranscriptionModelProps,
+} from "./open-ai-audio-transcription-model";
 export { OpenAiAudioSpeechModel } from "./open-ai-audio-speech-model";
 export {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
 } from "./open-ai-audio-speech-options";
-export {
-  OpenAiAudioTranscriptionModel,
-  type OpenAiAudioTranscriptionModelProps,
-} from "./open-ai-audio-transcription-model";
 export { OpenAiChatModel } from "./open-ai-chat-model";
 export { OpenAiChatOptions } from "./open-ai-chat-options";
 export {

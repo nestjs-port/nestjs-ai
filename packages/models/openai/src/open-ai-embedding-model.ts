@@ -33,9 +33,10 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { AzureOpenAI, OpenAI } from "openai";
+import type { OpenAI } from "openai";
 
 import { OpenAiEmbeddingOptions } from "./open-ai-embedding-options";
+import type { OpenAiClient } from "./open-ai-client";
 import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
 
 type OpenAiEmbeddingResponse = Awaited<
@@ -43,7 +44,7 @@ type OpenAiEmbeddingResponse = Awaited<
 >;
 
 export interface OpenAiEmbeddingModelProps {
-  openAiClient?: OpenAI | AzureOpenAI | null;
+  openAiClient?: OpenAiClient | null;
   metadataMode?: MetadataMode | null;
   options?: OpenAiEmbeddingOptions | null;
   observationRegistry?: ObservationRegistry | null;
@@ -58,7 +59,7 @@ export class OpenAiEmbeddingModel extends AbstractEmbeddingModel {
 
   private readonly logger = LoggerFactory.getLogger(OpenAiEmbeddingModel.name);
 
-  private readonly _openAiClient: OpenAI | AzureOpenAI;
+  private readonly _openAiClient: OpenAiClient;
   private readonly _options: OpenAiEmbeddingOptions;
   private readonly _metadataMode: MetadataMode;
   private readonly _observationRegistry: ObservationRegistry;

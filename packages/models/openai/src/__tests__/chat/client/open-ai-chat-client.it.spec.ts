@@ -18,8 +18,8 @@ import { readFileSync } from "node:fs";
 import { EOL } from "node:os";
 import { resolve } from "node:path";
 import {
-  ChatClient,
   AdvisorParams,
+  ChatClient,
   SimpleLoggerAdvisor,
 } from "@nestjs-ai/client-chat";
 import { MediaFormat, type TemplateRenderer } from "@nestjs-ai/commons";
@@ -28,7 +28,7 @@ import {
   FunctionToolCallback,
   ListOutputConverter,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -36,14 +36,16 @@ import { z } from "zod";
 import { OpenAiChatModel } from "../../../open-ai-chat-model";
 import { OpenAiChatOptions } from "../../../open-ai-chat-options";
 import {
-  MockWeatherService,
   type MockWeatherRequest,
   MockWeatherRequestInputType,
+  MockWeatherService,
 } from "../mock-weather-service";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("OpenAiChatClientIT");
   const systemTextResource = readFileSync(
     resolve(__dirname, "../system-message.st"),
@@ -55,7 +57,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("call", async () => {
-    // @formatter:off
     const response = await ChatClient.create(chatModel)
       .prompt()
       .advisors(new SimpleLoggerAdvisor())
@@ -70,7 +71,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .chatResponse();
-    // @formatter:on
 
     logger.info("%o", response);
     expect(response).not.toBeNull();
@@ -84,7 +84,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   it("list output converter string", async () => {
     const outputConverter = new ListOutputConverter();
 
-    // @formatter:off
     const collection = await ChatClient.create(chatModel)
       .prompt()
       .user((u) =>
@@ -92,7 +91,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .entity(outputConverter);
-    // @formatter:on
 
     logger.info("%s", String(collection));
     expect(collection).not.toBeNull();
@@ -103,7 +101,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("list output converter bean", async () => {
-    // @formatter:off
     const actorsFilms = await ChatClient.create(chatModel)
       .prompt()
       .user(
@@ -111,7 +108,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .entity(z.array(ActorsFilmsSchema), ActorsFilms);
-    // @formatter:on
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms).not.toBeNull();
@@ -124,7 +120,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   it("custom output converter", async () => {
     const toStringListConverter = new ListOutputConverter();
 
-    // @formatter:off
     const flavors = await ChatClient.create(chatModel)
       .prompt()
       .user((u) =>
@@ -132,7 +127,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .entity(toStringListConverter);
-    // @formatter:on
 
     logger.info("ice cream flavors%s", String(flavors));
     expect(flavors).not.toBeNull();
@@ -144,13 +138,11 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("bean output converter", async () => {
-    // @formatter:off
     const actorsFilms = await ChatClient.create(chatModel)
       .prompt()
       .user("Generate the filmography for a random actor.")
       .call()
       .entity(ActorsFilmsSchema, ActorsFilms);
-    // @formatter:on
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms).not.toBeNull();
@@ -161,14 +153,12 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("bean output converter native structured output", async () => {
-    // @formatter:off
     const actorsFilms = await ChatClient.create(chatModel)
       .prompt()
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .user("Generate the filmography for a random actor.")
       .call()
       .entity(ActorsFilmsSchema, ActorsFilms);
-    // @formatter:on
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms).not.toBeNull();
@@ -179,13 +169,11 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("bean output converter records", async () => {
-    // @formatter:off
     const actorsFilms = await ChatClient.create(chatModel)
       .prompt()
       .user("Generate the filmography of 5 movies for Tom Hanks.")
       .call()
       .entity(ActorsFilmsSchema, ActorsFilms);
-    // @formatter:on
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms).not.toBeNull();
@@ -197,14 +185,12 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("bean output converter records native structured output", async () => {
-    // @formatter:off
     const actorsFilms = await ChatClient.create(chatModel)
       .prompt()
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .user("Generate the filmography of 5 movies for Tom Hanks.")
       .call()
       .entity(ActorsFilmsSchema, ActorsFilms);
-    // @formatter:on
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms).not.toBeNull();
@@ -221,7 +207,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       outputType: ActorsFilms,
     });
 
-    // @formatter:off
     const chatResponse = ChatClient.create(chatModel)
       .prompt()
       .options(
@@ -245,7 +230,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .map((cr) => cr.result?.output.text)
       .filter((text): text is string => text != null && text.trim().length > 0)
       .join("");
-    // @formatter:on
 
     // Add debugging to understand what text we're trying to parse
     logger.debug("Aggregated streaming text: %s", generationTextFromStream);
@@ -267,7 +251,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   it("function call test", async () => {
     const weatherService = new MockWeatherService();
 
-    // @formatter:off
     const response = await ChatClient.create(chatModel)
       .prompt()
       .user((u) =>
@@ -286,7 +269,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .content();
-    // @formatter:on
 
     logger.info("Response: %s", response);
 
@@ -302,7 +284,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   it("default function call test", async () => {
     const weatherService = new MockWeatherService();
 
-    // @formatter:off
     const response = await ChatClient.builder(chatModel)
       .defaultToolCallbacks(
         FunctionToolCallback.builder(
@@ -322,7 +303,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .prompt()
       .call()
       .content();
-    // @formatter:on
 
     logger.info("Response: %s", response);
 
@@ -338,7 +318,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   it("stream function call test", async () => {
     const weatherService = new MockWeatherService();
 
-    // @formatter:off
     const response = ChatClient.create(chatModel)
       .prompt()
       .user(
@@ -355,7 +334,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .stream()
       .content();
-    // @formatter:on
 
     const content = await collectContentText(response);
     logger.info("Response: %s", content);
@@ -368,7 +346,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   it.each(["gpt-4o"])("multi modality embedded image", async (modelName) => {
     const imageResource = readFileSync(resolve(__dirname, "../test.png"));
 
-    // @formatter:off
     const response = await ChatClient.create(chatModel)
       .prompt()
       .options(OpenAiChatOptions.builder().model(modelName))
@@ -379,7 +356,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .content();
-    // @formatter:on
 
     logger.info("%s", response);
     expect(response).not.toBeNull();
@@ -394,7 +370,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       "https://docs.spring.io/spring-ai/reference/_images/multimodal.test.png",
     );
 
-    // @formatter:off
     const response = await ChatClient.create(chatModel)
       .prompt()
       // TODO consider adding model(...) method to ChatClient as a shortcut to
@@ -406,7 +381,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .call()
       .content();
-    // @formatter:on
 
     logger.info("%s", response);
     expect(response).not.toBeNull();
@@ -421,7 +395,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       "https://docs.spring.io/spring-ai/reference/_images/multimodal.test.png",
     );
 
-    // @formatter:off
     const response = ChatClient.create(chatModel)
       .prompt()
       .options(OpenAiChatOptions.builder().model("gpt-5-mini"))
@@ -432,7 +405,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       )
       .stream()
       .content();
-    // @formatter:on
 
     const content = await collectContentText(response);
 
@@ -475,7 +447,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       outputType: ActorsFilms,
     });
 
-    // @formatter:off
     const result = await ChatClient.create(chatModel)
       .prompt()
       .user((u) =>
@@ -488,7 +459,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .templateRenderer(new AngleBracketTemplateRenderer())
       .call()
       .content();
-    // @formatter:on
 
     expect(result).not.toBeNull();
     if (result == null) {
@@ -507,7 +477,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       outputType: ActorsFilms,
     });
 
-    // @formatter:off
     const result = await ChatClient.create(chatModel)
       .prompt()
       .advisors(new SimpleLoggerAdvisor())
@@ -521,7 +490,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .templateRenderer(new AngleBracketTemplateRenderer())
       .call()
       .content();
-    // @formatter:on
 
     expect(result).not.toBeNull();
     if (result == null) {
@@ -540,7 +508,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       outputType: ActorsFilms,
     });
 
-    // @formatter:off
     const chatResponse = ChatClient.create(chatModel)
       .prompt()
       .options(
@@ -563,7 +530,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .filter((cr) => cr.result != null)
       .map((cr) => cr.result?.output.text ?? "")
       .join("");
-    // @formatter:on
 
     const actorsFilms = outputConverter.convert(generationTextFromStream);
 
@@ -578,7 +544,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       outputType: ActorsFilms,
     });
 
-    // @formatter:off
     const chatResponse = ChatClient.create(chatModel)
       .prompt()
       .options(
@@ -602,7 +567,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .filter((cr) => cr.result != null)
       .map((cr) => cr.result?.output.text ?? "")
       .join("");
-    // @formatter:on
 
     const actorsFilms = outputConverter.convert(generationTextFromStream);
 

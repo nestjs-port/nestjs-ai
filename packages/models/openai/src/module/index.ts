@@ -14,12 +14,57 @@
  * limitations under the License.
  */
 
-export * from "./open-ai-chat-model.module";
-export type { OpenAiChatProperties } from "./open-ai-chat-properties";
-export { OPEN_AI_CHAT_DEFAULT_MODEL } from "./open-ai-chat-properties";
-export * from "./open-ai-embedding-model.module";
-export type { OpenAiEmbeddingProperties } from "./open-ai-embedding-properties";
-export { OPEN_AI_EMBEDDING_DEFAULT_MODEL } from "./open-ai-embedding-properties";
-export * from "./open-ai-image-model.module";
-export type { OpenAiImageProperties } from "./open-ai-image-properties";
-export { OPEN_AI_IMAGE_DEFAULT_MODEL } from "./open-ai-image-properties";
+export {
+  OpenAiChatModelModule,
+  type OpenAiChatModelModuleAsyncOptions,
+  OPEN_AI_CHAT_PROPERTIES_TOKEN,
+} from "./open-ai-chat-model.module";
+export {
+  OPEN_AI_CHAT_DEFAULT_MODEL,
+  type OpenAiChatProperties,
+} from "./open-ai-chat-properties";
+export {
+  OpenAiAudioSpeechModelModule,
+  type OpenAiAudioSpeechModelModuleAsyncOptions,
+  OPEN_AI_AUDIO_SPEECH_PROPERTIES_TOKEN,
+} from "./open-ai-audio-speech-model.module";
+export {
+  OPEN_AI_AUDIO_SPEECH_DEFAULT_MODEL,
+  type OpenAiAudioSpeechProperties,
+} from "./open-ai-audio-speech-properties";
+export {
+  OpenAiAudioTranscriptionModelModule,
+  type OpenAiAudioTranscriptionModelModuleAsyncOptions,
+  OPEN_AI_AUDIO_TRANSCRIPTION_PROPERTIES_TOKEN,
+} from "./open-ai-audio-transcription-model.module";
+export {
+  OPEN_AI_AUDIO_TRANSCRIPTION_DEFAULT_MODEL,
+  type OpenAiAudioTranscriptionProperties,
+} from "./open-ai-audio-transcription-properties";
+export {
+  OpenAiEmbeddingModelModule,
+  type OpenAiEmbeddingModelModuleAsyncOptions,
+  OPEN_AI_EMBEDDING_PROPERTIES_TOKEN,
+} from "./open-ai-embedding-model.module";
+export {
+  OPEN_AI_EMBEDDING_DEFAULT_MODEL,
+  type OpenAiEmbeddingProperties,
+} from "./open-ai-embedding-properties";
+export {
+  OpenAiModerationModelModule,
+  type OpenAiModerationModelModuleAsyncOptions,
+  OPEN_AI_MODERATION_PROPERTIES_TOKEN,
+} from "./open-ai-moderation-model.module";
+export {
+  OPEN_AI_MODERATION_DEFAULT_MODEL,
+  type OpenAiModerationProperties,
+} from "./open-ai-moderation-properties";
+export {
+  OpenAiImageModelModule,
+  type OpenAiImageModelModuleAsyncOptions,
+  OPEN_AI_IMAGE_PROPERTIES_TOKEN,
+} from "./open-ai-image-model.module";
+export {
+  OPEN_AI_IMAGE_DEFAULT_MODEL,
+  type OpenAiImageProperties,
+} from "./open-ai-image-properties";

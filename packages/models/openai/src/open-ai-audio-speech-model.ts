@@ -17,6 +17,7 @@
 import assert from "node:assert/strict";
 import { from, type Observable } from "rxjs";
 import type { AzureOpenAI, OpenAI } from "openai";
+import type { SpeechCreateParams } from "openai/resources/audio";
 import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import {
   Speech,
@@ -26,13 +27,12 @@ import {
   TextToSpeechResponse,
 } from "@nestjs-ai/model";
 
-import { OpenAiAudioSpeechOptions } from "./open-ai-audio-speech-options";
+import {
+  OpenAiAudioSpeechOptions,
+  type OpenAiAudioSpeechOptionsProps,
+} from "./open-ai-audio-speech-options";
 import { OpenAiAudioSpeechResponseMetadata } from "./metadata";
 import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
-
-type OpenAiAudioSpeechCreateParams = Parameters<
-  OpenAI["audio"]["speech"]["create"]
->[0];
 
 export interface OpenAiAudioSpeechModelProps {
   openAiClient?: OpenAI | AzureOpenAI | null;
@@ -50,11 +50,11 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
   );
 
   private readonly _openAiClient: OpenAI | AzureOpenAI;
-  private readonly _options: OpenAiAudioSpeechOptions;
+  private readonly _defaultOptions: OpenAiAudioSpeechOptions;
 
   constructor(props: OpenAiAudioSpeechModelProps = {}) {
     super();
-    this._options =
+    this._defaultOptions =
       props.options ??
       new OpenAiAudioSpeechOptions({
         model: OpenAiAudioSpeechModel.DEFAULT_MODEL_NAME,
@@ -64,15 +64,11 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
       });
     this._openAiClient =
       props.openAiClient ??
-      OpenAiSetup.setupClient(this.toSetupProps(this._options));
-  }
-
-  get options(): OpenAiAudioSpeechOptions {
-    return this._options;
+      OpenAiSetup.setupClient(this.toSetupProps(this._defaultOptions));
   }
 
   override get defaultOptions(): TextToSpeechOptions {
-    return this._options;
+    return this._defaultOptions;
   }
 
   override call(text: string): Promise<Uint8Array>;
@@ -101,11 +97,7 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
 
     if (this.logger.isTraceEnabled()) {
       this.logger.trace(
-        "Calling OpenAI SDK audio speech with model: {}, voice: {}, format: {}, speed: {}",
-        mergedOptions.model,
-        mergedOptions.voice,
-        mergedOptions.responseFormat,
-        mergedOptions.speed,
+        `Calling OpenAI SDK audio speech with model: ${mergedOptions.model}, voice: ${mergedOptions.voice}, format: ${mergedOptions.responseFormat}, speed: ${mergedOptions.speed}`,
       );
     }
 
@@ -145,13 +137,56 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
         : null;
 
     if (runtimeOptions != null) {
-      return OpenAiAudioSpeechOptions.builder()
-        .from(this._options)
-        .merge(runtimeOptions)
-        .build();
+      return new OpenAiAudioSpeechOptions(
+        this.mergeProps(runtimeOptions, this._defaultOptions),
+      );
     }
 
-    return this._options;
+    return this._defaultOptions;
+  }
+
+  private mergeProps(
+    source: OpenAiAudioSpeechOptions,
+    target: OpenAiAudioSpeechOptions,
+  ): OpenAiAudioSpeechOptionsProps {
+    return {
+      baseUrl: source.baseUrl != null ? source.baseUrl : target.baseUrl,
+      apiKey: source.apiKey != null ? source.apiKey : target.apiKey,
+      azureADTokenProvider:
+        source.azureADTokenProvider != null
+          ? source.azureADTokenProvider
+          : target.azureADTokenProvider,
+      model: source.model != null ? source.model : target.model,
+      deploymentName:
+        source.deploymentName != null
+          ? source.deploymentName
+          : target.deploymentName,
+      microsoftFoundryServiceVersion:
+        source.microsoftFoundryServiceVersion != null
+          ? source.microsoftFoundryServiceVersion
+          : target.microsoftFoundryServiceVersion,
+      organizationId:
+        source.organizationId != null
+          ? source.organizationId
+          : target.organizationId,
+      microsoftFoundry: source.microsoftFoundry || target.microsoftFoundry,
+      gitHubModels: source.gitHubModels || target.gitHubModels,
+      timeout: source.timeout ?? undefined,
+      maxRetries: source.maxRetries,
+      fetchOptions:
+        source.fetchOptions != null ? source.fetchOptions : target.fetchOptions,
+      customHeaders:
+        source.customHeaders != null
+          ? source.customHeaders
+          : target.customHeaders,
+      input: source.input != null ? source.input : target.input,
+      voice: source.voice != null ? source.voice : target.voice,
+      responseFormat:
+        source.responseFormat != null
+          ? source.responseFormat
+          : target.responseFormat,
+      speed: source.speed != null ? source.speed : target.speed,
+    };
   }
 
   private getInputText(
@@ -167,22 +202,16 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
   private toSpeechCreateParams(
     options: OpenAiAudioSpeechOptions,
     inputText: string,
-  ): OpenAiAudioSpeechCreateParams {
-    const params: Record<string, unknown> = {
-      model: options.model,
+  ): SpeechCreateParams {
+    return {
+      model: options.model!,
       input: inputText,
-      voice: options.voice,
+      voice: options.voice!,
+      ...(options.responseFormat != null
+        ? { response_format: options.responseFormat }
+        : {}),
+      ...(options.speed != null ? { speed: options.speed } : {}),
     };
-
-    if (options.responseFormat != null) {
-      params.response_format = options.responseFormat;
-    }
-
-    if (options.speed != null) {
-      params.speed = options.speed;
-    }
-
-    return params as unknown as OpenAiAudioSpeechCreateParams;
   }
 
   private toSetupProps(options: OpenAiAudioSpeechOptions): OpenAiSetupProps {

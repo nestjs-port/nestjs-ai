@@ -22,6 +22,7 @@ import type { ChatModel } from "@nestjs-ai/model";
 import {
   ANTHROPIC_CHAT_DEFAULT_MODEL,
   ANTHROPIC_CHAT_PROPERTIES_TOKEN,
+  AnthropicChatModel,
   AnthropicChatModelModule,
   type AnthropicChatProperties,
 } from "@nestjs-ai/model-anthropic";
@@ -80,20 +81,7 @@ describe("AnthropicChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        options: {
-          apiKey: string | null;
-          baseUrl: string | null;
-          timeout: number | null;
-          maxRetries: number | null;
-          customHeaders: Record<string, string>;
-          model: string | null;
-          temperature: number | null;
-          topP: number | null;
-          maxTokens: number | null;
-          httpHeaders: Record<string, string>;
-        };
-      };
+      const chatModel = moduleRef.get<AnthropicChatModel>(CHAT_MODEL_TOKEN);
 
       expect(chatModel.options.apiKey).toBe("test-api-key");
       expect(chatModel.options.baseUrl).toBe("http://test-base-url");
@@ -120,11 +108,7 @@ describe("AnthropicChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        options: {
-          model: string | null;
-        };
-      };
+      const chatModel = moduleRef.get<AnthropicChatModel>(CHAT_MODEL_TOKEN);
 
       expect(chatModel.options.model).toBe(ANTHROPIC_CHAT_DEFAULT_MODEL);
     });
@@ -212,14 +196,7 @@ describe("AnthropicChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        options: {
-          apiKey: string | null;
-          baseUrl: string | null;
-          model: string | null;
-          maxTokens: number | null;
-        };
-      };
+      const chatModel = moduleRef.get<AnthropicChatModel>(CHAT_MODEL_TOKEN);
 
       expect(chatModel.options.apiKey).toBe("test-api-key-from-config");
       expect(chatModel.options.baseUrl).toBe("http://async-base-url");

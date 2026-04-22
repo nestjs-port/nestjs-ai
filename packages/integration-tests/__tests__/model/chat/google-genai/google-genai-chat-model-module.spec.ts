@@ -18,6 +18,7 @@ import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
+import { GoogleGenAiChatModel } from "@nestjs-ai/model-google-genai";
 import {
   GoogleGenAiCachedContentService,
   GoogleGenAiChatModelModule,
@@ -52,12 +53,10 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _genAiClient: { vertexai: boolean };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
       expect(chatModel).toBeDefined();
-      expect(chatModel._genAiClient).toBeDefined();
+      expect(chatModel.genAiClient).toBeDefined();
     });
 
     it("builds a GoogleGenAI client from apiKey properties", async () => {
@@ -70,11 +69,9 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _genAiClient: { vertexai: boolean };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
-      expect(chatModel._genAiClient.vertexai).toBe(false);
+      expect(chatModel.genAiClient.vertexai).toBe(false);
     });
 
     it("prefers Vertex AI when explicitly enabled even if apiKey is also present", async () => {
@@ -90,11 +87,9 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _genAiClient: { vertexai: boolean };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
-      expect(chatModel._genAiClient.vertexai).toBe(true);
+      expect(chatModel.genAiClient.vertexai).toBe(true);
     });
 
     it("builds a vertex AI client when apiKey is not provided", async () => {
@@ -108,11 +103,9 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _genAiClient: { vertexai: boolean };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
-      expect(chatModel._genAiClient.vertexai).toBe(true);
+      expect(chatModel.genAiClient.vertexai).toBe(true);
     });
 
     it("fails fast when vertex AI is explicitly enabled without project or location", async () => {
@@ -160,19 +153,13 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _defaultOptions: {
-          model: string;
-          temperature: number;
-          topP: number;
-          maxOutputTokens: number;
-        };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
+      const defaultOptions = chatModel.defaultOptions;
 
-      expect(chatModel._defaultOptions.model).toBe("gemini-2.0-flash");
-      expect(chatModel._defaultOptions.temperature).toBe(0.2);
-      expect(chatModel._defaultOptions.topP).toBe(0.7);
-      expect(chatModel._defaultOptions.maxOutputTokens).toBe(128);
+      expect(defaultOptions.model).toBe("gemini-2.0-flash");
+      expect(defaultOptions.temperature).toBe(0.2);
+      expect(defaultOptions.topP).toBe(0.7);
+      expect(defaultOptions.maxOutputTokens).toBe(128);
     });
 
     it("adds the tool call content filter when enabled", async () => {
@@ -249,12 +236,10 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _genAiClient: { vertexai: boolean };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
       expect(chatModel).toBeDefined();
-      expect(chatModel._genAiClient).toBeDefined();
+      expect(chatModel.genAiClient).toBeDefined();
     });
 
     it("supports imports and inject for async factory", async () => {
@@ -271,11 +256,9 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      const chatModel = moduleRef.get(CHAT_MODEL_TOKEN) as unknown as {
-        _genAiClient: { vertexai: boolean };
-      };
+      const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
-      expect(chatModel._genAiClient.vertexai).toBe(false);
+      expect(chatModel.genAiClient.vertexai).toBe(false);
       expect(chatModel).toBeDefined();
     });
 

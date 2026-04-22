@@ -21,6 +21,7 @@ import { IMAGE_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   OPEN_AI_IMAGE_DEFAULT_MODEL,
   OPEN_AI_IMAGE_PROPERTIES_TOKEN,
+  OpenAiImageModel,
   OpenAiImageModelModule,
   type OpenAiImageProperties,
 } from "@nestjs-ai/model-openai";
@@ -70,15 +71,7 @@ describe("OpenAiImageModelModule", () => {
         ],
       }).compile();
 
-      const imageModel = moduleRef.get(IMAGE_MODEL_TOKEN) as unknown as {
-        options: {
-          apiKey: string | null;
-          model: string | null;
-          n: number | null;
-          size: string | null;
-          user: string | null;
-        };
-      };
+      const imageModel = moduleRef.get<OpenAiImageModel>(IMAGE_MODEL_TOKEN);
 
       expect(imageModel.options.apiKey).toBe("test-api-key");
       expect(imageModel.options.model).toBe("gpt-image-2");
@@ -96,11 +89,7 @@ describe("OpenAiImageModelModule", () => {
         ],
       }).compile();
 
-      const imageModel = moduleRef.get(IMAGE_MODEL_TOKEN) as unknown as {
-        options: {
-          model: string | null;
-        };
-      };
+      const imageModel = moduleRef.get<OpenAiImageModel>(IMAGE_MODEL_TOKEN);
 
       expect(imageModel.options.model).toBe(OPEN_AI_IMAGE_DEFAULT_MODEL);
     });
@@ -171,13 +160,7 @@ describe("OpenAiImageModelModule", () => {
         ],
       }).compile();
 
-      const imageModel = moduleRef.get(IMAGE_MODEL_TOKEN) as unknown as {
-        options: {
-          apiKey: string | null;
-          model: string | null;
-          user: string | null;
-        };
-      };
+      const imageModel = moduleRef.get<OpenAiImageModel>(IMAGE_MODEL_TOKEN);
 
       expect(imageModel.options.apiKey).toBe("test-api-key-from-config");
       expect(imageModel.options.model).toBe("gpt-image-1");

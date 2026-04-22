@@ -28,7 +28,7 @@ import {
 import type { ChatModel } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
-const CHAT_MODEL = {} as unknown as ChatModel;
+const CHAT_MODEL = {} as ChatModel;
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 
 @Module({

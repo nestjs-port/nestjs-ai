@@ -20,7 +20,7 @@ import { join } from "node:path";
 
 import type { Anthropic } from "@anthropic-ai/sdk";
 import { Prompt, UserMessage } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -35,7 +35,7 @@ import {
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicSkillsIT", () => {
-  LoggerFactory.bind(new ConsoleLoggerFactory());
+  LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("AnthropicSkillsIT");
   let anthropicClient: Anthropic;
   let chatModel: AnthropicChatModel;

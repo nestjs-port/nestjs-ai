@@ -35,7 +35,7 @@ import {
   SystemPromptTemplate,
   UserMessage,
 } from "@nestjs-ai/model";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
@@ -52,7 +52,7 @@ import {
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
-  LoggerFactory.bind(new ConsoleLoggerFactory());
+  LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("OpenAiChatModelIT");
 
   const systemPromptResource = readFileSync(

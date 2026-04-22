@@ -26,7 +26,7 @@ import {
   OpenAiAudioTranscriptionModelModule,
   type OpenAiAudioTranscriptionProperties,
 } from "@nestjs-ai/model-openai";
-import { LoggerFactory } from "@nestjs-port/core";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { describe, expect, it } from "vitest";
 
@@ -35,7 +35,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 describe.skipIf(!OPENAI_API_KEY)(
   "OpenAiAudioTranscriptionModelModuleIT",
   () => {
-    LoggerFactory.bind(new ConsoleLoggerFactory());
+    LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
     const logger = LoggerFactory.getLogger(
       "OpenAiAudioTranscriptionModelModuleIT",
     );

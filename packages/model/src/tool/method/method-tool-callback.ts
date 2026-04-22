@@ -95,6 +95,8 @@ export class MethodToolCallback extends ToolCallback {
       `Starting execution of tool: ${this._toolDefinition.name}`,
     );
 
+    this.validateToolContextSupport(toolContext);
+
     const methodArguments = this.resolveMethodArguments(toolInput, toolContext);
     const result = await this.callMethod(methodArguments);
 
@@ -124,6 +126,29 @@ export class MethodToolCallback extends ToolCallback {
       this._logger.warn("Conversion from JSON failed", ex as Error);
       throw this.wrapToolExecutionException(ex);
     }
+  }
+
+  private validateToolContextSupport(toolContext: ToolContext | null): void {
+    if (!this.acceptsToolContext()) {
+      return;
+    }
+
+    const isNonEmptyToolContextProvided =
+      toolContext != null && Object.keys(toolContext.context).length > 0;
+    if (!isNonEmptyToolContextProvided) {
+      throw new Error("ToolContext is required by the method as an argument");
+    }
+  }
+
+  private acceptsToolContext(): boolean {
+    const shape = this._toolInputSchema
+      ? this.getObjectShape(this._toolInputSchema)
+      : null;
+    if (!shape) {
+      return false;
+    }
+
+    return Object.values(shape).some((schema) => schema === ToolContextSchema);
   }
 
   private injectToolContextFields(

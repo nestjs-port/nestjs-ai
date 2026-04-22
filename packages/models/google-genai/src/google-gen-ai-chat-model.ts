@@ -162,6 +162,10 @@ export class GoogleGenAiChatModel extends ChatModel {
     }
   }
 
+  get genAiClient(): GoogleGenAI {
+    return this._genAiClient;
+  }
+
   protected override async callPrompt(prompt: Prompt): Promise<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
     return this.internalCall(requestPrompt, null);

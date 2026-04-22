@@ -59,6 +59,10 @@ export class OpenAiAudioTranscriptionModel extends TranscriptionModel {
       OpenAiSetup.setupClient(this.toSetupProps(this._defaultOptions));
   }
 
+  get defaultOptions(): OpenAiAudioTranscriptionOptions {
+    return this._defaultOptions;
+  }
+
   get openAiClient(): OpenAiClient {
     return this._openAiClient;
   }
@@ -93,7 +97,7 @@ export class OpenAiAudioTranscriptionModel extends TranscriptionModel {
     const response =
       await this._openAiClient.audio.transcriptions.create(params);
 
-    const transcript = new AudioTranscription(response.text);
+    const transcript = new AudioTranscription(this.extractText(response));
     return new AudioTranscriptionResponse(
       transcript,
       new AudioTranscriptionResponseMetadata(),
@@ -172,6 +176,14 @@ export class OpenAiAudioTranscriptionModel extends TranscriptionModel {
       .from(target)
       .merge(source)
       .build();
+  }
+
+  private extractText(response: string | { text: string }): string {
+    if (typeof response === "string") {
+      return response;
+    }
+
+    return response.text;
   }
 
   private toSetupProps(

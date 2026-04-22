@@ -82,6 +82,42 @@ export class TransformersEmbeddingModel extends AbstractEmbeddingModel {
       props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
   }
 
+  get model(): string {
+    return this._model;
+  }
+
+  get cacheDir(): string | null {
+    return this._cacheDir;
+  }
+
+  get quantized(): boolean {
+    return this._quantized;
+  }
+
+  get config(): PretrainedOptions["config"] | null {
+    return this._config;
+  }
+
+  get localFilesOnly(): boolean {
+    return this._localFilesOnly;
+  }
+
+  get revision(): string | undefined {
+    return this._revision;
+  }
+
+  get metadataMode(): MetadataMode {
+    return this._metadataMode;
+  }
+
+  get observationRegistry(): ObservationRegistry {
+    return this._observationRegistry;
+  }
+
+  get observationConvention(): EmbeddingModelObservationConvention {
+    return this._observationConvention;
+  }
+
   setModel(model: string): void {
     assert(model, "model cannot be null");
     this._model = model;

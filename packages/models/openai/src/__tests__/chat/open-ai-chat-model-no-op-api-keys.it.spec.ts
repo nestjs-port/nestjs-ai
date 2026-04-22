@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-export {
-  BATCHING_STRATEGY_TOKEN,
-  AUDIO_SPEECH_MODEL_TOKEN,
-  AUDIO_TRANSCRIPTION_MODEL_TOKEN,
-  AUDIO_MODERATION_MODEL_TOKEN,
-  CHAT_CLIENT_BUILDER_TOKEN,
-  CHAT_CLIENT_CUSTOMIZER_TOKEN,
-  CHAT_MEMORY_TOKEN,
-  CHAT_MODEL_TOKEN,
-  EMBEDDING_MODEL_TOKEN,
-  HTTP_CLIENT_TOKEN,
-  IMAGE_MODEL_TOKEN,
-  PROVIDER_INSTANCE_EXPLORER_TOKEN,
-  VECTOR_STORE_TOKEN,
-} from "./tokens";
+import { describe, expect, it } from "vitest";
+
+import { OpenAiChatModel } from "../../open-ai-chat-model";
+import { OpenAiChatOptions } from "../../open-ai-chat-options";
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelNoOpApiKeys", () => {
+  const openAiChatModel = new OpenAiChatModel({
+    options: OpenAiChatOptions.builder().apiKey("noop").build(),
+  });
+
+  it("check no op api key", async () => {
+    await expect(openAiChatModel.call("Tell me a joke")).rejects.toThrow(/./);
+  });
+});

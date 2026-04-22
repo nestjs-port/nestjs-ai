@@ -28,9 +28,6 @@ export interface AbstractOpenAiOptionsProps {
    */
   apiKey?: string | null;
 
-  /**
-   * Azure Active Directory token provider used to connect to Microsoft Foundry.
-   */
   azureADTokenProvider?: (() => Promise<string>) | null;
 
   /**
@@ -47,7 +44,7 @@ export interface AbstractOpenAiOptionsProps {
   deploymentName?: string | null;
 
   /**
-   * The service version to use when connecting to Microsoft Foundry.
+   * The Service version to use when connecting to Microsoft Foundry.
    */
   microsoftFoundryServiceVersion?: unknown;
 
@@ -76,9 +73,6 @@ export interface AbstractOpenAiOptionsProps {
    */
   maxRetries?: number | null;
 
-  /**
-   * Fetch options for OpenAI client requests.
-   */
   fetchOptions?: ClientOptions["fetchOptions"] | null;
 
   /**
@@ -88,7 +82,14 @@ export interface AbstractOpenAiOptionsProps {
 }
 
 export class AbstractOpenAiOptions {
+  /**
+   * Default request timeout for the OpenAI client.
+   */
   static readonly DEFAULT_TIMEOUT: Milliseconds = ms(60_000);
+
+  /**
+   * Default maximum number of retries for the OpenAI client.
+   */
   static readonly DEFAULT_MAX_RETRIES = 3;
 
   private _baseUrl: string | null = null;

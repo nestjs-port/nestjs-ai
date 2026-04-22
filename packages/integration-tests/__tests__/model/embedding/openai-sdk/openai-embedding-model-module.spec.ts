@@ -22,6 +22,7 @@ import { EmbeddingModelObservationConvention } from "@nestjs-ai/model";
 import {
   OPEN_AI_EMBEDDING_DEFAULT_MODEL,
   OPEN_AI_EMBEDDING_PROPERTIES_TOKEN,
+  OpenAiEmbeddingModel,
   OpenAiEmbeddingModelModule,
   type OpenAiEmbeddingProperties,
 } from "@nestjs-ai/model-openai";
@@ -108,23 +109,15 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      const embeddingModel = moduleRef.get(
+      const embeddingModel = moduleRef.get<OpenAiEmbeddingModel>(
         EMBEDDING_MODEL_TOKEN,
-      ) as unknown as {
-        options: {
-          apiKey: string | null;
-          model: string | null;
-          user: string | null;
-          dimensions: number | null;
-        };
-        _metadataMode: MetadataMode;
-      };
+      );
 
       expect(embeddingModel.options.apiKey).toBe("test-api-key");
       expect(embeddingModel.options.model).toBe("text-embedding-3-small");
       expect(embeddingModel.options.user).toBe("test-user");
       expect(embeddingModel.options.dimensions).toBe(1024);
-      expect(embeddingModel._metadataMode).toBe(MetadataMode.ALL);
+      expect(embeddingModel.metadataMode).toBe(MetadataMode.ALL);
     });
 
     it("should fall back to the default embedding model", async () => {
@@ -136,13 +129,9 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      const embeddingModel = moduleRef.get(
+      const embeddingModel = moduleRef.get<OpenAiEmbeddingModel>(
         EMBEDDING_MODEL_TOKEN,
-      ) as unknown as {
-        options: {
-          model: string | null;
-        };
-      };
+      );
 
       expect(embeddingModel.options.model).toBe(
         OPEN_AI_EMBEDDING_DEFAULT_MODEL,
@@ -163,19 +152,14 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      const embeddingModel = moduleRef.get(
+      const embeddingModel = moduleRef.get<OpenAiEmbeddingModel>(
         EMBEDDING_MODEL_TOKEN,
-      ) as unknown as {
-        _observationRegistry: unknown;
-        _observationConvention: unknown;
-      };
+      );
 
-      expect(embeddingModel._observationRegistry).toBe(
+      expect(embeddingModel.observationRegistry).toBe(
         NoopObservationRegistry.INSTANCE,
       );
-      expect(embeddingModel._observationConvention).toBe(
-        OBSERVATION_CONVENTION,
-      );
+      expect(embeddingModel.observationConvention).toBe(OBSERVATION_CONVENTION);
     });
 
     it("should not export the properties token", async () => {
@@ -244,15 +228,9 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      const embeddingModel = moduleRef.get(
+      const embeddingModel = moduleRef.get<OpenAiEmbeddingModel>(
         EMBEDDING_MODEL_TOKEN,
-      ) as unknown as {
-        options: {
-          apiKey: string | null;
-          model: string | null;
-          user: string | null;
-        };
-      };
+      );
 
       expect(embeddingModel.options.apiKey).toBe("test-api-key-from-config");
       expect(embeddingModel.options.model).toBe("text-embedding-3-large");

@@ -40,6 +40,12 @@ export enum ModelProvider {
   GITHUB_MODELS = "GITHUB_MODELS",
 }
 
+/**
+ * Helps configure the OpenAI Java SDK, depending on the platform used. This code is
+ * inspired by LangChain4j's
+ * `dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper` class, which is
+ * coded by the same author (Julien Dubois, from Microsoft).
+ */
 export class OpenAiSetup {
   static readonly OPENAI_URL = "https://api.openai.com/v1";
   static readonly OPENAI_API_KEY = "OPENAI_API_KEY";

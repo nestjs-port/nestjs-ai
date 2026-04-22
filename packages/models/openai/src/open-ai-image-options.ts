@@ -28,15 +28,48 @@ import {
 } from "./abstract-open-ai-options";
 
 export interface OpenAiImageOptionsProps extends AbstractOpenAiOptionsProps {
+  /**
+   * The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1
+   * is supported.
+   */
   n?: number | null;
+  /**
+   * The width of the generated images. Must be one of 256, 512, or 1024 for dall-e-2.
+   */
   width?: number | null;
+  /**
+   * The height of the generated images. Must be one of 256, 512, or 1024 for dall-e-2.
+   */
   height?: number | null;
+  /**
+   * The quality of the image that will be generated. hd creates images with finer
+   * details and greater consistency across the image. This param is only supported for
+   * dall-e-3. standard or hd
+   */
   quality?: ImageGenerateParamsNonStreaming["quality"] | null;
+  /**
+   * The format in which the generated images are returned. Must be one of url or
+   * b64_json.
+   */
   responseFormat?: NonNullable<
     ImageGenerateParamsNonStreaming["response_format"]
   > | null;
+  /**
+   * The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for
+   * dall-e-2. Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models.
+   */
   size?: NonNullable<ImageGenerateParamsNonStreaming["size"]> | null;
+  /**
+   * The style of the generated images. Must be one of vivid or natural. Vivid causes
+   * the model to lean towards generating hyper-real and dramatic images. Natural causes
+   * the model to produce more natural, less hyper-real looking images. This param is
+   * only supported for dall-e-3. natural or vivid
+   */
   style?: NonNullable<ImageGenerateParamsNonStreaming["style"]> | null;
+  /**
+   * A unique identifier representing your end-user, which can help OpenAI to monitor
+   * and detect abuse.
+   */
   user?: string | null;
 }
 

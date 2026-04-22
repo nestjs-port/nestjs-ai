@@ -35,8 +35,6 @@ export interface RewriteQueryTransformerProps {
  * This transformer is useful when the user query is verbose, ambiguous, or contains
  * irrelevant information that may affect the quality of the search results.
  *
- * @author Thomas Vitale
- * @since 1.0.0
  * @see https://arxiv.org/pdf/2305.14283
  */
 export class RewriteQueryTransformer extends QueryTransformer {

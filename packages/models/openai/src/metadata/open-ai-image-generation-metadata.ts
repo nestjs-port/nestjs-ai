@@ -32,7 +32,6 @@ export class OpenAiImageGenerationMetadata implements ImageGenerationMetadata {
 
   /**
    * Gets the revised prompt that was used for image generation.
-   *
    * @returns the revised prompt, or null if not available
    */
   get revisedPrompt(): string | null {

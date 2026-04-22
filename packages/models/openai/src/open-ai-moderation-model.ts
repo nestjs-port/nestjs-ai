@@ -45,6 +45,12 @@ export interface OpenAiModerationModelProps {
   options?: OpenAiModerationOptions | null;
 }
 
+/**
+ * OpenAI SDK Moderation Model implementation.
+ *
+ * This model provides content moderation capabilities using the OpenAI Moderation API
+ * through the official OpenAI Java SDK.
+ */
 export class OpenAiModerationModel implements ModerationModel {
   private readonly logger = LoggerFactory.getLogger(OpenAiModerationModel.name);
 

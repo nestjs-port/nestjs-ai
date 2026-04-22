@@ -19,9 +19,6 @@ import { DefaultToolDefinition } from "./default-tool-definition";
 
 /**
  * Definition used by the AI model to determine when and how to call the tool.
- *
- * @author Thomas Vitale
- * @since 1.0.0
  */
 export interface ToolDefinition {
   /**

@@ -26,12 +26,17 @@ import {
 export type OpenAiEmbeddingCreateParams = EmbeddingCreateParams;
 
 export interface OpenAiEmbeddingOptionsProps extends AbstractOpenAiOptionsProps {
+  /**
+   * An identifier for the caller or end user of the operation. This may be used for
+   * tracking or rate-limiting purposes.
+   */
   user?: string | null;
   dimensions?: number | null;
 }
 
 /**
- * Configuration information for the Embedding Model implementation using the OpenAI Node SDK.
+ * Configuration information for the Embedding Model implementation using the OpenAI Java
+ * SDK.
  */
 export class OpenAiEmbeddingOptions extends AbstractOpenAiOptions {
   static readonly DEFAULT_EMBEDDING_MODEL = "text-embedding-ada-002";

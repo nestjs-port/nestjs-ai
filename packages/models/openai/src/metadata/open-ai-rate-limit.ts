@@ -19,7 +19,7 @@ import { ms } from "@nestjs-port/core";
 import type { RateLimit } from "@nestjs-ai/model";
 
 /**
- * Rate limit metadata implementation for the OpenAI SDK.
+ * {@link RateLimit} implementation for {@literal OpenAI SDK}.
  *
  * @see https://developers.openai.com/api/docs/guides/rate-limits/#rate-limits-in-headers
  */

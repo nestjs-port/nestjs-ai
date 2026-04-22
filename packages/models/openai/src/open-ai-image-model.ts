@@ -47,6 +47,9 @@ export interface OpenAiImageModelProps {
   observationRegistry?: ObservationRegistry | null;
 }
 
+/**
+ * Image Model implementation using the OpenAI Java SDK.
+ */
 export class OpenAiImageModel implements ImageModel {
   private static readonly DEFAULT_MODEL_NAME =
     OpenAiImageOptions.DEFAULT_IMAGE_MODEL;
@@ -76,6 +79,10 @@ export class OpenAiImageModel implements ImageModel {
       props.observationRegistry ?? NoopObservationRegistry.INSTANCE;
   }
 
+  /**
+   * Gets the image options for this model.
+   * @returns the image options
+   */
   get options(): OpenAiImageOptions {
     return this._options;
   }
@@ -146,6 +153,10 @@ export class OpenAiImageModel implements ImageModel {
       });
   }
 
+  /**
+   * Use the provided convention for reporting observation data
+   * @param observationConvention The provided convention
+   */
   setObservationConvention(
     observationConvention: ImageModelObservationConvention,
   ): void {

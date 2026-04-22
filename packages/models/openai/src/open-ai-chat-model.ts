@@ -81,6 +81,9 @@ export interface OpenAiChatModelProps {
   toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate | null;
 }
 
+/**
+ * Chat Model implementation using the OpenAI Java SDK.
+ */
 export class OpenAiChatModel extends ChatModel {
   private static readonly DEFAULT_MODEL_NAME =
     OpenAiChatOptions.DEFAULT_CHAT_MODEL;
@@ -135,6 +138,10 @@ export class OpenAiChatModel extends ChatModel {
       new DefaultToolExecutionEligibilityPredicate();
   }
 
+  /**
+   * Gets the chat options for this model.
+   * @returns the chat options
+   */
   get options(): OpenAiChatOptions {
     return this._options;
   }
@@ -144,6 +151,12 @@ export class OpenAiChatModel extends ChatModel {
     return this.internalCall(requestPrompt, null);
   }
 
+  /**
+   * Internal method to handle chat completion calls with tool execution support.
+   * @param prompt the prompt for the chat completion
+   * @param previousChatResponse the previous chat response for accumulating usage
+   * @returns the chat response
+   */
   private async internalCall(
     prompt: Prompt,
     previousChatResponse: ChatResponse | null,
@@ -245,6 +258,11 @@ export class OpenAiChatModel extends ChatModel {
     return this.internalStream(requestPrompt, null);
   }
 
+  /**
+   * Safely extracts the assistant message from a chat response.
+   * @param response the chat response
+   * @returns the assistant message, or null if not available
+   */
   public safeAssistantMessage(
     response: ChatResponse | null,
   ): AssistantMessage | null {
@@ -255,6 +273,13 @@ export class OpenAiChatModel extends ChatModel {
     return generation ? generation.output : null;
   }
 
+  /**
+   * Internal method to handle streaming chat completion calls with tool execution
+   * support.
+   * @param prompt the prompt for the chat completion
+   * @param previousChatResponse the previous chat response for accumulating usage
+   * @returns a Flux of chat responses
+   */
   private internalStream(
     prompt: Prompt,
     previousChatResponse: ChatResponse | null,
@@ -520,6 +545,11 @@ export class OpenAiChatModel extends ChatModel {
       .build();
   }
 
+  /**
+   * Convert the ChatCompletionChunk into a ChatCompletion. The Usage is set to null.
+   * @param chunk the ChatCompletionChunk to convert
+   * @returns the ChatCompletion
+   */
   private chunkToChatCompletion(chunk: ChatCompletionChunk): ChatCompletion {
     return {
       id: chunk.id,
@@ -632,6 +662,11 @@ export class OpenAiChatModel extends ChatModel {
     });
   }
 
+  /**
+   * Builds the request prompt by merging runtime options with default options.
+   * @param prompt the original prompt
+   * @returns the prompt with merged options
+   */
   buildRequestPrompt(prompt: Prompt): Prompt {
     const requestBuilder = this._options.mutate();
 
@@ -653,6 +688,12 @@ export class OpenAiChatModel extends ChatModel {
     return new Prompt(prompt.instructions, requestOptions);
   }
 
+  /**
+   * Creates a chat completion request from the given prompt.
+   * @param prompt the prompt containing messages and options
+   * @param stream whether this is a streaming request
+   * @returns the chat completion create parameters
+   */
   createRequest(prompt: Prompt, stream: boolean): ChatCompletionCreateParams {
     const chatCompletionMessageParams = prompt.instructions.flatMap((message) =>
       this.toMessageParams(message),
@@ -1006,6 +1047,10 @@ export class OpenAiChatModel extends ChatModel {
     return this._options.copy();
   }
 
+  /**
+   * Use the provided convention for reporting observation data
+   * @param observationConvention The provided convention
+   */
   setObservationConvention(
     observationConvention: ChatModelObservationConvention,
   ): void {
@@ -1014,6 +1059,11 @@ export class OpenAiChatModel extends ChatModel {
   }
 }
 
+/**
+ * Helper class to merge streaming tool calls that arrive in pieces across multiple
+ * chunks. In OpenAI streaming, a tool call's ID, name, and arguments can arrive in
+ * separate chunks.
+ */
 class ToolCallBuilder {
   private id = "";
   private type = "function";

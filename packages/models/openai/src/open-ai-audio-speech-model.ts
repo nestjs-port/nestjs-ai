@@ -39,6 +39,9 @@ export interface OpenAiAudioSpeechModelProps {
   options?: OpenAiAudioSpeechOptions | null;
 }
 
+/**
+ * OpenAI audio speech client implementation using the OpenAI Java SDK.
+ */
 export class OpenAiAudioSpeechModel extends TextToSpeechModel {
   private static readonly DEFAULT_MODEL_NAME =
     OpenAiAudioSpeechOptions.DEFAULT_SPEECH_MODEL;

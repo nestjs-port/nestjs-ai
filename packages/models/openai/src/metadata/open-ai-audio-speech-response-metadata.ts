@@ -24,6 +24,9 @@ import {
 
 import { OpenAiRateLimit } from "./open-ai-rate-limit";
 
+/**
+ * Audio speech metadata implementation for OpenAI using the OpenAI Java SDK.
+ */
 export class OpenAiAudioSpeechResponseMetadata extends TextToSpeechResponseMetadata {
   static readonly NULL = new OpenAiAudioSpeechResponseMetadata();
 

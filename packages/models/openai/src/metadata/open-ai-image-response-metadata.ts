@@ -25,7 +25,6 @@ import type { ImagesResponse } from "openai/resources/images";
 export class OpenAiImageResponseMetadata extends ImageResponseMetadata {
   /**
    * Creates metadata from an ImagesResponse.
-   *
    * @param imagesResponse the OpenAI images response
    * @returns the metadata instance
    */

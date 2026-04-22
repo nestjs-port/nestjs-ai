@@ -22,6 +22,7 @@ import { GoogleGenAiChatModel } from "@nestjs-ai/model-google-genai";
 import {
   GoogleGenAiCachedContentService,
   GoogleGenAiChatModelModule,
+  type GoogleGenAiChatOptions,
   type GoogleGenAiChatProperties,
 } from "@nestjs-ai/model-google-genai";
 import { ObservationFilters } from "@nestjs-port/core";
@@ -154,7 +155,7 @@ describe("GoogleGenAiChatModelModule", () => {
       }).compile();
 
       const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
-      const defaultOptions = chatModel.defaultOptions;
+      const defaultOptions = chatModel.defaultOptions as GoogleGenAiChatOptions;
 
       expect(defaultOptions.model).toBe("gemini-2.0-flash");
       expect(defaultOptions.temperature).toBe(0.2);

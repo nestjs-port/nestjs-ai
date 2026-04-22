@@ -238,6 +238,31 @@ describe("MethodToolCallbackGenericTypes", () => {
     expect(JSON.parse(result)).toBe("1 entries processed {foo=bar}");
   });
 
+  it("throws when required tool context is missing", async () => {
+    const testObject = new TestGenericClass();
+
+    const toolDefinition = DefaultToolDefinition.builder()
+      .name("processToolContext")
+      .description("Process tool context")
+      .inputSchema("{}")
+      .build();
+
+    const callback = MethodToolCallback.builder()
+      .toolDefinition(toolDefinition)
+      .toolMethod(testObject.processStringListInToolContext)
+      .toolObject(testObject)
+      .toolInputSchema(
+        z.object({
+          toolContext: ToolContextSchema,
+        }),
+      )
+      .build();
+
+    await expect(callback.call("{}")).rejects.toThrow(
+      "ToolContext is required by the method as an argument",
+    );
+  });
+
   it("prefers runtime tool context over input toolContext field", async () => {
     const testObject = new TestGenericClass();
 

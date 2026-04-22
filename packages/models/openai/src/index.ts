@@ -29,12 +29,17 @@ export {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
 } from "./open-ai-audio-speech-options";
+export {
+  OpenAiAudioTranscriptionModel,
+  type OpenAiAudioTranscriptionModelProps,
+} from "./open-ai-audio-transcription-model";
 export { OpenAiChatModel } from "./open-ai-chat-model";
 export { OpenAiChatOptions } from "./open-ai-chat-options";
 export {
   OpenAiEmbeddingModel,
   type OpenAiEmbeddingModelProps,
 } from "./open-ai-embedding-model";
+export type { OpenAiClient } from "./open-ai-client";
 export {
   type OpenAiEmbeddingCreateParams,
   OpenAiEmbeddingOptions,
@@ -48,4 +53,12 @@ export {
   OpenAiImageOptions,
   type OpenAiImageOptionsProps,
 } from "./open-ai-image-options";
+export {
+  OpenAiModerationOptions,
+  type OpenAiModerationOptionsProps,
+} from "./open-ai-moderation-options";
+export {
+  OpenAiModerationModel,
+  type OpenAiModerationModelProps,
+} from "./open-ai-moderation-model";
 export * from "./setup";

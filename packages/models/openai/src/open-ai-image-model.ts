@@ -32,7 +32,7 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { AzureOpenAI, OpenAI } from "openai";
+import type { OpenAiClient } from "./open-ai-client";
 
 import {
   OpenAiImageGenerationMetadata,
@@ -42,7 +42,7 @@ import { OpenAiImageOptions } from "./open-ai-image-options";
 import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
 
 export interface OpenAiImageModelProps {
-  openAiClient?: OpenAI | AzureOpenAI | null;
+  openAiClient?: OpenAiClient | null;
   options?: OpenAiImageOptions | null;
   observationRegistry?: ObservationRegistry | null;
 }
@@ -56,7 +56,7 @@ export class OpenAiImageModel implements ImageModel {
 
   private readonly logger = LoggerFactory.getLogger(OpenAiImageModel.name);
 
-  private readonly _openAiClient: OpenAI | AzureOpenAI;
+  private readonly _openAiClient: OpenAiClient;
   private readonly _options: OpenAiImageOptions;
   private readonly _observationRegistry: ObservationRegistry;
   private _observationConvention: ImageModelObservationConvention =

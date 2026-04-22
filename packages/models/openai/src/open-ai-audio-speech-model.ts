@@ -16,7 +16,6 @@
 
 import assert from "node:assert/strict";
 import { from, type Observable } from "rxjs";
-import type { AzureOpenAI, OpenAI } from "openai";
 import type { SpeechCreateParams } from "openai/resources/audio";
 import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import {
@@ -31,11 +30,12 @@ import {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
 } from "./open-ai-audio-speech-options";
+import type { OpenAiClient } from "./open-ai-client";
 import { OpenAiAudioSpeechResponseMetadata } from "./metadata";
 import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
 
 export interface OpenAiAudioSpeechModelProps {
-  openAiClient?: OpenAI | AzureOpenAI | null;
+  openAiClient?: OpenAiClient | null;
   options?: OpenAiAudioSpeechOptions | null;
 }
 
@@ -49,7 +49,7 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
     OpenAiAudioSpeechModel.name,
   );
 
-  private readonly _openAiClient: OpenAI | AzureOpenAI;
+  private readonly _openAiClient: OpenAiClient;
   private readonly _defaultOptions: OpenAiAudioSpeechOptions;
 
   constructor(props: OpenAiAudioSpeechModelProps = {}) {

@@ -52,7 +52,7 @@ import {
   type ObservationRegistry,
   StringUtils,
 } from "@nestjs-port/core";
-import type { AzureOpenAI, OpenAI } from "openai";
+import type { OpenAI } from "openai";
 import type {
   ChatCompletion,
   ChatCompletionAssistantMessageParam,
@@ -71,8 +71,7 @@ import { defer, EMPTY, from, Observable } from "rxjs";
 import { bufferCount, map, switchMap, toArray } from "rxjs/operators";
 import { OpenAiChatOptions } from "./open-ai-chat-options";
 import { OpenAiSetup } from "./setup";
-
-type OpenAiClient = OpenAI | AzureOpenAI;
+import { OpenAiClient } from "./open-ai-client";
 
 export interface OpenAiChatModelProps {
   client?: OpenAiClient | null;

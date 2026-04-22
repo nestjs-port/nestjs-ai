@@ -47,6 +47,10 @@ export interface ChatClient {
 
   prompt(prompt: Prompt): ChatClient.ChatClientRequestSpec;
 
+  prompt(
+    props: ChatClient.ChatClientRequestProps,
+  ): ChatClient.ChatClientRequestSpec;
+
   mutate(): ChatClient.Builder;
 }
 
@@ -192,6 +196,12 @@ export namespace ChatClient {
     chatResponse(): Observable<ChatResponse>;
 
     content(): Observable<string>;
+
+    chatClientResponseIterable(): AsyncIterable<ChatClientResponse>;
+
+    chatResponseIterable(): AsyncIterable<ChatResponse>;
+
+    contentIterable(): AsyncIterable<string>;
   }
 
   export interface ChatClientRequestSpec {
@@ -255,6 +265,43 @@ export namespace ChatClient {
     call(): CallResponseSpec;
 
     stream(): StreamResponseSpec;
+  }
+
+  export type ChatClientRequestPropsParams =
+    | Map<string, unknown>
+    | Record<string, unknown>;
+
+  export interface ChatClientRequestUserProps {
+    text: string | Buffer;
+    charset?: BufferEncoding;
+    params?: ChatClientRequestPropsParams;
+    metadata?: ChatClientRequestPropsParams;
+    media?: Media[];
+  }
+
+  export interface ChatClientRequestSystemProps {
+    text: string | Buffer;
+    charset?: BufferEncoding;
+    params?: ChatClientRequestPropsParams;
+    metadata?: ChatClientRequestPropsParams;
+  }
+
+  export interface ChatClientRequestAdvisorProps {
+    advisors?: Advisor[];
+    params?: ChatClientRequestPropsParams;
+  }
+
+  export interface ChatClientRequestProps {
+    user?: string | Buffer | ChatClientRequestUserProps;
+    system?: string | Buffer | ChatClientRequestSystemProps;
+    messages?: Message[];
+    advisors?: Advisor[] | ChatClientRequestAdvisorProps;
+    tools?: ToolObjectInstance[];
+    toolCallbacks?: ToolCallback[] | ToolCallbackProvider[];
+    toolNames?: string[];
+    toolContext?: ChatClientRequestPropsParams;
+    options?: ChatOptions.Builder;
+    templateRenderer?: TemplateRenderer;
   }
 
   export interface Builder {

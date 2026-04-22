@@ -15,6 +15,7 @@
  */
 
 import type { TextToSpeechOptions } from "@nestjs-ai/model";
+import type { SpeechCreateParams } from "openai/resources/audio";
 
 import {
   AbstractOpenAiOptions,
@@ -24,7 +25,7 @@ import {
 export interface OpenAiAudioSpeechOptionsProps extends AbstractOpenAiOptionsProps {
   input?: string | null;
   voice?: string | null;
-  responseFormat?: string | null;
+  responseFormat?: SpeechCreateParams["response_format"] | null;
   speed?: number | null;
 }
 
@@ -37,12 +38,13 @@ export class OpenAiAudioSpeechOptions
 {
   static readonly DEFAULT_SPEECH_MODEL = "gpt-4o-mini-tts";
   static readonly DEFAULT_VOICE = "alloy";
-  static readonly DEFAULT_RESPONSE_FORMAT = "mp3";
+  static readonly DEFAULT_RESPONSE_FORMAT: SpeechCreateParams["response_format"] =
+    "mp3";
   static readonly DEFAULT_SPEED = 1.0;
 
   private _input: string | null = null;
   private _voice: string | null = null;
-  private _responseFormat: string | null = null;
+  private _responseFormat: SpeechCreateParams["response_format"] | null = null;
   private _speed: number | null = null;
 
   constructor(props: OpenAiAudioSpeechOptionsProps = {}) {
@@ -75,19 +77,12 @@ export class OpenAiAudioSpeechOptions
     this._voice = voice ?? null;
   }
 
-  get responseFormat(): string | null {
+  get responseFormat(): SpeechCreateParams["response_format"] | null {
     return this._responseFormat;
   }
 
-  setResponseFormat(responseFormat: string | null): void;
   setResponseFormat(
-    responseFormat: OpenAiAudioSpeechOptions.AudioResponseFormat | null,
-  ): void;
-  setResponseFormat(
-    responseFormat:
-      | string
-      | OpenAiAudioSpeechOptions.AudioResponseFormat
-      | null,
+    responseFormat: SpeechCreateParams["response_format"] | null,
   ): void {
     this._responseFormat = responseFormat ?? null;
   }
@@ -126,15 +121,6 @@ export namespace OpenAiAudioSpeechOptions {
     ASH = "ash",
   }
 
-  export enum AudioResponseFormat {
-    MP3 = "mp3",
-    OPUS = "opus",
-    AAC = "aac",
-    FLAC = "flac",
-    WAV = "wav",
-    PCM = "pcm",
-  }
-
   export class Builder {
     private readonly options = new OpenAiAudioSpeechOptions();
 
@@ -161,62 +147,6 @@ export namespace OpenAiAudioSpeechOptions {
       return this;
     }
 
-    merge(from: TextToSpeechOptions | null | undefined): this {
-      if (from == null) {
-        return this;
-      }
-      if (from instanceof OpenAiAudioSpeechOptions) {
-        if (from.baseUrl != null) {
-          this.options.setBaseUrl(from.baseUrl);
-        }
-        if (from.apiKey != null) {
-          this.options.setApiKey(from.apiKey);
-        }
-        if (from.azureADTokenProvider != null) {
-          this.options.setAzureADTokenProvider(from.azureADTokenProvider);
-        }
-        if (from.model != null) {
-          this.options.setModel(from.model);
-        }
-        if (from.deploymentName != null) {
-          this.options.setDeploymentName(from.deploymentName);
-        }
-        if (from.microsoftFoundryServiceVersion != null) {
-          this.options.setMicrosoftFoundryServiceVersion(
-            from.microsoftFoundryServiceVersion,
-          );
-        }
-        if (from.organizationId != null) {
-          this.options.setOrganizationId(from.organizationId);
-        }
-        this.options.setMicrosoftFoundry(from.microsoftFoundry);
-        this.options.setGitHubModels(from.gitHubModels);
-        if (from.timeout != null) {
-          this.options.setTimeout(from.timeout);
-        }
-        if (from.maxRetries != null) {
-          this.options.setMaxRetries(from.maxRetries);
-        }
-        if (from.fetchOptions != null) {
-          this.options.setFetchOptions(from.fetchOptions);
-        }
-        this.options.setCustomHeaders(from.customHeaders);
-        if (from.input != null) {
-          this.options.setInput(from.input);
-        }
-        if (from.voice != null) {
-          this.options.setVoice(from.voice);
-        }
-        if (from.responseFormat != null) {
-          this.options.setResponseFormat(from.responseFormat);
-        }
-        if (from.speed != null) {
-          this.options.setSpeed(from.speed);
-        }
-      }
-      return this;
-    }
-
     model(model: string | null): this {
       this.options.setModel(model);
       return this;
@@ -234,15 +164,8 @@ export namespace OpenAiAudioSpeechOptions {
       return this;
     }
 
-    responseFormat(responseFormat: string | null): this;
     responseFormat(
-      responseFormat: OpenAiAudioSpeechOptions.AudioResponseFormat | null,
-    ): this;
-    responseFormat(
-      responseFormat:
-        | string
-        | OpenAiAudioSpeechOptions.AudioResponseFormat
-        | null,
+      responseFormat: SpeechCreateParams["response_format"] | null,
     ): this {
       this.options.setResponseFormat(responseFormat);
       return this;

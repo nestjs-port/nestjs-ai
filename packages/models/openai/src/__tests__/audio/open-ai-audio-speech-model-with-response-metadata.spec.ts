@@ -27,14 +27,10 @@ describe("OpenAiAudioSpeechModelWithResponseMetadataTests", () => {
     // Set up header values matching the REST implementation test
     mockHeaders.set("x-ratelimit-limit-requests", "4000");
     mockHeaders.set("x-ratelimit-remaining-requests", "999");
-    mockHeaders.set("x-ratelimit-reset-requests", "231329"); // 2d16h15m29s
-    // in
-    // seconds
+    mockHeaders.set("x-ratelimit-reset-requests", "231329"); // 2d16h15m29s in seconds
     mockHeaders.set("x-ratelimit-limit-tokens", "725000");
     mockHeaders.set("x-ratelimit-remaining-tokens", "112358");
-    mockHeaders.set("x-ratelimit-reset-tokens", "100855"); // 27h55s451ms
-    // in
-    // seconds
+    mockHeaders.set("x-ratelimit-reset-tokens", "100855"); // 27h55s451ms in seconds
 
     // Create metadata from headers
     const speechResponseMetadata =
@@ -119,8 +115,7 @@ describe("OpenAiAudioSpeechModelWithResponseMetadataTests", () => {
 
     const metadata = OpenAiAudioSpeechResponseMetadata.from(mockHeaders);
 
-    // Should gracefully handle invalid values by returning EmptyRateLimit (0L not
-    // null)
+    // Should gracefully handle invalid values by returning EmptyRateLimit (0L not null)
     const rateLimit = metadata.rateLimit;
     expect(rateLimit).not.toBeNull();
     expect(rateLimit.requestsLimit).toBe(0);

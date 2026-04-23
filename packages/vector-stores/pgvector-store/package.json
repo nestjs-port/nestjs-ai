@@ -1,0 +1,60 @@
+{
+  "name": "@nestjs-ai/vector-store-pgvector",
+  "version": "0.0.0",
+  "private": false,
+  "description": "JSDbC-backed PostgreSQL pgvector vector store for NestJS AI",
+  "keywords": [
+    "ai",
+    "nestjs",
+    "pgvector",
+    "postgres",
+    "store",
+    "vector"
+  ],
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/vector-stores/pgvector-store"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*",
+    "@nestjs-port/core": "^0.0.4",
+    "@nestjs-port/jsdbc": "^0.0.4",
+    "@nestjs/common": "^11.1.11",
+    "@testcontainers/postgresql": "^11.13.0",
+    "pgvector": "^0.2.1",
+    "testcontainers": "^11.13.0"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "workspace:^",
+    "@nestjs-ai/model": "workspace:^",
+    "@nestjs-ai/vector-store": "workspace:^",
+    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/jsdbc": "^0.0.3",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "pgvector": "^0.2.0"
+  }
+}

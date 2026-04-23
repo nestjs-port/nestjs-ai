@@ -569,6 +569,36 @@ importers:
         specifier: ^0.0.3
         version: 0.0.3(@nestjs-port/core@0.0.4(rxjs@7.8.2))
 
+  packages/vector-stores/pgvector-store:
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../model
+      '@nestjs-ai/vector-store':
+        specifier: workspace:*
+        version: link:../../vector-store
+      '@nestjs-port/core':
+        specifier: ^0.0.4
+        version: 0.0.4(rxjs@7.8.2)
+      '@nestjs-port/jsdbc':
+        specifier: ^0.0.4
+        version: 0.0.4(586d50e82a56a5eb9195d450704da245)
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@testcontainers/postgresql':
+        specifier: ^11.13.0
+        version: 11.14.0
+      pgvector:
+        specifier: ^0.2.1
+        version: 0.2.1
+      testcontainers:
+        specifier: ^11.13.0
+        version: 11.14.0
+
   packages/vector-stores/redis-store:
     devDependencies:
       '@nestjs-ai/commons':
@@ -4066,6 +4096,10 @@ packages:
 
   pgpass@1.0.5:
     resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
+
+  pgvector@0.2.1:
+    resolution: {integrity: sha512-nKaQY9wtuiidwLMdVIce1O3kL0d+FxrigCVzsShnoqzOSaWWWOvuctb/sYwlai5cTwwzRSNa+a/NtN2kVZGNJw==}
+    engines: {node: '>= 18'}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -8845,6 +8879,8 @@ snapshots:
   pgpass@1.0.5:
     dependencies:
       split2: 4.2.0
+
+  pgvector@0.2.1: {}
 
   picocolors@1.1.1: {}
 

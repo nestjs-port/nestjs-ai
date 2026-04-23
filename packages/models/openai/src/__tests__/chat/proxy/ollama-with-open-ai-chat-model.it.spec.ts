@@ -31,7 +31,7 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { OpenAiChatModel } from "../../../open-ai-chat-model";
 import { OpenAiChatOptions } from "../../../open-ai-chat-options";
@@ -53,16 +53,19 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
   () => {
     LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
     const logger = LoggerFactory.getLogger("OllamaWithOpenAiChatModelIT");
+    let chatModel: OpenAiChatModel;
 
     const systemPromptResource = readFileSync(
       resolve(__dirname, "..", "system-message.st"),
     );
 
-    const chatModel = new OpenAiChatModel({
-      options: OpenAiChatOptions.builder()
-        .baseUrl(OLLAMA_BASE_URL)
-        .model(DEFAULT_OLLAMA_MODEL)
-        .build(),
+    beforeEach(() => {
+      chatModel = new OpenAiChatModel({
+        options: OpenAiChatOptions.builder()
+          .baseUrl(OLLAMA_BASE_URL)
+          .model(DEFAULT_OLLAMA_MODEL)
+          .build(),
+      });
     });
 
     it("role test", async () => {

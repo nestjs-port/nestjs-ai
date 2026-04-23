@@ -17,10 +17,13 @@
 import { OpenAiChatModel, OpenAiChatOptions } from "@nestjs-ai/model-openai";
 import { beforeAll, describe, it } from "vitest";
 import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared";
+import { ConsoleLoggerFactory } from "@nestjs-port/testing";
+import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiToolCallAdvisorIT", () => {
+  LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   let abstractIT: AbstractToolCallAdvisorIT;
 
   beforeAll(() => {

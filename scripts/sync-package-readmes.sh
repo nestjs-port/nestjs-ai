@@ -16,6 +16,7 @@ while IFS= read -r target; do
   count=$((count + 1))
 done < <(
   find "$repo_root/packages" \
+    -path "$repo_root/packages/integration-tests" -prune -o \
     -path '*/node_modules/*' -prune -o \
     -type f -name 'README.md' -print | sort
 )

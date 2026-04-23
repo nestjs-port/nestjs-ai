@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 
 import { LoggerFactory } from "@nestjs-port/core";
-import {Document, DocumentTransformer} from "@nestjs-ai/commons";
+import { Document, DocumentTransformer } from "@nestjs-ai/commons";
 import type { ChatModel } from "../../chat";
 import { PromptTemplate } from "../../chat";
 

@@ -33,7 +33,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)("MetadataTransformerIT", () => {
   const chatModel = new OpenAiChatModel({
-    options: OpenAiChatOptions.builder().apiKey( OPENAI_API_KEY ?? '' ).build(),
+    options: OpenAiChatOptions.builder()
+      .apiKey(OPENAI_API_KEY ?? "")
+      .build(),
   });
 
   const defaultContentFormatter = DefaultContentFormatter.builder()

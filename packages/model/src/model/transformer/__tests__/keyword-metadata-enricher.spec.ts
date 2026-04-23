@@ -23,9 +23,7 @@ import {
   Prompt,
   PromptTemplate,
 } from "../../../chat";
-import {
-  KeywordMetadataEnricher,
-} from "../keyword-metadata-enricher";
+import { KeywordMetadataEnricher } from "../keyword-metadata-enricher";
 import { describe, expect, it, vi } from "vitest";
 
 const CUSTOM_TEMPLATE = "Custom template: {context_str}";
@@ -263,9 +261,11 @@ describe("KeywordMetadataEnricher", () => {
 
   it("testApplyWithSingleDocument", async () => {
     const documents = [new Document("single content")];
-    const call = vi.fn().mockResolvedValue(
-      createResponse("single, keyword, test, document, content"),
-    );
+    const call = vi
+      .fn()
+      .mockResolvedValue(
+        createResponse("single, keyword, test, document, content"),
+      );
     const keywordMetadataEnricher = new KeywordMetadataEnricher({
       chatModel: createChatModel(call),
       keywordCount: 5,
@@ -284,9 +284,7 @@ describe("KeywordMetadataEnricher", () => {
     const document = new Document("content with existing metadata");
     document.metadata.existing_key = "existing_value";
     const documents = [document];
-    const call = vi
-      .fn()
-      .mockResolvedValue(createResponse("new, keywords"));
+    const call = vi.fn().mockResolvedValue(createResponse("new, keywords"));
     const keywordMetadataEnricher = new KeywordMetadataEnricher({
       chatModel: createChatModel(call),
       keywordCount: 2,

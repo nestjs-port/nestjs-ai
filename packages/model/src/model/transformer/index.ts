@@ -18,4 +18,7 @@ export {
   KeywordMetadataEnricher,
   type KeywordMetadataEnricherProps,
 } from "./keyword-metadata-enricher";
-export { SummaryMetadataEnricher, SummaryType } from "./summary-metadata-enricher";
+export {
+  SummaryMetadataEnricher,
+  SummaryType,
+} from "./summary-metadata-enricher";

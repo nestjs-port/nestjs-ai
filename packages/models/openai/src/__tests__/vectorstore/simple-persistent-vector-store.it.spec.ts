@@ -17,10 +17,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import {
-  type JsonMetadataGenerator,
-  JsonReader,
-} from "@nestjs-ai/commons";
+import { type JsonMetadataGenerator, JsonReader } from "@nestjs-ai/commons";
 import { SimpleVectorStore } from "@nestjs-ai/vector-store";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
@@ -38,7 +35,7 @@ class ProductMetadataGenerator implements JsonMetadataGenerator {
 describe.skipIf(!OPENAI_API_KEY)("SimplePersistentVectorStoreIT", () => {
   let workingDir: string;
 
-  const bikesJsonResource = resolve( __dirname, "bikes.json", );
+  const bikesJsonResource = resolve(__dirname, "bikes.json");
 
   const embeddingModel = new OpenAiEmbeddingModel({
     options: OpenAiEmbeddingOptions.builder()
@@ -78,9 +75,8 @@ describe.skipIf(!OPENAI_API_KEY)("SimplePersistentVectorStoreIT", () => {
     const vectorStore2 = SimpleVectorStore.builder(embeddingModel).build();
 
     await vectorStore2.load(tempFile);
-    const similaritySearch = await vectorStore2.similaritySearch(
-      "Velo 99 XR1 AXS",
-    );
+    const similaritySearch =
+      await vectorStore2.similaritySearch("Velo 99 XR1 AXS");
     expect(similaritySearch.length).toBeGreaterThan(0);
     expect(similaritySearch[0].metadata).toHaveProperty(
       "name",

@@ -15,7 +15,11 @@
  */
 
 import assert from "node:assert/strict";
-import {type Document, DocumentTransformer, MetadataMode} from "@nestjs-ai/commons";
+import {
+  type Document,
+  DocumentTransformer,
+  MetadataMode,
+} from "@nestjs-ai/commons";
 import type { ChatModel } from "../../chat";
 import { PromptTemplate } from "../../chat";
 
@@ -32,8 +36,7 @@ Summarize the key topics and entities of the section.
 
 Summary:`;
 
-  private static readonly SECTION_SUMMARY_METADATA_KEY =
-    "section_summary";
+  private static readonly SECTION_SUMMARY_METADATA_KEY = "section_summary";
 
   private static readonly NEXT_SECTION_SUMMARY_METADATA_KEY =
     "next_section_summary";
@@ -128,9 +131,8 @@ Summary:`;
       ] = documentSummaries[index + 1];
     }
     if (this._summaryTypes.includes(SummaryType.CURRENT)) {
-      summaryMetadata[
-        SummaryMetadataEnricher.SECTION_SUMMARY_METADATA_KEY
-      ] = documentSummaries[index];
+      summaryMetadata[SummaryMetadataEnricher.SECTION_SUMMARY_METADATA_KEY] =
+        documentSummaries[index];
     }
 
     return summaryMetadata;

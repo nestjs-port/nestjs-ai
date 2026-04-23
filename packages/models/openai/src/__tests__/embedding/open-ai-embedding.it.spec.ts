@@ -83,7 +83,9 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
           .build(),
         new TokenCountBatchingStrategy(),
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      "Tokens in a single document exceeds the maximum number of allowed input tokens",
+    );
   });
 
   it("embedding3 large", async () => {

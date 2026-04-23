@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
@@ -44,7 +45,7 @@ const DEFAULT_MODEL = "ai/gemma3:4B-F16";
 
 // @Disabled("Requires Docker Model Runner enabled. See
 // https://docs.docker.com/desktop/features/model-runner/")
-describe.skip("DockerModelRunnerWithOpenAiChatModel IT", () => {
+describe.skipIf(true)("DockerModelRunnerWithOpenAiChatModel IT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger(
     "DockerModelRunnerWithOpenAiChatModelIT",
@@ -77,7 +78,7 @@ describe.skip("DockerModelRunnerWithOpenAiChatModel IT", () => {
         body: JSON.stringify({ from: DEFAULT_MODEL }),
       },
     );
-    expect(response.status).toBe(200);
+    assert.equal(response.status, 200);
 
     logger.info(`${DEFAULT_MODEL} pulling competed!`);
   });
@@ -311,7 +312,7 @@ describe.skip("DockerModelRunnerWithOpenAiChatModel IT", () => {
   });
 
   // @Disabled("stream function call not supported yet")
-  it.skip("stream function call test", async () => {
+  it.skipIf(true)("stream function call test", async () => {
     const userMessage = new UserMessage({
       content:
         "What's the weather like in San Francisco, Tokyo, and Paris? Return the temperature in Celsius.",

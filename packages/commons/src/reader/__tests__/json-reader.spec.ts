@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { JsonReader } from "../json-reader.js";
 
 describe("JsonReader", () => {
-  const bikesJsonPath = join(__dirname, "bikes.json");
-  const personJsonPath = join(__dirname, "person.json");
-  const eventsJsonPath = join(__dirname, "events.json");
+  const bikesJsonPath = new URL("bikes.json", import.meta.url);
+  const personJsonPath = new URL("person.json", import.meta.url);
+  const eventsJsonPath = new URL("events.json", import.meta.url);
 
   it("load json array", async () => {
     const arrayResource = bikesJsonPath;

@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
   BeanOutputConverter,
@@ -51,7 +50,7 @@ describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
   const logger = LoggerFactory.getLogger("NvidiaWithOpenAiChatModelIT");
 
   const systemResource = readFileSync(
-    resolve(__dirname, "..", "system-message.st"),
+    new URL("../system-message.st", import.meta.url),
   );
 
   const chatModel = new OpenAiChatModel({

@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { Document } from "@nestjs-ai/commons";
 import { EmbeddingRequest, TokenCountBatchingStrategy } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
@@ -33,7 +32,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
   });
 
   const textSource = readFileSync(
-    resolve(__dirname, "text_source.txt"),
+    new URL("text_source.txt", import.meta.url),
     "utf8",
   );
 

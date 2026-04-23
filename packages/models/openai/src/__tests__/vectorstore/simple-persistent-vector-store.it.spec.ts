@@ -16,7 +16,6 @@
 
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
 import { type JsonMetadataGenerator, JsonReader } from "@nestjs-ai/commons";
 import { SimpleVectorStore } from "@nestjs-ai/vector-store";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -35,7 +34,7 @@ class ProductMetadataGenerator implements JsonMetadataGenerator {
 describe.skipIf(!OPENAI_API_KEY)("SimplePersistentVectorStoreIT", () => {
   let workingDir: string;
 
-  const bikesJsonResource = resolve(__dirname, "bikes.json");
+  const bikesJsonResource = new URL("bikes.json", import.meta.url);
 
   const embeddingModel = new OpenAiEmbeddingModel({
     options: OpenAiEmbeddingOptions.builder()

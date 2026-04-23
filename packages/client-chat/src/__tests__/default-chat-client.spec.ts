@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { Media, MediaFormat, type TemplateRenderer } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -132,12 +131,14 @@ function getCapturedPrompt(chatModel: ChatModel): Prompt {
 }
 
 const userPromptResource = readFileSync(
-  resolve(__dirname, "./user-prompt.txt"),
+  new URL("./user-prompt.txt", import.meta.url),
 );
 const systemPromptResource = readFileSync(
-  resolve(__dirname, "./system-prompt.txt"),
+  new URL("./system-prompt.txt", import.meta.url),
 );
-const tabbyCatResource = readFileSync(resolve(__dirname, "./tabby-cat.png"));
+const tabbyCatResource = readFileSync(
+  new URL("./tabby-cat.png", import.meta.url),
+);
 
 describe("DefaultChatClient", () => {
   describe("Constructor", () => {

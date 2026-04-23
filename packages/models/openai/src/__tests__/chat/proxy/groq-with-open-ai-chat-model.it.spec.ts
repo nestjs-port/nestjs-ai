@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
   BeanOutputConverter,
@@ -71,7 +70,7 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
   const logger = LoggerFactory.getLogger("GroqWithOpenAiChatModelIT");
 
   const systemPromptResource = readFileSync(
-    resolve(__dirname, "..", "system-message.st"),
+    new URL("../system-message.st", import.meta.url),
   );
 
   const chatModel = new OpenAiChatModel({

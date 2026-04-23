@@ -16,7 +16,6 @@
 
 import { readFileSync } from "node:fs";
 import { EOL } from "node:os";
-import { resolve } from "node:path";
 import {
   AdvisorParams,
   ChatClient,
@@ -48,7 +47,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("OpenAiChatClientIT");
   const systemTextResource = readFileSync(
-    resolve(__dirname, "../system-message.st"),
+    new URL("../system-message.st", import.meta.url),
   );
   const chatModel = new OpenAiChatModel({
     options: OpenAiChatOptions.builder()
@@ -344,7 +343,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it.each(["gpt-4o"])("multi modality embedded image", async (modelName) => {
-    const imageResource = readFileSync(resolve(__dirname, "../test.png"));
+    const imageResource = readFileSync(new URL("../test.png", import.meta.url));
 
     const response = await ChatClient.create(chatModel)
       .prompt()

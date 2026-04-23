@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
@@ -56,7 +55,7 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
     let chatModel: OpenAiChatModel;
 
     const systemPromptResource = readFileSync(
-      resolve(__dirname, "..", "system-message.st"),
+      new URL("../system-message.st", import.meta.url),
     );
 
     beforeEach(() => {
@@ -201,7 +200,7 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
     });
 
     it("multi modality embedded image", async () => {
-      const imageData = readFileSync(resolve(__dirname, "..", "test.png"));
+      const imageData = readFileSync(new URL("../test.png", import.meta.url));
 
       const userMessage = new UserMessage({
         content: "Explain what do you see on this picture?",

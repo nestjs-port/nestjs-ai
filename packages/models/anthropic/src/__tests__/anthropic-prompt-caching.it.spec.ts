@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type {
   Model as AnthropicModel,
   Usage as AnthropicSdkUsage,
@@ -57,7 +56,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
   function loadPrompt(filename: string): string {
     try {
       const basePrompt = readFileSync(
-        resolve(__dirname, "resources", filename),
+        new URL(`resources/${filename}`, import.meta.url),
         "utf8",
       );
       return `${basePrompt}\n\nTest execution timestamp: ${Date.now()}`;

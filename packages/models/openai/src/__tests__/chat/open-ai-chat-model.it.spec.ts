@@ -16,7 +16,6 @@
 
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
@@ -56,7 +55,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
   const logger = LoggerFactory.getLogger("OpenAiChatModelIT");
 
   const systemPromptResource = readFileSync(
-    resolve(__dirname, "system-message.st"),
+    new URL("system-message.st", import.meta.url),
   );
 
   const chatModel = new OpenAiChatModel({
@@ -489,7 +488,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
   });
 
   it("multi modality embedded image", async () => {
-    const imageResource = readFileSync(resolve(__dirname, "test.png"));
+    const imageResource = readFileSync(new URL("test.png", import.meta.url));
 
     const userMessage = new UserMessage({
       content: "Explain what do you see on this picture?",

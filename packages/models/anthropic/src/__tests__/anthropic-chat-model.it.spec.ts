@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { inspect } from "node:util";
 import type {
   Model as AnthropicModel,
@@ -66,7 +65,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatModelIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("AnthropicChatModelIT");
   const systemTextResource = readFileSync(
-    resolve(__dirname, "resources", "system-message.st"),
+    new URL("resources/system-message.st", import.meta.url),
     "utf8",
   );
 
@@ -537,7 +536,9 @@ Generate the filmography of 5 movies for Tom Hanks.
   });
 
   it("multi modality test", async () => {
-    const imageData = readFileSync(resolve(__dirname, "resources", "test.png"));
+    const imageData = readFileSync(
+      new URL("resources/test.png", import.meta.url),
+    );
 
     const userMessage = new UserMessage({
       content: "Explain what do you see on this picture?",
@@ -554,7 +555,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
   it("multi modality pdf test", async () => {
     const pdfData = readFileSync(
-      resolve(__dirname, "resources", "spring-ai-reference-overview.pdf"),
+      new URL("resources/spring-ai-reference-overview.pdf", import.meta.url),
     );
 
     const userMessage = new UserMessage({
@@ -799,7 +800,7 @@ Generate the filmography of 5 movies for Tom Hanks.
   it("test pdf citation", async () => {
     const document = AnthropicCitationDocument.builder()
       .pdfFile(
-        resolve(__dirname, "resources", "spring-ai-reference-overview.pdf"),
+        new URL("resources/spring-ai-reference-overview.pdf", import.meta.url),
       )
       .title("Spring AI Reference")
       .citationsEnabled(true)

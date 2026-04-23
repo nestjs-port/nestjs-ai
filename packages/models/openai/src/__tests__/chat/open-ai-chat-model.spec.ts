@@ -17,7 +17,7 @@
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import { Prompt, UserMessage } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { OpenAiChatModel } from "../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
@@ -77,16 +77,12 @@ describe("OpenAiChatModel", () => {
 
     const request = chatModel.createRequest(new Prompt("test", options), false);
     expect(request.tool_choice).toEqual(toolChoice);
-    expect(request.tool_choice).not.toBeNull();
-    if (
-      request.tool_choice == null ||
-      typeof request.tool_choice === "string"
-    ) {
+    const namedToolChoice = request.tool_choice;
+    assert.exists(namedToolChoice);
+    if (typeof namedToolChoice === "string") {
       throw new Error("Expected named tool choice to be present");
     }
-    expect(
-      (request.tool_choice as { function: { name: string } }).function.name,
-    ).toBe("my_function");
+    expect(namedToolChoice.function.name).toBe("my_function");
   });
 
   it("tool choice invalid json", () => {

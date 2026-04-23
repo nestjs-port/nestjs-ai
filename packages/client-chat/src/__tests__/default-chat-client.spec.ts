@@ -34,7 +34,7 @@ import {
 import { NoopObservationRegistry } from "@nestjs-port/core";
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import { defaultIfEmpty, lastValueFrom, type Observable, of } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import type { Advisor, BaseAdvisorChain } from "../advisor/index.js";
@@ -157,7 +157,7 @@ describe("DefaultChatClient", () => {
       const chatClient = new DefaultChatClientBuilder(
         createChatModel(),
       ).build();
-      expect(chatClient.prompt()).toBeDefined();
+      assert.exists(chatClient.prompt());
     });
 
     it("when prompt content is empty then throw", () => {
@@ -302,10 +302,10 @@ describe("DefaultChatClient", () => {
   describe("DefaultPromptUserSpec", () => {
     it("build prompt user spec", () => {
       const spec = new DefaultChatClient.DefaultPromptUserSpec();
-      expect(spec).toBeDefined();
-      expect(spec.mediaValue).toBeDefined();
-      expect(spec.paramsValue).toBeDefined();
-      expect(spec.metadataValue).toBeDefined();
+      assert.exists(spec);
+      assert.exists(spec.mediaValue);
+      assert.exists(spec.paramsValue);
+      assert.exists(spec.metadataValue);
       expect(spec.textValue).toBeNull();
     });
 
@@ -547,9 +547,9 @@ describe("DefaultChatClient", () => {
   describe("DefaultPromptSystemSpec", () => {
     it("build prompt system spec", () => {
       const spec = new DefaultChatClient.DefaultPromptSystemSpec();
-      expect(spec).toBeDefined();
-      expect(spec.paramsValue).toBeDefined();
-      expect(spec.metadataValue).toBeDefined();
+      assert.exists(spec);
+      assert.exists(spec.paramsValue);
+      assert.exists(spec.metadataValue);
       expect(spec.textValue).toBeNull();
     });
 
@@ -720,9 +720,9 @@ describe("DefaultChatClient", () => {
   describe("DefaultAdvisorSpec", () => {
     it("build advisor spec", () => {
       const spec = new DefaultChatClient.DefaultAdvisorSpec();
-      expect(spec).toBeDefined();
-      expect(spec.advisorsValue).toBeDefined();
-      expect(spec.paramsValue).toBeDefined();
+      assert.exists(spec);
+      assert.exists(spec.advisorsValue);
+      assert.exists(spec.paramsValue);
     });
 
     it("when advisor param key value then return", () => {
@@ -831,7 +831,7 @@ describe("DefaultChatClient", () => {
         createChatModel(),
       ).build();
       const spec = asRequestSpec(chatClient.prompt("question")).call();
-      expect(spec).toBeDefined();
+      assert.exists(spec);
     });
 
     it("build call response spec with null request", () => {
@@ -912,7 +912,7 @@ describe("DefaultChatClient", () => {
       const spec = asRequestSpec(chatClient.prompt("my question")).call();
 
       const chatClientResponse = await spec.chatClientResponse();
-      expect(chatClientResponse).toBeDefined();
+      assert.exists(chatClientResponse);
       expect(chatClientResponse.chatResponse?.result?.output.text).toBe(
         "response",
       );
@@ -1035,7 +1035,7 @@ describe("DefaultChatClient", () => {
       )
         .call()
         .responseEntity(new ListOutputConverter());
-      expect(responseEntity.response).not.toBeNull();
+      assert.exists(responseEntity.response);
       expect(responseEntity.entity).toBeNull();
     });
 
@@ -1049,7 +1049,7 @@ describe("DefaultChatClient", () => {
       )
         .call()
         .responseEntity(new ListOutputConverter());
-      expect(responseEntity.response).not.toBeNull();
+      assert.exists(responseEntity.response);
       expect(responseEntity.entity).toHaveLength(3);
     });
 
@@ -1074,8 +1074,8 @@ describe("DefaultChatClient", () => {
       )
         .call()
         .responseEntity(PersonSchema, Person);
-      expect(responseEntity.response).not.toBeNull();
-      expect(responseEntity.entity).not.toBeNull();
+      assert.exists(responseEntity.response);
+      assert.exists(responseEntity.entity);
       expect(responseEntity.entity?.name).toBe("James Bond");
     });
 
@@ -1138,7 +1138,7 @@ describe("DefaultChatClient", () => {
       const entity = await asRequestSpec(chatClient.prompt("my question"))
         .call()
         .entity(PersonSchema, Person);
-      expect(entity).not.toBeNull();
+      assert.exists(entity);
       expect((entity as Person).name).toBe("James Bond");
     });
 
@@ -1176,7 +1176,7 @@ describe("DefaultChatClient", () => {
         createChatModel(),
       ).build();
       const spec = asRequestSpec(chatClient.prompt("question")).stream();
-      expect(spec).toBeDefined();
+      assert.exists(spec);
     });
 
     it("build stream response spec with null request", () => {
@@ -1392,7 +1392,7 @@ describe("DefaultChatClient", () => {
         null,
         null,
       );
-      expect(spec).toBeDefined();
+      assert.exists(spec);
     });
 
     it("when chat model is null then throw", () => {
@@ -2094,7 +2094,7 @@ describe("DefaultChatClient", () => {
         observationConvention,
         advisorObservationConvention,
       );
-      expect(builder).toBeDefined();
+      assert.exists(builder);
     });
 
     it("when prompt with system user and options then return", () => {
@@ -2157,7 +2157,7 @@ describe("DefaultChatClient", () => {
       ).build();
       const spec = asRequestSpec(chatClient.prompt().messages([]));
       // Messages should not be modified from original state
-      expect(requestData(spec)._messages).toBeDefined();
+      assert.exists(requestData(spec)._messages);
     });
 
     it("when mutate builder then returns same type", () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { DefaultUsage } from "../default-usage.js";
 
 describe("DefaultUsage", () => {
@@ -245,7 +245,7 @@ describe("DefaultUsage", () => {
       totalTokens: 150,
     });
     const stringValue = String(usage);
-    expect(stringValue).toBeDefined();
+    assert.exists(stringValue);
 
     // Test with custom nativeUsage
     const usageWithNative = new DefaultUsage({
@@ -254,11 +254,11 @@ describe("DefaultUsage", () => {
       totalTokens: 150,
       nativeUsage: { custom: "value" },
     });
-    expect(String(usageWithNative)).toBeDefined();
+    assert.exists(String(usageWithNative));
 
     // Test with null values
     const usageWithNulls = new DefaultUsage({});
-    expect(String(usageWithNulls)).toBeDefined();
+    assert.exists(String(usageWithNulls));
   });
 
   it("test negative token values", () => {

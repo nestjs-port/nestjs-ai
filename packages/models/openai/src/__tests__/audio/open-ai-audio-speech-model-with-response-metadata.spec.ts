@@ -15,7 +15,7 @@
  */
 
 import { ms } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiAudioSpeechResponseMetadata } from "../../metadata/index.js";
 
@@ -37,11 +37,11 @@ describe("OpenAiAudioSpeechModelWithResponseMetadataTests", () => {
       OpenAiAudioSpeechResponseMetadata.from(mockHeaders);
 
     // Verify metadata is created
-    expect(speechResponseMetadata).not.toBeNull();
+    assert.exists(speechResponseMetadata);
 
     // Verify rate limit information
     const rateLimit = speechResponseMetadata.rateLimit;
-    expect(rateLimit).not.toBeNull();
+    assert.exists(rateLimit);
 
     const requestsLimit = rateLimit.requestsLimit;
     const tokensLimit = rateLimit.tokensLimit;
@@ -97,7 +97,7 @@ describe("OpenAiAudioSpeechModelWithResponseMetadataTests", () => {
 
     // Should return EmptyRateLimit when no headers present (returns 0L not null)
     const rateLimit = metadata.rateLimit;
-    expect(rateLimit).not.toBeNull();
+    assert.exists(rateLimit);
     expect(rateLimit.requestsLimit).toBe(0);
     expect(rateLimit.tokensLimit).toBe(0);
   });
@@ -117,7 +117,7 @@ describe("OpenAiAudioSpeechModelWithResponseMetadataTests", () => {
 
     // Should gracefully handle invalid values by returning EmptyRateLimit (0L not null)
     const rateLimit = metadata.rateLimit;
-    expect(rateLimit).not.toBeNull();
+    assert.exists(rateLimit);
     expect(rateLimit.requestsLimit).toBe(0);
     expect(rateLimit.requestsRemaining).toBe(0);
     expect(rateLimit.requestsReset).toBe(ms(0));

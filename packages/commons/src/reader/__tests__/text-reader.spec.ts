@@ -17,14 +17,14 @@
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { TextReader } from "../text-reader.js";
 
 describe("TextReader", () => {
   it("load text", async () => {
     const resource = new URL("text_source.txt", import.meta.url);
-    expect(resource).toBeDefined();
+    assert.exists(resource);
 
     const textReader = new TextReader({ resource });
     textReader.customMetadata.customKey = "Value";
@@ -46,7 +46,7 @@ describe("TextReader", () => {
   it("load text from byte array resource", async () => {
     // Test with default constructor
     const defaultByteArrayResource = Buffer.from("Test content", "utf8");
-    expect(defaultByteArrayResource).toBeDefined();
+    assert.exists(defaultByteArrayResource);
     const defaultTextReader = new TextReader({
       resource: defaultByteArrayResource,
     });
@@ -69,7 +69,7 @@ describe("TextReader", () => {
 
     // Test with custom description constructor
     const customByteArrayResource = Buffer.from("Another test content", "utf8");
-    expect(customByteArrayResource).toBeDefined();
+    assert.exists(customByteArrayResource);
     const customTextReader = new TextReader({
       resource: customByteArrayResource,
     });

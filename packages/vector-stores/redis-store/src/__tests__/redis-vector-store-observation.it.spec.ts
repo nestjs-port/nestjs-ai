@@ -25,7 +25,15 @@ import {
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  assert,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 
 import { RedisMetadataField } from "../redis-metadata-field.js";
 import { RedisVectorStore } from "../redis-vector-store.js";
@@ -106,6 +114,6 @@ describe("RedisVectorStoreObservationIT", () => {
     );
 
     // Just verify that we have registry
-    expect(observationRegistry).not.toBeNull();
+    assert.exists(observationRegistry);
   });
 });

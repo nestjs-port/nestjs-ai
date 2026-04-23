@@ -15,7 +15,7 @@
  */
 
 import { Prompt } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import type { Advisor } from "../../advisor/index.js";
 import { ChatClientAttributes } from "../../chat-client-attributes.js";
@@ -40,7 +40,7 @@ describe("ChatClientObservationContext", () => {
       .request(ChatClientRequest.builder().prompt(new Prompt("Hello")).build())
       .build();
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("when null request then throw", () => {

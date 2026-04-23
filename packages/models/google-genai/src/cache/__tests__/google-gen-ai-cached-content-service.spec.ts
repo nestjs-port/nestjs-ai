@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import assert from "node:assert/strict";
+import nodeAssert from "node:assert/strict";
 import type { Content } from "@google/genai";
 import { ms } from "@nestjs-port/core";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 import { CachedContentRequest } from "../cached-content-request.js";
 import { CachedContentUpdateRequest } from "../cached-content-update-request.js";
 import { CachedContentException } from "../google-gen-ai-cached-content-service.js";
@@ -53,17 +53,17 @@ describe("GoogleGenAiCachedContentService", () => {
 
     const result = service.create(request);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.name).toMatch(/^cachedContent\//);
     expect(result.model).toBe(model);
     expect(result.displayName).toBe(displayName);
     expect(result.ttl).toBe(ttl);
     expect(result.contents).toContainEqual(contextContent);
     expect(result.systemInstruction).toEqual(systemContent);
-    expect(result.createTime).toBeDefined();
+    assert.exists(result.createTime);
 
     // Verify it's stored
-    assert(result.name, "result.name must be defined");
+    nodeAssert(result.name, "result.name must be defined");
     expect(service.contains(result.name)).toBe(true);
     expect(service.size).toBe(1);
   });
@@ -81,12 +81,12 @@ describe("GoogleGenAiCachedContentService", () => {
       .build();
 
     const created = service.create(request);
-    assert(created.name, "created.name must be defined");
+    nodeAssert(created.name, "created.name must be defined");
     const name = created.name;
 
     const retrieved = service.get(name);
 
-    expect(retrieved).toBeDefined();
+    assert.exists(retrieved);
     expect(retrieved?.name).toBe(name);
     expect(retrieved?.model).toBe(created.model);
     expect(retrieved?.displayName).toBe(created.displayName);
@@ -110,7 +110,7 @@ describe("GoogleGenAiCachedContentService", () => {
       .build();
 
     const created = service.create(createRequest);
-    assert(created.name, "created.name must be defined");
+    nodeAssert(created.name, "created.name must be defined");
     const name = created.name;
 
     // Update with new TTL
@@ -119,12 +119,12 @@ describe("GoogleGenAiCachedContentService", () => {
 
     const updated = service.update(name, updateRequest);
 
-    expect(updated).toBeDefined();
+    assert.exists(updated);
     expect(updated.name).toBe(name);
     expect(updated.ttl).toBe(newTtl);
-    expect(updated.updateTime).toBeDefined();
-    assert(updated.updateTime, "updated.updateTime must be defined");
-    assert(created.createTime, "created.createTime must be defined");
+    assert.exists(updated.updateTime);
+    nodeAssert(updated.updateTime, "updated.updateTime must be defined");
+    nodeAssert(created.createTime, "created.createTime must be defined");
     expect(new Date(updated.updateTime).getTime()).toBeGreaterThanOrEqual(
       new Date(created.createTime).getTime(),
     );
@@ -156,7 +156,7 @@ describe("GoogleGenAiCachedContentService", () => {
       .build();
 
     const created = service.create(request);
-    assert(created.name, "created.name must be defined");
+    nodeAssert(created.name, "created.name must be defined");
     const name = created.name;
 
     expect(service.contains(name)).toBe(true);
@@ -190,7 +190,7 @@ describe("GoogleGenAiCachedContentService", () => {
 
     const page = service.list(10, undefined);
 
-    expect(page).toBeDefined();
+    assert.exists(page);
     expect(page.contents).toHaveLength(3);
     expect(page.hasNextPage).toBe(false);
   });
@@ -198,7 +198,7 @@ describe("GoogleGenAiCachedContentService", () => {
   it("should list empty cached content", () => {
     const page = service.list(10, undefined);
 
-    expect(page).toBeDefined();
+    assert.exists(page);
     expect(page.contents).toHaveLength(0);
     expect(page.hasNextPage).toBe(false);
   });
@@ -238,9 +238,9 @@ describe("GoogleGenAiCachedContentService", () => {
     const cached = service.create(request);
 
     expect(cached.expired).toBe(false);
-    expect(cached.remainingTtl).toBeDefined();
+    assert.exists(cached.remainingTtl);
     // Remaining TTL should be approximately 1 hour (within 1 hour tolerance)
-    assert(cached.remainingTtl != null, "cached.remainingTtl must be defined");
+    nodeAssert(cached.remainingTtl, "cached.remainingTtl must be defined");
     const remainingHours = cached.remainingTtl / 3_600_000;
     expect(remainingHours).toBeGreaterThan(0);
     expect(remainingHours).toBeLessThanOrEqual(1);

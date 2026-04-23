@@ -17,7 +17,7 @@
 import { readFileSync } from "node:fs";
 import { Document } from "@nestjs-ai/commons";
 import { EmbeddingRequest, TokenCountBatchingStrategy } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiEmbeddingModel } from "../../open-ai-embedding-model.js";
 import { OpenAiEmbeddingOptions } from "../../open-ai-embedding-options.js";
@@ -37,13 +37,13 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
   );
 
   it("default embedding", async () => {
-    expect(openAiSdkEmbeddingModel).not.toBeNull();
+    assert.exists(openAiSdkEmbeddingModel);
 
     const embeddingResponse = await openAiSdkEmbeddingModel.embedForResponse([
       "Hello World",
     ]);
     expect(embeddingResponse.results).toHaveLength(1);
-    expect(embeddingResponse.results[0]).not.toBeNull();
+    assert.exists(embeddingResponse.results[0]);
     expect(embeddingResponse.results[0]?.output).toHaveLength(1536);
     expect(embeddingResponse.metadata.usage.totalTokens).toBe(2);
     expect(embeddingResponse.metadata.usage.promptTokens).toBe(2);
@@ -55,7 +55,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
   });
 
   it("embedding batch documents", async () => {
-    expect(openAiSdkEmbeddingModel).not.toBeNull();
+    assert.exists(openAiSdkEmbeddingModel);
     const embeddings = await openAiSdkEmbeddingModel.embed(
       [
         new Document("Hello world"),
@@ -73,7 +73,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
   });
 
   it("embedding batch documents that exceed the limit", async () => {
-    expect(openAiSdkEmbeddingModel).not.toBeNull();
+    assert.exists(openAiSdkEmbeddingModel);
     await expect(
       openAiSdkEmbeddingModel.embed(
         [new Document("Hello World"), new Document(textSource)],
@@ -97,7 +97,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
       ),
     );
     expect(embeddingResponse.results).toHaveLength(1);
-    expect(embeddingResponse.results[0]).not.toBeNull();
+    assert.exists(embeddingResponse.results[0]);
     expect(embeddingResponse.results[0]?.output).toHaveLength(3072);
     expect(embeddingResponse.metadata.usage.totalTokens).toBe(2);
     expect(embeddingResponse.metadata.usage.promptTokens).toBe(2);
@@ -114,7 +114,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingIT", () => {
       ),
     );
     expect(embeddingResponse.results).toHaveLength(1);
-    expect(embeddingResponse.results[0]).not.toBeNull();
+    assert.exists(embeddingResponse.results[0]);
     expect(embeddingResponse.results[0]?.output).toHaveLength(1536);
 
     expect(embeddingResponse.metadata.usage.totalTokens).toBe(2);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 import {
   ExtractedTextFormatter,
@@ -84,7 +84,7 @@ describe("ParagraphPdfDocumentReader", () => {
 
       const documents = await reader.get();
 
-      expect(documents).toBeDefined();
+      assert.exists(documents);
       expect(documents).toHaveLength(2);
       expect(documents[0]?.metadata.title).toBe("Chapter 1");
       expect(documents[1]?.metadata.title).toBe("Chapter 3");

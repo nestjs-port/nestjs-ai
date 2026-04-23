@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { JsonReader } from "../json-reader.js";
 
@@ -25,7 +25,7 @@ describe("JsonReader", () => {
 
   it("load json array", async () => {
     const arrayResource = bikesJsonPath;
-    expect(arrayResource).toBeDefined();
+    assert.exists(arrayResource);
 
     const jsonReader = new JsonReader({
       resource: arrayResource,
@@ -41,7 +41,7 @@ describe("JsonReader", () => {
 
   it("load json object", async () => {
     const objectResource = personJsonPath;
-    expect(objectResource).toBeDefined();
+    assert.exists(objectResource);
 
     const jsonReader = new JsonReader({
       resource: objectResource,
@@ -57,7 +57,7 @@ describe("JsonReader", () => {
 
   it("load json array from pointer", async () => {
     const eventsResource = eventsJsonPath;
-    expect(eventsResource).toBeDefined();
+    assert.exists(eventsResource);
 
     const jsonReader = new JsonReader({
       resource: eventsResource,
@@ -74,7 +74,7 @@ describe("JsonReader", () => {
 
   it("load json object from pointer", async () => {
     const objectResource = personJsonPath;
-    expect(objectResource).toBeDefined();
+    assert.exists(objectResource);
 
     const jsonReader = new JsonReader({
       resource: objectResource,

@@ -17,7 +17,7 @@
 import { readFileSync } from "node:fs";
 import { Document } from "@nestjs-ai/commons";
 import { EmbeddingRequest, TokenCountBatchingStrategy } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiEmbeddingModel } from "../../open-ai-embedding-model.js";
 import { OpenAiEmbeddingOptions } from "../../open-ai-embedding-options.js";
@@ -37,13 +37,13 @@ describe.skipIf(!OPENAI_API_KEY)("Embedding", () => {
   );
 
   it("default embedding", async () => {
-    expect(embeddingModel).not.toBeNull();
+    assert.exists(embeddingModel);
 
     const embeddingResponse = await embeddingModel.embedForResponse([
       "Hello World",
     ]);
     expect(embeddingResponse.results).toHaveLength(1);
-    expect(embeddingResponse.results[0]).not.toBeNull();
+    assert.exists(embeddingResponse.results[0]);
     expect(embeddingResponse.results[0]?.output).toHaveLength(1536);
     expect(embeddingResponse.metadata.model).toBe("text-embedding-ada-002-v2");
     expect(embeddingResponse.metadata.usage.totalTokens).toBe(2);
@@ -53,7 +53,7 @@ describe.skipIf(!OPENAI_API_KEY)("Embedding", () => {
   });
 
   it("embedding batch documents", async () => {
-    expect(embeddingModel).not.toBeNull();
+    assert.exists(embeddingModel);
     const embeddings = await embeddingModel.embed(
       [
         new Document("Hello world"),
@@ -71,7 +71,7 @@ describe.skipIf(!OPENAI_API_KEY)("Embedding", () => {
   });
 
   it("embedding batch documents that exceed the limit", async () => {
-    expect(embeddingModel).not.toBeNull();
+    assert.exists(embeddingModel);
     await expect(
       embeddingModel.embed(
         [new Document("Hello World"), new Document(textSource)],
@@ -93,7 +93,7 @@ describe.skipIf(!OPENAI_API_KEY)("Embedding", () => {
       ),
     );
     expect(embeddingResponse.results).toHaveLength(1);
-    expect(embeddingResponse.results[0]).not.toBeNull();
+    assert.exists(embeddingResponse.results[0]);
     expect(embeddingResponse.results[0]?.output).toHaveLength(3072);
     expect(embeddingResponse.metadata.model).toBe("text-embedding-3-large");
     expect(embeddingResponse.metadata.usage.totalTokens).toBe(2);
@@ -112,7 +112,7 @@ describe.skipIf(!OPENAI_API_KEY)("Embedding", () => {
       ),
     );
     expect(embeddingResponse.results).toHaveLength(1);
-    expect(embeddingResponse.results[0]).not.toBeNull();
+    assert.exists(embeddingResponse.results[0]);
     expect(embeddingResponse.results[0]?.output).toHaveLength(1536);
 
     expect(embeddingResponse.metadata.model).toBe("text-embedding-3-small");

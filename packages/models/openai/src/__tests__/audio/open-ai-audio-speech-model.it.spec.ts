@@ -15,7 +15,7 @@
  */
 
 import { lastValueFrom, toArray } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   TextToSpeechPrompt,
@@ -37,14 +37,11 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await speechModel.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).toHaveLength(1);
 
     const speech = response.result;
-    expect(speech).not.toBeNull();
-    if (speech == null) {
-      throw new Error("Expected speech generation to be present");
-    }
+    assert.exists(speech);
     expect(speech.output.byteLength).toBeGreaterThan(0);
   });
 
@@ -71,7 +68,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await model.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).toHaveLength(1);
     expect(response.result?.output.byteLength).toBeGreaterThan(0);
   });
@@ -87,7 +84,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await model.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.byteLength).toBeGreaterThan(0);
   });
 
@@ -103,7 +100,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await model.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.byteLength).toBeGreaterThan(0);
   });
 
@@ -125,11 +122,11 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const responseFlux = speechModel.stream(prompt);
 
-    expect(responseFlux).not.toBeNull();
+    assert.exists(responseFlux);
     const responses: TextToSpeechResponse[] = await lastValueFrom(
       responseFlux.pipe(toArray()),
     );
-    expect(responses).not.toBeNull();
+    assert.exists(responses);
 
     // SDK doesn't support true streaming - should return single response
     expect(responses).toHaveLength(1);
@@ -159,7 +156,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await model.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).toHaveLength(1);
     expect(response.result?.output.byteLength).toBeGreaterThan(0);
   });
@@ -175,8 +172,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
     const metadata = response.metadata as OpenAiAudioSpeechResponseMetadata;
 
     // Metadata should be present with rate limit information
-    expect(metadata).not.toBeNull();
-    expect(metadata.rateLimit).not.toBeNull();
+    assert.exists(metadata);
+    assert.exists(metadata.rateLimit);
 
     // Rate limit values should be populated from response headers
     const hasRateLimitData =
@@ -200,7 +197,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await model.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).toHaveLength(1);
     expect(response.result?.output.byteLength).toBeGreaterThan(0);
   });
@@ -220,7 +217,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioSpeechModelIT", () => {
 
     const response = await model.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).toHaveLength(1);
     expect(response.result?.output.byteLength).toBeGreaterThan(0);
   });

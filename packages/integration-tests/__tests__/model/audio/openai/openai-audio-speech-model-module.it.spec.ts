@@ -24,7 +24,7 @@ import {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechProperties,
 } from "@nestjs-ai/model-openai";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 describe("OpenAiAudioSpeechModelModuleIT", () => {
   it("auto configuration enabled", async () => {
@@ -32,14 +32,14 @@ describe("OpenAiAudioSpeechModelModuleIT", () => {
       apiKey: "test-api-key",
     });
 
-    expect(moduleRef.get(AUDIO_SPEECH_MODEL_TOKEN)).toBeDefined();
+    assert.exists(moduleRef.get(AUDIO_SPEECH_MODEL_TOKEN));
 
     const model = moduleRef.get<OpenAiAudioSpeechModel>(
       AUDIO_SPEECH_MODEL_TOKEN,
     );
 
-    expect(model).not.toBeNull();
-    expect(model.defaultOptions).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.defaultOptions);
   });
 
   it("default properties applied", async () => {

@@ -16,7 +16,7 @@
 
 import { Prompt } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiChatModel } from "../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../open-ai-chat-options.js";
@@ -49,7 +49,7 @@ describe("OpenAiExtraBody", () => {
     ) as unknown as Record<string, unknown>;
 
     // Assert
-    expect(createParams).not.toBeNull();
+    assert.exists(createParams);
     expect(createParams).toHaveProperty("top_k");
     expect(createParams).toHaveProperty("repetition_penalty");
     expect(createParams).toHaveProperty("best_of");

@@ -15,7 +15,7 @@
  */
 
 import { Readable } from "node:stream";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
 import {
@@ -206,8 +206,8 @@ describe("ToolDecorator", () => {
       "getWeather",
     ) as ToolAnnotationMetadata;
 
-    expect(metadata.parameters).toBeDefined();
-    expect(metadata.returns).toBeDefined();
+    assert.exists(metadata.parameters);
+    assert.exists(metadata.returns);
     expect(
       metadata.parameters?.safeParse({ city: "seoul" }).success,
     ).toBeTruthy();
@@ -236,7 +236,7 @@ describe("ToolDecorator", () => {
       "contextEcho",
     ) as ToolAnnotationMetadata;
 
-    expect(metadata.parameters).toBeDefined();
+    assert.exists(metadata.parameters);
     expect(
       metadata.parameters?.safeParse({
         toolContext: new ToolContext({ foo: "bar" }),

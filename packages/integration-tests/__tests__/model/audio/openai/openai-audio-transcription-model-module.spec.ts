@@ -25,7 +25,7 @@ import {
   OpenAiAudioTranscriptionModelModule,
   type OpenAiAudioTranscriptionProperties,
 } from "@nestjs-ai/model-openai";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 
@@ -51,7 +51,7 @@ describe("OpenAiAudioTranscriptionModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN));
     });
 
     it("should apply feature properties to the audio transcription model options", async () => {
@@ -115,7 +115,7 @@ describe("OpenAiAudioTranscriptionModelModule", () => {
         imports: [featureModule],
       }).compile();
 
-      expect(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN));
 
       const exports = featureModule.exports as symbol[];
       expect(exports).toContain(AUDIO_TRANSCRIPTION_MODEL_TOKEN);
@@ -154,7 +154,7 @@ describe("OpenAiAudioTranscriptionModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN));
     });
 
     it("should support imports and inject for async factory", async () => {
@@ -198,7 +198,7 @@ describe("OpenAiAudioTranscriptionModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(AUDIO_TRANSCRIPTION_MODEL_TOKEN));
     });
 
     it("should default global to false for async", () => {

@@ -28,7 +28,7 @@ import {
 } from "@nestjs-ai/model-anthropic";
 import { ms, ObservationFilters } from "@nestjs-port/core";
 import { ObservationModule } from "@nestjs-port/observation";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 
@@ -54,7 +54,7 @@ describe("AnthropicChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(CHAT_MODEL_TOKEN));
     });
 
     it("should apply feature properties to the chat model options", async () => {
@@ -138,7 +138,7 @@ describe("AnthropicChatModelModule", () => {
         imports: [featureModule],
       }).compile();
 
-      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(CHAT_MODEL_TOKEN));
 
       const exports = featureModule.exports as symbol[];
       expect(exports).toContain(CHAT_MODEL_TOKEN);
@@ -175,7 +175,7 @@ describe("AnthropicChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN));
     });
 
     it("should support imports and inject for async factory", async () => {
@@ -215,7 +215,7 @@ describe("AnthropicChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get<ChatModel>(CHAT_MODEL_TOKEN));
     });
 
     it("should default global to false for async", () => {

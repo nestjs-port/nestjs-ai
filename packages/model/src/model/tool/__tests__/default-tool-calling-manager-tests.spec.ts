@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import {
   AssistantMessage,
   ChatResponse,
@@ -106,7 +106,7 @@ describe("DefaultToolCallingManagerTests", () => {
 
   it("when default arguments then return", async () => {
     const manager = new DefaultToolCallingManager();
-    expect(manager).not.toBeNull();
+    assert.exists(manager);
   });
 
   // RESOLVE TOOL DEFINITIONS
@@ -215,7 +215,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual([expectedToolResponse]);
   });
 
@@ -259,7 +259,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual([expectedToolResponse]);
     expect(result.returnDirect()).toBe(true);
   });
@@ -310,7 +310,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual(expectedToolResponses);
   });
 
@@ -352,7 +352,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual([expectedToolResponse]);
   });
 
@@ -402,7 +402,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual(expectedToolResponses);
     expect(result.returnDirect()).toBe(true);
   });
@@ -453,7 +453,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual(expectedToolResponses);
     expect(result.returnDirect()).toBe(false);
   });
@@ -498,7 +498,7 @@ describe("DefaultToolCallingManagerTests", () => {
     const toolResponseMsg = findToolResponseMessage(
       result.conversationHistory(),
     );
-    expect(toolResponseMsg).toBeDefined();
+    assert.exists(toolResponseMsg);
     expect(toolResponseMsg?.responses).toEqual([expectedToolResponse]);
   });
 });

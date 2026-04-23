@@ -27,7 +27,7 @@ import {
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import { firstValueFrom } from "rxjs";
 import { toArray } from "rxjs/operators";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 import { OpenAiChatModel } from "../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
@@ -61,7 +61,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelObservationIT", () => {
     expect((chatResponse.result?.output.text ?? "").length).toBeGreaterThan(0);
 
     const responseMetadata = chatResponse.metadata;
-    expect(responseMetadata).toBeDefined();
+    assert.exists(responseMetadata);
     if (responseMetadata == null) {
       throw new Error("Expected response metadata to be present");
     }
@@ -91,7 +91,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelObservationIT", () => {
 
     const lastChatResponse = responses[responses.length - 1];
     const responseMetadata = lastChatResponse.metadata;
-    expect(responseMetadata).toBeDefined();
+    assert.exists(responseMetadata);
     if (responseMetadata == null) {
       throw new Error("Expected response metadata to be present");
     }
@@ -112,7 +112,7 @@ async function validate(
     (entry) =>
       entry.context.name === DefaultChatModelObservationConvention.DEFAULT_NAME,
   );
-  expect(observation).toBeDefined();
+  assert.exists(observation);
   if (observation == null) {
     throw new Error("Expected observation context to be present");
   }

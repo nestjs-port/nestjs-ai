@@ -20,7 +20,7 @@ import type {
   ChatCompletionStreamOptions,
 } from "openai/resources/chat/completions";
 import type { ResponseFormatJSONSchema } from "openai/resources/shared";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
 class TestToolCallback extends ToolCallback {
@@ -593,13 +593,13 @@ describe("OpenAiChatOptions", () => {
     options.setOutputSchema(schema);
 
     const responseFormat = options.responseFormat;
-    expect(responseFormat).not.toBeNull();
-    if (responseFormat == null) {
-      throw new Error("Expected response format");
-    }
+    assert.exists(responseFormat);
 
     expect(responseFormat.type).toBe("json_schema");
-    const jsonSchemaResponseFormat = responseFormat as ResponseFormatJSONSchema;
+    if (responseFormat.type !== "json_schema") {
+      throw new Error("Expected json schema response format");
+    }
+    const jsonSchemaResponseFormat = responseFormat;
     expect(jsonSchemaResponseFormat.json_schema.schema).toEqual({
       type: "object",
       properties: {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import {
   AssistantMessage,
   ChatResponse,
@@ -63,7 +63,7 @@ describe("DefaultToolCallingManager", () => {
       "A test tool",
       "{}",
       (toolInput: string) => {
-        expect(toolInput).not.toBeNull();
+        assert.exists(toolInput);
         expect(toolInput).not.toBe("");
         return '{"result": "success"}';
       },
@@ -106,7 +106,7 @@ describe("DefaultToolCallingManager", () => {
       "A test tool",
       "{}",
       (toolInput: string) => {
-        expect(toolInput).not.toBeNull();
+        assert.exists(toolInput);
         expect(toolInput).not.toBe("");
         return '{"result": "success"}';
       },
@@ -249,7 +249,7 @@ describe("DefaultToolCallingManager", () => {
       "Test tool",
       "{}",
       (toolInput: string) => {
-        expect(toolInput).not.toBeNull();
+        assert.exists(toolInput);
         return '{"result": "handled"}';
       },
     );

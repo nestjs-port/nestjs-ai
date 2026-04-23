@@ -27,7 +27,7 @@ import {
   ObservationContext,
   type Tag,
 } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { Usage } from "../../../chat/metadata/usage.js";
 import { ModelUsageMetricsGenerator } from "../model-usage-metrics-generator.js";
 
@@ -237,7 +237,7 @@ describe("ModelUsageMetricsGenerator", () => {
       AiObservationMetricAttributes.TOKEN_TYPE.value,
       AiTokenType.INPUT.value,
     );
-    expect(inputCounter).toBeDefined();
+    assert.exists(inputCounter);
     expect(inputCounter?.hasTag("key1", "value1")).toBe(true);
     expect(inputCounter?.hasTag("key2", "value2")).toBe(true);
   });

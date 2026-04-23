@@ -20,7 +20,7 @@ import {
   AudioTranscriptionResponse,
 } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 import { OpenAiAudioTranscriptionModel } from "../../../open-ai-audio-transcription-model.js";
 
@@ -48,7 +48,7 @@ describe("TranscriptionModel", () => {
     const callSpy = vi
       .spyOn(model, "call")
       .mockImplementation(async (transcriptionRequest) => {
-        expect(transcriptionRequest).not.toBeNull();
+        assert.exists(transcriptionRequest);
         expect(transcriptionRequest.instructions).toBe(mockAudioFile);
         return response;
       });

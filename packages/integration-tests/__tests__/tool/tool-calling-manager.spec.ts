@@ -15,7 +15,6 @@
  */
 
 import "reflect-metadata";
-import assert from "node:assert/strict";
 import {
   type ChatResponse,
   DefaultToolCallingManager,
@@ -30,7 +29,7 @@ import {
 import { OpenAiChatModel, OpenAiChatOptions } from "@nestjs-ai/model-openai";
 import { firstValueFrom, from, of } from "rxjs";
 import { map, mergeMap, tap, toArray } from "rxjs/operators";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { Author } from "./domain/author.js";
 import { BookService } from "./domain/book-service.js";
@@ -85,7 +84,7 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
   ): Promise<void> {
     const chatResponse = (await openAiChatModel.call(prompt)) as ChatResponse;
 
-    expect(chatResponse).not.toBeNull();
+    assert.exists(chatResponse);
     expect(chatResponse.hasToolCalls()).toBe(true);
 
     const toolExecutionResult = await toolCallingManager.executeToolCalls(
@@ -107,7 +106,7 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
 
     const secondChatResponse = await openAiChatModel.call(secondPrompt);
 
-    expect(secondChatResponse).not.toBeNull();
+    assert.exists(secondChatResponse);
     expect(secondChatResponse.result?.output.text ?? "").not.toHaveLength(0);
     expect(secondChatResponse.result?.output.text ?? "").toContain(
       "The Hobbit",
@@ -151,7 +150,7 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
       ),
     );
 
-    expect(joinedTextResponse).not.toBeNull();
+    assert.exists(joinedTextResponse);
     expect(joinedTextResponse).not.toHaveLength(0);
     expect(joinedTextResponse).toContain("His Dark Materials");
     expect(joinedTextResponse).toContain("The Lion, the Witch and the Wardrob");

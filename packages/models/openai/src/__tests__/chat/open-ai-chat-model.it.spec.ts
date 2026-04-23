@@ -37,7 +37,7 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { OpenAiChatModel } from "../../open-ai-chat-model.js";
@@ -438,7 +438,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     const usage = chatResponse.metadata.usage;
 
     logger.info("Usage: %o", usage);
-    expect(usage).not.toBeNull();
+    assert.exists(usage);
     expect(usage).not.toBeInstanceOf(EmptyUsage);
     expect(usage).toBeInstanceOf(DefaultUsage);
     expect(usage.promptTokens).toBeGreaterThan(500);
@@ -476,7 +476,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       .usage;
 
     logger.info("Usage: %o", usage);
-    expect(usage).not.toBeNull();
+    assert.exists(usage);
     expect(usage).not.toBeInstanceOf(EmptyUsage);
     expect(usage).toBeInstanceOf(DefaultUsage);
     expect(usage.promptTokens).toBeGreaterThan(500);
@@ -575,7 +575,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       expect(response.result?.output.text).not.toBe("");
 
       const audio = response.result?.output.media[0]?.dataAsByteArray;
-      expect(audio).toBeDefined();
+      assert.exists(audio);
       if (audio == null) {
         throw new Error("Expected audio data to be present");
       }
@@ -646,7 +646,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       new Prompt("Tell me a joke", options),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
   });
 
   it("chat memory", async () => {
@@ -661,10 +661,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       new Prompt(await memory.get(conversationId)),
     );
 
-    expect(response1).not.toBeNull();
-    if (response1.result == null) {
-      throw new Error("Expected response1 result to be present");
-    }
+    assert.exists(response1);
+    assert.exists(response1.result);
     await memory.add(conversationId, response1.result.output);
 
     const userMessage2 = new UserMessage({ content: "What is my name?" });
@@ -673,10 +671,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       new Prompt(await memory.get(conversationId)),
     );
 
-    expect(response2).not.toBeNull();
-    if (response2.result == null) {
-      throw new Error("Expected response2 result to be present");
-    }
+    assert.exists(response2);
+    assert.exists(response2.result);
     await memory.add(conversationId, response2.result.output);
 
     expect(response2.results).toHaveLength(1);
@@ -744,7 +740,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       await chatMemory.add(conversationId, chatResponse.result.output);
     }
 
-    expect(chatResponse).not.toBeNull();
+    assert.exists(chatResponse);
     expect(chatResponse.result?.output.text).toContain("48");
 
     const newUserMessage = new UserMessage({
@@ -756,7 +752,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       new Prompt(await chatMemory.get(conversationId)),
     );
 
-    expect(newResponse).not.toBeNull();
+    assert.exists(newResponse);
     expect(newResponse.result?.output.text).toContain("6");
     expect(newResponse.result?.output.text).toContain("8");
   });

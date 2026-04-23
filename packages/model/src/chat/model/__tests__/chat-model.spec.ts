@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { AssistantMessage } from "../../messages/index.js";
 import { Prompt } from "../../prompt/index.js";
 import { ChatModel } from "../chat-model.js";
@@ -64,7 +64,7 @@ describe("ChatModel", () => {
     const chatModel = new TestChatModel();
     const callSpy = spyOnChatPrompt(chatModel).mockImplementation(
       (prompt: Prompt) => {
-        expect(prompt).toBeDefined();
+        assert.exists(prompt);
         expect(prompt.contents).toBe(userMessage);
         return Promise.resolve(response);
       },

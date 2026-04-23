@@ -25,7 +25,7 @@ import {
   OpenAiImageModelModule,
   type OpenAiImageProperties,
 } from "@nestjs-ai/model-openai";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 
@@ -51,7 +51,7 @@ describe("OpenAiImageModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(IMAGE_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(IMAGE_MODEL_TOKEN));
     });
 
     it("should apply feature properties to the image model options", async () => {
@@ -103,7 +103,7 @@ describe("OpenAiImageModelModule", () => {
         imports: [featureModule],
       }).compile();
 
-      expect(moduleRef.get(IMAGE_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(IMAGE_MODEL_TOKEN));
 
       const exports = featureModule.exports as symbol[];
       expect(exports).toContain(IMAGE_MODEL_TOKEN);
@@ -140,7 +140,7 @@ describe("OpenAiImageModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(IMAGE_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(IMAGE_MODEL_TOKEN));
     });
 
     it("should support imports and inject for async factory", async () => {
@@ -178,7 +178,7 @@ describe("OpenAiImageModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(IMAGE_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(IMAGE_MODEL_TOKEN));
     });
 
     it("should default global to false for async", () => {

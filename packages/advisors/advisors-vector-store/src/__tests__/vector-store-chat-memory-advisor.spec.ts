@@ -18,7 +18,7 @@ import { PromptTemplate } from "@nestjs-ai/model";
 import type { VectorStore } from "@nestjs-ai/vector-store";
 import type { SchedulerLike } from "rxjs";
 import { queueScheduler } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { VectorStoreChatMemoryAdvisor } from "../vector-store-chat-memory-advisor.js";
 
 function createVectorStore(): VectorStore {
@@ -95,7 +95,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
 
     const advisor = VectorStoreChatMemoryAdvisor.builder(vectorStore).build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with all valid parameters then success", () => {
@@ -110,7 +110,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(5)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when default conversation id is blank then throw", () => {
@@ -130,7 +130,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .conversationId("valid-id")
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with valid top k then success", () => {
@@ -140,7 +140,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(10)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with minimum top k then success", () => {
@@ -150,7 +150,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(1)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with large top k then success", () => {
@@ -160,7 +160,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(1000)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder called multiple times with same vector store then success", () => {
@@ -169,8 +169,8 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
     const advisor1 = VectorStoreChatMemoryAdvisor.builder(vectorStore).build();
     const advisor2 = VectorStoreChatMemoryAdvisor.builder(vectorStore).build();
 
-    expect(advisor1).toBeDefined();
-    expect(advisor2).toBeDefined();
+    assert.exists(advisor1);
+    assert.exists(advisor2);
     expect(advisor1).not.toBe(advisor2);
   });
 
@@ -182,7 +182,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .scheduler(customScheduler)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with custom system prompt template then success", () => {
@@ -193,7 +193,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .systemPromptTemplate(customTemplate)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with empty string conversation id then throw", () => {
@@ -223,7 +223,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .conversationId("conversation-id_123@domain.com")
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with max integer top k then success", () => {
@@ -233,7 +233,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(2147483647)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with negative top k then throw", () => {
@@ -258,7 +258,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .systemPromptTemplate(systemPromptTemplate)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder parameters set in different order then success", () => {
@@ -273,7 +273,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .conversationId("order-test")
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder with overridden parameters then use last value", () => {
@@ -286,7 +286,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(10) // This should override the first
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder reused then creates separate instances", () => {
@@ -301,8 +301,8 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
     const advisor1 = builder.build();
     const advisor2 = builder.build();
 
-    expect(advisor1).toBeDefined();
-    expect(advisor2).toBeDefined();
+    assert.exists(advisor1);
+    assert.exists(advisor2);
     expect(advisor1).not.toBe(advisor2);
   });
 
@@ -314,7 +314,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .conversationId(longId)
       .build();
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
   });
 
   it("when builder called with null after valid value then throw", () => {
@@ -341,7 +341,7 @@ describe("VectorStoreChatMemoryAdvisorTests", () => {
       .defaultTopK(10000)
       .build();
 
-    expect(advisor1).toBeDefined();
-    expect(advisor2).toBeDefined();
+    assert.exists(advisor1);
+    assert.exists(advisor2);
   });
 });

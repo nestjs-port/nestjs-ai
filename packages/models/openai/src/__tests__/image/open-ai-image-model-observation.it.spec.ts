@@ -24,7 +24,7 @@ import {
   ImagePrompt,
 } from "@nestjs-ai/model";
 import { TestObservationRegistry } from "@nestjs-port/testing";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 import { OpenAiImageModel } from "../../open-ai-image-model.js";
 import { OpenAiImageOptions } from "../../open-ai-image-options.js";
 
@@ -74,7 +74,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelObservationIT", () => {
         entry.context.name ===
         DefaultImageModelObservationConvention.DEFAULT_NAME,
     );
-    expect(observation).toBeDefined();
+    assert.exists(observation);
     if (observation == null) {
       throw new Error("Expected observation context to be present");
     }

@@ -41,7 +41,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelObservationIT", () => {
         apiKey: OPENAI_API_KEY,
         model: OpenAiImageOptions.DEFAULT_IMAGE_MODEL,
       }),
-      observationRegistry: observationRegistry as never,
+      observationRegistry: observationRegistry
     });
 
     observationRegistry.clear();

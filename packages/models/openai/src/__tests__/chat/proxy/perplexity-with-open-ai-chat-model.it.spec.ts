@@ -40,9 +40,7 @@ const PERPLEXITY_BASE_URL = "https://api.perplexity.ai";
 
 const DEFAULT_PERPLEXITY_MODEL = "llama-3.1-sonar-small-128k-online";
 
-// @EnabledIfEnvironmentVariable(named = "PERPLEXITY_API_KEY", matches = ".+")
-// @Disabled("Requires Perplexity credits")
-describe.skip("PerplexityWithOpenAiChatModelIT", () => {
+describe.skipIf(!PERPLEXITY_API_KEY)("PerplexityWithOpenAiChatModelIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("PerplexityWithOpenAiChatModelIT");
 

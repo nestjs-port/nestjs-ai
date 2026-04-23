@@ -42,7 +42,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingModelObservationIT", () => {
         apiKey: OPENAI_API_KEY,
         model: OpenAiEmbeddingOptions.DEFAULT_EMBEDDING_MODEL,
       }),
-      observationRegistry: observationRegistry as never,
+      observationRegistry: observationRegistry,
     });
 
     observationRegistry.clear();

@@ -30,4 +30,5 @@ export type { ResponseMetadata } from "./response-metadata.interface";
 export type { ResultMetadata } from "./result-metadata.interface";
 export { SimpleApiKey } from "./simple-api-key";
 export type { StreamingModel } from "./streaming-model.interface";
+export * from "./transformer";
 export * from "./tool";

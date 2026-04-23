@@ -41,6 +41,7 @@
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-port/core": "^0.0.3",
     "@nestjs-port/testing": "^0.0.2",
     "@nestjs/common": "^11.1.11",

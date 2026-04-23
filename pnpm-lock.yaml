@@ -439,6 +439,9 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-ai/vector-store':
+        specifier: workspace:*
+        version: link:../../vector-store
       '@nestjs-port/core':
         specifier: ^0.0.3
         version: 0.0.3(rxjs@7.8.2)

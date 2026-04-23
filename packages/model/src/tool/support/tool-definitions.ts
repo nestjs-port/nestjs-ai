@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { JsonSchemaGenerator } from "../../util";
-import type { ToolAnnotationMetadata } from "../annotation";
+import { JsonSchemaGenerator } from "../../util/index.js";
+import type { ToolAnnotationMetadata } from "../annotation/index.js";
 import type {
   DefaultToolDefinitionBuilder,
   ToolDefinition,
-} from "../definition";
-import { DefaultToolDefinition } from "../definition";
-import { ToolUtils } from "./tool-utils";
+} from "../definition/index.js";
+import { DefaultToolDefinition } from "../definition/index.js";
+import { ToolUtils } from "./tool-utils.js";
 
 export interface ToolMethodDefinition {
   methodName: string;

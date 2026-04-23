@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { AbstractResponseMetadata, type ResponseMetadata } from "../model";
+import {
+  AbstractResponseMetadata,
+  type ResponseMetadata,
+} from "../model/index.js";
 
 /**
  * Defines the metadata associated with a moderation response, extending a base response

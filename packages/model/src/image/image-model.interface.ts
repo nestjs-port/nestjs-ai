@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Model } from "../model";
-import type { ImagePrompt } from "./image-prompt";
-import type { ImageResponse } from "./image-response";
+import type { Model } from "../model/index.js";
+import type { ImagePrompt } from "./image-prompt.js";
+import type { ImageResponse } from "./image-response.js";
 
 export interface ImageModel extends Model<ImagePrompt, ImageResponse> {
   call(prompt: ImagePrompt): Promise<ImageResponse>;

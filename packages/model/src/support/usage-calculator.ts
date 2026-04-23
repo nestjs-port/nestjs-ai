@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type ChatResponse, DefaultUsage, type Usage } from "../chat";
+import { type ChatResponse, DefaultUsage, type Usage } from "../chat/index.js";
 
 /**
  * A utility class to provide support methods handling {@link Usage}.

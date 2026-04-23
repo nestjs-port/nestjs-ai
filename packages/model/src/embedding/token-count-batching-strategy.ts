@@ -24,7 +24,7 @@ import {
   TiktokenTokenCountEstimator,
   type TokenCountEstimator,
 } from "@nestjs-ai/commons";
-import type { BatchingStrategy } from "./batching-strategy.interface";
+import type { BatchingStrategy } from "./batching-strategy.interface.js";
 
 /**
  * Token count based strategy implementation for {@link BatchingStrategy}.

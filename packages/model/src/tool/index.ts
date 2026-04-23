@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-export * from "./annotation";
-export * from "./definition";
-export * from "./execution";
-export * from "./function";
-export * from "./metadata";
-export * from "./method";
-export * from "./observation";
-export * from "./resolution";
-export { StaticToolCallbackProvider } from "./static-tool-callback-provider";
-export * from "./support";
-export { ToolCallback } from "./tool-callback";
-export { ToolCallbackProvider } from "./tool-callback-provider";
+export * from "./annotation/index.js";
+export * from "./definition/index.js";
+export * from "./execution/index.js";
+export * from "./function/index.js";
+export * from "./metadata/index.js";
+export * from "./method/index.js";
+export * from "./observation/index.js";
+export * from "./resolution/index.js";
+export { StaticToolCallbackProvider } from "./static-tool-callback-provider.js";
+export * from "./support/index.js";
+export { ToolCallback } from "./tool-callback.js";
+export { ToolCallbackProvider } from "./tool-callback-provider.js";

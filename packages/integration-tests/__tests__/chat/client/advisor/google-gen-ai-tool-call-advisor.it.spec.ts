@@ -20,7 +20,7 @@ import {
   GoogleGenAiChatOptions,
 } from "@nestjs-ai/model-google-genai";
 import { beforeAll, describe, expect, it } from "vitest";
-import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared";
+import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared.js";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 

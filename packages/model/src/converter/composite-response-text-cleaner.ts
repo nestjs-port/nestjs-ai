@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ResponseTextCleaner } from "./response-text-cleaner";
+import type { ResponseTextCleaner } from "./response-text-cleaner.js";
 
 export class CompositeResponseTextCleaner implements ResponseTextCleaner {
   private readonly _cleaners: ResponseTextCleaner[];

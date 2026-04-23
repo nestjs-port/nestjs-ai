@@ -18,14 +18,14 @@ import { resolve } from "node:path";
 
 import {
   AudioTranscriptionPrompt,
-  AudioTranscriptionResponse,
+  type AudioTranscriptionResponse,
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiAudioTranscriptionModel } from "../../open-ai-audio-transcription-model";
-import { OpenAiAudioTranscriptionOptions } from "../../open-ai-audio-transcription-options";
+import { OpenAiAudioTranscriptionModel } from "../../open-ai-audio-transcription-model.js";
+import { OpenAiAudioTranscriptionOptions } from "../../open-ai-audio-transcription-options.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

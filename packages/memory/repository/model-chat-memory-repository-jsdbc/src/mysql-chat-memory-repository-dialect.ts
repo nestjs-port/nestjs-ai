@@ -15,7 +15,7 @@
  */
 
 import { sql } from "@nestjs-port/jsdbc";
-import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
+import { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect.js";
 
 /**
  * MySQL dialect for chat memory repository.

@@ -15,9 +15,9 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelResult } from "../../model";
-import type { AssistantMessage } from "../messages";
-import { ChatGenerationMetadata } from "../metadata";
+import type { ModelResult } from "../../model/index.js";
+import type { AssistantMessage } from "../messages/index.js";
+import { ChatGenerationMetadata } from "../metadata/index.js";
 
 /**
  * Properties for creating a Generation instance.

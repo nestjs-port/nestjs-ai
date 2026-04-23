@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { DocumentRetriever } from "./document-retriever";
+export { DocumentRetriever } from "./document-retriever.js";
 export {
   VectorStoreDocumentRetriever,
   type VectorStoreDocumentRetrieverProps,
-} from "./vector-store-document-retriever";
+} from "./vector-store-document-retriever.js";

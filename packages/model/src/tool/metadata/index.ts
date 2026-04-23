@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { DefaultToolMetadata } from "./default-tool-metadata";
-export { ToolMetadata, type ToolMetadataProps } from "./tool-metadata";
+export { DefaultToolMetadata } from "./default-tool-metadata.js";
+export { ToolMetadata, type ToolMetadataProps } from "./tool-metadata.js";

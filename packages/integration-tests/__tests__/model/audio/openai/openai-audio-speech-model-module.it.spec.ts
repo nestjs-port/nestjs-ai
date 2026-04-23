@@ -19,7 +19,7 @@ import "reflect-metadata";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { AUDIO_SPEECH_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
-  OpenAiAudioSpeechModel,
+  type OpenAiAudioSpeechModel,
   OpenAiAudioSpeechModelModule,
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechProperties,

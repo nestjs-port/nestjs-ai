@@ -18,7 +18,7 @@ import { describe, expect, it } from "vitest";
 
 import { ModerationPrompt } from "@nestjs-ai/model";
 
-import { OpenAiModerationModel, OpenAiModerationOptions } from "../../index";
+import { OpenAiModerationModel, OpenAiModerationOptions } from "../../index.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

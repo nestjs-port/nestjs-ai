@@ -23,7 +23,7 @@ import {
   ExtractedTextFormatter,
   PagePdfDocumentReader,
   PdfDocumentReaderConfig,
-} from "..";
+} from "../index.js";
 
 describe("PagePdfDocumentReader", () => {
   const TEST_TIMEOUT = 30_000;

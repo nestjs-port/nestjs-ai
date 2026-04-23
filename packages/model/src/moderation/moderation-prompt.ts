@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ModelRequest } from "../model";
-import { ModerationMessage } from "./moderation-message";
-import type { ModerationOptions } from "./moderation-options";
-import { ModerationOptionsBuilder } from "./moderation-options-builder";
+import type { ModelRequest } from "../model/index.js";
+import { ModerationMessage } from "./moderation-message.js";
+import type { ModerationOptions } from "./moderation-options.js";
+import { ModerationOptionsBuilder } from "./moderation-options-builder.js";
 
 /**
  * Represents a prompt for moderation containing a single message and the options for the

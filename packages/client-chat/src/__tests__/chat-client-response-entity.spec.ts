@@ -28,7 +28,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { ChatClient } from "../chat-client";
+import { ChatClient } from "../chat-client.js";
 
 const MyBeanSchema = z.object({
   name: z.string(),

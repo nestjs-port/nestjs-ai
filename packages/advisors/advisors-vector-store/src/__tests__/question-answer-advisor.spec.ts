@@ -36,7 +36,7 @@ import {
 } from "@nestjs-ai/vector-store";
 import { type Milliseconds, ms } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { QuestionAnswerAdvisor } from "../question-answer-advisor";
+import { QuestionAnswerAdvisor } from "../question-answer-advisor.js";
 
 describe("QuestionAnswerAdvisorTests", () => {
   let chatModel: ChatModel;

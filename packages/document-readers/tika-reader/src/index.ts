@@ -17,4 +17,4 @@
 export {
   TikaDocumentReader,
   type TikaDocumentReaderProps,
-} from "./tika-document-reader";
+} from "./tika-document-reader.js";

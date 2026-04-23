@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { ToolCallbacks } from "./tool-callbacks";
-export { UsageCalculator } from "./usage-calculator";
+export { ToolCallbacks } from "./tool-callbacks.js";
+export { UsageCalculator } from "./usage-calculator.js";

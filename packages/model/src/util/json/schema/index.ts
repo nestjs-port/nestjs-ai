@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { JsonSchemaGenerator, SchemaOption } from "./json-schema-generator";
+export { JsonSchemaGenerator, SchemaOption } from "./json-schema-generator.js";

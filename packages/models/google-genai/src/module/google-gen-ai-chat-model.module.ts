@@ -39,13 +39,13 @@ import {
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { GoogleGenAiCachedContentService } from "../cache";
-import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model";
-import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options";
+import { GoogleGenAiCachedContentService } from "../cache/index.js";
+import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model.js";
+import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 import type {
   GoogleGenAiChatProperties,
   GoogleGenAiConnectionProperties,
-} from "./google-gen-ai-properties";
+} from "./google-gen-ai-properties.js";
 
 export const GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN = Symbol.for(
   "GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN",

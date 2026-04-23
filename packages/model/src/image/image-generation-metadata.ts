@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-import type { ResultMetadata } from "../model";
+import type { ResultMetadata } from "../model/index.js";
 
 export interface ImageGenerationMetadata extends ResultMetadata {}

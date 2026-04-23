@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-export { Image, type ImageProps } from "./image";
-export { ImageGeneration, type ImageGenerationProps } from "./image-generation";
-export type { ImageGenerationMetadata } from "./image-generation-metadata";
-export { ImageMessage } from "./image-message";
-export type { ImageModel } from "./image-model.interface";
-export type { ImageOptions } from "./image-options";
+export { Image, type ImageProps } from "./image.js";
+export {
+  ImageGeneration,
+  type ImageGenerationProps,
+} from "./image-generation.js";
+export type { ImageGenerationMetadata } from "./image-generation-metadata.js";
+export { ImageMessage } from "./image-message.js";
+export type { ImageModel } from "./image-model.interface.js";
+export type { ImageOptions } from "./image-options.js";
 export {
   ImageOptionsBuilder,
   type ImageOptionsProps,
-} from "./image-options-builder";
-export { ImagePrompt } from "./image-prompt";
-export { ImageResponse, type ImageResponseProps } from "./image-response";
-export { ImageResponseMetadata } from "./image-response-metadata";
-export * from "./observation";
+} from "./image-options-builder.js";
+export { ImagePrompt } from "./image-prompt.js";
+export { ImageResponse, type ImageResponseProps } from "./image-response.js";
+export { ImageResponseMetadata } from "./image-response-metadata.js";
+export * from "./observation/index.js";

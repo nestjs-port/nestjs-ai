@@ -15,8 +15,8 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { Filter } from "../filter";
-import { FilterExpressionTextParser } from "../filter-expression-text-parser";
+import { Filter } from "../filter.js";
+import { FilterExpressionTextParser } from "../filter-expression-text-parser.js";
 
 describe("FilterExpressionTextParser", () => {
   let parser: FilterExpressionTextParser;

@@ -23,8 +23,8 @@ import {
   type VectorStore,
 } from "@nestjs-ai/vector-store";
 import { StringUtils } from "@nestjs-port/core";
-import type { Query } from "../../query";
-import { DocumentRetriever } from "./document-retriever";
+import type { Query } from "../../query.js";
+import { DocumentRetriever } from "./document-retriever.js";
 
 export interface VectorStoreDocumentRetrieverProps {
   vectorStore: VectorStore;

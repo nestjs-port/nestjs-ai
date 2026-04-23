@@ -15,11 +15,15 @@
  */
 
 import type { Observable } from "rxjs";
-import type { Model } from "../../model";
-import type { Message } from "../messages";
-import { type ChatOptions, DefaultChatOptions, Prompt } from "../prompt";
-import type { ChatResponse } from "./chat-response";
-import { StreamingChatModel } from "./streaming-chat-model";
+import type { Model } from "../../model/index.js";
+import type { Message } from "../messages/index.js";
+import {
+  type ChatOptions,
+  DefaultChatOptions,
+  Prompt,
+} from "../prompt/index.js";
+import type { ChatResponse } from "./chat-response.js";
+import { StreamingChatModel } from "./streaming-chat-model.js";
 
 export abstract class ChatModel
   extends StreamingChatModel

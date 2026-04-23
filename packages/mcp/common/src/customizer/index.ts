@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export type { McpClientCustomizer } from "./mcp-client-customizer";
-export type { McpServerCustomizer } from "./mcp-server-customizer";
+export type { McpClientCustomizer } from "./mcp-client-customizer.js";
+export type { McpServerCustomizer } from "./mcp-server-customizer.js";

@@ -17,5 +17,5 @@
 export {
   CheerioDocumentReader,
   type CheerioDocumentReaderProps,
-} from "./cheerio-document-reader";
-export * from "./config";
+} from "./cheerio-document-reader.js";
+export * from "./config/index.js";

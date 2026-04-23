@@ -32,14 +32,14 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { OpenAiClient } from "./open-ai-client";
+import type { OpenAiClient } from "./open-ai-client.js";
 
 import {
   OpenAiImageGenerationMetadata,
   OpenAiImageResponseMetadata,
-} from "./metadata";
-import { OpenAiImageOptions } from "./open-ai-image-options";
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
+} from "./metadata/index.js";
+import { OpenAiImageOptions } from "./open-ai-image-options.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
 
 export interface OpenAiImageModelProps {
   openAiClient?: OpenAiClient | null;

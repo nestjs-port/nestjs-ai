@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-export { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder";
-export * from "./filter";
-export * from "./observation";
-export * from "./properties";
-export { SearchRequest, SearchRequestBuilder } from "./search-request";
+export { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder.js";
+export * from "./filter/index.js";
+export * from "./observation/index.js";
+export * from "./properties/index.js";
+export { SearchRequest, SearchRequestBuilder } from "./search-request.js";
 export {
   EmbeddingMath,
   SimpleVectorStore,
   SimpleVectorStoreBuilder,
-} from "./simple-vector-store";
-export { SpringAIVectorStoreTypes } from "./spring-ai-vector-store-types";
-export { VectorStore } from "./vector-store";
-export { VectorStoreRetriever } from "./vector-store-retriever";
+} from "./simple-vector-store.js";
+export { SpringAIVectorStoreTypes } from "./spring-ai-vector-store-types.js";
+export { VectorStore } from "./vector-store.js";
+export { VectorStoreRetriever } from "./vector-store-retriever.js";

@@ -18,8 +18,8 @@ import type { Provider } from "@nestjs/common";
 import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
 import { createClient, type RedisClientType } from "redis";
 
-import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
-import type { RedisChatMemoryProperties } from "./redis-chat-memory-properties";
+import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
+import type { RedisChatMemoryProperties } from "./redis-chat-memory-properties.js";
 
 export const REDIS_CHAT_MEMORY_PROPERTIES_TOKEN = Symbol.for(
   "REDIS_CHAT_MEMORY_PROPERTIES_TOKEN",

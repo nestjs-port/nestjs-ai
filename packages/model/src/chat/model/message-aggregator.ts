@@ -18,7 +18,7 @@ import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { defer } from "rxjs";
 import { finalize, tap } from "rxjs/operators";
-import { AssistantMessage, type ToolCall } from "../messages";
+import { AssistantMessage, type ToolCall } from "../messages/index.js";
 import {
   ChatGenerationMetadata,
   ChatResponseMetadata,
@@ -26,9 +26,9 @@ import {
   EmptyRateLimit,
   PromptMetadata,
   type RateLimit,
-} from "../metadata";
-import { ChatResponse } from "./chat-response";
-import { Generation } from "./generation";
+} from "../metadata/index.js";
+import { ChatResponse } from "./chat-response.js";
+import { Generation } from "./generation.js";
 
 /**
  * Helper that for streaming chat responses, aggregate the chat response messages into a

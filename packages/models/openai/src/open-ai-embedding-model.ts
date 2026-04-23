@@ -35,9 +35,9 @@ import {
 } from "@nestjs-port/core";
 import type { OpenAI } from "openai";
 
-import { OpenAiEmbeddingOptions } from "./open-ai-embedding-options";
-import type { OpenAiClient } from "./open-ai-client";
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
+import { OpenAiEmbeddingOptions } from "./open-ai-embedding-options.js";
+import type { OpenAiClient } from "./open-ai-client.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
 
 type OpenAiEmbeddingResponse = Awaited<
   ReturnType<OpenAI["embeddings"]["create"]>

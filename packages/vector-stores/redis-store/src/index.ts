@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-export * from "./module";
-export { RedisFilterExpressionConverter } from "./redis-filter-expression-converter";
+export * from "./module/index.js";
+export { RedisFilterExpressionConverter } from "./redis-filter-expression-converter.js";
 export {
   RedisMetadataField,
   RedisMetadataFieldType,
-} from "./redis-metadata-field";
+} from "./redis-metadata-field.js";
 export {
   RedisDistanceMetric,
   RedisTextScorer,
   RedisVectorAlgorithm,
   RedisVectorStore,
   RedisVectorStoreBuilder,
-} from "./redis-vector-store";
+} from "./redis-vector-store.js";

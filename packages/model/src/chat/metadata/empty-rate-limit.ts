@@ -16,7 +16,7 @@
 
 import type { Milliseconds } from "@nestjs-port/core";
 import { ms } from "@nestjs-port/core";
-import type { RateLimit } from "./rate-limit";
+import type { RateLimit } from "./rate-limit.js";
 
 /**
  * A RateLimit implementation that returns zero for all property getters.

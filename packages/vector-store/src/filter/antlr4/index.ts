@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { FiltersLexer } from "./FiltersLexer";
-export { FiltersListener } from "./FiltersListener";
+export { FiltersLexer } from "./FiltersLexer.js";
+export { FiltersListener } from "./FiltersListener.js";
 export {
   AndExpressionContext,
   BooleanConstantContext,
@@ -41,5 +41,5 @@ export {
   SimpleIdentifierContext,
   TextConstantContext,
   WhereContext,
-} from "./FiltersParser";
-export { FiltersVisitor } from "./FiltersVisitor";
+} from "./FiltersParser.js";
+export { FiltersVisitor } from "./FiltersVisitor.js";

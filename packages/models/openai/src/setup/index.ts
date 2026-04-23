@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export type { OpenAiSetupProps } from "./open-ai-setup";
-export { ModelProvider, OpenAiSetup } from "./open-ai-setup";
+export type { OpenAiSetupProps } from "./open-ai-setup.js";
+export { ModelProvider, OpenAiSetup } from "./open-ai-setup.js";

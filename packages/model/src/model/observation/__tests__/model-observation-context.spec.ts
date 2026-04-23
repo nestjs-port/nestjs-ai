@@ -20,7 +20,7 @@ import {
   AiProvider,
 } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { ModelObservationContext } from "../model-observation-context";
+import { ModelObservationContext } from "../model-observation-context.js";
 
 describe("ModelObservationContext", () => {
   it("when request and metadata then return", () => {

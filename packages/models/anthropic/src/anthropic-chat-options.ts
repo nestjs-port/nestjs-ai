@@ -34,16 +34,16 @@ import {
 import type { Milliseconds } from "@nestjs-port/core";
 import { StringUtils } from "@nestjs-port/core";
 
-import { AbstractAnthropicOptions } from "./abstract-anthropic-options";
-import { AnthropicCacheOptions } from "./anthropic-cache-options";
-import { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
-import type { AnthropicCitationDocument } from "./anthropic-citation-document";
-import type { AnthropicServiceTier } from "./anthropic-service-tier";
-import { AnthropicSkill } from "./anthropic-skill";
-import { AnthropicSkillContainer } from "./anthropic-skill-container";
-import { AnthropicSkillRecord } from "./anthropic-skill-record";
-import { AnthropicSkillType } from "./anthropic-skill-type";
-import type { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
+import { AbstractAnthropicOptions } from "./abstract-anthropic-options.js";
+import { AnthropicCacheOptions } from "./anthropic-cache-options.js";
+import { AnthropicCacheStrategy } from "./anthropic-cache-strategy.js";
+import type { AnthropicCitationDocument } from "./anthropic-citation-document.js";
+import type { AnthropicServiceTier } from "./anthropic-service-tier.js";
+import { AnthropicSkill } from "./anthropic-skill.js";
+import { AnthropicSkillContainer } from "./anthropic-skill-container.js";
+import { AnthropicSkillRecord } from "./anthropic-skill-record.js";
+import { AnthropicSkillType } from "./anthropic-skill-type.js";
+import type { AnthropicWebSearchTool } from "./anthropic-web-search-tool.js";
 
 export interface AnthropicChatOptionsProps {
   model?: string | null;

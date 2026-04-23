@@ -29,7 +29,7 @@ import {
   ToolContext,
   type ToolResponse,
   ToolResponseMessage,
-} from "../../chat";
+} from "../../chat/index.js";
 import {
   DefaultToolExecutionExceptionProcessor,
   type ToolCallback,
@@ -40,15 +40,15 @@ import {
   type ToolDefinition,
   ToolExecutionException,
   type ToolExecutionExceptionProcessor,
-} from "../../tool";
+} from "../../tool/index.js";
 // Import these directly to avoid the barrel re-export cycle through `../../tool`,
 // which can leave these constructors half-initialized during module evaluation.
-import { DefaultToolCallingObservationConvention } from "../../tool/observation/default-tool-calling-observation-convention";
-import { DelegatingToolCallbackResolver } from "../../tool/resolution/delegating-tool-callback-resolver";
-import { DefaultToolExecutionResult } from "./default-tool-execution-result";
-import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
-import type { ToolCallingManager } from "./tool-calling-manager.interface";
-import type { ToolExecutionResult } from "./tool-execution-result";
+import { DefaultToolCallingObservationConvention } from "../../tool/observation/default-tool-calling-observation-convention.js";
+import { DelegatingToolCallbackResolver } from "../../tool/resolution/delegating-tool-callback-resolver.js";
+import { DefaultToolExecutionResult } from "./default-tool-execution-result.js";
+import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface.js";
+import type { ToolCallingManager } from "./tool-calling-manager.interface.js";
+import type { ToolExecutionResult } from "./tool-execution-result.js";
 
 interface InternalToolExecutionResult {
   toolResponseMessage: ToolResponseMessage;

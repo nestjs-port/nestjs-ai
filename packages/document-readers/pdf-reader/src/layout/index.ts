@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-export { Character } from "./character";
-export { CharacterFactory, type TextPositionLike } from "./character-factory";
+export { Character } from "./character.js";
+export {
+  CharacterFactory,
+  type TextPositionLike,
+} from "./character-factory.js";
 export {
   ForkPdfLayoutTextStripper,
   type Region,
-} from "./fork-pdf-layout-text-stripper";
-export { PdfLayoutTextStripperByArea } from "./pdf-layout-text-stripper-by-area";
-export { TextLine } from "./text-line";
+} from "./fork-pdf-layout-text-stripper.js";
+export { PdfLayoutTextStripperByArea } from "./pdf-layout-text-stripper-by-area.js";
+export { TextLine } from "./text-line.js";

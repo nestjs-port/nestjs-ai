@@ -34,7 +34,8 @@ The project faithfully mirrors Spring AI's module structure and API design while
 | Category        | Technology                   |
 | --------------- | ---------------------------- |
 | Language        | TypeScript 6.x (strict mode) |
-| Runtime         | Node.js >= 20                |
+| Runtime         | Node.js >= 22.12             |
+| Module format   | ESM only                     |
 | Framework       | NestJS 11.x                  |
 | Package Manager | pnpm 10.x                    |
 | Build           | Turborepo + tsc              |
@@ -246,8 +247,10 @@ nestjs-ai/
 
 ### Prerequisites
 
-- Node.js >= 20.0.0
+- Node.js >= 22.12.0 (required for `require(esm)` support so ESM-only packages can be consumed from CJS)
 - pnpm >= 10.0.0
+
+All packages are published as **ESM only**. Consumer apps running Node.js 22.12+ can import them from either ESM or CJS code.
 
 ### Installation
 

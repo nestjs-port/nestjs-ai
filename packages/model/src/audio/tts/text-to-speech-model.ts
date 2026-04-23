@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Model } from "../../model";
-import { DefaultTextToSpeechOptions } from "./default-text-to-speech-options";
-import { StreamingTextToSpeechModel } from "./streaming-text-to-speech-model";
-import type { TextToSpeechOptions } from "./text-to-speech-options.interface";
-import { TextToSpeechPrompt } from "./text-to-speech-prompt";
-import type { TextToSpeechResponse } from "./text-to-speech-response";
+import type { Model } from "../../model/index.js";
+import { DefaultTextToSpeechOptions } from "./default-text-to-speech-options.js";
+import { StreamingTextToSpeechModel } from "./streaming-text-to-speech-model.js";
+import type { TextToSpeechOptions } from "./text-to-speech-options.interface.js";
+import { TextToSpeechPrompt } from "./text-to-speech-prompt.js";
+import type { TextToSpeechResponse } from "./text-to-speech-response.js";
 
 /**
  * Interface for the text to speech model.

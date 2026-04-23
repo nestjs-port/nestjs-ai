@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-export { Advisor } from "./advisor.interface";
-export { AdvisorChain } from "./advisor-chain";
-export { BaseAdvisor } from "./base-advisor";
-export { BaseAdvisorChain } from "./base-advisor-chain";
-export { BaseChatMemoryAdvisor } from "./base-chat-memory-advisor";
-export { CallAdvisor } from "./call-advisor.interface";
-export { CallAdvisorChain } from "./call-advisor-chain.interface";
-export { StreamAdvisor } from "./stream-advisor.interface";
-export { StreamAdvisorChain } from "./stream-advisor-chain.interface";
+export { Advisor } from "./advisor.interface.js";
+export { AdvisorChain } from "./advisor-chain.js";
+export { BaseAdvisor } from "./base-advisor.js";
+export { BaseAdvisorChain } from "./base-advisor-chain.js";
+export { BaseChatMemoryAdvisor } from "./base-chat-memory-advisor.js";
+export type { CallAdvisor } from "./call-advisor.interface.js";
+export type { CallAdvisorChain } from "./call-advisor-chain.interface.js";
+export type { StreamAdvisor } from "./stream-advisor.interface.js";
+export type { StreamAdvisorChain } from "./stream-advisor-chain.interface.js";

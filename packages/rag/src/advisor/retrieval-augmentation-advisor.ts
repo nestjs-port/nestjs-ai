@@ -23,15 +23,18 @@ import {
 } from "@nestjs-ai/client-chat";
 import type { Document } from "@nestjs-ai/commons";
 import { ChatResponse } from "@nestjs-ai/model";
-import { ContextualQueryAugmenter, type QueryAugmenter } from "../generation";
-import type { DocumentPostProcessor } from "../postretrieval";
-import type { QueryExpander, QueryTransformer } from "../preretrieval";
-import { Query } from "../query";
+import {
+  ContextualQueryAugmenter,
+  type QueryAugmenter,
+} from "../generation/index.js";
+import type { DocumentPostProcessor } from "../postretrieval/index.js";
+import type { QueryExpander, QueryTransformer } from "../preretrieval/index.js";
+import { Query } from "../query.js";
 import {
   ConcatenationDocumentJoiner,
   type DocumentJoiner,
   type DocumentRetriever,
-} from "../retrieval";
+} from "../retrieval/index.js";
 
 export interface RetrievalAugmentationAdvisorProps {
   queryTransformers?: QueryTransformer[] | null;

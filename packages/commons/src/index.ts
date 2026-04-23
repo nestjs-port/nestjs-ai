@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-export * from "./constant";
-export * from "./content";
-export * from "./document";
-export * from "./evaluation";
-export * from "./observation";
-export * from "./reader";
-export * from "./transformer";
-export * from "./template";
-export * from "./tokenizer";
-export * from "./writer";
+export * from "./constant/index.js";
+export * from "./content/index.js";
+export * from "./document/index.js";
+export * from "./evaluation/index.js";
+export * from "./observation/index.js";
+export * from "./reader/index.js";
+export * from "./transformer/index.js";
+export * from "./template/index.js";
+export * from "./tokenizer/index.js";
+export * from "./writer/index.js";

@@ -24,7 +24,10 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { DefaultToolCallingManager, type ToolCallingManager } from "../model";
+import {
+  DefaultToolCallingManager,
+  type ToolCallingManager,
+} from "../model/index.js";
 import {
   DefaultToolExecutionExceptionProcessor,
   DelegatingToolCallbackResolver,
@@ -35,7 +38,7 @@ import {
   type ToolCallbackResolver,
   ToolCallingContentObservationFilter,
   ToolCallingObservationConvention,
-} from "../tool";
+} from "../tool/index.js";
 import {
   TOOL_CALLBACK_PROVIDER_TOKEN,
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
@@ -45,8 +48,8 @@ import {
   TOOL_CALLING_MANAGER_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
-} from "./tool-calling.tokens";
-import type { ToolCallingObservationProperties } from "./tool-calling-observation-properties";
+} from "./tool-calling.tokens.js";
+import type { ToolCallingObservationProperties } from "./tool-calling-observation-properties.js";
 
 const toolCallbackResolverProvider: Provider = {
   provide: TOOL_CALLBACK_RESOLVER_TOKEN,

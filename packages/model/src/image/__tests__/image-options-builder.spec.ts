@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ImageOptionsBuilder } from "../image-options-builder";
+import { ImageOptionsBuilder } from "../image-options-builder.js";
 
 describe("ImageOptionsBuilder", () => {
   it("builder should support props initialization", () => {

@@ -44,26 +44,26 @@ import type {
   Advisor,
   AdvisorObservationConvention,
   BaseAdvisorChain,
-} from "./advisor";
+} from "./advisor/index.js";
 import {
   ChatModelCallAdvisor,
   ChatModelStreamAdvisor,
   DefaultAroundAdvisorChain,
-} from "./advisor";
-import { ChatClient } from "./chat-client";
-import { ChatClientAttributes } from "./chat-client-attributes";
-import { ChatClientMessageAggregator } from "./chat-client-message-aggregator";
-import type { ChatClientRequest } from "./chat-client-request";
-import { ChatClientResponse } from "./chat-client-response";
-import type { DefaultChatClientBuilder } from "./default-chat-client-builder";
-import { DefaultChatClientUtils } from "./default-chat-client-utils";
+} from "./advisor/index.js";
+import { ChatClient } from "./chat-client.js";
+import { ChatClientAttributes } from "./chat-client-attributes.js";
+import { ChatClientMessageAggregator } from "./chat-client-message-aggregator.js";
+import type { ChatClientRequest } from "./chat-client-request.js";
+import { ChatClientResponse } from "./chat-client-response.js";
+import type { DefaultChatClientBuilder } from "./default-chat-client-builder.js";
+import { DefaultChatClientUtils } from "./default-chat-client-utils.js";
 import {
   ChatClientObservationContext,
   type ChatClientObservationConvention,
   ChatClientObservationDocumentation,
   DefaultChatClientObservationConvention,
-} from "./observation";
-import { ResponseEntity } from "./response-entity";
+} from "./observation/index.js";
+import { ResponseEntity } from "./response-entity.js";
 
 export class DefaultChatClient implements ChatClient {
   private readonly _defaultChatClientRequest: DefaultChatClient.DefaultChatClientRequestSpec;

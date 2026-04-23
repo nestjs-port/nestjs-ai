@@ -16,13 +16,13 @@
 
 import { Document, MetadataMode } from "@nestjs-ai/commons";
 import { describe, expect, it, vi } from "vitest";
-import { AbstractEmbeddingModel } from "../abstract-embedding-model";
-import { Embedding } from "../embedding";
-import type { EmbeddingModel } from "../embedding-model";
-import { EmbeddingOptions } from "../embedding-options.interface";
-import type { EmbeddingRequest } from "../embedding-request";
-import { EmbeddingResponse } from "../embedding-response";
-import { TokenCountBatchingStrategy } from "../token-count-batching-strategy";
+import { AbstractEmbeddingModel } from "../abstract-embedding-model.js";
+import { Embedding } from "../embedding.js";
+import type { EmbeddingModel } from "../embedding-model.js";
+import { EmbeddingOptions } from "../embedding-options.interface.js";
+import type { EmbeddingRequest } from "../embedding-request.js";
+import { EmbeddingResponse } from "../embedding-response.js";
+import { TokenCountBatchingStrategy } from "../token-count-batching-strategy.js";
 
 describe("AbstractEmbeddingModel", () => {
   it("unknown model dimension", async () => {

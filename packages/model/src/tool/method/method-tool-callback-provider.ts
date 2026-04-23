@@ -16,13 +16,13 @@
 
 import "reflect-metadata";
 import assert from "node:assert/strict";
-import type { ToolAnnotationMetadata } from "../annotation";
-import { TOOL_METADATA_KEY } from "../annotation";
-import { ToolMetadata } from "../metadata";
-import { ToolDefinitions, ToolUtils } from "../support";
-import type { ToolCallback } from "../tool-callback";
-import type { ToolCallbackProvider } from "../tool-callback-provider";
-import { MethodToolCallback } from "./method-tool-callback";
+import type { ToolAnnotationMetadata } from "../annotation/index.js";
+import { TOOL_METADATA_KEY } from "../annotation/index.js";
+import { ToolMetadata } from "../metadata/index.js";
+import { ToolDefinitions, ToolUtils } from "../support/index.js";
+import type { ToolCallback } from "../tool-callback.js";
+import type { ToolCallbackProvider } from "../tool-callback-provider.js";
+import { MethodToolCallback } from "./method-tool-callback.js";
 
 interface ToolMethodDescriptor {
   metadataTarget: object;

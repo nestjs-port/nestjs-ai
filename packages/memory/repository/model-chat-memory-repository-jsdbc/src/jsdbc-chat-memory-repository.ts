@@ -33,8 +33,8 @@ import {
   ZodRowMapper,
 } from "@nestjs-port/jsdbc";
 import { z } from "zod";
-import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
-import { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory";
+import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect.js";
+import { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory.js";
 
 export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
   constructor(

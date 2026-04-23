@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-export * from "./antlr4";
-export * from "./converter";
-export { Filter } from "./filter";
-export { FilterExpressionBuilder } from "./filter-expression-builder";
-export type { FilterExpressionConverter } from "./filter-expression-converter";
+export * from "./antlr4/index.js";
+export * from "./converter/index.js";
+export { Filter } from "./filter.js";
+export { FilterExpressionBuilder } from "./filter-expression-builder.js";
+export type { FilterExpressionConverter } from "./filter-expression-converter.js";
 export {
   DescriptiveErrorListener,
   FilterExpressionParseException,
   FilterExpressionTextParser,
   FilterExpressionVisitor,
-} from "./filter-expression-text-parser";
-export { FilterHelper } from "./filter-helper";
+} from "./filter-expression-text-parser.js";
+export { FilterHelper } from "./filter-helper.js";

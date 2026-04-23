@@ -36,19 +36,19 @@ import {
 import { firstValueFrom, type Observable, of, toArray } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientResponse } from "../../chat-client-response";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientResponse } from "../../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "../api";
-import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain";
+} from "../api/index.js";
+import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain.js";
 import {
   ToolCallAdvisor,
   type ToolCallAdvisorProps,
-} from "../tool-call-advisor";
+} from "../tool-call-advisor.js";
 
 class TerminalCallAdvisor implements CallAdvisor {
   private readonly _responseFn: (

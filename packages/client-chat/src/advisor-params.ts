@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ChatClient } from "./chat-client";
-import { ChatClientAttributes } from "./chat-client-attributes";
+import type { ChatClient } from "./chat-client.js";
+import { ChatClientAttributes } from "./chat-client-attributes.js";
 
 /**
  * Configuration options for ChatClient requests.

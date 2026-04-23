@@ -30,7 +30,7 @@ import {
   type SqlFragment,
 } from "@nestjs-port/jsdbc";
 
-import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository";
+import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository.js";
 import {
   MARIADB_CHAT_MEMORY_SCHEMA,
   MYSQL_CHAT_MEMORY_SCHEMA,
@@ -38,8 +38,8 @@ import {
   POSTGRESQL_CHAT_MEMORY_SCHEMA,
   SQL_SERVER_CHAT_MEMORY_SCHEMA,
   SQLITE_CHAT_MEMORY_SCHEMA,
-} from "../resources";
-import type { JsdbcChatMemoryRepositoryProperties } from "./jsdbc-chat-memory-repository-properties";
+} from "../resources/index.js";
+import type { JsdbcChatMemoryRepositoryProperties } from "./jsdbc-chat-memory-repository-properties.js";
 
 export const JSDBC_CHAT_MEMORY_PROPERTIES_TOKEN = Symbol.for(
   "JSDBC_CHAT_MEMORY_PROPERTIES_TOKEN",

@@ -18,7 +18,7 @@ import type {
   PDFPageProxy,
   TextContent,
   TextItem,
-} from "pdfjs-dist/types/src/display/api";
+} from "pdfjs-dist/types/src/display/api.js";
 
 export interface Region {
   x: number;

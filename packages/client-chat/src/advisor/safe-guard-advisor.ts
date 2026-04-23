@@ -19,14 +19,14 @@ import { AssistantMessage, ChatResponse, Generation } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
 import { of } from "rxjs";
 
-import type { ChatClientRequest } from "../chat-client-request";
-import { ChatClientResponse } from "../chat-client-response";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import { ChatClientResponse } from "../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "./api";
+} from "./api/index.js";
 
 export interface SafeGuardAdvisorProps {
   sensitiveWords: string[];

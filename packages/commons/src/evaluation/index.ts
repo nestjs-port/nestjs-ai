@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { EvaluationRequest } from "./evaluation-request";
-export { EvaluationResponse } from "./evaluation-response";
-export { Evaluator } from "./evaluator";
+export { EvaluationRequest } from "./evaluation-request.js";
+export { EvaluationResponse } from "./evaluation-response.js";
+export { Evaluator } from "./evaluator.js";

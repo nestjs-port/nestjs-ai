@@ -25,7 +25,7 @@ import {
 import { finalize, interval, map, of, throwError } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 
-import { ChatClient } from "../chat-client";
+import { ChatClient } from "../chat-client.js";
 
 describe("ChatClient stream iterable", () => {
   it("contentIterable emits all chunks in order", async () => {

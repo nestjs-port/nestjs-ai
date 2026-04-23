@@ -15,13 +15,13 @@
  */
 
 import type { Milliseconds } from "@nestjs-port/core";
-import type { CachedContentRequest } from "../cached-content-request";
-import { CachedContentUpdateRequest } from "../cached-content-update-request";
-import { GoogleGenAiCachedContent } from "../google-gen-ai-cached-content";
+import type { CachedContentRequest } from "../cached-content-request.js";
+import { CachedContentUpdateRequest } from "../cached-content-update-request.js";
+import { GoogleGenAiCachedContent } from "../google-gen-ai-cached-content.js";
 import {
   CachedContentException,
   CachedContentPage,
-} from "../google-gen-ai-cached-content-service";
+} from "../google-gen-ai-cached-content-service.js";
 
 export class TestGoogleGenAiCachedContentService {
   private readonly _cache = new Map<string, GoogleGenAiCachedContent>();

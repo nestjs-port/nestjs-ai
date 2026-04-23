@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { DefaultEmbeddingModelObservationConvention } from "./default-embedding-model-observation-convention";
-export { EmbeddingModelMeterObservationHandler } from "./embedding-model-meter-observation-handler";
-export { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
-export { EmbeddingModelObservationConvention } from "./embedding-model-observation-convention";
-export { EmbeddingModelObservationDocumentation } from "./embedding-model-observation-documentation";
+export { DefaultEmbeddingModelObservationConvention } from "./default-embedding-model-observation-convention.js";
+export { EmbeddingModelMeterObservationHandler } from "./embedding-model-meter-observation-handler.js";
+export { EmbeddingModelObservationContext } from "./embedding-model-observation-context.js";
+export { EmbeddingModelObservationConvention } from "./embedding-model-observation-convention.js";
+export { EmbeddingModelObservationDocumentation } from "./embedding-model-observation-documentation.js";

@@ -22,7 +22,7 @@ import {
 import type { OpenAI } from "openai";
 import { describe, expect, it, vi } from "vitest";
 
-import { OpenAiAudioTranscriptionModel } from "../../../open-ai-audio-transcription-model";
+import { OpenAiAudioTranscriptionModel } from "../../../open-ai-audio-transcription-model.js";
 
 describe("TranscriptionModel", () => {
   it("transcrbe request returns response correctly", async () => {

@@ -20,7 +20,7 @@ import type {
   ObservationConvention,
 } from "@nestjs-port/core";
 
-import { ToolCallingObservationContext } from "./tool-calling-observation-context";
+import { ToolCallingObservationContext } from "./tool-calling-observation-context.js";
 
 export abstract class ToolCallingObservationConvention implements ObservationConvention<ToolCallingObservationContext> {
   abstract getName(): string;

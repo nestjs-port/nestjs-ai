@@ -21,7 +21,7 @@ import { AUDIO_MODERATION_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   OPEN_AI_MODERATION_DEFAULT_MODEL,
   OPEN_AI_MODERATION_PROPERTIES_TOKEN,
-  OpenAiModerationModel,
+  type OpenAiModerationModel,
   OpenAiModerationModelModule,
   type OpenAiModerationProperties,
 } from "@nestjs-ai/model-openai";

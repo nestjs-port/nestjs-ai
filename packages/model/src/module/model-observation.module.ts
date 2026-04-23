@@ -23,9 +23,9 @@ import {
 import {
   ChatModelCompletionObservationHandler,
   ChatModelMeterObservationHandler,
-} from "../chat";
-import { EmbeddingModelMeterObservationHandler } from "../embedding";
-import { ImageModelPromptContentObservationHandler } from "../image";
+} from "../chat/index.js";
+import { EmbeddingModelMeterObservationHandler } from "../embedding/index.js";
+import { ImageModelPromptContentObservationHandler } from "../image/index.js";
 
 const modelObservationHandlerProvider: Provider = {
   provide: Symbol.for("MODEL_OBSERVATION_HANDLER_PROVIDER"),

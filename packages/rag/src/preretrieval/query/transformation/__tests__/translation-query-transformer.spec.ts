@@ -17,9 +17,9 @@
 import type { ChatClient } from "@nestjs-ai/client-chat";
 import { PromptTemplate } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import type { Query } from "../../../../query";
-import type { QueryTransformer } from "../query-transformer";
-import { TranslationQueryTransformer } from "../translation-query-transformer";
+import type { Query } from "../../../../query.js";
+import type { QueryTransformer } from "../query-transformer.js";
+import { TranslationQueryTransformer } from "../translation-query-transformer.js";
 
 const mockChatClientBuilder = (): ChatClient.Builder =>
   ({

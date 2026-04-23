@@ -30,13 +30,13 @@ import {
   type Tag,
 } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages";
-import { ChatResponseMetadata, Usage } from "../../metadata";
-import { ChatResponse, Generation } from "../../model";
-import { DefaultChatOptions, Prompt } from "../../prompt";
-import { ChatModelMeterObservationHandler } from "../chat-model-meter-observation-handler";
-import { ChatModelObservationContext } from "../chat-model-observation-context";
-import { DefaultChatModelObservationConvention } from "../default-chat-model-observation-convention";
+import { AssistantMessage } from "../../messages/index.js";
+import { ChatResponseMetadata, Usage } from "../../metadata/index.js";
+import { ChatResponse, Generation } from "../../model/index.js";
+import { DefaultChatOptions, Prompt } from "../../prompt/index.js";
+import { ChatModelMeterObservationHandler } from "../chat-model-meter-observation-handler.js";
+import { ChatModelObservationContext } from "../chat-model-observation-context.js";
+import { DefaultChatModelObservationConvention } from "../default-chat-model-observation-convention.js";
 
 class SimpleCounter implements Counter {
   private _count = 0;

@@ -16,12 +16,12 @@
 
 import type { RedisClientOptions, RedisClientType } from "redis";
 
-import type { RedisMetadataField } from "../redis-metadata-field";
+import type { RedisMetadataField } from "../redis-metadata-field.js";
 import type {
   RedisDistanceMetric,
   RedisTextScorer,
   RedisVectorAlgorithm,
-} from "../redis-vector-store";
+} from "../redis-vector-store.js";
 
 export interface RedisVectorStoreHnswProperties {
   m?: number;

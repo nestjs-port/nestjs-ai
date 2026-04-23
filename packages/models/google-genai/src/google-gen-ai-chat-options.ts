@@ -25,7 +25,7 @@ import { StringUtils } from "@nestjs-port/core";
 import type {
   GoogleGenAiSafetySetting,
   GoogleGenAiThinkingLevel,
-} from "./common";
+} from "./common/index.js";
 
 export class GoogleGenAiChatOptions
   implements ToolCallingChatOptions, StructuredOutputChatOptions

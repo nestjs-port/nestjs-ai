@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { DefaultImageModelObservationConvention } from "./default-image-model-observation-convention";
-export { ImageModelObservationContext } from "./image-model-observation-context";
-export { ImageModelObservationConvention } from "./image-model-observation-convention";
-export { ImageModelObservationDocumentation } from "./image-model-observation-documentation";
-export { ImageModelPromptContentObservationHandler } from "./image-model-prompt-content-observation-handler";
+export { DefaultImageModelObservationConvention } from "./default-image-model-observation-convention.js";
+export { ImageModelObservationContext } from "./image-model-observation-context.js";
+export { ImageModelObservationConvention } from "./image-model-observation-convention.js";
+export { ImageModelObservationDocumentation } from "./image-model-observation-documentation.js";
+export { ImageModelPromptContentObservationHandler } from "./image-model-prompt-content-observation-handler.js";

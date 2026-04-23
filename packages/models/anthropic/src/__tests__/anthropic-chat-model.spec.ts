@@ -36,7 +36,7 @@ import {
   type AnthropicChatModelProps,
   AnthropicChatOptions,
   AnthropicSkill,
-} from "../index";
+} from "../index.js";
 
 describe("AnthropicChatModel", () => {
   let anthropicClient: Anthropic;

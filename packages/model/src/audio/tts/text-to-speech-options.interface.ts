@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelOptions } from "../../model";
+import type { ModelOptions } from "../../model/index.js";
 
 /**
  * Interface for text-to-speech model options. Defines the common, portable options that

@@ -16,6 +16,7 @@
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/integration-tests"
   },
+  "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
@@ -53,5 +54,8 @@
     "testcontainers": "^11.13.0",
     "typeorm": "^0.3.28",
     "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

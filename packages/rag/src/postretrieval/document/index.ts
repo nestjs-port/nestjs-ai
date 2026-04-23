@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { DocumentPostProcessor } from "./document-post-processor";
+export { DocumentPostProcessor } from "./document-post-processor.js";

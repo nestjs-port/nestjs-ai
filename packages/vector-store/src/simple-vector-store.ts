@@ -23,16 +23,16 @@ import {
   VectorStoreSimilarityMetric,
 } from "@nestjs-ai/commons";
 import type { EmbeddingModel } from "@nestjs-ai/model";
-import { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder";
-import type { Filter } from "./filter";
+import { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder.js";
+import type { Filter } from "./filter/index.js";
 import {
   AbstractObservationVectorStore,
   VectorStoreObservationContext as ObservationContext,
   type VectorStoreObservationContext,
-} from "./observation";
-import type { SearchRequest } from "./search-request";
-import { SimpleVectorStoreContent } from "./simple-vector-store-content";
-import { SimpleVectorStoreFilterExpressionEvaluator } from "./simple-vector-store-filter-expression-evaluator";
+} from "./observation/index.js";
+import type { SearchRequest } from "./search-request.js";
+import { SimpleVectorStoreContent } from "./simple-vector-store-content.js";
+import { SimpleVectorStoreFilterExpressionEvaluator } from "./simple-vector-store-filter-expression-evaluator.js";
 
 export class SimpleVectorStore extends AbstractObservationVectorStore {
   private readonly _filterExpressionEvaluator =

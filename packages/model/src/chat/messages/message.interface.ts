@@ -15,7 +15,7 @@
  */
 
 import type { Content } from "@nestjs-ai/commons";
-import type { MessageType } from "./message-type";
+import type { MessageType } from "./message-type.js";
 
 /**
  * The Message interface represents a message that can be sent or received in a chat

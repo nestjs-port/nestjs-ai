@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import { ExtractedTextFormatter } from "../extracted-text-formatter";
+import { ExtractedTextFormatter } from "../extracted-text-formatter.js";
 
 export class PdfDocumentReaderConfig {
   static readonly ALL_PAGES = 0;

@@ -41,13 +41,13 @@ import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { OpenAiChatModel } from "../../open-ai-chat-model";
-import { OpenAiChatOptions } from "../../open-ai-chat-options";
+import { OpenAiChatModel } from "../../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 import {
   type MockWeatherRequest,
   MockWeatherRequestInputType,
   MockWeatherService,
-} from "./mock-weather-service";
+} from "./mock-weather-service.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

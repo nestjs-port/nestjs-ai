@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./module";
+export * from "./module/index.js";
 export {
   TransformersEmbeddingModel,
   type TransformersEmbeddingModelProps,
-} from "./transformers-embedding-model";
+} from "./transformers-embedding-model.js";

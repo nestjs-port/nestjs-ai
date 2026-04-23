@@ -16,7 +16,7 @@
 
 import { OpenAiChatModel, OpenAiChatOptions } from "@nestjs-ai/model-openai";
 import { beforeAll, describe, it } from "vitest";
-import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared";
+import { AbstractToolCallAdvisorIT } from "./abstract-tool-call-advisor.it-shared.js";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 

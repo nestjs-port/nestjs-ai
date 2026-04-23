@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AbstractMessage } from "../abstract-message";
-import { MessageType } from "../message-type";
-import { SystemMessage } from "../system-message";
+import { AbstractMessage } from "../abstract-message.js";
+import { MessageType } from "../message-type.js";
+import { SystemMessage } from "../system-message.js";
 
 describe("SystemMessage", () => {
   it("system message with null text", () => {

@@ -19,7 +19,7 @@ import type { VectorStore } from "@nestjs-ai/vector-store";
 import type { SchedulerLike } from "rxjs";
 import { queueScheduler } from "rxjs";
 import { describe, expect, it } from "vitest";
-import { VectorStoreChatMemoryAdvisor } from "../vector-store-chat-memory-advisor";
+import { VectorStoreChatMemoryAdvisor } from "../vector-store-chat-memory-advisor.js";
 
 function createVectorStore(): VectorStore {
   return {} as VectorStore;

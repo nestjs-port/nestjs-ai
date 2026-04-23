@@ -16,7 +16,7 @@
 
 import { PromptTemplate } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { PromptAssert } from "../prompt-assert";
+import { PromptAssert } from "../prompt-assert.js";
 
 describe("PromptAssert", () => {
   it("when placeholder is present then ok", () => {

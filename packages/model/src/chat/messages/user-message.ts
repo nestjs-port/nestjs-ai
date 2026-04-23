@@ -16,8 +16,8 @@
 
 import assert from "node:assert/strict";
 import type { Media, MediaContent } from "@nestjs-ai/commons";
-import { AbstractMessage } from "./abstract-message";
-import { MessageType } from "./message-type";
+import { AbstractMessage } from "./abstract-message.js";
+import { MessageType } from "./message-type.js";
 
 export interface UserMessageProps {
   content?: string | null;

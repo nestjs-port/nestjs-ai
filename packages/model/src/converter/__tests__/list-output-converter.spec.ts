@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ListOutputConverter } from "../list-output-converter";
+import { ListOutputConverter } from "../list-output-converter.js";
 
 describe("ListOutputConverter", () => {
   const converter = new ListOutputConverter();

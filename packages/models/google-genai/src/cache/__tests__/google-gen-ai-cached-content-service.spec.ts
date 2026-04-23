@@ -18,10 +18,10 @@ import assert from "node:assert/strict";
 import type { Content } from "@google/genai";
 import { ms } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CachedContentRequest } from "../cached-content-request";
-import { CachedContentUpdateRequest } from "../cached-content-update-request";
-import { CachedContentException } from "../google-gen-ai-cached-content-service";
-import { TestGoogleGenAiCachedContentService } from "./test-google-gen-ai-cached-content-service";
+import { CachedContentRequest } from "../cached-content-request.js";
+import { CachedContentUpdateRequest } from "../cached-content-update-request.js";
+import { CachedContentException } from "../google-gen-ai-cached-content-service.js";
+import { TestGoogleGenAiCachedContentService } from "./test-google-gen-ai-cached-content-service.js";
 
 describe("GoogleGenAiCachedContentService", () => {
   let service: TestGoogleGenAiCachedContentService;

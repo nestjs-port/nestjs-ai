@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { MapOutputConverter } from "../map-output-converter";
+import { MapOutputConverter } from "../map-output-converter.js";
 
 describe("MapOutputConverter", () => {
   const converter = new MapOutputConverter();

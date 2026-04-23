@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from "./tool-definitions";
-export * from "./tool-utils";
+export * from "./tool-definitions.js";
+export * from "./tool-utils.js";

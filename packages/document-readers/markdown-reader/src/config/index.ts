@@ -17,4 +17,4 @@
 export {
   MarkdownDocumentReaderConfig,
   MarkdownDocumentReaderConfigBuilder,
-} from "./markdown-document-reader-config";
+} from "./markdown-document-reader-config.js";

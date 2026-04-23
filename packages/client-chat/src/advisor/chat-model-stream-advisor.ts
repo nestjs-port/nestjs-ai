@@ -20,9 +20,9 @@ import { LOWEST_PRECEDENCE } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { asyncScheduler, map, observeOn } from "rxjs";
 
-import type { ChatClientRequest } from "../chat-client-request";
-import { ChatClientResponse } from "../chat-client-response";
-import type { StreamAdvisor, StreamAdvisorChain } from "./api";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import { ChatClientResponse } from "../chat-client-response.js";
+import type { StreamAdvisor, StreamAdvisorChain } from "./api/index.js";
 
 export class ChatModelStreamAdvisor implements StreamAdvisor {
   private readonly _chatModel: ChatModel;

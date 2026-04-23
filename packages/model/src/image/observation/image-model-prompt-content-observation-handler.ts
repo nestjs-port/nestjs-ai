@@ -17,7 +17,7 @@
 import { ObservabilityHelper } from "@nestjs-ai/commons";
 import type { ObservationContext, ObservationHandler } from "@nestjs-port/core";
 import { LoggerFactory } from "@nestjs-port/core";
-import { ImageModelObservationContext } from "./image-model-observation-context";
+import { ImageModelObservationContext } from "./image-model-observation-context.js";
 
 export class ImageModelPromptContentObservationHandler implements ObservationHandler<ImageModelObservationContext> {
   private readonly logger = LoggerFactory.getLogger(

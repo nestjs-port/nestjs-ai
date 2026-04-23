@@ -32,9 +32,9 @@ import { VectorStoreObservationConvention } from "@nestjs-ai/vector-store";
 import type { ObservationRegistry } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { createClient, type RedisClientType } from "redis";
-import { RedisVectorStore } from "../redis-vector-store";
+import { RedisVectorStore } from "../redis-vector-store.js";
 
-import type { RedisVectorStoreProperties } from "./redis-vector-store-properties";
+import type { RedisVectorStoreProperties } from "./redis-vector-store-properties.js";
 
 export const REDIS_VECTOR_STORE_PROPERTIES_TOKEN = Symbol.for(
   "REDIS_VECTOR_STORE_PROPERTIES_TOKEN",

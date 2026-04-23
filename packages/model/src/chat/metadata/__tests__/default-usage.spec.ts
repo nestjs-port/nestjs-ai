@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { DefaultUsage } from "../default-usage";
+import { DefaultUsage } from "../default-usage.js";
 
 describe("DefaultUsage", () => {
   it("test serialization with all fields", () => {

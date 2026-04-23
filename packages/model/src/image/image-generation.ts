@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ModelResult } from "../model";
-import type { Image } from "./image";
-import type { ImageGenerationMetadata } from "./image-generation-metadata";
+import type { ModelResult } from "../model/index.js";
+import type { Image } from "./image.js";
+import type { ImageGenerationMetadata } from "./image-generation-metadata.js";
 
 export interface ImageGenerationProps {
   image: Image;

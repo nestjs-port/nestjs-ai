@@ -17,7 +17,7 @@
 import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { DefaultToolCallResultConverter } from "../default-tool-call-result-converter";
+import { DefaultToolCallResultConverter } from "../default-tool-call-result-converter.js";
 
 /**
  * Unit tests for {@link DefaultToolCallResultConverter}.

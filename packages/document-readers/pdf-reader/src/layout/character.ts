@@ -15,7 +15,7 @@
  */
 
 import { LoggerFactory } from "@nestjs-port/core";
-import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper";
+import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper.js";
 
 export class Character {
   private static readonly logger = LoggerFactory.getLogger(Character.name);

@@ -18,7 +18,7 @@ import "reflect-metadata";
 import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
-import { GoogleGenAiChatModel } from "@nestjs-ai/model-google-genai";
+import type { GoogleGenAiChatModel } from "@nestjs-ai/model-google-genai";
 import {
   GoogleGenAiCachedContentService,
   GoogleGenAiChatModelModule,

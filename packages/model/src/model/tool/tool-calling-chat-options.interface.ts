@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { ChatOptions } from "../../chat";
-import { type ToolCallback, ToolUtils } from "../../tool";
+import type { ChatOptions } from "../../chat/index.js";
+import { type ToolCallback, ToolUtils } from "../../tool/index.js";
 
 /**
  * A set of options that can be used to configure the interaction with a chat model,

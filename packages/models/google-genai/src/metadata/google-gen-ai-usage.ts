@@ -19,11 +19,11 @@ import type {
   ModalityTokenCount,
 } from "@google/genai";
 import { DefaultUsage } from "@nestjs-ai/model";
-import { GoogleGenAiModalityTokenCount } from "./google-gen-ai-modality-token-count";
+import { GoogleGenAiModalityTokenCount } from "./google-gen-ai-modality-token-count.js";
 import {
   type GoogleGenAiTrafficType,
   trafficTypeFrom,
-} from "./google-gen-ai-traffic-type";
+} from "./google-gen-ai-traffic-type.js";
 
 /**
  * Props for creating a GoogleGenAiUsage instance.

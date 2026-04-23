@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelResult } from "./model-result.interface";
-import type { ResponseMetadata } from "./response-metadata.interface";
+import type { ModelResult } from "./model-result.interface.js";
+import type { ResponseMetadata } from "./response-metadata.interface.js";
 
 /**
  * Interface representing the response received from an AI model. This interface provides

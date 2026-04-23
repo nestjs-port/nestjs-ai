@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AbstractMessage } from "../abstract-message";
-import { MessageType } from "../message-type";
-import { UserMessage } from "../user-message";
+import { AbstractMessage } from "../abstract-message.js";
+import { MessageType } from "../message-type.js";
+import { UserMessage } from "../user-message.js";
 
 describe("UserMessage", () => {
   it("user message with null text", () => {

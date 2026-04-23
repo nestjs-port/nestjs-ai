@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Content } from "./content.interface";
-import type { Media } from "./media";
+import type { Content } from "./content.interface.js";
+import type { Media } from "./media.js";
 
 export interface MediaContent extends Content {
   /**

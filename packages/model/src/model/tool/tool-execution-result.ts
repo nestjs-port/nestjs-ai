@@ -20,7 +20,7 @@ import {
   Generation,
   type Message,
   ToolResponseMessage,
-} from "../../chat";
+} from "../../chat/index.js";
 
 /**
  * The result of a tool execution.

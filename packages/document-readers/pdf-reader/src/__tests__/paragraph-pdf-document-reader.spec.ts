@@ -22,7 +22,7 @@ import {
   PagePdfDocumentReader,
   ParagraphPdfDocumentReader,
   PdfDocumentReaderConfig,
-} from "..";
+} from "../index.js";
 
 describe("ParagraphPdfDocumentReader", () => {
   const sample1Pdf = resolve(__dirname, "sample1.pdf");

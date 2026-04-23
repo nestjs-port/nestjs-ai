@@ -20,17 +20,17 @@ import { StringUtils } from "@nestjs-port/core";
 import type {
   PDFDocumentProxy,
   PDFPageProxy,
-} from "pdfjs-dist/types/src/display/api";
+} from "pdfjs-dist/types/src/display/api.js";
 import {
   type Paragraph,
   ParagraphManager,
   PdfDocumentReaderConfig,
-} from "./config";
-import { PdfLayoutTextStripperByArea } from "./layout";
+} from "./config/index.js";
+import { PdfLayoutTextStripperByArea } from "./layout/index.js";
 import {
   PagePdfDocumentReader,
   type PdfResource,
-} from "./page-pdf-document-reader";
+} from "./page-pdf-document-reader.js";
 
 export interface ParagraphPdfDocumentReaderProps {
   pdfResource: PdfResource;

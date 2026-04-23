@@ -19,8 +19,8 @@ import {
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { UserMessage } from "../../messages";
-import { PromptTemplate } from "../prompt-template";
+import { UserMessage } from "../../messages/index.js";
+import { PromptTemplate } from "../prompt-template.js";
 
 class CustomTestRenderer implements TemplateRenderer {
   apply(template: string, _variables: Record<string, unknown | null>): string {

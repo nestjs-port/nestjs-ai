@@ -25,9 +25,9 @@ import {
   EmbeddingResponse,
 } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { FilterExpressionBuilder } from "../filter";
-import { SearchRequest } from "../search-request";
-import { EmbeddingMath, SimpleVectorStore } from "../simple-vector-store";
+import { FilterExpressionBuilder } from "../filter/index.js";
+import { SearchRequest } from "../search-request.js";
+import { EmbeddingMath, SimpleVectorStore } from "../simple-vector-store.js";
 
 class MockEmbeddingModel extends EmbeddingModel {
   override async call(request: EmbeddingRequest): Promise<EmbeddingResponse> {

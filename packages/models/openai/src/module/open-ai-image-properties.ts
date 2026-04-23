@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
-import type { OpenAiImageOptionsProps } from "../open-ai-image-options";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options.js";
+import type { OpenAiImageOptionsProps } from "../open-ai-image-options.js";
 
 export const OPEN_AI_IMAGE_DEFAULT_MODEL = "dall-e-3";
 

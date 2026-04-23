@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DefaultToolMetadata } from "./default-tool-metadata";
+import { DefaultToolMetadata } from "./default-tool-metadata.js";
 
 /**
  * Props for creating a {@link ToolMetadata} instance.

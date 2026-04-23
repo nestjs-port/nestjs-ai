@@ -15,8 +15,8 @@
  */
 
 import type { ToolCallingObservationProperties } from "@nestjs-ai/model";
-import type { AnthropicChatOptionsProps } from "../anthropic-chat-options";
-import type { AnthropicSetupProps } from "../anthropic-setup";
+import type { AnthropicChatOptionsProps } from "../anthropic-chat-options.js";
+import type { AnthropicSetupProps } from "../anthropic-setup.js";
 
 export const ANTHROPIC_CHAT_DEFAULT_MODEL = "claude-haiku-4-5";
 

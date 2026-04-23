@@ -22,7 +22,7 @@ import { EmbeddingModelObservationConvention } from "@nestjs-ai/model";
 import {
   OPEN_AI_EMBEDDING_DEFAULT_MODEL,
   OPEN_AI_EMBEDDING_PROPERTIES_TOKEN,
-  OpenAiEmbeddingModel,
+  type OpenAiEmbeddingModel,
   OpenAiEmbeddingModelModule,
   type OpenAiEmbeddingProperties,
 } from "@nestjs-ai/model-openai";

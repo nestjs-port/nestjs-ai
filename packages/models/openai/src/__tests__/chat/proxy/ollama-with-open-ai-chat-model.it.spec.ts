@@ -33,13 +33,13 @@ import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { OpenAiChatModel } from "../../../open-ai-chat-model";
-import { OpenAiChatOptions } from "../../../open-ai-chat-options";
+import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../../../open-ai-chat-options.js";
 import {
   type MockWeatherRequest,
   MockWeatherRequestInputType,
   MockWeatherService,
-} from "../mock-weather-service";
+} from "../mock-weather-service.js";
 
 const OLLAMA_BASE_URL =
   process.env.OLLAMA_BASE_URL ?? "http://localhost:11434/v1";

@@ -15,11 +15,11 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { CompositeResponseTextCleaner } from "../composite-response-text-cleaner";
-import { MarkdownCodeBlockCleaner } from "../markdown-code-block-cleaner";
-import type { ResponseTextCleaner } from "../response-text-cleaner";
-import { ThinkingTagCleaner } from "../thinking-tag-cleaner";
-import { WhitespaceCleaner } from "../whitespace-cleaner";
+import { CompositeResponseTextCleaner } from "../composite-response-text-cleaner.js";
+import { MarkdownCodeBlockCleaner } from "../markdown-code-block-cleaner.js";
+import type { ResponseTextCleaner } from "../response-text-cleaner.js";
+import { ThinkingTagCleaner } from "../thinking-tag-cleaner.js";
+import { WhitespaceCleaner } from "../whitespace-cleaner.js";
 
 describe("CompositeResponseTextCleaner", () => {
   it("applies cleaners in order", () => {

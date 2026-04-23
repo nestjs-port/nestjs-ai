@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import { StringUtils } from "@nestjs-port/core";
-import type { Message } from "../messages";
+import type { Message } from "../messages/index.js";
 
 /**
  * The contract for storing and managing the memory of chat conversations.

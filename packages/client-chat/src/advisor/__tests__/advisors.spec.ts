@@ -25,15 +25,15 @@ import {
 import { lastValueFrom, map, of, reduce, tap } from "rxjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ChatClient } from "../../chat-client";
-import type { ChatClientRequest } from "../../chat-client-request";
-import type { ChatClientResponse } from "../../chat-client-response";
+import { ChatClient } from "../../chat-client.js";
+import type { ChatClientRequest } from "../../chat-client-request.js";
+import type { ChatClientResponse } from "../../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "../api";
+} from "../api/index.js";
 
 describe("Advisors", () => {
   let chatModel: ChatModel;

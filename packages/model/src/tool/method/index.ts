@@ -18,8 +18,8 @@ export {
   MethodToolCallback,
   MethodToolCallbackBuilder,
   type MethodToolCallbackProps,
-} from "./method-tool-callback";
+} from "./method-tool-callback.js";
 export {
   MethodToolCallbackProvider,
   type ToolObjectInstance,
-} from "./method-tool-callback-provider";
+} from "./method-tool-callback-provider.js";

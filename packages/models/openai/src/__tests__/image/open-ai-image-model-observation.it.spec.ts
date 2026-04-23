@@ -25,8 +25,8 @@ import {
 } from "@nestjs-ai/model";
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { OpenAiImageModel } from "../../open-ai-image-model";
-import { OpenAiImageOptions } from "../../open-ai-image-options";
+import { OpenAiImageModel } from "../../open-ai-image-model.js";
+import { OpenAiImageOptions } from "../../open-ai-image-options.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

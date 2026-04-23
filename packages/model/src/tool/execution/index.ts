@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { DefaultToolCallResultConverter } from "./default-tool-call-result-converter";
-export { DefaultToolExecutionExceptionProcessor } from "./default-tool-execution-exception-processor";
-export type { ToolCallResultConverter } from "./tool-call-result-converter";
-export { ToolExecutionException } from "./tool-execution-exception";
-export type { ToolExecutionExceptionProcessor } from "./tool-execution-exception-processor.interface";
+export { DefaultToolCallResultConverter } from "./default-tool-call-result-converter.js";
+export { DefaultToolExecutionExceptionProcessor } from "./default-tool-execution-exception-processor.js";
+export type { ToolCallResultConverter } from "./tool-call-result-converter.js";
+export { ToolExecutionException } from "./tool-execution-exception.js";
+export type { ToolExecutionExceptionProcessor } from "./tool-execution-exception-processor.interface.js";

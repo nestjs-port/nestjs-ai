@@ -27,10 +27,10 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { Advisor, AdvisorObservationConvention } from "./advisor";
-import type { ChatClient } from "./chat-client";
-import { DefaultChatClient } from "./default-chat-client";
-import type { ChatClientObservationConvention } from "./observation";
+import type { Advisor, AdvisorObservationConvention } from "./advisor/index.js";
+import type { ChatClient } from "./chat-client.js";
+import { DefaultChatClient } from "./default-chat-client.js";
+import type { ChatClientObservationConvention } from "./observation/index.js";
 
 export class DefaultChatClientBuilder implements ChatClient.Builder {
   protected readonly defaultRequest: DefaultChatClient.DefaultChatClientRequestSpec;

@@ -18,8 +18,8 @@ import { Buffer } from "node:buffer";
 
 import { get_encoding, type Tiktoken, type TiktokenEncoding } from "tiktoken";
 
-import type { MediaContent } from "../content";
-import type { TokenCountEstimator } from "./token-count-estimator.interface";
+import type { MediaContent } from "../content/index.js";
+import type { TokenCountEstimator } from "./token-count-estimator.interface.js";
 
 export class TiktokenTokenCountEstimator implements TokenCountEstimator {
   private readonly _estimator: Tiktoken;

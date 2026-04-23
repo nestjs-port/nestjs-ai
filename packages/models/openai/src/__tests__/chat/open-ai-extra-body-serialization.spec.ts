@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { OpenAiChatOptions } from "../../open-ai-chat-options";
+import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
 describe("OpenAiExtraBodySerialization", () => {
   it("test merge with extra body", () => {

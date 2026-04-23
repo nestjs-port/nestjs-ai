@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-export type { ContentFormatter } from "./content-formatter.interface";
+export type { ContentFormatter } from "./content-formatter.interface.js";
 export {
   DefaultContentFormatter,
   DefaultContentFormatterBuilder,
-} from "./default-content-formatter";
-export { Document, DocumentBuilder } from "./document";
-export { DocumentMetadata } from "./document-metadata";
-export type { DocumentReader } from "./document-reader.interface";
-export type { DocumentTransformer } from "./document-transformer.interface";
-export type { DocumentWriter } from "./document-writer.interface";
-export * from "./id";
-export { MetadataMode } from "./metadata-mode";
+} from "./default-content-formatter.js";
+export { Document, DocumentBuilder } from "./document.js";
+export { DocumentMetadata } from "./document-metadata.js";
+export type { DocumentReader } from "./document-reader.interface.js";
+export type { DocumentTransformer } from "./document-transformer.interface.js";
+export type { DocumentWriter } from "./document-writer.interface.js";
+export * from "./id/index.js";
+export { MetadataMode } from "./metadata-mode.js";

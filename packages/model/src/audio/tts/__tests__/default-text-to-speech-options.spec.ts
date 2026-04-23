@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { DefaultTextToSpeechOptions } from "../default-text-to-speech-options";
+import { DefaultTextToSpeechOptions } from "../default-text-to-speech-options.js";
 
 describe("DefaultTextToSpeechOptions", () => {
   it("test constructor with all fields", () => {

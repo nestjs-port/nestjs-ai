@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { MediaContent } from "../content";
+import type { MediaContent } from "../content/index.js";
 
 export interface TokenCountEstimator {
   estimate(text: string | null): number;

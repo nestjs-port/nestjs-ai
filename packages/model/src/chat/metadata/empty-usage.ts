@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Usage } from "./usage";
+import { Usage } from "./usage.js";
 
 /**
  * An EmptyUsage implementation that returns zero for all property getters.

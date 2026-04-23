@@ -16,7 +16,7 @@
 
 import { ObservationDocumentation } from "@nestjs-port/core";
 
-import { DefaultToolCallingObservationConvention } from "./default-tool-calling-observation-convention";
+import { DefaultToolCallingObservationConvention } from "./default-tool-calling-observation-convention.js";
 
 export class ToolCallingObservationDocumentation extends ObservationDocumentation {
   get name() {

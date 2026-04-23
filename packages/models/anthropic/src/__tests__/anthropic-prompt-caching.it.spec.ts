@@ -118,6 +118,12 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       cacheCreation > 0 || cacheRead > 0,
       `Expected either cache creation or cache read tokens, but got creation=${cacheCreation}, read=${cacheRead}`,
     );
+    expect(response.metadata.usage.cacheWriteInputTokens).toBe(
+      usage.cache_creation_input_tokens ?? null,
+    );
+    expect(response.metadata.usage.cacheReadInputTokens).toBe(
+      usage.cache_read_input_tokens ?? null,
+    );
 
     logger.info(
       "Cache creation tokens: {}, Cache read tokens: {}",
@@ -179,6 +185,16 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
         cacheCreation > 0 || cacheRead > 0,
         `Expected either cache creation or cache read tokens, but got creation=${cacheCreation}, read=${cacheRead}`,
       );
+      assertEqual(
+        response.metadata.usage.cacheWriteInputTokens,
+        usage.cache_creation_input_tokens ?? null,
+        "Expected cache write input tokens to match SDK usage",
+      );
+      assertEqual(
+        response.metadata.usage.cacheReadInputTokens,
+        usage.cache_read_input_tokens ?? null,
+        "Expected cache read input tokens to match SDK usage",
+      );
       logger.info(
         "Cache creation tokens: {}, Cache read tokens: {}",
         cacheCreation,
@@ -231,6 +247,12 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       throw new Error("Expected SDK usage to be present");
     }
     const turn1Creation = usage1.cache_creation_input_tokens ?? 0;
+    expect(turn1.metadata.usage.cacheWriteInputTokens).toBe(
+      usage1.cache_creation_input_tokens ?? null,
+    );
+    expect(turn1.metadata.usage.cacheReadInputTokens).toBe(
+      usage1.cache_read_input_tokens ?? null,
+    );
     logger.info(
       "Turn 1 - Cache creation: {}, Cache read: {}",
       turn1Creation,
@@ -256,6 +278,12 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     if (usage2 == null) {
       throw new Error("Expected SDK usage to be present");
     }
+    expect(turn2.metadata.usage.cacheWriteInputTokens).toBe(
+      usage2.cache_creation_input_tokens ?? null,
+    );
+    expect(turn2.metadata.usage.cacheReadInputTokens).toBe(
+      usage2.cache_read_input_tokens ?? null,
+    );
     if (turn1Creation > 0) {
       assertGreaterThan(
         usage2.cache_read_input_tokens ?? 0,
@@ -697,6 +725,12 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
 
 function assertTrue(condition: boolean, message: string): void {
   if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function assertEqual<T>(actual: T, expected: T, message: string): void {
+  if (actual !== expected) {
     throw new Error(message);
   }
 }

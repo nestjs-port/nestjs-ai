@@ -551,6 +551,8 @@ export class AnthropicChatModel extends ChatModel {
         completionTokens: outputTokens,
         totalTokens: inputTokens + outputTokens,
         nativeUsage: event.usage,
+        cacheReadInputTokens: event.usage.cache_read_input_tokens ?? null,
+        cacheWriteInputTokens: event.usage.cache_creation_input_tokens ?? null,
       });
 
       const accumulatedUsage = UsageCalculator.getCumulativeUsage(
@@ -1099,6 +1101,8 @@ export class AnthropicChatModel extends ChatModel {
       completionTokens: outputTokens,
       totalTokens: inputTokens + outputTokens,
       nativeUsage: usage,
+      cacheReadInputTokens: usage.cache_read_input_tokens ?? null,
+      cacheWriteInputTokens: usage.cache_creation_input_tokens ?? null,
     });
   }
 

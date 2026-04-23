@@ -120,8 +120,10 @@ export class OpenAiAudioTranscriptionModel extends TranscriptionModel {
   ): Promise<TranscriptionCreateParamsNonStreaming> {
     const file = await toFile(audioBytes, filename);
     const model =
+      options.deploymentName ??
       options.model ??
       OpenAiAudioTranscriptionOptions.DEFAULT_TRANSCRIPTION_MODEL;
+    assert(model, "Model must not be null");
 
     return {
       file,

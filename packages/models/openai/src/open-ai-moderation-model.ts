@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
+
 import { LoggerFactory } from "@nestjs-port/core";
 import type {
   Moderation as OpenAiModerationResult,
@@ -85,10 +87,12 @@ export class OpenAiModerationModel implements ModerationModel {
       moderationPrompt.options,
       this._defaultOptions,
     );
+    const model = options.deploymentName ?? options.model;
+    assert(model, "Model must not be null");
 
     const params: ModerationCreateParams = {
       input: text,
-      model: options.model,
+      model,
     };
 
     const response = await this._openAiClient.moderations.create(params);

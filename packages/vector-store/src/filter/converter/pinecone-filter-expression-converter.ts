@@ -16,8 +16,8 @@
 
 import assert from "node:assert/strict";
 
-import { Filter } from "../filter";
-import { AbstractFilterExpressionConverter } from "./abstract-filter-expression-converter";
+import { Filter } from "../filter.js";
+import { AbstractFilterExpressionConverter } from "./abstract-filter-expression-converter.js";
 
 export class PineconeFilterExpressionConverter extends AbstractFilterExpressionConverter {
   protected override doExpression(

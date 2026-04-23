@@ -17,9 +17,9 @@
 export {
   REDIS_VECTOR_STORE_PROPERTIES_TOKEN,
   RedisVectorStoreModule,
-  RedisVectorStoreModuleAsyncOptions,
-} from "./redis-vector-store.module";
+  type RedisVectorStoreModuleAsyncOptions,
+} from "./redis-vector-store.module.js";
 export type {
   RedisVectorStoreHnswProperties,
   RedisVectorStoreProperties,
-} from "./redis-vector-store-properties";
+} from "./redis-vector-store-properties.js";

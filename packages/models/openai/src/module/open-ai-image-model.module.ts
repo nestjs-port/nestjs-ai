@@ -29,13 +29,13 @@ import {
 } from "@nestjs-ai/model";
 import type { ObservationRegistry } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
-import { OpenAiImageModel } from "../open-ai-image-model";
-import { OpenAiImageOptions } from "../open-ai-image-options";
-import { OpenAiSetup } from "../setup";
+import { OpenAiImageModel } from "../open-ai-image-model.js";
+import { OpenAiImageOptions } from "../open-ai-image-options.js";
+import { OpenAiSetup } from "../setup/index.js";
 import {
   OPEN_AI_IMAGE_DEFAULT_MODEL,
   type OpenAiImageProperties,
-} from "./open-ai-image-properties";
+} from "./open-ai-image-properties.js";
 
 export const OPEN_AI_IMAGE_PROPERTIES_TOKEN = Symbol.for(
   "OPEN_AI_IMAGE_PROPERTIES_TOKEN",

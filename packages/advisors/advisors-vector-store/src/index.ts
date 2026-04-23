@@ -17,8 +17,8 @@
 export {
   QuestionAnswerAdvisor,
   type QuestionAnswerAdvisorProps,
-} from "./question-answer-advisor";
+} from "./question-answer-advisor.js";
 export {
   VectorStoreChatMemoryAdvisor,
   type VectorStoreChatMemoryAdvisorProps,
-} from "./vector-store-chat-memory-advisor";
+} from "./vector-store-chat-memory-advisor.js";

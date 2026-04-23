@@ -17,23 +17,27 @@
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { DefaultToolCallingChatOptions } from "../../../model";
+import { DefaultToolCallingChatOptions } from "../../../model/index.js";
 import {
   DefaultToolDefinition,
   ToolCallback,
   type ToolDefinition,
   ToolMetadata,
-} from "../../../tool";
-import { AssistantMessage } from "../../messages";
+} from "../../../tool/index.js";
+import { AssistantMessage } from "../../messages/index.js";
 import {
   ChatGenerationMetadata,
   ChatResponseMetadata,
   DefaultUsage,
-} from "../../metadata";
-import { ChatResponse, Generation } from "../../model";
-import { type ChatOptions, DefaultChatOptions, Prompt } from "../../prompt";
-import { ChatModelObservationContext } from "../chat-model-observation-context";
-import { DefaultChatModelObservationConvention } from "../default-chat-model-observation-convention";
+} from "../../metadata/index.js";
+import { ChatResponse, Generation } from "../../model/index.js";
+import {
+  type ChatOptions,
+  DefaultChatOptions,
+  Prompt,
+} from "../../prompt/index.js";
+import { ChatModelObservationContext } from "../chat-model-observation-context.js";
+import { DefaultChatModelObservationConvention } from "../default-chat-model-observation-convention.js";
 
 describe("DefaultChatModelObservationConvention", () => {
   const observationConvention = new DefaultChatModelObservationConvention();

@@ -20,7 +20,7 @@ import type {
   ObservationConvention,
 } from "@nestjs-port/core";
 
-import { ChatModelObservationContext } from "./chat-model-observation-context";
+import { ChatModelObservationContext } from "./chat-model-observation-context.js";
 
 export abstract class ChatModelObservationConvention implements ObservationConvention<ChatModelObservationContext> {
   abstract getName(): string;

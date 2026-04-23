@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Query } from "../../../query";
+import type { Query } from "../../../query.js";
 
 export abstract class QueryTransformer {
   abstract transform(query: Query): Promise<Query>;

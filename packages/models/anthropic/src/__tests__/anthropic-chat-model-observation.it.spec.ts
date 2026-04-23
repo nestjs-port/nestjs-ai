@@ -29,7 +29,7 @@ import { firstValueFrom } from "rxjs";
 import { toArray } from "rxjs/operators";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { AnthropicChatModel, AnthropicChatOptions } from "../index";
+import { AnthropicChatModel, AnthropicChatOptions } from "../index.js";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const TEST_MODEL = AnthropicChatOptions.DEFAULT_MODEL;

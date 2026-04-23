@@ -20,8 +20,8 @@ import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable, tap } from "rxjs";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiChatModel } from "../../open-ai-chat-model";
-import { OpenAiChatOptions } from "../../open-ai-chat-options";
+import { OpenAiChatModel } from "../../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

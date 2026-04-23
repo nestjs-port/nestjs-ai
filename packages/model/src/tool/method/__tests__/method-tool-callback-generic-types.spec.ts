@@ -16,10 +16,10 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext, ToolContextSchema } from "../../../chat";
-import { DefaultToolDefinition } from "../../definition";
-import type { ToolCallResultConverter } from "../../execution";
-import { MethodToolCallback } from "../method-tool-callback";
+import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
+import { DefaultToolDefinition } from "../../definition/index.js";
+import type { ToolCallResultConverter } from "../../execution/index.js";
+import { MethodToolCallback } from "../method-tool-callback.js";
 
 class TestGenericClass {
   static readonly STATIC_PREFIX = "STATIC";

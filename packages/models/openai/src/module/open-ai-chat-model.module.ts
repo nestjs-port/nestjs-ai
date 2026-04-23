@@ -39,12 +39,12 @@ import {
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { OpenAiChatModel } from "../open-ai-chat-model";
-import { OpenAiChatOptions } from "../open-ai-chat-options";
+import { OpenAiChatModel } from "../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../open-ai-chat-options.js";
 import {
   OPEN_AI_CHAT_DEFAULT_MODEL,
   type OpenAiChatProperties,
-} from "./open-ai-chat-properties";
+} from "./open-ai-chat-properties.js";
 
 export const OPEN_AI_CHAT_PROPERTIES_TOKEN = Symbol.for(
   "OPEN_AI_CHAT_PROPERTIES_TOKEN",

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-export { ChatClientCompletionObservationHandler } from "./chat-client-completion-observation-handler";
+export { ChatClientCompletionObservationHandler } from "./chat-client-completion-observation-handler.js";
 export {
   ChatClientObservationContext,
   ChatClientObservationContextBuilder,
-} from "./chat-client-observation-context";
-export { ChatClientObservationConvention } from "./chat-client-observation-convention";
-export { ChatClientObservationDocumentation } from "./chat-client-observation-documentation";
-export { ChatClientPromptContentObservationHandler } from "./chat-client-prompt-content-observation-handler";
-export { DefaultChatClientObservationConvention } from "./default-chat-client-observation-convention";
+} from "./chat-client-observation-context.js";
+export { ChatClientObservationConvention } from "./chat-client-observation-convention.js";
+export { ChatClientObservationDocumentation } from "./chat-client-observation-documentation.js";
+export { ChatClientPromptContentObservationHandler } from "./chat-client-prompt-content-observation-handler.js";
+export { DefaultChatClientObservationConvention } from "./default-chat-client-observation-convention.js";

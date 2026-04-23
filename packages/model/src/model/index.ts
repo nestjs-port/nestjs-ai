@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-export { AbstractResponseMetadata } from "./abstract-response-metadata";
-export type { ApiKey } from "./api-key.interface";
-export type { ChatModelDescription } from "./chat-model-description.interface";
-export { EmbeddingModelDescription } from "./embedding-model-description";
-export type { Model } from "./model.interface";
-export type { ModelDescription } from "./model-description.interface";
-export type { ModelOptions } from "./model-options.interface";
-export type { ModelRequest } from "./model-request.interface";
-export type { ModelResponse } from "./model-response.interface";
-export type { ModelResult } from "./model-result.interface";
-export { NoopApiKey } from "./noop-api-key";
-export * from "./observation";
-export type { ResponseMetadata } from "./response-metadata.interface";
-export type { ResultMetadata } from "./result-metadata.interface";
-export { SimpleApiKey } from "./simple-api-key";
-export type { StreamingModel } from "./streaming-model.interface";
-export * from "./transformer";
-export * from "./tool";
+export { AbstractResponseMetadata } from "./abstract-response-metadata.js";
+export type { ApiKey } from "./api-key.interface.js";
+export type { ChatModelDescription } from "./chat-model-description.interface.js";
+export { EmbeddingModelDescription } from "./embedding-model-description.js";
+export type { Model } from "./model.interface.js";
+export type { ModelDescription } from "./model-description.interface.js";
+export type { ModelOptions } from "./model-options.interface.js";
+export type { ModelRequest } from "./model-request.interface.js";
+export type { ModelResponse } from "./model-response.interface.js";
+export type { ModelResult } from "./model-result.interface.js";
+export { NoopApiKey } from "./noop-api-key.js";
+export * from "./observation/index.js";
+export type { ResponseMetadata } from "./response-metadata.interface.js";
+export type { ResultMetadata } from "./result-metadata.interface.js";
+export { SimpleApiKey } from "./simple-api-key.js";
+export type { StreamingModel } from "./streaming-model.interface.js";
+export * from "./transformer/index.js";
+export * from "./tool/index.js";

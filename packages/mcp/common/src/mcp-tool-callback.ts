@@ -23,7 +23,7 @@ import type {
 import type { ToolContext, ToolDefinition } from "@nestjs-ai/model";
 import { ToolCallback, ToolExecutionException } from "@nestjs-ai/model";
 import { type Logger, LoggerFactory, StringUtils } from "@nestjs-port/core";
-import { McpToolUtils } from "./mcp-tool-utils";
+import { McpToolUtils } from "./mcp-tool-utils.js";
 
 export class McpToolCallback extends ToolCallback {
   private readonly _logger: Logger = LoggerFactory.getLogger(

@@ -15,10 +15,10 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { Filter } from "../filter";
-import type { FilterExpressionConverter } from "../filter-expression-converter";
-import { FilterExpressionTextParser } from "../filter-expression-text-parser";
-import { FilterHelper } from "../filter-helper";
+import { Filter } from "../filter.js";
+import type { FilterExpressionConverter } from "../filter-expression-converter.js";
+import { FilterExpressionTextParser } from "../filter-expression-text-parser.js";
+import { FilterHelper } from "../filter-helper.js";
 
 class InNinTestConverter implements FilterExpressionConverter {
   convertExpression(expression: Filter.Expression): string {

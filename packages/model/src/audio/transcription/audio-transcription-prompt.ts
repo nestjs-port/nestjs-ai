@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelRequest } from "../../model";
-import type { AudioTranscriptionOptions } from "./audio-transcription-options";
+import type { ModelRequest } from "../../model/index.js";
+import type { AudioTranscriptionOptions } from "./audio-transcription-options.js";
 
 export type AudioResource = string | URL | Buffer;
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export { GoogleGenAiConstants } from "./google-gen-ai-constants";
+export { GoogleGenAiConstants } from "./google-gen-ai-constants.js";
 export {
   GoogleGenAiSafetySetting,
   HarmBlockMethod,
   HarmBlockThreshold,
   HarmCategory,
-} from "./google-gen-ai-safety-setting";
-export { GoogleGenAiThinkingLevel } from "./google-gen-ai-thinking-level";
+} from "./google-gen-ai-safety-setting.js";
+export { GoogleGenAiThinkingLevel } from "./google-gen-ai-thinking-level.js";

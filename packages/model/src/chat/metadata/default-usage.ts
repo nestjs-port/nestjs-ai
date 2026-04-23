@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Usage } from "./usage";
+import { Usage } from "./usage.js";
 
 export type DefaultUsageProps = Partial<Usage>;
 

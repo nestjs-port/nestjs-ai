@@ -39,11 +39,11 @@ import type {
 } from "redis";
 import { SCHEMA_FIELD_TYPE, SCHEMA_VECTOR_FIELD_ALGORITHM } from "redis";
 
-import { RedisFilterExpressionConverter } from "./redis-filter-expression-converter";
+import { RedisFilterExpressionConverter } from "./redis-filter-expression-converter.js";
 import {
   type RedisMetadataField,
   RedisMetadataFieldType,
-} from "./redis-metadata-field";
+} from "./redis-metadata-field.js";
 
 export enum RedisVectorAlgorithm {
   FLAT = "FLAT",

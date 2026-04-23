@@ -15,7 +15,7 @@
  */
 
 import type { ToolCallingObservationProperties } from "@nestjs-ai/model";
-import type { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options";
+import type { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 
 export interface GoogleGenAiConnectionProperties {
   apiKey?: string;

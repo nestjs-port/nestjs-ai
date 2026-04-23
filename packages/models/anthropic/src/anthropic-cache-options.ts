@@ -16,8 +16,8 @@
 
 import { MessageType } from "@nestjs-ai/model";
 
-import { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
-import { AnthropicCacheTtl } from "./anthropic-cache-ttl";
+import { AnthropicCacheStrategy } from "./anthropic-cache-strategy.js";
+import { AnthropicCacheTtl } from "./anthropic-cache-ttl.js";
 
 export interface AnthropicCacheOptionsProps {
   strategy?: AnthropicCacheStrategy;

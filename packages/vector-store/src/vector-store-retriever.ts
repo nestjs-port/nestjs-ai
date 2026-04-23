@@ -15,7 +15,7 @@
  */
 
 import type { Document } from "@nestjs-ai/commons";
-import { SearchRequest } from "./search-request";
+import { SearchRequest } from "./search-request.js";
 
 export abstract class VectorStoreRetriever {
   similaritySearch(query: string): Promise<Document[]>;

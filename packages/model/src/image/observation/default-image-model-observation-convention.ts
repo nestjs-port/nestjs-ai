@@ -16,8 +16,8 @@
 
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
-import type { ImageModelObservationContext } from "./image-model-observation-context";
-import { ImageModelObservationConvention } from "./image-model-observation-convention";
+import type { ImageModelObservationContext } from "./image-model-observation-context.js";
+import { ImageModelObservationConvention } from "./image-model-observation-convention.js";
 
 export class DefaultImageModelObservationConvention extends ImageModelObservationConvention {
   static readonly DEFAULT_NAME = "gen_ai.client.operation";

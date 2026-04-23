@@ -16,7 +16,7 @@
 
 import type { TemplateRenderer } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { PromptTemplate } from "../prompt-template";
+import { PromptTemplate } from "../prompt-template.js";
 
 describe("PromptTemplateBuilder", () => {
   it("null template should throw", () => {

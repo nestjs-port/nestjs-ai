@@ -21,7 +21,7 @@ import { IMAGE_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   OPEN_AI_IMAGE_DEFAULT_MODEL,
   OPEN_AI_IMAGE_PROPERTIES_TOKEN,
-  OpenAiImageModel,
+  type OpenAiImageModel,
   OpenAiImageModelModule,
   type OpenAiImageProperties,
 } from "@nestjs-ai/model-openai";

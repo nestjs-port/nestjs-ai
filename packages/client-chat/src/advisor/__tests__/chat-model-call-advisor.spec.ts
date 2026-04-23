@@ -17,7 +17,7 @@
 import type { ChatModel } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
-import { ChatModelCallAdvisor } from "../chat-model-call-advisor";
+import { ChatModelCallAdvisor } from "../chat-model-call-advisor.js";
 
 describe("ChatModelCallAdvisor", () => {
   it("when chat model is null then throw", () => {

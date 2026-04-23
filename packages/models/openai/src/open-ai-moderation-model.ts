@@ -28,19 +28,19 @@ import {
   CategoryScores,
   Moderation,
   ModerationGeneration,
-  ModerationModel,
-  ModerationOptions,
-  ModerationPrompt,
+  type ModerationModel,
+  type ModerationOptions,
+  type ModerationPrompt,
   ModerationResponse,
   ModerationResult,
 } from "@nestjs-ai/model";
 
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
 import {
   OpenAiModerationOptions,
   type OpenAiModerationOptionsProps,
-} from "./open-ai-moderation-options";
-import type { OpenAiClient } from "./open-ai-client";
+} from "./open-ai-moderation-options.js";
+import type { OpenAiClient } from "./open-ai-client.js";
 
 export interface OpenAiModerationModelProps {
   openAiClient?: OpenAiClient | null;

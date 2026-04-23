@@ -18,7 +18,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 
-import { Document, type DocumentReader } from "../document";
+import { Document, type DocumentReader } from "../document/index.js";
 
 export interface TextReaderProps {
   resource: string | URL | Buffer;

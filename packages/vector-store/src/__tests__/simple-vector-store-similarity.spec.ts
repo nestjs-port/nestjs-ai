@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { SimpleVectorStoreContent } from "../simple-vector-store-content";
+import { SimpleVectorStoreContent } from "../simple-vector-store-content.js";
 
 describe("SimpleVectorStoreSimilarityTests", () => {
   it("test similarity", () => {

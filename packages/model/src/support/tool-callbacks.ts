@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ToolCallback, ToolObjectInstance } from "../tool";
-import { MethodToolCallbackProvider } from "../tool";
+import type { ToolCallback, ToolObjectInstance } from "../tool/index.js";
+import { MethodToolCallbackProvider } from "../tool/index.js";
 
 export abstract class ToolCallbacks {
   static from(source: ToolObjectInstance): ToolCallback[];

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./json";
+export * from "./json/index.js";

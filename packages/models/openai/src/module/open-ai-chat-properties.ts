@@ -15,8 +15,8 @@
  */
 
 import type { ToolCallingObservationProperties } from "@nestjs-ai/model";
-import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
-import type { OpenAiChatOptionsProps } from "../open-ai-chat-options";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options.js";
+import type { OpenAiChatOptionsProps } from "../open-ai-chat-options.js";
 
 export const OPEN_AI_CHAT_DEFAULT_MODEL = "gpt-5-mini";
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./config";
+export * from "./config/index.js";
 export {
   MarkdownDocumentReader,
   type MarkdownDocumentReaderProps,
-} from "./markdown-document-reader";
+} from "./markdown-document-reader.js";

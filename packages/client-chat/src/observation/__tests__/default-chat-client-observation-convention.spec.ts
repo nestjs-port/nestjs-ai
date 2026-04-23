@@ -25,10 +25,10 @@ import {
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
-import type { Advisor } from "../../advisor";
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientObservationContext } from "../chat-client-observation-context";
-import { DefaultChatClientObservationConvention } from "../default-chat-client-observation-convention";
+import type { Advisor } from "../../advisor/index.js";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientObservationContext } from "../chat-client-observation-context.js";
+import { DefaultChatClientObservationConvention } from "../default-chat-client-observation-convention.js";
 
 function createAdvisor(name: string): Advisor {
   return {

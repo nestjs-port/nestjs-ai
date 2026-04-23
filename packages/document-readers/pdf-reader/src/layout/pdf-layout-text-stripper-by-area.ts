@@ -15,12 +15,12 @@
  */
 
 import assert from "node:assert/strict";
-import type { PDFPageProxy } from "pdfjs-dist/types/src/display/api";
+import type { PDFPageProxy } from "pdfjs-dist/types/src/display/api.js";
 
 import {
   ForkPdfLayoutTextStripper,
   type Region,
-} from "./fork-pdf-layout-text-stripper";
+} from "./fork-pdf-layout-text-stripper.js";
 
 export class PdfLayoutTextStripperByArea extends ForkPdfLayoutTextStripper {
   private readonly _regions: string[] = [];

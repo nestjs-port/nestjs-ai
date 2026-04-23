@@ -22,4 +22,4 @@ export {
   type ToolConsumer,
   type ToolFunction,
   type ToolSupplier,
-} from "./function-tool-callback";
+} from "./function-tool-callback.js";

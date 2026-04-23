@@ -27,10 +27,14 @@ import {
 } from "@nestjs-port/core";
 import { lastValueFrom, of } from "rxjs";
 import { describe, expect, it } from "vitest";
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientResponse } from "../../chat-client-response";
-import type { CallAdvisor, CallAdvisorChain, StreamAdvisor } from "../api";
-import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientResponse } from "../../chat-client-response.js";
+import type {
+  CallAdvisor,
+  CallAdvisorChain,
+  StreamAdvisor,
+} from "../api/index.js";
+import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain.js";
 
 describe("DefaultAroundAdvisorChain", () => {
   it("when observation registry is null then throw", () => {

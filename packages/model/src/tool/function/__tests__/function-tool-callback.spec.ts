@@ -16,11 +16,11 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext } from "../../../chat";
-import { DefaultToolDefinition } from "../../definition";
-import { ToolExecutionException } from "../../execution";
-import { ToolMetadata } from "../../metadata";
-import { FunctionToolCallback } from "../function-tool-callback";
+import { ToolContext } from "../../../chat/index.js";
+import { DefaultToolDefinition } from "../../definition/index.js";
+import { ToolExecutionException } from "../../execution/index.js";
+import { ToolMetadata } from "../../metadata/index.js";
+import { FunctionToolCallback } from "../function-tool-callback.js";
 
 class TestFunctionTool {
   calledValue: unknown = null;

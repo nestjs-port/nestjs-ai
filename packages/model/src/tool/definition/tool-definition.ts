@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DefaultToolDefinitionBuilder } from "./default-tool-definition";
-import { DefaultToolDefinition } from "./default-tool-definition";
+import type { DefaultToolDefinitionBuilder } from "./default-tool-definition.js";
+import { DefaultToolDefinition } from "./default-tool-definition.js";
 
 /**
  * Definition used by the AI model to determine when and how to call the tool.

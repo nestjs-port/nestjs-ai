@@ -22,13 +22,13 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { Filter } from "../filter";
-import type { SearchRequest } from "../search-request";
-import { VectorStore } from "../vector-store";
-import { DefaultVectorStoreObservationConvention } from "./default-vector-store-observation-convention";
-import { VectorStoreObservationContext } from "./vector-store-observation-context";
-import type { VectorStoreObservationConvention } from "./vector-store-observation-convention";
-import { VectorStoreObservationDocumentation } from "./vector-store-observation-documentation";
+import type { Filter } from "../filter/index.js";
+import type { SearchRequest } from "../search-request.js";
+import { VectorStore } from "../vector-store.js";
+import { DefaultVectorStoreObservationConvention } from "./default-vector-store-observation-convention.js";
+import { VectorStoreObservationContext } from "./vector-store-observation-context.js";
+import type { VectorStoreObservationConvention } from "./vector-store-observation-convention.js";
+import { VectorStoreObservationDocumentation } from "./vector-store-observation-documentation.js";
 
 export interface AbstractObservationVectorStoreProps {
   embeddingModel: EmbeddingModel;

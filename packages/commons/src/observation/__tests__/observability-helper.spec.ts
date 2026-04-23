@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ObservabilityHelper } from "../observability-helper";
+import { ObservabilityHelper } from "../observability-helper.js";
 
 describe("ObservabilityHelper", () => {
   it("should get empty brackets for empty map", () => {

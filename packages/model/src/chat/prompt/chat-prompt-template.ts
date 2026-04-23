@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Message } from "../messages";
-import type { ChatOptions } from "./chat-options.interface";
-import { Prompt } from "./prompt";
-import type { PromptTemplate } from "./prompt-template";
-import type { PromptTemplateActions } from "./prompt-template-actions.interface";
-import type { PromptTemplateChatActions } from "./prompt-template-chat-actions.interface";
+import type { Message } from "../messages/index.js";
+import type { ChatOptions } from "./chat-options.interface.js";
+import { Prompt } from "./prompt.js";
+import type { PromptTemplate } from "./prompt-template.js";
+import type { PromptTemplateActions } from "./prompt-template-actions.interface.js";
+import type { PromptTemplateChatActions } from "./prompt-template-chat-actions.interface.js";
 
 export class ChatPromptTemplate
   implements PromptTemplateActions, PromptTemplateChatActions

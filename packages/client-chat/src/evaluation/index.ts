@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { FactCheckingEvaluator } from "./fact-checking-evaluator";
-export { RelevancyEvaluator } from "./relevancy-evaluator";
+export { FactCheckingEvaluator } from "./fact-checking-evaluator.js";
+export { RelevancyEvaluator } from "./relevancy-evaluator.js";

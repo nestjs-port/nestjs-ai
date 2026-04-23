@@ -16,10 +16,10 @@
 
 import assert from "node:assert/strict";
 import { StringUtils } from "@nestjs-port/core";
-import type { Message } from "../messages";
-import { SystemMessage } from "../messages";
-import { ChatMemory } from "./chat-memory";
-import type { ChatMemoryRepository } from "./chat-memory-repository";
+import type { Message } from "../messages/index.js";
+import { SystemMessage } from "../messages/index.js";
+import { ChatMemory } from "./chat-memory.js";
+import type { ChatMemoryRepository } from "./chat-memory-repository.js";
 
 const DEFAULT_MAX_MESSAGES = 20;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatOptions, ChatResponse } from "../../chat";
+import type { ChatOptions, ChatResponse } from "../../chat/index.js";
 
 /**
  * Base contract for determining when tool execution should be performed based on model

@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ImageOptionsBuilder, ImagePrompt } from "../../";
-import { ImageModelObservationContext } from "../image-model-observation-context";
+import { ImageOptionsBuilder, ImagePrompt } from "../../index.js";
+import { ImageModelObservationContext } from "../image-model-observation-context.js";
 
 describe("ImageModelObservationContext", () => {
   it("when mandatory request options then return", () => {

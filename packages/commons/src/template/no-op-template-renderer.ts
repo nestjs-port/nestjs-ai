@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { TemplateRenderer } from "./template-renderer.interface";
+import type { TemplateRenderer } from "./template-renderer.interface.js";
 
 export class NoOpTemplateRenderer implements TemplateRenderer {
   apply(template: string, variables: Record<string, unknown | null>): string {

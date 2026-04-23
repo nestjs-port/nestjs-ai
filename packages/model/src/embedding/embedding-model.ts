@@ -16,11 +16,11 @@
 
 import assert from "node:assert/strict";
 import type { Document } from "@nestjs-ai/commons";
-import type { Model } from "../model";
-import type { BatchingStrategy } from "./batching-strategy.interface";
-import { EmbeddingOptions } from "./embedding-options.interface";
-import { EmbeddingRequest } from "./embedding-request";
-import type { EmbeddingResponse } from "./embedding-response";
+import type { Model } from "../model/index.js";
+import type { BatchingStrategy } from "./batching-strategy.interface.js";
+import { EmbeddingOptions } from "./embedding-options.interface.js";
+import { EmbeddingRequest } from "./embedding-request.js";
+import type { EmbeddingResponse } from "./embedding-response.js";
 
 /**
  * EmbeddingModel is a generic interface for embedding models.

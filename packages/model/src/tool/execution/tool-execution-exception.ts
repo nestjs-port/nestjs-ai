@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ToolDefinition } from "../index";
+import type { ToolDefinition } from "../index.js";
 
 /**
  * An exception thrown when a tool execution fails.

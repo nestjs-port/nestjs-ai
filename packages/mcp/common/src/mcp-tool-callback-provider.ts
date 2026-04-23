@@ -22,11 +22,11 @@ import type {
   InitializeResult,
 } from "@modelcontextprotocol/sdk/spec.types.js";
 import { type ToolCallback, ToolUtils } from "@nestjs-ai/model";
-import { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator";
-import { McpConnectionInfo } from "./mcp-connection-info";
-import { McpToolCallback } from "./mcp-tool-callback";
-import { DefaultMcpToolFilter, type McpToolFilter } from "./mcp-tool-filter";
-import type { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator";
+import { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator.js";
+import { McpConnectionInfo } from "./mcp-connection-info.js";
+import { McpToolCallback } from "./mcp-tool-callback.js";
+import { DefaultMcpToolFilter, type McpToolFilter } from "./mcp-tool-filter.js";
+import type { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator.js";
 
 interface McpClientContext {
   _clientInfo?: Implementation;

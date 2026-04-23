@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import { EmptyUsage, type Usage } from "../chat";
-import { AbstractResponseMetadata, type ResponseMetadata } from "../model";
+import { EmptyUsage, type Usage } from "../chat/index.js";
+import {
+  AbstractResponseMetadata,
+  type ResponseMetadata,
+} from "../model/index.js";
 
 /**
  * Common AI provider metadata returned in an embedding response.

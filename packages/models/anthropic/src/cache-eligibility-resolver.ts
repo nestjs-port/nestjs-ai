@@ -20,11 +20,11 @@ import type { CacheControlEphemeral } from "@anthropic-ai/sdk/resources/messages
 import { MessageType } from "@nestjs-ai/model";
 import { LoggerFactory } from "@nestjs-port/core";
 
-import type { AnthropicCacheOptions } from "./anthropic-cache-options";
-import { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
-import type { AnthropicCacheTtl } from "./anthropic-cache-ttl";
-import { toSdkCacheTtl } from "./anthropic-cache-ttl";
-import { CacheBreakpointTracker } from "./cache-breakpoint-tracker";
+import type { AnthropicCacheOptions } from "./anthropic-cache-options.js";
+import { AnthropicCacheStrategy } from "./anthropic-cache-strategy.js";
+import type { AnthropicCacheTtl } from "./anthropic-cache-ttl.js";
+import { toSdkCacheTtl } from "./anthropic-cache-ttl.js";
+import { CacheBreakpointTracker } from "./cache-breakpoint-tracker.js";
 
 /**
  * Resolves cache eligibility for messages based on the provided

@@ -19,9 +19,9 @@ import assert from "node:assert/strict";
 import type { BetaManagedAgentsSkillParams } from "@anthropic-ai/sdk/resources/beta";
 import { StringUtils } from "@nestjs-port/core";
 
-import { AnthropicSkill } from "./anthropic-skill";
-import { AnthropicSkillRecord } from "./anthropic-skill-record";
-import { AnthropicSkillType } from "./anthropic-skill-type";
+import { AnthropicSkill } from "./anthropic-skill.js";
+import { AnthropicSkillRecord } from "./anthropic-skill-record.js";
+import { AnthropicSkillType } from "./anthropic-skill-type.js";
 
 /**
  * Container for Claude Skills in a chat completion request. Maximum of 8 skills per

@@ -16,9 +16,9 @@
 
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import type { Message } from "../../messages";
-import { AssistantMessage, UserMessage } from "../../messages";
-import { InMemoryChatMemoryRepository } from "../in-memory-chat-memory-repository";
+import type { Message } from "../../messages/index.js";
+import { AssistantMessage, UserMessage } from "../../messages/index.js";
+import { InMemoryChatMemoryRepository } from "../in-memory-chat-memory-repository.js";
 
 function summarizeMessages(messages: Message[]): Array<{
   messageType: Message["messageType"];

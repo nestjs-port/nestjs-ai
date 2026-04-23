@@ -16,7 +16,7 @@
 
 import { ObservationDocumentation } from "@nestjs-port/core";
 
-import { DefaultAdvisorObservationConvention } from "./default-advisor-observation-convention";
+import { DefaultAdvisorObservationConvention } from "./default-advisor-observation-convention.js";
 
 export class AdvisorObservationDocumentation extends ObservationDocumentation {
   override get name(): string {

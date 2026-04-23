@@ -42,7 +42,7 @@ import type {
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,
-} from "./abstract-open-ai-options";
+} from "./abstract-open-ai-options.js";
 
 type OpenAiResponseFormat =
   | ResponseFormatText

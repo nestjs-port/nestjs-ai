@@ -19,9 +19,9 @@ import {
   DefaultToolDefinition,
   ToolCallback,
   type ToolDefinition,
-} from "../../../tool";
-import { DefaultToolCallingChatOptions } from "../default-tool-calling-chat-options";
-import { ToolCallingChatOptions } from "../tool-calling-chat-options.interface";
+} from "../../../tool/index.js";
+import { DefaultToolCallingChatOptions } from "../default-tool-calling-chat-options.js";
+import { ToolCallingChatOptions } from "../tool-calling-chat-options.interface.js";
 
 class TestToolCallback extends ToolCallback {
   private readonly _toolDefinition: ToolDefinition;

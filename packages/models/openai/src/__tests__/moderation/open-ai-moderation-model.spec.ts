@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { OpenAiClient } from "../../open-ai-client";
-import { OpenAiModerationModel } from "../../open-ai-moderation-model";
-import { OpenAiModerationOptions } from "../../open-ai-moderation-options";
+import type { OpenAiClient } from "../../open-ai-client.js";
+import { OpenAiModerationModel } from "../../open-ai-moderation-model.js";
+import { OpenAiModerationOptions } from "../../open-ai-moderation-options.js";
 import { ModerationOptionsBuilder, ModerationPrompt } from "@nestjs-ai/model";
 import { describe, expect, it, vi } from "vitest";
 import { ms } from "@nestjs-port/core";

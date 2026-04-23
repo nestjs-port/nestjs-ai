@@ -17,5 +17,5 @@
 export {
   ContextualQueryAugmenter,
   type ContextualQueryAugmenterProps,
-} from "./contextual-query-augmenter";
-export { QueryAugmenter } from "./query-augmenter";
+} from "./contextual-query-augmenter.js";
+export { QueryAugmenter } from "./query-augmenter.js";

@@ -21,7 +21,7 @@ import {
   AnthropicCacheOptions,
   AnthropicCacheStrategy,
   AnthropicCacheTtl,
-} from "../index";
+} from "../index.js";
 
 describe("AnthropicCacheOptions", () => {
   it("defaults are sane", () => {

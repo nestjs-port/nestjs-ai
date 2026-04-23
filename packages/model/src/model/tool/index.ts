@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-export { DefaultToolExecutionExceptionProcessor } from "../../tool/execution/default-tool-execution-exception-processor";
-export { ToolExecutionException } from "../../tool/execution/tool-execution-exception";
-export type { ToolExecutionExceptionProcessor } from "../../tool/execution/tool-execution-exception-processor.interface";
-export { DefaultToolCallingChatOptions } from "./default-tool-calling-chat-options";
+export { DefaultToolExecutionExceptionProcessor } from "../../tool/execution/default-tool-execution-exception-processor.js";
+export { ToolExecutionException } from "../../tool/execution/tool-execution-exception.js";
+export type { ToolExecutionExceptionProcessor } from "../../tool/execution/tool-execution-exception-processor.interface.js";
+export { DefaultToolCallingChatOptions } from "./default-tool-calling-chat-options.js";
 export {
   DefaultToolCallingManager,
   type DefaultToolCallingManagerProps,
-} from "./default-tool-calling-manager";
-export { DefaultToolExecutionEligibilityPredicate } from "./default-tool-execution-eligibility-predicate";
-export { DefaultToolExecutionResult } from "./default-tool-execution-result";
-export { StructuredOutputChatOptions } from "./structured-output-chat-options.interface";
-export { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
-export { ToolCallingManager } from "./tool-calling-manager.interface";
-export { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate";
-export { ToolExecutionResult } from "./tool-execution-result";
+} from "./default-tool-calling-manager.js";
+export { DefaultToolExecutionEligibilityPredicate } from "./default-tool-execution-eligibility-predicate.js";
+export { DefaultToolExecutionResult } from "./default-tool-execution-result.js";
+export type { StructuredOutputChatOptions } from "./structured-output-chat-options.interface.js";
+export { ToolCallingChatOptions } from "./tool-calling-chat-options.interface.js";
+export type { ToolCallingManager } from "./tool-calling-manager.interface.js";
+export { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate.js";
+export { ToolExecutionResult } from "./tool-execution-result.js";

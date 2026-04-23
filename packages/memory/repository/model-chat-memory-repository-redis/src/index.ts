@@ -17,15 +17,15 @@
 export type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
-} from "./advanced-redis-chat-memory-repository";
-export * from "./module";
+} from "./advanced-redis-chat-memory-repository.js";
+export * from "./module/index.js";
 export {
   RedisChatMemoryConfig,
   RedisChatMemoryConfigBuilder,
   type RedisChatMemoryMetadataField,
   type RedisChatMemoryMetadataFieldType,
-} from "./redis-chat-memory-config";
+} from "./redis-chat-memory-config.js";
 export {
   RedisChatMemoryRepository,
   RedisChatMemoryRepositoryBuilder,
-} from "./redis-chat-memory-repository";
+} from "./redis-chat-memory-repository.js";

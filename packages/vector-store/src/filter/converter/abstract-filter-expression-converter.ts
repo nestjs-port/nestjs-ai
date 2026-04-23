@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Filter } from "../filter";
-import type { FilterExpressionConverter } from "../filter-expression-converter";
-import { FilterHelper } from "../filter-helper";
+import { Filter } from "../filter.js";
+import type { FilterExpressionConverter } from "../filter-expression-converter.js";
+import { FilterHelper } from "../filter-helper.js";
 
 export abstract class AbstractFilterExpressionConverter implements FilterExpressionConverter {
   convertExpression(expression: Filter.Expression): string {

@@ -22,14 +22,14 @@ import {
   Prompt,
   type ToolCall,
   UserMessage,
-} from "../../../chat";
-import type { ToolCallbackResolver } from "../../../tool";
+} from "../../../chat/index.js";
+import type { ToolCallbackResolver } from "../../../tool/index.js";
 import {
   DefaultToolDefinition,
   ToolCallback,
   ToolMetadata,
-} from "../../../tool";
-import { DefaultToolCallingManager } from "../default-tool-calling-manager";
+} from "../../../tool/index.js";
+import { DefaultToolCallingManager } from "../default-tool-calling-manager.js";
 
 function createMockToolCallback(
   name: string,

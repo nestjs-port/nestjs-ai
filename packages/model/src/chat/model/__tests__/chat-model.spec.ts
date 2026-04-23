@@ -15,11 +15,11 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { AssistantMessage } from "../../messages";
-import { Prompt } from "../../prompt";
-import { ChatModel } from "../chat-model";
-import { ChatResponse } from "../chat-response";
-import { Generation } from "../generation";
+import { AssistantMessage } from "../../messages/index.js";
+import { Prompt } from "../../prompt/index.js";
+import { ChatModel } from "../chat-model.js";
+import { ChatResponse } from "../chat-response.js";
+import { Generation } from "../generation.js";
 
 /**
  * Test implementation of ChatModel for testing purposes.

@@ -20,7 +20,7 @@ import type {
   ObservationConvention,
 } from "@nestjs-port/core";
 
-import { AdvisorObservationContext } from "./advisor-observation-context";
+import { AdvisorObservationContext } from "./advisor-observation-context.js";
 
 export abstract class AdvisorObservationConvention implements ObservationConvention<AdvisorObservationContext> {
   abstract getName(): string;

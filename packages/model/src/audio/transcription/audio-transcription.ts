@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelResult } from "../../model";
-import { AudioTranscriptionMetadata } from "./audio-transcription-metadata";
+import type { ModelResult } from "../../model/index.js";
+import { AudioTranscriptionMetadata } from "./audio-transcription-metadata.js";
 
 /**
  * Represents a response returned by the AI.

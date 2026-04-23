@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { type Paragraph, ParagraphManager } from "./paragraph-manager";
+export { type Paragraph, ParagraphManager } from "./paragraph-manager.js";
 export {
   PdfDocumentReaderConfig,
   PdfDocumentReaderConfigBuilder,
-} from "./pdf-document-reader-config";
+} from "./pdf-document-reader-config.js";

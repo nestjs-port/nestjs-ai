@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from "./expansion";
-export * from "./transformation";
+export * from "./expansion/index.js";
+export * from "./transformation/index.js";

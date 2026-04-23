@@ -17,11 +17,11 @@
 import { Prompt } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
-import type { Advisor } from "../../advisor";
-import { ChatClientAttributes } from "../../chat-client-attributes";
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientResponse } from "../../chat-client-response";
-import { ChatClientObservationContext } from "../chat-client-observation-context";
+import type { Advisor } from "../../advisor/index.js";
+import { ChatClientAttributes } from "../../chat-client-attributes.js";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientResponse } from "../../chat-client-response.js";
+import { ChatClientObservationContext } from "../chat-client-observation-context.js";
 
 function createAdvisor(name: string): Advisor {
   return {

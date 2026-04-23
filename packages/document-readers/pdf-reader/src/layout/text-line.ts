@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Character } from "./character";
-import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper";
+import type { Character } from "./character.js";
+import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper.js";
 
 export class TextLine {
   private static readonly SPACE_CHARACTER = " ";

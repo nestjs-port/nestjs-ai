@@ -18,8 +18,8 @@ import assert from "node:assert/strict";
 import { AiObservationAttributes, SpringAiKind } from "@nestjs-ai/commons";
 import { ChatMemory, type ToolCallingChatOptions } from "@nestjs-ai/model";
 import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
-import type { ChatClientObservationContext } from "./chat-client-observation-context";
-import { ChatClientObservationConvention } from "./chat-client-observation-convention";
+import type { ChatClientObservationContext } from "./chat-client-observation-context.js";
+import { ChatClientObservationConvention } from "./chat-client-observation-convention.js";
 
 export class DefaultChatClientObservationConvention extends ChatClientObservationConvention {
   static readonly DEFAULT_NAME = "spring.ai.chat.client";

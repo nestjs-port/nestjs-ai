@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./augmentation";
+export * from "./augmentation/index.js";

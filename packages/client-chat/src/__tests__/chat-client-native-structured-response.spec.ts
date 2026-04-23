@@ -30,12 +30,12 @@ import {
 } from "@nestjs-ai/model";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import type { CallAdvisor, CallAdvisorChain } from "../advisor";
-import { AdvisorParams } from "../advisor-params";
-import { ChatClient } from "../chat-client";
-import { ChatClientAttributes } from "../chat-client-attributes";
-import type { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
+import type { CallAdvisor, CallAdvisorChain } from "../advisor/index.js";
+import { AdvisorParams } from "../advisor-params.js";
+import { ChatClient } from "../chat-client.js";
+import { ChatClientAttributes } from "../chat-client-attributes.js";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
 
 type StructuredOutputChatOptionsBuilder = ChatOptions.Builder & {
   outputSchema(outputSchema: string | null): ChatOptions.Builder;

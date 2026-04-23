@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AnthropicSkillRecord } from "./anthropic-skill-record";
-import { AnthropicSkillType } from "./anthropic-skill-type";
+import { AnthropicSkillRecord } from "./anthropic-skill-record.js";
+import { AnthropicSkillType } from "./anthropic-skill-type.js";
 
 /**
  * Enum representing the pre-built Anthropic Skills available for Claude.

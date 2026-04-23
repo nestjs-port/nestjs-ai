@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ModelRequest } from "../../model";
-import { DefaultTextToSpeechOptions } from "./default-text-to-speech-options";
-import { TextToSpeechMessage } from "./text-to-speech-message";
-import type { TextToSpeechOptions } from "./text-to-speech-options.interface";
+import type { ModelRequest } from "../../model/index.js";
+import { DefaultTextToSpeechOptions } from "./default-text-to-speech-options.js";
+import { TextToSpeechMessage } from "./text-to-speech-message.js";
+import type { TextToSpeechOptions } from "./text-to-speech-options.interface.js";
 
 export interface TextToSpeechPromptProps {
   text?: string | null;

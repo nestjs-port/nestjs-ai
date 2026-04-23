@@ -20,8 +20,8 @@ import { Document } from "@nestjs-ai/commons";
 import { EmbeddingRequest, TokenCountBatchingStrategy } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiEmbeddingModel } from "../../open-ai-embedding-model";
-import { OpenAiEmbeddingOptions } from "../../open-ai-embedding-options";
+import { OpenAiEmbeddingModel } from "../../open-ai-embedding-model.js";
+import { OpenAiEmbeddingOptions } from "../../open-ai-embedding-options.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
-export type { Content } from "./content.interface";
-export { Media, MediaFormat, MediaOptionsProps, type MimeType } from "./media";
-export type { MediaContent } from "./media-content.interface";
+export type { Content } from "./content.interface.js";
+export {
+  Media,
+  MediaFormat,
+  type MediaOptionsProps,
+  type MimeType,
+} from "./media.js";
+export type { MediaContent } from "./media-content.interface.js";

@@ -26,8 +26,8 @@ import {
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { RedisChatMemoryConfig } from "../redis-chat-memory-config";
-import { RedisChatMemoryRepository } from "../redis-chat-memory-repository";
+import { RedisChatMemoryConfig } from "../redis-chat-memory-config.js";
+import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
 
 describe("RedisChatMemoryRepositoryIT", () => {
   let redisContainer: StartedRedisContainer;

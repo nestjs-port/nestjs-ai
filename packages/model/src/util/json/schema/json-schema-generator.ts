@@ -15,7 +15,7 @@
  */
 
 import { z } from "zod";
-import { ToolContextSchema } from "../../../chat";
+import { ToolContextSchema } from "../../../chat/index.js";
 
 type JsonSchemaNode = z.core.ZodStandardJSONSchemaPayload<z.ZodTypeAny>;
 

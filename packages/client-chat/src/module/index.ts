@@ -16,12 +16,12 @@
 
 export {
   ChatClientModule,
-  ChatClientModuleAsyncOptions,
-} from "./chat-client.module";
-export { ChatClientBuilderConfigurer } from "./chat-client-builder-configurer";
+  type ChatClientModuleAsyncOptions,
+} from "./chat-client.module.js";
+export { ChatClientBuilderConfigurer } from "./chat-client-builder-configurer.js";
 export type {
   ChatClientBuilderObservationProperties,
   ChatClientBuilderProperties,
   ChatClientCustomizerDefinition,
   ChatClientCustomizerFactoryDefinition,
-} from "./chat-client-builder-properties";
+} from "./chat-client-builder-properties.js";

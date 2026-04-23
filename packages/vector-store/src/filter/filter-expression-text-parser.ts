@@ -51,8 +51,8 @@ import {
   type SimpleIdentifierContext,
   type TextConstantContext,
   type WhereContext,
-} from "./antlr4";
-import { Filter } from "./filter";
+} from "./antlr4/index.js";
+import { Filter } from "./filter.js";
 
 export class FilterExpressionTextParser {
   private static readonly WHERE_PREFIX = "WHERE";

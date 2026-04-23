@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { Message } from "../../chat";
-import { ToolExecutionResult } from "./tool-execution-result";
+import type { Message } from "../../chat/index.js";
+import { ToolExecutionResult } from "./tool-execution-result.js";
 
 export interface DefaultToolExecutionResultProps {
   conversationHistory: Message[];

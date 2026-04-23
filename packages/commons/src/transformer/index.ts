@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { ContentFormatTransformer } from "./content-format-transformer";
+export { ContentFormatTransformer } from "./content-format-transformer.js";

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AbstractResponseMetadata } from "../../model";
+import { AbstractResponseMetadata } from "../../model/index.js";
 
 /**
  * Metadata associated with an audio transcription response.

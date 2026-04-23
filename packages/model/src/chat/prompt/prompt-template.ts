@@ -18,12 +18,12 @@ import assert from "node:assert/strict";
 import type { Media, TemplateRenderer } from "@nestjs-ai/commons";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { Message } from "../messages";
-import { UserMessage } from "../messages";
-import type { ChatOptions } from "./chat-options.interface";
-import { Prompt } from "./prompt";
-import type { PromptTemplateActions } from "./prompt-template-actions.interface";
-import type { PromptTemplateMessageActions } from "./prompt-template-message-actions.interface";
+import type { Message } from "../messages/index.js";
+import { UserMessage } from "../messages/index.js";
+import type { ChatOptions } from "./chat-options.interface.js";
+import { Prompt } from "./prompt.js";
+import type { PromptTemplateActions } from "./prompt-template-actions.interface.js";
+import type { PromptTemplateMessageActions } from "./prompt-template-message-actions.interface.js";
 
 const DEFAULT_TEMPLATE_RENDERER: TemplateRenderer = new StTemplateRenderer();
 

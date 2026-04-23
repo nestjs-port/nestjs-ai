@@ -23,8 +23,8 @@ import {
   RetryPolicy,
   RetryTemplate,
 } from "@nestjs-port/core";
-import { NonTransientAiException } from "./non-transient-ai-exception";
-import { TransientAiException } from "./transient-ai-exception";
+import { NonTransientAiException } from "./non-transient-ai-exception.js";
+import { TransientAiException } from "./transient-ai-exception.js";
 
 /**
  * RetryUtils is a utility class for configuring and handling retry operations.

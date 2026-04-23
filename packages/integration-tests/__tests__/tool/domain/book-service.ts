@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Author } from "./author";
-import { Book } from "./book";
+import { Author } from "./author.js";
+import { Book } from "./book.js";
 
 export class BookService {
   private static readonly books = new Map<number, Book>([

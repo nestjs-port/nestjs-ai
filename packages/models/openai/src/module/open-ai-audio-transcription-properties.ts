@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
-import type { OpenAiAudioTranscriptionOptionsProps } from "../open-ai-audio-transcription-options";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options.js";
+import type { OpenAiAudioTranscriptionOptionsProps } from "../open-ai-audio-transcription-options.js";
 
 export const OPEN_AI_AUDIO_TRANSCRIPTION_DEFAULT_MODEL = "whisper-1" as const;
 

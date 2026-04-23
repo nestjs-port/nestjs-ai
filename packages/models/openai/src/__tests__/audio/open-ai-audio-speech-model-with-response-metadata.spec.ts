@@ -17,7 +17,7 @@
 import { ms } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiAudioSpeechResponseMetadata } from "../../metadata";
+import { OpenAiAudioSpeechResponseMetadata } from "../../metadata/index.js";
 
 describe("OpenAiAudioSpeechModelWithResponseMetadataTests", () => {
   it("metadata extracts rate limit headers correctly", () => {

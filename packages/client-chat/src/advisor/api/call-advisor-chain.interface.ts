@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ChatClientRequest } from "../../chat-client-request";
-import type { ChatClientResponse } from "../../chat-client-response";
-import type { AdvisorChain } from "./advisor-chain";
-import type { CallAdvisor } from "./call-advisor.interface";
+import type { ChatClientRequest } from "../../chat-client-request.js";
+import type { ChatClientResponse } from "../../chat-client-response.js";
+import type { AdvisorChain } from "./advisor-chain.js";
+import type { CallAdvisor } from "./call-advisor.interface.js";
 
 export interface CallAdvisorChain extends AdvisorChain {
   nextCall(chatClientRequest: ChatClientRequest): Promise<ChatClientResponse>;

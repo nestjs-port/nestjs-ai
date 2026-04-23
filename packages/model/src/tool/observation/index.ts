@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { DefaultToolCallingObservationConvention } from "./default-tool-calling-observation-convention";
-export { ToolCallingContentObservationFilter } from "./tool-calling-content-observation-filter";
-export { ToolCallingObservationContext } from "./tool-calling-observation-context";
-export { ToolCallingObservationConvention } from "./tool-calling-observation-convention";
-export { ToolCallingObservationDocumentation } from "./tool-calling-observation-documentation";
+export { DefaultToolCallingObservationConvention } from "./default-tool-calling-observation-convention.js";
+export { ToolCallingContentObservationFilter } from "./tool-calling-content-observation-filter.js";
+export { ToolCallingObservationContext } from "./tool-calling-observation-context.js";
+export { ToolCallingObservationConvention } from "./tool-calling-observation-convention.js";
+export { ToolCallingObservationDocumentation } from "./tool-calling-observation-documentation.js";

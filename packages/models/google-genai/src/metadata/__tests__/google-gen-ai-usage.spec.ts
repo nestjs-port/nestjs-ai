@@ -22,8 +22,8 @@ import {
 } from "@google/genai";
 import type { Usage } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { GoogleGenAiTrafficType } from "../google-gen-ai-traffic-type";
-import { GoogleGenAiUsage } from "../google-gen-ai-usage";
+import { GoogleGenAiTrafficType } from "../google-gen-ai-traffic-type.js";
+import { GoogleGenAiUsage } from "../google-gen-ai-usage.js";
 
 describe("GoogleGenAiUsage", () => {
   it("should extract basic usage", () => {

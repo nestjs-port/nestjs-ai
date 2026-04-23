@@ -16,9 +16,9 @@
 
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { ToolDefinition } from "../../definition";
-import { DefaultToolCallingObservationConvention } from "../default-tool-calling-observation-convention";
-import { ToolCallingObservationContext } from "../tool-calling-observation-context";
+import { ToolDefinition } from "../../definition/index.js";
+import { DefaultToolCallingObservationConvention } from "../default-tool-calling-observation-convention.js";
+import { ToolCallingObservationContext } from "../tool-calling-observation-context.js";
 
 describe("DefaultToolCallingObservationConvention", () => {
   const observationConvention = new DefaultToolCallingObservationConvention();

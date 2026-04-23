@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export { MARIADB_CHAT_MEMORY_SCHEMA } from "./mariadb-chat-memory-repository-schema";
-export { MYSQL_CHAT_MEMORY_SCHEMA } from "./mysql-chat-memory-repository-schema";
-export { ORACLE_CHAT_MEMORY_SCHEMA } from "./oracle-chat-memory-repository-schema";
-export { POSTGRESQL_CHAT_MEMORY_SCHEMA } from "./postgresql-chat-memory-repository-schema";
-export { SQL_SERVER_CHAT_MEMORY_SCHEMA } from "./sql-server-chat-memory-repository-schema";
-export { SQLITE_CHAT_MEMORY_SCHEMA } from "./sqlite-chat-memory-repository-schema";
+export { MARIADB_CHAT_MEMORY_SCHEMA } from "./mariadb-chat-memory-repository-schema.js";
+export { MYSQL_CHAT_MEMORY_SCHEMA } from "./mysql-chat-memory-repository-schema.js";
+export { ORACLE_CHAT_MEMORY_SCHEMA } from "./oracle-chat-memory-repository-schema.js";
+export { POSTGRESQL_CHAT_MEMORY_SCHEMA } from "./postgresql-chat-memory-repository-schema.js";
+export { SQL_SERVER_CHAT_MEMORY_SCHEMA } from "./sql-server-chat-memory-repository-schema.js";
+export { SQLITE_CHAT_MEMORY_SCHEMA } from "./sqlite-chat-memory-repository-schema.js";

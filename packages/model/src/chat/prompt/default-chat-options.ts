@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChatOptions } from "./chat-options.interface";
+import { ChatOptions } from "./chat-options.interface.js";
 
 export type DefaultChatOptionsProps = Omit<Partial<ChatOptions>, "copy">;
 

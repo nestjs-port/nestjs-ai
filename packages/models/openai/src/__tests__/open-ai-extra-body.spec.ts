@@ -18,8 +18,8 @@ import { Prompt } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiChatModel } from "../open-ai-chat-model";
-import { OpenAiChatOptions } from "../open-ai-chat-options";
+import { OpenAiChatModel } from "../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../open-ai-chat-options.js";
 
 function createChatModel(): OpenAiChatModel {
   return new OpenAiChatModel({ client: {} as OpenAI });

@@ -17,9 +17,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { Prompt } from "@nestjs-ai/model";
 import { beforeEach, describe, expect, it } from "vitest";
-import { GoogleGenAiThinkingLevel } from "../common";
-import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model";
-import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options";
+import { GoogleGenAiThinkingLevel } from "../common/index.js";
+import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model.js";
+import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 

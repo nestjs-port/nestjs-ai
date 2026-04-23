@@ -29,7 +29,7 @@ import {
 } from "@testcontainers/postgresql";
 import { DataSource } from "typeorm";
 import { afterAll, beforeAll, describe, it } from "vitest";
-import { AbstractJdbcChatMemoryRepositoryIT } from "./abstract-jdbc-chat-memory-repository.it-shared";
+import { AbstractJdbcChatMemoryRepositoryIT } from "./abstract-jdbc-chat-memory-repository.it-shared.js";
 
 describe("JsdbcChatMemoryRepositoryPostgresqlIT", () => {
   let postgresContainer: StartedPostgreSqlContainer;

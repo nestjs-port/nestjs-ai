@@ -17,8 +17,8 @@
 import assert from "node:assert/strict";
 import type { Document } from "@nestjs-ai/commons";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { Query } from "../../query";
-import { DocumentJoiner } from "./document-joiner";
+import type { Query } from "../../query.js";
+import { DocumentJoiner } from "./document-joiner.js";
 
 /**
  * Combines documents retrieved based on multiple queries and from multiple data sources

@@ -15,8 +15,8 @@
  */
 
 import type { Document } from "@nestjs-ai/commons";
-import type { ModelRequest } from "../model";
-import { EmbeddingOptions } from "./embedding-options.interface";
+import type { ModelRequest } from "../model/index.js";
+import { EmbeddingOptions } from "./embedding-options.interface.js";
 
 /**
  * Represents a request to embed a list of documents.

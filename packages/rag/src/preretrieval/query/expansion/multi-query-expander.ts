@@ -18,9 +18,9 @@ import assert from "node:assert/strict";
 import type { ChatClient } from "@nestjs-ai/client-chat";
 import { PromptTemplate } from "@nestjs-ai/model";
 import { type Logger, LoggerFactory, StringUtils } from "@nestjs-port/core";
-import type { Query } from "../../../query";
-import { PromptAssert } from "../../../util";
-import { QueryExpander } from "./query-expander";
+import type { Query } from "../../../query.js";
+import { PromptAssert } from "../../../util/index.js";
+import { QueryExpander } from "./query-expander.js";
 
 export interface MultiQueryExpanderProps {
   chatClientBuilder: ChatClient.Builder;

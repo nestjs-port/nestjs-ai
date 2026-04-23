@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelRequest } from "../model";
-import type { EmbeddingOptions } from "./embedding-options.interface";
+import type { ModelRequest } from "../model/index.js";
+import type { EmbeddingOptions } from "./embedding-options.interface.js";
 
 /**
  * Request to embed a list of input instructions.

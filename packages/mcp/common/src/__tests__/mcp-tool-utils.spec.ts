@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { McpToolUtils } from "../mcp-tool-utils";
+import { McpToolUtils } from "../mcp-tool-utils.js";
 
 describe("McpToolUtils", () => {
   it("prefixed tool name should concatenate with underscore", () => {

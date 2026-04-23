@@ -16,9 +16,9 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Media, MediaFormat } from "../../content";
-import { Document, type DocumentBuilder } from "../document";
-import type { IdGenerator } from "../id";
+import { Media, MediaFormat } from "../../content/index.js";
+import { Document, type DocumentBuilder } from "../document.js";
+import type { IdGenerator } from "../id/index.js";
 
 function getMedia(): Media {
   return new Media({

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { MessageType } from "../message-type";
+import { MessageType } from "../message-type.js";
 
 describe("MessageType", () => {
   it("should resolve message types from their names", () => {

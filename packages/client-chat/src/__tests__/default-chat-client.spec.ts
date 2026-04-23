@@ -38,12 +38,12 @@ import { defaultIfEmpty, lastValueFrom, type Observable, of } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import type { Advisor, BaseAdvisorChain } from "../advisor";
-import { SimpleLoggerAdvisor } from "../advisor";
-import type { ChatClient } from "../chat-client";
-import { DefaultChatClient } from "../default-chat-client";
-import { DefaultChatClientBuilder } from "../default-chat-client-builder";
-import type { ChatClientObservationConvention } from "../observation";
+import type { Advisor, BaseAdvisorChain } from "../advisor/index.js";
+import { SimpleLoggerAdvisor } from "../advisor/index.js";
+import type { ChatClient } from "../chat-client.js";
+import { DefaultChatClient } from "../default-chat-client.js";
+import { DefaultChatClientBuilder } from "../default-chat-client-builder.js";
+import type { ChatClientObservationConvention } from "../observation/index.js";
 
 class Person {
   name = "";

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { StructuredOutputConverter } from "./structured-output-converter";
+import type { StructuredOutputConverter } from "./structured-output-converter.js";
 
 export class MapOutputConverter implements StructuredOutputConverter<
   Record<string, unknown>

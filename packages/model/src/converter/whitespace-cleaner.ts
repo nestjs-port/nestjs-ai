@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ResponseTextCleaner } from "./response-text-cleaner";
+import type { ResponseTextCleaner } from "./response-text-cleaner.js";
 
 export class WhitespaceCleaner implements ResponseTextCleaner {
   clean(text: string | null): string | null {

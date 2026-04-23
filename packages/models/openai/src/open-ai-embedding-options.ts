@@ -21,7 +21,7 @@ import type { EmbeddingCreateParams } from "openai/resources/embeddings";
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,
-} from "./abstract-open-ai-options";
+} from "./abstract-open-ai-options.js";
 
 export type OpenAiEmbeddingCreateParams = EmbeddingCreateParams;
 

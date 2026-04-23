@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Document } from "./document";
+import type { Document } from "./document.js";
 
 export interface DocumentTransformer {
   apply(documents: Document[]): Promise<Document[]>;

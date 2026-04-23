@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Query } from "../query";
+import { Query } from "../query.js";
 
 describe("Query", () => {
   it("when text is null then throw", () => {

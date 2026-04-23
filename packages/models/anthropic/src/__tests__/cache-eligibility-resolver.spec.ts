@@ -22,7 +22,7 @@ import {
   AnthropicCacheStrategy,
   AnthropicCacheTtl,
   CacheEligibilityResolver,
-} from "../index";
+} from "../index.js";
 
 describe("CacheEligibilityResolver", () => {
   it("no caching when strategy is none", () => {

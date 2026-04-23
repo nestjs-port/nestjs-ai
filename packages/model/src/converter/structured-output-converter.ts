@@ -15,7 +15,7 @@
  */
 
 import type { Converter } from "@nestjs-port/core";
-import type { FormatProvider } from "./format-provider";
+import type { FormatProvider } from "./format-provider.js";
 
 export interface StructuredOutputConverter<T>
   extends Converter<string, T>, FormatProvider {}

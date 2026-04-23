@@ -18,8 +18,8 @@ import { AudioTranscriptionPrompt } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
 import { describe, expect, it, vi } from "vitest";
 
-import { OpenAiAudioTranscriptionModel } from "../../open-ai-audio-transcription-model";
-import { OpenAiAudioTranscriptionOptions } from "../../open-ai-audio-transcription-options";
+import { OpenAiAudioTranscriptionModel } from "../../open-ai-audio-transcription-model.js";
+import { OpenAiAudioTranscriptionOptions } from "../../open-ai-audio-transcription-options.js";
 
 function createMockClient(mockResponse: { text: string } | unknown): {
   client: OpenAI;

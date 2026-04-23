@@ -224,7 +224,7 @@ export class OpenAiSetup {
 
     return async () => {
       credentialProviderPromise ??=
-        import("./azure-internal-open-ai-helper").then(
+        import("./azure-internal-open-ai-helper.js").then(
           ({ AzureInternalOpenAiHelper }) =>
             AzureInternalOpenAiHelper.getAzureCredential(),
         );

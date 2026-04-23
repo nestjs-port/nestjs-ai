@@ -27,14 +27,14 @@ import type { Observable } from "rxjs";
 import { throwError } from "rxjs";
 import type { ZodType } from "zod";
 
-import type { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "./api";
+} from "./api/index.js";
 
 interface ValidationResponse {
   valid: boolean;

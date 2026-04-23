@@ -32,8 +32,8 @@ import { firstValueFrom, from, of } from "rxjs";
 import { map, mergeMap, tap, toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { Author } from "./domain/author";
-import { BookService } from "./domain/book-service";
+import { Author } from "./domain/author.js";
+import { BookService } from "./domain/book-service.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

@@ -15,8 +15,8 @@
  */
 
 import type { MetadataMode } from "@nestjs-ai/commons";
-import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
-import type { OpenAiEmbeddingOptionsProps } from "../open-ai-embedding-options";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options.js";
+import type { OpenAiEmbeddingOptionsProps } from "../open-ai-embedding-options.js";
 
 export const OPEN_AI_EMBEDDING_DEFAULT_MODEL = "text-embedding-ada-002";
 

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Media, MediaFormat } from "../media";
+import { Media, MediaFormat } from "../media.js";
 
 describe("Media", () => {
   it("test media builder with byte array resource", () => {

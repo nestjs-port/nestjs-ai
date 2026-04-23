@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ModelRequest } from "./model-request.interface";
-import type { ModelResponse } from "./model-response.interface";
-import type { ModelResult } from "./model-result.interface";
+import type { ModelRequest } from "./model-request.interface.js";
+import type { ModelResponse } from "./model-response.interface.js";
+import type { ModelResult } from "./model-result.interface.js";
 
 /**
  * The Model interface provides a generic API for invoking AI models. It is designed to

@@ -19,7 +19,7 @@ import { ExtractedTextFormatter } from "@nestjs-ai/commons";
 import { GenericContainer, type StartedTestContainer } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { TikaDocumentReader } from "..";
+import { TikaDocumentReader } from "../index.js";
 
 describe("TikaDocumentReader", () => {
   const wordSampleDocx = resolve(__dirname, "word-sample.docx");

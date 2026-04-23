@@ -15,9 +15,9 @@
  */
 
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { ToolContext } from "../chat";
-import type { ToolDefinition } from "./definition";
-import { ToolMetadata } from "./metadata";
+import type { ToolContext } from "../chat/index.js";
+import type { ToolDefinition } from "./definition/index.js";
+import { ToolMetadata } from "./metadata/index.js";
 
 /**
  * Represents a tool whose execution can be triggered by an AI model.

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export { GoogleGenAiModalityTokenCount } from "./google-gen-ai-modality-token-count";
+export { GoogleGenAiModalityTokenCount } from "./google-gen-ai-modality-token-count.js";
 export {
   GoogleGenAiTrafficType,
   trafficTypeFrom,
-} from "./google-gen-ai-traffic-type";
-export { GoogleGenAiUsage } from "./google-gen-ai-usage";
+} from "./google-gen-ai-traffic-type.js";
+export { GoogleGenAiUsage } from "./google-gen-ai-usage.js";

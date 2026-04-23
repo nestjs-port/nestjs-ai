@@ -17,4 +17,4 @@
 export {
   CheerioDocumentReaderConfig,
   CheerioDocumentReaderConfigBuilder,
-} from "./cheerio-document-reader-config";
+} from "./cheerio-document-reader-config.js";

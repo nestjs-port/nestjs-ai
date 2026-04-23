@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { JsonSchemaConverter } from "../json-schema-converter";
+import { JsonSchemaConverter } from "../json-schema-converter.js";
 
 describe("JsonSchemaConverter", () => {
   it("should parse valid JSON with fromJson", () => {

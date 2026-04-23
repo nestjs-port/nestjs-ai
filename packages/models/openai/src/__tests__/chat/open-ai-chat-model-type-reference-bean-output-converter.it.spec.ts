@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  BeanOutputConverter,
-  Prompt,
-  PromptTemplate,
-} from "@nestjs-ai/model";
+import { BeanOutputConverter, Prompt, PromptTemplate } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable, tap } from "rxjs";

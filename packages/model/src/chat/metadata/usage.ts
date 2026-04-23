@@ -45,6 +45,24 @@ export abstract class Usage {
   abstract get nativeUsage(): unknown;
 
   /**
+   * Returns the number of input tokens read from the prompt cache, if available.
+   *
+   * @returns the number of cached input tokens read, or `null` if unavailable
+   */
+  get cacheReadInputTokens(): number | null {
+    return null;
+  }
+
+  /**
+   * Returns the number of input tokens written to the prompt cache, if available.
+   *
+   * @returns the number of cached input tokens written, or `null` if unavailable
+   */
+  get cacheWriteInputTokens(): number | null {
+    return null;
+  }
+
+  /**
    * Returns the total number of tokens from both the prompt of an AI request
    * and generation of the AI's response.
    *

@@ -518,6 +518,7 @@ export class GoogleGenAiChatModel extends ChatModel {
       promptTokens: usageMetadata?.promptTokenCount ?? 0,
       completionTokens: usageMetadata?.candidatesTokenCount ?? 0,
       totalTokens: usageMetadata?.totalTokenCount ?? 0,
+      cacheReadInputTokens: usageMetadata?.cachedContentTokenCount ?? null,
     });
   }
 

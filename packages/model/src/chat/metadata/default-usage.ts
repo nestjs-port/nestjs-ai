@@ -26,6 +26,8 @@ export class DefaultUsage extends Usage {
   private readonly _completionTokens: number;
   private readonly _totalTokens: number;
   private readonly _nativeUsage: unknown;
+  private readonly _cacheReadInputTokens: number | null;
+  private readonly _cacheWriteInputTokens: number | null;
 
   /**
    * Create a new DefaultUsage with promptTokens, completionTokens, totalTokens and
@@ -38,6 +40,8 @@ export class DefaultUsage extends Usage {
     this._totalTokens =
       props.totalTokens ?? this._promptTokens + this._completionTokens;
     this._nativeUsage = props.nativeUsage ?? null;
+    this._cacheReadInputTokens = props.cacheReadInputTokens ?? null;
+    this._cacheWriteInputTokens = props.cacheWriteInputTokens ?? null;
   }
 
   get promptTokens(): number {
@@ -56,11 +60,21 @@ export class DefaultUsage extends Usage {
     return this._nativeUsage;
   }
 
+  override get cacheReadInputTokens(): number | null {
+    return this._cacheReadInputTokens;
+  }
+
+  override get cacheWriteInputTokens(): number | null {
+    return this._cacheWriteInputTokens;
+  }
+
   toJSON() {
     return {
       promptTokens: this._promptTokens,
       completionTokens: this._completionTokens,
       totalTokens: this._totalTokens,
+      cacheReadInputTokens: this._cacheReadInputTokens,
+      cacheWriteInputTokens: this._cacheWriteInputTokens,
       nativeUsage: this._nativeUsage,
     };
   }

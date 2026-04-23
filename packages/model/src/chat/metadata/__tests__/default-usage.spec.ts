@@ -26,7 +26,7 @@ describe("DefaultUsage", () => {
     });
     const json = JSON.stringify(usage.toJSON());
     expect(json).toBe(
-      '{"promptTokens":100,"completionTokens":50,"totalTokens":150,"nativeUsage":null}',
+      '{"promptTokens":100,"completionTokens":50,"totalTokens":150,"cacheReadInputTokens":null,"cacheWriteInputTokens":null,"nativeUsage":null}',
     );
   });
 
@@ -42,7 +42,7 @@ describe("DefaultUsage", () => {
     const usage = new DefaultUsage({});
     const json = JSON.stringify(usage.toJSON());
     expect(json).toBe(
-      '{"promptTokens":0,"completionTokens":0,"totalTokens":0,"nativeUsage":null}',
+      '{"promptTokens":0,"completionTokens":0,"totalTokens":0,"cacheReadInputTokens":null,"cacheWriteInputTokens":null,"nativeUsage":null}',
     );
   });
 
@@ -87,7 +87,7 @@ describe("DefaultUsage", () => {
     // Test serialization
     const json = JSON.stringify(usage.toJSON());
     expect(json).toBe(
-      '{"promptTokens":100,"completionTokens":50,"totalTokens":150,"nativeUsage":null}',
+      '{"promptTokens":100,"completionTokens":50,"totalTokens":150,"cacheReadInputTokens":null,"cacheWriteInputTokens":null,"nativeUsage":null}',
     );
 
     // Test deserialization
@@ -108,7 +108,7 @@ describe("DefaultUsage", () => {
     // Test serialization
     const json = JSON.stringify(usage.toJSON());
     expect(json).toBe(
-      '{"promptTokens":0,"completionTokens":0,"totalTokens":0,"nativeUsage":null}',
+      '{"promptTokens":0,"completionTokens":0,"totalTokens":0,"cacheReadInputTokens":null,"cacheWriteInputTokens":null,"nativeUsage":null}',
     );
 
     // Test deserialization
@@ -273,8 +273,47 @@ describe("DefaultUsage", () => {
 
     const json = JSON.stringify(usage.toJSON());
     expect(json).toBe(
-      '{"promptTokens":-1,"completionTokens":-2,"totalTokens":-3,"nativeUsage":null}',
+      '{"promptTokens":-1,"completionTokens":-2,"totalTokens":-3,"cacheReadInputTokens":null,"cacheWriteInputTokens":null,"nativeUsage":null}',
     );
+  });
+
+  it("test cache fields", () => {
+    const usage = new DefaultUsage({
+      promptTokens: 100,
+      completionTokens: 50,
+      totalTokens: 150,
+      cacheReadInputTokens: 500,
+      cacheWriteInputTokens: 200,
+    });
+    expect(usage.cacheReadInputTokens).toBe(500);
+    expect(usage.cacheWriteInputTokens).toBe(200);
+  });
+
+  it("test cache fields null by default", () => {
+    const usage = new DefaultUsage({ promptTokens: 100, completionTokens: 50 });
+    expect(usage.cacheReadInputTokens).toBeNull();
+    expect(usage.cacheWriteInputTokens).toBeNull();
+  });
+
+  it("test cache field serialization", () => {
+    const usage = new DefaultUsage({
+      promptTokens: 100,
+      completionTokens: 50,
+      totalTokens: 150,
+      cacheReadInputTokens: 500,
+      cacheWriteInputTokens: 200,
+    });
+    const json = JSON.stringify(usage.toJSON());
+    expect(json).toContain('"cacheReadInputTokens":500');
+    expect(json).toContain('"cacheWriteInputTokens":200');
+  });
+
+  it("test cache field deserialization", () => {
+    const json =
+      '{"promptTokens":100,"completionTokens":50,"totalTokens":150,"cacheReadInputTokens":500,"cacheWriteInputTokens":200}';
+    const usage = new DefaultUsage(JSON.parse(json));
+    expect(usage.cacheReadInputTokens).toBe(500);
+    expect(usage.cacheWriteInputTokens).toBe(200);
   });
 
   it("test calculated total tokens", () => {

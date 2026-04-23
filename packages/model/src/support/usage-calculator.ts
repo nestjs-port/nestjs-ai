@@ -49,10 +49,26 @@ export abstract class UsageCalculator {
       promptTokens += usageFromPreviousChatResponse.promptTokens;
       generationTokens += usageFromPreviousChatResponse.completionTokens;
       totalTokens += usageFromPreviousChatResponse.totalTokens;
+      const cacheReadTokens =
+        (currentUsage.cacheReadInputTokens ?? 0) +
+        (usageFromPreviousChatResponse.cacheReadInputTokens ?? 0);
+      const cacheWriteTokens =
+        (currentUsage.cacheWriteInputTokens ?? 0) +
+        (usageFromPreviousChatResponse.cacheWriteInputTokens ?? 0);
       return new DefaultUsage({
         promptTokens,
         completionTokens: generationTokens,
         totalTokens,
+        cacheReadInputTokens:
+          currentUsage.cacheReadInputTokens != null ||
+          usageFromPreviousChatResponse.cacheReadInputTokens != null
+            ? cacheReadTokens
+            : null,
+        cacheWriteInputTokens:
+          currentUsage.cacheWriteInputTokens != null ||
+          usageFromPreviousChatResponse.cacheWriteInputTokens != null
+            ? cacheWriteTokens
+            : null,
       });
     }
     // When current usage is empty, return the usage from the previous chat response.

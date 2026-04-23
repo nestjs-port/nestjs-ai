@@ -117,6 +117,7 @@ export class GoogleGenAiUsage extends DefaultUsage {
       completionTokens: props.completionTokens,
       totalTokens: props.totalTokens,
       nativeUsage: props.nativeUsage,
+      cacheReadInputTokens: props.cachedContentTokenCount ?? null,
     });
     this.thoughtsTokenCount = props.thoughtsTokenCount;
     this.cachedContentTokenCount = props.cachedContentTokenCount;
@@ -140,6 +141,10 @@ export class GoogleGenAiUsage extends DefaultUsage {
       toolUsePromptTokensDetails: this.toolUsePromptTokensDetails,
       trafficType: this.trafficType,
     };
+  }
+
+  override get cacheReadInputTokens(): number | null {
+    return this.cachedContentTokenCount ?? null;
   }
 
   static from(

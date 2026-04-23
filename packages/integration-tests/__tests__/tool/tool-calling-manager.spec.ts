@@ -29,7 +29,7 @@ import {
 } from "@nestjs-ai/model";
 import { OpenAiChatModel, OpenAiChatOptions } from "@nestjs-ai/model-openai";
 import { firstValueFrom, from, of } from "rxjs";
-import { map, mergeMap, toArray } from "rxjs/operators";
+import { map, mergeMap, tap, toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { Author } from "./domain/author";
@@ -131,17 +131,16 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
             return from(
               toolCallingManager.executeToolCalls(prompt, response),
             ).pipe(
-              mergeMap((toolExecutionResult: ToolExecutionResult) =>
-                from(assertToolExecutionResult(toolExecutionResult)).pipe(
-                  mergeMap(() => {
-                    const secondPrompt = new Prompt(
-                      toolExecutionResult.conversationHistory(),
-                      chatOptions,
-                    );
-                    return openAiChatModel.stream(secondPrompt);
-                  }),
-                ),
+              tap((toolExecutionResult: ToolExecutionResult) =>
+                assertToolExecutionResult(toolExecutionResult),
               ),
+              mergeMap((toolExecutionResult: ToolExecutionResult) => {
+                const secondPrompt = new Prompt(
+                  toolExecutionResult.conversationHistory(),
+                  chatOptions,
+                );
+                return openAiChatModel.stream(secondPrompt);
+              }),
             );
           }
           return of(response);
@@ -161,9 +160,9 @@ describe.skipIf(!OPENAI_API_KEY)("ToolCallingManagerTests", () => {
     expect(joinedTextResponse).toContain("The Silmarillion");
   }
 
-  async function assertToolExecutionResult(
+  function assertToolExecutionResult(
     toolExecutionResult: ToolExecutionResult,
-  ): Promise<void> {
+  ): void {
     expect(toolExecutionResult.conversationHistory()).not.toHaveLength(0);
     expect(
       toolExecutionResult

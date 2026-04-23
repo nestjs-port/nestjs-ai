@@ -577,11 +577,13 @@ export class OpenAiChatModel extends ChatModel {
   private getDefaultUsage(
     usage: NonNullable<ChatCompletion["usage"]>,
   ): DefaultUsage {
+    const cacheRead = usage.prompt_tokens_details?.cached_tokens ?? null;
     return new DefaultUsage({
       promptTokens: usage.prompt_tokens,
       completionTokens: usage.completion_tokens,
       totalTokens: usage.total_tokens,
       nativeUsage: usage,
+      cacheReadInputTokens: cacheRead != null ? Number(cacheRead) : null,
     });
   }
 

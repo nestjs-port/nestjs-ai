@@ -46,9 +46,7 @@ const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com";
 
 const DEFAULT_NVIDIA_MODEL = "meta/llama-3.1-70b-instruct";
 
-// @EnabledIfEnvironmentVariable(named = "NVIDIA_API_KEY", matches = ".+")
-// @Disabled("Requires NVIDIA credits")
-describe.skip("NvidiaWithOpenAiChatModelIT", () => {
+describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("NvidiaWithOpenAiChatModelIT");
 

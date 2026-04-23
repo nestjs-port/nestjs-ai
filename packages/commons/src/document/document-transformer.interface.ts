@@ -17,7 +17,7 @@
 import type { Document } from "./document";
 
 export interface DocumentTransformer {
-  apply(documents: Document[]): Document[];
+  apply(documents: Document[]): Promise<Document[]>;
 
-  transform(documents: Document[]): Document[];
+  transform(documents: Document[]): Promise<Document[]>;
 }

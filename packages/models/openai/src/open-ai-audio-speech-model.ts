@@ -100,14 +100,15 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
 
     if (this.logger.isTraceEnabled()) {
       this.logger.trace(
-        `Calling OpenAI SDK audio speech with model: ${mergedOptions.model}, voice: ${mergedOptions.voice}, format: ${mergedOptions.responseFormat}, speed: ${mergedOptions.speed}`,
+        `Calling OpenAI SDK audio speech with model: ${mergedOptions.deploymentName ?? mergedOptions.model}, voice: ${mergedOptions.voice}, format: ${mergedOptions.responseFormat}, speed: ${mergedOptions.speed}`,
       );
     }
 
-    assert(mergedOptions.model, "Model must not be null");
+    const model = mergedOptions.deploymentName ?? mergedOptions.model;
+    assert(model, "Model must not be null");
     assert(mergedOptions.voice, "Voice must not be null");
 
-    const params = this.toSpeechCreateParams(mergedOptions, inputText);
+    const params = this.toSpeechCreateParams(mergedOptions, inputText, model);
     const speechResponse = await this._openAiClient.audio.speech.create(params);
     const audioBytes = new Uint8Array(await speechResponse.arrayBuffer());
 
@@ -205,9 +206,10 @@ export class OpenAiAudioSpeechModel extends TextToSpeechModel {
   private toSpeechCreateParams(
     options: OpenAiAudioSpeechOptions,
     inputText: string,
+    model: string,
   ): SpeechCreateParams {
     return {
-      model: options.model!,
+      model,
       input: inputText,
       voice: options.voice!,
       ...(options.responseFormat != null

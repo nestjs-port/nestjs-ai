@@ -20,7 +20,7 @@ import {
   type ObservationContext,
   type ObservationFilter,
 } from "@nestjs-port/core";
-import { ToolCallingObservationContext } from "./tool-calling-observation-context";
+import { ToolCallingObservationContext } from "./tool-calling-observation-context.js";
 
 const TOOL_CALL_ARGUMENTS = "spring.ai.tool.call.arguments";
 const TOOL_CALL_RESULT = "spring.ai.tool.call.result";

@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { GoogleGenAiToolCallingManager } from "./google-genai-tool-calling-manager";
-export { JsonSchemaConverter } from "./json-schema-converter";
+export { GoogleGenAiToolCallingManager } from "./google-genai-tool-calling-manager.js";
+export { JsonSchemaConverter } from "./json-schema-converter.js";

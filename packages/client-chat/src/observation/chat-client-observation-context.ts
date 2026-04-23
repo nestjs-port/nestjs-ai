@@ -21,10 +21,10 @@ import {
   AiProvider,
 } from "@nestjs-ai/commons";
 import { ObservationContext, StringUtils } from "@nestjs-port/core";
-import type { Advisor } from "../advisor";
-import { ChatClientAttributes } from "../chat-client-attributes";
-import type { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
+import type { Advisor } from "../advisor/index.js";
+import { ChatClientAttributes } from "../chat-client-attributes.js";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
 
 export class ChatClientObservationContext extends ObservationContext {
   private readonly _request: ChatClientRequest;

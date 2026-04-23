@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export { ChatModelCompletionObservationHandler } from "./chat-model-completion-observation-handler";
-export { ChatModelMeterObservationHandler } from "./chat-model-meter-observation-handler";
-export { ChatModelObservationContext } from "./chat-model-observation-context";
-export { ChatModelObservationConvention } from "./chat-model-observation-convention";
-export { ChatModelObservationDocumentation } from "./chat-model-observation-documentation";
-export { DefaultChatModelObservationConvention } from "./default-chat-model-observation-convention";
+export { ChatModelCompletionObservationHandler } from "./chat-model-completion-observation-handler.js";
+export { ChatModelMeterObservationHandler } from "./chat-model-meter-observation-handler.js";
+export { ChatModelObservationContext } from "./chat-model-observation-context.js";
+export { ChatModelObservationConvention } from "./chat-model-observation-convention.js";
+export { ChatModelObservationDocumentation } from "./chat-model-observation-documentation.js";
+export { DefaultChatModelObservationConvention } from "./default-chat-model-observation-convention.js";

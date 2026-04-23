@@ -23,13 +23,13 @@ import {
   type Provider,
 } from "@nestjs/common";
 import { AUDIO_MODERATION_MODEL_TOKEN } from "@nestjs-ai/commons";
-import { OpenAiModerationModel } from "../open-ai-moderation-model";
-import { OpenAiModerationOptions } from "../open-ai-moderation-options";
-import { OpenAiSetup, type OpenAiSetupProps } from "../setup";
+import { OpenAiModerationModel } from "../open-ai-moderation-model.js";
+import { OpenAiModerationOptions } from "../open-ai-moderation-options.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "../setup/index.js";
 import {
   OPEN_AI_MODERATION_DEFAULT_MODEL,
   type OpenAiModerationProperties,
-} from "./open-ai-moderation-properties";
+} from "./open-ai-moderation-properties.js";
 
 export const OPEN_AI_MODERATION_PROPERTIES_TOKEN = Symbol.for(
   "OPEN_AI_MODERATION_PROPERTIES_TOKEN",

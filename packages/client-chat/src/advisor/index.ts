@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-export { AdvisorUtils } from "./advisor-utils";
-export * from "./api";
-export { ChatModelCallAdvisor } from "./chat-model-call-advisor";
-export { ChatModelStreamAdvisor } from "./chat-model-stream-advisor";
+export { AdvisorUtils } from "./advisor-utils.js";
+export * from "./api/index.js";
+export { ChatModelCallAdvisor } from "./chat-model-call-advisor.js";
+export { ChatModelStreamAdvisor } from "./chat-model-stream-advisor.js";
 export {
   DefaultAroundAdvisorChain,
   DefaultAroundAdvisorChainBuilder,
-} from "./default-around-advisor-chain";
-export { LastMaxTokenSizeContentPurger } from "./last-max-token-size-content-purger";
+} from "./default-around-advisor-chain.js";
+export { LastMaxTokenSizeContentPurger } from "./last-max-token-size-content-purger.js";
 export {
   MessageChatMemoryAdvisor,
   type MessageChatMemoryAdvisorProps,
-} from "./message-chat-memory-advisor";
-export * from "./observation";
+} from "./message-chat-memory-advisor.js";
+export * from "./observation/index.js";
 export {
   PromptChatMemoryAdvisor,
   type PromptChatMemoryAdvisorProps,
-} from "./prompt-chat-memory-advisor";
+} from "./prompt-chat-memory-advisor.js";
 export {
   SafeGuardAdvisor,
   type SafeGuardAdvisorProps,
-} from "./safe-guard-advisor";
-export { SimpleLoggerAdvisor } from "./simple-logger-advisor";
+} from "./safe-guard-advisor.js";
+export { SimpleLoggerAdvisor } from "./simple-logger-advisor.js";
 export {
   StructuredOutputValidationAdvisor,
   type StructuredOutputValidationAdvisorProps,
-} from "./structured-output-validation-advisor";
+} from "./structured-output-validation-advisor.js";
 export {
   ToolCallAdvisor,
   type ToolCallAdvisorProps,
-} from "./tool-call-advisor";
+} from "./tool-call-advisor.js";

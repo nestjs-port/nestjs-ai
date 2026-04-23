@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 
-import type { IdGenerator } from "./id-generator.interface";
+import type { IdGenerator } from "./id-generator.interface.js";
 
 export class JdkSha256HexIdGenerator implements IdGenerator {
   private static readonly SHA_256 = "sha256";

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelResult, ResultMetadata } from "../../model";
+import type { ModelResult, ResultMetadata } from "../../model/index.js";
 
 /**
  * Implementation of the {@link ModelResult} interface for the speech model.

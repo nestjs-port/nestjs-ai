@@ -20,7 +20,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { TextReader } from "../text-reader";
+import { TextReader } from "../text-reader.js";
 
 describe("TextReader", () => {
   it("load text", async () => {

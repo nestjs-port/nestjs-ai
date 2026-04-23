@@ -21,7 +21,7 @@ import {
   Evaluator,
 } from "@nestjs-ai/commons";
 import { PromptTemplate } from "@nestjs-ai/model";
-import type { ChatClient } from "../chat-client";
+import type { ChatClient } from "../chat-client.js";
 
 export class RelevancyEvaluator extends Evaluator {
   static readonly DEFAULT_PROMPT_TEMPLATE =

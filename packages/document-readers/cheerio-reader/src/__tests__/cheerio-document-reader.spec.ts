@@ -18,8 +18,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { CheerioDocumentReader } from "../cheerio-document-reader";
-import { CheerioDocumentReaderConfig } from "../config";
+import { CheerioDocumentReader } from "../cheerio-document-reader.js";
+import { CheerioDocumentReaderConfig } from "../config/index.js";
 
 describe("CheerioDocumentReader", () => {
   it("test simple read", async () => {

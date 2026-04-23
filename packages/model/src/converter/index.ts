@@ -18,20 +18,20 @@ export type {
   JsonOrJsonArraySchema,
   OutputTypeTarget,
   SchemaOutput,
-} from "./bean-output-converter";
-export { BeanOutputConverter } from "./bean-output-converter";
+} from "./bean-output-converter.js";
+export { BeanOutputConverter } from "./bean-output-converter.js";
 export {
   CompositeResponseTextCleaner,
   type CompositeResponseTextCleanerBuilder,
-} from "./composite-response-text-cleaner";
-export type { FormatProvider } from "./format-provider";
-export { ListOutputConverter } from "./list-output-converter";
-export { MapOutputConverter } from "./map-output-converter";
-export { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner";
-export type { ResponseTextCleaner } from "./response-text-cleaner";
-export type { StructuredOutputConverter } from "./structured-output-converter";
+} from "./composite-response-text-cleaner.js";
+export type { FormatProvider } from "./format-provider.js";
+export { ListOutputConverter } from "./list-output-converter.js";
+export { MapOutputConverter } from "./map-output-converter.js";
+export { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner.js";
+export type { ResponseTextCleaner } from "./response-text-cleaner.js";
+export type { StructuredOutputConverter } from "./structured-output-converter.js";
 export {
   ThinkingTagCleaner,
   type ThinkingTagCleanerBuilder,
-} from "./thinking-tag-cleaner";
-export { WhitespaceCleaner } from "./whitespace-cleaner";
+} from "./thinking-tag-cleaner.js";
+export { WhitespaceCleaner } from "./whitespace-cleaner.js";

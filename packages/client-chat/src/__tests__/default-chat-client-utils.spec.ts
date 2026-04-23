@@ -30,9 +30,9 @@ import {
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import { describe, expect, it } from "vitest";
 
-import { ChatClient } from "../chat-client";
-import type { DefaultChatClient } from "../default-chat-client";
-import { DefaultChatClientUtils } from "../default-chat-client-utils";
+import { ChatClient } from "../chat-client.js";
+import type { DefaultChatClient } from "../default-chat-client.js";
+import { DefaultChatClientUtils } from "../default-chat-client-utils.js";
 
 function asRequestSpec(
   spec: ChatClient.ChatClientRequestSpec,

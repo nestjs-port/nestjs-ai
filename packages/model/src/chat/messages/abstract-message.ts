@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { Message } from "./message.interface";
-import { MessageType } from "./message-type";
+import type { Message } from "./message.interface.js";
+import { MessageType } from "./message-type.js";
 
 /**
  * The AbstractMessage class is an abstract implementation of the {@link Message} interface.

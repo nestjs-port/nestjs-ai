@@ -17,11 +17,14 @@
 import { firstValueFrom, of } from "rxjs";
 import { toArray } from "rxjs/operators";
 import { describe, expect, it } from "vitest";
-import { AssistantMessage, type ToolCall } from "../../messages";
-import { ChatGenerationMetadata, ChatResponseMetadata } from "../../metadata";
-import { ChatResponse } from "../chat-response";
-import { Generation } from "../generation";
-import { MessageAggregator } from "../message-aggregator";
+import { AssistantMessage, type ToolCall } from "../../messages/index.js";
+import {
+  ChatGenerationMetadata,
+  ChatResponseMetadata,
+} from "../../metadata/index.js";
+import { ChatResponse } from "../chat-response.js";
+import { Generation } from "../generation.js";
+import { MessageAggregator } from "../message-aggregator.js";
 
 describe("ChatResponse", () => {
   it("when tool calls are present then return true", () => {

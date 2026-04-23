@@ -23,7 +23,7 @@ import {
 import {
   RedisMetadataField,
   RedisMetadataFieldType,
-} from "./redis-metadata-field";
+} from "./redis-metadata-field.js";
 
 class Numeric {
   constructor(

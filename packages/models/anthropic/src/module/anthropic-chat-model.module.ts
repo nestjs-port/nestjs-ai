@@ -39,12 +39,12 @@ import {
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { AnthropicChatModel } from "../anthropic-chat-model";
-import { AnthropicChatOptions } from "../anthropic-chat-options";
+import { AnthropicChatModel } from "../anthropic-chat-model.js";
+import { AnthropicChatOptions } from "../anthropic-chat-options.js";
 import {
   ANTHROPIC_CHAT_DEFAULT_MODEL,
   type AnthropicChatProperties,
-} from "./anthropic-chat-properties";
+} from "./anthropic-chat-properties.js";
 
 export const ANTHROPIC_CHAT_PROPERTIES_TOKEN = Symbol.for(
   "ANTHROPIC_CHAT_PROPERTIES_TOKEN",

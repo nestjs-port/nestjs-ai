@@ -17,4 +17,4 @@
 export {
   RetrievalAugmentationAdvisor,
   type RetrievalAugmentationAdvisorProps,
-} from "./retrieval-augmentation-advisor";
+} from "./retrieval-augmentation-advisor.js";

@@ -24,7 +24,7 @@ import type {
   ToolExecutionResult,
 } from "@nestjs-ai/model";
 import { DefaultToolDefinition, JsonSchemaGenerator } from "@nestjs-ai/model";
-import { JsonSchemaConverter } from "./json-schema-converter";
+import { JsonSchemaConverter } from "./json-schema-converter.js";
 
 type JsonSchemaNodeArg = Parameters<
   typeof JsonSchemaGenerator.convertTypeValuesToUpperCase

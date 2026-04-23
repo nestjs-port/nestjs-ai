@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { AdvisorObservationContext } from "./advisor-observation-context";
-export { AdvisorObservationConvention } from "./advisor-observation-convention";
-export { AdvisorObservationDocumentation } from "./advisor-observation-documentation";
-export { DefaultAdvisorObservationConvention } from "./default-advisor-observation-convention";
+export { AdvisorObservationContext } from "./advisor-observation-context.js";
+export { AdvisorObservationConvention } from "./advisor-observation-convention.js";
+export { AdvisorObservationDocumentation } from "./advisor-observation-documentation.js";
+export { DefaultAdvisorObservationConvention } from "./default-advisor-observation-convention.js";

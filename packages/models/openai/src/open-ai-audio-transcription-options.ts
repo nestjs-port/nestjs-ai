@@ -21,7 +21,7 @@ import type { TranscriptionCreateParams } from "openai/resources/audio/transcrip
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,
-} from "./abstract-open-ai-options";
+} from "./abstract-open-ai-options.js";
 
 export interface OpenAiAudioTranscriptionOptionsProps extends AbstractOpenAiOptionsProps {
   model?: string | null;

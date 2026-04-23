@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export { EmptyJsonMetadataGenerator } from "./empty-json-metadata-generator";
+export { EmptyJsonMetadataGenerator } from "./empty-json-metadata-generator.js";
 export {
   ExtractedTextFormatter,
   ExtractedTextFormatterBuilder,
-} from "./extracted-text-formatter";
-export type { JsonMetadataGenerator } from "./json-metadata-generator";
-export { JsonReader, type JsonReaderProps } from "./json-reader";
-export { TextReader, type TextReaderProps } from "./text-reader";
+} from "./extracted-text-formatter.js";
+export type { JsonMetadataGenerator } from "./json-metadata-generator.js";
+export { JsonReader, type JsonReaderProps } from "./json-reader.js";
+export { TextReader, type TextReaderProps } from "./text-reader.js";

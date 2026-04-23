@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Document } from "./document";
-import type { MetadataMode } from "./metadata-mode";
+import type { Document } from "./document.js";
+import type { MetadataMode } from "./metadata-mode.js";
 
 export interface ContentFormatter {
   format(document: Document, mode: MetadataMode): string;

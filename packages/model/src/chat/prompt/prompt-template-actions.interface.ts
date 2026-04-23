@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ChatOptions } from "./chat-options.interface";
-import type { Prompt } from "./prompt";
-import type { PromptTemplateStringActions } from "./prompt-template-string-actions.interface";
+import type { ChatOptions } from "./chat-options.interface.js";
+import type { Prompt } from "./prompt.js";
+import type { PromptTemplateStringActions } from "./prompt-template-string-actions.interface.js";
 
 export interface PromptTemplateActions extends PromptTemplateStringActions {
   create(): Prompt;

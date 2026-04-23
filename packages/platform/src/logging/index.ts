@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { NestLoggerFactory } from "./nest-logger-factory";
+export { NestLoggerFactory } from "./nest-logger-factory.js";

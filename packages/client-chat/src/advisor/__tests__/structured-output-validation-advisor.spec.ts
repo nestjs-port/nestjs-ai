@@ -30,17 +30,17 @@ import { firstValueFrom } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientResponse } from "../../chat-client-response";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientResponse } from "../../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "../api";
-import { BaseAdvisorChain } from "../api";
-import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain";
-import { StructuredOutputValidationAdvisor } from "../structured-output-validation-advisor";
+} from "../api/index.js";
+import { BaseAdvisorChain } from "../api/index.js";
+import { DefaultAroundAdvisorChain } from "../default-around-advisor-chain.js";
+import { StructuredOutputValidationAdvisor } from "../structured-output-validation-advisor.js";
 
 class FakeCallAdvisorChain extends BaseAdvisorChain {
   private readonly _responses: ChatClientResponse[];

@@ -26,14 +26,14 @@ import {
   throwError,
 } from "rxjs";
 
-import type { ChatClientRequest } from "../../chat-client-request";
-import type { ChatClientResponse } from "../../chat-client-response";
-import { AdvisorUtils } from "../advisor-utils";
-import type { AdvisorChain } from "./advisor-chain";
-import type { CallAdvisor } from "./call-advisor.interface";
-import type { CallAdvisorChain } from "./call-advisor-chain.interface";
-import type { StreamAdvisor } from "./stream-advisor.interface";
-import type { StreamAdvisorChain } from "./stream-advisor-chain.interface";
+import type { ChatClientRequest } from "../../chat-client-request.js";
+import type { ChatClientResponse } from "../../chat-client-response.js";
+import { AdvisorUtils } from "../advisor-utils.js";
+import type { AdvisorChain } from "./advisor-chain.js";
+import type { CallAdvisor } from "./call-advisor.interface.js";
+import type { CallAdvisorChain } from "./call-advisor-chain.interface.js";
+import type { StreamAdvisor } from "./stream-advisor.interface.js";
+import type { StreamAdvisorChain } from "./stream-advisor-chain.interface.js";
 
 export abstract class BaseAdvisor implements CallAdvisor, StreamAdvisor {
   static readonly DEFAULT_SCHEDULER: SchedulerLike = asyncScheduler;

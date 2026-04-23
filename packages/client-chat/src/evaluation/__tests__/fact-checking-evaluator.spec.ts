@@ -16,8 +16,8 @@
 
 import type { ChatModel } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { ChatClient } from "../../chat-client";
-import { FactCheckingEvaluator } from "../fact-checking-evaluator";
+import { ChatClient } from "../../chat-client.js";
+import { FactCheckingEvaluator } from "../fact-checking-evaluator.js";
 
 function createChatModel(): ChatModel {
   return {} as ChatModel;

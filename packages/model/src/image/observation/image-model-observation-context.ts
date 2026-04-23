@@ -16,9 +16,9 @@
 
 import assert from "node:assert/strict";
 import { AiOperationMetadata, AiOperationType } from "@nestjs-ai/commons";
-import { ModelObservationContext } from "../../model";
-import type { ImagePrompt } from "../image-prompt";
-import type { ImageResponse } from "../image-response";
+import { ModelObservationContext } from "../../model/index.js";
+import type { ImagePrompt } from "../image-prompt.js";
+import type { ImageResponse } from "../image-response.js";
 
 export class ImageModelObservationContext extends ModelObservationContext<
   ImagePrompt,

@@ -19,9 +19,9 @@ import type { Logger } from "@nestjs-port/core";
 import { ObservationContext } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientObservationContext } from "../chat-client-observation-context";
-import { ChatClientPromptContentObservationHandler } from "../chat-client-prompt-content-observation-handler";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientObservationContext } from "../chat-client-observation-context.js";
+import { ChatClientPromptContentObservationHandler } from "../chat-client-prompt-content-observation-handler.js";
 
 function createObservationContext(
   prompt = new Prompt([]),

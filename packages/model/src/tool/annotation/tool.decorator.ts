@@ -16,8 +16,8 @@
 
 import "reflect-metadata";
 import { z } from "zod";
-import type { ToolCallResultConverter } from "../execution";
-import { DefaultToolCallResultConverter } from "../execution";
+import type { ToolCallResultConverter } from "../execution/index.js";
+import { DefaultToolCallResultConverter } from "../execution/index.js";
 
 type AnyZodSchema = z.ZodTypeAny;
 type AnyZodObjectSchema = z.ZodObject<z.ZodRawShape>;

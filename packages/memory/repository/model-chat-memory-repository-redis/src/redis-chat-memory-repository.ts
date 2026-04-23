@@ -41,12 +41,12 @@ import {
 import type {
   AdvancedRedisChatMemoryRepository,
   MessageWithConversation,
-} from "./advanced-redis-chat-memory-repository";
+} from "./advanced-redis-chat-memory-repository.js";
 import {
   type RedisChatMemoryConfig,
   RedisChatMemoryConfigBuilder,
   type RedisChatMemoryMetadataField,
-} from "./redis-chat-memory-config";
+} from "./redis-chat-memory-config.js";
 
 interface StoredMessageDocument {
   content: string;

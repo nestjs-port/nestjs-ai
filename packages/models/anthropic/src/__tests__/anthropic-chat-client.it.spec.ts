@@ -26,6 +26,7 @@ import {
 import { MediaFormat } from "@nestjs-ai/commons";
 import {
   BeanOutputConverter,
+  type ChatResponse,
   FunctionToolCallback,
   ListOutputConverter,
   MapOutputConverter,
@@ -37,13 +38,13 @@ import { firstValueFrom, map, type Observable, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { AnthropicChatModel, AnthropicChatOptions } from "../index";
+import { AnthropicChatModel, AnthropicChatOptions } from "../index.js";
 import {
   MockWeatherService,
   type WeatherRequest,
   WeatherRequestSchema,
   type WeatherResponse,
-} from "./mock-weather-service";
+} from "./mock-weather-service.js";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
@@ -409,7 +410,7 @@ async function collectText(stream: Observable<string>): Promise<string> {
 }
 
 async function collectChatResponses(
-  responses: Observable<import("@nestjs-ai/model").ChatResponse>,
-): Promise<import("@nestjs-ai/model").ChatResponse[]> {
+  responses: Observable<ChatResponse>,
+): Promise<ChatResponse[]> {
   return await firstValueFrom(responses.pipe(toArray()));
 }

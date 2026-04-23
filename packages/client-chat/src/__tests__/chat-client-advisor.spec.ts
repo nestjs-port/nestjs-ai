@@ -28,8 +28,8 @@ import {
 } from "@nestjs-ai/model";
 import { lastValueFrom, type Observable, of, reduce } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
-import { PromptChatMemoryAdvisor } from "../advisor";
-import { ChatClient } from "../chat-client";
+import { PromptChatMemoryAdvisor } from "../advisor/index.js";
+import { ChatClient } from "../chat-client.js";
 
 describe("ChatClientAdvisorTests", () => {
   it("promptChatMemory", async () => {

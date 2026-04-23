@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DefaultEmbeddingOptionsBuilder } from "./default-embedding-options-builder";
-import type { EmbeddingOptions } from "./embedding-options.interface";
+import { DefaultEmbeddingOptionsBuilder } from "./default-embedding-options-builder.js";
+import type { EmbeddingOptions } from "./embedding-options.interface.js";
 
 export type DefaultEmbeddingOptionsProps = Partial<EmbeddingOptions>;
 

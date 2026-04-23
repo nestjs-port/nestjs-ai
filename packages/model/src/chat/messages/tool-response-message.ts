@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AbstractMessage } from "./abstract-message";
-import { MessageType } from "./message-type";
+import { AbstractMessage } from "./abstract-message.js";
+import { MessageType } from "./message-type.js";
 
 /**
  * Represents a response from a tool/function call.

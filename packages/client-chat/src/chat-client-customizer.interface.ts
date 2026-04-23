@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatClient } from "./chat-client";
+import type { ChatClient } from "./chat-client.js";
 
 /**
  * Callback type that can be used to customize a ChatClient.Builder.

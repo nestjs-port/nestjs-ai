@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelRequest } from "../../model";
+import type { ModelRequest } from "../../model/index.js";
 import {
   AssistantMessage,
   type Message,
@@ -23,8 +23,8 @@ import {
   SystemMessage,
   type ToolResponseMessage,
   UserMessage,
-} from "../messages";
-import type { ChatOptions } from "./chat-options.interface";
+} from "../messages/index.js";
+import type { ChatOptions } from "./chat-options.interface.js";
 
 /**
  * Type guard to check if a message is a {@link UserMessage}.

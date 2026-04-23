@@ -35,7 +35,7 @@ import { lastValueFrom, type Observable, of, reduce } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { ChatClient } from "../chat-client";
+import { ChatClient } from "../chat-client.js";
 
 describe("ChatClient prompt(props) API", () => {
   const ToolInputSchema = z.object({

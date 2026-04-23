@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelOptions } from "../../model";
+import type { ModelOptions } from "../../model/index.js";
 
 /**
  * Options for audio transcription.

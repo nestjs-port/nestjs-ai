@@ -20,7 +20,16 @@
   },
   "rules": {
     "require-mock-type-parameters": "off",
-    "expect-expect": "off"
+    "expect-expect": "off",
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "inline-type-imports",
+        "disallowTypeAnnotations": true
+      }
+    ],
+    "typescript/no-import-type-side-effects": "error"
   },
   "env": {
     "builtin": true,

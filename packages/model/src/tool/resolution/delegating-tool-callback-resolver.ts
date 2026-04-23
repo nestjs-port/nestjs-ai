@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { ToolCallback } from "../tool-callback";
-import type { ToolCallbackResolver } from "./tool-callback-resolver.interface";
+import type { ToolCallback } from "../tool-callback.js";
+import type { ToolCallbackResolver } from "./tool-callback-resolver.interface.js";
 
 export class DelegatingToolCallbackResolver implements ToolCallbackResolver {
   private readonly _toolCallbackResolvers: ToolCallbackResolver[];

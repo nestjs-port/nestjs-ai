@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { PromptAssert } from "./prompt-assert";
+export { PromptAssert } from "./prompt-assert.js";

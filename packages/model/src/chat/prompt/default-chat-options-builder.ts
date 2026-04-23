@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ChatOptions } from "./chat-options.interface";
-import { DefaultChatOptions } from "./default-chat-options";
+import type { ChatOptions } from "./chat-options.interface.js";
+import { DefaultChatOptions } from "./default-chat-options.js";
 
 export class DefaultChatOptionsBuilder implements ChatOptions.Builder {
   protected _model: string | null = null;

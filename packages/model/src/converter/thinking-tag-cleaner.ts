@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ResponseTextCleaner } from "./response-text-cleaner";
+import type { ResponseTextCleaner } from "./response-text-cleaner.js";
 
 const DEFAULT_PATTERNS = [
   /<thinking>[\s\S]*?<\/thinking>\s*/gi,

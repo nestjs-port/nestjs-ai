@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./document";
+export * from "./document/index.js";

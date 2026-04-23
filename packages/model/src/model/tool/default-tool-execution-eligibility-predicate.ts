@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ChatOptions, ChatResponse } from "../../chat";
-import { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
-import { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate";
+import type { ChatOptions, ChatResponse } from "../../chat/index.js";
+import { ToolCallingChatOptions } from "./tool-calling-chat-options.interface.js";
+import { ToolExecutionEligibilityPredicate } from "./tool-execution-eligibility-predicate.js";
 
 /**
  * Default implementation of {@link ToolExecutionEligibilityPredicate} that checks whether

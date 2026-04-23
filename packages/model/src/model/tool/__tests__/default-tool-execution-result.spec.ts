@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { Message } from "../../../chat";
-import { AssistantMessage, UserMessage } from "../../../chat";
-import { DefaultToolExecutionResult } from "../default-tool-execution-result";
+import type { Message } from "../../../chat/index.js";
+import { AssistantMessage, UserMessage } from "../../../chat/index.js";
+import { DefaultToolExecutionResult } from "../default-tool-execution-result.js";
 
 describe("DefaultToolExecutionResult", () => {
   it("when conversation history is null then throw", () => {

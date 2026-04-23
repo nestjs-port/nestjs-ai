@@ -22,7 +22,7 @@ import { Test } from "@nestjs/testing";
 import { AUDIO_TRANSCRIPTION_MODEL_TOKEN } from "@nestjs-ai/commons";
 import { AudioTranscriptionPrompt } from "@nestjs-ai/model";
 import {
-  OpenAiAudioTranscriptionModel,
+  type OpenAiAudioTranscriptionModel,
   OpenAiAudioTranscriptionModelModule,
   type OpenAiAudioTranscriptionProperties,
 } from "@nestjs-ai/model-openai";

@@ -22,8 +22,8 @@ import {
   type VectorStore,
 } from "@nestjs-ai/vector-store";
 import { describe, expect, it, vi } from "vitest";
-import { Query } from "../../../query";
-import { VectorStoreDocumentRetriever } from "../vector-store-document-retriever";
+import { Query } from "../../../query.js";
+import { VectorStoreDocumentRetriever } from "../vector-store-document-retriever.js";
 
 describe("VectorStoreDocumentRetriever", () => {
   it("when vector store is null then throw", () => {

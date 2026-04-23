@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ChatClient } from "../chat-client";
-import type { ChatClientCustomizer } from "../chat-client-customizer.interface";
+import type { ChatClient } from "../chat-client.js";
+import type { ChatClientCustomizer } from "../chat-client-customizer.interface.js";
 
 export class ChatClientBuilderConfigurer {
   private _customizers: ChatClientCustomizer[] | null = null;

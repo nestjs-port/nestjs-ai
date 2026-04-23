@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { StaticToolCallbackProvider } from "./static-tool-callback-provider";
-import type { ToolCallback } from "./tool-callback";
+import { StaticToolCallbackProvider } from "./static-tool-callback-provider.js";
+import type { ToolCallback } from "./tool-callback.js";
 
 export interface ToolCallbackProvider {
   get toolCallbacks(): ToolCallback[];

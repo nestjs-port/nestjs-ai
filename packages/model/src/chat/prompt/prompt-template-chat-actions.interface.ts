@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Message } from "../messages";
+import type { Message } from "../messages/index.js";
 
 export interface PromptTemplateChatActions {
   createMessages(): Message[];

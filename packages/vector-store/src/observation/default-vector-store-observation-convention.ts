@@ -20,8 +20,8 @@ import {
   VectorStoreObservationAttributes,
 } from "@nestjs-ai/commons";
 import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
-import type { VectorStoreObservationContext } from "./vector-store-observation-context";
-import { VectorStoreObservationConvention } from "./vector-store-observation-convention";
+import type { VectorStoreObservationContext } from "./vector-store-observation-context.js";
+import { VectorStoreObservationConvention } from "./vector-store-observation-convention.js";
 
 export class DefaultVectorStoreObservationConvention extends VectorStoreObservationConvention {
   static readonly DEFAULT_NAME = "db.vector.client.operation";

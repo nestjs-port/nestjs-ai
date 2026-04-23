@@ -21,8 +21,8 @@ import { AUDIO_SPEECH_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   OPEN_AI_AUDIO_SPEECH_DEFAULT_MODEL,
   OPEN_AI_AUDIO_SPEECH_PROPERTIES_TOKEN,
-  OpenAiAudioSpeechModel,
-  OpenAiAudioSpeechOptions,
+  type OpenAiAudioSpeechModel,
+  type OpenAiAudioSpeechOptions,
   OpenAiAudioSpeechModelModule,
   type OpenAiAudioSpeechProperties,
 } from "@nestjs-ai/model-openai";

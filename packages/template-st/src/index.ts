@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { Slf4jStErrorListener } from "./slf4j-st-error-listener";
+export { Slf4jStErrorListener } from "./slf4j-st-error-listener.js";
 export {
   StTemplateRenderer,
   type StTemplateRendererProps,
-} from "./st-template-renderer";
+} from "./st-template-renderer.js";

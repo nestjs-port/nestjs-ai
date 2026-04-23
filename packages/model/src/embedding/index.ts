@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-export { AbstractEmbeddingModel } from "./abstract-embedding-model";
-export type { BatchingStrategy } from "./batching-strategy.interface";
+export { AbstractEmbeddingModel } from "./abstract-embedding-model.js";
+export type { BatchingStrategy } from "./batching-strategy.interface.js";
 export {
   DefaultEmbeddingOptions,
   type DefaultEmbeddingOptionsProps,
-} from "./default-embedding-options";
-export { DefaultEmbeddingOptionsBuilder } from "./default-embedding-options-builder";
-export type { DocumentEmbeddingModel } from "./document-embedding-model.interface";
-export { DocumentEmbeddingRequest } from "./document-embedding-request";
-export { Embedding } from "./embedding";
-export { EmbeddingModel } from "./embedding-model";
-export { EmbeddingOptions } from "./embedding-options.interface";
-export { EmbeddingRequest } from "./embedding-request";
-export { EmbeddingResponse } from "./embedding-response";
-export { EmbeddingResponseMetadata } from "./embedding-response-metadata";
+} from "./default-embedding-options.js";
+export { DefaultEmbeddingOptionsBuilder } from "./default-embedding-options-builder.js";
+export type { DocumentEmbeddingModel } from "./document-embedding-model.interface.js";
+export { DocumentEmbeddingRequest } from "./document-embedding-request.js";
+export { Embedding } from "./embedding.js";
+export { EmbeddingModel } from "./embedding-model.js";
+export { EmbeddingOptions } from "./embedding-options.interface.js";
+export { EmbeddingRequest } from "./embedding-request.js";
+export { EmbeddingResponse } from "./embedding-response.js";
+export { EmbeddingResponseMetadata } from "./embedding-response-metadata.js";
 export {
   EmbeddingResultMetadata,
   ModalityType,
   ModalityUtils,
-} from "./embedding-result-metadata";
-export * from "./observation";
-export { TokenCountBatchingStrategy } from "./token-count-batching-strategy";
+} from "./embedding-result-metadata.js";
+export * from "./observation/index.js";
+export { TokenCountBatchingStrategy } from "./token-count-batching-strategy.js";

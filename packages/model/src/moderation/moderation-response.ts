@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ModelResponse } from "../model";
-import type { ModerationGeneration } from "./moderationGeneration";
-import { ModerationResponseMetadata } from "./moderation-response-metadata";
+import type { ModelResponse } from "../model/index.js";
+import type { ModerationGeneration } from "./moderationGeneration.js";
+import { ModerationResponseMetadata } from "./moderation-response-metadata.js";
 
 /**
  * Represents a response from a moderation process, encapsulating the moderation metadata

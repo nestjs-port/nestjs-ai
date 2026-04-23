@@ -17,7 +17,7 @@
 import type { ChatModel } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
 
-import { ChatModelStreamAdvisor } from "../chat-model-stream-advisor";
+import { ChatModelStreamAdvisor } from "../chat-model-stream-advisor.js";
 
 describe("ChatModelStreamAdvisor", () => {
   it("when chat model is null then throw", () => {

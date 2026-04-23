@@ -18,7 +18,7 @@ import { type ChatResponse, MessageAggregator } from "@nestjs-ai/model";
 import type { Observable } from "rxjs";
 import { filter, map } from "rxjs";
 
-import { ChatClientResponse } from "./chat-client-response";
+import { ChatClientResponse } from "./chat-client-response.js";
 
 /**
  * Helper that for streaming chat responses, aggregate the chat response messages into a

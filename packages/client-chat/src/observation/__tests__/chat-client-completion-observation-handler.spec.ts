@@ -24,10 +24,10 @@ import type { Logger } from "@nestjs-port/core";
 import { ObservationContext } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ChatClientRequest } from "../../chat-client-request";
-import { ChatClientResponse } from "../../chat-client-response";
-import { ChatClientCompletionObservationHandler } from "../chat-client-completion-observation-handler";
-import { ChatClientObservationContext } from "../chat-client-observation-context";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import { ChatClientResponse } from "../../chat-client-response.js";
+import { ChatClientCompletionObservationHandler } from "../chat-client-completion-observation-handler.js";
+import { ChatClientObservationContext } from "../chat-client-observation-context.js";
 
 function createObservationContext(): ChatClientObservationContext {
   return ChatClientObservationContext.builder()

@@ -19,5 +19,5 @@ export {
   RedisChatMemoryModule,
   type RedisChatMemoryModuleAsyncOptions,
   type RedisChatMemoryModuleOptions,
-} from "./redis-chat-memory.module";
-export type { RedisChatMemoryProperties } from "./redis-chat-memory-properties";
+} from "./redis-chat-memory.module.js";
+export type { RedisChatMemoryProperties } from "./redis-chat-memory-properties.js";

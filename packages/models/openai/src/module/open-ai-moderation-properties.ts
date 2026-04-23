@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
-import type { OpenAiModerationOptionsProps } from "../open-ai-moderation-options";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options.js";
+import type { OpenAiModerationOptionsProps } from "../open-ai-moderation-options.js";
 
 export const OPEN_AI_MODERATION_DEFAULT_MODEL =
   "omni-moderation-latest" as const;

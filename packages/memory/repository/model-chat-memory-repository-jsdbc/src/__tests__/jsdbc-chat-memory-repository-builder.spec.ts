@@ -20,13 +20,13 @@ import {
   JsdbcTemplate,
 } from "@nestjs-port/jsdbc";
 import { describe, expect, it, vi } from "vitest";
-import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository";
-import { JsdbcChatMemoryRepositoryDialectFactory } from "../jsdbc-chat-memory-repository-dialect-factory";
-import { MysqlChatMemoryRepositoryDialect } from "../mysql-chat-memory-repository-dialect";
-import { OracleChatMemoryRepositoryDialect } from "../oracle-chat-memory-repository-dialect";
-import { PostgresChatMemoryRepositoryDialect } from "../postgres-chat-memory-repository-dialect";
-import { SqlServerChatMemoryRepositoryDialect } from "../sql-server-chat-memory-repository-dialect";
-import { SqliteChatMemoryRepositoryDialect } from "../sqlite-chat-memory-repository-dialect";
+import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository.js";
+import { JsdbcChatMemoryRepositoryDialectFactory } from "../jsdbc-chat-memory-repository-dialect-factory.js";
+import { MysqlChatMemoryRepositoryDialect } from "../mysql-chat-memory-repository-dialect.js";
+import { OracleChatMemoryRepositoryDialect } from "../oracle-chat-memory-repository-dialect.js";
+import { PostgresChatMemoryRepositoryDialect } from "../postgres-chat-memory-repository-dialect.js";
+import { SqlServerChatMemoryRepositoryDialect } from "../sql-server-chat-memory-repository-dialect.js";
+import { SqliteChatMemoryRepositoryDialect } from "../sqlite-chat-memory-repository-dialect.js";
 
 describe("JsdbcChatMemoryRepositoryBuilder", () => {
   const createDataSource = (dialect: DatabaseDialect): DataSource => ({

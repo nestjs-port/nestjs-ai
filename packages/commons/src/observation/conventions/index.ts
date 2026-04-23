@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-export { AiObservationAttributes } from "./ai-observation-attributes";
-export { AiObservationMetricAttributes } from "./ai-observation-metric-attributes";
-export { AiObservationMetricNames } from "./ai-observation-metric-names";
-export { AiOperationType } from "./ai-operation-type";
-export { AiProvider } from "./ai-provider";
-export { AiTokenType } from "./ai-token-type";
-export { SpringAiKind } from "./spring-ai-kind";
-export { VectorStoreObservationAttributes } from "./vector-store-observation-attributes";
-export { VectorStoreProvider } from "./vector-store-provider";
-export { VectorStoreSimilarityMetric } from "./vector-store-similarity-metric";
+export { AiObservationAttributes } from "./ai-observation-attributes.js";
+export { AiObservationMetricAttributes } from "./ai-observation-metric-attributes.js";
+export { AiObservationMetricNames } from "./ai-observation-metric-names.js";
+export { AiOperationType } from "./ai-operation-type.js";
+export { AiProvider } from "./ai-provider.js";
+export { AiTokenType } from "./ai-token-type.js";
+export { SpringAiKind } from "./spring-ai-kind.js";
+export { VectorStoreObservationAttributes } from "./vector-store-observation-attributes.js";
+export { VectorStoreProvider } from "./vector-store-provider.js";
+export { VectorStoreSimilarityMetric } from "./vector-store-similarity-metric.js";

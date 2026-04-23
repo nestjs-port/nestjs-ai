@@ -22,7 +22,7 @@ import type { ChatModel } from "@nestjs-ai/model";
 import {
   OPEN_AI_CHAT_DEFAULT_MODEL,
   OPEN_AI_CHAT_PROPERTIES_TOKEN,
-  OpenAiChatModel,
+  type OpenAiChatModel,
   OpenAiChatModelModule,
   type OpenAiChatProperties,
 } from "@nestjs-ai/model-openai";

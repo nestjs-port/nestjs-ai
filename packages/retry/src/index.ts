@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./non-transient-ai-exception";
-export * from "./retry-utils";
-export * from "./transient-ai-exception";
+export * from "./non-transient-ai-exception.js";
+export * from "./retry-utils.js";
+export * from "./transient-ai-exception.js";

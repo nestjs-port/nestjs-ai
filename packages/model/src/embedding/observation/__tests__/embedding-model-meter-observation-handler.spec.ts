@@ -30,14 +30,14 @@ import {
   type Tag,
 } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { Usage } from "../../../chat";
-import { EmbeddingOptions } from "../../embedding-options.interface";
-import { EmbeddingRequest } from "../../embedding-request";
-import { EmbeddingResponse } from "../../embedding-response";
-import { EmbeddingResponseMetadata } from "../../embedding-response-metadata";
-import { DefaultEmbeddingModelObservationConvention } from "../default-embedding-model-observation-convention";
-import { EmbeddingModelMeterObservationHandler } from "../embedding-model-meter-observation-handler";
-import { EmbeddingModelObservationContext } from "../embedding-model-observation-context";
+import { Usage } from "../../../chat/index.js";
+import { EmbeddingOptions } from "../../embedding-options.interface.js";
+import { EmbeddingRequest } from "../../embedding-request.js";
+import { EmbeddingResponse } from "../../embedding-response.js";
+import { EmbeddingResponseMetadata } from "../../embedding-response-metadata.js";
+import { DefaultEmbeddingModelObservationConvention } from "../default-embedding-model-observation-convention.js";
+import { EmbeddingModelMeterObservationHandler } from "../embedding-model-meter-observation-handler.js";
+import { EmbeddingModelObservationContext } from "../embedding-model-observation-context.js";
 
 class SimpleCounter implements Counter {
   private _count = 0;

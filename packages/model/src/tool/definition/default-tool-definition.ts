@@ -15,7 +15,7 @@
  */
 
 import { ParsingUtils } from "@nestjs-port/core";
-import type { ToolDefinition } from "./tool-definition";
+import type { ToolDefinition } from "./tool-definition.js";
 
 /**
  * Default implementation of {@link ToolDefinition}.

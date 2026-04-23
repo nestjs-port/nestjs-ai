@@ -20,7 +20,7 @@ import type {
   ObservationConvention,
 } from "@nestjs-port/core";
 
-import { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
+import { EmbeddingModelObservationContext } from "./embedding-model-observation-context.js";
 
 export abstract class EmbeddingModelObservationConvention implements ObservationConvention<EmbeddingModelObservationContext> {
   abstract getName(): string;

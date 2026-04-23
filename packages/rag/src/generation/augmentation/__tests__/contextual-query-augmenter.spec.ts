@@ -17,9 +17,9 @@
 import { Document } from "@nestjs-ai/commons";
 import { PromptTemplate } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { Query } from "../../../query";
-import { ContextualQueryAugmenter } from "../contextual-query-augmenter";
-import type { QueryAugmenter } from "../query-augmenter";
+import { Query } from "../../../query.js";
+import { ContextualQueryAugmenter } from "../contextual-query-augmenter.js";
+import type { QueryAugmenter } from "../query-augmenter.js";
 
 describe("ContextualQueryAugmenter", () => {
   it("when prompt has missing context placeholder then throw", () => {

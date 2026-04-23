@@ -18,7 +18,10 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { MarkdownDocumentReader, MarkdownDocumentReaderConfig } from "..";
+import {
+  MarkdownDocumentReader,
+  MarkdownDocumentReaderConfig,
+} from "../index.js";
 
 describe("MarkdownDocumentReader", () => {
   it("test dir path single", async () => {

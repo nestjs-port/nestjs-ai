@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { NoOpTemplateRenderer } from "../no-op-template-renderer";
+import { NoOpTemplateRenderer } from "../no-op-template-renderer.js";
 
 describe("NoOpTemplateRenderer", () => {
   it("should return unchanged template", () => {

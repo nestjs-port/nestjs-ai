@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { DefaultToolDefinition } from "../../definition";
-import { DefaultToolExecutionExceptionProcessor } from "../default-tool-execution-exception-processor";
-import { ToolExecutionException } from "../tool-execution-exception";
+import { DefaultToolDefinition } from "../../definition/index.js";
+import { DefaultToolExecutionExceptionProcessor } from "../default-tool-execution-exception-processor.js";
+import { ToolExecutionException } from "../tool-execution-exception.js";
 
 /**
  * Custom error class for testing rethrow functionality.

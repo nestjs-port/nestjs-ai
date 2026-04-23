@@ -92,14 +92,14 @@ import {
 import { defer, EMPTY, from, Observable, of } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 
-import { AnthropicChatOptions } from "./anthropic-chat-options";
-import { toSdkServiceTier } from "./anthropic-service-tier";
-import { AnthropicSetup } from "./anthropic-setup";
-import type { AnthropicSkillContainer } from "./anthropic-skill-container";
-import type { AnthropicWebSearchResult } from "./anthropic-web-search-result";
-import type { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
-import { CacheEligibilityResolver } from "./cache-eligibility-resolver";
-import { Citation } from "./citation";
+import { AnthropicChatOptions } from "./anthropic-chat-options.js";
+import { toSdkServiceTier } from "./anthropic-service-tier.js";
+import { AnthropicSetup } from "./anthropic-setup.js";
+import type { AnthropicSkillContainer } from "./anthropic-skill-container.js";
+import type { AnthropicWebSearchResult } from "./anthropic-web-search-result.js";
+import type { AnthropicWebSearchTool } from "./anthropic-web-search-tool.js";
+import { CacheEligibilityResolver } from "./cache-eligibility-resolver.js";
+import { Citation } from "./citation.js";
 
 export interface AnthropicChatModelProps {
   anthropicClient?: Anthropic;

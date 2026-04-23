@@ -16,12 +16,12 @@
 
 import { LoggerFactory } from "@nestjs-port/core";
 import { DatabaseDialect, type DataSource } from "@nestjs-port/jsdbc";
-import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
-import { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
-import { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";
-import { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect";
-import { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect";
-import { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect";
+import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect.js";
+import { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect.js";
+import { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect.js";
+import { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect.js";
+import { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect.js";
+import { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect.js";
 
 export class JsdbcChatMemoryRepositoryDialectFactory {
   private static readonly logger = LoggerFactory.getLogger(

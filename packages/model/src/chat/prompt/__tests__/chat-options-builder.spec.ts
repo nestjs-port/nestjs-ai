@@ -15,8 +15,8 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { ChatOptions } from "../chat-options.interface";
-import type { DefaultChatOptions } from "../default-chat-options";
+import { ChatOptions } from "../chat-options.interface.js";
+import type { DefaultChatOptions } from "../default-chat-options.js";
 
 describe("ChatOptionsBuilder", () => {
   let builder: ChatOptions.Builder;

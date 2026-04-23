@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export { NEST_AI_ROOT_MODULE_OPTIONS, NestAiModule } from "./nest-ai.module";
+export { NEST_AI_ROOT_MODULE_OPTIONS, NestAiModule } from "./nest-ai.module.js";
 export type {
   NestAiRootModuleAsyncFactoryOptions,
   NestAiRootModuleAsyncOptions,
   NestAiRootModuleOptions,
-} from "./nest-ai-module.options";
+} from "./nest-ai-module.options.js";

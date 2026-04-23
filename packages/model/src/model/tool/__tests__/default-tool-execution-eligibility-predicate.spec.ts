@@ -22,10 +22,10 @@ import {
   DefaultChatOptions,
   Generation,
   type ToolCall,
-} from "../../../chat";
-import type { ToolCallback } from "../../../tool";
-import { DefaultToolExecutionEligibilityPredicate } from "../default-tool-execution-eligibility-predicate";
-import type { ToolCallingChatOptions } from "../tool-calling-chat-options.interface";
+} from "../../../chat/index.js";
+import type { ToolCallback } from "../../../tool/index.js";
+import { DefaultToolExecutionEligibilityPredicate } from "../default-tool-execution-eligibility-predicate.js";
+import type { ToolCallingChatOptions } from "../tool-calling-chat-options.interface.js";
 
 describe("DefaultToolExecutionEligibilityPredicate", () => {
   const predicate = new DefaultToolExecutionEligibilityPredicate();

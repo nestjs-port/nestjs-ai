@@ -16,8 +16,8 @@
 
 import { type ChatModel, PromptTemplate } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { ChatClient } from "../../chat-client";
-import { RelevancyEvaluator } from "../relevancy-evaluator";
+import { ChatClient } from "../../chat-client.js";
+import { RelevancyEvaluator } from "../relevancy-evaluator.js";
 
 function createChatModel(): ChatModel {
   return {} as ChatModel;

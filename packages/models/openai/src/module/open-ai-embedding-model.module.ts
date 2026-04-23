@@ -32,13 +32,13 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { OpenAiEmbeddingModel } from "../open-ai-embedding-model";
-import { OpenAiEmbeddingOptions } from "../open-ai-embedding-options";
-import { OpenAiSetup, type OpenAiSetupProps } from "../setup";
+import { OpenAiEmbeddingModel } from "../open-ai-embedding-model.js";
+import { OpenAiEmbeddingOptions } from "../open-ai-embedding-options.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "../setup/index.js";
 import {
   OPEN_AI_EMBEDDING_DEFAULT_MODEL,
   type OpenAiEmbeddingProperties,
-} from "./open-ai-embedding-properties";
+} from "./open-ai-embedding-properties.js";
 
 export const OPEN_AI_EMBEDDING_PROPERTIES_TOKEN = Symbol.for(
   "OPEN_AI_EMBEDDING_PROPERTIES_TOKEN",

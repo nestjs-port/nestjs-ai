@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 import type { Document } from "@nestjs-ai/commons";
 import { ObservationContext, StringUtils } from "@nestjs-port/core";
-import type { SearchRequest } from "../search-request";
+import type { SearchRequest } from "../search-request.js";
 
 export interface VectorStoreObservationContextProps {
   databaseSystem: string;

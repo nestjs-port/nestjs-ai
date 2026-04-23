@@ -17,7 +17,7 @@
 import { EOL } from "node:os";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { BeanOutputConverter } from "../bean-output-converter";
+import { BeanOutputConverter } from "../bean-output-converter.js";
 
 const TestSchema = z.object({
   someString: z.string(),

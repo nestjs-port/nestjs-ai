@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelOptions } from "./model-options.interface";
+import type { ModelOptions } from "./model-options.interface.js";
 
 /**
  * Interface representing a request to an AI model. This interface encapsulates the

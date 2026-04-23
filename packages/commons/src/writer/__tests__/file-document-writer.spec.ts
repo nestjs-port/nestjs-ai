@@ -20,8 +20,8 @@ import { join } from "node:path";
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Document, MetadataMode } from "../../document";
-import { FileDocumentWriter } from "../file-document-writer";
+import { Document, MetadataMode } from "../../document/index.js";
+import { FileDocumentWriter } from "../file-document-writer.js";
 
 async function readAllLines(path: string): Promise<string[]> {
   const content = await readFile(path, "utf8");

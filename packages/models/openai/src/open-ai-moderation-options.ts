@@ -19,7 +19,7 @@ import type { ModerationOptions } from "@nestjs-ai/model";
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,
-} from "./abstract-open-ai-options";
+} from "./abstract-open-ai-options.js";
 
 export interface OpenAiModerationOptionsProps extends AbstractOpenAiOptionsProps {}
 

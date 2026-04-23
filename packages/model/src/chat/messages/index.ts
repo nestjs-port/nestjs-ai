@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-export { AbstractMessage } from "./abstract-message";
+export { AbstractMessage } from "./abstract-message.js";
 export {
   AssistantMessage,
   type AssistantMessageProps,
   type ToolCall,
-} from "./assistant-message";
-export type { Message } from "./message.interface";
-export { MessageType } from "./message-type";
-export { SystemMessage, type SystemMessageProps } from "./system-message";
+} from "./assistant-message.js";
+export type { Message } from "./message.interface.js";
+export { MessageType } from "./message-type.js";
+export { SystemMessage, type SystemMessageProps } from "./system-message.js";
 export {
   type ToolResponse,
   ToolResponseMessage,
   type ToolResponseMessageProps,
-} from "./tool-response-message";
-export { UserMessage, type UserMessageProps } from "./user-message";
+} from "./tool-response-message.js";
+export { UserMessage, type UserMessageProps } from "./user-message.js";

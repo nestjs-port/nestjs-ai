@@ -28,8 +28,8 @@ import {
 import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { RedisMetadataField } from "../redis-metadata-field";
-import { RedisVectorStore } from "../redis-vector-store";
+import { RedisMetadataField } from "../redis-metadata-field.js";
+import { RedisVectorStore } from "../redis-vector-store.js";
 
 const readTestData = (fileName: string): string =>
   readFileSync(resolve(__dirname, fileName), "utf8");

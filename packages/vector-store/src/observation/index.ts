@@ -17,12 +17,12 @@
 export {
   AbstractObservationVectorStore,
   type AbstractObservationVectorStoreProps,
-} from "./abstract-observation-vector-store";
-export { DefaultVectorStoreObservationConvention } from "./default-vector-store-observation-convention";
+} from "./abstract-observation-vector-store.js";
+export { DefaultVectorStoreObservationConvention } from "./default-vector-store-observation-convention.js";
 export {
   VectorStoreObservationContext,
   type VectorStoreObservationContextProps,
-} from "./vector-store-observation-context";
-export { VectorStoreObservationConvention } from "./vector-store-observation-convention";
-export { VectorStoreObservationDocumentation } from "./vector-store-observation-documentation";
-export { VectorStoreQueryResponseObservationHandler } from "./vector-store-query-response-observation-handler";
+} from "./vector-store-observation-context.js";
+export { VectorStoreObservationConvention } from "./vector-store-observation-convention.js";
+export { VectorStoreObservationDocumentation } from "./vector-store-observation-documentation.js";
+export { VectorStoreQueryResponseObservationHandler } from "./vector-store-query-response-observation-handler.js";

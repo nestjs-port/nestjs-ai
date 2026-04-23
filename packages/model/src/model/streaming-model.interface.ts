@@ -15,9 +15,9 @@
  */
 
 import type { Observable } from "rxjs";
-import type { ModelRequest } from "./model-request.interface";
-import type { ModelResponse } from "./model-response.interface";
-import type { ModelResult } from "./model-result.interface";
+import type { ModelRequest } from "./model-request.interface.js";
+import type { ModelResponse } from "./model-response.interface.js";
+import type { ModelResult } from "./model-result.interface.js";
 
 /**
  * The StreamingModel interface provides a generic API for invoking an AI models with

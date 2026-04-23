@@ -21,12 +21,12 @@ import type {
   Tool as McpTool,
 } from "@modelcontextprotocol/sdk/spec.types.js";
 import { describe, expect, it, vi } from "vitest";
-import { DefaultMcpToolNamePrefixGenerator } from "../default-mcp-tool-name-prefix-generator";
-import type { McpConnectionInfo } from "../mcp-connection-info";
-import { McpToolCallbackProvider } from "../mcp-tool-callback-provider";
-import type { McpToolFilter } from "../mcp-tool-filter";
-import { DefaultMcpToolFilter } from "../mcp-tool-filter";
-import type { McpToolNamePrefixGenerator } from "../mcp-tool-name-prefix-generator";
+import { DefaultMcpToolNamePrefixGenerator } from "../default-mcp-tool-name-prefix-generator.js";
+import type { McpConnectionInfo } from "../mcp-connection-info.js";
+import { McpToolCallbackProvider } from "../mcp-tool-callback-provider.js";
+import type { McpToolFilter } from "../mcp-tool-filter.js";
+import { DefaultMcpToolFilter } from "../mcp-tool-filter.js";
+import type { McpToolNamePrefixGenerator } from "../mcp-tool-name-prefix-generator.js";
 
 function createTool(
   name: string,

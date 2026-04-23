@@ -17,6 +17,6 @@
 export {
   GOOGLE_GEN_AI_CHAT_PROPERTIES_TOKEN,
   GoogleGenAiChatModelModule,
-  GoogleGenAiChatModelModuleAsyncOptions,
-} from "./google-gen-ai-chat-model.module";
-export * from "./google-gen-ai-properties";
+  type GoogleGenAiChatModelModuleAsyncOptions,
+} from "./google-gen-ai-chat-model.module.js";
+export * from "./google-gen-ai-properties.js";

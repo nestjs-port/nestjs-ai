@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Model } from "../model";
-import type { ModerationPrompt } from "./moderation-prompt";
-import type { ModerationResponse } from "./moderation-response";
+import type { Model } from "../model/index.js";
+import type { ModerationPrompt } from "./moderation-prompt.js";
+import type { ModerationResponse } from "./moderation-response.js";
 
 /**
  * The ModerationModel interface defines a generic AI model for moderation. It extends the

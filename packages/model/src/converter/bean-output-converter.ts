@@ -23,12 +23,12 @@ import { z } from "zod";
 import {
   CompositeResponseTextCleaner,
   type CompositeResponseTextCleanerBuilder,
-} from "./composite-response-text-cleaner";
-import { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner";
-import type { ResponseTextCleaner } from "./response-text-cleaner";
-import type { StructuredOutputConverter } from "./structured-output-converter";
-import { ThinkingTagCleaner } from "./thinking-tag-cleaner";
-import { WhitespaceCleaner } from "./whitespace-cleaner";
+} from "./composite-response-text-cleaner.js";
+import { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner.js";
+import type { ResponseTextCleaner } from "./response-text-cleaner.js";
+import type { StructuredOutputConverter } from "./structured-output-converter.js";
+import { ThinkingTagCleaner } from "./thinking-tag-cleaner.js";
+import { WhitespaceCleaner } from "./whitespace-cleaner.js";
 
 type ZodJsonObjectSchema = z.ZodObject<z.ZodRawShape>;
 type ZodJsonObjectArraySchema = z.ZodArray<ZodJsonObjectSchema>;

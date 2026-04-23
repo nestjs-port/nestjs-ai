@@ -15,9 +15,9 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelResponse } from "../model";
-import type { Embedding } from "./embedding";
-import { EmbeddingResponseMetadata } from "./embedding-response-metadata";
+import type { ModelResponse } from "../model/index.js";
+import type { Embedding } from "./embedding.js";
+import { EmbeddingResponseMetadata } from "./embedding-response-metadata.js";
 
 /**
  * Embedding response object.

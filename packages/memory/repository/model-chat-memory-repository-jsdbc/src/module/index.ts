@@ -18,6 +18,6 @@ export {
   JSDBC_CHAT_MEMORY_PROPERTIES_TOKEN,
   JsdbcChatMemoryRepositoryModule,
   type JsdbcChatMemoryRepositoryModuleAsyncOptions,
-} from "./jsdbc-chat-memory-repository.module";
+} from "./jsdbc-chat-memory-repository.module.js";
 
-export type { JsdbcChatMemoryRepositoryProperties } from "./jsdbc-chat-memory-repository-properties";
+export type { JsdbcChatMemoryRepositoryProperties } from "./jsdbc-chat-memory-repository-properties.js";

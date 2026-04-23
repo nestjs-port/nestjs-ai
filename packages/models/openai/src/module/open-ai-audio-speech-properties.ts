@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options";
-import type { OpenAiAudioSpeechOptionsProps } from "../open-ai-audio-speech-options";
+import type { AbstractOpenAiOptionsProps } from "../abstract-open-ai-options.js";
+import type { OpenAiAudioSpeechOptionsProps } from "../open-ai-audio-speech-options.js";
 
 export const OPEN_AI_AUDIO_SPEECH_DEFAULT_MODEL = "gpt-4o-mini-tts" as const;
 

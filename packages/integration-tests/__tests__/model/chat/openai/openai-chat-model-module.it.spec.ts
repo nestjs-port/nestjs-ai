@@ -20,7 +20,7 @@ import { Test } from "@nestjs/testing";
 import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import { type ChatResponse, Prompt } from "@nestjs-ai/model";
 import {
-  OpenAiChatModel,
+  type OpenAiChatModel,
   OpenAiChatModelModule,
   OpenAiChatOptions,
   type OpenAiChatProperties,

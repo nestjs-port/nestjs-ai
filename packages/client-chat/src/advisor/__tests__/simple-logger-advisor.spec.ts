@@ -25,8 +25,8 @@ import {
 import { firstValueFrom, of } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 
-import { ChatClient } from "../../chat-client";
-import { SimpleLoggerAdvisor } from "../simple-logger-advisor";
+import { ChatClient } from "../../chat-client.js";
+import { SimpleLoggerAdvisor } from "../simple-logger-advisor.js";
 
 class TestChatModel extends ChatModel {
   readonly chatPromptMock = vi.fn(

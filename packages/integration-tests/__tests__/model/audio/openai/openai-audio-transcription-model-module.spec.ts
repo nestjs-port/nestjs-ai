@@ -21,7 +21,7 @@ import { AUDIO_TRANSCRIPTION_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
   OPEN_AI_AUDIO_TRANSCRIPTION_DEFAULT_MODEL,
   OPEN_AI_AUDIO_TRANSCRIPTION_PROPERTIES_TOKEN,
-  OpenAiAudioTranscriptionModel,
+  type OpenAiAudioTranscriptionModel,
   OpenAiAudioTranscriptionModelModule,
   type OpenAiAudioTranscriptionProperties,
 } from "@nestjs-ai/model-openai";

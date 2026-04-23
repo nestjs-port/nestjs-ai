@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import { LoggerFactory } from "@nestjs-port/core";
 import {
   AudioTranscription,
-  AudioTranscriptionPrompt,
+  type AudioTranscriptionPrompt,
   AudioTranscriptionResponse,
   AudioTranscriptionResponseMetadata,
   TranscriptionModel,
@@ -29,9 +29,9 @@ import {
 import type { TranscriptionCreateParamsNonStreaming } from "openai/resources/audio/transcriptions";
 import { toFile } from "openai";
 
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
-import type { OpenAiClient } from "./open-ai-client";
-import { OpenAiAudioTranscriptionOptions } from "./open-ai-audio-transcription-options";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
+import type { OpenAiClient } from "./open-ai-client.js";
+import { OpenAiAudioTranscriptionOptions } from "./open-ai-audio-transcription-options.js";
 import { readFile } from "node:fs/promises";
 
 export interface OpenAiAudioTranscriptionModelProps {

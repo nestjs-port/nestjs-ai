@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-export { ChatModel } from "./chat-model";
+export { ChatModel } from "./chat-model.js";
 
 export {
   ChatResponse,
   ChatResponseBuilder,
   type ChatResponseProps,
-} from "./chat-response";
+} from "./chat-response.js";
 
-export { Generation, type GenerationProps } from "./generation";
+export { Generation, type GenerationProps } from "./generation.js";
 
-export { MessageAggregator } from "./message-aggregator";
-export { StreamingChatModel } from "./streaming-chat-model";
-export { ToolContext, ToolContextSchema } from "./tool-context";
+export { MessageAggregator } from "./message-aggregator.js";
+export { StreamingChatModel } from "./streaming-chat-model.js";
+export { ToolContext, ToolContextSchema } from "./tool-context.js";

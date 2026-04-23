@@ -33,13 +33,13 @@ import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { OpenAiChatModel } from "../../../open-ai-chat-model";
-import { OpenAiChatOptions } from "../../../open-ai-chat-options";
+import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../../../open-ai-chat-options.js";
 import {
   type MockWeatherRequest,
   MockWeatherRequestInputType,
   MockWeatherService,
-} from "../mock-weather-service";
+} from "../mock-weather-service.js";
 
 const DEFAULT_MODEL = "ai/gemma3:4B-F16";
 

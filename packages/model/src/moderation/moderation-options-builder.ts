@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModerationOptions } from "./moderation-options";
+import type { ModerationOptions } from "./moderation-options.js";
 
 export interface ModerationOptionsProps {
   model?: string | null;

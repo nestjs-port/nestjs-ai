@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-export { Categories, type CategoriesProps } from "./categories";
-export { CategoryScores, type CategoryScoresProps } from "./category-scores";
+export { Categories, type CategoriesProps } from "./categories.js";
+export { CategoryScores, type CategoryScoresProps } from "./category-scores.js";
 export {
   ModerationGeneration,
   type ModerationGenerationProps,
-} from "./moderationGeneration";
-export { Moderation, type ModerationProps } from "./moderation";
-export type { ModerationGenerationMetadata } from "./moderation-generation-metadata";
-export { ModerationMessage } from "./moderation-message";
-export type { ModerationModel } from "./moderation-model.interface";
-export type { ModerationOptions } from "./moderation-options";
+} from "./moderationGeneration.js";
+export { Moderation, type ModerationProps } from "./moderation.js";
+export type { ModerationGenerationMetadata } from "./moderation-generation-metadata.js";
+export { ModerationMessage } from "./moderation-message.js";
+export type { ModerationModel } from "./moderation-model.interface.js";
+export type { ModerationOptions } from "./moderation-options.js";
 export {
   ModerationOptionsBuilder,
   type ModerationOptionsProps,
-} from "./moderation-options-builder";
-export { ModerationPrompt } from "./moderation-prompt";
-export { ModerationResponse } from "./moderation-response";
-export { ModerationResponseMetadata } from "./moderation-response-metadata";
+} from "./moderation-options-builder.js";
+export { ModerationPrompt } from "./moderation-prompt.js";
+export { ModerationResponse } from "./moderation-response.js";
+export { ModerationResponseMetadata } from "./moderation-response-metadata.js";
 export {
   ModerationResult,
   type ModerationResultProps,
-} from "./moderation-result";
+} from "./moderation-result.js";

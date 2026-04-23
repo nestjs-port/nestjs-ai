@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AiOperationMetadata } from "../ai-operation-metadata";
+import { AiOperationMetadata } from "../ai-operation-metadata.js";
 
 describe("AiOperationMetadata", () => {
   it("when mandatory metadata then return", () => {

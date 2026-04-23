@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ChatResponse, Prompt } from "../../chat";
-import type { ToolDefinition } from "../../tool";
-import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface";
-import type { ToolExecutionResult } from "./tool-execution-result";
+import type { ChatResponse, Prompt } from "../../chat/index.js";
+import type { ToolDefinition } from "../../tool/index.js";
+import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface.js";
+import type { ToolExecutionResult } from "./tool-execution-result.js";
 
 /**
  * Service responsible for managing the tool calling process for a chat model.

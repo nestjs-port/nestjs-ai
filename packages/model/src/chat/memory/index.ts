@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-export { ChatMemory } from "./chat-memory";
-export type { ChatMemoryRepository } from "./chat-memory-repository";
-export { InMemoryChatMemoryRepository } from "./in-memory-chat-memory-repository";
+export { ChatMemory } from "./chat-memory.js";
+export type { ChatMemoryRepository } from "./chat-memory-repository.js";
+export { InMemoryChatMemoryRepository } from "./in-memory-chat-memory-repository.js";
 export {
   MessageWindowChatMemory,
   type MessageWindowChatMemoryProps,
-} from "./message-window-chat-memory";
+} from "./message-window-chat-memory.js";

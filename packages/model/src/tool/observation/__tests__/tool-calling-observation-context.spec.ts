@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ToolDefinition } from "../../definition";
-import { ToolCallingObservationContext } from "../tool-calling-observation-context";
+import { ToolDefinition } from "../../definition/index.js";
+import { ToolCallingObservationContext } from "../tool-calling-observation-context.js";
 
 describe("ToolCallingObservationContext", () => {
   it("when mandatory request options then return", () => {

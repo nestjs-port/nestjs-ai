@@ -35,7 +35,7 @@ import {
   type WeatherRequest,
   WeatherRequestSchema,
   type WeatherResponse,
-} from "./mock-weather-service";
+} from "./mock-weather-service.js";
 
 /**
  * Abstract base suite for tool call advisor integration tests.

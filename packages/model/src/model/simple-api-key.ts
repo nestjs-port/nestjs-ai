@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ApiKey } from "./api-key.interface";
+import type { ApiKey } from "./api-key.interface.js";
 
 /**
  * A simple implementation of {@link ApiKey} that holds an immutable API key value. This

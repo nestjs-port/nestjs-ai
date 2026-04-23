@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { CommonVectorStoreProperties } from "./common-vector-store-properties";
+export { CommonVectorStoreProperties } from "./common-vector-store-properties.js";

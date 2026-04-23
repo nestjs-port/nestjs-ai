@@ -19,7 +19,7 @@ import { Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { EMBEDDING_MODEL_TOKEN, MetadataMode } from "@nestjs-ai/commons";
 import { EmbeddingModelObservationConvention } from "@nestjs-ai/model";
-import { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
+import type { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
 import { TransformersEmbeddingModelModule } from "@nestjs-ai/model-transformers";
 import {
   KeyValues,

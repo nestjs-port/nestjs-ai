@@ -17,7 +17,7 @@
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { JsonReader } from "../json-reader";
+import { JsonReader } from "../json-reader.js";
 
 describe("JsonReader", () => {
   const bikesJsonPath = join(__dirname, "bikes.json");

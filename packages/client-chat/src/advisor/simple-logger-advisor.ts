@@ -18,15 +18,15 @@ import type { ChatResponse } from "@nestjs-ai/model";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 
-import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
-import type { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
+import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "./api";
+} from "./api/index.js";
 
 export interface SimpleLoggerAdvisorProps {
   requestToString?:

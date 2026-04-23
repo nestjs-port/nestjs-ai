@@ -25,7 +25,7 @@ import {
   type ObservationContext,
   Tag,
 } from "@nestjs-port/core";
-import type { Usage } from "../../chat";
+import type { Usage } from "../../chat/index.js";
 
 /**
  * Generate metrics about the model usage in the context of an AI operation.

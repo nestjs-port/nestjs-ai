@@ -16,7 +16,7 @@
 
 import type { RedisClientOptions, RedisClientType } from "redis";
 
-import type { RedisChatMemoryMetadataField } from "../redis-chat-memory-config";
+import type { RedisChatMemoryMetadataField } from "../redis-chat-memory-config.js";
 
 export interface RedisChatMemoryProperties {
   client?: RedisClientType;

@@ -29,7 +29,7 @@ import {
   AnthropicSkill,
   AnthropicSkillType,
   AnthropicWebSearchTool,
-} from "../index";
+} from "../index.js";
 
 describe("AnthropicChatOptions", () => {
   const toComparable = (options: AnthropicChatOptions) => ({

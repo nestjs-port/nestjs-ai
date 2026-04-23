@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AssistantMessage } from "../assistant-message";
-import { MessageType } from "../message-type";
+import { AssistantMessage } from "../assistant-message.js";
+import { MessageType } from "../message-type.js";
 
 describe("AssistantMessage", () => {
   it("when media is null then set default empty array", () => {

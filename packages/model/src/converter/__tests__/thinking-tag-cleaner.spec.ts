@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ThinkingTagCleaner } from "../thinking-tag-cleaner";
+import { ThinkingTagCleaner } from "../thinking-tag-cleaner.js";
 
 describe("ThinkingTagCleaner", () => {
   it("removes Amazon Nova thinking tags", () => {

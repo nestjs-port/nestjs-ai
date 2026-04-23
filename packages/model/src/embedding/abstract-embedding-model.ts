@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EmbeddingModel } from "./embedding-model";
+import { EmbeddingModel } from "./embedding-model.js";
 
 /**
  * Abstract implementation of the {@link EmbeddingModel} interface that provides

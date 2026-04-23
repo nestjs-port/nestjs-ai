@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export * from "./memory";
-export * from "./messages";
-export * from "./metadata";
-export * from "./model";
-export * from "./observation";
-export * from "./prompt";
+export * from "./memory/index.js";
+export * from "./messages/index.js";
+export * from "./metadata/index.js";
+export * from "./model/index.js";
+export * from "./observation/index.js";
+export * from "./prompt/index.js";

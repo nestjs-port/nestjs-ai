@@ -15,10 +15,10 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { SearchRequest } from "../../search-request";
-import { Filter } from "../filter";
-import { FilterExpressionBuilder } from "../filter-expression-builder";
-import { FilterExpressionParseException } from "../filter-expression-text-parser";
+import { SearchRequest } from "../../search-request.js";
+import { Filter } from "../filter.js";
+import { FilterExpressionBuilder } from "../filter-expression-builder.js";
+import { FilterExpressionParseException } from "../filter-expression-text-parser.js";
 
 describe("SearchRequest", () => {
   it("create defaults", () => {

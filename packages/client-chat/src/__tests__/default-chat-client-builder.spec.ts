@@ -18,8 +18,8 @@ import type { ChatModel } from "@nestjs-ai/model";
 import { NoopObservationRegistry } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
 
-import { DefaultChatClient } from "../default-chat-client";
-import { DefaultChatClientBuilder } from "../default-chat-client-builder";
+import { DefaultChatClient } from "../default-chat-client.js";
+import { DefaultChatClientBuilder } from "../default-chat-client-builder.js";
 
 function createChatModel(): ChatModel {
   return {} as ChatModel;

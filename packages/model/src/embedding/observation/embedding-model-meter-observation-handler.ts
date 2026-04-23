@@ -20,8 +20,8 @@ import type {
   ObservationHandler,
 } from "@nestjs-port/core";
 
-import { ModelUsageMetricsGenerator } from "../../model";
-import { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
+import { ModelUsageMetricsGenerator } from "../../model/index.js";
+import { EmbeddingModelObservationContext } from "./embedding-model-observation-context.js";
 
 export class EmbeddingModelMeterObservationHandler implements ObservationHandler<EmbeddingModelObservationContext> {
   private readonly _meterRegistry: MeterRegistry;

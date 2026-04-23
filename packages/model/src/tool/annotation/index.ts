@@ -22,4 +22,4 @@ export {
   type ToolReturnsOnlyAnnotationMetadata,
   type ToolSchemaAnnotationMetadata,
   type ToolSchemaLessAnnotationMetadata,
-} from "./tool.decorator";
+} from "./tool.decorator.js";

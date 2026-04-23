@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { JdkSha256HexIdGenerator } from "../jdk-sha256-hex-id-generator";
+import { JdkSha256HexIdGenerator } from "../jdk-sha256-hex-id-generator.js";
 
 type DigestAccessor = {
   getMessageDigest(input: Uint8Array): Buffer;

@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from "./transcription";
-export * from "./tts";
+export * from "./transcription/index.js";
+export * from "./tts/index.js";

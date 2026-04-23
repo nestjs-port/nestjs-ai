@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { PineconeFilterExpressionConverter } from "../converter";
-import { Filter } from "../filter";
+import { PineconeFilterExpressionConverter } from "../converter/index.js";
+import { Filter } from "../filter.js";
 
 describe("PineconeFilterExpressionConverter", () => {
   const converter = new PineconeFilterExpressionConverter();

@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { GoogleGenAiThinkingLevel } from "../common";
-import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options";
+import { GoogleGenAiThinkingLevel } from "../common/index.js";
+import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 
 describe("GoogleGenAiChatOptions", () => {
   it("should get and set thinkingBudget", () => {

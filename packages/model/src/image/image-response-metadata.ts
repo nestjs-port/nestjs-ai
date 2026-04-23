@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AbstractResponseMetadata } from "../model";
+import { AbstractResponseMetadata } from "../model/index.js";
 
 /**
  * Represents metadata associated with an image response.

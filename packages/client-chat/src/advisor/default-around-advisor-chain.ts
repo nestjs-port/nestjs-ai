@@ -19,23 +19,23 @@ import type { ObservationRegistry } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { defer, throwError } from "rxjs";
 
-import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
-import type { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
+import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
 import type {
   Advisor,
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "./api";
-import { BaseAdvisorChain } from "./api";
+} from "./api/index.js";
+import { BaseAdvisorChain } from "./api/index.js";
 import {
   AdvisorObservationContext,
   type AdvisorObservationConvention,
   AdvisorObservationDocumentation,
   DefaultAdvisorObservationConvention,
-} from "./observation";
+} from "./observation/index.js";
 
 export interface DefaultAroundAdvisorChainProps {
   observationRegistry: ObservationRegistry;

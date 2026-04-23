@@ -26,16 +26,16 @@ import {
   type ToolResponse,
   type ToolResponseMessage,
   UserMessage,
-} from "../../../chat";
-import type { ToolCallbackResolver } from "../../../tool";
+} from "../../../chat/index.js";
+import type { ToolCallbackResolver } from "../../../tool/index.js";
 import {
   DefaultToolDefinition,
   ToolCallback,
   ToolExecutionException,
   ToolMetadata,
-} from "../../../tool";
-import { DefaultToolCallingChatOptions } from "../default-tool-calling-chat-options";
-import { DefaultToolCallingManager } from "../default-tool-calling-manager";
+} from "../../../tool/index.js";
+import { DefaultToolCallingChatOptions } from "../default-tool-calling-chat-options.js";
+import { DefaultToolCallingManager } from "../default-tool-calling-manager.js";
 
 class TestToolCallback extends ToolCallback {
   private readonly _toolDefinition;

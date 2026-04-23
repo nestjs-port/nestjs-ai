@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ToolMetadata } from "./tool-metadata";
+import type { ToolMetadata } from "./tool-metadata.js";
 
 /**
  * Default implementation of {@link ToolMetadata}.

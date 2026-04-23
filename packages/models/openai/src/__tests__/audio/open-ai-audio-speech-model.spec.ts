@@ -18,8 +18,8 @@ import type { TextToSpeechOptions, TextToSpeechPrompt } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiAudioSpeechModel } from "../../open-ai-audio-speech-model";
-import { OpenAiAudioSpeechOptions } from "../../open-ai-audio-speech-options";
+import { OpenAiAudioSpeechModel } from "../../open-ai-audio-speech-model.js";
+import { OpenAiAudioSpeechOptions } from "../../open-ai-audio-speech-options.js";
 
 const mockClient = {} as OpenAI;
 

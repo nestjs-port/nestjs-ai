@@ -17,8 +17,8 @@
 import type {
   ChatGenerationMetadata,
   ChatGenerationMetadataBuilder,
-} from "./chat-generation-metadata.interface";
-import { DefaultChatGenerationMetadata } from "./chat-generation-metadata.interface";
+} from "./chat-generation-metadata.interface.js";
+import { DefaultChatGenerationMetadata } from "./chat-generation-metadata.interface.js";
 
 /**
  * Default implementation of {@link ChatGenerationMetadataBuilder}.

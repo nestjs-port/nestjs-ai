@@ -24,7 +24,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   MockWeatherService,
   WeatherRequestSchema,
-} from "./advisor/mock-weather-service";
+} from "./advisor/mock-weather-service.js";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 

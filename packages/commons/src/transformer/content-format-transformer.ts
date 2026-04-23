@@ -16,10 +16,10 @@
 
 import assert from "node:assert/strict";
 
-import { DefaultContentFormatter } from "../document";
-import type { ContentFormatter } from "../document";
-import type { Document } from "../document";
-import type { DocumentTransformer } from "../document";
+import { DefaultContentFormatter } from "../document/index.js";
+import type { ContentFormatter } from "../document/index.js";
+import type { Document } from "../document/index.js";
+import type { DocumentTransformer } from "../document/index.js";
 
 /**
  * ContentFormatTransformer processes a list of documents by applying a content formatter

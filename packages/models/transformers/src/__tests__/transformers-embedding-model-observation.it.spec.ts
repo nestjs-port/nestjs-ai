@@ -27,7 +27,7 @@ import {
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { TransformersEmbeddingModel } from "../transformers-embedding-model";
+import { TransformersEmbeddingModel } from "../transformers-embedding-model.js";
 
 describe("TransformersEmbeddingModelObservationIT", () => {
   let observationRegistry: TestObservationRegistry;

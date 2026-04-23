@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Filter } from "../filter";
-import { FilterExpressionBuilder } from "../filter-expression-builder";
+import { Filter } from "../filter.js";
+import { FilterExpressionBuilder } from "../filter-expression-builder.js";
 
 describe("FilterExpressionBuilder", () => {
   const b = new FilterExpressionBuilder();

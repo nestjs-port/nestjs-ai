@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatOptions } from "../../chat";
+import type { ChatOptions } from "../../chat/index.js";
 
 /**
  * Mixin interface for ChatModels that support structured output. Provides a unified way

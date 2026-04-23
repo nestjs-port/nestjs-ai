@@ -16,8 +16,8 @@
 
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { ToolCallback } from "../tool-callback";
-import type { ToolCallbackResolver } from "./tool-callback-resolver.interface";
+import type { ToolCallback } from "../tool-callback.js";
+import type { ToolCallbackResolver } from "./tool-callback-resolver.interface.js";
 
 export class StaticToolCallbackResolver implements ToolCallbackResolver {
   private readonly _logger: Logger = LoggerFactory.getLogger(

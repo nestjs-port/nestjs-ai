@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./schema";
+export * from "./schema/index.js";

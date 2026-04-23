@@ -28,4 +28,4 @@ export {
   IMAGE_MODEL_TOKEN,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
   VECTOR_STORE_TOKEN,
-} from "./tokens";
+} from "./tokens.js";

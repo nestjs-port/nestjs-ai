@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelResult } from "../model";
-import { EmbeddingResultMetadata } from "./embedding-result-metadata";
+import type { ModelResult } from "../model/index.js";
+import { EmbeddingResultMetadata } from "./embedding-result-metadata.js";
 
 /**
  * Represents a single embedding vector.

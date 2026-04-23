@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelOptions } from "../model";
-import { DefaultEmbeddingOptions } from "./default-embedding-options";
+import type { ModelOptions } from "../model/index.js";
+import { DefaultEmbeddingOptions } from "./default-embedding-options.js";
 
 /**
  * Options for embedding models.

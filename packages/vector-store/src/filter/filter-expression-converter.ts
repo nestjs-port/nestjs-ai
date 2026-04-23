@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Filter } from "./filter";
+import type { Filter } from "./filter.js";
 
 export interface FilterExpressionConverter {
   convertExpression(expression: Filter.Expression): string;

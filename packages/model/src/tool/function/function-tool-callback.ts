@@ -17,16 +17,19 @@
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { z } from "zod";
-import type { ToolContext } from "../../chat";
-import { DefaultToolDefinition, type ToolDefinition } from "../definition";
+import type { ToolContext } from "../../chat/index.js";
+import {
+  DefaultToolDefinition,
+  type ToolDefinition,
+} from "../definition/index.js";
 import {
   DefaultToolCallResultConverter,
   type ToolCallResultConverter,
   ToolExecutionException,
-} from "../execution";
-import { ToolMetadata } from "../metadata";
-import { ToolUtils } from "../support";
-import { ToolCallback } from "../tool-callback";
+} from "../execution/index.js";
+import { ToolMetadata } from "../metadata/index.js";
+import { ToolUtils } from "../support/index.js";
+import { ToolCallback } from "../tool-callback.js";
 
 type MaybePromise<T> = T | Promise<T>;
 type ToolInputObject = Record<string, unknown>;

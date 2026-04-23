@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-export { AudioTranscription } from "./audio-transcription";
-export { AudioTranscriptionMetadata } from "./audio-transcription-metadata";
-export type { AudioTranscriptionOptions } from "./audio-transcription-options";
+export { AudioTranscription } from "./audio-transcription.js";
+export { AudioTranscriptionMetadata } from "./audio-transcription-metadata.js";
+export type { AudioTranscriptionOptions } from "./audio-transcription-options.js";
 export {
   type AudioResource,
   AudioTranscriptionPrompt,
-} from "./audio-transcription-prompt";
-export { AudioTranscriptionResponse } from "./audio-transcription-response";
-export { AudioTranscriptionResponseMetadata } from "./audio-transcription-response-metadata";
-export { TranscriptionModel } from "./transcription-model";
+} from "./audio-transcription-prompt.js";
+export { AudioTranscriptionResponse } from "./audio-transcription-response.js";
+export { AudioTranscriptionResponseMetadata } from "./audio-transcription-response-metadata.js";
+export { TranscriptionModel } from "./transcription-model.js";

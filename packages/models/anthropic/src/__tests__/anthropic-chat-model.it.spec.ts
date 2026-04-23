@@ -42,20 +42,20 @@ import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom, type Observable, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
-import type { AnthropicWebSearchResult } from "../index";
+import type { AnthropicWebSearchResult } from "../index.js";
 import {
   AnthropicChatModel,
   AnthropicChatOptions,
   AnthropicCitationDocument,
   AnthropicWebSearchTool,
   Citation,
-} from "../index";
+} from "../index.js";
 import {
   MockWeatherService,
   type WeatherRequest,
   WeatherRequestSchema,
   type WeatherResponse,
-} from "./mock-weather-service";
+} from "./mock-weather-service.js";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const TEST_MODEL_4_20250514: AnthropicModel = "claude-sonnet-4-20250514";

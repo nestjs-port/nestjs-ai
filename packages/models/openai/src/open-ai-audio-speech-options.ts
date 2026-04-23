@@ -20,7 +20,7 @@ import type { SpeechCreateParams } from "openai/resources/audio";
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,
-} from "./abstract-open-ai-options";
+} from "./abstract-open-ai-options.js";
 
 export interface OpenAiAudioSpeechOptionsProps extends AbstractOpenAiOptionsProps {
   input?: string | null;

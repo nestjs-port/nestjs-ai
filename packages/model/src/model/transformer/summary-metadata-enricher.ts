@@ -17,11 +17,11 @@
 import assert from "node:assert/strict";
 import {
   type Document,
-  DocumentTransformer,
+  type DocumentTransformer,
   MetadataMode,
 } from "@nestjs-ai/commons";
-import type { ChatModel } from "../../chat";
-import { PromptTemplate } from "../../chat";
+import type { ChatModel } from "../../chat/index.js";
+import { PromptTemplate } from "../../chat/index.js";
 
 /**
  * Title extractor with adjacent sharing that uses generative to extract

@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { ModelObservationContext } from "./model-observation-context";
-export { ModelUsageMetricsGenerator } from "./model-usage-metrics-generator";
+export { ModelObservationContext } from "./model-observation-context.js";
+export { ModelUsageMetricsGenerator } from "./model-usage-metrics-generator.js";

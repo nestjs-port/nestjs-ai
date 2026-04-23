@@ -33,15 +33,15 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { AdvisorObservationConvention } from "../advisor";
-import { ChatClient } from "../chat-client";
-import type { ChatClientCustomizer } from "../chat-client-customizer.interface";
-import { ChatClientObservationConvention } from "../observation";
-import { ChatClientBuilderConfigurer } from "./chat-client-builder-configurer";
+import { AdvisorObservationConvention } from "../advisor/index.js";
+import { ChatClient } from "../chat-client.js";
+import type { ChatClientCustomizer } from "../chat-client-customizer.interface.js";
+import { ChatClientObservationConvention } from "../observation/index.js";
+import { ChatClientBuilderConfigurer } from "./chat-client-builder-configurer.js";
 import type {
   ChatClientCustomizerDefinition,
   ChatClientCustomizerFactoryDefinition,
-} from "./chat-client-builder-properties";
+} from "./chat-client-builder-properties.js";
 
 export interface ChatClientModuleAsyncOptions {
   imports?: ModuleMetadata["imports"];

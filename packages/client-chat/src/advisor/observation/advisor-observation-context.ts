@@ -17,8 +17,8 @@
 import assert from "node:assert/strict";
 import { ObservationContext } from "@nestjs-port/core";
 
-import type { ChatClientRequest } from "../../chat-client-request";
-import type { ChatClientResponse } from "../../chat-client-response";
+import type { ChatClientRequest } from "../../chat-client-request.js";
+import type { ChatClientResponse } from "../../chat-client-response.js";
 
 export class AdvisorObservationContext extends ObservationContext {
   private readonly _advisorName: string;

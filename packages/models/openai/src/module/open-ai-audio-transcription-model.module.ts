@@ -23,13 +23,13 @@ import {
   type Provider,
 } from "@nestjs/common";
 import { AUDIO_TRANSCRIPTION_MODEL_TOKEN } from "@nestjs-ai/commons";
-import { OpenAiAudioTranscriptionModel } from "../open-ai-audio-transcription-model";
-import { OpenAiAudioTranscriptionOptions } from "../open-ai-audio-transcription-options";
-import { OpenAiSetup, type OpenAiSetupProps } from "../setup";
+import { OpenAiAudioTranscriptionModel } from "../open-ai-audio-transcription-model.js";
+import { OpenAiAudioTranscriptionOptions } from "../open-ai-audio-transcription-options.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "../setup/index.js";
 import {
   OPEN_AI_AUDIO_TRANSCRIPTION_DEFAULT_MODEL,
   type OpenAiAudioTranscriptionProperties,
-} from "./open-ai-audio-transcription-properties";
+} from "./open-ai-audio-transcription-properties.js";
 
 export const OPEN_AI_AUDIO_TRANSCRIPTION_PROPERTIES_TOKEN = Symbol.for(
   "OPEN_AI_AUDIO_TRANSCRIPTION_PROPERTIES_TOKEN",

@@ -16,8 +16,8 @@
 
 import { AiOperationType } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { EmbeddingRequest } from "../../embedding-request";
-import { EmbeddingModelObservationContext } from "../embedding-model-observation-context";
+import { EmbeddingRequest } from "../../embedding-request.js";
+import { EmbeddingModelObservationContext } from "../embedding-model-observation-context.js";
 
 describe("EmbeddingModelObservationContext", () => {
   it("sets embedding operation metadata", () => {

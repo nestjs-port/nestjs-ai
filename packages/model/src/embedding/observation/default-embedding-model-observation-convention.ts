@@ -16,9 +16,9 @@
 
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
-import type { EmbeddingOptions } from "../embedding-options.interface";
-import type { EmbeddingModelObservationContext } from "./embedding-model-observation-context";
-import { EmbeddingModelObservationConvention } from "./embedding-model-observation-convention";
+import type { EmbeddingOptions } from "../embedding-options.interface.js";
+import type { EmbeddingModelObservationContext } from "./embedding-model-observation-context.js";
+import { EmbeddingModelObservationConvention } from "./embedding-model-observation-convention.js";
 
 export class DefaultEmbeddingModelObservationConvention extends EmbeddingModelObservationConvention {
   static readonly DEFAULT_NAME = "gen_ai.client.operation";

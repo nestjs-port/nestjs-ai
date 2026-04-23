@@ -15,15 +15,15 @@
  */
 
 import { Document } from "@nestjs-ai/commons";
-import type { ChatModel } from "../../../chat";
+import type { ChatModel } from "../../../chat/index.js";
 import {
   AssistantMessage,
   ChatResponse,
   Generation,
-  Prompt,
+  type Prompt,
   PromptTemplate,
-} from "../../../chat";
-import { KeywordMetadataEnricher } from "../keyword-metadata-enricher";
+} from "../../../chat/index.js";
+import { KeywordMetadataEnricher } from "../keyword-metadata-enricher.js";
 import { describe, expect, it, vi } from "vitest";
 
 const CUSTOM_TEMPLATE = "Custom template: {context_str}";

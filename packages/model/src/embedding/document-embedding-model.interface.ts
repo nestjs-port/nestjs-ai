@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Model } from "../model";
-import type { DocumentEmbeddingRequest } from "./document-embedding-request";
-import type { EmbeddingResponse } from "./embedding-response";
+import type { Model } from "../model/index.js";
+import type { DocumentEmbeddingRequest } from "./document-embedding-request.js";
+import type { EmbeddingResponse } from "./embedding-response.js";
 
 /**
  * EmbeddingModel is a generic interface for embedding models.

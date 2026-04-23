@@ -21,11 +21,11 @@ import { StringUtils } from "@nestjs-port/core";
 import type { Observable, SchedulerLike } from "rxjs";
 import { mergeMap, observeOn, of } from "rxjs";
 
-import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
-import type { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
-import type { AdvisorChain, StreamAdvisorChain } from "./api";
-import { Advisor, BaseAdvisor, BaseChatMemoryAdvisor } from "./api";
+import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
+import type { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
+import type { AdvisorChain, StreamAdvisorChain } from "./api/index.js";
+import { Advisor, BaseAdvisor, BaseChatMemoryAdvisor } from "./api/index.js";
 
 export interface MessageChatMemoryAdvisorProps {
   chatMemory: ChatMemory;

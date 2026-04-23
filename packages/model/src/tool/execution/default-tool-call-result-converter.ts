@@ -16,7 +16,7 @@
 
 import { Readable } from "node:stream";
 import type { z } from "zod";
-import type { ToolCallResultConverter } from "./tool-call-result-converter";
+import type { ToolCallResultConverter } from "./tool-call-result-converter.js";
 
 /**
  * A default implementation of {@link ToolCallResultConverter}.

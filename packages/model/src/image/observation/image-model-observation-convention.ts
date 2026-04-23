@@ -20,7 +20,7 @@ import type {
   ObservationConvention,
 } from "@nestjs-port/core";
 
-import { ImageModelObservationContext } from "./image-model-observation-context";
+import { ImageModelObservationContext } from "./image-model-observation-context.js";
 
 export abstract class ImageModelObservationConvention implements ObservationConvention<ImageModelObservationContext> {
   abstract getName(): string;

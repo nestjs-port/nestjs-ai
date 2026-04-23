@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContextSchema } from "../../../../chat";
-import { JsonSchemaGenerator, SchemaOption } from "../json-schema-generator";
+import { ToolContextSchema } from "../../../../chat/index.js";
+import { JsonSchemaGenerator, SchemaOption } from "../json-schema-generator.js";
 
 type JsonSchemaNodeArg = Parameters<
   typeof JsonSchemaGenerator.convertTypeValuesToUpperCase

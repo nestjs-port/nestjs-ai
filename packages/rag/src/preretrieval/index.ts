@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./query";
+export * from "./query/index.js";

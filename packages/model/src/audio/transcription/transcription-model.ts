@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { Model } from "../../model";
-import type { AudioTranscriptionOptions } from "./audio-transcription-options";
+import type { Model } from "../../model/index.js";
+import type { AudioTranscriptionOptions } from "./audio-transcription-options.js";
 import {
   type AudioResource,
   AudioTranscriptionPrompt,
-} from "./audio-transcription-prompt";
-import type { AudioTranscriptionResponse } from "./audio-transcription-response";
+} from "./audio-transcription-prompt.js";
+import type { AudioTranscriptionResponse } from "./audio-transcription-response.js";
 
 /**
  * A transcription model is a type of AI model that converts audio to text. This is also

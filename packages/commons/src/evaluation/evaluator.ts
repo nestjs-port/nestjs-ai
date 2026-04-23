@@ -17,8 +17,8 @@
 import { EOL } from "node:os";
 
 import { StringUtils } from "@nestjs-port/core";
-import type { EvaluationRequest } from "./evaluation-request";
-import type { EvaluationResponse } from "./evaluation-response";
+import type { EvaluationRequest } from "./evaluation-request.js";
+import type { EvaluationResponse } from "./evaluation-response.js";
 
 export abstract class Evaluator {
   abstract evaluate(

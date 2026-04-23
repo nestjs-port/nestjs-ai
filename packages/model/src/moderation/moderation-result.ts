@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Categories } from "./categories";
-import type { CategoryScores } from "./category-scores";
+import type { Categories } from "./categories.js";
+import type { CategoryScores } from "./category-scores.js";
 
 export interface ModerationResultProps {
   flagged?: boolean;

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./anthropic-chat-model.module";
-export type { AnthropicChatProperties } from "./anthropic-chat-properties";
-export { ANTHROPIC_CHAT_DEFAULT_MODEL } from "./anthropic-chat-properties";
+export * from "./anthropic-chat-model.module.js";
+export type { AnthropicChatProperties } from "./anthropic-chat-properties.js";
+export { ANTHROPIC_CHAT_DEFAULT_MODEL } from "./anthropic-chat-properties.js";

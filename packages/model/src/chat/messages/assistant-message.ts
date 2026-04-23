@@ -15,8 +15,8 @@
  */
 
 import type { Media, MediaContent } from "@nestjs-ai/commons";
-import { AbstractMessage } from "./abstract-message";
-import { MessageType } from "./message-type";
+import { AbstractMessage } from "./abstract-message.js";
+import { MessageType } from "./message-type.js";
 
 /**
  * Represents a tool call made by the assistant.

@@ -22,7 +22,7 @@ import {
   TextToSpeechResponseMetadata,
 } from "@nestjs-ai/model";
 
-import { OpenAiRateLimit } from "./open-ai-rate-limit";
+import { OpenAiRateLimit } from "./open-ai-rate-limit.js";
 
 /**
  * Audio speech metadata implementation for OpenAI using the OpenAI Java SDK.

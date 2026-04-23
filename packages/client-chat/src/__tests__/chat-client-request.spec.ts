@@ -16,7 +16,7 @@
 
 import { Prompt } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { ChatClientRequest } from "../chat-client-request";
+import { ChatClientRequest } from "../chat-client-request.js";
 
 describe("ChatClientRequest", () => {
   it("when prompt is null then throw", () => {

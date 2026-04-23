@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Filter } from "./filter";
+import { Filter } from "./filter.js";
 
 export class FilterExpressionBuilder {
   eq(key: string, value: unknown): FilterExpressionBuilder.Op {

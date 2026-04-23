@@ -24,8 +24,11 @@ import {
 import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { RedisMetadataField } from "../redis-metadata-field";
-import { RedisDistanceMetric, RedisVectorStore } from "../redis-vector-store";
+import { RedisMetadataField } from "../redis-metadata-field.js";
+import {
+  RedisDistanceMetric,
+  RedisVectorStore,
+} from "../redis-vector-store.js";
 
 describe("RedisVectorStoreDistanceMetricIT", () => {
   let redisContainer: StartedRedisContainer;

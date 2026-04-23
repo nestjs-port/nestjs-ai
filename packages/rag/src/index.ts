@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-export * from "./advisor";
-export * from "./generation";
-export * from "./postretrieval";
-export * from "./preretrieval";
-export { Query, QueryBuilder } from "./query";
-export * from "./retrieval";
-export * from "./util";
+export * from "./advisor/index.js";
+export * from "./generation/index.js";
+export * from "./postretrieval/index.js";
+export * from "./preretrieval/index.js";
+export { Query, QueryBuilder } from "./query.js";
+export * from "./retrieval/index.js";
+export * from "./util/index.js";

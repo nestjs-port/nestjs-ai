@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { ToolUtils } from "../tool-utils";
+import { ToolUtils } from "../tool-utils.js";
 
 describe("ToolUtils", () => {
   it("resolves tool name from metadata with fallback to method name", () => {

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { NoOpTemplateRenderer } from "./no-op-template-renderer";
-export type { TemplateRenderer } from "./template-renderer.interface";
-export { ValidationMode } from "./validation-mode";
+export { NoOpTemplateRenderer } from "./no-op-template-renderer.js";
+export type { TemplateRenderer } from "./template-renderer.interface.js";
+export { ValidationMode } from "./validation-mode.js";

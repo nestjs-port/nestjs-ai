@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelDescription } from "./model-description.interface";
+import type { ModelDescription } from "./model-description.interface.js";
 
 export abstract class EmbeddingModelDescription implements ModelDescription {
   abstract get name(): string;

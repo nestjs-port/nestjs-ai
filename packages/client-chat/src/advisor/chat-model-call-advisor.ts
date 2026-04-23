@@ -20,10 +20,10 @@ import type { ChatModel, StructuredOutputChatOptions } from "@nestjs-ai/model";
 import { UserMessage } from "@nestjs-ai/model";
 import { LOWEST_PRECEDENCE, StringUtils } from "@nestjs-port/core";
 
-import { ChatClientAttributes } from "../chat-client-attributes";
-import { ChatClientRequest } from "../chat-client-request";
-import { ChatClientResponse } from "../chat-client-response";
-import type { CallAdvisor, CallAdvisorChain } from "./api";
+import { ChatClientAttributes } from "../chat-client-attributes.js";
+import { ChatClientRequest } from "../chat-client-request.js";
+import { ChatClientResponse } from "../chat-client-response.js";
+import type { CallAdvisor, CallAdvisorChain } from "./api/index.js";
 
 function isStructuredOutputChatOptions(
   chatOptions: unknown,

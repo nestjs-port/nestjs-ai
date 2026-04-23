@@ -38,13 +38,13 @@ import {
   AnthropicCacheTtl,
   AnthropicChatModel,
   AnthropicChatOptions,
-} from "../index";
+} from "../index.js";
 import {
   MockWeatherService,
   type WeatherRequest,
   WeatherRequestSchema,
   type WeatherResponse,
-} from "./mock-weather-service";
+} from "./mock-weather-service.js";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const TEST_MODEL: AnthropicModel = "claude-sonnet-4-20250514";

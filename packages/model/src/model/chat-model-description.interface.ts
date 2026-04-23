@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelDescription } from "./model-description.interface";
+import type { ModelDescription } from "./model-description.interface.js";
 
 /**
  * Marker interface, to be used to store info on the model such as the current context

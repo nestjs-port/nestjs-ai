@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ModelOptions } from "../model";
+import type { ModelOptions } from "../model/index.js";
 
 /**
  * Image options represent the common options portable across different image generation models.

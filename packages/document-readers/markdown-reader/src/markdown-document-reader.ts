@@ -26,7 +26,7 @@ import type { Node as CommonmarkNode } from "commonmark";
 import * as commonmark from "commonmark";
 import fg from "fast-glob";
 
-import { MarkdownDocumentReaderConfig } from "./config";
+import { MarkdownDocumentReaderConfig } from "./config/index.js";
 
 type MarkdownResource = string | URL | Buffer;
 

@@ -17,13 +17,13 @@
 export {
   JsdbcChatMemoryRepository,
   JsdbcChatMemoryRepositoryBuilder,
-} from "./jsdbc-chat-memory-repository";
-export { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect";
-export { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory";
-export * from "./module";
-export { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect";
-export { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect";
-export { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect";
-export * from "./resources";
-export { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect";
-export { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect";
+} from "./jsdbc-chat-memory-repository.js";
+export { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect.js";
+export { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory.js";
+export * from "./module/index.js";
+export { MysqlChatMemoryRepositoryDialect } from "./mysql-chat-memory-repository-dialect.js";
+export { OracleChatMemoryRepositoryDialect } from "./oracle-chat-memory-repository-dialect.js";
+export { PostgresChatMemoryRepositoryDialect } from "./postgres-chat-memory-repository-dialect.js";
+export * from "./resources/index.js";
+export { SqlServerChatMemoryRepositoryDialect } from "./sql-server-chat-memory-repository-dialect.js";
+export { SqliteChatMemoryRepositoryDialect } from "./sqlite-chat-memory-repository-dialect.js";

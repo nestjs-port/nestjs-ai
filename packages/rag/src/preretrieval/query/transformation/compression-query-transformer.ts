@@ -19,9 +19,9 @@ import type { ChatClient } from "@nestjs-ai/client-chat";
 import type { Message } from "@nestjs-ai/model";
 import { MessageType, PromptTemplate } from "@nestjs-ai/model";
 import { type Logger, LoggerFactory, StringUtils } from "@nestjs-port/core";
-import type { Query } from "../../../query";
-import { PromptAssert } from "../../../util";
-import { QueryTransformer } from "./query-transformer";
+import type { Query } from "../../../query.js";
+import { PromptAssert } from "../../../util/index.js";
+import { QueryTransformer } from "./query-transformer.js";
 
 export interface CompressionQueryTransformerProps {
   chatClientBuilder: ChatClient.Builder;

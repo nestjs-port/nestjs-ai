@@ -28,15 +28,15 @@ import { HIGHEST_PRECEDENCE, LOWEST_PRECEDENCE } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { concatWith, defer, EMPTY, filter, from, mergeMap, of } from "rxjs";
 
-import { ChatClientMessageAggregator } from "../chat-client-message-aggregator";
-import { ChatClientRequest } from "../chat-client-request";
-import type { ChatClientResponse } from "../chat-client-response";
+import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
+import { ChatClientRequest } from "../chat-client-request.js";
+import type { ChatClientResponse } from "../chat-client-response.js";
 import type {
   CallAdvisor,
   CallAdvisorChain,
   StreamAdvisor,
   StreamAdvisorChain,
-} from "./api";
+} from "./api/index.js";
 
 export interface ToolCallAdvisorProps {
   toolCallingManager?: ToolCallingManager;

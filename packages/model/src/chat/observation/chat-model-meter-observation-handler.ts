@@ -19,8 +19,8 @@ import type {
   ObservationContext,
   ObservationHandler,
 } from "@nestjs-port/core";
-import { ModelUsageMetricsGenerator } from "../../model";
-import { ChatModelObservationContext } from "./chat-model-observation-context";
+import { ModelUsageMetricsGenerator } from "../../model/index.js";
+import { ChatModelObservationContext } from "./chat-model-observation-context.js";
 
 export class ChatModelMeterObservationHandler implements ObservationHandler<ChatModelObservationContext> {
   private readonly _meterRegistry: MeterRegistry;

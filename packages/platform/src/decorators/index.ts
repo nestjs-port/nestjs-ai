@@ -23,4 +23,4 @@ export {
   InjectHttpClient,
   InjectObservationRegistry,
   InjectVectorStore,
-} from "./inject-tokens.decorator";
+} from "./inject-tokens.decorator.js";

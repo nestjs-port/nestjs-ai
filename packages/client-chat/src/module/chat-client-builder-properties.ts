@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatClientCustomizer } from "../chat-client-customizer.interface";
+import type { ChatClientCustomizer } from "../chat-client-customizer.interface.js";
 
 export interface ChatClientCustomizerFactoryDefinition {
   useFactory: (...args: unknown[]) => ChatClientCustomizer;

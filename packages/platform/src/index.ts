@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./decorators";
-export * from "./logging";
-export * from "./module";
-export * from "./provider";
+export * from "./decorators/index.js";
+export * from "./logging/index.js";
+export * from "./module/index.js";
+export * from "./provider/index.js";

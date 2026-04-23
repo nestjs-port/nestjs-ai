@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { AbstractFilterExpressionConverter } from "./abstract-filter-expression-converter";
-export { PineconeFilterExpressionConverter } from "./pinecone-filter-expression-converter";
-export { PrintFilterExpressionConverter } from "./print-filter-expression-converter";
+export { AbstractFilterExpressionConverter } from "./abstract-filter-expression-converter.js";
+export { PineconeFilterExpressionConverter } from "./pinecone-filter-expression-converter.js";
+export { PrintFilterExpressionConverter } from "./print-filter-expression-converter.js";

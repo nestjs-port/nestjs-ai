@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ResultMetadata } from "./result-metadata.interface";
+import type { ResultMetadata } from "./result-metadata.interface.js";
 
 /**
  * This interface provides methods to access the main output of the AI model and the

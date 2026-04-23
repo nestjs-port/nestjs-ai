@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Filter } from "../filter";
-import { AbstractFilterExpressionConverter } from "./abstract-filter-expression-converter";
+import type { Filter } from "../filter.js";
+import { AbstractFilterExpressionConverter } from "./abstract-filter-expression-converter.js";
 
 export class PrintFilterExpressionConverter extends AbstractFilterExpressionConverter {
   protected override doExpression(

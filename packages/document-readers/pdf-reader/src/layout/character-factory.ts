@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { Character } from "./character";
-import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper";
+import { Character } from "./character.js";
+import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper.js";
 
 export interface TextPositionLike {
   unicode: string;

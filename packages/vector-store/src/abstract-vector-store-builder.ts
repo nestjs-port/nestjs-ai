@@ -21,8 +21,8 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { VectorStoreObservationConvention } from "./observation";
-import type { VectorStore } from "./vector-store";
+import type { VectorStoreObservationConvention } from "./observation/index.js";
+import type { VectorStore } from "./vector-store.js";
 
 export abstract class AbstractVectorStoreBuilder<
   T extends AbstractVectorStoreBuilder<T>,

@@ -16,7 +16,7 @@
 
 import type { ChatResponse } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { ChatClientResponse } from "../chat-client-response";
+import { ChatClientResponse } from "../chat-client-response.js";
 
 describe("ChatClientResponse", () => {
   it("when context is null then throw", () => {

@@ -16,8 +16,8 @@
 
 import { Prompt } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { ChatClientRequest } from "../../../chat-client-request";
-import { AdvisorObservationContext } from "../advisor-observation-context";
+import { ChatClientRequest } from "../../../chat-client-request.js";
+import { AdvisorObservationContext } from "../advisor-observation-context.js";
 
 describe("AdvisorObservationContext", () => {
   it("when mandatory options then return", () => {

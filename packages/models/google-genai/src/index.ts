@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-export * from "./cache";
-export * from "./common";
+export * from "./cache/index.js";
+export * from "./common/index.js";
 export {
   GoogleGenAiChatModel,
   type GoogleGenAiChatModelProps,
-} from "./google-gen-ai-chat-model";
-export { GoogleGenAiChatOptions } from "./google-gen-ai-chat-options";
-export * from "./metadata";
-export * from "./module";
-export * from "./schema";
+} from "./google-gen-ai-chat-model.js";
+export { GoogleGenAiChatOptions } from "./google-gen-ai-chat-options.js";
+export * from "./metadata/index.js";
+export * from "./module/index.js";
+export * from "./schema/index.js";

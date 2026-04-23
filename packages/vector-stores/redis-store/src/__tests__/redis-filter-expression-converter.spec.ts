@@ -17,8 +17,8 @@
 import { Filter } from "@nestjs-ai/vector-store";
 import { describe, expect, it } from "vitest";
 
-import { RedisFilterExpressionConverter } from "../redis-filter-expression-converter";
-import { RedisMetadataField } from "../redis-metadata-field";
+import { RedisFilterExpressionConverter } from "../redis-filter-expression-converter.js";
+import { RedisMetadataField } from "../redis-metadata-field.js";
 
 function converter(
   ...fields: RedisMetadataField[]

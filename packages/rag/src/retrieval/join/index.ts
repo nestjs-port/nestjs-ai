@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { ConcatenationDocumentJoiner } from "./concatenation-document-joiner";
-export { DocumentJoiner } from "./document-joiner";
+export { ConcatenationDocumentJoiner } from "./concatenation-document-joiner.js";
+export { DocumentJoiner } from "./document-joiner.js";

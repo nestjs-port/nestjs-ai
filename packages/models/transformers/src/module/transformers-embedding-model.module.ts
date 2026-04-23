@@ -29,8 +29,8 @@ import {
 } from "@nestjs-ai/model";
 import type { ObservationRegistry } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
-import { TransformersEmbeddingModel } from "../transformers-embedding-model";
-import type { TransformersEmbeddingModelProperties } from "./transformers-embedding-model-properties";
+import { TransformersEmbeddingModel } from "../transformers-embedding-model.js";
+import type { TransformersEmbeddingModelProperties } from "./transformers-embedding-model-properties.js";
 
 export const TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN = Symbol.for(
   "TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN",

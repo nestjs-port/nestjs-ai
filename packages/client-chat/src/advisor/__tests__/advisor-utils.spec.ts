@@ -22,8 +22,8 @@ import {
   Generation,
 } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { ChatClientResponse } from "../../chat-client-response";
-import { AdvisorUtils } from "../advisor-utils";
+import { ChatClientResponse } from "../../chat-client-response.js";
+import { AdvisorUtils } from "../advisor-utils.js";
 
 describe("AdvisorUtils", () => {
   describe("onFinishReason", () => {

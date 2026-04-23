@@ -17,10 +17,13 @@
 import "reflect-metadata";
 import assert from "node:assert/strict";
 import { LoggerFactory, ParsingUtils } from "@nestjs-port/core";
-import { TOOL_METADATA_KEY, type ToolAnnotationMetadata } from "../annotation";
-import type { ToolCallResultConverter } from "../execution";
-import { DefaultToolCallResultConverter } from "../execution";
-import type { ToolCallback } from "../tool-callback";
+import {
+  TOOL_METADATA_KEY,
+  type ToolAnnotationMetadata,
+} from "../annotation/index.js";
+import type { ToolCallResultConverter } from "../execution/index.js";
+import { DefaultToolCallResultConverter } from "../execution/index.js";
+import type { ToolCallback } from "../tool-callback.js";
 
 /**
  * Miscellaneous tool utility methods. Mainly for internal use within the framework.

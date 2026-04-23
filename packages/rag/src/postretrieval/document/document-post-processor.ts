@@ -15,7 +15,7 @@
  */
 
 import type { Document } from "@nestjs-ai/commons";
-import type { Query } from "../../query";
+import type { Query } from "../../query.js";
 
 export abstract class DocumentPostProcessor {
   abstract process(query: Query, documents: Document[]): Document[];

@@ -17,15 +17,15 @@
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { z } from "zod";
-import { type ToolContext, ToolContextSchema } from "../../chat";
-import type { ToolDefinition } from "../definition";
+import { type ToolContext, ToolContextSchema } from "../../chat/index.js";
+import type { ToolDefinition } from "../definition/index.js";
 import {
   DefaultToolCallResultConverter,
   type ToolCallResultConverter,
   ToolExecutionException,
-} from "../execution";
-import { ToolMetadata } from "../metadata";
-import { ToolCallback } from "../tool-callback";
+} from "../execution/index.js";
+import { ToolMetadata } from "../metadata/index.js";
+import { ToolCallback } from "../tool-callback.js";
 
 export interface MethodToolCallbackProps {
   toolDefinition: ToolDefinition;

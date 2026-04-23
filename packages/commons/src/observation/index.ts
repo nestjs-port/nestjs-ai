@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { AiOperationMetadata } from "./ai-operation-metadata";
-export * from "./conventions";
-export { ObservabilityHelper } from "./observability-helper";
+export { AiOperationMetadata } from "./ai-operation-metadata.js";
+export * from "./conventions/index.js";
+export { ObservabilityHelper } from "./observability-helper.js";

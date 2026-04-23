@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from "./join";
-export * from "./search";
+export * from "./join/index.js";
+export * from "./search/index.js";

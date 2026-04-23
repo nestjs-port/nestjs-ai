@@ -23,8 +23,8 @@ import {
 } from "@nestjs-ai/commons";
 import { KeyValue, KeyValues, ParsingUtils } from "@nestjs-port/core";
 
-import type { AdvisorObservationContext } from "./advisor-observation-context";
-import { AdvisorObservationConvention } from "./advisor-observation-convention";
+import type { AdvisorObservationContext } from "./advisor-observation-context.js";
+import { AdvisorObservationConvention } from "./advisor-observation-convention.js";
 
 export class DefaultAdvisorObservationConvention extends AdvisorObservationConvention {
   static readonly DEFAULT_NAME = "spring.ai.advisor";

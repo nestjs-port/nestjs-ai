@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModerationResult } from "./moderation-result";
+import type { ModerationResult } from "./moderation-result.js";
 
 export interface ModerationProps {
   id: string;

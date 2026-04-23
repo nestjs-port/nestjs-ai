@@ -18,8 +18,8 @@ import { Document } from "@nestjs-ai/commons";
 import { LoggerFactory, LogLevel, ObservationContext } from "@nestjs-port/core";
 import { RecordingLogger } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { VectorStoreObservationContext } from "../vector-store-observation-context";
-import { VectorStoreQueryResponseObservationHandler } from "../vector-store-query-response-observation-handler";
+import { VectorStoreObservationContext } from "../vector-store-observation-context.js";
+import { VectorStoreQueryResponseObservationHandler } from "../vector-store-query-response-observation-handler.js";
 
 describe("VectorStoreQueryResponseObservationHandler", () => {
   let recordingLogger: RecordingLogger;

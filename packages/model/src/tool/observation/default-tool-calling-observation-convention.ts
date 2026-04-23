@@ -16,8 +16,8 @@
 
 import { AiObservationAttributes, SpringAiKind } from "@nestjs-ai/commons";
 import { KeyValue, KeyValues } from "@nestjs-port/core";
-import type { ToolCallingObservationContext } from "./tool-calling-observation-context";
-import { ToolCallingObservationConvention } from "./tool-calling-observation-convention";
+import type { ToolCallingObservationContext } from "./tool-calling-observation-context.js";
+import { ToolCallingObservationConvention } from "./tool-calling-observation-convention.js";
 
 export class DefaultToolCallingObservationConvention extends ToolCallingObservationConvention {
   static readonly DEFAULT_NAME = "spring.ai.tool";

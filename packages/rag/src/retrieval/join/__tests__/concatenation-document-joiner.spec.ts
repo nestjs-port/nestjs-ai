@@ -16,9 +16,9 @@
 
 import { Document } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { Query } from "../../../query";
-import { ConcatenationDocumentJoiner } from "../concatenation-document-joiner";
-import type { DocumentJoiner } from "../document-joiner";
+import { Query } from "../../../query.js";
+import { ConcatenationDocumentJoiner } from "../concatenation-document-joiner.js";
+import type { DocumentJoiner } from "../document-joiner.js";
 
 describe("ConcatenationDocumentJoiner", () => {
   it("when documentsForQuery is null then throw", () => {

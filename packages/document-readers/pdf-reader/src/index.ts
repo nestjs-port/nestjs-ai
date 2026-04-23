@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-export * from "./config";
+export * from "./config/index.js";
 export {
   ExtractedTextFormatter,
   ExtractedTextFormatterBuilder,
-} from "./extracted-text-formatter";
-export * from "./layout";
+} from "./extracted-text-formatter.js";
+export * from "./layout/index.js";
 export {
   PagePdfDocumentReader,
   type PagePdfDocumentReaderProps,
   type PdfResource,
-} from "./page-pdf-document-reader";
+} from "./page-pdf-document-reader.js";
 export {
   ParagraphPdfDocumentReader,
   type ParagraphPdfDocumentReaderProps,
-} from "./paragraph-pdf-document-reader";
+} from "./paragraph-pdf-document-reader.js";

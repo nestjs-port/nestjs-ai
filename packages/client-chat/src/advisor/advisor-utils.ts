@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatClientResponse } from "../chat-client-response";
+import type { ChatClientResponse } from "../chat-client-response.js";
 
 export abstract class AdvisorUtils {
   static onFinishReason(): (chatClientResponse: ChatClientResponse) => boolean {

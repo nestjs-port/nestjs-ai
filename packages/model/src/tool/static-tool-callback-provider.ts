@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { ToolCallback } from "./tool-callback";
-import type { ToolCallbackProvider } from "./tool-callback-provider";
+import type { ToolCallback } from "./tool-callback.js";
+import type { ToolCallbackProvider } from "./tool-callback-provider.js";
 
 export class StaticToolCallbackProvider implements ToolCallbackProvider {
   private readonly _toolCallbacks: ToolCallback[];

@@ -18,53 +18,53 @@ export {
   OpenAiChatModelModule,
   type OpenAiChatModelModuleAsyncOptions,
   OPEN_AI_CHAT_PROPERTIES_TOKEN,
-} from "./open-ai-chat-model.module";
+} from "./open-ai-chat-model.module.js";
 export {
   OPEN_AI_CHAT_DEFAULT_MODEL,
   type OpenAiChatProperties,
-} from "./open-ai-chat-properties";
+} from "./open-ai-chat-properties.js";
 export {
   OpenAiAudioSpeechModelModule,
   type OpenAiAudioSpeechModelModuleAsyncOptions,
   OPEN_AI_AUDIO_SPEECH_PROPERTIES_TOKEN,
-} from "./open-ai-audio-speech-model.module";
+} from "./open-ai-audio-speech-model.module.js";
 export {
   OPEN_AI_AUDIO_SPEECH_DEFAULT_MODEL,
   type OpenAiAudioSpeechProperties,
-} from "./open-ai-audio-speech-properties";
+} from "./open-ai-audio-speech-properties.js";
 export {
   OpenAiAudioTranscriptionModelModule,
   type OpenAiAudioTranscriptionModelModuleAsyncOptions,
   OPEN_AI_AUDIO_TRANSCRIPTION_PROPERTIES_TOKEN,
-} from "./open-ai-audio-transcription-model.module";
+} from "./open-ai-audio-transcription-model.module.js";
 export {
   OPEN_AI_AUDIO_TRANSCRIPTION_DEFAULT_MODEL,
   type OpenAiAudioTranscriptionProperties,
-} from "./open-ai-audio-transcription-properties";
+} from "./open-ai-audio-transcription-properties.js";
 export {
   OpenAiEmbeddingModelModule,
   type OpenAiEmbeddingModelModuleAsyncOptions,
   OPEN_AI_EMBEDDING_PROPERTIES_TOKEN,
-} from "./open-ai-embedding-model.module";
+} from "./open-ai-embedding-model.module.js";
 export {
   OPEN_AI_EMBEDDING_DEFAULT_MODEL,
   type OpenAiEmbeddingProperties,
-} from "./open-ai-embedding-properties";
+} from "./open-ai-embedding-properties.js";
 export {
   OpenAiModerationModelModule,
   type OpenAiModerationModelModuleAsyncOptions,
   OPEN_AI_MODERATION_PROPERTIES_TOKEN,
-} from "./open-ai-moderation-model.module";
+} from "./open-ai-moderation-model.module.js";
 export {
   OPEN_AI_MODERATION_DEFAULT_MODEL,
   type OpenAiModerationProperties,
-} from "./open-ai-moderation-properties";
+} from "./open-ai-moderation-properties.js";
 export {
   OpenAiImageModelModule,
   type OpenAiImageModelModuleAsyncOptions,
   OPEN_AI_IMAGE_PROPERTIES_TOKEN,
-} from "./open-ai-image-model.module";
+} from "./open-ai-image-model.module.js";
 export {
   OPEN_AI_IMAGE_DEFAULT_MODEL,
   type OpenAiImageProperties,
-} from "./open-ai-image-properties";
+} from "./open-ai-image-properties.js";

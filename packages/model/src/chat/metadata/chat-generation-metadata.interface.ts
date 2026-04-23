@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { ResultMetadata } from "../../model";
-import { DefaultChatGenerationMetadataBuilder } from "./default-chat-generation-metadata-builder";
+import type { ResultMetadata } from "../../model/index.js";
+import { DefaultChatGenerationMetadataBuilder } from "./default-chat-generation-metadata-builder.js";
 
 /**
  * Represents the metadata associated with the generation of a chat response.

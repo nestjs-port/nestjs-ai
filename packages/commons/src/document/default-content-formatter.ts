@@ -18,9 +18,9 @@ import assert from "node:assert/strict";
 import { EOL } from "node:os";
 
 import { StringUtils } from "@nestjs-port/core";
-import type { ContentFormatter } from "./content-formatter.interface";
-import type { Document } from "./document";
-import { MetadataMode } from "./metadata-mode";
+import type { ContentFormatter } from "./content-formatter.interface.js";
+import type { Document } from "./document.js";
+import { MetadataMode } from "./metadata-mode.js";
 
 const TEMPLATE_CONTENT_PLACEHOLDER = "{content}";
 const TEMPLATE_METADATA_STRING_PLACEHOLDER = "{metadata_string}";

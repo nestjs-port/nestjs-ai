@@ -25,8 +25,8 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { StringUtils } from "@nestjs-port/core";
-import { ChatClientRequest } from "./chat-client-request";
-import type { DefaultChatClient } from "./default-chat-client";
+import { ChatClientRequest } from "./chat-client-request.js";
+import type { DefaultChatClient } from "./default-chat-client.js";
 
 export abstract class DefaultChatClientUtils {
   static toChatClientRequest(

@@ -28,8 +28,8 @@ import {
   type Tag,
 } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { Usage } from "../../../chat/metadata/usage";
-import { ModelUsageMetricsGenerator } from "../model-usage-metrics-generator";
+import { Usage } from "../../../chat/metadata/usage.js";
+import { ModelUsageMetricsGenerator } from "../model-usage-metrics-generator.js";
 
 class SimpleCounter implements Counter {
   private _count = 0;

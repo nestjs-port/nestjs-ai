@@ -20,9 +20,9 @@ import type {
   Tool as McpTool,
 } from "@modelcontextprotocol/sdk/spec.types.js";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { McpConnectionInfo } from "./mcp-connection-info";
-import { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator";
-import { McpToolUtils } from "./mcp-tool-utils";
+import type { McpConnectionInfo } from "./mcp-connection-info.js";
+import { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator.js";
+import { McpToolUtils } from "./mcp-tool-utils.js";
 
 export class DefaultMcpToolNamePrefixGenerator extends McpToolNamePrefixGenerator {
   private static readonly logger: Logger = LoggerFactory.getLogger(

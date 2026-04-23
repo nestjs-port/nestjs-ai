@@ -15,17 +15,20 @@
  */
 
 export type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
-export * from "./customizer";
-export { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator";
+export * from "./customizer/index.js";
+export { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator.js";
 export {
   McpConnectionInfo,
   type McpConnectionInfoProps,
-} from "./mcp-connection-info";
-export { McpToolCallback, McpToolCallbackBuilder } from "./mcp-tool-callback";
+} from "./mcp-connection-info.js";
+export {
+  McpToolCallback,
+  McpToolCallbackBuilder,
+} from "./mcp-tool-callback.js";
 export {
   McpToolCallbackProvider,
   McpToolCallbackProviderBuilder,
-} from "./mcp-tool-callback-provider";
-export { DefaultMcpToolFilter, McpToolFilter } from "./mcp-tool-filter";
-export { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator";
-export { McpToolUtils } from "./mcp-tool-utils";
+} from "./mcp-tool-callback-provider.js";
+export { DefaultMcpToolFilter, McpToolFilter } from "./mcp-tool-filter.js";
+export { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator.js";
+export { McpToolUtils } from "./mcp-tool-utils.js";

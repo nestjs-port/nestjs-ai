@@ -32,13 +32,13 @@ import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
 import { describe, expect, it } from "vitest";
 
-import { OpenAiChatModel } from "../../../open-ai-chat-model";
-import { OpenAiChatOptions } from "../../../open-ai-chat-options";
+import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
+import { OpenAiChatOptions } from "../../../open-ai-chat-options.js";
 import {
   type MockWeatherRequest,
   MockWeatherRequestInputType,
   MockWeatherService,
-} from "../mock-weather-service";
+} from "../mock-weather-service.js";
 
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
 

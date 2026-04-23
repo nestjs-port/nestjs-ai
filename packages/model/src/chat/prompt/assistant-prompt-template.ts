@@ -15,11 +15,11 @@
  */
 
 import type { Media } from "@nestjs-ai/commons";
-import type { Message } from "../messages";
-import { AssistantMessage } from "../messages";
-import type { ChatOptions } from "./chat-options.interface";
-import { Prompt } from "./prompt";
-import { PromptTemplate } from "./prompt-template";
+import type { Message } from "../messages/index.js";
+import { AssistantMessage } from "../messages/index.js";
+import type { ChatOptions } from "./chat-options.interface.js";
+import { Prompt } from "./prompt.js";
+import { PromptTemplate } from "./prompt-template.js";
 
 export class AssistantPromptTemplate extends PromptTemplate {
   constructor(template: string);

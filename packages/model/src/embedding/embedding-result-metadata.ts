@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import type { MimeType } from "@nestjs-ai/commons";
-import type { ResultMetadata } from "../model";
+import type { ResultMetadata } from "../model/index.js";
 
 /**
  * Metadata associated with the embedding result.

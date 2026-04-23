@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { Filter } from "./filter";
-import type { FilterExpressionConverter } from "./filter-expression-converter";
+import { Filter } from "./filter.js";
+import type { FilterExpressionConverter } from "./filter-expression-converter.js";
 
 export abstract class FilterHelper {
   private static readonly TYPE_NEGATION_MAP = new Map<

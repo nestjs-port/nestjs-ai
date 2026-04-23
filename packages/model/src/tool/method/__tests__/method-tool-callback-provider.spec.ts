@@ -17,8 +17,8 @@
 import "reflect-metadata";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { Tool, type ToolAnnotationMetadata } from "../../annotation";
-import { MethodToolCallbackProvider } from "../method-tool-callback-provider";
+import { Tool, type ToolAnnotationMetadata } from "../../annotation/index.js";
+import { MethodToolCallbackProvider } from "../method-tool-callback-provider.js";
 
 class ValidToolObject {
   @Tool({

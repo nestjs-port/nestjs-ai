@@ -16,9 +16,9 @@
 
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { ToolDefinition } from "../../definition";
-import { ToolCallingContentObservationFilter } from "../tool-calling-content-observation-filter";
-import { ToolCallingObservationContext } from "../tool-calling-observation-context";
+import { ToolDefinition } from "../../definition/index.js";
+import { ToolCallingContentObservationFilter } from "../tool-calling-content-observation-filter.js";
+import { ToolCallingObservationContext } from "../tool-calling-observation-context.js";
 
 describe("ToolCallingContentObservationFilter", () => {
   const observationFilter = new ToolCallingContentObservationFilter();

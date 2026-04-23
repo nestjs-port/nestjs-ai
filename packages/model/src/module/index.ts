@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export { ModelObservationModule } from "./model-observation.module";
+export { ModelObservationModule } from "./model-observation.module.js";
 export {
   addToolCallingContentObservationFilter,
   ToolCallingModule,
-} from "./tool-calling.module";
+} from "./tool-calling.module.js";
 export {
   TOOL_CALLBACK_PROVIDER_TOKEN,
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
@@ -28,5 +28,5 @@ export {
   TOOL_CALLING_MANAGER_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_OVERRIDE_TOKEN,
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
-} from "./tool-calling.tokens";
-export type { ToolCallingObservationProperties } from "./tool-calling-observation-properties";
+} from "./tool-calling.tokens.js";
+export type { ToolCallingObservationProperties } from "./tool-calling-observation-properties.js";

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ModelOptions } from "../../model";
-import { DefaultChatOptionsBuilder } from "./default-chat-options-builder";
+import type { ModelOptions } from "../../model/index.js";
+import { DefaultChatOptionsBuilder } from "./default-chat-options-builder.js";
 
 /**
  * {@link ModelOptions} representing the common options that are portable across different

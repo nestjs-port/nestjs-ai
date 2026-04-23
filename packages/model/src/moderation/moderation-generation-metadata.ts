@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ResultMetadata } from "../model";
+import type { ResultMetadata } from "../model/index.js";
 
 /**
  * An interface that represents metadata associated with the results of a moderation

@@ -20,7 +20,7 @@ import type {
   ObservationConvention,
 } from "@nestjs-port/core";
 
-import { VectorStoreObservationContext } from "./vector-store-observation-context";
+import { VectorStoreObservationContext } from "./vector-store-observation-context.js";
 
 export abstract class VectorStoreObservationConvention implements ObservationConvention<VectorStoreObservationContext> {
   abstract getName(): string;

@@ -25,13 +25,13 @@ import {
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
 } from "@nestjs-ai/commons";
 import { FetchHttpClient, LoggerFactory } from "@nestjs-port/core";
-import { NestLoggerFactory } from "../logging";
-import { NestProviderInstanceExplorer } from "../provider";
+import { NestLoggerFactory } from "../logging/index.js";
+import { NestProviderInstanceExplorer } from "../provider/index.js";
 import type {
   NestAiRootModuleAsyncFactoryOptions,
   NestAiRootModuleAsyncOptions,
   NestAiRootModuleOptions,
-} from "./nest-ai-module.options";
+} from "./nest-ai-module.options.js";
 
 export const NEST_AI_ROOT_MODULE_OPTIONS = Symbol(
   "NEST_AI_ROOT_MODULE_OPTIONS",

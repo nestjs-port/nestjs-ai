@@ -16,7 +16,7 @@
 
 import { ObservationDocumentation } from "@nestjs-port/core";
 
-import { DefaultImageModelObservationConvention } from "./default-image-model-observation-convention";
+import { DefaultImageModelObservationConvention } from "./default-image-model-observation-convention.js";
 
 export class ImageModelObservationDocumentation extends ObservationDocumentation {
   get name() {

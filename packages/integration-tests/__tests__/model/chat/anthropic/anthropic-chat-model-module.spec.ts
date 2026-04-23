@@ -22,7 +22,7 @@ import type { ChatModel } from "@nestjs-ai/model";
 import {
   ANTHROPIC_CHAT_DEFAULT_MODEL,
   ANTHROPIC_CHAT_PROPERTIES_TOKEN,
-  AnthropicChatModel,
+  type AnthropicChatModel,
   AnthropicChatModelModule,
   type AnthropicChatProperties,
 } from "@nestjs-ai/model-anthropic";

@@ -28,10 +28,10 @@ import type { SchedulerLike } from "rxjs";
 import { queueScheduler } from "rxjs";
 import { describe, expect, it } from "vitest";
 
-import { ChatClientRequest } from "../../chat-client-request";
-import type { AdvisorChain } from "../api";
-import { Advisor } from "../api";
-import { MessageChatMemoryAdvisor } from "../message-chat-memory-advisor";
+import { ChatClientRequest } from "../../chat-client-request.js";
+import type { AdvisorChain } from "../api/index.js";
+import { Advisor } from "../api/index.js";
+import { MessageChatMemoryAdvisor } from "../message-chat-memory-advisor.js";
 
 function createChatMemory(): ChatMemory {
   return new MessageWindowChatMemory({

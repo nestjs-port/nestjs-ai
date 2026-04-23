@@ -18,7 +18,7 @@ import assert from "node:assert/strict";
 import { type TemplateRenderer, ValidationMode } from "@nestjs-ai/commons";
 import { LoggerFactory } from "@nestjs-port/core";
 import { Compiler, ST, STGroup, STLexer } from "stringtemplate4ts";
-import { Slf4jStErrorListener } from "./slf4j-st-error-listener";
+import { Slf4jStErrorListener } from "./slf4j-st-error-listener.js";
 
 /**
  * Options for creating a StTemplateRenderer instance.

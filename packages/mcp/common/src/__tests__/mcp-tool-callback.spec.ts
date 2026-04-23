@@ -21,8 +21,8 @@ import type {
 } from "@modelcontextprotocol/sdk/spec.types.js";
 import { ToolContext, ToolExecutionException } from "@nestjs-ai/model";
 import { describe, expect, it, vi } from "vitest";
-import { McpToolCallback } from "../mcp-tool-callback";
-import { McpToolUtils } from "../mcp-tool-utils";
+import { McpToolCallback } from "../mcp-tool-callback.js";
+import { McpToolUtils } from "../mcp-tool-utils.js";
 
 function createTool(
   name = "testTool",

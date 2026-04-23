@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-export type { CachedContentRequestProps } from "./cached-content-request";
+export type { CachedContentRequestProps } from "./cached-content-request.js";
 export {
   CachedContentRequest,
   CachedContentRequestBuilder,
-} from "./cached-content-request";
-export type { CachedContentUpdateRequestProps } from "./cached-content-update-request";
-export { CachedContentUpdateRequest } from "./cached-content-update-request";
-export type { GoogleGenAiCachedContentProps } from "./google-gen-ai-cached-content";
-export { GoogleGenAiCachedContent } from "./google-gen-ai-cached-content";
+} from "./cached-content-request.js";
+export type { CachedContentUpdateRequestProps } from "./cached-content-update-request.js";
+export { CachedContentUpdateRequest } from "./cached-content-update-request.js";
+export type { GoogleGenAiCachedContentProps } from "./google-gen-ai-cached-content.js";
+export { GoogleGenAiCachedContent } from "./google-gen-ai-cached-content.js";
 export {
   CachedContentException,
   CachedContentPage,
   GoogleGenAiCachedContentService,
-} from "./google-gen-ai-cached-content-service";
+} from "./google-gen-ai-cached-content-service.js";

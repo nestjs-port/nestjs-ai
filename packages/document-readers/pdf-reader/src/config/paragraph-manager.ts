@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
+import type { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api.js";
 
 type OutlineNode = Awaited<ReturnType<PDFDocumentProxy["getOutline"]>>[0];
 

@@ -17,48 +17,48 @@
 export {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,
-} from "./abstract-open-ai-options";
-export * from "./metadata";
-export * from "./module";
+} from "./abstract-open-ai-options.js";
+export * from "./metadata/index.js";
+export * from "./module/index.js";
 export {
   OpenAiAudioTranscriptionOptions,
   type OpenAiAudioTranscriptionOptionsProps,
-} from "./open-ai-audio-transcription-options";
+} from "./open-ai-audio-transcription-options.js";
 export {
   OpenAiAudioTranscriptionModel,
   type OpenAiAudioTranscriptionModelProps,
-} from "./open-ai-audio-transcription-model";
-export { OpenAiAudioSpeechModel } from "./open-ai-audio-speech-model";
+} from "./open-ai-audio-transcription-model.js";
+export { OpenAiAudioSpeechModel } from "./open-ai-audio-speech-model.js";
 export {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
-} from "./open-ai-audio-speech-options";
-export { OpenAiChatModel } from "./open-ai-chat-model";
-export { OpenAiChatOptions } from "./open-ai-chat-options";
+} from "./open-ai-audio-speech-options.js";
+export { OpenAiChatModel } from "./open-ai-chat-model.js";
+export { OpenAiChatOptions } from "./open-ai-chat-options.js";
 export {
   OpenAiEmbeddingModel,
   type OpenAiEmbeddingModelProps,
-} from "./open-ai-embedding-model";
-export type { OpenAiClient } from "./open-ai-client";
+} from "./open-ai-embedding-model.js";
+export type { OpenAiClient } from "./open-ai-client.js";
 export {
   type OpenAiEmbeddingCreateParams,
   OpenAiEmbeddingOptions,
   type OpenAiEmbeddingOptionsProps,
-} from "./open-ai-embedding-options";
+} from "./open-ai-embedding-options.js";
 export {
   OpenAiImageModel,
   type OpenAiImageModelProps,
-} from "./open-ai-image-model";
+} from "./open-ai-image-model.js";
 export {
   OpenAiImageOptions,
   type OpenAiImageOptionsProps,
-} from "./open-ai-image-options";
+} from "./open-ai-image-options.js";
 export {
   OpenAiModerationOptions,
   type OpenAiModerationOptionsProps,
-} from "./open-ai-moderation-options";
+} from "./open-ai-moderation-options.js";
 export {
   OpenAiModerationModel,
   type OpenAiModerationModelProps,
-} from "./open-ai-moderation-model";
-export * from "./setup";
+} from "./open-ai-moderation-model.js";
+export * from "./setup/index.js";

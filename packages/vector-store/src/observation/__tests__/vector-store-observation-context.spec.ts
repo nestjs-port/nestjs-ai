@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { VectorStoreObservationContext } from "../vector-store-observation-context";
+import { VectorStoreObservationContext } from "../vector-store-observation-context.js";
 
 describe("VectorStoreObservationContext", () => {
   it("when mandatory fields then return", () => {

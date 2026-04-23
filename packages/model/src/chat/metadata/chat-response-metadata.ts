@@ -16,12 +16,15 @@
 
 import assert from "node:assert/strict";
 import { LoggerFactory } from "@nestjs-port/core";
-import { AbstractResponseMetadata, type ResponseMetadata } from "../../model";
-import { EmptyRateLimit } from "./empty-rate-limit";
-import { EmptyUsage } from "./empty-usage";
-import { PromptMetadata } from "./prompt-metadata";
-import type { RateLimit } from "./rate-limit";
-import type { Usage } from "./usage";
+import {
+  AbstractResponseMetadata,
+  type ResponseMetadata,
+} from "../../model/index.js";
+import { EmptyRateLimit } from "./empty-rate-limit.js";
+import { EmptyUsage } from "./empty-usage.js";
+import { PromptMetadata } from "./prompt-metadata.js";
+import type { RateLimit } from "./rate-limit.js";
+import type { Usage } from "./usage.js";
 
 export interface ChatResponseMetadataProps {
   id?: string;

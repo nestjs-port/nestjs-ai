@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { OpenAiImageGenerationMetadata } from "./open-ai-image-generation-metadata";
-export { OpenAiRateLimit } from "./open-ai-rate-limit";
-export { OpenAiAudioSpeechResponseMetadata } from "./open-ai-audio-speech-response-metadata";
-export { OpenAiImageResponseMetadata } from "./open-ai-image-response-metadata";
+export { OpenAiImageGenerationMetadata } from "./open-ai-image-generation-metadata.js";
+export { OpenAiRateLimit } from "./open-ai-rate-limit.js";
+export { OpenAiAudioSpeechResponseMetadata } from "./open-ai-audio-speech-response-metadata.js";
+export { OpenAiImageResponseMetadata } from "./open-ai-image-response-metadata.js";

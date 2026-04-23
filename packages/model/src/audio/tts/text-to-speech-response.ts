@@ -15,9 +15,9 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelResponse } from "../../model";
-import type { Speech } from "./speech";
-import { TextToSpeechResponseMetadata } from "./text-to-speech-response-metadata";
+import type { ModelResponse } from "../../model/index.js";
+import type { Speech } from "./speech.js";
+import { TextToSpeechResponseMetadata } from "./text-to-speech-response-metadata.js";
 
 export interface TextToSpeechResponseProps {
   results: Speech[];

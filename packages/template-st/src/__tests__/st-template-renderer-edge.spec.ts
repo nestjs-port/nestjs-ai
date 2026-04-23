@@ -16,7 +16,7 @@
 
 import { ValidationMode } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { StTemplateRenderer } from "../st-template-renderer";
+import { StTemplateRenderer } from "../st-template-renderer.js";
 
 describe("StTemplateRenderer", () => {
   it("should handle multiple built in functions and variables", () => {

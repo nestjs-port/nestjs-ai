@@ -17,7 +17,7 @@
 import { ObservabilityHelper } from "@nestjs-ai/commons";
 import type { ObservationContext, ObservationHandler } from "@nestjs-port/core";
 import { LoggerFactory, StringUtils } from "@nestjs-port/core";
-import { VectorStoreObservationContext } from "./vector-store-observation-context";
+import { VectorStoreObservationContext } from "./vector-store-observation-context.js";
 
 export class VectorStoreQueryResponseObservationHandler implements ObservationHandler<VectorStoreObservationContext> {
   private readonly logger = LoggerFactory.getLogger(

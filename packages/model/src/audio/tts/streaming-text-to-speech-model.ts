@@ -16,10 +16,10 @@
 
 import type { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import type { StreamingModel } from "../../model";
-import type { TextToSpeechOptions } from "./text-to-speech-options.interface";
-import { TextToSpeechPrompt } from "./text-to-speech-prompt";
-import type { TextToSpeechResponse } from "./text-to-speech-response";
+import type { StreamingModel } from "../../model/index.js";
+import type { TextToSpeechOptions } from "./text-to-speech-options.interface.js";
+import { TextToSpeechPrompt } from "./text-to-speech-prompt.js";
+import type { TextToSpeechResponse } from "./text-to-speech-response.js";
 
 /**
  * Interface for the streaming text to speech model.

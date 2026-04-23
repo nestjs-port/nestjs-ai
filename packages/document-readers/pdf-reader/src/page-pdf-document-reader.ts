@@ -22,10 +22,10 @@ import { StringUtils } from "@nestjs-port/core";
 import type {
   PDFDocumentProxy,
   PDFPageProxy,
-} from "pdfjs-dist/types/src/display/api";
+} from "pdfjs-dist/types/src/display/api.js";
 
-import { PdfDocumentReaderConfig } from "./config";
-import { PdfLayoutTextStripperByArea } from "./layout";
+import { PdfDocumentReaderConfig } from "./config/index.js";
+import { PdfLayoutTextStripperByArea } from "./layout/index.js";
 
 export type PdfResource = string | URL | Buffer;
 

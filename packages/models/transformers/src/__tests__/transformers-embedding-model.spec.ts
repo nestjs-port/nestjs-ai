@@ -18,7 +18,7 @@ import { Document } from "@nestjs-ai/commons";
 import type { EmbeddingResponse } from "@nestjs-ai/model";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { TransformersEmbeddingModel } from "../transformers-embedding-model";
+import { TransformersEmbeddingModel } from "../transformers-embedding-model.js";
 
 const DF = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,

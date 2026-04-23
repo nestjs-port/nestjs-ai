@@ -17,7 +17,7 @@
 import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
 import type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
 import { describe, expect, it, vi } from "vitest";
-import { McpToolCallback } from "../mcp-tool-callback";
+import { McpToolCallback } from "../mcp-tool-callback.js";
 
 function createTool(
   name = "test-tool",

@@ -21,7 +21,7 @@ import { LoggerFactory, StringUtils } from "@nestjs-port/core";
 import {
   Speech,
   TextToSpeechModel,
-  TextToSpeechOptions,
+  type TextToSpeechOptions,
   TextToSpeechPrompt,
   TextToSpeechResponse,
 } from "@nestjs-ai/model";
@@ -29,10 +29,10 @@ import {
 import {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
-} from "./open-ai-audio-speech-options";
-import type { OpenAiClient } from "./open-ai-client";
-import { OpenAiAudioSpeechResponseMetadata } from "./metadata";
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup";
+} from "./open-ai-audio-speech-options.js";
+import type { OpenAiClient } from "./open-ai-client.js";
+import { OpenAiAudioSpeechResponseMetadata } from "./metadata/index.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
 
 export interface OpenAiAudioSpeechModelProps {
   openAiClient?: OpenAiClient | null;

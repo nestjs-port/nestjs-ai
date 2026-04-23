@@ -23,9 +23,9 @@ import {
 import { Prompt } from "@nestjs-ai/model";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { ChatClientRequest } from "../../../chat-client-request";
-import { AdvisorObservationContext } from "../advisor-observation-context";
-import { DefaultAdvisorObservationConvention } from "../default-advisor-observation-convention";
+import { ChatClientRequest } from "../../../chat-client-request.js";
+import { AdvisorObservationContext } from "../advisor-observation-context.js";
+import { DefaultAdvisorObservationConvention } from "../default-advisor-observation-convention.js";
 
 describe("DefaultAdvisorObservationConvention", () => {
   const observationConvention = new DefaultAdvisorObservationConvention();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ImageOptions } from "./image-options";
+import type { ImageOptions } from "./image-options.js";
 
 export interface ImageOptionsProps {
   n?: number | null;

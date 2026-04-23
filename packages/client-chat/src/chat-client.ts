@@ -34,11 +34,11 @@ import {
   type ObservationRegistry,
 } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
-import type { Advisor, AdvisorObservationConvention } from "./advisor";
-import type { ChatClientResponse } from "./chat-client-response";
-import { DefaultChatClientBuilder } from "./default-chat-client-builder";
-import type { ChatClientObservationConvention } from "./observation";
-import type { ResponseEntity } from "./response-entity";
+import type { Advisor, AdvisorObservationConvention } from "./advisor/index.js";
+import type { ChatClientResponse } from "./chat-client-response.js";
+import { DefaultChatClientBuilder } from "./default-chat-client-builder.js";
+import type { ChatClientObservationConvention } from "./observation/index.js";
+import type { ResponseEntity } from "./response-entity.js";
 
 export interface ChatClient {
   prompt(): ChatClient.ChatClientRequestSpec;

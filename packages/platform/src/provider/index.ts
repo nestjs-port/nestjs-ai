@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { NestProviderInstanceExplorer } from "./nest-provider-instance-explorer";
+export { NestProviderInstanceExplorer } from "./nest-provider-instance-explorer.js";

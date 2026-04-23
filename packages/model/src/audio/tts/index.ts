@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-export type { DefaultTextToSpeechOptionsProps } from "./default-text-to-speech-options";
-export { DefaultTextToSpeechOptions } from "./default-text-to-speech-options";
-export { Speech } from "./speech";
-export { StreamingTextToSpeechModel } from "./streaming-text-to-speech-model";
-export { TextToSpeechMessage } from "./text-to-speech-message";
-export { TextToSpeechModel } from "./text-to-speech-model";
-export { TextToSpeechOptions } from "./text-to-speech-options.interface";
-export type { TextToSpeechPromptProps } from "./text-to-speech-prompt";
-export { TextToSpeechPrompt } from "./text-to-speech-prompt";
-export type { TextToSpeechResponseProps } from "./text-to-speech-response";
-export { TextToSpeechResponse } from "./text-to-speech-response";
-export { TextToSpeechResponseMetadata } from "./text-to-speech-response-metadata";
+export type { DefaultTextToSpeechOptionsProps } from "./default-text-to-speech-options.js";
+export { DefaultTextToSpeechOptions } from "./default-text-to-speech-options.js";
+export { Speech } from "./speech.js";
+export { StreamingTextToSpeechModel } from "./streaming-text-to-speech-model.js";
+export { TextToSpeechMessage } from "./text-to-speech-message.js";
+export { TextToSpeechModel } from "./text-to-speech-model.js";
+export type { TextToSpeechOptions } from "./text-to-speech-options.interface.js";
+export type { TextToSpeechPromptProps } from "./text-to-speech-prompt.js";
+export { TextToSpeechPrompt } from "./text-to-speech-prompt.js";
+export type { TextToSpeechResponseProps } from "./text-to-speech-response.js";
+export { TextToSpeechResponse } from "./text-to-speech-response.js";
+export { TextToSpeechResponseMetadata } from "./text-to-speech-response-metadata.js";

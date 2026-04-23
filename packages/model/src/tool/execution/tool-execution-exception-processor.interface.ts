@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ToolExecutionException } from "./tool-execution-exception";
+import type { ToolExecutionException } from "./tool-execution-exception.js";
 
 /**
  * A functional interface to process a {@link ToolExecutionException} by either converting

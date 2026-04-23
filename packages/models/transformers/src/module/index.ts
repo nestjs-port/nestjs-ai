@@ -17,6 +17,6 @@
 export {
   TRANSFORMERS_EMBEDDING_PROPERTIES_TOKEN,
   TransformersEmbeddingModelModule,
-  TransformersEmbeddingModelModuleAsyncOptions,
-} from "./transformers-embedding-model.module";
-export * from "./transformers-embedding-model-properties";
+  type TransformersEmbeddingModelModuleAsyncOptions,
+} from "./transformers-embedding-model.module.js";
+export * from "./transformers-embedding-model-properties.js";

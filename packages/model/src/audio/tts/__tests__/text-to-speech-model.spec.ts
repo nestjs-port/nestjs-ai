@@ -16,11 +16,11 @@
 
 import { type Observable, of } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
-import { Speech } from "../speech";
-import { TextToSpeechModel } from "../text-to-speech-model";
-import { TextToSpeechPrompt } from "../text-to-speech-prompt";
-import { TextToSpeechResponse } from "../text-to-speech-response";
-import { TextToSpeechResponseMetadata } from "../text-to-speech-response-metadata";
+import { Speech } from "../speech.js";
+import { TextToSpeechModel } from "../text-to-speech-model.js";
+import { TextToSpeechPrompt } from "../text-to-speech-prompt.js";
+import { TextToSpeechResponse } from "../text-to-speech-response.js";
+import { TextToSpeechResponseMetadata } from "../text-to-speech-response-metadata.js";
 
 class TestTextToSpeechModel extends TextToSpeechModel {
   constructor(

@@ -17,13 +17,13 @@
 export {
   CompressionQueryTransformer,
   type CompressionQueryTransformerProps,
-} from "./compression-query-transformer";
-export { QueryTransformer } from "./query-transformer";
+} from "./compression-query-transformer.js";
+export { QueryTransformer } from "./query-transformer.js";
 export {
   RewriteQueryTransformer,
   type RewriteQueryTransformerProps,
-} from "./rewrite-query-transformer";
+} from "./rewrite-query-transformer.js";
 export {
   TranslationQueryTransformer,
   type TranslationQueryTransformerProps,
-} from "./translation-query-transformer";
+} from "./translation-query-transformer.js";

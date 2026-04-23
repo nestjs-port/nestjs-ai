@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { TextToSpeechOptions } from "./text-to-speech-options.interface";
+import type { TextToSpeechOptions } from "./text-to-speech-options.interface.js";
 
 export interface DefaultTextToSpeechOptionsProps {
   model?: string | null;

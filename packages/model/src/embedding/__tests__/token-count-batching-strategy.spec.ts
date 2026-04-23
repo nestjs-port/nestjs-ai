@@ -19,7 +19,7 @@ import { resolve } from "node:path";
 
 import { Document } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
-import { TokenCountBatchingStrategy } from "../token-count-batching-strategy";
+import { TokenCountBatchingStrategy } from "../token-count-batching-strategy.js";
 
 describe("TokenCountBatchingStrategy", () => {
   it("batch embedding happy path", () => {

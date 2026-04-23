@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ApiKey } from "./api-key.interface";
+import type { ApiKey } from "./api-key.interface.js";
 
 /**
  * This implementation of ApiKey indicates that no API key should be used, e.g. no HTTP

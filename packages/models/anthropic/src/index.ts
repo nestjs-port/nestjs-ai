@@ -14,39 +14,39 @@
  * limitations under the License.
  */
 
-export { AbstractAnthropicOptions } from "./abstract-anthropic-options";
-export { AnthropicCacheOptions } from "./anthropic-cache-options";
-export { AnthropicCacheStrategy } from "./anthropic-cache-strategy";
+export { AbstractAnthropicOptions } from "./abstract-anthropic-options.js";
+export { AnthropicCacheOptions } from "./anthropic-cache-options.js";
+export { AnthropicCacheStrategy } from "./anthropic-cache-strategy.js";
 export {
   AnthropicCacheTtl,
   type AnthropicCacheTtlSdkValue,
   toSdkCacheTtl,
-} from "./anthropic-cache-ttl";
+} from "./anthropic-cache-ttl.js";
 export {
   AnthropicChatModel,
   type AnthropicChatModelProps,
-} from "./anthropic-chat-model";
+} from "./anthropic-chat-model.js";
 export {
   AnthropicChatOptions,
   AnthropicChatOptionsBuilder,
-} from "./anthropic-chat-options";
+} from "./anthropic-chat-options.js";
 export {
   AnthropicCitationDocument,
   DocumentType,
-} from "./anthropic-citation-document";
+} from "./anthropic-citation-document.js";
 export {
   AnthropicServiceTier,
   toSdkServiceTier,
-} from "./anthropic-service-tier";
-export { AnthropicSetup } from "./anthropic-setup";
-export { AnthropicSkill } from "./anthropic-skill";
-export { AnthropicSkillContainer } from "./anthropic-skill-container";
-export { AnthropicSkillRecord } from "./anthropic-skill-record";
-export { AnthropicSkillType } from "./anthropic-skill-type";
-export { AnthropicSkillsResponseHelper } from "./anthropic-skills-response-helper";
-export type { AnthropicWebSearchResult } from "./anthropic-web-search-result";
-export { AnthropicWebSearchTool } from "./anthropic-web-search-tool";
-export { CacheBreakpointTracker } from "./cache-breakpoint-tracker";
-export { CacheEligibilityResolver } from "./cache-eligibility-resolver";
-export { Citation } from "./citation";
-export * from "./module";
+} from "./anthropic-service-tier.js";
+export { AnthropicSetup } from "./anthropic-setup.js";
+export { AnthropicSkill } from "./anthropic-skill.js";
+export { AnthropicSkillContainer } from "./anthropic-skill-container.js";
+export { AnthropicSkillRecord } from "./anthropic-skill-record.js";
+export { AnthropicSkillType } from "./anthropic-skill-type.js";
+export { AnthropicSkillsResponseHelper } from "./anthropic-skills-response-helper.js";
+export type { AnthropicWebSearchResult } from "./anthropic-web-search-result.js";
+export { AnthropicWebSearchTool } from "./anthropic-web-search-tool.js";
+export { CacheBreakpointTracker } from "./cache-breakpoint-tracker.js";
+export { CacheEligibilityResolver } from "./cache-eligibility-resolver.js";
+export { Citation } from "./citation.js";
+export * from "./module/index.js";

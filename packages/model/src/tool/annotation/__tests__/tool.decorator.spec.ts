@@ -17,8 +17,12 @@
 import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext, ToolContextSchema } from "../../../chat";
-import { TOOL_METADATA_KEY, Tool, type ToolAnnotationMetadata } from "../index";
+import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
+import {
+  TOOL_METADATA_KEY,
+  Tool,
+  type ToolAnnotationMetadata,
+} from "../index.js";
 
 class ToolOverloadExamples {
   @Tool()

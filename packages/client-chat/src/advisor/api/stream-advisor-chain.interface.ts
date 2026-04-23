@@ -16,10 +16,10 @@
 
 import type { Observable } from "rxjs";
 
-import type { ChatClientRequest } from "../../chat-client-request";
-import type { ChatClientResponse } from "../../chat-client-response";
-import type { AdvisorChain } from "./advisor-chain";
-import type { StreamAdvisor } from "./stream-advisor.interface";
+import type { ChatClientRequest } from "../../chat-client-request.js";
+import type { ChatClientResponse } from "../../chat-client-response.js";
+import type { AdvisorChain } from "./advisor-chain.js";
+import type { StreamAdvisor } from "./stream-advisor.interface.js";
 
 export interface StreamAdvisorChain extends AdvisorChain {
   nextStream(

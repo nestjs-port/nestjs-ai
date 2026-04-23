@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ModelResult } from "../model";
-import type { Moderation } from "./moderation";
-import type { ModerationGenerationMetadata } from "./moderation-generation-metadata";
+import type { ModelResult } from "../model/index.js";
+import type { Moderation } from "./moderation.js";
+import type { ModerationGenerationMetadata } from "./moderation-generation-metadata.js";
 
 export interface ModerationGenerationProps {
   moderation: Moderation;

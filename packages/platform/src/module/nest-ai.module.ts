@@ -27,6 +27,7 @@ import {
 import { FetchHttpClient, LoggerFactory } from "@nestjs-port/core";
 import { NestLoggerFactory } from "../logging/index.js";
 import { NestProviderInstanceExplorer } from "../provider/index.js";
+import { NestAiTemplateRendererInitializer } from "./nest-ai-template-renderer.initializer.js";
 import type {
   NestAiRootModuleAsyncFactoryOptions,
   NestAiRootModuleAsyncOptions,
@@ -61,6 +62,7 @@ export class NestAiModule {
           useFactory: options.useFactory,
           inject: options.inject ?? [],
         },
+        NestAiTemplateRendererInitializer,
         ...NestAiModule.createAsyncRootProviders(),
       ],
       exports: NestAiModule.getRootExports(),

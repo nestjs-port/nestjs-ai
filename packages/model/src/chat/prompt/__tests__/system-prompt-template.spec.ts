@@ -16,9 +16,10 @@
 
 import {
   NoOpTemplateRenderer,
+  TemplateRendererFactory,
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { SystemMessage } from "../../messages/index.js";
 import { SystemPromptTemplate } from "../system-prompt-template.js";
 
@@ -29,6 +30,10 @@ class CustomTestRenderer implements TemplateRenderer {
 }
 
 describe("SystemPromptTemplate", () => {
+  beforeEach(() => {
+    TemplateRendererFactory.reset();
+  });
+
   it("create with valid template", () => {
     const template = "Hello {name}!";
     const systemPromptTemplate = new SystemPromptTemplate(template);

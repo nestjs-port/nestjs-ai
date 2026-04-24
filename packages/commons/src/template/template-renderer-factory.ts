@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { NoOpTemplateRenderer } from "./no-op-template-renderer.js";
+import { SimpleTemplateRenderer } from "./simple-template-renderer.js";
 import type { TemplateRenderer } from "./template-renderer.interface.js";
 
 let boundRenderer: TemplateRenderer | null = null;
 
 class DelegatingTemplateRenderer implements TemplateRenderer {
-  private readonly fallback = new NoOpTemplateRenderer();
+  private readonly fallback = new SimpleTemplateRenderer();
 
   apply(template: string, variables: Record<string, unknown | null>): string {
     return (boundRenderer ?? this.fallback).apply(template, variables);

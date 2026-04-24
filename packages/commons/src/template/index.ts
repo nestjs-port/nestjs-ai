@@ -15,5 +15,7 @@
  */
 
 export { NoOpTemplateRenderer } from "./no-op-template-renderer.js";
+export { TemplateRendererFactory } from "./template-renderer-factory.js";
+export { SimpleTemplateRenderer } from "./simple-template-renderer.js";
 export type { TemplateRenderer } from "./template-renderer.interface.js";
 export { ValidationMode } from "./validation-mode.js";

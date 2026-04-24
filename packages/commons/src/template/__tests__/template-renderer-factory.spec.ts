@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { NoOpTemplateRenderer } from "../no-op-template-renderer.js";
 import { TemplateRendererFactory } from "../template-renderer-factory.js";
 import type { TemplateRenderer } from "../template-renderer.interface.js";
@@ -30,14 +30,10 @@ describe("TemplateRendererFactory", () => {
     TemplateRendererFactory.reset();
   });
 
-  afterEach(() => {
-    TemplateRendererFactory.reset();
-  });
-
   it("should use fallback renderer until bound", () => {
     const renderer = TemplateRendererFactory.getTemplateRenderer();
     expect(renderer.apply("Hello {name}!", { name: "Spring AI" })).toBe(
-      "Hello {name}!",
+      "Hello Spring AI!",
     );
   });
 

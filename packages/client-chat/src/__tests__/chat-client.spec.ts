@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -43,7 +42,9 @@ const ToolInputSchema = z.object({
 });
 
 const mockFunction = ({ input }: z.infer<typeof ToolInputSchema>) => input;
-const tabbyCatResource = readFileSync(resolve(__dirname, "./tabby-cat.png"));
+const tabbyCatResource = readFileSync(
+  new URL("./tabby-cat.png", import.meta.url),
+);
 
 describe("ChatClient", () => {
   // ChatClient Builder Tests

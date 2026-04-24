@@ -16,8 +16,6 @@
 
 import "reflect-metadata";
 
-import { resolve } from "node:path";
-
 import { Test } from "@nestjs/testing";
 import { AUDIO_TRANSCRIPTION_MODEL_TOKEN } from "@nestjs-ai/commons";
 import { AudioTranscriptionPrompt } from "@nestjs-ai/model";
@@ -45,7 +43,7 @@ describe.skipIf(!OPENAI_API_KEY)(
         apiKey: OPENAI_API_KEY ?? "",
       });
 
-      const speechFile = resolve(__dirname, "speech.flac");
+      const speechFile = new URL("speech.flac", import.meta.url);
 
       const response = await transcriptionModel.call(
         new AudioTranscriptionPrompt(speechFile),

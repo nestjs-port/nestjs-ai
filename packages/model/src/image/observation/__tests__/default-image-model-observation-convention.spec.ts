@@ -16,7 +16,7 @@
 
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ImageOptionsBuilder, ImagePrompt } from "../../index.js";
 import { DefaultImageModelObservationConvention } from "../default-image-model-observation-convention.js";
 import { ImageModelObservationContext } from "../image-model-observation-context.js";
@@ -262,9 +262,9 @@ describe("DefaultImageModelObservationConvention", () => {
         KeyValue.NONE_VALUE,
       ),
     );
-    expect(
+    assert.exists(
       observationConvention.getHighCardinalityKeyValues(observationContext),
-    ).toBeDefined();
+    );
   });
 });
 

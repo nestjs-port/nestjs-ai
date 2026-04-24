@@ -16,7 +16,7 @@
 
 import type { ChatClient } from "@nestjs-ai/client-chat";
 import { PromptTemplate } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import type { Query } from "../../../../query.js";
 import { MultiQueryExpander } from "../multi-query-expander.js";
 
@@ -88,7 +88,7 @@ describe("MultiQueryExpander", () => {
       promptTemplate: null,
     });
 
-    expect(queryExpander).toBeDefined();
+    assert.exists(queryExpander);
   });
 
   it("when prompt template has both placeholders then build", () => {
@@ -101,7 +101,7 @@ describe("MultiQueryExpander", () => {
       promptTemplate: validTemplate,
     });
 
-    expect(expander).toBeDefined();
+    assert.exists(expander);
   });
 
   it("when prompt template has extra placeholders then build", () => {
@@ -114,7 +114,7 @@ describe("MultiQueryExpander", () => {
       promptTemplate: templateWithExtra,
     });
 
-    expect(expander).toBeDefined();
+    assert.exists(expander);
   });
 
   it("when prompt template set to null after valid template then use default", () => {
@@ -122,7 +122,7 @@ describe("MultiQueryExpander", () => {
       chatClientBuilder: mockChatClientBuilder(),
     });
 
-    expect(expander).toBeDefined();
+    assert.exists(expander);
   });
 
   it("when prompt template has placeholders in different case then throw", () => {

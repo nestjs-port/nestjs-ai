@@ -15,7 +15,7 @@
  */
 
 import { Prompt } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiChatModel } from "../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
@@ -43,6 +43,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelAdditionalHttpHeaders", () => {
       new Prompt("Tell me a joke", options),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
   });
 });

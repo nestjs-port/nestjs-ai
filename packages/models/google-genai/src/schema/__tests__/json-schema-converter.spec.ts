@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { JsonSchemaConverter } from "../json-schema-converter.js";
 
 describe("JsonSchemaConverter", () => {
@@ -44,7 +44,7 @@ describe("JsonSchemaConverter", () => {
   it("should handle empty object with fromJson", () => {
     const result = JsonSchemaConverter.fromJson("{}");
 
-    expect(result).not.toBeNull();
+    assert.exists(result);
     expect(Object.keys(result)).toHaveLength(0);
   });
 
@@ -79,7 +79,7 @@ describe("JsonSchemaConverter", () => {
     const result = JsonSchemaConverter.convertToOpenApiSchema(
       JsonSchemaConverter.fromJson(json),
     );
-    expect(result.enum).not.toBeNull();
+    assert.exists(result.enum);
     const enumValues = result.enum as string[];
     expect(enumValues[0]).toBe("a");
     expect(enumValues[1]).toBe("b");
@@ -196,7 +196,7 @@ describe("JsonSchemaConverter", () => {
         JsonSchemaConverter.fromJson(json),
       );
 
-      expect(result.allOf).not.toBeNull();
+      assert.exists(result.allOf);
       expect(Array.isArray(result.allOf)).toBe(true);
       expect((result.allOf as unknown[]).length).toBe(2);
     });

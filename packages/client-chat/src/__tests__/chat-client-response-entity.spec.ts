@@ -25,7 +25,7 @@ import {
   MessageType,
   type Prompt,
 } from "@nestjs-ai/model";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import { ChatClient } from "../chat-client.js";
@@ -56,7 +56,7 @@ describe("ChatClient Response Entity Tests", () => {
       .call()
       .responseEntity(MyBeanSchema);
 
-    expect(responseEntity.response).toBeDefined();
+    assert.exists(responseEntity.response);
     expect(responseEntity.response).toBe(chatModelState.mockChatResponse);
     expect(responseEntity.response?.metadata.get("key1")).toBe("value1");
     expect(responseEntity.entity).toEqual({ name: "John", age: 30 });

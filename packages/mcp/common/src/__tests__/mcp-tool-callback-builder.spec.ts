@@ -16,7 +16,7 @@
 
 import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
 import type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { McpToolCallback } from "../mcp-tool-callback.js";
 
 function createTool(
@@ -54,9 +54,9 @@ describe("McpToolCallbackBuilder", () => {
       .tool(tool)
       .build();
 
-    expect(callback).toBeDefined();
+    assert.exists(callback);
     expect(callback.originalToolName).toBe("test-tool");
-    expect(callback.toolDefinition).toBeDefined();
+    assert.exists(callback.toolDefinition);
     expect(callback.toolDefinition.name).toBe("test_tool");
     expect(callback.toolDefinition.description).toBe("Test tool description");
   });
@@ -73,9 +73,9 @@ describe("McpToolCallbackBuilder", () => {
       .prefixedToolName(customPrefixedName)
       .build();
 
-    expect(callback).toBeDefined();
+    assert.exists(callback);
     expect(callback.originalToolName).toBe("test-tool");
-    expect(callback.toolDefinition).toBeDefined();
+    assert.exists(callback.toolDefinition);
     expect(callback.toolDefinition.name).toBe(customPrefixedName);
     expect(callback.toolDefinition.description).toBe("Test tool description");
   });
@@ -106,7 +106,7 @@ describe("McpToolCallbackBuilder", () => {
       .prefixedToolName("chained_tool_name")
       .build();
 
-    expect(callback).toBeDefined();
+    assert.exists(callback);
     expect(callback.toolDefinition.name).toBe("chained_tool_name");
   });
 

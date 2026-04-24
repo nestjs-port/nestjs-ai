@@ -23,7 +23,7 @@ import {
   type Prompt,
 } from "@nestjs-ai/model";
 import { lastValueFrom, map, of, reduce, tap } from "rxjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { assert, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatClient } from "../../chat-client.js";
 import type { ChatClientRequest } from "../../chat-client-request.js";
@@ -77,12 +77,13 @@ describe("Advisors", () => {
     expect(content).toBe("Hello John");
 
     // AROUND
-    expect(mockAroundAdvisor1.chatClientResponse?.chatResponse).not.toBeNull();
-    const context = mockAroundAdvisor1.chatClientResponse?.context;
-    expect(context).toBeDefined();
-    expect(context?.get("key1")).toBe("value1");
-    expect(context?.get("key2")).toBe("value2");
-    expect(context?.get("aroundCallBeforeAdvisor1")).toBe(
+    assert.exists(mockAroundAdvisor1.chatClientResponse);
+    assert.exists(mockAroundAdvisor1.chatClientResponse.chatResponse);
+    const context = mockAroundAdvisor1.chatClientResponse.context;
+    assert.exists(context);
+    expect(context.get("key1")).toBe("value1");
+    expect(context.get("key2")).toBe("value2");
+    expect(context.get("aroundCallBeforeAdvisor1")).toBe(
       "AROUND_CALL_BEFORE Advisor1",
     );
     expect(context?.get("aroundCallAfterAdvisor1")).toBe(
@@ -98,7 +99,7 @@ describe("Advisors", () => {
     expect(context?.get("lastAfter")).toBe("Advisor1"); // outer
 
     expect(chatModel.call).toHaveBeenCalled();
-    expect(capturedPrompt.instructions).toBeDefined();
+    assert.exists(capturedPrompt.instructions);
   });
 
   it("stream advisors context propagation", async () => {
@@ -156,7 +157,7 @@ describe("Advisors", () => {
     }
 
     expect(chatModel.stream).toHaveBeenCalled();
-    expect(capturedPrompt.instructions).toBeDefined();
+    assert.exists(capturedPrompt.instructions);
   });
 });
 

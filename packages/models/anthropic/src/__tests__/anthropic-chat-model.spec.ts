@@ -27,7 +27,7 @@ import {
   SystemMessage,
   UserMessage,
 } from "@nestjs-ai/model";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { assert, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   AnthropicCacheOptions,
@@ -70,8 +70,8 @@ describe("AnthropicChatModel", () => {
 
     const response = await chatModel.call(new Prompt("Hello"));
 
-    expect(response).not.toBeNull();
-    expect(response.result).not.toBeNull();
+    assert.exists(response);
+    assert.exists(response.result);
     expect(response.result?.output.text).toBe(
       "Hello! How can I help you today?",
     );
@@ -100,7 +100,7 @@ describe("AnthropicChatModel", () => {
 
     expect(create).toHaveBeenCalledTimes(1);
     const request = create.mock.calls[0]?.[0] as MessageCreateParams;
-    expect(request.system).toBeDefined();
+    assert.exists(request.system);
   });
 
   it("call with runtime options override", async () => {
@@ -118,7 +118,7 @@ describe("AnthropicChatModel", () => {
 
     const response = await chatModel.call(new Prompt("Test", runtimeOptions));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
 
     expect(create).toHaveBeenCalledTimes(1);
     const request = create.mock.calls[0]?.[0] as MessageCreateParams;
@@ -132,8 +132,8 @@ describe("AnthropicChatModel", () => {
 
     const response = await chatModel.call(new Prompt("Test"));
 
-    expect(response.metadata).not.toBeNull();
-    expect(response.metadata.usage).not.toBeNull();
+    assert.exists(response.metadata);
+    assert.exists(response.metadata.usage);
     expect(response.metadata.usage.promptTokens).toBe(10);
     expect(response.metadata.usage.completionTokens).toBe(20);
     expect(response.metadata.usage.totalTokens).toBe(30);
@@ -169,7 +169,7 @@ describe("AnthropicChatModel", () => {
       new Prompt("What's the weather?", options),
     );
 
-    expect(response.result).not.toBeNull();
+    assert.exists(response.result);
     const output = response.result?.output as AssistantMessage;
     expect(output.toolCalls).not.toHaveLength(0);
     expect(output.toolCalls).toHaveLength(1);
@@ -210,7 +210,7 @@ describe("AnthropicChatModel", () => {
 
     expect(requestPrompt.options).toBe(runtimeOptions);
     const mergedOptions = requestPrompt.options as AnthropicChatOptions;
-    expect(mergedOptions.cacheOptions).not.toBeNull();
+    assert.exists(mergedOptions.cacheOptions);
     expect(mergedOptions.cacheOptions.strategy).toBe(
       AnthropicCacheStrategy.SYSTEM_ONLY,
     );
@@ -251,12 +251,12 @@ describe("AnthropicChatModel", () => {
 
     const response = await chatModel.call(new Prompt("Generate JSON", options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
 
     expect(create).toHaveBeenCalledTimes(1);
     const request = create.mock.calls[0]?.[0] as MessageCreateParams;
-    expect(request.output_config).toBeDefined();
-    expect(request.output_config?.effort).toBe("high");
+    assert.exists(request.output_config);
+    expect(request.output_config.effort).toBe("high");
   });
 
   it("call with output schema", async () => {
@@ -269,12 +269,12 @@ describe("AnthropicChatModel", () => {
 
     const response = await chatModel.call(new Prompt("Generate JSON", options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
 
     expect(create).toHaveBeenCalledTimes(1);
     const request = create.mock.calls[0]?.[0] as MessageCreateParams;
-    expect(request.output_config).toBeDefined();
-    expect(request.output_config?.format).toBeDefined();
+    assert.exists(request.output_config);
+    assert.exists(request.output_config.format);
   });
 
   it("call with http headers", async () => {
@@ -290,7 +290,7 @@ describe("AnthropicChatModel", () => {
 
     const response = await chatModel.call(new Prompt("Hello", options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
 
     expect(create).toHaveBeenCalledTimes(1);
     const requestOptions = create.mock.calls[0]?.[1] as {
@@ -315,7 +315,7 @@ describe("AnthropicChatModel", () => {
       new Prompt("Create an Excel file", options),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
 
     expect(create).toHaveBeenCalledTimes(1);
     const request = create.mock.calls[0]?.[0] as MessageCreateParams;
@@ -324,15 +324,14 @@ describe("AnthropicChatModel", () => {
     };
 
     // Verify beta headers are set for skills
-    expect(requestOptions.headers?.["anthropic-beta"]).toBeDefined();
-    const betaHeader = requestOptions.headers?.["anthropic-beta"] ?? "";
+    assert.exists(requestOptions.headers);
+    assert.exists(requestOptions.headers["anthropic-beta"]);
+    const betaHeader = requestOptions.headers["anthropic-beta"];
     expect(betaHeader).toContain("skills-2025-10-02");
     expect(betaHeader).toContain("code-execution-2025-08-25");
     expect(betaHeader).toContain("files-api-2025-04-14");
     // Verify container body property is set
-    expect(
-      (request as unknown as Record<string, unknown>).container,
-    ).toBeDefined();
+    assert.exists(Reflect.get(request, "container"));
   });
 });
 

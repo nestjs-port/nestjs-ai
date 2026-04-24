@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
@@ -40,10 +40,7 @@ describe("OpenAiExtraBodySerialization", () => {
 
     // Assert: Verify extraBody was successfully merged
     const mergedExtraBody = merged.extraBody;
-    expect(mergedExtraBody).not.toBeNull();
-    if (mergedExtraBody == null) {
-      throw new Error("Expected merged extraBody to be non-null");
-    }
+    assert.exists(mergedExtraBody);
     // runtime option overrides default option for same key
     expect(mergedExtraBody.enable_thinking).toBe(false);
     expect(mergedExtraBody.max_depth).toBe(10);

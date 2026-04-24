@@ -16,7 +16,6 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
   BeanOutputConverter,
@@ -52,7 +51,7 @@ describe.skipIf(true)("DockerModelRunnerWithOpenAiChatModel IT", () => {
   );
 
   const systemPromptResource = readFileSync(
-    resolve(__dirname, "..", "system-message.st"),
+    new URL("../system-message.st", import.meta.url),
   );
 
   const baseUrl = "http://model-runner.docker.internal/engines";

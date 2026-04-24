@@ -25,7 +25,7 @@ import {
   RedisVectorStoreModule,
   type RedisVectorStoreProperties,
 } from "@nestjs-ai/vector-store-redis";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 const REDIS_CONFIG_TOKEN = Symbol("REDIS_CONFIG_TOKEN");
 
@@ -45,7 +45,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -64,7 +64,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
 
       const exports = featureModule.exports as symbol[];
@@ -87,7 +87,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(false);
     });
@@ -108,7 +108,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(true);
     });
@@ -131,7 +131,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -164,7 +164,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -184,7 +184,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -205,7 +205,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(false);
     });
@@ -228,7 +228,7 @@ describe("RedisVectorStoreModule", () => {
       }).compile();
 
       const vectorStore = await moduleRef.resolve(VECTOR_STORE_TOKEN);
-      expect(vectorStore).toBeDefined();
+      assert.exists(vectorStore);
       expect(client.connect).toHaveBeenCalledTimes(1);
       expect(featureModule.global).toBe(true);
     });

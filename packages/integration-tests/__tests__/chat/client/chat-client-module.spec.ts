@@ -26,7 +26,7 @@ import {
   CHAT_MODEL_TOKEN,
 } from "@nestjs-ai/commons";
 import type { ChatModel } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const CHAT_MODEL = {} as ChatModel;
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
@@ -65,7 +65,7 @@ describe("ChatClientModule", () => {
       }).compile();
 
       const builder = await moduleRef.resolve(CHAT_CLIENT_BUILDER_TOKEN);
-      expect(builder).toBeDefined();
+      assert.exists(builder);
     });
 
     it("creates a transient builder provider", async () => {

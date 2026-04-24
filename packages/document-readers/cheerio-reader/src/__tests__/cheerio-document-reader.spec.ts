@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { join } from "node:path";
-
 import { describe, expect, it } from "vitest";
 
 import { CheerioDocumentReader } from "../cheerio-document-reader.js";
@@ -24,7 +22,7 @@ import { CheerioDocumentReaderConfig } from "../config/index.js";
 describe("CheerioDocumentReader", () => {
   it("test simple read", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test.html"),
+      htmlResource: new URL("test.html", import.meta.url),
     });
     const documents = await reader.get();
 
@@ -41,7 +39,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test simple read with additional metadata", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test.html"),
+      htmlResource: new URL("test.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder()
         .additionalMetadata("key", "value")
         .build(),
@@ -55,7 +53,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test selector", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test.html"),
+      htmlResource: new URL("test.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder().selector("p").build(),
     });
     const documents = await reader.get();
@@ -66,7 +64,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test all elements", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test.html"),
+      htmlResource: new URL("test.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder().allElements(true).build(),
     });
     const documents = await reader.get();
@@ -79,7 +77,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test with link urls", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test.html"),
+      htmlResource: new URL("test.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder()
         .includeLinkUrls(true)
         .build(),
@@ -97,7 +95,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test with metadata tags", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test.html"),
+      htmlResource: new URL("test.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder()
         .metadataTags(["custom1", "custom2"])
         .build(),
@@ -114,7 +112,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test with group by element", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "test-group-by.html"),
+      htmlResource: new URL("test-group-by.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder()
         .groupByElement(true)
         .selector("section")
@@ -191,7 +189,7 @@ describe("CheerioDocumentReader", () => {
 
   it("test non existing html resource", async () => {
     const reader = new CheerioDocumentReader({
-      htmlResource: join(__dirname, "non-existing.html"),
+      htmlResource: new URL("non-existing.html", import.meta.url),
       config: CheerioDocumentReaderConfig.builder().build(),
     });
 

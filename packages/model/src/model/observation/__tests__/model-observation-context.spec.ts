@@ -19,7 +19,7 @@ import {
   AiOperationType,
   AiProvider,
 } from "@nestjs-ai/commons";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ModelObservationContext } from "../model-observation-context.js";
 
 describe("ModelObservationContext", () => {
@@ -32,7 +32,7 @@ describe("ModelObservationContext", () => {
       ),
     );
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("when request is null then throw", () => {
@@ -86,7 +86,7 @@ describe("ModelObservationContext", () => {
     );
     observationContext.setResponse("test response");
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("when response is null then throw", () => {
@@ -148,9 +148,9 @@ describe("ModelObservationContext", () => {
       ),
     );
 
-    expect(ollamaContext).toBeDefined();
-    expect(openaiContext).toBeDefined();
-    expect(anthropicContext).toBeDefined();
+    assert.exists(ollamaContext);
+    assert.exists(openaiContext);
+    assert.exists(anthropicContext);
   });
 
   it("when complex object types are used then return", () => {
@@ -163,7 +163,7 @@ describe("ModelObservationContext", () => {
     );
     observationContext.setResponse(true);
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("when get request then return", () => {
@@ -263,7 +263,7 @@ describe("ModelObservationContext", () => {
       ),
     );
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.request).toBe("");
   });
 

@@ -16,7 +16,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { Prompt } from "@nestjs-ai/model";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 import { GoogleGenAiThinkingLevel } from "../common/index.js";
 import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model.js";
 import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
@@ -64,8 +64,8 @@ describe.skipIf(!GOOGLE_API_KEY)("GoogleGenAiThinkingLevelIT", () => {
         new Prompt("What is 2+2? Answer with just the number."),
       );
 
-      expect(response).not.toBeNull();
-      expect(response.result).not.toBeNull();
+      assert.exists(response);
+      assert.exists(response.result);
       expect(response.result?.output.text).toMatch(/\S/);
     },
   );
@@ -88,8 +88,8 @@ describe.skipIf(!GOOGLE_API_KEY)("GoogleGenAiThinkingLevelIT", () => {
       new Prompt("What is 2+2? Answer with just the number."),
     );
 
-    expect(response).not.toBeNull();
-    expect(response.result).not.toBeNull();
+    assert.exists(response);
+    assert.exists(response.result);
     expect(response.result?.output.text).toMatch(/\S/);
   });
 });

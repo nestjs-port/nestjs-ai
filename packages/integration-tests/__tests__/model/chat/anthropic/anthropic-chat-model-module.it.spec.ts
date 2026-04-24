@@ -29,7 +29,7 @@ import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable } from "rxjs";
 import { tap } from "rxjs/operators";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
@@ -44,7 +44,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatModelModuleIT", () => {
 
     const response = await chatModel.call("Hello");
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response ?? "").not.toHaveLength(0);
     logger.info("Response: %s", response);
   });

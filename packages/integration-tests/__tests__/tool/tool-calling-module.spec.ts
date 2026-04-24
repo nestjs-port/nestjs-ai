@@ -25,7 +25,7 @@ import {
   TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
   ToolCallingModule,
 } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 @Global()
 @Module({
@@ -47,11 +47,9 @@ describe("ToolCallingModule", () => {
       imports: [ToolCallingModule],
     }).compile();
 
-    expect(moduleRef.get(TOOL_CALLBACK_RESOLVER_TOKEN)).toBeDefined();
-    expect(
-      moduleRef.get(TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN),
-    ).toBeDefined();
-    expect(moduleRef.get(TOOL_CALLING_MANAGER_TOKEN)).toBeDefined();
+    assert.exists(moduleRef.get(TOOL_CALLBACK_RESOLVER_TOKEN));
+    assert.exists(moduleRef.get(TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN));
+    assert.exists(moduleRef.get(TOOL_CALLING_MANAGER_TOKEN));
   });
 
   it("uses a delegating resolver when a provider instance explorer is available", async () => {

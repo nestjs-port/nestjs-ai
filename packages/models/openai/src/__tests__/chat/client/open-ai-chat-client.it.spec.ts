@@ -16,7 +16,6 @@
 
 import { readFileSync } from "node:fs";
 import { EOL } from "node:os";
-import { resolve } from "node:path";
 import {
   AdvisorParams,
   ChatClient,
@@ -30,7 +29,7 @@ import {
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
@@ -48,7 +47,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("OpenAiChatClientIT");
   const systemTextResource = readFileSync(
-    resolve(__dirname, "../system-message.st"),
+    new URL("../system-message.st", import.meta.url),
   );
   const chatModel = new OpenAiChatModel({
     options: OpenAiChatOptions.builder()
@@ -73,10 +72,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .chatResponse();
 
     logger.info("%o", response);
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected chat response to be present");
-    }
+    assert.exists(response);
     expect(response.results).toHaveLength(1);
     expect(response.results[0]?.output.text).toContain("Blackbeard");
   });
@@ -93,10 +89,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(outputConverter);
 
     logger.info("%s", String(collection));
-    expect(collection).not.toBeNull();
-    if (collection == null) {
-      throw new Error("Expected collection to be present");
-    }
+    assert.exists(collection);
     expect(collection).toHaveLength(5);
   });
 
@@ -110,10 +103,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(z.array(ActorsFilmsSchema), ActorsFilms);
 
     logger.info("%s", String(actorsFilms));
-    expect(actorsFilms).not.toBeNull();
-    if (actorsFilms == null) {
-      throw new Error("Expected actors films to be present");
-    }
+    assert.exists(actorsFilms);
     expect(actorsFilms).toHaveLength(2);
   });
 
@@ -129,10 +119,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(toStringListConverter);
 
     logger.info("ice cream flavors%s", String(flavors));
-    expect(flavors).not.toBeNull();
-    if (flavors == null) {
-      throw new Error("Expected flavors to be present");
-    }
+    assert.exists(flavors);
     expect(flavors).toHaveLength(5);
     expect(flavors).toContain("Vanilla");
   });
@@ -145,10 +132,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(ActorsFilmsSchema, ActorsFilms);
 
     logger.info("%s", String(actorsFilms));
-    expect(actorsFilms).not.toBeNull();
-    if (actorsFilms == null) {
-      throw new Error("Expected actors films to be present");
-    }
+    assert.exists(actorsFilms);
     expect(actorsFilms.actor).not.toBe("");
   });
 
@@ -161,10 +145,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(ActorsFilmsSchema, ActorsFilms);
 
     logger.info("%s", String(actorsFilms));
-    expect(actorsFilms).not.toBeNull();
-    if (actorsFilms == null) {
-      throw new Error("Expected actors films to be present");
-    }
+    assert.exists(actorsFilms);
     expect(actorsFilms.actor).not.toBe("");
   });
 
@@ -176,10 +157,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(ActorsFilmsSchema, ActorsFilms);
 
     logger.info("%s", String(actorsFilms));
-    expect(actorsFilms).not.toBeNull();
-    if (actorsFilms == null) {
-      throw new Error("Expected actors films to be present");
-    }
+    assert.exists(actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -193,10 +171,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .entity(ActorsFilmsSchema, ActorsFilms);
 
     logger.info("%s", String(actorsFilms));
-    expect(actorsFilms).not.toBeNull();
-    if (actorsFilms == null) {
-      throw new Error("Expected actors films to be present");
-    }
+    assert.exists(actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -272,10 +247,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
 
     logger.info("Response: %s", response);
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected response to be present");
-    }
+    assert.exists(response);
     expect(response).toContain("30");
     expect(response).toContain("10");
     expect(response).toContain("15");
@@ -306,10 +278,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
 
     logger.info("Response: %s", response);
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected response to be present");
-    }
+    assert.exists(response);
     expect(response).toContain("30");
     expect(response).toContain("10");
     expect(response).toContain("15");
@@ -344,7 +313,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it.each(["gpt-4o"])("multi modality embedded image", async (modelName) => {
-    const imageResource = readFileSync(resolve(__dirname, "../test.png"));
+    const imageResource = readFileSync(new URL("../test.png", import.meta.url));
 
     const response = await ChatClient.create(chatModel)
       .prompt()
@@ -358,10 +327,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .content();
 
     logger.info("%s", response);
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected response to be present");
-    }
+    assert.exists(response);
     expect(response).toContain("bananas");
   });
 
@@ -383,10 +349,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .content();
 
     logger.info("%s", response);
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected response to be present");
-    }
+    assert.exists(response);
     expect(response).toContain("bananas");
   });
 
@@ -424,14 +387,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .call()
       .chatResponse();
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected response to be present");
-    }
-    expect(response.result).not.toBeNull();
-    if (response.result == null) {
-      throw new Error("Expected response result to be present");
-    }
+    assert.exists(response);
+    assert.exists(response.result);
     const audio = response.result.output.media[0]?.dataAsByteArray;
     expect(audio).not.toBeUndefined();
     if (audio == null) {
@@ -460,10 +417,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .call()
       .content();
 
-    expect(result).not.toBeNull();
-    if (result == null) {
-      throw new Error("Expected result to be present");
-    }
+    assert.exists(result);
     const actorsFilms = outputConverter.convert(result);
 
     logger.info("%s", String(actorsFilms));
@@ -491,10 +445,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .call()
       .content();
 
-    expect(result).not.toBeNull();
-    if (result == null) {
-      throw new Error("Expected result to be present");
-    }
+    assert.exists(result);
     const actorsFilms = outputConverter.convert(result);
 
     logger.info("%s", String(actorsFilms));

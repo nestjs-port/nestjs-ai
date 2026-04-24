@@ -22,7 +22,7 @@ import type { Anthropic } from "@anthropic-ai/sdk";
 import { Prompt, UserMessage } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { assert, beforeAll, describe, expect, it } from "vitest";
 
 import {
   AnthropicChatModel,
@@ -70,7 +70,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicSkillsIT", () => {
       const prompt = new Prompt([userMessage], options);
       const response = await chatModel.call(prompt);
 
-      expect(response).not.toBeNull();
+      assert.exists(response);
       expect(response.results).not.toHaveLength(0);
 
       const responseText = response.result?.output.text ?? "";

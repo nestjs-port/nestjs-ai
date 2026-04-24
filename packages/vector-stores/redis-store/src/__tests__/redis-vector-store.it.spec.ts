@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type { Document } from "@nestjs-ai/commons";
 import {
   DocumentMetadata,
@@ -34,7 +33,7 @@ import { RedisMetadataField } from "../redis-metadata-field.js";
 import { RedisVectorStore } from "../redis-vector-store.js";
 
 const readTestData = (fileName: string): string =>
-  readFileSync(resolve(__dirname, fileName), "utf8");
+  readFileSync(new URL(fileName, import.meta.url), "utf8");
 
 const createRedisVectorStoreDocuments = (): Document[] => [
   new VectorDocument("1", readTestData("spring.ai.txt"), { meta1: "meta1" }),

@@ -31,7 +31,7 @@ import {
   NoopObservationRegistry,
   OBSERVATION_REGISTRY_TOKEN,
 } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 const OBSERVATION_CONVENTION =
@@ -90,7 +90,7 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
     });
 
     it("should apply feature properties to the embedding model options", async () => {
@@ -171,7 +171,7 @@ describe("OpenAiEmbeddingModelModule", () => {
         imports: [featureModule],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
 
       const exports = featureModule.exports as symbol[];
       expect(exports).toContain(EMBEDDING_MODEL_TOKEN);
@@ -208,7 +208,7 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
     });
 
     it("should support imports and inject for async factory", async () => {
@@ -248,7 +248,7 @@ describe("OpenAiEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
     });
 
     it("should default global to false for async", () => {

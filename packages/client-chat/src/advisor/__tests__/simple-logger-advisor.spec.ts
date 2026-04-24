@@ -20,10 +20,9 @@ import {
   ChatResponse,
   Generation,
   type Prompt,
-  type UserMessage,
 } from "@nestjs-ai/model";
 import { firstValueFrom, of } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 import { ChatClient } from "../../chat-client.js";
 import { SimpleLoggerAdvisor } from "../simple-logger-advisor.js";
@@ -78,8 +77,9 @@ describe("SimpleLoggerAdvisor", () => {
     expect(responseToString).toHaveBeenCalledTimes(1);
 
     const prompt = chatModel.lastCallPrompt;
-    expect(prompt).not.toBeNull();
-    const userMessage = prompt?.instructions[0] as UserMessage;
+    assert.exists(prompt);
+    assert.exists(prompt.instructions[0]);
+    const userMessage = prompt.instructions[0];
     expect(userMessage.text).toBe("Please answer my question XYZ");
   });
 
@@ -109,8 +109,9 @@ describe("SimpleLoggerAdvisor", () => {
     expect(responseToString).toHaveBeenCalledTimes(1);
 
     const prompt = chatModel.lastStreamPrompt;
-    expect(prompt).not.toBeNull();
-    const userMessage = prompt?.instructions[0] as UserMessage;
+    assert.exists(prompt);
+    assert.exists(prompt.instructions[0]);
+    const userMessage = prompt.instructions[0];
     expect(userMessage.text).toBe("Please answer my question XYZ");
   });
 

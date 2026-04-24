@@ -16,7 +16,7 @@
 
 import "reflect-metadata";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { Tool } from "../../annotation/index.js";
 import { NestProviderToolCallbackResolver } from "../nest-provider-tool-callback-resolver.js";
@@ -66,8 +66,8 @@ describe("NestProviderToolCallbackResolver", () => {
 
     const toolCallback = resolver.resolve("currentWeather");
 
-    expect(toolCallback).not.toBeNull();
-    expect(toolCallback?.toolDefinition.name).toBe("currentWeather");
+    assert.exists(toolCallback);
+    expect(toolCallback.toolDefinition.name).toBe("currentWeather");
   });
 
   it("returns null when no matching tool callback exists", () => {
@@ -89,8 +89,8 @@ describe("NestProviderToolCallbackResolver", () => {
 
     const toolCallback = resolver.resolve("staticTool");
 
-    expect(toolCallback).not.toBeNull();
-    expect(toolCallback?.toolDefinition.name).toBe("staticTool");
+    assert.exists(toolCallback);
+    expect(toolCallback.toolDefinition.name).toBe("staticTool");
   });
 
   it("initializes cache once and reuses it for subsequent resolves", () => {
@@ -117,6 +117,6 @@ describe("NestProviderToolCallbackResolver", () => {
 
     const toolCallback = resolver.resolve("currentWeather");
 
-    expect(toolCallback).not.toBeNull();
+    assert.exists(toolCallback);
   });
 });

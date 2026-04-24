@@ -21,7 +21,15 @@ import {
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  assert,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 import { RedisChatMemoryConfig } from "../redis-chat-memory-config.js";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
 
@@ -79,7 +87,7 @@ describe("RedisChatMemoryErrorHandlingIT", () => {
 
     // Reading with non-existent conversation ID should return empty list
     const messages = await chatMemory.get("non-existent-id", 10);
-    expect(messages).not.toBeNull();
+    assert.exists(messages);
     expect(messages).toHaveLength(0);
 
     // Clearing with null conversation ID

@@ -22,7 +22,7 @@ import {
   SystemMessage,
   UserMessage,
 } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { GoogleGenAiThinkingLevel } from "../common/index.js";
 import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model.js";
 import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
@@ -403,7 +403,7 @@ describe("GoogleGenAiChatModel", () => {
       ),
     );
 
-    expect(request.config.systemInstruction).toBeDefined();
+    assert.exists(request.config.systemInstruction);
     expect(request.contents).toEqual([]);
   });
 
@@ -673,7 +673,8 @@ describe("GoogleGenAiChatModel", () => {
       model.buildRequestPrompt(new Prompt("Test message content")),
     );
 
-    expect(request.config.thinkingConfig?.thinkingLevel).toBeDefined();
+    assert.exists(request.config.thinkingConfig);
+    assert.exists(request.config.thinkingConfig.thinkingLevel);
   });
 
   it("create request with pro model in custom path", () => {

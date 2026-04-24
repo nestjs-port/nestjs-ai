@@ -23,6 +23,11 @@ import {
   MarkdownDocumentReaderConfig,
 } from "../index.js";
 
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+
 describe("MarkdownDocumentReader", () => {
   it("test dir path single", async () => {
     const reader = new MarkdownDocumentReader({
@@ -450,5 +455,5 @@ function expectUnorderedDocuments(
 }
 
 function resourcePath(path: string): string {
-  return join(__dirname, path);
+  return join(currentDir, path);
 }

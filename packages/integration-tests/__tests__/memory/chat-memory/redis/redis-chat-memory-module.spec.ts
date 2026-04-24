@@ -22,7 +22,7 @@ import {
   RedisChatMemoryModule,
   type RedisChatMemoryProperties,
 } from "@nestjs-ai/model-chat-memory-repository-redis";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 describe("RedisChatMemoryModule", () => {
   describe("forFeature", () => {
@@ -39,7 +39,7 @@ describe("RedisChatMemoryModule", () => {
       }).compile();
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
-      expect(chatMemory).toBeDefined();
+      assert.exists(chatMemory);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -65,7 +65,7 @@ describe("RedisChatMemoryModule", () => {
       expect(resolvedProperties).toEqual(properties);
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
-      expect(chatMemory).toBeDefined();
+      assert.exists(chatMemory);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
   });
@@ -86,7 +86,7 @@ describe("RedisChatMemoryModule", () => {
       }).compile();
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
-      expect(chatMemory).toBeDefined();
+      assert.exists(chatMemory);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -111,7 +111,7 @@ describe("RedisChatMemoryModule", () => {
       }).compile();
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
-      expect(chatMemory).toBeDefined();
+      assert.exists(chatMemory);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
 
@@ -131,7 +131,7 @@ describe("RedisChatMemoryModule", () => {
       }).compile();
 
       const chatMemory = await moduleRef.resolve(CHAT_MEMORY_TOKEN);
-      expect(chatMemory).toBeDefined();
+      assert.exists(chatMemory);
       expect(client.connect).toHaveBeenCalledTimes(1);
     });
   });

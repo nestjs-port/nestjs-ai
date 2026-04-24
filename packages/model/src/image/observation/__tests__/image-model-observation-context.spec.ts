@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ImageOptionsBuilder, ImagePrompt } from "../../index.js";
 import { ImageModelObservationContext } from "../image-model-observation-context.js";
 
@@ -27,7 +27,7 @@ describe("ImageModelObservationContext", () => {
       "superprovider",
     );
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("should build context with image options", () => {
@@ -41,7 +41,7 @@ describe("ImageModelObservationContext", () => {
       "test-provider",
     );
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("should throw exception when image prompt is null", () => {
@@ -95,8 +95,8 @@ describe("ImageModelObservationContext", () => {
       "provider-beta",
     );
 
-    expect(context1).toBeDefined();
-    expect(context2).toBeDefined();
+    assert.exists(context1);
+    assert.exists(context2);
     expect(context1).not.toBe(context2);
   });
 });

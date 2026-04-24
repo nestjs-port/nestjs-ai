@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages/assistant-message.js";
-import { SystemMessage } from "../../messages/system-message.js";
-import { ToolResponseMessage } from "../../messages/tool-response-message.js";
-import { UserMessage } from "../../messages/user-message.js";
+import { assert, describe, expect, it } from "vitest";
+import { AssistantMessage } from "../../messages/index.js";
+import { SystemMessage } from "../../messages/index.js";
+import { ToolResponseMessage } from "../../messages/index.js";
+import { UserMessage } from "../../messages/index.js";
 import { DefaultChatOptions } from "../default-chat-options.js";
 import { Prompt } from "../prompt.js";
 
@@ -35,10 +35,10 @@ describe("Prompt", () => {
 
   it("when content is empty then return", () => {
     const prompt = new Prompt("");
-    expect(prompt).toBeDefined();
+    assert.exists(prompt);
 
     const prompt2 = new Prompt("", new DefaultChatOptions());
-    expect(prompt2).toBeDefined();
+    assert.exists(prompt2);
   });
 
   it("when message is null then throw", () => {
@@ -63,7 +63,7 @@ describe("Prompt", () => {
       .messages(new UserMessage({ content: "Hello" }))
       .build();
 
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("Hello");
   });
 
@@ -75,7 +75,7 @@ describe("Prompt", () => {
       )
       .build();
 
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("How are you?");
   });
 
@@ -84,12 +84,12 @@ describe("Prompt", () => {
       .messages(new SystemMessage({ content: "You'll be back!" }))
       .build();
 
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("");
 
     const prompt2 = Prompt.builder().messages([]).build();
 
-    expect(prompt2.userMessage).toBeDefined();
+    assert.exists(prompt2.userMessage);
     expect(prompt2.userMessage.text).toBe("");
   });
 
@@ -98,7 +98,7 @@ describe("Prompt", () => {
       .messages(new UserMessage({ content: "Hello" }))
       .build();
 
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("Hello");
 
     const copy = prompt.augmentUserMessage((message) => {
@@ -109,9 +109,9 @@ describe("Prompt", () => {
       });
     });
 
-    expect(copy.userMessage).toBeDefined();
+    assert.exists(copy.userMessage);
     expect(copy.userMessage.text).toBe("How are you?");
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("Hello");
   });
 
@@ -123,7 +123,7 @@ describe("Prompt", () => {
       )
       .build();
 
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("How are you?");
 
     const copy = prompt.augmentUserMessage((message) => {
@@ -134,9 +134,9 @@ describe("Prompt", () => {
       });
     });
 
-    expect(copy.userMessage).toBeDefined();
+    assert.exists(copy.userMessage);
     expect(copy.userMessage.text).toBe("What about you?");
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("How are you?");
   });
 
@@ -145,7 +145,7 @@ describe("Prompt", () => {
       .messages(new SystemMessage({ content: "You'll be back!" }))
       .build();
 
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("");
 
     const copy = prompt.augmentUserMessage((message) => {
@@ -159,9 +159,9 @@ describe("Prompt", () => {
     expect(copy.instructions[copy.instructions.length - 1]).toBeInstanceOf(
       UserMessage,
     );
-    expect(copy.userMessage).toBeDefined();
+    assert.exists(copy.userMessage);
     expect(copy.userMessage.text).toBe("How are you?");
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("");
   });
 
@@ -170,7 +170,7 @@ describe("Prompt", () => {
       .messages(new SystemMessage({ content: "Hello" }))
       .build();
 
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("Hello");
   });
 
@@ -182,7 +182,7 @@ describe("Prompt", () => {
       )
       .build();
 
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("Hello");
   });
 
@@ -191,12 +191,12 @@ describe("Prompt", () => {
       .messages(new UserMessage({ content: "You'll be back!" }))
       .build();
 
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("");
 
     const prompt2 = Prompt.builder().messages([]).build();
 
-    expect(prompt2.systemMessage).toBeDefined();
+    assert.exists(prompt2.systemMessage);
     expect(prompt2.systemMessage.text).toBe("");
   });
 
@@ -205,7 +205,7 @@ describe("Prompt", () => {
       .messages(new SystemMessage({ content: "Hello" }))
       .build();
 
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("Hello");
 
     const copy = prompt.augmentSystemMessage((message) => {
@@ -215,9 +215,9 @@ describe("Prompt", () => {
       });
     });
 
-    expect(copy.systemMessage).toBeDefined();
+    assert.exists(copy.systemMessage);
     expect(copy.systemMessage.text).toBe("How are you?");
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("Hello");
   });
 
@@ -229,7 +229,7 @@ describe("Prompt", () => {
       )
       .build();
 
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("Hello");
 
     const copy = prompt.augmentSystemMessage((message) => {
@@ -239,9 +239,9 @@ describe("Prompt", () => {
       });
     });
 
-    expect(copy.systemMessage).toBeDefined();
+    assert.exists(copy.systemMessage);
     expect(copy.systemMessage.text).toBe("What about you?");
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("Hello");
   });
 
@@ -250,7 +250,7 @@ describe("Prompt", () => {
       .messages(new UserMessage({ content: "You'll be back!" }))
       .build();
 
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("");
 
     const copy = prompt.augmentSystemMessage((message) => {
@@ -261,9 +261,9 @@ describe("Prompt", () => {
     });
 
     expect(copy.instructions[0]).toBeInstanceOf(SystemMessage);
-    expect(copy.systemMessage).toBeDefined();
+    assert.exists(copy.systemMessage);
     expect(copy.systemMessage.text).toBe("How are you?");
-    expect(prompt.systemMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
     expect(prompt.systemMessage.text).toBe("");
   });
 
@@ -274,8 +274,8 @@ describe("Prompt", () => {
     ];
     const prompt = Prompt.builder().messages(messages).build();
 
-    expect(prompt.systemMessage).toBeDefined();
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("Hi");
     expect(prompt.systemMessage.text).toBe("Hello");
 
@@ -286,12 +286,12 @@ describe("Prompt", () => {
       });
     });
 
-    expect(copy.systemMessage).toBeDefined();
+    assert.exists(copy.systemMessage);
     expect(copy.instructions.length).toBe(messages.length);
     expect(copy.systemMessage.text).toBe("How are you?");
 
-    expect(prompt.systemMessage).toBeDefined();
-    expect(prompt.userMessage).toBeDefined();
+    assert.exists(prompt.systemMessage);
+    assert.exists(prompt.userMessage);
     expect(prompt.userMessage.text).toBe("Hi");
     expect(prompt.systemMessage.text).toBe("Hello");
   });
@@ -344,7 +344,7 @@ describe("Prompt", () => {
       .messages(new UserMessage({ content: "Hello" }))
       .build();
 
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(UserMessage);
     expect(prompt.lastUserOrToolResponseMessage.text).toBe("Hello");
   });
@@ -355,7 +355,7 @@ describe("Prompt", () => {
     });
     const prompt = Prompt.builder().messages(toolResponse).build();
 
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(
       ToolResponseMessage,
     );
@@ -376,7 +376,7 @@ describe("Prompt", () => {
       .build();
 
     // Should return the last one chronologically (toolResponse)
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(
       ToolResponseMessage,
     );
@@ -391,7 +391,7 @@ describe("Prompt", () => {
       .build();
 
     // Should return the last UserMessage
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(UserMessage);
     expect(prompt.lastUserOrToolResponseMessage.text).toBe("Second question");
   });
@@ -405,7 +405,7 @@ describe("Prompt", () => {
       .build();
 
     // Should return empty UserMessage
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(UserMessage);
     expect(prompt.lastUserOrToolResponseMessage.text).toBe("");
   });
@@ -413,7 +413,7 @@ describe("Prompt", () => {
   it("get last user or tool response message when empty", () => {
     const prompt = Prompt.builder().messages([]).build();
 
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(UserMessage);
     expect(prompt.lastUserOrToolResponseMessage.text).toBe("");
   });
@@ -430,7 +430,7 @@ describe("Prompt", () => {
       .build();
 
     // Should return the last UserMessage
-    expect(prompt.lastUserOrToolResponseMessage).toBeDefined();
+    assert.exists(prompt.lastUserOrToolResponseMessage);
     expect(prompt.lastUserOrToolResponseMessage).toBeInstanceOf(UserMessage);
     expect(prompt.lastUserOrToolResponseMessage.text).toBe(
       "Latest user message",

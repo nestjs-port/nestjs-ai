@@ -28,7 +28,15 @@ import {
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  assert,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 import { RedisChatMemoryConfig } from "../redis-chat-memory-config.js";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
 
@@ -150,7 +158,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
       // Verify message was stored and retrieved correctly
       expect(messages).toHaveLength(1);
       const retrievedMessage = messages[0];
-      expect(retrievedMessage).toBeDefined();
+      assert.exists(retrievedMessage);
       if (!retrievedMessage) {
         return;
       }
@@ -185,7 +193,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(SystemMessage);
     const retrievedMessage = messages[0] as SystemMessage | undefined;
-    expect(retrievedMessage).toBeDefined();
+    assert.exists(retrievedMessage);
     if (!retrievedMessage) {
       return;
     }
@@ -307,7 +315,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
       // Verify message was stored correctly
       expect(messages).toHaveLength(1);
       const retrievedMessage = messages[0];
-      expect(retrievedMessage).toBeDefined();
+      assert.exists(retrievedMessage);
       if (!retrievedMessage) {
         return;
       }
@@ -358,7 +366,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(AssistantMessage);
     const retrievedMessage = messages[0] as AssistantMessage | undefined;
-    expect(retrievedMessage).toBeDefined();
+    assert.exists(retrievedMessage);
     if (!retrievedMessage) {
       return;
     }
@@ -405,7 +413,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
 
     // Cast and verify tool responses
     const retrievedMessage = messages[0] as ToolResponseMessage | undefined;
-    expect(retrievedMessage).toBeDefined();
+    assert.exists(retrievedMessage);
     if (!retrievedMessage) {
       return;
     }
@@ -459,7 +467,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toBeInstanceOf(ToolResponseMessage);
     const retrievedMessage = messages[0] as ToolResponseMessage | undefined;
-    expect(retrievedMessage).toBeDefined();
+    assert.exists(retrievedMessage);
     if (!retrievedMessage) {
       return;
     }
@@ -557,7 +565,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     const retrievedToolResponse = messages[2] as
       | ToolResponseMessage
       | undefined;
-    expect(retrievedToolResponse).toBeDefined();
+    assert.exists(retrievedToolResponse);
     if (!retrievedToolResponse) {
       return;
     }
@@ -567,7 +575,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
 
     // Verify the final response includes information from the tool
     const retrievedFinalResponse = messages[3] as AssistantMessage | undefined;
-    expect(retrievedFinalResponse).toBeDefined();
+    assert.exists(retrievedFinalResponse);
     if (!retrievedFinalResponse) {
       return;
     }
@@ -708,7 +716,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     for (let i = 0; i < expectedMessages.length; i++) {
       const expected = expectedMessages[i];
       const actual = retrievedMessages[i];
-      expect(actual).toBeDefined();
+      assert.exists(actual);
       if (!actual || !expected) {
         continue;
       }
@@ -772,7 +780,7 @@ describe("RedisChatMemoryMessageTypesIT", () => {
     for (let i = 0; i < expectedMessages.length; i++) {
       const expected = expectedMessages[i];
       const actual = retrievedMessages[i];
-      expect(actual).toBeDefined();
+      assert.exists(actual);
       if (!actual || !expected) {
         continue;
       }

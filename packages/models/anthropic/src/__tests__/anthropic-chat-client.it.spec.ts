@@ -17,7 +17,6 @@
 import "reflect-metadata";
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import {
   AdvisorParams,
   ChatClient,
@@ -52,7 +51,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("AnthropicChatClientIT");
   const systemTextResource = readFileSync(
-    resolve(__dirname, "resources", "system-message.st"),
+    new URL("resources/system-message.st", import.meta.url),
   );
 
   let chatModel: AnthropicChatModel;
@@ -290,7 +289,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
           .text("Explain what do you see on this picture?")
           .media(
             MediaFormat.IMAGE_PNG,
-            readFileSync(resolve(__dirname, "resources", "test.png")),
+            readFileSync(new URL("resources/test.png", import.meta.url)),
           ),
       )
       .call()
@@ -329,7 +328,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
           .text("Explain what do you see on this picture?")
           .media(
             MediaFormat.IMAGE_PNG,
-            readFileSync(resolve(__dirname, "resources", "test.png")),
+            readFileSync(new URL("resources/test.png", import.meta.url)),
           ),
       )
       .stream()

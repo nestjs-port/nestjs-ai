@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { Character, ForkPdfLayoutTextStripper, TextLine } from "../index.js";
 
 describe("TextLine", () => {
@@ -173,6 +173,6 @@ describe("TextLine", () => {
 
     // Verify how non-printable characters are handled
     const line = textLine.line;
-    expect(line).toBeDefined();
+    assert.exists(line);
   });
 });

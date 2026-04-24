@@ -26,7 +26,7 @@ import {
   NoopObservationRegistry,
 } from "@nestjs-port/core";
 import { lastValueFrom, of } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ChatClientRequest } from "../../chat-client-request.js";
 import { ChatClientResponse } from "../../chat-client-response.js";
 import type {
@@ -78,7 +78,7 @@ describe("DefaultAroundAdvisorChain", () => {
       .observationConvention(null)
       .build();
 
-    expect(chain).toBeDefined();
+    assert.exists(chain);
   });
 
   it("get observation registry", () => {

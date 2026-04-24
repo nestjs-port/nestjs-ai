@@ -16,7 +16,7 @@
 
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { DefaultToolCallingChatOptions } from "../../../model/index.js";
 import {
   DefaultToolDefinition,
@@ -336,7 +336,7 @@ describe("DefaultChatModelObservationConvention", () => {
             keyValue.key === AiObservationAttributes.REQUEST_TOOL_NAMES.value,
         ) ?? null;
 
-    expect(toolNamesKeyValue).not.toBeNull();
+    assert.exists(toolNamesKeyValue);
     expect(toolNamesKeyValue?.value).toContain("toolA");
     expect(toolNamesKeyValue?.value).toContain("toolB");
     expect(toolNamesKeyValue?.value).toContain("tool1");

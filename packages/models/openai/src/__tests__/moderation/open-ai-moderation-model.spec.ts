@@ -18,7 +18,7 @@ import type { OpenAiClient } from "../../open-ai-client.js";
 import { OpenAiModerationModel } from "../../open-ai-moderation-model.js";
 import { OpenAiModerationOptions } from "../../open-ai-moderation-options.js";
 import { ModerationOptionsBuilder, ModerationPrompt } from "@nestjs-ai/model";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { ms } from "@nestjs-port/core";
 
 function createMockClient(): OpenAiClient {
@@ -35,8 +35,8 @@ describe("OpenAiModerationModelTests", () => {
       openAiClient: createMockClient(),
     });
 
-    expect(model).not.toBeNull();
-    expect(model.options).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.options);
   });
 
   it("test builder with defaults", () => {
@@ -44,8 +44,8 @@ describe("OpenAiModerationModelTests", () => {
       openAiClient: createMockClient(),
     });
 
-    expect(model).not.toBeNull();
-    expect(model.options).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.options);
     expect(model.options).toBeInstanceOf(OpenAiModerationOptions);
     expect(model.options.model).toBe(
       OpenAiModerationOptions.DEFAULT_MODERATION_MODEL,
@@ -62,7 +62,7 @@ describe("OpenAiModerationModelTests", () => {
       options,
     });
 
-    expect(model).not.toBeNull();
+    assert.exists(model);
     expect(model.options.model).toBe("omni-moderation-2024-09-26");
   });
 
@@ -73,8 +73,8 @@ describe("OpenAiModerationModelTests", () => {
       }),
     });
 
-    expect(model).not.toBeNull();
-    expect(model.options).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.options);
   });
 
   it("test mutate creates builder with same configuration", () => {
@@ -90,7 +90,7 @@ describe("OpenAiModerationModelTests", () => {
 
     const mutatedModel = model.mutate();
 
-    expect(mutatedModel).not.toBeNull();
+    assert.exists(mutatedModel);
     expect(mutatedModel.options.model).toBe("omni-moderation-2024-09-26");
     expect(mutatedModel.options.baseUrl).toBe("https://custom.example.com");
   });

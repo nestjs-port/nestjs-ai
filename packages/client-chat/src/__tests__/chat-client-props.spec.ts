@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
   AssistantMessage,
@@ -70,7 +69,7 @@ describe("ChatClient prompt(props) API", () => {
     const captured = createCapturedPrompt();
     const chatModel = createChatModel(captured);
     const tabbyCatResource = readFileSync(
-      resolve(__dirname, "./tabby-cat.png"),
+      new URL("./tabby-cat.png", import.meta.url),
     );
 
     const content = await ChatClient.builder(chatModel)

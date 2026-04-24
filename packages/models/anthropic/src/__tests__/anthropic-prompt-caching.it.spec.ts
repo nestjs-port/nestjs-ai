@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type {
   Model as AnthropicModel,
   Usage as AnthropicSdkUsage,
@@ -30,7 +29,7 @@ import {
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   AnthropicCacheOptions,
@@ -57,7 +56,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
   function loadPrompt(filename: string): string {
     try {
       const basePrompt = readFileSync(
-        resolve(__dirname, "resources", filename),
+        new URL(`resources/${filename}`, import.meta.url),
         "utf8",
       );
       return `${basePrompt}\n\nTest execution timestamp: ${Date.now()}`;
@@ -102,15 +101,12 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.text).toMatch(/\S/);
     logger.info("System-only cache response: {}", response.result?.output.text);
 
     const usage = getSdkUsage(response);
-    expect(usage).not.toBeNull();
-    if (usage == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage);
 
     const cacheCreation = usage.cache_creation_input_tokens ?? 0;
     const cacheRead = usage.cache_read_input_tokens ?? 0;
@@ -169,7 +165,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.text).toMatch(/\S/);
     logger.info(
       "System and tools cache response: {}",
@@ -234,18 +230,13 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn1 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn1).not.toBeNull();
+    assert.exists(turn1);
     const turn1Output = turn1.result?.output;
-    if (turn1Output == null) {
-      throw new Error("Expected turn 1 output to be present");
-    }
+    assert.exists(turn1Output);
     conversationHistory.push(turn1Output);
 
     const usage1 = getSdkUsage(turn1);
-    expect(usage1).not.toBeNull();
-    if (usage1 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage1);
     const turn1Creation = usage1.cache_creation_input_tokens ?? 0;
     expect(turn1.metadata.usage.cacheWriteInputTokens).toBe(
       usage1.cache_creation_input_tokens ?? null,
@@ -266,18 +257,13 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn2 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn2).not.toBeNull();
+    assert.exists(turn2);
     const turn2Output = turn2.result?.output;
-    if (turn2Output == null) {
-      throw new Error("Expected turn 2 output to be present");
-    }
+    assert.exists(turn2Output);
     conversationHistory.push(turn2Output);
 
     const usage2 = getSdkUsage(turn2);
-    expect(usage2).not.toBeNull();
-    if (usage2 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage2);
     expect(turn2.metadata.usage.cacheWriteInputTokens).toBe(
       usage2.cache_creation_input_tokens ?? null,
     );
@@ -309,18 +295,13 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn3 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn3).not.toBeNull();
+    assert.exists(turn3);
     const turn3Output = turn3.result?.output;
-    if (turn3Output == null) {
-      throw new Error("Expected turn 3 output to be present");
-    }
+    assert.exists(turn3Output);
     conversationHistory.push(turn3Output);
 
     const usage3 = getSdkUsage(turn3);
-    expect(usage3).not.toBeNull();
-    if (usage3 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage3);
     if (turn1Creation > 0 || (usage2.cache_creation_input_tokens ?? 0) > 0) {
       assertGreaterThan(
         usage3.cache_read_input_tokens ?? 0,
@@ -343,13 +324,10 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn4 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn4).not.toBeNull();
+    assert.exists(turn4);
 
     const usage4 = getSdkUsage(turn4);
-    expect(usage4).not.toBeNull();
-    if (usage4 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage4);
     const cachingStarted =
       turn1Creation > 0 ||
       (usage2.cache_creation_input_tokens ?? 0) > 0 ||
@@ -414,12 +392,9 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     const usage = getSdkUsage(response);
-    expect(usage).not.toBeNull();
-    if (usage == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage);
     assertTrue(
       (usage.cache_creation_input_tokens ?? 0) === 0,
       "No cache should be created below min length",
@@ -458,7 +433,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.text ?? "").toContain("4");
     logger.info(
       "Extended TTL cache response: {}",
@@ -466,10 +441,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     );
 
     const usage = getSdkUsage(response);
-    expect(usage).not.toBeNull();
-    if (usage == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage);
     const cacheCreation = usage.cache_creation_input_tokens ?? 0;
     const cacheRead = usage.cache_read_input_tokens ?? 0;
     assertTrue(
@@ -505,14 +477,11 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.text).toMatch(/\S/);
 
     const usage = getSdkUsage(response);
-    expect(usage).not.toBeNull();
-    if (usage == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage);
     expect(usage.cache_creation_input_tokens ?? 0).toBe(0);
     expect(usage.cache_read_input_tokens ?? 0).toBe(0);
   });
@@ -544,18 +513,13 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn1 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn1).not.toBeNull();
+    assert.exists(turn1);
     const turn1Output = turn1.result?.output;
-    if (turn1Output == null) {
-      throw new Error("Expected turn 1 output to be present");
-    }
+    assert.exists(turn1Output);
     conversationHistory.push(turn1Output);
 
     const usage1 = getSdkUsage(turn1);
-    expect(usage1).not.toBeNull();
-    if (usage1 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage1);
     let cachingStarted = (usage1.cache_creation_input_tokens ?? 0) > 0;
 
     // Turn 2
@@ -567,18 +531,13 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn2 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn2).not.toBeNull();
+    assert.exists(turn2);
     const turn2Output = turn2.result?.output;
-    if (turn2Output == null) {
-      throw new Error("Expected turn 2 output to be present");
-    }
+    assert.exists(turn2Output);
     conversationHistory.push(turn2Output);
 
     const usage2 = getSdkUsage(turn2);
-    expect(usage2).not.toBeNull();
-    if (usage2 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage2);
     if (cachingStarted) {
       assertGreaterThan(
         usage2.cache_read_input_tokens ?? 0,
@@ -599,18 +558,13 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn3 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn3).not.toBeNull();
+    assert.exists(turn3);
     const turn3Output = turn3.result?.output;
-    if (turn3Output == null) {
-      throw new Error("Expected turn 3 output to be present");
-    }
+    assert.exists(turn3Output);
     conversationHistory.push(turn3Output);
 
     const usage3 = getSdkUsage(turn3);
-    expect(usage3).not.toBeNull();
-    if (usage3 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage3);
     if (cachingStarted) {
       assertGreaterThan(
         usage3.cache_read_input_tokens ?? 0,
@@ -630,13 +584,10 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     const turn4 = await chatModel.call(
       new Prompt(conversationHistory, options),
     );
-    expect(turn4).not.toBeNull();
+    assert.exists(turn4);
 
     const usage4 = getSdkUsage(turn4);
-    expect(usage4).not.toBeNull();
-    if (usage4 == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage4);
     assertTrue(cachingStarted, "Caching should have started by turn 4");
     if (cachingStarted) {
       assertGreaterThan(
@@ -696,7 +647,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.text).toMatch(/\S/);
     logger.info(
       "Multi-block system cache response: {}",
@@ -704,10 +655,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicPromptCachingIT", () => {
     );
 
     const usage = getSdkUsage(response);
-    expect(usage).not.toBeNull();
-    if (usage == null) {
-      throw new Error("Expected SDK usage to be present");
-    }
+    assert.exists(usage);
     const cacheCreation = usage.cache_creation_input_tokens ?? 0;
     const cacheRead = usage.cache_read_input_tokens ?? 0;
     assertTrue(

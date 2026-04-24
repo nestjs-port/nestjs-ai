@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { resolve } from "node:path";
-
 import {
   AudioTranscriptionPrompt,
   type AudioTranscriptionResponse,
@@ -29,7 +27,7 @@ import { OpenAiAudioTranscriptionOptions } from "../../open-ai-audio-transcripti
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const SPEECH_RESOURCE = resolve(__dirname, "./speech.flac");
+const SPEECH_RESOURCE = new URL("./speech.flac", import.meta.url);
 
 describe.skipIf(!OPENAI_API_KEY)("OpenAiAudioTranscriptionModelIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));

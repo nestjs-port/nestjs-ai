@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { resolve } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 import {
   ExtractedTextFormatter,
@@ -25,8 +24,8 @@ import {
 } from "../index.js";
 
 describe("ParagraphPdfDocumentReader", () => {
-  const sample1Pdf = resolve(__dirname, "sample1.pdf");
-  const sample3Pdf = resolve(__dirname, "sample3.pdf");
+  const sample1Pdf = new URL("sample1.pdf", import.meta.url);
+  const sample3Pdf = new URL("sample3.pdf", import.meta.url);
 
   it("test pdf without toc", async () => {
     const reader = new ParagraphPdfDocumentReader({
@@ -85,7 +84,7 @@ describe("ParagraphPdfDocumentReader", () => {
 
       const documents = await reader.get();
 
-      expect(documents).toBeDefined();
+      assert.exists(documents);
       expect(documents).toHaveLength(2);
       expect(documents[0]?.metadata.title).toBe("Chapter 1");
       expect(documents[1]?.metadata.title).toBe("Chapter 3");

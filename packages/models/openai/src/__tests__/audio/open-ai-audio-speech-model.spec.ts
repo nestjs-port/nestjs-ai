@@ -16,7 +16,7 @@
 
 import type { TextToSpeechOptions, TextToSpeechPrompt } from "@nestjs-ai/model";
 import type { OpenAI } from "openai";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiAudioSpeechModel } from "../../open-ai-audio-speech-model.js";
 import { OpenAiAudioSpeechOptions } from "../../open-ai-audio-speech-options.js";
@@ -36,23 +36,23 @@ describe("OpenAiAudioSpeechModelTests", () => {
   it("creates a model", () => {
     const model = createModel();
 
-    expect(model).not.toBeNull();
-    expect(model.defaultOptions).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.defaultOptions);
   });
 
   it("uses the default constructor", () => {
     const model = createModel();
 
-    expect(model).not.toBeNull();
-    expect(model.defaultOptions).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.defaultOptions);
     expect(model.defaultOptions).toBeInstanceOf(OpenAiAudioSpeechOptions);
   });
 
   it("creates a model with a client", () => {
     const model = createModel();
 
-    expect(model).not.toBeNull();
-    expect(model.defaultOptions).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.defaultOptions);
   });
 
   it("creates a model with a client and options", () => {
@@ -63,7 +63,7 @@ describe("OpenAiAudioSpeechModelTests", () => {
 
     const model = createModel(options);
 
-    expect(model).not.toBeNull();
+    assert.exists(model);
     expect(model.defaultOptions).toEqual(options);
   });
 
@@ -76,7 +76,7 @@ describe("OpenAiAudioSpeechModelTests", () => {
 
     const model = createModel(options);
 
-    expect(model).not.toBeNull();
+    assert.exists(model);
     expect(model.defaultOptions).toEqual(options);
   });
 
@@ -212,15 +212,15 @@ describe("OpenAiAudioSpeechModelTests", () => {
 
     const model = createModel(options);
 
-    expect(model).not.toBeNull();
+    assert.exists(model);
     expect(model.defaultOptions).toEqual(options);
   });
 
   it("builds a model with defaults", () => {
     const model = createModel();
 
-    expect(model).not.toBeNull();
-    expect(model.defaultOptions).not.toBeNull();
+    assert.exists(model);
+    assert.exists(model.defaultOptions);
     expect(model.defaultOptions).toBeInstanceOf(OpenAiAudioSpeechOptions);
 
     const defaults = model.defaultOptions as OpenAiAudioSpeechOptions;
@@ -261,7 +261,7 @@ describe("OpenAiAudioSpeechModelTests", () => {
   it("builds a model with partial options", () => {
     const model = createModel();
 
-    expect(model).not.toBeNull();
+    assert.exists(model);
     const defaults = model.defaultOptions as OpenAiAudioSpeechOptions;
     expect(defaults.model).toBe("gpt-4o-mini-tts");
   });

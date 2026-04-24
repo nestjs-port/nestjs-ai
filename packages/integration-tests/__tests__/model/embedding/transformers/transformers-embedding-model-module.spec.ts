@@ -26,7 +26,7 @@ import {
   NoopObservationRegistry,
   OBSERVATION_REGISTRY_TOKEN,
 } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const MODEL_CONFIG_TOKEN = Symbol("MODEL_CONFIG_TOKEN");
 const OBSERVATION_CONVENTION =
@@ -85,7 +85,7 @@ describe("TransformersEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
     });
 
     it("maps properties into the embedding model", async () => {
@@ -168,7 +168,7 @@ describe("TransformersEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
     });
 
     it("supports imports and inject for async factory", async () => {
@@ -202,7 +202,7 @@ describe("TransformersEmbeddingModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(EMBEDDING_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(EMBEDDING_MODEL_TOKEN));
     });
 
     it("uses global false by default for async", () => {

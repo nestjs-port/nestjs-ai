@@ -25,7 +25,7 @@ import {
   EmbeddingRequest,
 } from "@nestjs-ai/model";
 import { TestObservationRegistry } from "@nestjs-port/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { assert, beforeAll, describe, expect, it } from "vitest";
 
 import { TransformersEmbeddingModel } from "../transformers-embedding-model.js";
 
@@ -52,7 +52,7 @@ describe("TransformersEmbeddingModelObservationIT", () => {
 
     const embeddingResponse = await embeddingModel.call(embeddingRequest);
     expect(embeddingResponse.results).not.toHaveLength(0);
-    expect(embeddingResponse.metadata).toBeDefined();
+    assert.exists(embeddingResponse.metadata);
 
     expect(observationRegistry.currentObservation).toBeNull();
     expect(observationRegistry.contexts).toHaveLength(1);

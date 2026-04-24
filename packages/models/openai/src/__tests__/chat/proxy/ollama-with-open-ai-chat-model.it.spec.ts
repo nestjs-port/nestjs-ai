@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
@@ -31,7 +30,7 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 
 import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../../open-ai-chat-options.js";
@@ -56,7 +55,7 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
     let chatModel: OpenAiChatModel;
 
     const systemPromptResource = readFileSync(
-      resolve(__dirname, "..", "system-message.st"),
+      new URL("../system-message.st", import.meta.url),
     );
 
     beforeEach(() => {
@@ -201,7 +200,7 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
     });
 
     it("multi modality embedded image", async () => {
-      const imageData = readFileSync(resolve(__dirname, "..", "test.png"));
+      const imageData = readFileSync(new URL("../test.png", import.meta.url));
 
       const userMessage = new UserMessage({
         content: "Explain what do you see on this picture?",
@@ -262,7 +261,7 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
 
       const response = await chatModel.call(prompt);
 
-      expect(response).not.toBeNull();
+      assert.exists(response);
       expect(response.result?.output.text).not.toBe("");
       // Because max_tokens is 2, the finish reason should be length or similar
       // indicating truncation

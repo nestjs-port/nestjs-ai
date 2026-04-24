@@ -23,7 +23,7 @@ import {
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
@@ -161,10 +161,7 @@ describe.skipIf(!OPENAI_API_KEY)(
 
       logger.info("Response: %s", response);
 
-      expect(response).not.toBeNull();
-      if (response == null) {
-        throw new Error("Expected response to be present");
-      }
+      assert.exists(response);
       expect(response).toContain("30");
       expect(response).toContain("10");
       expect(response).toContain("15");
@@ -228,10 +225,7 @@ describe.skipIf(!OPENAI_API_KEY)(
 
       logger.info("Response: %s", response);
 
-      expect(response).not.toBeNull();
-      if (response == null) {
-        throw new Error("Expected response to be present");
-      }
+      assert.exists(response);
       expect(response).toContain("30");
       expect(response).toContain("10");
       expect(response).toContain("15");
@@ -277,10 +271,7 @@ describe.skipIf(!OPENAI_API_KEY)(
 
       logger.info("Response: %s", response);
 
-      expect(response).not.toBeNull();
-      if (response == null) {
-        throw new Error("Expected response to be present");
-      }
+      assert.exists(response);
       expect(response).toContain("30");
       expect(response).toContain("10");
       expect(response).toContain("15");

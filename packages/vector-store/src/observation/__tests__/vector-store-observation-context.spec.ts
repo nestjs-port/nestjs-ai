@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { VectorStoreObservationContext } from "../vector-store-observation-context.js";
 
 describe("VectorStoreObservationContext", () => {
@@ -23,7 +23,7 @@ describe("VectorStoreObservationContext", () => {
       databaseSystem: "db",
       operationName: VectorStoreObservationContext.Operation.ADD,
     });
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("when db system is null then throw", () => {

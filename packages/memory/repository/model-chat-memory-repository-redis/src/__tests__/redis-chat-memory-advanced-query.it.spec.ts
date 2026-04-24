@@ -27,7 +27,15 @@ import {
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  assert,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
 
 const sleep = async (ms: number) =>
@@ -290,7 +298,7 @@ describe("RedisChatMemoryAdvancedQueryIT", () => {
     const systemMessages = await chatMemory.findByType(MessageType.SYSTEM, 10);
 
     // Verify an empty list is returned (not null)
-    expect(systemMessages).not.toBeNull();
+    assert.exists(systemMessages);
     expect(systemMessages).toHaveLength(0);
   });
 

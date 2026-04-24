@@ -448,7 +448,7 @@ export namespace DefaultChatClient {
       if (responseContent == null) {
         return new ResponseEntity<ChatResponse, T>(chatResponse, null);
       }
-      const entity = outputConverter.convert(responseContent);
+      const entity = await outputConverter.convert(responseContent);
       return new ResponseEntity<ChatResponse, T>(chatResponse, entity);
     }
 

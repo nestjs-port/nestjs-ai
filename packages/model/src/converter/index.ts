@@ -27,7 +27,10 @@ export {
 export type { FormatProvider } from "./format-provider.js";
 export { ListOutputConverter } from "./list-output-converter.js";
 export { MapOutputConverter } from "./map-output-converter.js";
+export { JsonSchemaOutputConverter } from "./json-schema-output-converter.js";
 export { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner.js";
+export { StandardSchemaOutputConverter } from "./standard-schema-output-converter.js";
+export type { StandardSchemaOutputConverterProps } from "./standard-schema-output-converter.js";
 export type { ResponseTextCleaner } from "./response-text-cleaner.js";
 export type { StructuredOutputConverter } from "./structured-output-converter.js";
 export {

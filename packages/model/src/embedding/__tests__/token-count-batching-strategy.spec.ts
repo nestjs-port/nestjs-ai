@@ -37,6 +37,7 @@ describe("TokenCountBatchingStrategy", () => {
   it("batch embedding with large document exceeds max token size", () => {
     const contentAsString = readFileSync(
       new URL("./text_source.txt", import.meta.url),
+      "utf8",
     );
     const tokenCountBatchingStrategy = new TokenCountBatchingStrategy();
 

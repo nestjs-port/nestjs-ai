@@ -792,7 +792,10 @@ Generate the filmography of 5 movies for Tom Hanks.
   it("test pdf citation", async () => {
     const document = AnthropicCitationDocument.builder()
       .pdfFile(
-        new URL("resources/spring-ai-reference-overview.pdf", import.meta.url),
+        new URL(
+          "resources/spring-ai-reference-overview.pdf",
+          import.meta.url,
+        ).toString(),
       )
       .title("Spring AI Reference")
       .citationsEnabled(true)

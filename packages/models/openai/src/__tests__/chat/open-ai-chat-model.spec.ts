@@ -79,7 +79,10 @@ describe("OpenAiChatModel", () => {
     expect(request.tool_choice).toEqual(toolChoice);
     const namedToolChoice = request.tool_choice;
     assert.exists(namedToolChoice);
-    if (typeof namedToolChoice === "string") {
+    if (
+      typeof namedToolChoice === "string" ||
+      !("function" in namedToolChoice)
+    ) {
       throw new Error("Expected named tool choice to be present");
     }
     expect(namedToolChoice.function.name).toBe("my_function");

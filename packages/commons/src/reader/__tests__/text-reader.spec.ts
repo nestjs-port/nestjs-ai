@@ -16,6 +16,7 @@
 
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { assert, describe, expect, it } from "vitest";
 

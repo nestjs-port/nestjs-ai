@@ -76,7 +76,7 @@ describe("TikaDocumentReader", () => {
   ])(
     "test docx (%s)",
     async (
-      resourceUri: string,
+      resourceUri: URL | string,
       resourceName: string,
       contentSnipped: string,
     ) => {
@@ -108,7 +108,7 @@ describe("TikaDocumentReader", () => {
   ])(
     "test reader with formatter (%s)",
     async (
-      resourceUri: string,
+      resourceUri: URL | string,
       resourceName: string,
       contentSnipped: string,
     ) => {

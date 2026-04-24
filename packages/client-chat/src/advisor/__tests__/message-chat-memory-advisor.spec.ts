@@ -26,7 +26,7 @@ import {
 } from "@nestjs-ai/model";
 import type { SchedulerLike } from "rxjs";
 import { queueScheduler } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request.js";
 import type { AdvisorChain } from "../api/index.js";
@@ -87,7 +87,7 @@ describe("MessageChatMemoryAdvisor", () => {
       scheduler: queueScheduler,
     });
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
     expect(advisor.order).toBe(42);
   });
 
@@ -96,7 +96,7 @@ describe("MessageChatMemoryAdvisor", () => {
       chatMemory: createChatMemory(),
     });
 
-    expect(advisor).toBeDefined();
+    assert.exists(advisor);
     expect(advisor.order).toBe(Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER);
   });
 

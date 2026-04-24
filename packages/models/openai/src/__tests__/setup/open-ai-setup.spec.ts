@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ModelProvider, OpenAiSetup } from "../../setup/index.js";
 
 describe("OpenAiSetupTests", () => {
@@ -83,7 +83,7 @@ describe("OpenAiSetupTests", () => {
       apiKey: "valid-api-key",
     });
 
-    expect(client).not.toBeNull();
+    assert.exists(client);
   });
 
   it("setup sync client applies custom headers when provided", () => {
@@ -92,7 +92,7 @@ describe("OpenAiSetupTests", () => {
       customHeaders: { "X-Custom-Header": "value" },
     });
 
-    expect(client).not.toBeNull();
+    assert.exists(client);
   });
 
   it("calculate base url returns default open ai url when base url is null", () => {
@@ -139,6 +139,6 @@ describe("OpenAiSetupTests", () => {
       modelName: "gpt-5-mini",
     });
 
-    expect(client).not.toBeNull();
+    assert.exists(client);
   });
 });

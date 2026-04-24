@@ -15,7 +15,7 @@
  */
 
 import { ImagePrompt } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { OpenAiImageGenerationMetadata } from "../../metadata/index.js";
 import { OpenAiImageModel } from "../../open-ai-image-model.js";
 import { OpenAiImageOptions } from "../../open-ai-image-options.js";
@@ -49,10 +49,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelIT", () => {
     expect(imageResponseMetadata.created).toBeGreaterThan(0);
 
     const generation = imageResponse.result;
-    expect(generation).not.toBeNull();
-    if (generation == null) {
-      throw new Error("Expected image generation to be present");
-    }
+    assert.exists(generation);
 
     const image = generation.output;
     expect(image.url).toBeTruthy();
@@ -66,7 +63,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiImageModelIT", () => {
     const openAiImageGenerationMetadata =
       imageGenerationMetadata as OpenAiImageGenerationMetadata;
 
-    expect(openAiImageGenerationMetadata).not.toBeNull();
+    assert.exists(openAiImageGenerationMetadata);
     expect(openAiImageGenerationMetadata.revisedPrompt?.trim()).toBeTruthy();
   });
 });

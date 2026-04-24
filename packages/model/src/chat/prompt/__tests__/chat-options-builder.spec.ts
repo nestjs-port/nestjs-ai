@@ -72,7 +72,7 @@ describe("ChatOptionsBuilder", () => {
   });
 
   it("should upcast to chat options", () => {
-    const options = builder
+    const chatOptions: ChatOptions = builder
       .model("gpt-4")
       .maxTokens(100)
       .temperature(0.7)
@@ -80,8 +80,6 @@ describe("ChatOptionsBuilder", () => {
       .topK(40)
       .stopSequences(["stop1", "stop2"])
       .build();
-
-    const chatOptions: ChatOptions = options;
 
     expect(chatOptions.model).toBe("gpt-4");
     expect(chatOptions.maxTokens).toBe(100);

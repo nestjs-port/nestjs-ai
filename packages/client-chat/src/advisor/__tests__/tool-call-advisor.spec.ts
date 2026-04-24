@@ -34,7 +34,7 @@ import {
   NoopObservationRegistry,
 } from "@nestjs-port/core";
 import { firstValueFrom, type Observable, of, toArray } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request.js";
 import { ChatClientResponse } from "../../chat-client-response.js";
@@ -403,7 +403,7 @@ describe("ToolCallAdvisor", () => {
     const result = await advisor.adviseCall(request, realChain);
 
     expect(toolCallingManager.executeToolCalls).toHaveBeenCalledTimes(1);
-    expect(result.chatResponse).not.toBeNull();
+    assert.exists(result.chatResponse);
     expect(result.chatResponse?.results).toHaveLength(1);
     expect(result.chatResponse?.results[0]?.output.text).toBe(
       "Tool result data",

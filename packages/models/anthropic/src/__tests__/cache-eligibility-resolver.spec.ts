@@ -15,7 +15,7 @@
  */
 
 import { MessageType } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   AnthropicCacheOptions,
@@ -47,7 +47,7 @@ describe("CacheEligibilityResolver", () => {
 
     // Above min length -> cache control with default TTL
     const cc = resolver.resolve(MessageType.SYSTEM, "01234567890");
-    expect(cc).not.toBeNull();
+    assert.exists(cc);
     expect(cc?.ttl).toBe("5m");
   });
 
@@ -87,7 +87,7 @@ describe("CacheEligibilityResolver", () => {
       AnthropicCacheTtl.ONE_HOUR,
     );
     const toolsOnly = CacheEligibilityResolver.from(toolsOnlyOptions);
-    expect(toolsOnly.resolveToolCacheControl()).not.toBeNull();
+    assert.exists(toolsOnly.resolveToolCacheControl());
     expect(
       toolsOnly.resolve(MessageType.SYSTEM, "Large system prompt text"),
     ).toBeNull();
@@ -101,7 +101,7 @@ describe("CacheEligibilityResolver", () => {
     );
     const sysAndTools = CacheEligibilityResolver.from(sysAndToolsOptions);
     const cc = sysAndTools.resolveToolCacheControl();
-    expect(cc).not.toBeNull();
+    assert.exists(cc);
     expect(cc?.ttl).toBe("1h");
 
     // CONVERSATION_HISTORY -> tool caching enabled
@@ -110,7 +110,7 @@ describe("CacheEligibilityResolver", () => {
         strategy: AnthropicCacheStrategy.CONVERSATION_HISTORY,
       }),
     );
-    expect(history.resolveToolCacheControl()).not.toBeNull();
+    assert.exists(history.resolveToolCacheControl());
   });
 
   it("tools only strategy behavior", () => {
@@ -136,7 +136,7 @@ describe("CacheEligibilityResolver", () => {
     ).toBeNull();
 
     const toolCache = resolver.resolveToolCacheControl();
-    expect(toolCache).not.toBeNull();
+    assert.exists(toolCache);
   });
 
   it("breakpoint count for each strategy", () => {
@@ -156,7 +156,7 @@ describe("CacheEligibilityResolver", () => {
       }),
     );
     expect(systemOnly.resolveToolCacheControl()).toBeNull();
-    expect(systemOnly.resolve(MessageType.SYSTEM, "content")).not.toBeNull();
+    assert.exists(systemOnly.resolve(MessageType.SYSTEM, "content"));
 
     // TOOLS_ONLY: tools cached, system not cached
     const toolsOnly = CacheEligibilityResolver.from(
@@ -164,7 +164,7 @@ describe("CacheEligibilityResolver", () => {
         strategy: AnthropicCacheStrategy.TOOLS_ONLY,
       }),
     );
-    expect(toolsOnly.resolveToolCacheControl()).not.toBeNull();
+    assert.exists(toolsOnly.resolveToolCacheControl());
     expect(toolsOnly.resolve(MessageType.SYSTEM, "content")).toBeNull();
 
     // SYSTEM_AND_TOOLS: both cached
@@ -173,10 +173,8 @@ describe("CacheEligibilityResolver", () => {
         strategy: AnthropicCacheStrategy.SYSTEM_AND_TOOLS,
       }),
     );
-    expect(systemAndTools.resolveToolCacheControl()).not.toBeNull();
-    expect(
-      systemAndTools.resolve(MessageType.SYSTEM, "content"),
-    ).not.toBeNull();
+    assert.exists(systemAndTools.resolveToolCacheControl());
+    assert.exists(systemAndTools.resolve(MessageType.SYSTEM, "content"));
   });
 
   it("message type eligibility per strategy", () => {
@@ -197,7 +195,7 @@ describe("CacheEligibilityResolver", () => {
         strategy: AnthropicCacheStrategy.SYSTEM_ONLY,
       }),
     );
-    expect(systemOnly.resolve(MessageType.SYSTEM, "content")).not.toBeNull();
+    assert.exists(systemOnly.resolve(MessageType.SYSTEM, "content"));
     expect(systemOnly.resolve(MessageType.USER, "content")).toBeNull();
     expect(systemOnly.resolve(MessageType.ASSISTANT, "content")).toBeNull();
     expect(systemOnly.resolve(MessageType.TOOL, "content")).toBeNull();
@@ -219,9 +217,7 @@ describe("CacheEligibilityResolver", () => {
         strategy: AnthropicCacheStrategy.SYSTEM_AND_TOOLS,
       }),
     );
-    expect(
-      systemAndTools.resolve(MessageType.SYSTEM, "content"),
-    ).not.toBeNull();
+    assert.exists(systemAndTools.resolve(MessageType.SYSTEM, "content"));
     expect(systemAndTools.resolve(MessageType.USER, "content")).toBeNull();
     expect(systemAndTools.resolve(MessageType.ASSISTANT, "content")).toBeNull();
     expect(systemAndTools.resolve(MessageType.TOOL, "content")).toBeNull();
@@ -232,10 +228,10 @@ describe("CacheEligibilityResolver", () => {
         strategy: AnthropicCacheStrategy.CONVERSATION_HISTORY,
       }),
     );
-    expect(history.resolve(MessageType.SYSTEM, "content")).not.toBeNull();
-    expect(history.resolve(MessageType.USER, "content")).not.toBeNull();
-    expect(history.resolve(MessageType.ASSISTANT, "content")).not.toBeNull();
-    expect(history.resolve(MessageType.TOOL, "content")).not.toBeNull();
+    assert.exists(history.resolve(MessageType.SYSTEM, "content"));
+    assert.exists(history.resolve(MessageType.USER, "content"));
+    assert.exists(history.resolve(MessageType.ASSISTANT, "content"));
+    assert.exists(history.resolve(MessageType.TOOL, "content"));
   });
 
   it("system and tools independent breakpoints", () => {
@@ -248,8 +244,8 @@ describe("CacheEligibilityResolver", () => {
     const toolCache = resolver.resolveToolCacheControl();
     const systemCache = resolver.resolve(MessageType.SYSTEM, "content");
 
-    expect(toolCache).not.toBeNull();
-    expect(systemCache).not.toBeNull();
+    assert.exists(toolCache);
+    assert.exists(systemCache);
     expect(toolCache?.ttl).toBe(systemCache?.ttl);
   });
 
@@ -282,7 +278,7 @@ describe("CacheEligibilityResolver", () => {
 
     expect(resolver.resolve(MessageType.SYSTEM, "")).toBeNull();
     expect(resolver.resolve(MessageType.SYSTEM, null)).toBeNull();
-    expect(resolver.resolve(MessageType.SYSTEM, "   ")).not.toBeNull();
+    assert.exists(resolver.resolve(MessageType.SYSTEM, "   "));
   });
 
   it("one hour ttl returned for configured message type", () => {
@@ -292,7 +288,7 @@ describe("CacheEligibilityResolver", () => {
     const resolver = CacheEligibilityResolver.from(options);
 
     const cc = resolver.resolve(MessageType.SYSTEM, "enough content");
-    expect(cc).not.toBeNull();
+    assert.exists(cc);
     expect(cc?.ttl).toBe("1h");
   });
 });

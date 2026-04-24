@@ -15,7 +15,7 @@
  */
 
 import type { ChatModel } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ChatClient } from "../../chat-client.js";
 import { FactCheckingEvaluator } from "../fact-checking-evaluator.js";
 
@@ -38,7 +38,7 @@ describe("FactCheckingEvaluator", () => {
       chatClientBuilder: ChatClient.builder(createChatModel()),
     });
 
-    expect(evaluator).toBeDefined();
+    assert.exists(evaluator);
   });
 
   it("when for bespoke minicheck then use bespoke evaluation prompt text", () => {
@@ -46,6 +46,6 @@ describe("FactCheckingEvaluator", () => {
       ChatClient.builder(createChatModel()),
     );
 
-    expect(evaluator).toBeDefined();
+    assert.exists(evaluator);
   });
 });

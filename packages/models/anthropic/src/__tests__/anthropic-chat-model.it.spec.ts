@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { inspect } from "node:util";
 import type {
   Model as AnthropicModel,
@@ -40,7 +39,7 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom, type Observable, toArray } from "rxjs";
-import { beforeAll, describe, expect, it } from "vitest";
+import { assert, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import type { AnthropicWebSearchResult } from "../index.js";
 import {
@@ -66,7 +65,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatModelIT", () => {
   LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
   const logger = LoggerFactory.getLogger("AnthropicChatModelIT");
   const systemTextResource = readFileSync(
-    resolve(__dirname, "resources", "system-message.st"),
+    new URL("resources/system-message.st", import.meta.url),
     "utf8",
   );
 
@@ -272,11 +271,8 @@ Generate the filmography of 5 movies for Tom Hanks.
       .filter((response) => (response.metadata?.usage?.totalTokens ?? 0) > 0)
       .reduce<ChatResponse | null>((_, response) => response, null);
 
-    expect(lastResponseWithUsage).not.toBeNull();
-
-    if (!lastResponseWithUsage?.metadata?.usage) {
-      throw new Error("Expected usage metadata in streaming response");
-    }
+    assert.exists(lastResponseWithUsage);
+    assert.exists(lastResponseWithUsage.metadata.usage);
     const usage = lastResponseWithUsage.metadata.usage;
     logger.info(
       `Streaming usage - Input: ${usage.promptTokens}, Output: ${usage.completionTokens}, Total: ${usage.totalTokens}`,
@@ -310,14 +306,14 @@ Generate the filmography of 5 movies for Tom Hanks.
     logger.info(`Response: ${inspect(response, { depth: null })}`);
 
     const generation = response.result;
-    expect(generation).not.toBeNull();
-    expect(generation?.output).not.toBeNull();
-    expect(generation?.output.text ?? "").toContain("30");
-    expect(generation?.output.text ?? "").toContain("10");
-    expect(generation?.output.text ?? "").toContain("15");
-    expect(response.metadata).not.toBeNull();
-    expect(response.metadata?.usage).not.toBeNull();
-    expect(response.metadata?.usage?.totalTokens ?? 0).toBeGreaterThan(100);
+    assert.exists(generation);
+    assert.exists(generation.output);
+    expect(generation.output.text ?? "").toContain("30");
+    expect(generation.output.text ?? "").toContain("10");
+    expect(generation.output.text ?? "").toContain("15");
+    assert.exists(response.metadata);
+    assert.exists(response.metadata.usage);
+    expect(response.metadata.usage.totalTokens ?? 0).toBeGreaterThan(100);
   });
 
   it("stream function call test", async () => {
@@ -364,12 +360,10 @@ Generate the filmography of 5 movies for Tom Hanks.
       `Streaming Response with usage: ${inspect(lastResponse, { depth: null })}`,
     );
 
-    expect(lastResponse).not.toBeNull();
-    if (!lastResponse?.metadata?.usage) {
-      throw new Error("Expected usage metadata in streaming tool response");
-    }
+    assert.exists(lastResponse);
+    assert.exists(lastResponse.metadata.usage);
     const usage = lastResponse.metadata.usage;
-    expect(usage).not.toBeNull();
+    assert.exists(usage);
     // Tool calling uses more tokens due to multi-turn conversation
     expect(usage.totalTokens).toBeGreaterThan(100);
   });
@@ -414,11 +408,8 @@ Generate the filmography of 5 movies for Tom Hanks.
         .chatResponse(),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     logger.info(`Response: ${inspect(response, { depth: null })}`);
-    if (!response) {
-      throw new Error("Expected streaming response");
-    }
     validateChatResponseMetadata(response, model);
   });
 
@@ -470,7 +461,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
     logger.info(`Response: ${inspect(response, { depth: null })}`);
-    expect(response.results).not.toBeNull();
+    assert.exists(response.results);
     // When tool choice is "any", the model MUST use at least one tool
     const hasToolCalls = response.results.some(
       (generation) => generation.output.toolCalls.length > 0,
@@ -502,7 +493,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
     logger.info(`Response: ${inspect(response, { depth: null })}`);
-    expect(response.results).not.toBeNull();
+    assert.exists(response.results);
     // When tool choice is a specific tool, the model MUST use that specific tool
     const allToolCalls = response.results.flatMap(
       (generation) => generation.output.toolCalls,
@@ -528,7 +519,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     const response = await chatModel.call(new Prompt(messages, promptOptions));
 
     logger.info(`Response: ${inspect(response, { depth: null })}`);
-    expect(response.results).not.toBeNull();
+    assert.exists(response.results);
     // When tool choice is "none", the model MUST NOT use any tools
     const allToolCalls = response.results.flatMap(
       (generation) => generation.output.toolCalls,
@@ -537,7 +528,9 @@ Generate the filmography of 5 movies for Tom Hanks.
   });
 
   it("multi modality test", async () => {
-    const imageData = readFileSync(resolve(__dirname, "resources", "test.png"));
+    const imageData = readFileSync(
+      new URL("resources/test.png", import.meta.url),
+    );
 
     const userMessage = new UserMessage({
       content: "Explain what do you see on this picture?",
@@ -554,7 +547,7 @@ Generate the filmography of 5 movies for Tom Hanks.
 
   it("multi modality pdf test", async () => {
     const pdfData = readFileSync(
-      resolve(__dirname, "resources", "spring-ai-reference-overview.pdf"),
+      new URL("resources/spring-ai-reference-overview.pdf", import.meta.url),
     );
 
     const userMessage = new UserMessage({
@@ -670,12 +663,12 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt([userMessage], options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).not.toHaveLength(0);
     expect(response.result?.output.text ?? "").not.toBe("");
 
     const citationsObj = response.metadata?.get<Citation[]>("citations") ?? [];
-    expect(citationsObj).toBeDefined();
+    assert.exists(citationsObj);
     expect(citationsObj).not.toHaveLength(0);
 
     for (const citation of citationsObj ?? []) {
@@ -721,12 +714,12 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt([userMessage], options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).not.toHaveLength(0);
     expect(response.result?.output.text ?? "").not.toBe("");
 
     const citationsObj = response.metadata?.get<Citation[]>("citations") ?? [];
-    expect(citationsObj).toBeDefined();
+    assert.exists(citationsObj);
     expect(citationsObj).not.toHaveLength(0);
 
     const hasDoc0 = (citationsObj ?? []).some(
@@ -776,12 +769,12 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt([userMessage], options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).not.toHaveLength(0);
     expect(response.result?.output.text ?? "").not.toBe("");
 
     const citationsObj = response.metadata?.get<Citation[]>("citations") ?? [];
-    expect(citationsObj).toBeDefined();
+    assert.exists(citationsObj);
     expect(citationsObj).not.toHaveLength(0);
 
     for (const citation of citationsObj ?? []) {
@@ -799,7 +792,10 @@ Generate the filmography of 5 movies for Tom Hanks.
   it("test pdf citation", async () => {
     const document = AnthropicCitationDocument.builder()
       .pdfFile(
-        resolve(__dirname, "resources", "spring-ai-reference-overview.pdf"),
+        new URL(
+          "resources/spring-ai-reference-overview.pdf",
+          import.meta.url,
+        ).toString(),
       )
       .title("Spring AI Reference")
       .citationsEnabled(true)
@@ -818,12 +814,12 @@ Generate the filmography of 5 movies for Tom Hanks.
 
     const response = await chatModel.call(new Prompt([userMessage], options));
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.results).not.toHaveLength(0);
     expect(response.result?.output.text ?? "").not.toBe("");
 
     const citationsObj = response.metadata?.get<Citation[]>("citations") ?? [];
-    expect(citationsObj).toBeDefined();
+    assert.exists(citationsObj);
     expect(citationsObj).not.toHaveLength(0);
 
     for (const citation of citationsObj ?? []) {
@@ -861,7 +857,7 @@ Generate the filmography of 5 movies for Tom Hanks.
       new Prompt("Tell me about France. Respond in JSON.", options),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     const text = response.result?.output.text ?? "";
     expect(text).not.toBe("");
     logger.info(`Structured output response: ${text}`);
@@ -895,7 +891,7 @@ Generate the filmography of 5 movies for Tom Hanks.
       ),
     );
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     const text = response.result?.output.text ?? "";
     expect(text).not.toBe("");
     logger.info(`Structured output with effort response: ${text}`);
@@ -922,7 +918,7 @@ Generate the filmography of 5 movies for Tom Hanks.
       response.metadata?.get<AnthropicWebSearchResult[]>(
         "web-search-results",
       ) ?? [];
-    expect(results).not.toBeNull();
+    assert.exists(results);
     expect(results).not.toHaveLength(0);
     expect(results[0]?.url ?? "").not.toBe("");
     expect(results[0]?.title ?? "").not.toBe("");

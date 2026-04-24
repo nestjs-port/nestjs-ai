@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { AiOperationMetadata } from "../ai-operation-metadata.js";
 
 describe("AiOperationMetadata", () => {
   it("when mandatory metadata then return", () => {
     const operationMetadata = new AiOperationMetadata("chat", "doofenshmirtz");
 
-    expect(operationMetadata).toBeDefined();
+    assert.exists(operationMetadata);
   });
 
   it("when operation type is null then throw", () => {

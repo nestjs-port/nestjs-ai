@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ObservabilityHelper } from "../observability-helper.js";
 
 describe("ObservabilityHelper", () => {
@@ -99,7 +99,7 @@ describe("ObservabilityHelper", () => {
       backslashes: "value\\with\\backslashes",
     });
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.startsWith("[")).toBe(true);
     expect(result.endsWith("]")).toBe(true);
     expect(result).toContain("quotes");
@@ -114,7 +114,7 @@ describe("ObservabilityHelper", () => {
       "string\\with\\backslashes",
     ]);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.startsWith("[")).toBe(true);
     expect(result.endsWith("]")).toBe(true);
     expect(result).toContain("quotes");
@@ -129,7 +129,7 @@ describe("ObservabilityHelper", () => {
       " \t\n ",
     ]);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.startsWith("[")).toBe(true);
     expect(result.endsWith("]")).toBe(true);
     expect(result).toContain('"   "');
@@ -173,7 +173,7 @@ describe("ObservabilityHelper", () => {
       object: {},
     });
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result).toContain("list");
     expect(result).toContain("array");
     expect(result).toContain("object");

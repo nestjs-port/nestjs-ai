@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { resolve } from "node:path";
 import { ExtractedTextFormatter } from "@nestjs-ai/commons";
 import { GenericContainer, type StartedTestContainer } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -22,11 +21,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { TikaDocumentReader } from "../index.js";
 
 describe("TikaDocumentReader", () => {
-  const wordSampleDocx = resolve(__dirname, "word-sample.docx");
-  const wordSampleDoc = resolve(__dirname, "word-sample.doc");
-  const sample2Pdf = resolve(__dirname, "sample2.pdf");
-  const samplePpt = resolve(__dirname, "sample.ppt");
-  const samplePptx = resolve(__dirname, "sample.pptx");
+  const wordSampleDocx = new URL("word-sample.docx", import.meta.url);
+  const wordSampleDoc = new URL("word-sample.doc", import.meta.url);
+  const sample2Pdf = new URL("sample2.pdf", import.meta.url);
+  const samplePpt = new URL("sample.ppt", import.meta.url);
+  const samplePptx = new URL("sample.pptx", import.meta.url);
 
   let tikaContainer: StartedTestContainer | null;
   let tikaServerUrl: string;
@@ -77,7 +76,7 @@ describe("TikaDocumentReader", () => {
   ])(
     "test docx (%s)",
     async (
-      resourceUri: string,
+      resourceUri: URL | string,
       resourceName: string,
       contentSnipped: string,
     ) => {
@@ -109,7 +108,7 @@ describe("TikaDocumentReader", () => {
   ])(
     "test reader with formatter (%s)",
     async (
-      resourceUri: string,
+      resourceUri: URL | string,
       resourceName: string,
       contentSnipped: string,
     ) => {

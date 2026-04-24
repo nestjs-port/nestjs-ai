@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { SimpleVectorStoreContent } from "../simple-vector-store-content.js";
 
 describe("SimpleVectorStoreSimilarityTests", () => {
@@ -29,7 +29,7 @@ describe("SimpleVectorStoreSimilarityTests", () => {
       embedding: testEmbedding,
     });
     const document = storeContent.toDocument(0.6);
-    expect(document).toBeDefined();
+    assert.exists(document);
     expect(document.id).toBe("1");
     expect(document.text).toBe("hello, how are you?");
     expect(document.metadata.foo).toBe("bar");
@@ -77,7 +77,7 @@ describe("SimpleVectorStoreSimilarityTests", () => {
     });
     const document = storeContent.toDocument(0.1);
 
-    expect(document).toBeDefined();
+    assert.exists(document);
     expect(document.score).toBe(0.1);
   });
 

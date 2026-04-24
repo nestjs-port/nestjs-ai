@@ -21,7 +21,15 @@ import {
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  assert,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 import { RedisChatMemoryConfig } from "../redis-chat-memory-config.js";
 import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
 
@@ -403,19 +411,21 @@ describe("RedisChatMemoryMediaIT", () => {
 
     // Check first media with empty/null values
     const firstMedia = retrievedMedia[0];
-    expect(firstMedia?.mimeType).toBe(MediaFormat.IMAGE_PNG);
-    expect(firstMedia?.dataAsByteArray).not.toBeNull();
-    expect(firstMedia?.dataAsByteArray).toHaveLength(0);
-    expect(firstMedia?.id).toBeNull();
-    expect(firstMedia?.name).toBe("");
+    assert.exists(firstMedia);
+    expect(firstMedia.mimeType).toBe(MediaFormat.IMAGE_PNG);
+    assert.exists(firstMedia.dataAsByteArray);
+    expect(firstMedia.dataAsByteArray).toHaveLength(0);
+    expect(firstMedia.id).toBeNull();
+    expect(firstMedia.name).toBe("");
 
     // Check second media with only required field
     const secondMedia = retrievedMedia[1];
-    expect(secondMedia?.mimeType).toBe(MediaFormat.DOC_TXT);
-    expect(secondMedia?.dataAsByteArray).not.toBeNull();
-    expect(secondMedia?.dataAsByteArray).toHaveLength(0);
-    expect(secondMedia?.id).toBeNull();
-    expect(secondMedia?.name).not.toBeNull();
+    assert.exists(secondMedia);
+    expect(secondMedia.mimeType).toBe(MediaFormat.DOC_TXT);
+    assert.exists(secondMedia.dataAsByteArray);
+    expect(secondMedia.dataAsByteArray).toHaveLength(0);
+    expect(secondMedia.id).toBeNull();
+    assert.exists(secondMedia.name);
   });
 
   it("should handle complex binary data types", async () => {

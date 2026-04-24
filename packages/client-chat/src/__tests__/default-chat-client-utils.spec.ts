@@ -28,7 +28,7 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { ChatClient } from "../chat-client.js";
 import type { DefaultChatClient } from "../default-chat-client.js";
@@ -101,7 +101,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).not.toHaveLength(0);
     expect(result.prompt.instructions[0]).toBeInstanceOf(SystemMessage);
     expect(result.prompt.instructions[0]?.text).toBe(systemText);
@@ -118,7 +118,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).not.toHaveLength(0);
     expect(result.prompt.instructions[0]).toBeInstanceOf(SystemMessage);
     expect(result.prompt.instructions[0]?.text).toBe(
@@ -137,7 +137,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).toHaveLength(2);
     expect(result.prompt.instructions[0]?.text).toBe("System message");
     expect(result.prompt.instructions[1]?.text).toBe("User message");
@@ -151,7 +151,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).not.toHaveLength(0);
     expect(result.prompt.instructions[0]).toBeInstanceOf(UserMessage);
     expect(result.prompt.instructions[0]?.text).toBe(userText);
@@ -168,7 +168,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).not.toHaveLength(0);
     expect(result.prompt.instructions[0]).toBeInstanceOf(UserMessage);
     expect(result.prompt.instructions[0]?.text).toBe(
@@ -188,7 +188,7 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const userMessage = result.prompt.instructions[0] as UserMessage;
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).not.toHaveLength(0);
     expect(result.prompt.instructions[0]).toBeInstanceOf(UserMessage);
     expect(userMessage.text).toBe(userText);
@@ -209,7 +209,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).toHaveLength(2);
     expect(result.prompt.instructions[0]).toBeInstanceOf(SystemMessage);
     expect(result.prompt.instructions[0]?.text).toBe(systemText);
@@ -227,7 +227,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).toHaveLength(2);
     expect(result.prompt.instructions.at(-1)).toBeInstanceOf(UserMessage);
     expect(result.prompt.instructions.at(-1)?.text).toBe(userText);
@@ -246,9 +246,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolNames).toEqual(new Set(toolNames));
   });
 
@@ -265,9 +265,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolCallbacks).toContain(toolCallback);
   });
 
@@ -284,9 +284,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolContext).toMatchObject({ key: "value" });
   });
 
@@ -306,9 +306,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolNames).toEqual(new Set(toolNames2));
   });
 
@@ -328,9 +328,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolCallbacks).toEqual([toolCallback2]);
   });
 
@@ -349,9 +349,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolContext).toMatchObject({
       key1: "value1",
       key2: "value2",
@@ -373,9 +373,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolNames).toEqual(toolNames1);
   });
 
@@ -394,9 +394,9 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result);
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolCallbacks).toEqual([toolCallback1]);
   });
 
@@ -415,8 +415,8 @@ describe("DefaultChatClientUtils", () => {
     const result = toChatClientRequest(inputRequest);
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolContext).toMatchObject({ key1: "value1" });
   });
 
@@ -433,7 +433,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(Object.fromEntries(result.context)).toMatchObject({
       key1: "value1",
       key2: "value2",
@@ -458,7 +458,7 @@ describe("DefaultChatClientUtils", () => {
 
     const result = toChatClientRequest(inputRequest);
 
-    expect(result).toBeDefined();
+    assert.exists(result);
     expect(result.prompt.instructions).not.toHaveLength(0);
     expect(result.prompt.instructions[0]).toBeInstanceOf(SystemMessage);
     expect(result.prompt.instructions[0]?.text).toBe("Instructions Spring AI");
@@ -505,7 +505,7 @@ describe("DefaultChatClientUtils", () => {
     const userMessage = instructions[2] as UserMessage;
     const resultOptions = result.prompt.options as ToolCallingChatOptions;
 
-    expect(result).toBeDefined();
+    assert.exists(result);
 
     expect(instructions).toHaveLength(3);
     expect(instructions[0]).toBeInstanceOf(SystemMessage);
@@ -515,8 +515,8 @@ describe("DefaultChatClientUtils", () => {
     expect(instructions[2]?.text).toBe("Question about Spring AI");
     expect(userMessage.media).toContain(media);
 
-    expect(result.prompt.options).toBeDefined();
-    expect(resultOptions).toBeDefined();
+    assert.exists(result.prompt.options);
+    assert.exists(resultOptions);
     expect(resultOptions.toolNames).toEqual(new Set(toolNames));
     expect(resultOptions.toolCallbacks).toContain(toolCallback);
     expect(resultOptions.toolContext).toMatchObject({ toolKey: "toolValue" });

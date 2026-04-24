@@ -20,7 +20,7 @@ import type {
   ToolChoice,
 } from "@anthropic-ai/sdk/resources/messages";
 import { ms } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   AnthropicChatOptions,
@@ -253,9 +253,9 @@ describe("AnthropicChatOptions", () => {
 
     const options = AnthropicChatOptions.builder().outputSchema(schema).build();
 
-    expect(options.outputSchema).not.toBeNull();
-    expect(options.outputConfig).not.toBeNull();
-    expect(options.outputConfig?.format).toBeDefined();
+    assert.exists(options.outputSchema);
+    assert.exists(options.outputConfig);
+    assert.exists(options.outputConfig.format);
 
     // Verify round-trip: the schema should parse and serialize back
     const roundTripped = options.outputSchema;
@@ -270,7 +270,7 @@ describe("AnthropicChatOptions", () => {
       .effort("high" as NonNullable<OutputConfig["effort"]>)
       .build();
 
-    expect(options.outputConfig).not.toBeNull();
+    assert.exists(options.outputConfig);
     expect(options.outputConfig).toEqual({ effort: "high" });
     // No format set, so outputSchema should be null
     expect(options.outputSchema).toBeNull();
@@ -285,9 +285,9 @@ describe("AnthropicChatOptions", () => {
       .outputSchema(schema)
       .build();
 
-    expect(options.outputConfig).not.toBeNull();
-    expect(options.outputConfig?.effort).toBe("high");
-    expect(options.outputConfig?.format).toBeDefined();
+    assert.exists(options.outputConfig);
+    expect(options.outputConfig.effort).toBe("high");
+    assert.exists(options.outputConfig.format);
     expect(options.outputSchema).toContain("result");
   });
 
@@ -306,7 +306,7 @@ describe("AnthropicChatOptions", () => {
       .outputConfig(outputConfig)
       .build();
 
-    expect(options.outputConfig).not.toBeNull();
+    assert.exists(options.outputConfig);
     expect(options.outputConfig).toEqual(outputConfig);
     expect(options.outputSchema).toContain("object");
   });
@@ -324,7 +324,7 @@ describe("AnthropicChatOptions", () => {
     const merged = base.mutate().combineWith(override.mutate()).build();
 
     expect(merged.model).toBe("base-model");
-    expect(merged.outputConfig).not.toBeNull();
+    assert.exists(merged.outputConfig);
     expect(merged.outputConfig?.effort).toBe("medium");
   });
 
@@ -333,7 +333,7 @@ describe("AnthropicChatOptions", () => {
       .outputSchema('{"type":"object"}')
       .build();
 
-    expect(options.outputConfig).not.toBeNull();
+    assert.exists(options.outputConfig);
 
     options.setOutputSchema(null);
     expect(options.outputConfig).toBeNull();
@@ -465,7 +465,7 @@ describe("AnthropicChatOptions", () => {
   it("skill builder with string id", () => {
     const options = AnthropicChatOptions.builder().skill("xlsx").build();
 
-    expect(options.skillContainer).not.toBeNull();
+    assert.exists(options.skillContainer);
     expect(options.skillContainer?.skills).toHaveLength(1);
     expect(options.skillContainer?.skills[0].skillId).toBe("xlsx");
     expect(options.skillContainer?.skills[0].type).toBe(
@@ -479,7 +479,7 @@ describe("AnthropicChatOptions", () => {
       .skill(AnthropicSkill.PPTX)
       .build();
 
-    expect(options.skillContainer).not.toBeNull();
+    assert.exists(options.skillContainer);
     expect(options.skillContainer?.skills[0].skillId).toBe("pptx");
     expect(options.skillContainer?.skills[0].type).toBe(
       AnthropicSkillType.ANTHROPIC,
@@ -492,7 +492,7 @@ describe("AnthropicChatOptions", () => {
       .skill(AnthropicSkill.PPTX)
       .build();
 
-    expect(options.skillContainer).not.toBeNull();
+    assert.exists(options.skillContainer);
     expect(options.skillContainer?.skills).toHaveLength(2);
     expect(options.skillContainer?.skills[0].skillId).toBe("xlsx");
     expect(options.skillContainer?.skills[1].skillId).toBe("pptx");
@@ -506,7 +506,7 @@ describe("AnthropicChatOptions", () => {
 
     const copied = original.mutate().build();
 
-    expect(copied.skillContainer).not.toBeNull();
+    assert.exists(copied.skillContainer);
     expect(copied.skillContainer?.skills).toHaveLength(2);
     expect(copied.skillContainer?.skills[0].skillId).toBe("xlsx");
     expect(copied.skillContainer?.skills[1].skillId).toBe("pdf");
@@ -521,7 +521,7 @@ describe("AnthropicChatOptions", () => {
     const merged = base.mutate().combineWith(override.mutate()).build();
 
     expect(merged.model).toBe("base-model");
-    expect(merged.skillContainer).not.toBeNull();
+    assert.exists(merged.skillContainer);
     expect(merged.skillContainer?.skills).toHaveLength(1);
     expect(merged.skillContainer?.skills[0].skillId).toBe("docx");
   });
@@ -572,13 +572,13 @@ describe("AnthropicChatOptions", () => {
       .webSearchTool(webSearch)
       .build();
 
-    expect(options.webSearchTool).not.toBeNull();
+    assert.exists(options.webSearchTool);
     expect(options.webSearchTool?.allowedDomains).toEqual(["docs.spring.io"]);
     expect(options.webSearchTool?.blockedDomains).toEqual(["example.com"]);
     expect(options.webSearchTool?.maxUses).toBe(5);
-    expect(options.webSearchTool?.userLocation).not.toBeNull();
-    expect(options.webSearchTool?.userLocation?.city).toBe("San Francisco");
-    expect(options.webSearchTool?.userLocation?.country).toBe("US");
+    assert.exists(options.webSearchTool.userLocation);
+    expect(options.webSearchTool.userLocation.city).toBe("San Francisco");
+    expect(options.webSearchTool.userLocation.country).toBe("US");
   });
 
   it("web search tool preserved in mutate", () => {
@@ -588,7 +588,7 @@ describe("AnthropicChatOptions", () => {
       .build();
     const copied = original.mutate().build();
 
-    expect(copied.webSearchTool).not.toBeNull();
+    assert.exists(copied.webSearchTool);
     expect(copied.webSearchTool?.maxUses).toBe(3);
   });
 
@@ -648,7 +648,7 @@ describe("AnthropicChatOptions", () => {
       .maxTokens(16384)
       .build();
 
-    expect(options.thinking).not.toBeNull();
+    assert.exists(options.thinking);
     expect(options.thinking).toEqual({
       type: "enabled",
       budget_tokens: 2048,
@@ -687,7 +687,7 @@ describe("AnthropicChatOptions", () => {
       .maxTokens(16384)
       .build();
 
-    expect(options.thinking).not.toBeNull();
+    assert.exists(options.thinking);
     expect(options.thinking).toEqual({
       type: "adaptive",
       display: "summarized",

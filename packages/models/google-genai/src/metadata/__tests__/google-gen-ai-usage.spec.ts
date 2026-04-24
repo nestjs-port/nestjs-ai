@@ -21,7 +21,7 @@ import {
   TrafficType,
 } from "@google/genai";
 import type { Usage } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { GoogleGenAiTrafficType } from "../google-gen-ai-traffic-type.js";
 import { GoogleGenAiUsage } from "../google-gen-ai-usage.js";
 
@@ -184,7 +184,7 @@ describe("GoogleGenAiUsage", () => {
     expect(usage.candidatesTokensDetails).toHaveLength(1);
     expect(usage.cacheTokensDetails).toHaveLength(1);
     expect(usage.trafficType).toBe(GoogleGenAiTrafficType.ON_DEMAND);
-    expect(usage.nativeUsage).toBeDefined();
+    assert.exists(usage.nativeUsage);
     expect(usage.nativeUsage).toBeInstanceOf(
       GenerateContentResponseUsageMetadata,
     );
@@ -242,6 +242,6 @@ describe("GoogleGenAiUsage", () => {
     expect(usage.promptTokens).toBe(100);
     expect(usage.completionTokens).toBe(50);
     expect(usage.totalTokens).toBe(150);
-    expect(usage.nativeUsage).toBeDefined();
+    assert.exists(usage.nativeUsage);
   });
 });

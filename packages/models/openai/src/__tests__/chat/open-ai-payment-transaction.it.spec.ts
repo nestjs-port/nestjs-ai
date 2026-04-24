@@ -23,7 +23,7 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { OpenAiChatModel } from "../../open-ai-chat-model.js";
@@ -118,10 +118,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiPaymentTransaction", () => {
       .call()
       .entity(TransactionStatusResponseSchema);
 
-    expect(content).not.toBeNull();
-    if (content == null) {
-      throw new Error("Expected entity content to be non-null");
-    }
+    assert.exists(content);
     expect(content[0]?.id).toBe("001");
     expect(content[0]?.status).toBe("pending");
 
@@ -154,10 +151,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiPaymentTransaction", () => {
     const content = (await lastValueFrom(flux.pipe(toArray()))).join("");
 
     const structure = converter.convert(content);
-    expect(structure).not.toBeNull();
-    if (structure == null) {
-      throw new Error("Expected converted structure to be non-null");
-    }
+    assert.exists(structure);
 
     expect(structure[0]?.id).toBe("001");
     expect(structure[0]?.status).toBe("pending");

@@ -15,7 +15,7 @@
  */
 
 import { type ChatModel, PromptTemplate } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ChatClient } from "../../chat-client.js";
 import { RelevancyEvaluator } from "../relevancy-evaluator.js";
 
@@ -34,13 +34,13 @@ describe("RelevancyEvaluator", () => {
     const evaluator = new RelevancyEvaluator(
       ChatClient.builder(createChatModel()),
     );
-    expect(evaluator).toBeDefined();
+    assert.exists(evaluator);
 
     const evaluatorWithNullPrompt = new RelevancyEvaluator(
       ChatClient.builder(createChatModel()),
       null,
     );
-    expect(evaluatorWithNullPrompt).toBeDefined();
+    assert.exists(evaluatorWithNullPrompt);
   });
 
   it("when prompt template is provided then use it", () => {
@@ -49,6 +49,6 @@ describe("RelevancyEvaluator", () => {
       new PromptTemplate("Question: {query}"),
     );
 
-    expect(evaluator).toBeDefined();
+    assert.exists(evaluator);
   });
 });

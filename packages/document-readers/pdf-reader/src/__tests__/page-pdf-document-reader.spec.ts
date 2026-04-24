@@ -15,7 +15,6 @@
  */
 
 import { EOL } from "node:os";
-import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -27,8 +26,8 @@ import {
 
 describe("PagePdfDocumentReader", () => {
   const TEST_TIMEOUT = 30_000;
-  const sample1Pdf = resolve(__dirname, "sample1.pdf");
-  const sample2Pdf = resolve(__dirname, "sample2.pdf");
+  const sample1Pdf = new URL("sample1.pdf", import.meta.url);
+  const sample2Pdf = new URL("sample2.pdf", import.meta.url);
 
   it(
     "file url read",

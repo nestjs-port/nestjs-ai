@@ -24,7 +24,7 @@ import {
   EmbeddingRequest,
 } from "@nestjs-ai/model";
 import { TestObservationRegistry } from "@nestjs-port/testing";
-import { beforeEach, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 
 import { OpenAiEmbeddingModel } from "../../open-ai-embedding-model.js";
 import { OpenAiEmbeddingOptions } from "../../open-ai-embedding-options.js";
@@ -63,7 +63,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingModelObservationIT", () => {
     expect(embeddingResponse.results).not.toHaveLength(0);
 
     const responseMetadata = embeddingResponse.metadata;
-    expect(responseMetadata).toBeDefined();
+    assert.exists(responseMetadata);
 
     expect(observationRegistry.currentObservation).toBeNull();
 
@@ -72,7 +72,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiEmbeddingModelObservationIT", () => {
         entry.context.name ===
         DefaultEmbeddingModelObservationConvention.DEFAULT_NAME,
     );
-    expect(observation).toBeDefined();
+    assert.exists(observation);
     if (observation == null) {
       throw new Error("Expected observation context to be present");
     }

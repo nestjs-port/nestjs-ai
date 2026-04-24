@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type { Document } from "@nestjs-ai/commons";
 import { Document as VectorDocument } from "@nestjs-ai/commons";
 import { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
@@ -26,13 +25,21 @@ import {
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  assert,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 
 import { RedisMetadataField } from "../redis-metadata-field.js";
 import { RedisVectorStore } from "../redis-vector-store.js";
 
 const readTestData = (fileName: string): string =>
-  readFileSync(resolve(__dirname, fileName), "utf8");
+  readFileSync(new URL(fileName, import.meta.url), "utf8");
 
 const createRedisVectorStoreDocuments = (): Document[] => [
   new VectorDocument("1", readTestData("spring.ai.txt"), { meta1: "meta1" }),
@@ -107,6 +114,6 @@ describe("RedisVectorStoreObservationIT", () => {
     );
 
     // Just verify that we have registry
-    expect(observationRegistry).not.toBeNull();
+    assert.exists(observationRegistry);
   });
 });

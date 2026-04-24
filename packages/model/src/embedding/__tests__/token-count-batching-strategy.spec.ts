@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 
 import { Document } from "@nestjs-ai/commons";
 import { describe, expect, it } from "vitest";
@@ -37,8 +36,8 @@ describe("TokenCountBatchingStrategy", () => {
 
   it("batch embedding with large document exceeds max token size", () => {
     const contentAsString = readFileSync(
-      resolve(__dirname, "./text_source.txt"),
-      "utf-8",
+      new URL("./text_source.txt", import.meta.url),
+      "utf8",
     );
     const tokenCountBatchingStrategy = new TokenCountBatchingStrategy();
 

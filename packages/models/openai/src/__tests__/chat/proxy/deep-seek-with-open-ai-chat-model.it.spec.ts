@@ -15,7 +15,6 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
   BeanOutputConverter,
@@ -29,7 +28,7 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, toArray } from "rxjs";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { OpenAiChatModel } from "../../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../../open-ai-chat-options.js";
@@ -48,7 +47,7 @@ describe.skipIf(!DEEPSEEK_API_KEY)("DeepSeekWithOpenAiChatModelIT", () => {
   const logger = LoggerFactory.getLogger("DeepSeekWithOpenAiChatModelIT");
 
   const systemPromptResource = readFileSync(
-    resolve(__dirname, "..", "system-message.st"),
+    new URL("../system-message.st", import.meta.url),
   );
 
   const chatModel = new OpenAiChatModel({
@@ -214,7 +213,7 @@ describe.skipIf(!DEEPSEEK_API_KEY)("DeepSeekWithOpenAiChatModelIT", () => {
 
     const response = await chatModel.call(prompt);
 
-    expect(response).not.toBeNull();
+    assert.exists(response);
     expect(response.result?.output.text).not.toBe("");
     // Because max_tokens is 2, the finish reason should be length or similar
     // indicating truncation

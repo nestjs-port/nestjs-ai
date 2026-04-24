@@ -16,7 +16,7 @@
 
 import type { ChatModel } from "@nestjs-ai/model";
 import { NoopObservationRegistry } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { DefaultChatClient } from "../default-chat-client.js";
 import { DefaultChatClientBuilder } from "../default-chat-client-builder.js";
@@ -58,7 +58,7 @@ describe("DefaultChatClientBuilder", () => {
     expect(clonedBuilder).not.toBe(originalBuilder);
 
     const clonedRequest = getDefaultRequest(clonedBuilder);
-    expect(clonedRequest).toBeDefined();
+    assert.exists(clonedRequest);
     expect(getSystemText(clonedRequest)).toBe("first instructions");
   });
 
@@ -87,7 +87,7 @@ describe("DefaultChatClientBuilder", () => {
       null,
       null,
     );
-    expect(builder).toBeDefined();
+    assert.exists(builder);
   });
 
   it("when user resource is null then throws", () => {
@@ -150,7 +150,7 @@ describe("DefaultChatClientBuilder", () => {
     const builder = new DefaultChatClientBuilder(createChatModel());
     const chatClient = builder.build();
 
-    expect(chatClient).toBeDefined();
+    assert.exists(chatClient);
     expect(chatClient).toBeInstanceOf(DefaultChatClient);
   });
 

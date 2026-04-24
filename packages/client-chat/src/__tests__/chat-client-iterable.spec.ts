@@ -23,7 +23,7 @@ import {
   type Prompt,
 } from "@nestjs-ai/model";
 import { finalize, interval, map, of, throwError } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 
 import { ChatClient } from "../chat-client.js";
 
@@ -67,7 +67,7 @@ describe("ChatClient stream iterable", () => {
       .prompt({ user: "hi" })
       .stream()
       .chatClientResponseIterable()) {
-      expect(response.chatResponse).toBeDefined();
+      assert.exists(response.chatResponse);
       count++;
     }
 

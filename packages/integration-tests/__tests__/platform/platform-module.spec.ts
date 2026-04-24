@@ -23,7 +23,7 @@ import {
 } from "@nestjs-ai/commons";
 import { NestAiModule } from "@nestjs-ai/platform";
 import type { HttpClient } from "@nestjs-port/core";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const TEST_HTTP_CLIENT: HttpClient = {
   fetch: async () => new Response(null, { status: 200 }),
@@ -49,8 +49,8 @@ describe("NestAiModule", () => {
         imports: [NestAiModule.forRoot()],
       }).compile();
 
-      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
-      expect(moduleRef.get(PROVIDER_INSTANCE_EXPLORER_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
+      assert.exists(moduleRef.get(PROVIDER_INSTANCE_EXPLORER_TOKEN));
     });
 
     it("should use explicit HTTP client when provided", async () => {
@@ -68,7 +68,7 @@ describe("NestAiModule", () => {
         imports: [rootModule],
       }).compile();
 
-      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(true);
     });
 
@@ -79,7 +79,7 @@ describe("NestAiModule", () => {
         imports: [rootModule],
       }).compile();
 
-      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(false);
     });
   });
@@ -124,7 +124,7 @@ describe("NestAiModule", () => {
         imports: [rootModule],
       }).compile();
 
-      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(true);
     });
 
@@ -138,7 +138,7 @@ describe("NestAiModule", () => {
         imports: [rootModule],
       }).compile();
 
-      expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(false);
     });
   });

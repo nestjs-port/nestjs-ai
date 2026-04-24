@@ -35,7 +35,7 @@ import {
   type VectorStore,
 } from "@nestjs-ai/vector-store";
 import { type Milliseconds, ms } from "@nestjs-port/core";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { assert, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuestionAnswerAdvisor } from "../question-answer-advisor.js";
 
 describe("QuestionAnswerAdvisorTests", () => {
@@ -130,28 +130,25 @@ describe("QuestionAnswerAdvisorTests", () => {
       .call()
       .chatResponse();
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected chat response");
-    }
-    const safeResponse = response;
+    assert.exists(response);
 
     // Ensure the metadata is correctly copied over
-    expect(safeResponse.metadata.model).toBe("model1");
-    expect(safeResponse.metadata.id).toBe("678");
-    expect(safeResponse.metadata.rateLimit.requestsLimit).toBe(5);
-    expect(safeResponse.metadata.rateLimit.requestsRemaining).toBe(6);
-    expect(safeResponse.metadata.rateLimit.requestsReset).toBe(7000);
-    expect(safeResponse.metadata.rateLimit.tokensLimit).toBe(8);
-    expect(safeResponse.metadata.rateLimit.tokensRemaining).toBe(8);
-    expect(safeResponse.metadata.rateLimit.tokensReset).toBe(9000);
-    expect(safeResponse.metadata.usage.promptTokens).toBe(6);
-    expect(safeResponse.metadata.usage.completionTokens).toBe(7);
-    expect(safeResponse.metadata.usage.totalTokens).toBe(13);
-    expect(safeResponse.metadata.get("key6")).toBe("value6");
-    expect(safeResponse.metadata.get("key1")).toBe("value1");
+    expect(response.metadata.model).toBe("model1");
+    expect(response.metadata.id).toBe("678");
+    expect(response.metadata.rateLimit.requestsLimit).toBe(5);
+    expect(response.metadata.rateLimit.requestsRemaining).toBe(6);
+    expect(response.metadata.rateLimit.requestsReset).toBe(7000);
+    expect(response.metadata.rateLimit.tokensLimit).toBe(8);
+    expect(response.metadata.rateLimit.tokensRemaining).toBe(8);
+    expect(response.metadata.rateLimit.tokensReset).toBe(9000);
+    expect(response.metadata.usage.promptTokens).toBe(6);
+    expect(response.metadata.usage.completionTokens).toBe(7);
+    expect(response.metadata.usage.totalTokens).toBe(13);
+    expect(response.metadata.get("key6")).toBe("value6");
+    expect(response.metadata.get("key1")).toBe("value1");
 
-    const content = safeResponse.result?.output.text;
+    assert.exists(response.result);
+    const content = response.result.output.text;
     expect(content).toBe("Your answer is ZXY");
 
     const systemMessage = capturedPrompt.instructions[0];
@@ -309,7 +306,7 @@ describe("QuestionAnswerAdvisorTests", () => {
       .chatResponse();
 
     const capturedFilter = capturedSearchRequest.filterExpression;
-    expect(capturedFilter).not.toBeNull();
+    assert.exists(capturedFilter);
     // The filter should be properly constructed with AND operation
     expect(JSON.stringify(capturedFilter)).toContain("type");
     expect(JSON.stringify(capturedFilter)).toContain("Documentation");
@@ -453,7 +450,7 @@ describe("QuestionAnswerAdvisorTests", () => {
 
     // Test successful builder creation
     const advisor = QuestionAnswerAdvisor.builder(vectorStore).build();
-    expect(advisor).not.toBeNull();
+    assert.exists(advisor);
   });
 
   it("qa advisor with zero top k", async () => {

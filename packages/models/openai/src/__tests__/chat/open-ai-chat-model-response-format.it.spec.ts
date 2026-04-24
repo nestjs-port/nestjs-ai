@@ -19,7 +19,7 @@ import type {
   ResponseFormatJSONObject,
   ResponseFormatJSONSchema,
 } from "openai/resources/shared";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { OpenAiChatModel } from "../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
@@ -92,16 +92,10 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
 
     const response = await chatModel.call(prompt);
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected chat response to be present");
-    }
+    assert.exists(response);
 
     const result = response.result;
-    expect(result).not.toBeNull();
-    if (result == null) {
-      throw new Error("Expected chat response result to be present");
-    }
+    assert.exists(result);
 
     const content = result.output.text;
 
@@ -128,16 +122,10 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
 
     const response = await chatModel.call(prompt);
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected chat response to be present");
-    }
+    assert.exists(response);
 
     const result = response.result;
-    expect(result).not.toBeNull();
-    if (result == null) {
-      throw new Error("Expected chat response result to be present");
-    }
+    assert.exists(result);
 
     const content = result.output.text;
 
@@ -155,16 +143,10 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
 
     const response = await chatModel.call(prompt);
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected chat response to be present");
-    }
+    assert.exists(response);
 
     const result = response.result;
-    expect(result).not.toBeNull();
-    if (result == null) {
-      throw new Error("Expected chat response result to be present");
-    }
+    assert.exists(result);
 
     const content = result.output.text;
 
@@ -249,7 +231,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
     );
     const jsonSchema1 = outputConverter.jsonSchema;
 
-    expect(jsonSchema1).not.toBeNull();
+    assert.exists(jsonSchema1);
     expect(jsonSchema1).toBe(expectedJsonSchema);
 
     const prompt = new Prompt(
@@ -262,16 +244,10 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
 
     const response = await chatModel.call(prompt);
 
-    expect(response).not.toBeNull();
-    if (response == null) {
-      throw new Error("Expected chat response to be present");
-    }
+    assert.exists(response);
 
     const result = response.result;
-    expect(result).not.toBeNull();
-    if (result == null) {
-      throw new Error("Expected chat response result to be present");
-    }
+    assert.exists(result);
 
     const content = result.output.text;
 
@@ -283,6 +259,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
 
     const mathReasoning = outputConverter.convert(content || "");
 
-    expect(mathReasoning).not.toBeNull();
+    assert.exists(mathReasoning);
   });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   ModerationOptionsBuilder,
@@ -62,17 +62,14 @@ async function callModeration(instructions: string): Promise<Moderation> {
   expect(moderationResponse.results).toHaveLength(1);
 
   const generation = moderationResponse.result;
-  expect(generation).not.toBeNull();
-  if (generation == null) {
-    throw new Error("Expected moderation result to be present");
-  }
+  assert.exists(generation);
 
   const moderation = generation.output;
   expect(moderation.id).not.toBe("");
   expect(moderation.id).toBeTruthy();
-  expect(moderation.results).not.toBeNull();
+  assert.exists(moderation.results);
   expect(moderation.results.length).not.toBe(0);
-  expect(moderation.model).not.toBeNull();
+  assert.exists(moderation.model);
 
   return moderation;
 }
@@ -86,38 +83,32 @@ function expectModerationShape(
   expect(result.flagged).toBe(expectedViolenceFlag);
 
   const categories = result.categories;
-  expect(categories).not.toBeNull();
-  if (categories == null) {
-    throw new Error("Expected moderation categories to be present");
-  }
+  assert.exists(categories);
 
-  expect(categories.sexual).not.toBeNull();
-  expect(categories.hate).not.toBeNull();
-  expect(categories.harassment).not.toBeNull();
-  expect(categories.selfHarm).not.toBeNull();
-  expect(categories.sexualMinors).not.toBeNull();
-  expect(categories.hateThreatening).not.toBeNull();
-  expect(categories.violenceGraphic).not.toBeNull();
-  expect(categories.selfHarmIntent).not.toBeNull();
-  expect(categories.selfHarmInstructions).not.toBeNull();
-  expect(categories.harassmentThreatening).not.toBeNull();
+  assert.exists(categories.sexual);
+  assert.exists(categories.hate);
+  assert.exists(categories.harassment);
+  assert.exists(categories.selfHarm);
+  assert.exists(categories.sexualMinors);
+  assert.exists(categories.hateThreatening);
+  assert.exists(categories.violenceGraphic);
+  assert.exists(categories.selfHarmIntent);
+  assert.exists(categories.selfHarmInstructions);
+  assert.exists(categories.harassmentThreatening);
   expect(categories.violence).toBe(expectedViolenceFlag);
 
   const scores = result.categoryScores;
-  expect(scores).not.toBeNull();
-  if (scores == null) {
-    throw new Error("Expected moderation category scores to be present");
-  }
+  assert.exists(scores);
 
-  expect(scores.sexual).not.toBeNull();
-  expect(scores.hate).not.toBeNull();
-  expect(scores.harassment).not.toBeNull();
-  expect(scores.selfHarm).not.toBeNull();
-  expect(scores.sexualMinors).not.toBeNull();
-  expect(scores.hateThreatening).not.toBeNull();
-  expect(scores.violenceGraphic).not.toBeNull();
-  expect(scores.selfHarmIntent).not.toBeNull();
-  expect(scores.selfHarmInstructions).not.toBeNull();
-  expect(scores.harassmentThreatening).not.toBeNull();
-  expect(scores.violence).not.toBeNull();
+  assert.exists(scores.sexual);
+  assert.exists(scores.hate);
+  assert.exists(scores.harassment);
+  assert.exists(scores.selfHarm);
+  assert.exists(scores.sexualMinors);
+  assert.exists(scores.hateThreatening);
+  assert.exists(scores.violenceGraphic);
+  assert.exists(scores.selfHarmIntent);
+  assert.exists(scores.selfHarmInstructions);
+  assert.exists(scores.harassmentThreatening);
+  assert.exists(scores.violence);
 }

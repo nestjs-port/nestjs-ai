@@ -27,7 +27,7 @@ import {
 } from "@nestjs-ai/model-google-genai";
 import { ObservationFilters } from "@nestjs-port/core";
 import { ObservationModule } from "@nestjs-port/observation";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 const API_KEY_TOKEN = Symbol("API_KEY_TOKEN");
 
@@ -56,8 +56,8 @@ describe("GoogleGenAiChatModelModule", () => {
 
       const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
-      expect(chatModel).toBeDefined();
-      expect(chatModel.genAiClient).toBeDefined();
+      assert.exists(chatModel);
+      assert.exists(chatModel.genAiClient);
     });
 
     it("builds a GoogleGenAI client from apiKey properties", async () => {
@@ -188,7 +188,7 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(GoogleGenAiCachedContentService)).toBeDefined();
+      assert.exists(moduleRef.get(GoogleGenAiCachedContentService));
     });
 
     it("omits cached content service when disabled", async () => {
@@ -239,8 +239,8 @@ describe("GoogleGenAiChatModelModule", () => {
 
       const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
-      expect(chatModel).toBeDefined();
-      expect(chatModel.genAiClient).toBeDefined();
+      assert.exists(chatModel);
+      assert.exists(chatModel.genAiClient);
     });
 
     it("supports imports and inject for async factory", async () => {
@@ -260,7 +260,7 @@ describe("GoogleGenAiChatModelModule", () => {
       const chatModel = moduleRef.get<GoogleGenAiChatModel>(CHAT_MODEL_TOKEN);
 
       expect(chatModel.genAiClient.vertexai).toBe(false);
-      expect(chatModel).toBeDefined();
+      assert.exists(chatModel);
     });
 
     it("supports async factory returning a Promise", async () => {
@@ -275,7 +275,7 @@ describe("GoogleGenAiChatModelModule", () => {
         ],
       }).compile();
 
-      expect(moduleRef.get(CHAT_MODEL_TOKEN)).toBeDefined();
+      assert.exists(moduleRef.get(CHAT_MODEL_TOKEN));
     });
 
     it("uses global false by default for async", () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { ToolDefinition } from "../../definition/index.js";
 import { ToolCallingObservationContext } from "../tool-calling-observation-context.js";
 
@@ -24,7 +24,7 @@ describe("ToolCallingObservationContext", () => {
       toolDefinition: createToolDefinition("toolA", "description", "{}"),
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
   });
 
   it("when tool arguments is null then return", () => {
@@ -33,7 +33,7 @@ describe("ToolCallingObservationContext", () => {
       toolCallArguments: null,
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.toolCallArguments).toBe("{}");
   });
 
@@ -43,7 +43,7 @@ describe("ToolCallingObservationContext", () => {
       toolCallArguments: "lizard",
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.toolCallArguments).toBe("lizard");
   });
 
@@ -64,7 +64,7 @@ describe("ToolCallingObservationContext", () => {
       toolMetadata: null as never,
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.toolMetadata.returnDirect).toBe(false);
   });
 
@@ -74,7 +74,7 @@ describe("ToolCallingObservationContext", () => {
       toolCallArguments: "",
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.toolCallArguments).toBe("");
   });
 
@@ -84,7 +84,7 @@ describe("ToolCallingObservationContext", () => {
       toolCallResult: null,
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.toolCallResult).toBeNull();
   });
 
@@ -94,7 +94,7 @@ describe("ToolCallingObservationContext", () => {
       toolCallResult: "",
     });
 
-    expect(observationContext).toBeDefined();
+    assert.exists(observationContext);
     expect(observationContext.toolCallResult).toBe("");
   });
 

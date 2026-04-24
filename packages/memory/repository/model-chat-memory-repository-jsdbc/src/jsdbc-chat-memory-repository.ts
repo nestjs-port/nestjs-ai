@@ -120,13 +120,13 @@ class MessageRowMapper implements RowMapper<Message> {
     row: Record<string, unknown>,
     rowNum: number,
   ): MessageRow {
-    const content = row.content;
-    if (typeof content !== "string") {
+    const content = this.getTextField(row, "content");
+    if (content == null) {
       throw new Error(`Invalid message content at row ${rowNum}`);
     }
 
-    const type = row.type;
-    if (typeof type !== "string") {
+    const type = this.getTextField(row, "type");
+    if (type == null) {
       throw new Error(`Invalid message type at row ${rowNum}`);
     }
 
@@ -154,6 +154,25 @@ class MessageRowMapper implements RowMapper<Message> {
       default:
         throw new Error(`Unknown message type: ${String(row.type)}`);
     }
+  }
+
+  private getTextField(
+    row: Record<string, unknown>,
+    name: string,
+  ): string | null {
+    const lowerName = name.toLowerCase();
+    const upperName = name.toUpperCase();
+    const value = row[lowerName] ?? row[upperName] ?? row[name];
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (value == null) {
+      return null;
+    }
+
+    return value.toString();
   }
 }
 

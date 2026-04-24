@@ -15,6 +15,7 @@
     "type": "git",
     "url": "https://github.com/nestjs-port/nestjs-ai"
   },
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",

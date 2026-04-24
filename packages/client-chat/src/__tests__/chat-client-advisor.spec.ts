@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { TemplateRendererFactory } from "@nestjs-ai/commons";
 import type { ChatMemory } from "@nestjs-ai/model";
 import {
   AssistantMessage,
@@ -27,11 +28,15 @@ import {
   type Prompt,
 } from "@nestjs-ai/model";
 import { lastValueFrom, type Observable, of, reduce } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PromptChatMemoryAdvisor } from "../advisor/index.js";
 import { ChatClient } from "../chat-client.js";
 
 describe("ChatClientAdvisorTests", () => {
+  beforeEach(() => {
+    TemplateRendererFactory.reset();
+  });
+
   it("promptChatMemory", async () => {
     let capturedPrompt = {} as Prompt;
     const chatModel = {

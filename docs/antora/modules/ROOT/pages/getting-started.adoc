@@ -48,6 +48,7 @@ Modules must be imported in an order that satisfies their token dependencies:
 ----
 import { Module } from '@nestjs/common';
 import { NestAiModule } from '@nestjs-ai/platform';
+import { InjectChatModel } from '@nestjs-ai/platform/decorators';
 import { OpenAiChatModelModule } from '@nestjs-ai/model-openai';
 import { ChatClientModule } from '@nestjs-ai/client-chat';
 
@@ -105,22 +106,22 @@ export class AppModule {}
 
 === Using the ChatClient
 
-Inject `CHAT_MODEL_TOKEN` and create a `ChatClient` with `ChatClient.create(chatModel)`, or
+Use `InjectChatModel()` from `@nestjs-ai/platform` and create a `ChatClient` with `ChatClient.create(chatModel)`, or
 inject the transient `CHAT_CLIENT_BUILDER_TOKEN` provided by `ChatClientModule` to reuse the configured builder.
 
 [source,typescript]
 ----
 // chat.controller.ts
-import { Controller, Get, Inject, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ChatClient } from '@nestjs-ai/client-chat';
-import { CHAT_MODEL_TOKEN } from '@nestjs-ai/commons';
+import { InjectChatModel } from '@nestjs-ai/platform';
 import type { ChatModel } from '@nestjs-ai/model';
 
 @Controller()
 export class ChatController {
   private readonly chatClient: ChatClient;
 
-  constructor(@Inject(CHAT_MODEL_TOKEN) chatModel: ChatModel) {
+  constructor(@InjectChatModel() chatModel: ChatModel) {
     this.chatClient = ChatClient.create(chatModel);
   }
 

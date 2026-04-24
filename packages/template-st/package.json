@@ -40,11 +40,11 @@
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
-    "@nestjs-port/core": "^0.0.3"
+    "@nestjs-port/core": "^0.0.4"
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-port/core": "^0.0.3"
+    "@nestjs-port/core": "^0.0.4"
   },
   "engines": {
     "node": ">=22.12.0"

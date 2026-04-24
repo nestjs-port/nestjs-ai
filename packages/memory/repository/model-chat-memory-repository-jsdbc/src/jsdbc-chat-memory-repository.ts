@@ -30,9 +30,7 @@ import {
   JsdbcTemplate,
   type RowMapper,
   SingleColumnRowMapper,
-  ZodRowMapper,
 } from "@nestjs-port/jsdbc";
-import { z } from "zod";
 import type { JsdbcChatMemoryRepositoryDialect } from "./jsdbc-chat-memory-repository-dialect.js";
 import { JsdbcChatMemoryRepositoryDialectFactory } from "./jsdbc-chat-memory-repository-dialect-factory.js";
 
@@ -114,22 +112,28 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
 }
 
 class MessageRowMapper implements RowMapper<Message> {
-  private static readonly messageRowSchema = z.object({
-    content: z.string(),
-    type: z.string(),
-  });
-
-  private readonly delegate = new ZodRowMapper(
-    MessageRowMapper.messageRowSchema,
-  );
-
   mapRow(row: Record<string, unknown>, rowNum: number): Message {
-    return this.toMessage(this.delegate.mapRow(row, rowNum));
+    return this.toMessage(this.validateRow(row, rowNum));
   }
 
-  private toMessage(
-    row: z.infer<typeof MessageRowMapper.messageRowSchema>,
-  ): Message {
+  private validateRow(
+    row: Record<string, unknown>,
+    rowNum: number,
+  ): MessageRow {
+    const content = row.content;
+    if (typeof content !== "string") {
+      throw new Error(`Invalid message content at row ${rowNum}`);
+    }
+
+    const type = row.type;
+    if (typeof type !== "string") {
+      throw new Error(`Invalid message type at row ${rowNum}`);
+    }
+
+    return { content, type };
+  }
+
+  private toMessage(row: MessageRow): Message {
     assert(
       StringUtils.hasText(row.type),
       "message type cannot be null or empty",
@@ -151,6 +155,11 @@ class MessageRowMapper implements RowMapper<Message> {
         throw new Error(`Unknown message type: ${String(row.type)}`);
     }
   }
+}
+
+interface MessageRow {
+  content: string;
+  type: string;
 }
 
 export class JsdbcChatMemoryRepositoryBuilder {

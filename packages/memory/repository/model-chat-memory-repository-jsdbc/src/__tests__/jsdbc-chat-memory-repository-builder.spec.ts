@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { UserMessage } from "@nestjs-ai/model";
 import {
   DatabaseDialect,
   type DataSource,
@@ -185,5 +186,61 @@ describe("JsdbcChatMemoryRepositoryBuilder", () => {
     expect(Reflect.get(repository, "dialect")).toBeInstanceOf(
       MysqlChatMemoryRepositoryDialect,
     );
+  });
+
+  it("maps message rows without zod", async () => {
+    const template = {
+      queryForList: vi.fn(
+        async (
+          _sql: string,
+          rowMapper: {
+            mapRow: (
+              row: Record<string, unknown>,
+              rowNum: number,
+            ) => Promise<unknown>;
+          },
+        ) => [await rowMapper.mapRow({ content: "hello", type: "USER" }, 0)],
+      ),
+      update: vi.fn(async () => 0),
+      transaction: async <T>(callback: (connection: never) => Promise<T>) =>
+        callback({} as never),
+    } as unknown as JsdbcTemplate;
+
+    const repository = new JsdbcChatMemoryRepository(
+      template,
+      new PostgresChatMemoryRepositoryDialect(),
+    );
+
+    await expect(
+      repository.findByConversationId("conversation-1"),
+    ).resolves.toEqual([new UserMessage({ content: "hello" })]);
+  });
+
+  it("rejects invalid message rows", async () => {
+    const template = {
+      queryForList: vi.fn(
+        async (
+          _sql: string,
+          rowMapper: {
+            mapRow: (
+              row: Record<string, unknown>,
+              rowNum: number,
+            ) => Promise<unknown>;
+          },
+        ) => rowMapper.mapRow({ content: 42, type: "USER" }, 0),
+      ),
+      update: vi.fn(async () => 0),
+      transaction: async <T>(callback: (connection: never) => Promise<T>) =>
+        callback({} as never),
+    } as unknown as JsdbcTemplate;
+
+    const repository = new JsdbcChatMemoryRepository(
+      template,
+      new PostgresChatMemoryRepositoryDialect(),
+    );
+
+    await expect(
+      repository.findByConversationId("conversation-1"),
+    ).rejects.toThrow("Invalid message content at row 0");
   });
 });

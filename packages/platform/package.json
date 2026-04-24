@@ -38,7 +38,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/template-st": "workspace:*",
-    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/core": "^0.0.4",
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11"
   },
@@ -46,7 +46,7 @@
     "@nestjs-ai/commons": "workspace:^",
     "@nestjs-ai/model": "workspace:^",
     "@nestjs-ai/template-st": "workspace:^",
-    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/core": "^0.0.4",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@nestjs/core": "^10.0.0 || ^11.0.0"
   },

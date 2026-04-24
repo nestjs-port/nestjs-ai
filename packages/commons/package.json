@@ -35,14 +35,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/core": "^0.0.4",
     "tiktoken": "^1.0.22"
   },
   "devDependencies": {
     "rxjs": "^7.0.0"
   },
   "peerDependencies": {
-    "@nestjs-port/core": "^0.0.3",
+    "@nestjs-port/core": "^0.0.4",
     "rxjs": "^7.0.0"
   },
   "engines": {

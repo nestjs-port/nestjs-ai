@@ -23,8 +23,9 @@ import {
   type Prompt,
   PromptTemplate,
 } from "../../../chat/index.js";
+import { TemplateRendererFactory } from "@nestjs-ai/commons";
 import { KeywordMetadataEnricher } from "../keyword-metadata-enricher.js";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const CUSTOM_TEMPLATE = "Custom template: {context_str}";
 
@@ -62,6 +63,10 @@ function getDefaultTemplatePromptText(
 }
 
 describe("KeywordMetadataEnricher", () => {
+  beforeEach(() => {
+    TemplateRendererFactory.reset();
+  });
+
   it("testUseWithDefaultTemplate", async () => {
     // 1. Prepare test data
     const documents = [

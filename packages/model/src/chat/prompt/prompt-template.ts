@@ -15,8 +15,11 @@
  */
 
 import assert from "node:assert/strict";
-import type { Media, TemplateRenderer } from "@nestjs-ai/commons";
-import { StTemplateRenderer } from "@nestjs-ai/template-st";
+import {
+  TemplateRendererFactory,
+  type Media,
+  type TemplateRenderer,
+} from "@nestjs-ai/commons";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Message } from "../messages/index.js";
 import { UserMessage } from "../messages/index.js";
@@ -24,8 +27,6 @@ import type { ChatOptions } from "./chat-options.interface.js";
 import { Prompt } from "./prompt.js";
 import type { PromptTemplateActions } from "./prompt-template-actions.interface.js";
 import type { PromptTemplateMessageActions } from "./prompt-template-message-actions.interface.js";
-
-const DEFAULT_TEMPLATE_RENDERER: TemplateRenderer = new StTemplateRenderer();
 
 export class PromptTemplate
   implements PromptTemplateActions, PromptTemplateMessageActions
@@ -53,13 +54,15 @@ export class PromptTemplate
   constructor(
     templateOrResource: string | Buffer,
     variables: Record<string, unknown> = {},
-    renderer: TemplateRenderer = DEFAULT_TEMPLATE_RENDERER,
+    renderer?: TemplateRenderer,
   ) {
     assert(variables != null, "variables cannot be null");
     for (const key of Object.keys(variables)) {
       assert(key != null, "variables keys cannot be null");
     }
-    assert(renderer != null, "renderer cannot be null");
+    const effectiveRenderer =
+      renderer ?? TemplateRendererFactory.getTemplateRenderer();
+    assert(effectiveRenderer != null, "renderer cannot be null");
 
     if (Buffer.isBuffer(templateOrResource)) {
       assert(templateOrResource != null, "resource cannot be null");
@@ -78,7 +81,7 @@ export class PromptTemplate
     }
 
     this._variables = { ...variables };
-    this._renderer = renderer;
+    this._renderer = effectiveRenderer;
   }
 
   add(name: string, value: unknown): void {
@@ -215,7 +218,8 @@ export class PromptTemplateBuilder {
 
   protected _variables: Record<string, unknown> = {};
 
-  protected _renderer: TemplateRenderer = DEFAULT_TEMPLATE_RENDERER;
+  protected _renderer: TemplateRenderer =
+    TemplateRendererFactory.getTemplateRenderer();
 
   template(template: string): PromptTemplateBuilder {
     assert(

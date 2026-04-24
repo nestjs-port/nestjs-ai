@@ -16,9 +16,11 @@
 
 import {
   NoOpTemplateRenderer,
+  TemplateRendererFactory,
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import { UserMessage } from "../../messages/index.js";
 import { PromptTemplate } from "../prompt-template.js";
 
@@ -29,6 +31,22 @@ class CustomTestRenderer implements TemplateRenderer {
 }
 
 describe("PromptTemplate", () => {
+  beforeEach(() => {
+    TemplateRendererFactory.reset();
+  });
+
+  it("should lazily switch from fallback renderer to ST renderer", () => {
+    TemplateRendererFactory.bind(new NoOpTemplateRenderer());
+
+    const promptTemplate = new PromptTemplate("Hello {name}!");
+    expect(promptTemplate.render({ name: "Spring AI" })).toBe("Hello {name}!");
+
+    TemplateRendererFactory.bind(new StTemplateRenderer());
+    expect(promptTemplate.render({ name: "Spring AI" })).toBe(
+      "Hello Spring AI!",
+    );
+  });
+
   it("create with valid template", () => {
     const template = "Hello {name}!";
     const promptTemplate = new PromptTemplate(template);

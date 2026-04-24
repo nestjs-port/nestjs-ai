@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-import type { TemplateRenderer } from "@nestjs-ai/commons";
-import { describe, expect, it } from "vitest";
+import {
+  TemplateRendererFactory,
+  type TemplateRenderer,
+} from "@nestjs-ai/commons";
+import { beforeEach, describe, expect, it } from "vitest";
 import { PromptTemplate } from "../prompt-template.js";
 
 describe("PromptTemplateBuilder", () => {
+  beforeEach(() => {
+    TemplateRendererFactory.reset();
+  });
+
   it("null template should throw", () => {
     expect(() =>
       PromptTemplate.builder().template(null as unknown as string),
@@ -86,7 +93,7 @@ describe("PromptTemplateBuilder", () => {
       .build();
 
     const result = promptTemplate.render();
-    expect(result).toContain("Result:");
+    expect(result).toBe("Result: ");
   });
 
   it("multiple missing variables should throw", () => {

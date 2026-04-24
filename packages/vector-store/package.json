@@ -42,13 +42,13 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/core": "^0.0.3",
-    "@nestjs-port/testing": "^0.0.2"
+    "@nestjs-port/core": "^0.0.4",
+    "@nestjs-port/testing": "^0.0.3"
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "workspace:^",
     "@nestjs-ai/model": "workspace:^",
-    "@nestjs-port/core": "^0.0.3"
+    "@nestjs-port/core": "^0.0.4"
   },
   "engines": {
     "node": ">=22.12.0"

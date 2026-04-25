@@ -64,7 +64,7 @@ describe("JsonLiteralOutputConverter", () => {
     expect(converter.jsonSchema).toContain('"type": "object"');
   });
 
-  it("uses a custom transformer when provided", () => {
+  it("uses a custom transformer when provided", async () => {
     const converter = new JsonSchemaOutputConverter<
       typeof TestJsonSchema,
       TestBean
@@ -73,7 +73,7 @@ describe("JsonLiteralOutputConverter", () => {
       transformer: (value) => Object.assign(new TestBean(), value),
     });
 
-    const result = converter.convert('{ "someString": "some value" }');
+    const result = await converter.convert('{ "someString": "some value" }');
 
     expect(result).toBeInstanceOf(TestBean);
     expect(result.someString).toBe("some value");

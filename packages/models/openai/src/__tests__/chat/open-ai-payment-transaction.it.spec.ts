@@ -16,8 +16,8 @@
 
 import { ChatClient, SimpleLoggerAdvisor } from "@nestjs-ai/client-chat";
 import {
-  BeanOutputConverter,
   FunctionToolCallback,
+  JsonSchemaOutputConverter,
   type ToolCallback,
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
@@ -53,17 +53,29 @@ const DATASET = new Map<string, Status>([
   ["003", { name: "rejected" }],
 ]);
 
+type TransactionStatusResponse = Array<{
+  id: string;
+  status: string;
+}>;
+
 const paymentStatusInputType = z.object({ id: z.string() });
 const paymentStatusesInputType = z.object({
   transactions: z.array(z.object({ id: z.string() })),
 });
 
-const TransactionStatusResponseSchema = z.array(
-  z.object({
-    id: z.string(),
-    status: z.string(),
-  }),
-);
+const TransactionStatusResponseSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      id: { type: "string" },
+      status: { type: "string" },
+    },
+    required: ["id", "status"],
+    additionalProperties: false,
+  },
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+} as const;
 
 function paymentStatusCallback(): ToolCallback {
   return FunctionToolCallback.builder<Transaction, Status>(
@@ -111,22 +123,23 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiPaymentTransaction", () => {
   ] as const)("transaction payment statuses: %s", async (_name, callback) => {
     const chatClient = buildChatClient(callback);
 
-    const content = await chatClient
+    const content: TransactionStatusResponse | null = await chatClient
       .prompt()
       .advisors(new SimpleLoggerAdvisor())
       .user(`What is the status of my payment transactions 001, 002 and 003?\n`)
       .call()
       .entity(TransactionStatusResponseSchema);
 
+    const typedContent: TransactionStatusResponse = content ?? [];
     assert.exists(content);
-    expect(content[0]?.id).toBe("001");
-    expect(content[0]?.status).toBe("pending");
+    expect(typedContent[0]?.id).toBe("001");
+    expect(typedContent[0]?.status).toBe("pending");
 
-    expect(content[1]?.id).toBe("002");
-    expect(content[1]?.status).toBe("approved");
+    expect(typedContent[1]?.id).toBe("002");
+    expect(typedContent[1]?.status).toBe("approved");
 
-    expect(content[2]?.id).toBe("003");
-    expect(content[2]?.status).toBe("rejected");
+    expect(typedContent[2]?.id).toBe("003");
+    expect(typedContent[2]?.status).toBe("rejected");
   });
 
   it.each([
@@ -135,7 +148,10 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiPaymentTransaction", () => {
   ] as const)("streaming payment statuses: %s", async (_name, callback) => {
     const chatClient = buildChatClient(callback);
 
-    const converter = new BeanOutputConverter({
+    const converter = new JsonSchemaOutputConverter<
+      typeof TransactionStatusResponseSchema,
+      TransactionStatusResponse
+    >({
       schema: TransactionStatusResponseSchema,
     });
 

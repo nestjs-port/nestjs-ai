@@ -18,8 +18,8 @@ import { readFileSync } from "node:fs";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
-  BeanOutputConverter,
   FunctionToolCallback,
+  JsonSchemaOutputConverter,
   ListOutputConverter,
   type Message,
   Prompt,
@@ -136,9 +136,8 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
     });
 
     it("bean output converter records", async () => {
-      const outputConverter = new BeanOutputConverter({
+      const outputConverter = new JsonSchemaOutputConverter({
         schema: ActorsFilmsSchema,
-        outputType: ActorsFilmsRecord,
       });
 
       const format = outputConverter.format;
@@ -158,8 +157,10 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
       }
       const generation = generationResponse.result;
 
-      const actorsFilms = outputConverter.convert(generation.output.text ?? "");
-      logger.info("%s", String(actorsFilms));
+      const actorsFilms = await outputConverter.convert(
+        generation.output.text ?? "",
+      );
+      logger.info("%o", actorsFilms);
       expect(actorsFilms.actor).toBe("Tom Hanks");
       expect(actorsFilms.movies).toHaveLength(5);
     });
@@ -271,12 +272,6 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
     });
   },
 );
-
-class ActorsFilmsRecord {
-  actor = "";
-
-  movies: string[] = [];
-}
 
 const ActorsFilmsSchema = {
   type: "object",

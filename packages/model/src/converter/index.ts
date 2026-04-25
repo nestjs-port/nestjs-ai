@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-export type {
-  JsonOrJsonArraySchema,
-  OutputTypeTarget,
-  SchemaOutput,
-} from "./bean-output-converter.js";
-export { BeanOutputConverter } from "./bean-output-converter.js";
 export {
   CompositeResponseTextCleaner,
   type CompositeResponseTextCleanerBuilder,
@@ -32,7 +26,7 @@ export { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner.js";
 export { StandardSchemaOutputConverter } from "./standard-schema-output-converter.js";
 export type { StandardSchemaOutputConverterProps } from "./standard-schema-output-converter.js";
 export type { ResponseTextCleaner } from "./response-text-cleaner.js";
-export type { StructuredOutputConverter } from "./structured-output-converter.js";
+export { StructuredOutputConverter } from "./structured-output-converter.js";
 export {
   ThinkingTagCleaner,
   type ThinkingTagCleanerBuilder,

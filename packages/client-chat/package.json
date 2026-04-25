@@ -35,6 +35,10 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "json-schema-to-ts": "^3.1.1"
+  },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",

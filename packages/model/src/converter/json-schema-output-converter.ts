@@ -23,6 +23,7 @@ import {
 } from "./composite-response-text-cleaner.js";
 import { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner.js";
 import type { ResponseTextCleaner } from "./response-text-cleaner.js";
+import { StructuredOutputConverter } from "./structured-output-converter.js";
 import { ThinkingTagCleaner } from "./thinking-tag-cleaner.js";
 import { WhitespaceCleaner } from "./whitespace-cleaner.js";
 
@@ -40,7 +41,7 @@ export interface JsonLiteralOutputConverterProps<
 export class JsonSchemaOutputConverter<
   TSchema extends JSONSchema,
   TOutput = JsonLiteralSchemaOutput<TSchema>,
-> {
+> extends StructuredOutputConverter<TOutput> {
   private readonly _schema: TSchema;
   private readonly _textCleaner: ResponseTextCleaner;
   private readonly _transformer:
@@ -48,6 +49,7 @@ export class JsonSchemaOutputConverter<
     | null;
 
   constructor(props: JsonLiteralOutputConverterProps<TSchema, TOutput>) {
+    super();
     assert(props.schema, "Schema cannot be null");
     this._schema = props.schema;
     this._textCleaner =
@@ -66,7 +68,7 @@ export class JsonSchemaOutputConverter<
       .build();
   }
 
-  convert(source: string): TOutput {
+  async convert(source: string): Promise<TOutput> {
     try {
       const cleaned = this._textCleaner.clean(source);
       const parsed = JSON.parse(cleaned ?? "");

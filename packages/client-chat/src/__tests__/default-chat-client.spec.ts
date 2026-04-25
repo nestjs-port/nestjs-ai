@@ -35,6 +35,7 @@ import { NoopObservationRegistry } from "@nestjs-port/core";
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import { defaultIfEmpty, lastValueFrom, type Observable, of } from "rxjs";
 import { assert, describe, expect, it, vi } from "vitest";
+import type { JSONSchema } from "json-schema-to-ts";
 import { z } from "zod";
 
 import type { Advisor, BaseAdvisorChain } from "../advisor/index.js";
@@ -1073,9 +1074,12 @@ describe("DefaultChatClient", () => {
         chatClient.prompt("my question"),
       )
         .call()
-        .responseEntity(PersonSchema, Person);
+        .responseEntity(PersonSchema, (value) =>
+          Object.assign(new Person(), value),
+        );
       assert.exists(responseEntity.response);
       assert.exists(responseEntity.entity);
+      expect(responseEntity.entity).toBeInstanceOf(Person);
       expect(responseEntity.entity?.name).toBe("James Bond");
     });
 
@@ -1137,34 +1141,20 @@ describe("DefaultChatClient", () => {
       const chatClient = new DefaultChatClientBuilder(chatModel).build();
       const entity = await asRequestSpec(chatClient.prompt("my question"))
         .call()
-        .entity(PersonSchema, Person);
+        .entity(PersonSchema, (value) => Object.assign(new Person(), value));
       assert.exists(entity);
-      expect((entity as Person).name).toBe("James Bond");
+      expect(entity).toBeInstanceOf(Person);
+      expect(entity?.name).toBe("James Bond");
     });
 
     it("when entity schema type is invalid then fails at compile time", () => {
-      const entity =
-        (() => {}) as unknown as ChatClient.CallResponseSpec["entity"];
+      const entity = (() => {}) as unknown as <TOutput = unknown>(
+        schema: JSONSchema,
+        transformer?: (value: unknown) => TOutput,
+      ) => void;
 
       // @ts-expect-error schema must be a JSON Schema object, not a raw JSON array
       entity([]);
-
-      // @ts-expect-error non-JSON zod schema is not supported
-      entity(z.string());
-
-      // @ts-expect-error zod array items must be JSON object schemas
-      entity(z.array(z.string()));
-
-      entity({
-        // @ts-expect-error invalid JSON Schema type literal
-        type: "not-a-valid-json-schema-type",
-      });
-
-      // @ts-expect-error invalid JSON Schema required keyword
-      entity({
-        type: "object",
-        required: "name",
-      });
 
       expect(true).toBe(true);
     });

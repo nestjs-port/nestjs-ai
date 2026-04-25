@@ -24,11 +24,11 @@ import {
 } from "@nestjs-ai/client-chat";
 import { MediaFormat } from "@nestjs-ai/commons";
 import {
-  BeanOutputConverter,
   type ChatResponse,
   FunctionToolCallback,
   ListOutputConverter,
   MapOutputConverter,
+  JsonSchemaOutputConverter,
   Tool,
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
@@ -101,7 +101,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
         "Generate the filmography of 5 movies for Tom Hanks and Bill Murray.",
       )
       .call()
-      .entity(z.array(ActorsFilmsSchema), ActorsFilms);
+      .entity(z.array(ActorsFilmsSchema.transform(toActorsFilms)));
 
     logger.info("%o", actorsFilms);
     expect(actorsFilms).toHaveLength(2);
@@ -116,7 +116,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
         "Generate the filmography of 5 movies for Tom Hanks and Bill Murray.",
       )
       .call()
-      .entity(z.array(ActorsFilmsSchema), ActorsFilms);
+      .entity(z.array(ActorsFilmsSchema.transform(toActorsFilms)));
 
     logger.info("%o", actorsFilms);
     expect(actorsFilms).toHaveLength(2);
@@ -160,7 +160,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
       .prompt()
       .user("Generate the filmography for a random actor.")
       .call()
-      .entity(ActorsFilmsSchema, ActorsFilms);
+      .entity(ActorsFilmsSchema.transform(toActorsFilms));
 
     logger.info("%o", actorsFilms);
     expect(actorsFilms?.actor ?? "").not.toBe("");
@@ -171,7 +171,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
       .prompt()
       .user("Generate the filmography of 5 movies for Tom Hanks.")
       .call()
-      .entity(ActorsFilmsSchema, ActorsFilms);
+      .entity(ActorsFilmsSchema.transform(toActorsFilms));
 
     logger.info("%o", actorsFilms);
     expect(actorsFilms?.actor).toBe("Tom Hanks");
@@ -179,9 +179,8 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
   });
 
   it("bean stream output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
+    const outputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsJsonSchema,
     });
 
     const chatResponse = ChatClient.create(chatModel)
@@ -201,7 +200,7 @@ describe.skipIf(!ANTHROPIC_API_KEY)("AnthropicChatClientIT", () => {
 
     const generationTextFromStream = await collectText(chatResponse);
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
 
     logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
@@ -374,16 +373,37 @@ class MyTools {
   }
 }
 
-class ActorsFilms {
-  actor!: string;
-
-  movies!: string[];
-}
-
 const ActorsFilmsSchema = z.object({
   actor: z.string(),
   movies: z.array(z.string()),
 });
+
+const ActorsFilmsJsonSchema = {
+  type: "object",
+  properties: {
+    actor: { type: "string" },
+    movies: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+  required: ["actor", "movies"],
+  additionalProperties: false,
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+} as const;
+
+class ActorsFilms {
+  actor = "";
+
+  movies: string[] = [];
+}
+
+function toActorsFilms(value: {
+  actor: string;
+  movies: string[];
+}): ActorsFilms {
+  return Object.assign(new ActorsFilms(), value);
+}
 
 function createWeatherToolCallback(name: string, includeDescription: boolean) {
   const weatherService = new MockWeatherService();

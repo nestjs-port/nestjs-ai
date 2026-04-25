@@ -17,8 +17,8 @@
 import { readFileSync } from "node:fs";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
-  BeanOutputConverter,
   FunctionToolCallback,
+  JsonSchemaOutputConverter,
   ListOutputConverter,
   Prompt,
   PromptTemplate,
@@ -124,9 +124,8 @@ describe.skipIf(!MISTRAL_AI_API_KEY)("MistralWithOpenAiChatModelIT", () => {
   });
 
   it("bean output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -145,8 +144,10 @@ describe.skipIf(!MISTRAL_AI_API_KEY)("MistralWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
-    logger.info("%s", String(actorsFilms));
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
+    logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -224,12 +225,6 @@ describe.skipIf(!MISTRAL_AI_API_KEY)("MistralWithOpenAiChatModelIT", () => {
     ).toContain("length");
   });
 });
-
-class ActorsFilmsRecord {
-  actor = "";
-
-  movies: string[] = [];
-}
 
 const ActorsFilmsSchema = {
   type: "object",

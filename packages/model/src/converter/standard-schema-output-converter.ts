@@ -14,6 +14,7 @@
  */
 
 import assert from "node:assert/strict";
+import { EOL } from "node:os";
 import type {
   StandardJSONSchemaV1,
   StandardSchemaV1,
@@ -26,7 +27,7 @@ import {
 } from "./composite-response-text-cleaner.js";
 import { MarkdownCodeBlockCleaner } from "./markdown-code-block-cleaner.js";
 import type { ResponseTextCleaner } from "./response-text-cleaner.js";
-import type { StructuredOutputConverter } from "./structured-output-converter.js";
+import { StructuredOutputConverter } from "./structured-output-converter.js";
 import { ThinkingTagCleaner } from "./thinking-tag-cleaner.js";
 import { WhitespaceCleaner } from "./whitespace-cleaner.js";
 
@@ -34,30 +35,34 @@ type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 export interface StandardSchemaOutputConverterProps<
   TSchema extends StandardSchemaWithJsonSchema,
+  TOutput = StandardJSONSchemaV1.InferOutput<TSchema>,
 > {
   schema: TSchema;
   textCleaner?: ResponseTextCleaner;
+  transformer?: (value: StandardJSONSchemaV1.InferOutput<TSchema>) => TOutput;
 }
 
 export class StandardSchemaOutputConverter<
   TSchema extends StandardSchemaWithJsonSchema,
-> implements StructuredOutputConverter<
-  StandardJSONSchemaV1.InferOutput<TSchema>
-> {
+  TOutput = StandardJSONSchemaV1.InferOutput<TSchema>,
+> extends StructuredOutputConverter<TOutput> {
   private readonly _schema: TSchema;
   private readonly _textCleaner: ResponseTextCleaner;
+  private readonly _transformer:
+    | ((value: StandardJSONSchemaV1.InferOutput<TSchema>) => TOutput)
+    | null;
 
-  constructor(props: StandardSchemaOutputConverterProps<TSchema>) {
+  constructor(props: StandardSchemaOutputConverterProps<TSchema, TOutput>) {
+    super();
     assert(props.schema, "Schema cannot be null");
     this._schema = props.schema;
     this._textCleaner =
       props.textCleaner ??
       StandardSchemaOutputConverter.createDefaultTextCleaner();
+    this._transformer = props.transformer ?? null;
   }
 
-  async convert(
-    source: string,
-  ): Promise<StandardJSONSchemaV1.InferOutput<TSchema>> {
+  async convert(source: string): Promise<TOutput> {
     try {
       const cleaned = this._textCleaner.clean(source);
       const parsed = JSON.parse(cleaned ?? "");
@@ -67,7 +72,12 @@ export class StandardSchemaOutputConverter<
         throw new SchemaError(result.issues);
       }
 
-      return result.value as StandardJSONSchemaV1.InferOutput<TSchema>;
+      const value = result.value as StandardJSONSchemaV1.InferOutput<TSchema>;
+      if (this._transformer) {
+        return this._transformer(value);
+      }
+
+      return value as TOutput;
     } catch (error) {
       throw new Error(
         `Could not parse the given text to the desired target schema: "${source}"`,
@@ -77,16 +87,16 @@ export class StandardSchemaOutputConverter<
   }
 
   get format(): string {
-    const jsonSchema = StandardSchemaOutputConverter.getJsonSchema(
-      this._schema,
-    );
-
     return `Your response should be in JSON format.
 Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
 Do not include markdown code blocks in your response.
 Remove the \`\`\`json markdown from the output.
 Here is the JSON Schema instance your output must adhere to:
-\`\`\`${JSON.stringify(jsonSchema, null, 2)}\`\`\``;
+\`\`\`${StandardSchemaOutputConverter.generateSchema(this._schema)}\`\`\``;
+  }
+
+  get jsonSchema(): string {
+    return StandardSchemaOutputConverter.generateSchema(this._schema);
   }
 
   static createDefaultTextCleaner(): ResponseTextCleaner {
@@ -101,8 +111,13 @@ Here is the JSON Schema instance your output must adhere to:
   }
 
   private static getJsonSchema(schema: StandardSchemaWithJsonSchema): unknown {
-    return schema["~standard"].jsonSchema.output({
+    return schema["~standard"].jsonSchema.input({
       target: "draft-2020-12",
     });
+  }
+
+  private static generateSchema(schema: StandardSchemaWithJsonSchema): string {
+    const jsonNode = StandardSchemaOutputConverter.getJsonSchema(schema);
+    return JSON.stringify(jsonNode, null, 2).replace(/\n/g, EOL);
   }
 }

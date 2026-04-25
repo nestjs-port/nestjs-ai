@@ -20,28 +20,28 @@ import { MapOutputConverter } from "../map-output-converter.js";
 describe("MapOutputConverter", () => {
   const converter = new MapOutputConverter();
 
-  it("converts JSON object", () => {
-    expect(converter.convert('{"foo":"bar","count":3}')).toEqual({
+  it("converts JSON object", async () => {
+    expect(await converter.convert('{"foo":"bar","count":3}')).toEqual({
       foo: "bar",
       count: 3,
     });
   });
 
-  it("converts fenced JSON object", () => {
+  it("converts fenced JSON object", async () => {
     expect(
-      converter.convert('```json\n{"foo":"bar","active":true}\n```'),
+      await converter.convert('```json\n{"foo":"bar","active":true}\n```'),
     ).toEqual({
       foo: "bar",
       active: true,
     });
   });
 
-  it("returns empty object for null", () => {
-    expect(converter.convert("null")).toEqual({});
+  it("returns empty object for null", async () => {
+    expect(await converter.convert("null")).toEqual({});
   });
 
-  it("throws for non-object JSON", () => {
-    expect(() => converter.convert('["a","b"]')).toThrow(
+  it("throws for non-object JSON", async () => {
+    await expect(converter.convert('["a","b"]')).rejects.toThrow(
       "JSON output must be an object",
     );
   });

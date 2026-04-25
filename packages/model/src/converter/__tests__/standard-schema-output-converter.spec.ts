@@ -101,6 +101,19 @@ describe("StandardSchemaOutputConverter", () => {
       expect(result).toEqual({ someString: "some value" });
     });
 
+    it("applies transformer after validation", async () => {
+      const converter = new StandardSchemaOutputConverter({
+        schema: TestSchema,
+        transformer: (value) => ({
+          someString: value.someString.toUpperCase(),
+        }),
+      });
+
+      const result = await converter.convert('{ "someString": "some value" }');
+
+      expect(result).toEqual({ someString: "SOME VALUE" });
+    });
+
     it("converts json schema backed standard schema output", async () => {
       const converter = new StandardSchemaOutputConverter({
         schema: JsonSchemaBackedStandardSchema,
@@ -139,6 +152,15 @@ describe("StandardSchemaOutputConverter", () => {
         "Your response should be in JSON format.",
       );
       expect(converter.format).toContain("someString");
+    });
+
+    it("uses the input json schema for transform schemas", () => {
+      const converter = new StandardSchemaOutputConverter({
+        schema: TransformSchema,
+      });
+
+      expect(converter.jsonSchema).toContain("some_string");
+      expect(converter.format).toContain("some_string");
     });
   });
 });

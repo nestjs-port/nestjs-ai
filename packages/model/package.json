@@ -55,8 +55,7 @@
     "@nestjs-port/core": "^0.0.4",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "reflect-metadata": "^0.1.12 || ^0.2.0",
-    "rxjs": "^7.0.0",
-    "zod": "^4.0.0"
+    "rxjs": "^7.0.0"
   },
   "engines": {
     "node": ">=22.12.0"

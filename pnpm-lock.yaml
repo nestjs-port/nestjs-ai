@@ -85,6 +85,13 @@ importers:
         version: 7.8.2
 
   packages/client-chat:
+    dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
+      json-schema-to-ts:
+        specifier: ^3.1.1
+        version: 3.1.1
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -104,12 +111,6 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@standard-schema/spec':
-        specifier: ^1.1.0
-        version: 1.1.0
-      json-schema-to-ts:
-        specifier: ^3.1.1
-        version: 3.1.1
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2
@@ -364,9 +365,6 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      class-transformer:
-        specifier: ^0.5.1
-        version: 0.5.1
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -7134,7 +7132,8 @@ snapshots:
   citty@0.2.2:
     optional: true
 
-  class-transformer@0.5.1: {}
+  class-transformer@0.5.1:
+    optional: true
 
   class-validator@0.14.3:
     dependencies:

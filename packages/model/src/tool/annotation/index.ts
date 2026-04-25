@@ -23,12 +23,3 @@ export {
   type ToolSchemaAnnotationMetadata,
   type ToolSchemaLessAnnotationMetadata,
 } from "./tool.decorator.js";
-export {
-  TOOL_V2_METADATA_KEY,
-  ToolV2,
-  type ToolV2AnnotationMetadata,
-  type ToolV2InputOnlyAnnotationMetadata,
-  type ToolV2ReturnsOnlyAnnotationMetadata,
-  type ToolV2SchemaAnnotationMetadata,
-  type ToolV2SchemaLessAnnotationMetadata,
-} from "./tool-v2.decorator.js";

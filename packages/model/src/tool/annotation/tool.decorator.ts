@@ -15,63 +15,85 @@
  */
 
 import "reflect-metadata";
-import { z } from "zod";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
+import type { ToolContext } from "../../chat/index.js";
 import type { ToolCallResultConverter } from "../execution/index.js";
 import { DefaultToolCallResultConverter } from "../execution/index.js";
 
-type AnyZodSchema = z.ZodTypeAny;
-type AnyZodObjectSchema = z.ZodObject<z.ZodRawShape>;
 type MaybePromise<T> = T | Promise<T>;
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
+type StandardSchemaInput<TSchema extends StandardSchemaWithJsonSchema> =
+  StandardSchemaV1.InferInput<TSchema>;
+type StandardSchemaOutput<TSchema extends StandardSchemaWithJsonSchema> =
+  StandardSchemaV1.InferOutput<TSchema>;
+
 type ExactToolMethodSignature<
   T extends (...args: any[]) => any,
-  I,
-  O,
-> = T extends (input: I) => MaybePromise<O>
-  ? Parameters<T> extends [I]
-    ? [I] extends Parameters<T>
-      ? T
-      : never
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
     : never
   : never;
 
+type ToolMethodWithInput<I, O> =
+  | ((input: I) => MaybePromise<O>)
+  | ((input: I, context: ToolContext) => MaybePromise<O>)
+  | ((input: I, context?: ToolContext) => MaybePromise<O>);
+
+type ToolMethodWithoutInput<O> =
+  | (() => MaybePromise<O>)
+  | ((context: ToolContext) => MaybePromise<O>);
+
 type ToolMethodDecoratorFor<
-  P extends AnyZodObjectSchema,
-  R extends AnyZodSchema,
+  P extends StandardSchemaWithJsonSchema,
+  R extends StandardSchemaWithJsonSchema,
 > = <T extends (...args: any[]) => any>(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<
-    ExactToolMethodSignature<T, z.infer<P>, z.infer<R>>
+    ExactToolMethodSignature<
+      T,
+      ToolMethodWithInput<StandardSchemaInput<P>, StandardSchemaOutput<R>>
+    >
   >,
 ) => void;
 
-type InputOnlyToolDecoratorFor<P extends AnyZodObjectSchema> = <
+type ToolInputOnlyDecoratorFor<P extends StandardSchemaWithJsonSchema> = <
   T extends (...args: any[]) => any,
 >(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<
-    ExactToolMethodSignature<T, z.infer<P>, void>
+    ExactToolMethodSignature<
+      T,
+      ToolMethodWithInput<StandardSchemaInput<P>, void>
+    >
   >,
 ) => void;
 
-type ReturnsOnlyToolDecoratorFor<R extends AnyZodSchema> = <
+type ToolReturnsOnlyDecoratorFor<R extends StandardSchemaWithJsonSchema> = <
   T extends (...args: any[]) => any,
 >(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<
-    T extends () => MaybePromise<z.infer<R>> ? T : never
+    ExactToolMethodSignature<T, ToolMethodWithoutInput<StandardSchemaOutput<R>>>
   >,
 ) => void;
 
-type SchemaLessToolDecorator = <T extends (...args: any[]) => any>(
+type ToolSchemaLessDecorator = <T extends (...args: any[]) => any>(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<
-    T extends () => MaybePromise<void> ? T : never
+    ExactToolMethodSignature<T, ToolMethodWithoutInput<void>>
   >,
 ) => void;
+
 type ToolBaseMetadata = {
   name?: string;
   description?: string;
@@ -80,36 +102,36 @@ type ToolBaseMetadata = {
 };
 
 /**
- * Metadata stored for methods decorated with @Tool
+ * Metadata stored for methods decorated with @Tool.
  */
 export type ToolAnnotationMetadata = ToolBaseMetadata & {
   /**
-   * Zod schema used to validate tool input parameters.
+   * Standard Schema used to validate tool input parameters.
    */
-  parameters?: AnyZodObjectSchema;
+  parameters?: StandardSchemaWithJsonSchema;
   /**
-   * Zod schema used to validate tool return value.
+   * Standard Schema used to validate tool return value.
    */
-  returns?: AnyZodSchema;
+  returns?: StandardSchemaWithJsonSchema;
 };
 
 export interface ToolSchemaAnnotationMetadata<
-  P extends AnyZodObjectSchema,
-  R extends AnyZodSchema,
+  P extends StandardSchemaWithJsonSchema,
+  R extends StandardSchemaWithJsonSchema,
 > extends ToolBaseMetadata {
   parameters: P;
   returns: R;
 }
 
 export interface ToolInputOnlyAnnotationMetadata<
-  P extends AnyZodObjectSchema,
+  P extends StandardSchemaWithJsonSchema,
 > extends ToolBaseMetadata {
   parameters: P;
   returns?: never;
 }
 
 export interface ToolReturnsOnlyAnnotationMetadata<
-  R extends AnyZodSchema,
+  R extends StandardSchemaWithJsonSchema,
 > extends ToolBaseMetadata {
   parameters?: never;
   returns: R;
@@ -121,48 +143,53 @@ export interface ToolSchemaLessAnnotationMetadata extends ToolBaseMetadata {
 }
 
 /**
- * Symbol key for storing tool metadata on methods
+ * Symbol key for storing tool metadata on methods.
  */
 export const TOOL_METADATA_KEY = Symbol("tool:metadata");
 
-function isFunctionSchema(schema: AnyZodSchema): boolean {
-  const def = (schema as { _zod?: { def?: { type?: unknown } } })._zod?.def;
-  return def?.type === "function";
-}
-
-function isObjectSchema(schema: AnyZodSchema): boolean {
-  const def = (schema as { _zod?: { def?: { type?: unknown } } })._zod?.def;
-  return def?.type === "object";
+function assertJsonSchemaSupport(
+  schema: StandardSchemaWithJsonSchema,
+  label: string,
+): void {
+  const standard = schema["~standard"] as {
+    jsonSchema?: { input?: (options?: { target?: string }) => unknown };
+  };
+  if (typeof standard?.jsonSchema?.input !== "function") {
+    throw new Error(
+      `@Tool requires ${label} to expose ~standard.jsonSchema.input().`,
+    );
+  }
 }
 
 /**
- * Marks a method as a tool in Spring AI.
+ * Marks a method as a tool using Standard Schema instead of Zod.
+ *
+ * Runtime rule:
+ * - if `parameters` is present, the tool receives `(input, context?)`
+ * - if `parameters` is absent, the tool receives `()` or `(context)`
  */
-export function Tool<P extends AnyZodObjectSchema, R extends AnyZodSchema>(
-  options: ToolSchemaAnnotationMetadata<P, R>,
-): ToolMethodDecoratorFor<P, R>;
-export function Tool<P extends AnyZodObjectSchema>(
+export function Tool<
+  P extends StandardSchemaWithJsonSchema,
+  R extends StandardSchemaWithJsonSchema,
+>(options: ToolSchemaAnnotationMetadata<P, R>): ToolMethodDecoratorFor<P, R>;
+export function Tool<P extends StandardSchemaWithJsonSchema>(
   options: ToolInputOnlyAnnotationMetadata<P>,
-): InputOnlyToolDecoratorFor<P>;
-export function Tool<R extends AnyZodSchema>(
+): ToolInputOnlyDecoratorFor<P>;
+export function Tool<R extends StandardSchemaWithJsonSchema>(
   options: ToolReturnsOnlyAnnotationMetadata<R>,
-): ReturnsOnlyToolDecoratorFor<R>;
-export function Tool(): SchemaLessToolDecorator;
+): ToolReturnsOnlyDecoratorFor<R>;
+export function Tool(): ToolSchemaLessDecorator;
 export function Tool(
   options: ToolSchemaLessAnnotationMetadata,
-): SchemaLessToolDecorator;
+): ToolSchemaLessDecorator;
 export function Tool(options: ToolAnnotationMetadata = {}): MethodDecorator {
   return (target: object, propertyKey: string | symbol) => {
-    if (options.parameters && !isObjectSchema(options.parameters)) {
-      throw new Error(
-        "@Tool requires parameters to be a z.object(...) schema.",
-      );
+    if (options.parameters) {
+      assertJsonSchemaSupport(options.parameters, "parameters");
     }
 
-    if (options.returns && isFunctionSchema(options.returns)) {
-      throw new Error(
-        "@Tool does not support z.function() as a return schema.",
-      );
+    if (options.returns) {
+      assertJsonSchemaSupport(options.returns, "returns");
     }
 
     const metadata: ToolAnnotationMetadata = {
@@ -172,7 +199,7 @@ export function Tool(options: ToolAnnotationMetadata = {}): MethodDecorator {
       resultConverter:
         options?.resultConverter ?? DefaultToolCallResultConverter,
       parameters: options?.parameters,
-      returns: options?.returns ?? z.void(),
+      returns: options?.returns,
     };
 
     Reflect.defineMetadata(TOOL_METADATA_KEY, metadata, target, propertyKey);

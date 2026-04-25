@@ -92,7 +92,6 @@ export class DefaultAroundAdvisorChain extends BaseAdvisorChain {
       throw new Error("No CallAdvisors available to execute");
     }
 
-    // biome-ignore lint/style/noNonNullAssertion: validated by length check above
     const advisor = this._callAdvisors.shift()!;
     const observationContext = new AdvisorObservationContext(
       advisor.name,
@@ -129,7 +128,6 @@ export class DefaultAroundAdvisorChain extends BaseAdvisorChain {
         );
       }
 
-      // biome-ignore lint/style/noNonNullAssertion: validated by length check above
       const advisor = this._streamAdvisors.shift()!;
       const observationContext = new AdvisorObservationContext(
         advisor.name,

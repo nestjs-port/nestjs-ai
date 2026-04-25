@@ -17,8 +17,8 @@
 import { readFileSync } from "node:fs";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
-  BeanOutputConverter,
   FunctionToolCallback,
+  JsonSchemaOutputConverter,
   ListOutputConverter,
   MapOutputConverter,
   Prompt,
@@ -44,12 +44,6 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_BASE_URL = "https://api.groq.com/openai";
 
 const DEFAULT_GROQ_MODEL = "llama-3.1-8b-instant";
-
-class ActorsFilmsRecord {
-  actor = "";
-
-  movies: string[] = [];
-}
 
 const ActorsFilmsSchema = {
   type: "object",
@@ -141,7 +135,7 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 
@@ -167,14 +161,13 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const result = outputConverter.convert(generation.output.text ?? "");
+    const result = await outputConverter.convert(generation.output.text ?? "");
     assert.exists(result.numbers);
   });
 
   it("bean output converter", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -193,14 +186,15 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
     expect(actorsFilms.actor.length).toBeGreaterThan(0);
   });
 
   it("bean output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -219,8 +213,10 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
-    logger.info("%s", String(actorsFilms));
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
+    logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });

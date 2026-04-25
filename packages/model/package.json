@@ -35,6 +35,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "@standard-schema/utils": "^0.3.0",
     "json-schema-to-ts": "^3.1.1"
   },
   "devDependencies": {
@@ -43,7 +45,6 @@
     "@nestjs-port/core": "^0.0.4",
     "@nestjs-port/testing": "^0.0.3",
     "@nestjs/common": "^11.1.11",
-    "class-transformer": "^0.5.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.0.0",
     "zod": "4.3.6"
@@ -53,10 +54,8 @@
     "@nestjs-ai/template-st": "workspace:^",
     "@nestjs-port/core": "^0.0.4",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
-    "class-transformer": "^0.4.0 || ^0.5.0",
     "reflect-metadata": "^0.1.12 || ^0.2.0",
-    "rxjs": "^7.0.0",
-    "zod": "^4.0.0"
+    "rxjs": "^7.0.0"
   },
   "engines": {
     "node": ">=22.12.0"

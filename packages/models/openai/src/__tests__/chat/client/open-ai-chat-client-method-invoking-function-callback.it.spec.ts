@@ -18,7 +18,6 @@ import { ChatClient } from "@nestjs-ai/client-chat";
 import {
   MethodToolCallback,
   type ToolContext,
-  ToolContextSchema,
   ToolDefinitions,
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
@@ -47,10 +46,6 @@ enum Unit {
 type WeatherRequest = {
   city: string;
   unit: Unit;
-};
-
-type WeatherRequestWithContext = WeatherRequest & {
-  toolContext: ToolContext;
 };
 
 type LightRequest = {
@@ -96,12 +91,15 @@ class TestFunctionClass {
     return TestFunctionClass.getWeatherStatic(input);
   }
 
-  getWeatherWithContext(input: WeatherRequestWithContext): string {
-    if (input.toolContext == null) {
+  getWeatherWithContext(
+    input: WeatherRequest,
+    toolContext: ToolContext | null,
+  ): string {
+    if (toolContext == null) {
       throw new Error("ToolContext is required by the method as an argument");
     }
 
-    argumentsMap.set("tool", input.toolContext.context.tool);
+    argumentsMap.set("tool", toolContext.context.tool);
     return TestFunctionClass.getWeatherStatic(input);
   }
 
@@ -243,11 +241,7 @@ describe.skipIf(!OPENAI_API_KEY)(
               ToolDefinitions.builder({
                 methodName: "getWeatherWithContext",
                 metadata: {
-                  parameters: z.object({
-                    city: z.string(),
-                    unit: z.enum(Unit),
-                    toolContext: ToolContextSchema,
-                  }),
+                  parameters: weatherInputType,
                   returns: z.string(),
                 },
               })
@@ -256,13 +250,7 @@ describe.skipIf(!OPENAI_API_KEY)(
             )
             .toolMethod(testFunctionClass.getWeatherWithContext)
             .toolObject(testFunctionClass)
-            .toolInputSchema(
-              z.object({
-                city: z.string(),
-                unit: z.enum(Unit),
-                toolContext: ToolContextSchema,
-              }),
-            )
+            .toolInputSchema(weatherInputType)
             .build(),
         ])
         .toolContext(new Map([["tool", "value"]]))
@@ -291,11 +279,7 @@ describe.skipIf(!OPENAI_API_KEY)(
                 ToolDefinitions.builder({
                   methodName: "getWeatherWithContext",
                   metadata: {
-                    parameters: z.object({
-                      city: z.string(),
-                      unit: z.enum(Unit),
-                      toolContext: ToolContextSchema,
-                    }),
+                    parameters: weatherInputType,
                     returns: z.string(),
                   },
                 })
@@ -304,13 +288,7 @@ describe.skipIf(!OPENAI_API_KEY)(
               )
               .toolMethod(testFunctionClass.getWeatherWithContext)
               .toolObject(testFunctionClass)
-              .toolInputSchema(
-                z.object({
-                  city: z.string(),
-                  unit: z.enum(Unit),
-                  toolContext: ToolContextSchema,
-                }),
-              )
+              .toolInputSchema(weatherInputType)
               .build(),
           ])
           .call()

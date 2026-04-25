@@ -19,7 +19,6 @@ import { readFileSync } from "node:fs";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
-  BeanOutputConverter,
   DefaultToolCallingManager,
   DefaultUsage,
   EmptyUsage,
@@ -33,6 +32,7 @@ import {
   SystemMessage,
   SystemPromptTemplate,
   UserMessage,
+  JsonSchemaOutputConverter,
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
@@ -241,7 +241,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 
@@ -267,14 +267,13 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const result = outputConverter.convert(generation.output.text ?? "");
+    const result = await outputConverter.convert(generation.output.text ?? "");
     expect(result.numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it("bean output converter", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
     });
 
     const format = outputConverter.format;
@@ -293,14 +292,16 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
-    expect(actorsFilms).toBeInstanceOf(ActorsFilms);
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
+    expect(actorsFilms.actor).toBe("Tom Hanks");
+    expect(actorsFilms.movies).toHaveLength(5);
   });
 
   it("bean output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -319,16 +320,17 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
-    logger.info("%s", String(actorsFilms));
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
+    logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
 
   it("bean stream output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -346,8 +348,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       chatModel.stream(prompt),
     );
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
-    logger.info("%s", String(actorsFilms));
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
+    logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -770,22 +772,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     );
   });
 });
-
-class ActorsFilms {
-  actor = "";
-
-  movies: string[] = [];
-
-  toString(): string {
-    return `ActorsFilms{actor='${this.actor}', movies=${JSON.stringify(this.movies)}}`;
-  }
-}
-
-class ActorsFilmsRecord {
-  actor = "";
-
-  movies: string[] = [];
-}
 
 const ActorsFilmsSchema = {
   type: "object",

@@ -26,4 +26,4 @@ export { Generation, type GenerationProps } from "./generation.js";
 
 export { MessageAggregator } from "./message-aggregator.js";
 export { StreamingChatModel } from "./streaming-chat-model.js";
-export { ToolContext, ToolContextSchema } from "./tool-context.js";
+export { ToolContext } from "./tool-context.js";

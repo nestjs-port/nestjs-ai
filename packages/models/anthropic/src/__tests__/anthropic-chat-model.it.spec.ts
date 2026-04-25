@@ -24,13 +24,13 @@ import type {
 import { ChatClient } from "@nestjs-ai/client-chat";
 import { Media, MediaFormat } from "@nestjs-ai/commons";
 import {
-  BeanOutputConverter,
   type ChatResponse,
   FunctionToolCallback,
   type Generation,
   ListOutputConverter,
   MapOutputConverter,
   type Message,
+  JsonSchemaOutputConverter,
   Prompt,
   PromptTemplate,
   SystemPromptTemplate,
@@ -40,7 +40,6 @@ import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom, type Observable, toArray } from "rxjs";
 import { assert, beforeAll, describe, expect, it } from "vitest";
-import { z } from "zod";
 import type { AnthropicWebSearchResult } from "../index.js";
 import {
   AnthropicChatModel,
@@ -196,14 +195,15 @@ Provide me a List of {subject}
     const prompt = new Prompt(promptTemplate.createMessage());
     const generation = (await chatModel.call(prompt)).result;
 
-    const result = mapOutputConverter.convert(generation?.output.text ?? "");
+    const result = await mapOutputConverter.convert(
+      generation?.output.text ?? "",
+    );
     expect(result?.numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it("bean output converter records", async () => {
-    const beanOutputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsRecordSchema,
-      outputType: ActorsFilmsRecord,
+    const beanOutputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsRecordJsonSchema,
     });
 
     const format = beanOutputConverter.format;
@@ -218,7 +218,7 @@ Generate the filmography of 5 movies for Tom Hanks.
     const prompt = new Prompt(promptTemplate.createMessage());
     const generation = (await chatModel.call(prompt)).result;
 
-    const actorsFilms = beanOutputConverter.convert(
+    const actorsFilms = await beanOutputConverter.convert(
       generation?.output.text ?? "",
     );
     logger.info(`Actors films: ${inspect(actorsFilms, { depth: null })}`);
@@ -369,9 +369,8 @@ Generate the filmography of 5 movies for Tom Hanks.
   });
 
   it("bean stream output converter records", async () => {
-    const beanOutputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsRecordSchema,
-      outputType: ActorsFilmsRecord,
+    const beanOutputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsRecordJsonSchema,
     });
 
     const format = beanOutputConverter.format;
@@ -389,7 +388,9 @@ Generate the filmography of 5 movies for Tom Hanks.
       await collectResponses(chatModel.stream(prompt)),
     );
 
-    const actorsFilms = beanOutputConverter.convert(generationTextFromStream);
+    const actorsFilms = await beanOutputConverter.convert(
+      generationTextFromStream,
+    );
     logger.info(`Actors films: ${inspect(actorsFilms, { depth: null })}`);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
@@ -949,16 +950,19 @@ Generate the filmography of 5 movies for Tom Hanks.
   }, 60_000);
 });
 
-class ActorsFilmsRecord {
-  actor!: string;
-
-  movies!: string[];
-}
-
-const ActorsFilmsRecordSchema = z.object({
-  actor: z.string(),
-  movies: z.array(z.string()),
-});
+const ActorsFilmsRecordJsonSchema = {
+  type: "object",
+  properties: {
+    actor: { type: "string" },
+    movies: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+  required: ["actor", "movies"],
+  additionalProperties: false,
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+} as const;
 
 function createWeatherToolCallback(name: string) {
   const weatherService = new MockWeatherService();

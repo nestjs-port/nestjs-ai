@@ -16,16 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContextSchema } from "../../../../chat/index.js";
 import { JsonSchemaGenerator, SchemaOption } from "../json-schema-generator.js";
-
-type JsonSchemaNodeArg = Parameters<
-  typeof JsonSchemaGenerator.convertTypeValuesToUpperCase
->[0];
-
-function asJsonSchemaNode<T>(value: T): JsonSchemaNodeArg {
-  return value as JsonSchemaNodeArg;
-}
 
 describe("JsonSchemaGenerator", () => {
   describe("generateForMethodInput", () => {
@@ -222,8 +213,7 @@ describe("JsonSchemaGenerator", () => {
               "required": [
                 "id",
                 "name"
-              ],
-              "additionalProperties": false
+              ]
             },
             "moreData": {
               "type": "object",
@@ -242,7 +232,6 @@ describe("JsonSchemaGenerator", () => {
                 "id",
                 "name"
               ],
-              "additionalProperties": false,
               "description": "Much more data"
             }
           },
@@ -293,36 +282,6 @@ describe("JsonSchemaGenerator", () => {
     it("returns empty schema for null input", () => {
       const schema = JsonSchemaGenerator.generateForMethodInput(null);
       expect(schema).toMatchInlineSnapshot(`"{}"`);
-    });
-
-    it("removes ToolContextSchema fields from method input schema", () => {
-      const schema = JsonSchemaGenerator.generateForMethodInput(
-        z.object({
-          name: z.string(),
-          toolContext: ToolContextSchema,
-          count: z.number(),
-        }),
-      );
-
-      expect(schema).toMatchInlineSnapshot(`
-        "{
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "count": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "name",
-            "count"
-          ],
-          "additionalProperties": false
-        }"
-      `);
     });
 
     it("generates schema for method with additional properties disallowed by default", () => {
@@ -434,7 +393,7 @@ describe("JsonSchemaGenerator", () => {
   describe("convertTypeValuesToUpperCase", () => {
     it("should convert simple type value to uppercase", () => {
       const node = { type: "string" };
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       expect(node.type).toBe("STRING");
     });
 
@@ -446,7 +405,7 @@ describe("JsonSchemaGenerator", () => {
           age: { type: "integer" },
         },
       };
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       expect(node.type).toBe("OBJECT");
       expect(node.properties.name.type).toBe("STRING");
       expect(node.properties.age.type).toBe("INTEGER");
@@ -457,7 +416,7 @@ describe("JsonSchemaGenerator", () => {
         type: "array",
         items: { type: "string" },
       };
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       expect(node.type).toBe("ARRAY");
       expect(node.items.type).toBe("STRING");
     });
@@ -479,7 +438,7 @@ describe("JsonSchemaGenerator", () => {
           },
         },
       };
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       expect(node.type).toBe("OBJECT");
       expect(node.properties.user.type).toBe("OBJECT");
       expect(node.properties.user.properties.address.type).toBe("OBJECT");
@@ -496,7 +455,7 @@ describe("JsonSchemaGenerator", () => {
           { type: "object", properties: { age: { type: "integer" } } },
         ],
       };
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       const allOf = node.allOf as Record<string, unknown>[];
       const first = allOf[0] as Record<
         string,
@@ -519,7 +478,7 @@ describe("JsonSchemaGenerator", () => {
         description: "a description",
         format: "email",
       };
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       expect(node.type).toBe("STRING");
       expect(node.description).toBe("a description");
       expect(node.format).toBe("email");
@@ -527,7 +486,7 @@ describe("JsonSchemaGenerator", () => {
 
     it("should handle empty object", () => {
       const node = {};
-      JsonSchemaGenerator.convertTypeValuesToUpperCase(asJsonSchemaNode(node));
+      JsonSchemaGenerator.convertTypeValuesToUpperCase(node);
       expect(Object.keys(node)).toHaveLength(0);
     });
   });

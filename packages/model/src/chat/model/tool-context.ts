@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { z } from "zod";
-
 /**
  * Represents the context for tool execution in a function calling scenario.
  *
@@ -48,8 +46,3 @@ export class ToolContext {
     return this._context;
   }
 }
-
-/**
- * Shared schema to validate that a value is a {@link ToolContext} instance.
- */
-export const ToolContextSchema = z.instanceof(ToolContext);

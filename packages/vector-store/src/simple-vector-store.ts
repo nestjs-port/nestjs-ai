@@ -211,7 +211,6 @@ export abstract class EmbeddingMath {
 }
 
 export class SimpleVectorStoreBuilder extends AbstractVectorStoreBuilder<SimpleVectorStoreBuilder> {
-  // biome-ignore lint/complexity/noUselessConstructor: Required to expose protected base constructor.
   constructor(embeddingModel: EmbeddingModel) {
     super(embeddingModel);
   }

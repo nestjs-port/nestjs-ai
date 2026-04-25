@@ -64,7 +64,7 @@ describe("ChatClient Native Structured Response Tests", () => {
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
-      .responseEntity(UserEntitySchema, UserEntity);
+      .responseEntity(UserEntitySchema);
 
     const context = textCallAdvisor.context;
 
@@ -107,7 +107,7 @@ describe("ChatClient Native Structured Response Tests", () => {
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
-      .responseEntity(UserEntitySchema, UserEntity);
+      .responseEntity(UserEntitySchema);
 
     const context = textCallAdvisor.context;
 
@@ -151,7 +151,7 @@ describe("ChatClient Native Structured Response Tests", () => {
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
-      .responseEntity(UserEntitySchema, UserEntity);
+      .responseEntity(UserEntitySchema);
 
     const context = textCallAdvisor.context;
 
@@ -195,7 +195,7 @@ describe("ChatClient Native Structured Response Tests", () => {
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
-      .responseEntity(UserEntitySchema, UserEntity);
+      .responseEntity(UserEntitySchema);
 
     const context = textCallAdvisor.context;
 
@@ -213,7 +213,7 @@ describe("ChatClient Native Structured Response Tests", () => {
 
     const userMessage = capturedPrompt.instructions[0];
     expect(userMessage?.messageType).toBe(MessageType.USER);
-    expect(userMessage?.text).toBe("Tell me about John");
+    expect(userMessage?.text).toContain("Tell me about John");
   });
 
   it("dynamic disable native response entity test", async () => {
@@ -244,7 +244,7 @@ describe("ChatClient Native Structured Response Tests", () => {
       .advisors(textCallAdvisor)
       .user("Tell me about John")
       .call()
-      .responseEntity(UserEntitySchema, UserEntity);
+      .responseEntity(UserEntitySchema);
 
     const context = textCallAdvisor.context;
 
@@ -292,7 +292,7 @@ describe("ChatClient Native Structured Response Tests", () => {
       )
       .user("Tell me about John")
       .call()
-      .entity(UserEntitySchema, UserEntity);
+      .entity(UserEntitySchema);
 
     const context = textCallAdvisor.context;
 
@@ -367,11 +367,6 @@ class TestStructuredOutputChatOptionsBuilder
     options.setOutputSchema(this._outputSchema);
     return options;
   }
-}
-
-class UserEntity {
-  name = "";
-  age = 0;
 }
 
 const UserEntitySchema = z.object({

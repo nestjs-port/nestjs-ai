@@ -16,8 +16,12 @@
 
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { z } from "zod";
-import { type ToolContext, ToolContextSchema } from "../../chat/index.js";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
+import { SchemaError } from "@standard-schema/utils";
+import type { ToolContext } from "../../chat/index.js";
 import type { ToolDefinition } from "../definition/index.js";
 import {
   DefaultToolCallResultConverter,
@@ -27,13 +31,15 @@ import {
 import { ToolMetadata } from "../metadata/index.js";
 import { ToolCallback } from "../tool-callback.js";
 
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
 export interface MethodToolCallbackProps {
   toolDefinition: ToolDefinition;
   toolMetadata?: ToolMetadata | null;
   toolMethod: (...args: never[]) => unknown | Promise<unknown>;
   toolObject?: object | null;
-  toolInputSchema?: z.ZodObject<z.ZodRawShape> | null;
-  toolResultSchema?: z.ZodTypeAny | null;
+  toolInputSchema?: StandardSchemaWithJsonSchema | null;
+  toolResultSchema?: StandardSchemaWithJsonSchema | null;
   toolCallResultConverter?: ToolCallResultConverter | null;
 }
 
@@ -53,8 +59,8 @@ export class MethodToolCallback extends ToolCallback {
     ...args: never[]
   ) => unknown | Promise<unknown>;
   private readonly _toolObject: object | null;
-  private readonly _toolInputSchema: z.ZodObject<z.ZodRawShape> | null;
-  private readonly _toolResultSchema: z.ZodTypeAny | null;
+  private readonly _toolInputSchema: StandardSchemaWithJsonSchema | null;
+  private readonly _toolResultSchema: StandardSchemaWithJsonSchema | null;
   private readonly _toolCallResultConverter: ToolCallResultConverter;
 
   constructor(props: MethodToolCallbackProps) {
@@ -95,9 +101,10 @@ export class MethodToolCallback extends ToolCallback {
       `Starting execution of tool: ${this._toolDefinition.name}`,
     );
 
-    this.validateToolContextSupport(toolContext);
-
-    const methodArguments = this.resolveMethodArguments(toolInput, toolContext);
+    const methodArguments = await this.resolveMethodArguments(
+      toolInput,
+      toolContext,
+    );
     const result = await this.callMethod(methodArguments);
 
     this._logger.debug(
@@ -110,84 +117,31 @@ export class MethodToolCallback extends ToolCallback {
     );
   }
 
-  private resolveMethodArguments(
+  private async resolveMethodArguments(
     toolInput: string,
     toolContext: ToolContext | null,
-  ): unknown[] {
+  ): Promise<unknown[]> {
     try {
       const plain = JSON.parse(toolInput) as unknown;
-      if (!this._toolInputSchema) {
-        return [];
-      }
-      const preparedInput = this.injectToolContextFields(plain, toolContext);
-      const parsed = this._toolInputSchema.parse(preparedInput);
-      return [parsed];
+      const methodArguments = this._toolInputSchema
+        ? await this.validateToolInput(plain)
+        : [];
+
+      return this._toolInputSchema != null
+        ? [...methodArguments, toolContext]
+        : [toolContext];
     } catch (ex) {
       this._logger.warn("Conversion from JSON failed", ex as Error);
       throw this.wrapToolExecutionException(ex);
     }
   }
 
-  private validateToolContextSupport(toolContext: ToolContext | null): void {
-    if (!this.acceptsToolContext()) {
-      return;
+  private async validateToolInput(input: unknown): Promise<unknown[]> {
+    const result = await this._toolInputSchema!["~standard"].validate(input);
+    if (result.issues) {
+      throw new SchemaError(result.issues);
     }
-
-    const isNonEmptyToolContextProvided =
-      toolContext != null && Object.keys(toolContext.context).length > 0;
-    if (!isNonEmptyToolContextProvided) {
-      throw new Error("ToolContext is required by the method as an argument");
-    }
-  }
-
-  private acceptsToolContext(): boolean {
-    const shape = this._toolInputSchema
-      ? this.getObjectShape(this._toolInputSchema)
-      : null;
-    if (!shape) {
-      return false;
-    }
-
-    return Object.values(shape).some((schema) => schema === ToolContextSchema);
-  }
-
-  private injectToolContextFields(
-    input: unknown,
-    toolContext: ToolContext | null,
-  ): unknown {
-    if (!this._toolInputSchema || input == null || typeof input !== "object") {
-      return input;
-    }
-
-    const shape = this.getObjectShape(this._toolInputSchema);
-    if (!shape) {
-      return input;
-    }
-
-    const source = input as Record<string, unknown>;
-    const next = { ...source };
-    for (const [field, schema] of Object.entries(shape)) {
-      if (schema !== ToolContextSchema) {
-        continue;
-      }
-
-      if (toolContext != null) {
-        next[field] = toolContext;
-      }
-    }
-
-    return next;
-  }
-
-  private getObjectShape(
-    schema: z.ZodObject<z.ZodRawShape>,
-  ): Record<string, z.ZodTypeAny> | null {
-    const shape = (
-      schema as unknown as {
-        _zod?: { def?: { shape?: Record<string, z.ZodTypeAny> } };
-      }
-    )._zod?.def?.shape;
-    return shape ?? null;
+    return [result.value];
   }
 
   private async callMethod(methodArguments: unknown[]): Promise<unknown> {
@@ -226,8 +180,8 @@ export class MethodToolCallbackBuilder {
     | ((...args: never[]) => unknown | Promise<unknown>)
     | null = null;
   private _toolObject: object | null = null;
-  private _toolInputSchema: z.ZodObject<z.ZodRawShape> | null = null;
-  private _toolResultSchema: z.ZodTypeAny | null = null;
+  private _toolInputSchema: StandardSchemaWithJsonSchema | null = null;
+  private _toolResultSchema: StandardSchemaWithJsonSchema | null = null;
   private _toolCallResultConverter: ToolCallResultConverter | null = null;
 
   toolDefinition(toolDefinition: ToolDefinition): this {
@@ -252,12 +206,14 @@ export class MethodToolCallbackBuilder {
     return this;
   }
 
-  toolInputSchema(toolInputSchema: z.ZodObject<z.ZodRawShape> | null): this {
+  toolInputSchema(toolInputSchema: StandardSchemaWithJsonSchema | null): this {
     this._toolInputSchema = toolInputSchema;
     return this;
   }
 
-  toolResultSchema(toolResultSchema: z.ZodTypeAny | null): this {
+  toolResultSchema(
+    toolResultSchema: StandardSchemaWithJsonSchema | null,
+  ): this {
     this._toolResultSchema = toolResultSchema;
     return this;
   }

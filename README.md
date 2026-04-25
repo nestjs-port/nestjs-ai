@@ -31,18 +31,18 @@ The project faithfully mirrors Spring AI's module structure and API design while
 
 ## Tech Stack
 
-| Category        | Technology                   |
-| --------------- | ---------------------------- |
-| Language        | TypeScript 6.x (strict mode) |
-| Runtime         | Node.js >= 22.12             |
-| Module format   | ESM only                     |
-| Framework       | NestJS 11.x                  |
-| Package Manager | pnpm 10.x                    |
-| Build           | Turborepo + tsc              |
-| Test            | Vitest 4.x + TestContainers  |
-| Lint/Format     | Biomejs 2.x                  |
-| Reactive        | RxJS 7.x                     |
-| Validation      | Zod 4.x                      |
+| Category        | Technology                                                                     |
+| --------------- | ------------------------------------------------------------------------------ |
+| Language        | TypeScript 6.x (strict mode)                                                   |
+| Runtime         | Node.js >= 22.12                                                               |
+| Module format   | ESM only                                                                       |
+| Framework       | NestJS 11.x                                                                    |
+| Package Manager | pnpm 10.x                                                                      |
+| Build           | Turborepo + tsc                                                                |
+| Test            | Vitest 4.x + TestContainers                                                    |
+| Lint/Format     | Biomejs 2.x                                                                    |
+| Reactive        | RxJS 7.x                                                                       |
+| Validation      | [Standard Schema](https://standardschema.dev/) (zod / valibot / arktype / ...) |
 
 ## Porting Progress
 
@@ -84,13 +84,13 @@ The project faithfully mirrors Spring AI's module structure and API design while
 
 NestJS AI mirrors Spring AI's module structure and API design, but adapts the following areas to fit the Node.js / TypeScript ecosystem.
 
-### 1. Zod schemas instead of reflection-based JSON Schema
+### 1. Standard Schema instead of reflection-based JSON Schema
 
-Spring AI derives JSON Schema for tool/function calling from Java classes via reflection. Node.js reflection is limited, so NestJS AI accepts **Zod schemas** as the source of truth for tool parameters and structured output. The schema is both the runtime validator and the JSON Schema fed to the model.
+Spring AI derives JSON Schema for tool/function calling from Java classes via reflection. Node.js reflection is limited, so NestJS AI accepts any schema that implements [**Standard Schema**](https://standardschema.dev/) as the source of truth for tool parameters and structured output. Standard Schema is a vendor-neutral interface (`~standard.validate()` + `~standard.jsonSchema`) that [zod](https://github.com/colinhacks/zod), [valibot](https://github.com/fabian-hiller/valibot), [arktype](https://github.com/arktypeio/arktype), [effect](https://github.com/Effect-TS/effect), and others implement out of the box, so you can pick whichever library you prefer. The schema is both the runtime validator and the JSON Schema fed to the model.
 
 ```typescript
 import { Tool } from "@nestjs-ai/model";
-import { z } from "zod";
+import { z } from "zod"; // or valibot, arktype, ... — any Standard-Schema-compatible library works
 
 class WeatherTools {
   @Tool({
@@ -106,7 +106,7 @@ class WeatherTools {
 }
 ```
 
-Structured output works the same way — pass a Zod schema to `.entity()`:
+Structured output works the same way — pass a Standard Schema to `.entity()`:
 
 ```typescript
 const sentiment = await chatClient

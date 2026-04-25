@@ -23,9 +23,9 @@ import {
   type Logger,
   LoggerFactory,
 } from "@nestjs-port/core";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Observable } from "rxjs";
 import { throwError } from "rxjs";
-import type { ZodType } from "zod";
 
 import type { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";
@@ -43,7 +43,7 @@ interface ValidationResponse {
 
 export interface StructuredOutputValidationAdvisorProps {
   advisorOrder?: number;
-  outputSchema: ZodType<unknown>;
+  outputSchema: StandardSchemaV1;
   maxRepeatAttempts?: number;
 }
 
@@ -57,7 +57,7 @@ export class StructuredOutputValidationAdvisor
     StructuredOutputValidationAdvisor.name,
   );
   private readonly _advisorOrder: number;
-  private readonly _outputSchema: ZodType<unknown>;
+  private readonly _outputSchema: StandardSchemaV1;
   private readonly _maxRepeatAttempts: number;
 
   constructor(props: StructuredOutputValidationAdvisorProps) {
@@ -116,7 +116,7 @@ export class StructuredOutputValidationAdvisor
         !chatClientResponse.chatResponse.hasToolCalls()
       ) {
         const validationResponse =
-          this.validateOutputSchema(chatClientResponse);
+          await this.validateOutputSchema(chatClientResponse);
         isValidationSuccess = validationResponse.valid;
 
         if (!isValidationSuccess) {
@@ -158,9 +158,9 @@ export class StructuredOutputValidationAdvisor
     );
   }
 
-  private validateOutputSchema(
+  private async validateOutputSchema(
     chatClientResponse: ChatClientResponse,
-  ): ValidationResponse {
+  ): Promise<ValidationResponse> {
     const json = chatClientResponse.chatResponse?.result?.output?.text;
     if (json == null) {
       this._logger.warn(
@@ -178,7 +178,13 @@ export class StructuredOutputValidationAdvisor
 
     try {
       const parsed = JSON.parse(json) as unknown;
-      this._outputSchema.parse(parsed);
+      const result = await this._outputSchema["~standard"].validate(parsed);
+      if (result.issues) {
+        return {
+          valid: false,
+          errorMessage: result.issues.map((issue) => issue.message).join("; "),
+        };
+      }
       return { valid: true, errorMessage: null };
     } catch (error) {
       return {

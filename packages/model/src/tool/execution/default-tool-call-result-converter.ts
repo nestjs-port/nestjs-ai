@@ -15,8 +15,13 @@
  */
 
 import { Readable } from "node:stream";
-import type { z } from "zod";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 import type { ToolCallResultConverter } from "./tool-call-result-converter.js";
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 /**
  * A default implementation of {@link ToolCallResultConverter}.
@@ -24,7 +29,7 @@ import type { ToolCallResultConverter } from "./tool-call-result-converter.js";
 export class DefaultToolCallResultConverter implements ToolCallResultConverter {
   async convert(
     result?: unknown | null,
-    returnType?: z.ZodTypeAny | null,
+    returnType?: StandardSchemaWithJsonSchema | null,
   ): Promise<string> {
     if (this.isConventionalDoneReturnType(returnType)) {
       return JSON.stringify("Done");
@@ -60,7 +65,7 @@ export class DefaultToolCallResultConverter implements ToolCallResultConverter {
   }
 
   private isConventionalDoneReturnType(
-    returnType?: z.ZodTypeAny | null,
+    returnType?: StandardSchemaWithJsonSchema | null,
   ): boolean {
     if (!returnType) {
       return false;

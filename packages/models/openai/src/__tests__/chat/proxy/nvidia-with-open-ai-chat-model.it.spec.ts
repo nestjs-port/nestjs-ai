@@ -17,8 +17,8 @@
 import { readFileSync } from "node:fs";
 import { ChatClient } from "@nestjs-ai/client-chat";
 import {
-  BeanOutputConverter,
   FunctionToolCallback,
+  JsonSchemaOutputConverter,
   ListOutputConverter,
   MapOutputConverter,
   Prompt,
@@ -152,7 +152,7 @@ describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 
@@ -178,14 +178,13 @@ describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const result = outputConverter.convert(generation.output.text ?? "");
+    const result = await outputConverter.convert(generation.output.text ?? "");
     expect(result.numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it("bean output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -204,16 +203,17 @@ describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
-    logger.info("%s", String(actorsFilms));
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
+    logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
 
   it("bean stream output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: ActorsFilmsSchema,
-      outputType: ActorsFilmsRecord,
     });
 
     const format = outputConverter.format;
@@ -236,8 +236,8 @@ describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
       .filter((c) => c != null)
       .join("");
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
-    logger.info("%s", String(actorsFilms));
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
+    logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -352,12 +352,6 @@ describe.skipIf(!NVIDIA_API_KEY)("NvidiaWithOpenAiChatModelIT", () => {
     ).toContain("length");
   });
 });
-
-class ActorsFilmsRecord {
-  actor = "";
-
-  movies: string[] = [];
-}
 
 const ActorsFilmsSchema = {
   type: "object",

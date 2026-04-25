@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { BeanOutputConverter, Prompt, PromptTemplate } from "@nestjs-ai/model";
+import {
+  JsonSchemaOutputConverter,
+  Prompt,
+  PromptTemplate,
+} from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { lastValueFrom, type Observable, tap } from "rxjs";
@@ -26,11 +30,11 @@ import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 describe.skipIf(!OPENAI_API_KEY)(
-  "OpenAiChatModelTypeReferenceBeanOutputConverter IT",
+  "OpenAiChatModelTypeReferenceJsonSchemaOutputConverter IT",
   () => {
     LoggerFactory.bind(new ConsoleLoggerFactory(LogLevel.DEBUG));
     const logger = LoggerFactory.getLogger(
-      "OpenAiChatModelTypeReferenceBeanOutputConverterIT",
+      "OpenAiChatModelTypeReferenceJsonSchemaOutputConverterIT",
     );
 
     const chatModel = new OpenAiChatModel({
@@ -40,7 +44,7 @@ describe.skipIf(!OPENAI_API_KEY)(
     });
 
     it("type ref output converter records", async () => {
-      const outputConverter = new BeanOutputConverter({
+      const outputConverter = new JsonSchemaOutputConverter({
         schema: ActorsFilmsListSchema,
       });
 
@@ -60,7 +64,9 @@ describe.skipIf(!OPENAI_API_KEY)(
       }
       const generation = generationResponse.result;
 
-      const actorsFilms = outputConverter.convert(generation.output.text ?? "");
+      const actorsFilms = await outputConverter.convert(
+        generation.output.text ?? "",
+      );
       logger.info("%s", String(actorsFilms));
       expect(actorsFilms).toHaveLength(2);
       expect(actorsFilms[0]?.actor).toBe("Tom Hanks");
@@ -70,7 +76,7 @@ describe.skipIf(!OPENAI_API_KEY)(
     });
 
     it("type ref stream output converter records", async () => {
-      const outputConverter = new BeanOutputConverter({
+      const outputConverter = new JsonSchemaOutputConverter({
         schema: ActorsFilmsListSchema,
       });
 
@@ -89,7 +95,9 @@ describe.skipIf(!OPENAI_API_KEY)(
         chatModel.stream(prompt),
       );
 
-      const actorsFilms = outputConverter.convert(generationTextFromStream);
+      const actorsFilms = await outputConverter.convert(
+        generationTextFromStream,
+      );
       logger.info("%s", String(actorsFilms));
       expect(actorsFilms).toHaveLength(2);
       expect(actorsFilms[0]?.actor).toBe("Tom Hanks");

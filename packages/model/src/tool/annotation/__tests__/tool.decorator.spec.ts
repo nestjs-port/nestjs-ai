@@ -17,7 +17,7 @@
 import { Readable } from "node:stream";
 import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
+import type { ToolContext } from "../../../chat/index.js";
 import {
   TOOL_METADATA_KEY,
   Tool,
@@ -162,27 +162,17 @@ class AdvancedTypedToolExamples {
 void AdvancedTypedToolExamples;
 
 class ToolContextTypedExamples {
-  @Tool({
-    parameters: z.object({
-      toolContext: ToolContextSchema,
-    }),
-    returns: z.string(),
-  })
-  validToolContextInput(input: { toolContext: ToolContext }) {
-    return JSON.stringify(input.toolContext.context);
+  @Tool()
+  validToolContextAsFirstArg(context: ToolContext) {
+    void context.context;
   }
 
-  // @ts-expect-error input type must match ToolContextSchema in object field
   @Tool({
-    parameters: z.object({
-      toolContext: ToolContextSchema,
-    }),
+    parameters: z.object({ city: z.string() }),
     returns: z.string(),
   })
-  invalidToolContextInput(input: {
-    toolContext: { context: Record<string, unknown> };
-  }) {
-    return JSON.stringify(input.toolContext.context);
+  validToolContextAsSecondArg(input: { city: string }, context: ToolContext) {
+    return `${input.city}:${JSON.stringify(context?.context ?? {})}`;
   }
 }
 void ToolContextTypedExamples;
@@ -199,7 +189,7 @@ describe("ToolDecorator", () => {
     }
   }
 
-  it("stores zod parameter and return schemas in metadata", () => {
+  it("stores zod parameter and return schemas in metadata", async () => {
     const metadata = Reflect.getMetadata(
       TOOL_METADATA_KEY,
       TestTools.prototype,
@@ -208,78 +198,21 @@ describe("ToolDecorator", () => {
 
     assert.exists(metadata.parameters);
     assert.exists(metadata.returns);
-    expect(
-      metadata.parameters?.safeParse({ city: "seoul" }).success,
-    ).toBeTruthy();
-    expect(
-      metadata.returns?.safeParse({ temperature: 18 }).success,
-    ).toBeTruthy();
-  });
-
-  it("supports ToolContextSchema inside object parameters", () => {
-    class ContextTools {
-      @Tool({
-        name: "contextEcho",
-        parameters: z.object({
-          toolContext: ToolContextSchema,
-        }),
-        returns: z.string(),
-      })
-      contextEcho(input: { toolContext: ToolContext }) {
-        return JSON.stringify(input.toolContext.context);
-      }
-    }
-
-    const metadata = Reflect.getMetadata(
-      TOOL_METADATA_KEY,
-      ContextTools.prototype,
-      "contextEcho",
-    ) as ToolAnnotationMetadata;
-
-    assert.exists(metadata.parameters);
-    expect(
-      metadata.parameters?.safeParse({
-        toolContext: new ToolContext({ foo: "bar" }),
-      }).success,
-    ).toBeTruthy();
-    expect(
-      metadata.parameters?.safeParse({
-        toolContext: { context: { foo: "bar" } },
-      }).success,
-    ).toBeFalsy();
-  });
-
-  it("throws when parameters schema is not z.object()", () => {
-    expect(() => {
-      class InvalidParametersSchemaTools {
-        @Tool({
-          // biome-ignore lint/suspicious/noExplicitAny: runtime validation test
-          parameters: z.string() as any,
-          returns: z.string(),
-        })
-        invalid(_value: { value: string }) {
-          return "ok";
-        }
-      }
-      return InvalidParametersSchemaTools;
-    }).toThrowError(/requires parameters to be a z\.object/i);
-  });
-
-  it("throws when returns schema is z.function()", () => {
-    expect(() => {
-      class InvalidReturnSchemaTools {
-        @Tool({
-          parameters: z.object({ value: z.string() }),
-          returns: z.function({
-            input: [z.string()],
-            output: z.string(),
-          }),
-        })
-        invalid(_value: { value: string }) {
-          return (input: string) => input;
-        }
-      }
-      return InvalidReturnSchemaTools;
-    }).toThrowError(/does not support z\.function\(\) as a return schema/i);
+    await expect(
+      isStandardSchemaValid(metadata.parameters, { city: "seoul" }),
+    ).resolves.toBeTruthy();
+    await expect(
+      isStandardSchemaValid(metadata.returns, { temperature: 18 }),
+    ).resolves.toBeTruthy();
   });
 });
+
+async function isStandardSchemaValid(
+  schema: NonNullable<
+    ToolAnnotationMetadata["parameters"] | ToolAnnotationMetadata["returns"]
+  >,
+  value: unknown,
+): Promise<boolean> {
+  const result = await schema["~standard"].validate(value);
+  return result.issues == null;
+}

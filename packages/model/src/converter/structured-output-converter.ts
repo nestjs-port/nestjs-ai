@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { Converter } from "@nestjs-port/core";
 import type { FormatProvider } from "./format-provider.js";
 
-export interface StructuredOutputConverter<T>
-  extends Converter<string, T>, FormatProvider {}
+export abstract class StructuredOutputConverter<T> implements FormatProvider {
+  abstract convert(source: string): Promise<T>;
+
+  abstract get format(): string;
+}

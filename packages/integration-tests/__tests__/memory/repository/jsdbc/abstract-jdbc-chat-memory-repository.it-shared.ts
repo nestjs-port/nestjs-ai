@@ -242,7 +242,22 @@ export class AbstractJdbcChatMemoryRepositoryIT {
     }
 
     return Object.fromEntries(
-      Object.entries(row).map(([key, value]) => [key.toLowerCase(), value]),
+      Object.entries(row).map(([key, value]) => [
+        key.toLowerCase(),
+        key.toLowerCase() === "content" ? this.asText(value) : value,
+      ]),
     );
+  }
+
+  private asText(value: unknown): string | null {
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (value == null) {
+      return null;
+    }
+
+    return value.toString();
   }
 }

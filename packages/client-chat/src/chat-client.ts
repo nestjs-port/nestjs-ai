@@ -20,15 +20,17 @@ import type {
   ChatModel,
   ChatOptions,
   ChatResponse,
-  JsonOrJsonArraySchema,
   Message,
-  OutputTypeTarget,
   Prompt,
-  SchemaOutput,
   StructuredOutputConverter,
   ToolCallback,
   ToolObjectInstance,
 } from "@nestjs-ai/model";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
+import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 import {
   NoopObservationRegistry,
   type ObservationRegistry,
@@ -55,6 +57,8 @@ export interface ChatClient {
 }
 
 export namespace ChatClient {
+  type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
   export function create(chatModel: ChatModel): ChatClient;
 
   export function create(
@@ -169,10 +173,24 @@ export namespace ChatClient {
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
 
-    entity<TSchema extends JsonOrJsonArraySchema>(
+    entity<TSchema extends StandardSchemaWithJsonSchema>(
       schema: TSchema,
-      outputType?: Type<OutputTypeTarget<TSchema>>,
-    ): Promise<SchemaOutput<TSchema> | null>;
+    ): Promise<StandardJSONSchemaV1.InferOutput<TSchema> | null>;
+
+    entity<
+      TSchema extends StandardSchemaWithJsonSchema,
+      TOutput = StandardJSONSchemaV1.InferOutput<TSchema>,
+    >(
+      schema: TSchema,
+      transformer?: (
+        value: StandardJSONSchemaV1.InferOutput<TSchema>,
+      ) => TOutput,
+    ): Promise<TOutput | null>;
+
+    entity<TSchema extends JSONSchema, TOutput = FromSchema<TSchema>>(
+      schema: TSchema,
+      transformer?: (value: FromSchema<TSchema>) => TOutput,
+    ): Promise<TOutput | null>;
 
     chatClientResponse(): Promise<ChatClientResponse>;
 
@@ -184,10 +202,26 @@ export namespace ChatClient {
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;
 
-    responseEntity<TSchema extends JsonOrJsonArraySchema>(
+    responseEntity<TSchema extends StandardSchemaWithJsonSchema>(
       schema: TSchema,
-      outputType?: Type<OutputTypeTarget<TSchema>>,
-    ): Promise<ResponseEntity<ChatResponse, SchemaOutput<TSchema>>>;
+    ): Promise<
+      ResponseEntity<ChatResponse, StandardJSONSchemaV1.InferOutput<TSchema>>
+    >;
+
+    responseEntity<
+      TSchema extends StandardSchemaWithJsonSchema,
+      TOutput = StandardJSONSchemaV1.InferOutput<TSchema>,
+    >(
+      schema: TSchema,
+      transformer?: (
+        value: StandardJSONSchemaV1.InferOutput<TSchema>,
+      ) => TOutput,
+    ): Promise<ResponseEntity<ChatResponse, TOutput>>;
+
+    responseEntity<TSchema extends JSONSchema, TOutput = FromSchema<TSchema>>(
+      schema: TSchema,
+      transformer?: (value: FromSchema<TSchema>) => TOutput,
+    ): Promise<ResponseEntity<ChatResponse, TOutput>>;
   }
 
   export interface StreamResponseSpec {

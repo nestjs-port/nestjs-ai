@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { z } from "zod";
-import { ToolContextSchema } from "../../../chat/index.js";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 
-type JsonSchemaNode = z.core.ZodStandardJSONSchemaPayload<z.ZodTypeAny>;
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 export enum SchemaOption {
   ALLOW_ADDITIONAL_PROPERTIES_BY_DEFAULT = "ALLOW_ADDITIONAL_PROPERTIES_BY_DEFAULT",
@@ -26,7 +28,7 @@ export enum SchemaOption {
 
 export abstract class JsonSchemaGenerator {
   static generateForMethodInput(
-    parameters: z.ZodObject<z.ZodRawShape> | null | undefined,
+    parameters: StandardSchemaWithJsonSchema | null | undefined,
     ...schemaOptions: SchemaOption[]
   ): string {
     if (!parameters) {
@@ -34,10 +36,9 @@ export abstract class JsonSchemaGenerator {
     }
 
     try {
-      const jsonSchema: JsonSchemaNode = z.toJSONSchema(parameters, {
-        unrepresentable: "any",
+      const jsonSchema = parameters["~standard"].jsonSchema.input({
+        target: "draft-2020-12",
       });
-      JsonSchemaGenerator.removeToolContextProperties(parameters, jsonSchema);
       JsonSchemaGenerator.removeFormatFromDirectObjectProperties(jsonSchema);
       JsonSchemaGenerator.processSchemaOptions(schemaOptions, jsonSchema);
       return JSON.stringify(jsonSchema, null, 2);
@@ -46,12 +47,12 @@ export abstract class JsonSchemaGenerator {
     }
   }
 
-  static convertTypeValuesToUpperCase(node: JsonSchemaNode): void {
+  static convertTypeValuesToUpperCase(node: Record<string, unknown>): void {
     if (Array.isArray(node)) {
       for (const element of node) {
         if (element != null && typeof element === "object") {
           JsonSchemaGenerator.convertTypeValuesToUpperCase(
-            element as JsonSchemaNode,
+            element as Record<string, unknown>,
           );
         }
       }
@@ -63,13 +64,13 @@ export abstract class JsonSchemaGenerator {
           !Array.isArray(value)
         ) {
           JsonSchemaGenerator.convertTypeValuesToUpperCase(
-            value as JsonSchemaNode,
+            value as Record<string, unknown>,
           );
         } else if (Array.isArray(value)) {
           for (const element of value) {
             if (element != null && typeof element === "object") {
               JsonSchemaGenerator.convertTypeValuesToUpperCase(
-                element as JsonSchemaNode,
+                element as Record<string, unknown>,
               );
             }
           }
@@ -82,7 +83,7 @@ export abstract class JsonSchemaGenerator {
 
   private static processSchemaOptions(
     schemaOptions: SchemaOption[],
-    schema: JsonSchemaNode,
+    schema: Record<string, unknown>,
   ): void {
     const allowAdditionalProperties = schemaOptions.includes(
       SchemaOption.ALLOW_ADDITIONAL_PROPERTIES_BY_DEFAULT,
@@ -100,13 +101,16 @@ export abstract class JsonSchemaGenerator {
   }
 
   private static removeFormatFromDirectObjectProperties(
-    schema: JsonSchemaNode,
+    schema: Record<string, unknown>,
   ): void {
     if (schema.type !== "object" || !schema.properties) {
       return;
     }
 
-    const properties = schema.properties as Record<string, JsonSchemaNode>;
+    const properties = schema.properties as Record<
+      string,
+      Record<string, unknown>
+    >;
     for (const propertySchema of Object.values(properties)) {
       if (
         propertySchema &&
@@ -116,45 +120,5 @@ export abstract class JsonSchemaGenerator {
         delete propertySchema.format;
       }
     }
-  }
-
-  private static removeToolContextProperties(
-    parameters: z.ZodObject<z.ZodRawShape>,
-    schema: JsonSchemaNode,
-  ): void {
-    if (schema.type !== "object" || !schema.properties) {
-      return;
-    }
-
-    const shape = JsonSchemaGenerator.getObjectShape(parameters);
-    if (!shape) {
-      return;
-    }
-
-    const properties = schema.properties as Record<string, JsonSchemaNode>;
-    const toolContextKeys = Object.entries(shape)
-      .filter(([, fieldSchema]) => fieldSchema === ToolContextSchema)
-      .map(([field]) => field);
-
-    for (const key of toolContextKeys) {
-      delete properties[key];
-    }
-
-    if (Array.isArray(schema.required)) {
-      schema.required = schema.required.filter(
-        (key) => !toolContextKeys.includes(key),
-      );
-    }
-  }
-
-  private static getObjectShape(
-    schema: z.ZodObject<z.ZodRawShape>,
-  ): Record<string, z.ZodTypeAny> | null {
-    const shape = (
-      schema as unknown as {
-        _zod?: { def?: { shape?: Record<string, z.ZodTypeAny> } };
-      }
-    )._zod?.def?.shape;
-    return shape ?? null;
   }
 }

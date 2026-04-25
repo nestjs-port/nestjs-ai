@@ -21,5 +21,4 @@
  * version, or other relevant details that enhance understanding and management of AI
  * model outputs in various applications.
  */
-// biome-ignore lint/suspicious/noEmptyInterface: Marker interface for result metadata
 export interface ResultMetadata {}

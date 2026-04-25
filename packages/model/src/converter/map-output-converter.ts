@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { StructuredOutputConverter } from "./structured-output-converter.js";
+import { StructuredOutputConverter } from "./structured-output-converter.js";
 
-export class MapOutputConverter implements StructuredOutputConverter<
+export class MapOutputConverter extends StructuredOutputConverter<
   Record<string, unknown>
 > {
   get format(): string {
@@ -26,7 +26,7 @@ Do not include any explanations, only provide a RFC8259 compliant JSON response 
 Remove the \`\`\`json markdown surrounding the output including the trailing "\`\`\`".`;
   }
 
-  convert(source: string): Record<string, unknown> {
+  async convert(source: string): Promise<Record<string, unknown>> {
     const normalized = this.normalize(source);
     const parsed = JSON.parse(normalized) as unknown;
 

@@ -25,6 +25,7 @@ import {
   LOWEST_PRECEDENCE,
   NoopObservationRegistry,
 } from "@nestjs-port/core";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Observable } from "rxjs";
 import { firstValueFrom } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
@@ -194,7 +195,7 @@ describe("StructuredOutputValidationAdvisor", () => {
   it("when output schema is null then throw", () => {
     expect(() => {
       new StructuredOutputValidationAdvisor({
-        outputSchema: null as unknown as z.ZodType<unknown>,
+        outputSchema: null as unknown as StandardSchemaV1<unknown>,
       });
     }).toThrow("outputSchema must not be null");
   });

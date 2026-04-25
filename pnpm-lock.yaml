@@ -85,6 +85,13 @@ importers:
         version: 7.8.2
 
   packages/client-chat:
+    dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
+      json-schema-to-ts:
+        specifier: ^3.1.1
+        version: 3.1.1
     devDependencies:
       '@nestjs-ai/commons':
         specifier: workspace:*
@@ -306,9 +313,6 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
 
   packages/memory/repository/model-chat-memory-repository-redis:
     devDependencies:
@@ -336,6 +340,12 @@ importers:
 
   packages/model:
     dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
+      '@standard-schema/utils':
+        specifier: ^0.3.0
+        version: 0.3.0
       json-schema-to-ts:
         specifier: ^3.1.1
         version: 3.1.1
@@ -355,9 +365,6 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      class-transformer:
-        specifier: ^0.5.1
-        version: 0.5.1
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -1858,6 +1865,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@tediousjs/connection-string@0.5.0':
     resolution: {integrity: sha512-7qSgZbincDDDFyRweCIEvZULFAw5iz/DeunhvuxpL31nfntX3P4Yd4HkHBRg9H8CdqY1e5WFN1PZIz/REL9MVQ==}
@@ -6434,6 +6444,8 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
+  '@standard-schema/utils@0.3.0': {}
+
   '@tediousjs/connection-string@0.5.0': {}
 
   '@testcontainers/mariadb@11.14.0':
@@ -7120,7 +7132,8 @@ snapshots:
   citty@0.2.2:
     optional: true
 
-  class-transformer@0.5.1: {}
+  class-transformer@0.5.1:
+    optional: true
 
   class-validator@0.14.3:
     dependencies:

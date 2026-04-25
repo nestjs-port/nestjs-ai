@@ -23,9 +23,9 @@ import {
 } from "@nestjs-ai/client-chat";
 import { MediaFormat, type TemplateRenderer } from "@nestjs-ai/commons";
 import {
-  BeanOutputConverter,
   FunctionToolCallback,
   ListOutputConverter,
+  JsonSchemaOutputConverter,
 } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { lastValueFrom, type Observable, tap, toArray } from "rxjs";
@@ -100,7 +100,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
         "Generate the filmography of 5 movies for Tom Hanks and Bill Murray.",
       )
       .call()
-      .entity(z.array(ActorsFilmsSchema), ActorsFilms);
+      .entity(z.array(ActorsFilmsSchema.transform(toActorsFilms)));
 
     logger.info("%s", String(actorsFilms));
     assert.exists(actorsFilms);
@@ -129,7 +129,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .prompt()
       .user("Generate the filmography for a random actor.")
       .call()
-      .entity(ActorsFilmsSchema, ActorsFilms);
+      .entity(ActorsFilmsSchema.transform(toActorsFilms));
 
     logger.info("%s", String(actorsFilms));
     assert.exists(actorsFilms);
@@ -142,7 +142,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .user("Generate the filmography for a random actor.")
       .call()
-      .entity(ActorsFilmsSchema, ActorsFilms);
+      .entity(ActorsFilmsSchema.transform(toActorsFilms));
 
     logger.info("%s", String(actorsFilms));
     assert.exists(actorsFilms);
@@ -154,7 +154,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .prompt()
       .user("Generate the filmography of 5 movies for Tom Hanks.")
       .call()
-      .entity(ActorsFilmsSchema, ActorsFilms);
+      .entity(ActorsFilmsSchema.transform(toActorsFilms));
 
     logger.info("%s", String(actorsFilms));
     assert.exists(actorsFilms);
@@ -168,7 +168,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
       .user("Generate the filmography of 5 movies for Tom Hanks.")
       .call()
-      .entity(ActorsFilmsSchema, ActorsFilms);
+      .entity(ActorsFilmsSchema.transform(toActorsFilms));
 
     logger.info("%s", String(actorsFilms));
     assert.exists(actorsFilms);
@@ -177,9 +177,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("bean stream output converter records", async () => {
-    const outputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
+    const outputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsJsonSchema,
     });
 
     const chatResponse = ChatClient.create(chatModel)
@@ -216,7 +215,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       );
     }
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms.actor).toBe("Tom Hanks");
@@ -399,9 +398,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("custom template renderer with call", async () => {
-    const outputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
+    const outputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsJsonSchema,
     });
 
     const result = await ChatClient.create(chatModel)
@@ -418,7 +416,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .content();
 
     assert.exists(result);
-    const actorsFilms = outputConverter.convert(result);
+    const actorsFilms = await outputConverter.convert(result);
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms.actor).toBe("Tom Hanks");
@@ -426,9 +424,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("custom template renderer with call and advisor", async () => {
-    const outputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
+    const outputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsJsonSchema,
     });
 
     const result = await ChatClient.create(chatModel)
@@ -446,7 +443,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .content();
 
     assert.exists(result);
-    const actorsFilms = outputConverter.convert(result);
+    const actorsFilms = await outputConverter.convert(result);
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms.actor).toBe("Tom Hanks");
@@ -454,9 +451,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("custom template renderer with stream", async () => {
-    const outputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
+    const outputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsJsonSchema,
     });
 
     const chatResponse = ChatClient.create(chatModel)
@@ -482,7 +478,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .map((cr) => cr.result?.output.text ?? "")
       .join("");
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms.actor).toBe("Tom Hanks");
@@ -490,9 +486,8 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
   });
 
   it("custom template renderer with stream and advisor", async () => {
-    const outputConverter = new BeanOutputConverter({
-      schema: ActorsFilmsSchema,
-      outputType: ActorsFilms,
+    const outputConverter = new JsonSchemaOutputConverter({
+      schema: ActorsFilmsJsonSchema,
     });
 
     const chatResponse = ChatClient.create(chatModel)
@@ -519,7 +514,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatClientIT", () => {
       .map((cr) => cr.result?.output.text ?? "")
       .join("");
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
 
     logger.info("%s", String(actorsFilms));
     expect(actorsFilms.actor).toBe("Tom Hanks");
@@ -531,16 +526,33 @@ class ActorsFilms {
   actor = "";
 
   movies: string[] = [];
-
-  toString(): string {
-    return `ActorsFilms{actor='${this.actor}', movies=${JSON.stringify(this.movies)}}`;
-  }
 }
 
 const ActorsFilmsSchema = z.object({
   actor: z.string(),
   movies: z.array(z.string()),
 });
+
+const ActorsFilmsJsonSchema = {
+  type: "object",
+  properties: {
+    actor: { type: "string" },
+    movies: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+  required: ["actor", "movies"],
+  additionalProperties: false,
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+} as const;
+
+function toActorsFilms(value: {
+  actor: string;
+  movies: string[];
+}): ActorsFilms {
+  return Object.assign(new ActorsFilms(), value);
+}
 
 class AngleBracketTemplateRenderer implements TemplateRenderer {
   apply(template: string, variables: Record<string, unknown | null>): string {

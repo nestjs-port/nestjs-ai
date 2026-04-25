@@ -16,8 +16,13 @@
 
 import assert from "node:assert/strict";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { z } from "zod";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
+import { SchemaError } from "@standard-schema/utils";
 import type { ToolContext } from "../../chat/index.js";
+import { JsonSchemaGenerator } from "../../util/index.js";
 import {
   DefaultToolDefinition,
   type ToolDefinition,
@@ -33,7 +38,7 @@ import { ToolCallback } from "../tool-callback.js";
 
 type MaybePromise<T> = T | Promise<T>;
 type ToolInputObject = Record<string, unknown>;
-type ToolInputSchema = z.ZodObject<z.ZodRawShape>;
+type ToolInputSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 export type ToolBiFunction<I extends ToolInputObject, O> = (
   input: I,
@@ -109,7 +114,7 @@ export class FunctionToolCallback<
       `Starting execution of tool: ${this._toolDefinition.name}`,
     );
 
-    const request = this.parseToolInput(toolInput);
+    const request = await this.parseToolInput(toolInput);
     const response = await this.callMethod(request, toolContext);
 
     this._logger.debug(
@@ -119,9 +124,13 @@ export class FunctionToolCallback<
     return this._toolCallResultConverter.convert(response, null);
   }
 
-  private parseToolInput(toolInput: string): I {
-    const plain = JSON.parse(toolInput);
-    return this._toolInputType.parse(plain) as I;
+  private async parseToolInput(toolInput: string): Promise<I> {
+    const plain = JSON.parse(toolInput) as unknown;
+    const result = await this._toolInputType["~standard"].validate(plain);
+    if (result.issues) {
+      throw new SchemaError(result.issues);
+    }
+    return result.value as I;
   }
 
   private async callMethod(
@@ -259,7 +268,7 @@ export class FunctionToolCallbackBuilder<I extends ToolInputObject, O> {
     const inputSchema =
       this._inputSchema && this._inputSchema.trim() !== ""
         ? this._inputSchema
-        : FunctionToolCallbackBuilder.generateSchemaForType(this._inputType);
+        : JsonSchemaGenerator.generateForMethodInput(this._inputType);
 
     const toolDefinition = DefaultToolDefinition.builder()
       .name(this._name)
@@ -274,14 +283,5 @@ export class FunctionToolCallbackBuilder<I extends ToolInputObject, O> {
       toolFunction: this._toolFunction,
       toolCallResultConverter: this._toolCallResultConverter,
     });
-  }
-
-  private static generateSchemaForType(inputType: ToolInputSchema): string {
-    try {
-      const schema = inputType.toJSONSchema();
-      return JSON.stringify(schema);
-    } catch {
-      return "{}";
-    }
   }
 }

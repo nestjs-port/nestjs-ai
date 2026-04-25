@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BeanOutputConverter, Prompt } from "@nestjs-ai/model";
+import { JsonSchemaOutputConverter, Prompt } from "@nestjs-ai/model";
 import type {
   ResponseFormatJSONObject,
   ResponseFormatJSONSchema,
@@ -24,20 +24,6 @@ import { OpenAiChatModel } from "../../open-ai-chat-model.js";
 import { OpenAiChatOptions } from "../../open-ai-chat-options.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-class MathReasoningItems {
-  explanation!: string;
-  output!: string;
-}
-
-class MathReasoningSteps {
-  items!: MathReasoningItems[];
-}
-
-class MathReasoning {
-  steps!: MathReasoningSteps;
-  final_answer!: string;
-}
 
 const reasoningSchema = {
   type: "object",
@@ -154,7 +140,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
   });
 
   it("json schema bean converter", async () => {
-    const outputConverter = new BeanOutputConverter({
+    const outputConverter = new JsonSchemaOutputConverter({
       schema: {
         $schema: "https://json-schema.org/draft/2020-12/schema",
         type: "object",
@@ -189,7 +175,6 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
         required: ["steps", "final_answer"],
         additionalProperties: false,
       },
-      outputType: MathReasoning,
     });
     const expectedJsonSchema = JSON.stringify(
       {
@@ -257,7 +242,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
     // first before final answer.
     // expect(content.startsWith("{\"steps\":{\"items\":[")).toBe(true);
 
-    const mathReasoning = outputConverter.convert(content || "");
+    const mathReasoning = await outputConverter.convert(content || "");
 
     assert.exists(mathReasoning);
   });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ChatModel, StructuredOutputConverter } from "@nestjs-ai/model";
+import { type ChatModel, StructuredOutputConverter } from "@nestjs-ai/model";
 import {
   AssistantMessage,
   ChatOptions,
@@ -212,22 +212,22 @@ describe("ChatClient Response Entity Tests", () => {
   });
 });
 
-class BooleanOutputConverter implements StructuredOutputConverter<boolean> {
+class BooleanOutputConverter extends StructuredOutputConverter<boolean> {
   get format(): string {
     return "";
   }
 
-  convert(source: string): boolean {
+  async convert(source: string): Promise<boolean> {
     return JSON.parse(source) as boolean;
   }
 }
 
-class NumberOutputConverter implements StructuredOutputConverter<number> {
+class NumberOutputConverter extends StructuredOutputConverter<number> {
   get format(): string {
     return "";
   }
 
-  convert(source: string): number {
+  async convert(source: string): Promise<number> {
     return JSON.parse(source) as number;
   }
 }

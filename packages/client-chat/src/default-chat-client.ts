@@ -21,20 +21,23 @@ import {
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
 import {
-  BeanOutputConverter,
   type ChatModel,
   type ChatOptions,
   type ChatResponse,
-  type JsonOrJsonArraySchema,
+  JsonSchemaOutputConverter,
   type Message,
-  type OutputTypeTarget,
   Prompt,
-  type SchemaOutput,
-  type StructuredOutputConverter,
+  StandardSchemaOutputConverter,
+  StructuredOutputConverter,
   type ToolCallback,
   ToolCallbacks,
   type ToolObjectInstance,
 } from "@nestjs-ai/model";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
+import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { ObservationRegistry } from "@nestjs-port/core";
 import { StringUtils } from "@nestjs-port/core";
@@ -64,6 +67,8 @@ import {
   DefaultChatClientObservationConvention,
 } from "./observation/index.js";
 import { ResponseEntity } from "./response-entity.js";
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 export class DefaultChatClient implements ChatClient {
   private readonly _defaultChatClientRequest: DefaultChatClient.DefaultChatClientRequestSpec;
@@ -411,23 +416,41 @@ export namespace DefaultChatClient {
     responseEntity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<ResponseEntity<ChatResponse, T>>;
-    responseEntity<TSchema extends JsonOrJsonArraySchema>(
+
+    responseEntity<TSchema extends StandardSchemaWithJsonSchema>(
       schema: TSchema,
-      outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
-    ): Promise<ResponseEntity<ChatResponse, SchemaOutput<TSchema>>>;
+    ): Promise<
+      ResponseEntity<ChatResponse, StandardJSONSchemaV1.InferOutput<TSchema>>
+    >;
+
+    responseEntity<
+      TSchema extends StandardSchemaWithJsonSchema,
+      TOutput = StandardJSONSchemaV1.InferOutput<TSchema>,
+    >(
+      schema: TSchema,
+      transformer?: (
+        value: StandardJSONSchemaV1.InferOutput<TSchema>,
+      ) => TOutput,
+    ): Promise<ResponseEntity<ChatResponse, TOutput>>;
+
+    responseEntity<TSchema extends JSONSchema, TOutput = FromSchema<TSchema>>(
+      schema: TSchema,
+      transformer?: (value: FromSchema<TSchema>) => TOutput,
+    ): Promise<ResponseEntity<ChatResponse, TOutput>>;
     async responseEntity(
       schemaOrConverter:
-        | JsonOrJsonArraySchema
+        | StandardSchemaWithJsonSchema
+        | JSONSchema
         | StructuredOutputConverter<unknown>,
-      outputType?: ChatClient.Type<unknown>,
+      transformer?: (value: unknown) => unknown,
     ): Promise<ResponseEntity<ChatResponse, unknown>> {
-      if (this.isStructuredOutputConverter(schemaOrConverter)) {
+      if (schemaOrConverter instanceof StructuredOutputConverter) {
         return await this.doResponseEntity(schemaOrConverter);
       }
-      const converter = new BeanOutputConverter({
-        schema: schemaOrConverter,
-        outputType: outputType,
-      });
+      const converter = this.createStructuredOutputConverter(
+        schemaOrConverter,
+        transformer,
+      );
       return await this.doResponseEntity(converter);
     }
 
@@ -448,42 +471,72 @@ export namespace DefaultChatClient {
       if (responseContent == null) {
         return new ResponseEntity<ChatResponse, T>(chatResponse, null);
       }
-      const entity = outputConverter.convert(responseContent);
+      const entity = await outputConverter.convert(responseContent);
       return new ResponseEntity<ChatResponse, T>(chatResponse, entity);
     }
 
     entity<T>(
       structuredOutputConverter: StructuredOutputConverter<T>,
     ): Promise<T | null>;
-    entity<TSchema extends JsonOrJsonArraySchema>(
+
+    entity<TSchema extends StandardSchemaWithJsonSchema>(
       schema: TSchema,
-      outputType?: ChatClient.Type<OutputTypeTarget<TSchema>>,
-    ): Promise<SchemaOutput<TSchema> | null>;
+    ): Promise<StandardJSONSchemaV1.InferOutput<TSchema> | null>;
+
+    entity<
+      TSchema extends StandardSchemaWithJsonSchema,
+      TOutput = StandardJSONSchemaV1.InferOutput<TSchema>,
+    >(
+      schema: TSchema,
+      transformer?: (
+        value: StandardJSONSchemaV1.InferOutput<TSchema>,
+      ) => TOutput,
+    ): Promise<TOutput | null>;
+
+    entity<TSchema extends JSONSchema, TOutput = FromSchema<TSchema>>(
+      schema: TSchema,
+      transformer?: (value: FromSchema<TSchema>) => TOutput,
+    ): Promise<TOutput | null>;
     async entity(
       schemaOrConverter:
-        | JsonOrJsonArraySchema
+        | StandardSchemaWithJsonSchema
+        | JSONSchema
         | StructuredOutputConverter<unknown>,
-      outputType?: ChatClient.Type<unknown>,
+      transformer?: (value: unknown) => unknown,
     ): Promise<unknown | null> {
-      if (this.isStructuredOutputConverter(schemaOrConverter)) {
+      if (schemaOrConverter instanceof StructuredOutputConverter) {
         return this.doEntity(schemaOrConverter);
       }
 
-      const converter = new BeanOutputConverter({
-        schema: schemaOrConverter,
-        outputType: outputType,
-      });
+      const converter = this.createStructuredOutputConverter(
+        schemaOrConverter,
+        transformer,
+      );
       return this.doEntity(converter);
     }
 
-    private isStructuredOutputConverter(
-      value: JsonOrJsonArraySchema | StructuredOutputConverter<unknown>,
-    ): value is StructuredOutputConverter<unknown> {
+    private createStructuredOutputConverter(
+      schema: StandardSchemaWithJsonSchema | JSONSchema,
+      transformer?: (value: unknown) => unknown,
+    ): StructuredOutputConverter<unknown> {
+      if (this.isStandardSchema(schema)) {
+        return new StandardSchemaOutputConverter({
+          schema,
+          transformer,
+        });
+      }
+
+      return new JsonSchemaOutputConverter({
+        schema: schema as JSONSchema,
+        transformer,
+      } as any);
+    }
+
+    private isStandardSchema(
+      value: StandardSchemaWithJsonSchema | JSONSchema,
+    ): value is StandardSchemaWithJsonSchema {
       return (
-        typeof value === "object" &&
-        value !== null &&
-        "convert" in value &&
-        typeof value.convert === "function"
+        typeof value === "object" && value !== null && "~standard" in value
       );
     }
 
@@ -523,7 +576,8 @@ export namespace DefaultChatClient {
       if (
         context.get(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key) ===
           true &&
-        outputConverter instanceof BeanOutputConverter
+        (outputConverter instanceof JsonSchemaOutputConverter ||
+          outputConverter instanceof StandardSchemaOutputConverter)
       ) {
         context.set(
           ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key,

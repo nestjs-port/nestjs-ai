@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
+import { ToolContext } from "../../../chat/index.js";
 import { DefaultToolDefinition } from "../../definition/index.js";
 import type { ToolCallResultConverter } from "../../execution/index.js";
 import { MethodToolCallback } from "../method-tool-callback.js";
@@ -41,9 +41,26 @@ class TestGenericClass {
       .join(", ")}]`;
   }
 
-  processStringListInToolContext(input: { toolContext: ToolContext }): string {
-    const context = input.toolContext.context;
-    return `${Object.keys(context).length} entries processed ${formatMap(context)}`;
+  processStringListInToolContext(
+    _input: unknown,
+    context?: ToolContext | null,
+  ): string {
+    const ctx = context?.context ?? {};
+    return `${Object.keys(ctx).length} entries processed ${formatMap(ctx)}`;
+  }
+
+  processToolContextOnly(context?: ToolContext | null): string {
+    const ctx = context?.context ?? {};
+    return `${Object.keys(ctx).length} entries processed ${formatMap(ctx)}`;
+  }
+
+  processStringListWithToolContext(
+    input: { strings: string[] },
+    context?: ToolContext,
+  ): string {
+    return `${input.strings.length} strings processed with ${formatMap(
+      context?.context ?? {},
+    )}`;
   }
 
   static processStaticListWithThis(input: { strings: string[] }): string {
@@ -215,11 +232,7 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processStringListInToolContext)
       .toolObject(testObject)
-      .toolInputSchema(
-        z.object({
-          toolContext: ToolContextSchema,
-        }),
-      )
+      .toolInputSchema(z.object({}))
       .build();
 
     // Create a JSON input without tool context.
@@ -238,6 +251,50 @@ describe("MethodToolCallbackGenericTypes", () => {
     expect(JSON.parse(result)).toBe("1 entries processed {foo=bar}");
   });
 
+  it("passes tool context as the first argument when there is no input schema", async () => {
+    const testObject = new TestGenericClass();
+
+    const toolDefinition = DefaultToolDefinition.builder()
+      .name("processStringListInToolContext")
+      .description("Process tool context as first arg")
+      .inputSchema("{}")
+      .build();
+
+    const callback = MethodToolCallback.builder()
+      .toolDefinition(toolDefinition)
+      .toolMethod(testObject.processToolContextOnly)
+      .toolObject(testObject)
+      .build();
+
+    const result = await callback.call("{}", new ToolContext({ foo: "bar" }));
+
+    expect(JSON.parse(result)).toBe("1 entries processed {foo=bar}");
+  });
+
+  it("passes tool context as the second argument when input schema exists", async () => {
+    const testObject = new TestGenericClass();
+
+    const toolDefinition = DefaultToolDefinition.builder()
+      .name("processStringListWithToolContext")
+      .description("Process a list of strings with tool context")
+      .inputSchema("{}")
+      .build();
+
+    const callback = MethodToolCallback.builder()
+      .toolDefinition(toolDefinition)
+      .toolMethod(testObject.processStringListWithToolContext)
+      .toolObject(testObject)
+      .toolInputSchema(z.object({ strings: z.array(z.string()) }))
+      .build();
+
+    const result = await callback.call(
+      '{"strings":["one", "two"]}',
+      new ToolContext({ foo: "bar" }),
+    );
+
+    expect(JSON.parse(result)).toBe("2 strings processed with {foo=bar}");
+  });
+
   it("throws when required tool context is missing", async () => {
     const testObject = new TestGenericClass();
 
@@ -251,16 +308,11 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processStringListInToolContext)
       .toolObject(testObject)
-      .toolInputSchema(
-        z.object({
-          toolContext: ToolContextSchema,
-        }),
-      )
+      .toolInputSchema(z.object({}))
       .build();
 
-    await expect(callback.call("{}")).rejects.toThrow(
-      "ToolContext is required by the method as an argument",
-    );
+    const result = await callback.call("{}");
+    expect(JSON.parse(result)).toBe("0 entries processed {}");
   });
 
   it("prefers runtime tool context over input toolContext field", async () => {
@@ -276,15 +328,11 @@ describe("MethodToolCallbackGenericTypes", () => {
       .toolDefinition(toolDefinition)
       .toolMethod(testObject.processStringListInToolContext)
       .toolObject(testObject)
-      .toolInputSchema(
-        z.object({
-          toolContext: ToolContextSchema,
-        }),
-      )
+      .toolInputSchema(z.object({}))
       .build();
 
     const result = await callback.call(
-      '{"toolContext":{"foo":"input","env":"input"}}',
+      "{}",
       new ToolContext({ foo: "runtime" }),
     );
 

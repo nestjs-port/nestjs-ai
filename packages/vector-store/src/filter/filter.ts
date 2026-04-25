@@ -31,7 +31,6 @@ export namespace Filter {
     ISNOTNULL = "ISNOTNULL",
   }
 
-  // biome-ignore lint/suspicious/noEmptyInterface: marker interface kept for Java parity.
   export interface Operand {}
 
   export class Key implements Operand {

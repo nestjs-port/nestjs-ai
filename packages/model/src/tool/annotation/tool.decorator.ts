@@ -23,7 +23,6 @@ type AnyZodSchema = z.ZodTypeAny;
 type AnyZodObjectSchema = z.ZodObject<z.ZodRawShape>;
 type MaybePromise<T> = T | Promise<T>;
 type ExactToolMethodSignature<
-  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
   I,
   O,
@@ -38,10 +37,7 @@ type ExactToolMethodSignature<
 type ToolMethodDecoratorFor<
   P extends AnyZodObjectSchema,
   R extends AnyZodSchema,
-> = <
-  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
-  T extends (...args: any[]) => any,
->(
+> = <T extends (...args: any[]) => any>(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<
@@ -50,7 +46,6 @@ type ToolMethodDecoratorFor<
 ) => void;
 
 type InputOnlyToolDecoratorFor<P extends AnyZodObjectSchema> = <
-  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
 >(
   target: object,
@@ -61,7 +56,6 @@ type InputOnlyToolDecoratorFor<P extends AnyZodObjectSchema> = <
 ) => void;
 
 type ReturnsOnlyToolDecoratorFor<R extends AnyZodSchema> = <
-  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
   T extends (...args: any[]) => any,
 >(
   target: object,
@@ -71,10 +65,7 @@ type ReturnsOnlyToolDecoratorFor<R extends AnyZodSchema> = <
   >,
 ) => void;
 
-type SchemaLessToolDecorator = <
-  // biome-ignore lint/suspicious/noExplicitAny: Required for decorator method signature compatibility.
-  T extends (...args: any[]) => any,
->(
+type SchemaLessToolDecorator = <T extends (...args: any[]) => any>(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<

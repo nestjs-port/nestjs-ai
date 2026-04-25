@@ -21,5 +21,4 @@
  * and adaptability in different AI scenarios, ensuring that the AI models can be
  * fine-tuned according to specific requirements.
  */
-// biome-ignore lint/suspicious/noEmptyInterface: Marker interface for AI model options
 export interface ModelOptions {}

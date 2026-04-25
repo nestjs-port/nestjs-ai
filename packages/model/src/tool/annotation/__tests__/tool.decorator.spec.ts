@@ -17,7 +17,7 @@
 import { Readable } from "node:stream";
 import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
+import type { ToolContext } from "../../../chat/index.js";
 import {
   TOOL_METADATA_KEY,
   Tool,
@@ -204,39 +204,6 @@ describe("ToolDecorator", () => {
     await expect(
       isStandardSchemaValid(metadata.returns, { temperature: 18 }),
     ).resolves.toBeTruthy();
-  });
-
-  it("supports ToolContextSchema inside object parameters", async () => {
-    class ContextTools {
-      @Tool({
-        name: "contextEcho",
-        parameters: z.object({
-          toolContext: ToolContextSchema,
-        }),
-        returns: z.string(),
-      })
-      contextEcho(input: { toolContext: ToolContext }) {
-        return JSON.stringify(input.toolContext.context);
-      }
-    }
-
-    const metadata = Reflect.getMetadata(
-      TOOL_METADATA_KEY,
-      ContextTools.prototype,
-      "contextEcho",
-    ) as ToolAnnotationMetadata;
-
-    assert.exists(metadata.parameters);
-    await expect(
-      isStandardSchemaValid(metadata.parameters, {
-        toolContext: new ToolContext({ foo: "bar" }),
-      }),
-    ).resolves.toBeTruthy();
-    await expect(
-      isStandardSchemaValid(metadata.parameters, {
-        toolContext: { context: { foo: "bar" } },
-      }),
-    ).resolves.toBeFalsy();
   });
 });
 

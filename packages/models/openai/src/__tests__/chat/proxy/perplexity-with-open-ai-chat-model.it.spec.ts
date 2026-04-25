@@ -149,7 +149,7 @@ describe.skipIf(!PERPLEXITY_API_KEY)("PerplexityWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 
@@ -175,7 +175,7 @@ describe.skipIf(!PERPLEXITY_API_KEY)("PerplexityWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const result = outputConverter.convert(generation.output.text ?? "");
+    const result = await outputConverter.convert(generation.output.text ?? "");
     expect(result.numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 

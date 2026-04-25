@@ -117,7 +117,7 @@ describe.skipIf(!DEEPSEEK_API_KEY)("DeepSeekWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 

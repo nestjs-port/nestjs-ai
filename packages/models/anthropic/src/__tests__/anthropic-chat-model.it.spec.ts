@@ -195,7 +195,9 @@ Provide me a List of {subject}
     const prompt = new Prompt(promptTemplate.createMessage());
     const generation = (await chatModel.call(prompt)).result;
 
-    const result = mapOutputConverter.convert(generation?.output.text ?? "");
+    const result = await mapOutputConverter.convert(
+      generation?.output.text ?? "",
+    );
     expect(result?.numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 

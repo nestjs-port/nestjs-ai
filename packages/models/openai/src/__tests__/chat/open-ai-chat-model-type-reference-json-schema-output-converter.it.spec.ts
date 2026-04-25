@@ -95,7 +95,9 @@ describe.skipIf(!OPENAI_API_KEY)(
         chatModel.stream(prompt),
       );
 
-      const actorsFilms = outputConverter.convert(generationTextFromStream);
+      const actorsFilms = await outputConverter.convert(
+        generationTextFromStream,
+      );
       logger.info("%s", String(actorsFilms));
       expect(actorsFilms).toHaveLength(2);
       expect(actorsFilms[0]?.actor).toBe("Tom Hanks");

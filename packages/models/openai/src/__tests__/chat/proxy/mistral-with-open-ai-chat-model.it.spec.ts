@@ -119,7 +119,7 @@ describe.skipIf(!MISTRAL_AI_API_KEY)("MistralWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 

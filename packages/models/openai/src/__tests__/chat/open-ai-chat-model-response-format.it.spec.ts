@@ -242,7 +242,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModelResponseFormatIT", () => {
     // first before final answer.
     // expect(content.startsWith("{\"steps\":{\"items\":[")).toBe(true);
 
-    const mathReasoning = outputConverter.convert(content || "");
+    const mathReasoning = await outputConverter.convert(content || "");
 
     assert.exists(mathReasoning);
   });

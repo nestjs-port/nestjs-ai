@@ -166,7 +166,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiPaymentTransaction", () => {
 
     const content = (await lastValueFrom(flux.pipe(toArray()))).join("");
 
-    const structure = converter.convert(content);
+    const structure = await converter.convert(content);
     assert.exists(structure);
 
     expect(structure[0]?.id).toBe("001");

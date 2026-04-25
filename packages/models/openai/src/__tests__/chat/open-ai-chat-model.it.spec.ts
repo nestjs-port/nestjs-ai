@@ -241,7 +241,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 
@@ -267,7 +267,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const result = outputConverter.convert(generation.output.text ?? "");
+    const result = await outputConverter.convert(generation.output.text ?? "");
     expect(result.numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
@@ -292,7 +292,9 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
   });
@@ -318,7 +320,9 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
     }
     const generation = generationResponse.result;
 
-    const actorsFilms = outputConverter.convert(generation.output.text ?? "");
+    const actorsFilms = await outputConverter.convert(
+      generation.output.text ?? "",
+    );
     logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);
@@ -344,7 +348,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAiChatModel IT", () => {
       chatModel.stream(prompt),
     );
 
-    const actorsFilms = outputConverter.convert(generationTextFromStream);
+    const actorsFilms = await outputConverter.convert(generationTextFromStream);
     logger.info("%o", actorsFilms);
     expect(actorsFilms.actor).toBe("Tom Hanks");
     expect(actorsFilms.movies).toHaveLength(5);

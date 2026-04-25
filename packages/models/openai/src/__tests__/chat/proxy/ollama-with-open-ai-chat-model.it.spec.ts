@@ -131,7 +131,7 @@ describe.skipIf(!OLLAMA_WITH_OPENAI_TESTS)(
       }
       const generation = generationResponse.result;
 
-      const list = outputConverter.convert(generation.output.text ?? "");
+      const list = await outputConverter.convert(generation.output.text ?? "");
       expect(list).toHaveLength(5);
     });
 

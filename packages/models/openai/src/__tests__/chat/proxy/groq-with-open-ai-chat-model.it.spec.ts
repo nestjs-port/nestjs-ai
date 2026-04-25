@@ -135,7 +135,7 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const list = outputConverter.convert(generation.output.text ?? "");
+    const list = await outputConverter.convert(generation.output.text ?? "");
     expect(list).toHaveLength(5);
   });
 
@@ -161,7 +161,7 @@ describe.skipIf(!GROQ_API_KEY)("GroqWithOpenAiChatModelIT", () => {
     }
     const generation = generationResponse.result;
 
-    const result = outputConverter.convert(generation.output.text ?? "");
+    const result = await outputConverter.convert(generation.output.text ?? "");
     assert.exists(result.numbers);
   });
 

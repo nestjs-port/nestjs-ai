@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import type { z } from "zod";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 /**
  * A functional interface to convert tool call results to a String that can be sent back
@@ -27,6 +32,6 @@ export interface ToolCallResultConverter {
    */
   convert(
     result?: unknown | null,
-    returnType?: z.ZodTypeAny | null,
+    returnType?: StandardSchemaWithJsonSchema | null,
   ): Promise<string>;
 }

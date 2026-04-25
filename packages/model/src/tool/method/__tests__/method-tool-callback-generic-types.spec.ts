@@ -41,9 +41,17 @@ class TestGenericClass {
       .join(", ")}]`;
   }
 
-  processStringListInToolContext(input: { toolContext: ToolContext }): string {
-    const context = input.toolContext.context;
-    return `${Object.keys(context).length} entries processed ${formatMap(context)}`;
+  processStringListInToolContext(
+    _input: unknown,
+    context?: ToolContext | null,
+  ): string {
+    const ctx = context?.context ?? {};
+    return `${Object.keys(ctx).length} entries processed ${formatMap(ctx)}`;
+  }
+
+  processToolContextOnly(context?: ToolContext | null): string {
+    const ctx = context?.context ?? {};
+    return `${Object.keys(ctx).length} entries processed ${formatMap(ctx)}`;
   }
 
   processStringListWithToolContext(
@@ -254,7 +262,7 @@ describe("MethodToolCallbackGenericTypes", () => {
 
     const callback = MethodToolCallback.builder()
       .toolDefinition(toolDefinition)
-      .toolMethod(testObject.processStringListInToolContext)
+      .toolMethod(testObject.processToolContextOnly)
       .toolObject(testObject)
       .build();
 

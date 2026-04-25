@@ -19,48 +19,48 @@ import { assert, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { ToolContext, ToolContextSchema } from "../../../chat/index.js";
 import {
-  TOOL_METADATA_KEY,
-  Tool,
-  type ToolAnnotationMetadata,
+  TOOL_V2_METADATA_KEY,
+  ToolV2,
+  type ToolV2AnnotationMetadata,
 } from "../index.js";
 
 class ToolOverloadExamples {
-  @Tool()
+  @ToolV2()
   noArgsAndVoidReturn() {}
 
-  // @ts-expect-error schema-less @Tool() only supports `() => void | Promise<void>`
-  @Tool()
+  // @ts-expect-error schema-less @ToolV2() only supports `() => void | Promise<void>`
+  @ToolV2()
   hasInputWithoutSchema(_value: string) {}
 
-  // @ts-expect-error schema-less @Tool() only supports `() => void | Promise<void>`
-  @Tool()
+  // @ts-expect-error schema-less @ToolV2() only supports `() => void | Promise<void>`
+  @ToolV2()
   hasReturnWithoutSchema() {
     return "value";
   }
 
-  @Tool({
+  @ToolV2({
     parameters: z.object({ value: z.string() }),
   })
   onlyParametersSchema(input: { value: string }) {
     void input.value;
   }
 
-  @Tool({
+  @ToolV2({
     parameters: z.object({ value: z.string() }),
   })
   async onlyParametersSchemaAsync(input: { value: string }) {
     void input.value;
   }
 
-  @Tool({
+  @ToolV2({
     returns: z.string(),
   })
   onlyReturnsSchema() {
     return "value";
   }
 
-  // @ts-expect-error returns-only @Tool({ returns }) requires a zero-argument method
-  @Tool({
+  // @ts-expect-error returns-only @ToolV2({ returns }) requires a zero-argument method
+  @ToolV2({
     returns: z.string(),
   })
   onlyReturnsSchemaWithInput(_value: string) {
@@ -70,7 +70,7 @@ class ToolOverloadExamples {
 void ToolOverloadExamples;
 
 class TypedToolExamples {
-  @Tool({
+  @ToolV2({
     parameters: z.object({ city: z.string() }),
     returns: z.object({ temperature: z.number() }),
   })
@@ -79,7 +79,7 @@ class TypedToolExamples {
   }
 
   // @ts-expect-error input type must match the `parameters` schema type
-  @Tool({
+  @ToolV2({
     parameters: z.object({ city: z.string() }),
     returns: z.object({ temperature: z.number() }),
   })
@@ -88,7 +88,7 @@ class TypedToolExamples {
   }
 
   // @ts-expect-error return type must match the `returns` schema type
-  @Tool({
+  @ToolV2({
     parameters: z.object({ city: z.string() }),
     returns: z.object({ temperature: z.number() }),
   })
@@ -99,7 +99,7 @@ class TypedToolExamples {
 void TypedToolExamples;
 
 class AdvancedTypedToolExamples {
-  @Tool({
+  @ToolV2({
     parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Buffer),
   })
@@ -108,7 +108,7 @@ class AdvancedTypedToolExamples {
   }
 
   // @ts-expect-error return type must be Buffer
-  @Tool({
+  @ToolV2({
     parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Buffer),
   })
@@ -116,7 +116,7 @@ class AdvancedTypedToolExamples {
     return input.value;
   }
 
-  @Tool({
+  @ToolV2({
     parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Readable),
   })
@@ -125,7 +125,7 @@ class AdvancedTypedToolExamples {
   }
 
   // @ts-expect-error return type must be Readable
-  @Tool({
+  @ToolV2({
     parameters: z.object({ value: z.string() }),
     returns: z.instanceof(Readable),
   })
@@ -133,7 +133,7 @@ class AdvancedTypedToolExamples {
     return Buffer.from(input.value);
   }
 
-  @Tool({
+  @ToolV2({
     parameters: z.object({ city: z.string().optional() }),
     returns: z.boolean(),
   })
@@ -142,7 +142,7 @@ class AdvancedTypedToolExamples {
   }
 
   // @ts-expect-error optional method parameter does not match required schema input
-  @Tool({
+  @ToolV2({
     parameters: z.object({ city: z.string() }),
     returns: z.boolean(),
   })
@@ -151,7 +151,7 @@ class AdvancedTypedToolExamples {
   }
 
   // @ts-expect-error required method input does not match optional schema input
-  @Tool({
+  @ToolV2({
     parameters: z.object({ city: z.string().optional() }),
     returns: z.boolean(),
   })
@@ -162,34 +162,24 @@ class AdvancedTypedToolExamples {
 void AdvancedTypedToolExamples;
 
 class ToolContextTypedExamples {
-  @Tool({
-    parameters: z.object({
-      toolContext: ToolContextSchema,
-    }),
-    returns: z.string(),
-  })
-  validToolContextInput(input: { toolContext: ToolContext }) {
-    return JSON.stringify(input.toolContext.context);
+  @ToolV2()
+  validToolContextAsFirstArg(context: ToolContext) {
+    void context.context;
   }
 
-  // @ts-expect-error input type must match ToolContextSchema in object field
-  @Tool({
-    parameters: z.object({
-      toolContext: ToolContextSchema,
-    }),
+  @ToolV2({
+    parameters: z.object({ city: z.string() }),
     returns: z.string(),
   })
-  invalidToolContextInput(input: {
-    toolContext: { context: Record<string, unknown> };
-  }) {
-    return JSON.stringify(input.toolContext.context);
+  validToolContextAsSecondArg(input: { city: string }, context: ToolContext) {
+    return `${input.city}:${JSON.stringify(context?.context ?? {})}`;
   }
 }
 void ToolContextTypedExamples;
 
 describe("ToolDecorator", () => {
   class TestTools {
-    @Tool({
+    @ToolV2({
       name: "getWeather",
       parameters: z.object({ city: z.string() }),
       returns: z.object({ temperature: z.number() }),
@@ -199,26 +189,26 @@ describe("ToolDecorator", () => {
     }
   }
 
-  it("stores zod parameter and return schemas in metadata", () => {
+  it("stores zod parameter and return schemas in metadata", async () => {
     const metadata = Reflect.getMetadata(
-      TOOL_METADATA_KEY,
+      TOOL_V2_METADATA_KEY,
       TestTools.prototype,
       "getWeather",
-    ) as ToolAnnotationMetadata;
+    ) as ToolV2AnnotationMetadata;
 
     assert.exists(metadata.parameters);
     assert.exists(metadata.returns);
-    expect(
-      metadata.parameters?.safeParse({ city: "seoul" }).success,
-    ).toBeTruthy();
-    expect(
-      metadata.returns?.safeParse({ temperature: 18 }).success,
-    ).toBeTruthy();
+    await expect(
+      isStandardSchemaValid(metadata.parameters, { city: "seoul" }),
+    ).resolves.toBeTruthy();
+    await expect(
+      isStandardSchemaValid(metadata.returns, { temperature: 18 }),
+    ).resolves.toBeTruthy();
   });
 
-  it("supports ToolContextSchema inside object parameters", () => {
+  it("supports ToolContextSchema inside object parameters", async () => {
     class ContextTools {
-      @Tool({
+      @ToolV2({
         name: "contextEcho",
         parameters: z.object({
           toolContext: ToolContextSchema,
@@ -231,55 +221,31 @@ describe("ToolDecorator", () => {
     }
 
     const metadata = Reflect.getMetadata(
-      TOOL_METADATA_KEY,
+      TOOL_V2_METADATA_KEY,
       ContextTools.prototype,
       "contextEcho",
-    ) as ToolAnnotationMetadata;
+    ) as ToolV2AnnotationMetadata;
 
     assert.exists(metadata.parameters);
-    expect(
-      metadata.parameters?.safeParse({
+    await expect(
+      isStandardSchemaValid(metadata.parameters, {
         toolContext: new ToolContext({ foo: "bar" }),
-      }).success,
-    ).toBeTruthy();
-    expect(
-      metadata.parameters?.safeParse({
+      }),
+    ).resolves.toBeTruthy();
+    await expect(
+      isStandardSchemaValid(metadata.parameters, {
         toolContext: { context: { foo: "bar" } },
-      }).success,
-    ).toBeFalsy();
-  });
-
-  it("throws when parameters schema is not z.object()", () => {
-    expect(() => {
-      class InvalidParametersSchemaTools {
-        @Tool({
-          // biome-ignore lint/suspicious/noExplicitAny: runtime validation test
-          parameters: z.string() as any,
-          returns: z.string(),
-        })
-        invalid(_value: { value: string }) {
-          return "ok";
-        }
-      }
-      return InvalidParametersSchemaTools;
-    }).toThrowError(/requires parameters to be a z\.object/i);
-  });
-
-  it("throws when returns schema is z.function()", () => {
-    expect(() => {
-      class InvalidReturnSchemaTools {
-        @Tool({
-          parameters: z.object({ value: z.string() }),
-          returns: z.function({
-            input: [z.string()],
-            output: z.string(),
-          }),
-        })
-        invalid(_value: { value: string }) {
-          return (input: string) => input;
-        }
-      }
-      return InvalidReturnSchemaTools;
-    }).toThrowError(/does not support z\.function\(\) as a return schema/i);
+      }),
+    ).resolves.toBeFalsy();
   });
 });
+
+async function isStandardSchemaValid(
+  schema: NonNullable<
+    ToolV2AnnotationMetadata["parameters"] | ToolV2AnnotationMetadata["returns"]
+  >,
+  value: unknown,
+): Promise<boolean> {
+  const result = await schema["~standard"].validate(value);
+  return result.issues == null;
+}

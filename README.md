@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/antora/modules/ROOT/images/nestjs-ai-logo.svg" alt="NestJS AI logo" width="160" style="display:block; margin:0 auto 0.25rem;" />
+</div>
+
 # NestJS AI
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.

@@ -1,8 +1,6 @@
 [[introduction]]
 = Introduction
 
-image::spring_ai_logo_with_text.svg[Integration Problem, width=300, align="left"]
-
 [IMPORTANT]
 ====
 `NestJS AI` is a TypeScript/NestJS port of the https://github.com/spring-projects/spring-ai[Spring AI] project.

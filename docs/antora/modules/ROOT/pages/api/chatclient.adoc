@@ -399,7 +399,7 @@ const answer = await ChatClient.create(chatModel)
 Internally, `ChatClient` resolves a `TemplateRenderer` implementation through `TemplateRendererFactory` (from `@nestjs-ai/commons`). The factory returns a delegating renderer that picks an underlying engine at request time:
 
 * When `@nestjs-ai/template-st` is installed and `NestAiModule.forRoot()` is imported into your module graph, the platform binds `StTemplateRenderer` at module init. This implementation is built on top of the open-source https://github.com/mike-lischke/stringtemplate4ts[stringtemplate4ts] library — a TypeScript port of Terence Parr's https://www.stringtemplate.org/[StringTemplate] engine — and supports the full StringTemplate feature set (custom delimiters, ST functions, validation modes).
-* Otherwise, the factory falls back to `SimpleTemplateRenderer` (in `@nestjs-ai/commons`), a lightweight `{var}` placeholder renderer with no StringTemplate features.
+* Otherwise, the factory falls back to `SimpleTemplateRenderer` (in `@nestjs-ai/commons`), a lightweight `\{var\}` placeholder renderer with no StringTemplate features.
 
 NestJS AI also provides a `NoOpTemplateRenderer` (in `@nestjs-ai/commons`) for cases where no template processing is desired.
 

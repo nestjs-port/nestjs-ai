@@ -2,11 +2,11 @@
 = Chat Client API
 
 The `ChatClient` offers a fluent API for communicating with an AI Model.
-It supports both a synchronous and streaming programming model.  
+It supports both a Promise-based programming model and an RxJS-based streaming model (with an `AsyncIterable` adapter).
 
 [NOTE]
 ====
-See the xref:api/chatclient.adoc#_implementation_notes[Implementation Notes] at the bottom of this document related to the combined use of imperative and reactive programming models in `ChatClient`
+See the xref:api/chatclient.adoc#_implementation_notes[Implementation Notes] at the bottom of this document for the differences between Promise-based and reactive call paths in `ChatClient`.
 ====
 
 The fluent API has methods for building up the constituent parts of a xref:api/prompt.adoc#_prompt[Prompt] that is passed to the AI model as input.
@@ -18,39 +18,77 @@ These messages often contain placeholders that are substituted at runtime based 
 
 There are also Prompt options that can be specified, such as the name of the AI Model to use and the temperature setting that controls the randomness or creativity of the generated output.
 
+== Installation
+
+`ChatClient` lives in `@nestjs-ai/client-chat`:
+
+[source,bash]
+----
+pnpm add @nestjs-ai/client-chat
+----
+
 == Creating a ChatClient
 
-The `ChatClient` is created using a `ChatClient.Builder` object.
-You can obtain an autoconfigured `ChatClient.Builder` instance for any xref:api/chatmodel.adoc[ChatModel] Spring Boot autoconfiguration or create one programmatically.
+A `ChatClient` is created from a `ChatModel`. NestJS AI exposes three idiomatic ways to obtain one:
 
-=== Using an autoconfigured ChatClient.Builder
+* `ChatClient.create(chatModel)` — convenience factory that returns a `ChatClient` with no defaults.
+* `ChatClient.builder(chatModel)` — returns a `ChatClient.Builder` for full control over default options, advisors, system prompts, tools, and the template renderer.
+* Inject `CHAT_CLIENT_BUILDER_TOKEN` (alias `@InjectChatClientBuilder()`) — a transient builder produced by `ChatClientModule` that has already been customized through your module configuration.
 
-In the most simple use case, Spring AI provides Spring Boot autoconfiguration, creating a prototype `ChatClient.Builder` bean for you to inject into your class.
-Here is a simple example of retrieving a `String` response to a simple user request.
+=== Using `ChatClient.create()`
 
-[source,java]
+The simplest pattern is to inject the configured `ChatModel` and create a `ChatClient` per service:
+
+[source,typescript]
 ----
-@RestController
-class MyController {
+import { Controller, Get, Query } from '@nestjs/common';
+import { ChatClient } from '@nestjs-ai/client-chat';
+import { InjectChatModel } from '@nestjs-ai/platform';
+import type { ChatModel } from '@nestjs-ai/model';
 
-    private final ChatClient chatClient;
+@Controller()
+export class ChatController {
+  private readonly chatClient: ChatClient;
 
-    public MyController(ChatClient.Builder chatClientBuilder) {
-        this.chatClient = chatClientBuilder.build();
-    }
+  constructor(@InjectChatModel() chatModel: ChatModel) {
+    this.chatClient = ChatClient.create(chatModel);
+  }
 
-    @GetMapping("/ai")
-    String generation(String userInput) {
-        return this.chatClient.prompt()
-            .user(userInput)
-            .call()
-            .content();
-    }
+  @Get('/ai')
+  async generation(@Query('userInput') userInput: string): Promise<string | null> {
+    return this.chatClient.prompt().user(userInput).call().content();
+  }
 }
 ----
 
-In this simple example, the user input sets the contents of the user message.
-The `call()` method sends a request to the AI model, and the `content()` method returns the AI model's response as a `String`.
+The `call()` method instructs `ChatClient` to use a Promise-based call path; the actual model invocation happens when a terminal method such as `content()`, `chatResponse()`, or `entity()` is awaited.
+
+=== Using the Configured Builder from `ChatClientModule`
+
+When your `AppModule` imports `ChatClientModule.forFeature({ customizer })`, the module produces a transient `ChatClient.Builder` that has already had your defaults applied. Inject it and call `build()`:
+
+[source,typescript]
+----
+import { Controller, Get, Query } from '@nestjs/common';
+import { ChatClient } from '@nestjs-ai/client-chat';
+import { InjectChatClientBuilder } from '@nestjs-ai/platform';
+
+@Controller()
+export class ChatController {
+  private readonly chatClient: ChatClient;
+
+  constructor(@InjectChatClientBuilder() builder: ChatClient.Builder) {
+    this.chatClient = builder.build();
+  }
+
+  @Get('/ai')
+  async generation(@Query('userInput') userInput: string): Promise<string | null> {
+    return this.chatClient.prompt().user(userInput).call().content();
+  }
+}
+----
+
+NOTE: `CHAT_CLIENT_BUILDER_TOKEN` is registered with `Scope.TRANSIENT`, so each consumer receives a fresh builder.
 
 === Working with Multiple Chat Models
 
@@ -62,178 +100,128 @@ There are several scenarios where you might need to work with multiple chat mode
 * Providing users with a choice of models based on their preferences
 * Combining specialized models (one for code generation, another for creative content, etc.)
 
-By default, Spring AI autoconfigures a single `ChatClient.Builder` bean.
-However, you may need to work with multiple chat models in your application.
-Here's how to handle this scenario:
-
-In all cases, you need to disable the `ChatClient.Builder` autoconfiguration by setting the property `spring.ai.chat.client.enabled=false`.
-
-This allows you to create multiple `ChatClient` instances manually.
+NestJS AI does not autoconfigure a single global `ChatClient` — every chat model module is imported explicitly. To wire multiple models, register each `*ChatModelModule` in its own dynamic feature module and re-export the chat client builder under a custom token.
 
 ==== Multiple ChatClients with a Single Model Type
 
-This section covers a common use case where you need to create multiple ChatClient instances that all use the same underlying model type but with different configurations.
+Create distinct `ChatClient` instances programmatically by reusing the same `ChatModel`:
 
-[source,java]
+[source,typescript]
 ----
-// Create ChatClient instances programmatically
-ChatModel myChatModel = ... // already autoconfigured by Spring Boot
-ChatClient chatClient = ChatClient.create(myChatModel);
+import { ChatClient } from '@nestjs-ai/client-chat';
+import type { ChatModel } from '@nestjs-ai/model';
+
+// `chatModel` is provided by an OpenAiChatModelModule, AnthropicChatModelModule, etc.
+const chatClient = ChatClient.create(chatModel);
 
 // Or use the builder for more control
-ChatClient.Builder builder = ChatClient.builder(myChatModel);
-ChatClient customChatClient = builder
-    .defaultSystemPrompt("You are a helpful assistant.")
-    .build();
+const customChatClient = ChatClient.builder(chatModel)
+  .defaultSystem('You are a helpful assistant.')
+  .build();
 ----
 
 ==== ChatClients for Different Model Types
 
-When working with multiple AI models, you can define separate `ChatClient` beans for each model:
+When working with multiple AI models, isolate each chat model in its own NestJS module and expose a typed provider:
 
-[source,java]
+[source,typescript]
 ----
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import { Module } from '@nestjs/common';
+import { ChatClient } from '@nestjs-ai/client-chat';
+import { OpenAiChatModelModule } from '@nestjs-ai/model-openai';
+import { AnthropicChatModelModule } from '@nestjs-ai/model-anthropic';
+import { CHAT_MODEL_TOKEN } from '@nestjs-ai/commons';
+import type { ChatModel } from '@nestjs-ai/model';
 
-@Configuration
-public class ChatClientConfig {
-    
-    @Bean
-    public ChatClient openAiChatClient(OpenAiChatModel chatModel) {
-        return ChatClient.create(chatModel);
-    }
-    
-    @Bean
-    public ChatClient anthropicChatClient(AnthropicChatModel chatModel) {
-        return ChatClient.create(chatModel);
-    }
+export const OPENAI_CHAT_CLIENT = Symbol.for('OPENAI_CHAT_CLIENT');
+export const ANTHROPIC_CHAT_CLIENT = Symbol.for('ANTHROPIC_CHAT_CLIENT');
+
+@Module({
+  imports: [
+    OpenAiChatModelModule.forFeature({
+      apiKey: process.env.OPENAI_API_KEY,
+      options: { model: 'gpt-4o-mini' },
+    }),
+  ],
+  providers: [
+    {
+      provide: OPENAI_CHAT_CLIENT,
+      useFactory: (chatModel: ChatModel) => ChatClient.create(chatModel),
+      inject: [CHAT_MODEL_TOKEN],
+    },
+  ],
+  exports: [OPENAI_CHAT_CLIENT],
+})
+export class OpenAiChatClientModule {}
+
+@Module({
+  imports: [
+    AnthropicChatModelModule.forFeature({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      options: { model: 'claude-3-5-sonnet-latest' },
+    }),
+  ],
+  providers: [
+    {
+      provide: ANTHROPIC_CHAT_CLIENT,
+      useFactory: (chatModel: ChatModel) => ChatClient.create(chatModel),
+      inject: [CHAT_MODEL_TOKEN],
+    },
+  ],
+  exports: [ANTHROPIC_CHAT_CLIENT],
+})
+export class AnthropicChatClientModule {}
+----
+
+You can then inject these tokens into your services using `@Inject()`:
+
+[source,typescript]
+----
+import { Inject, Injectable } from '@nestjs/common';
+import type { ChatClient } from '@nestjs-ai/client-chat';
+import { ANTHROPIC_CHAT_CLIENT, OPENAI_CHAT_CLIENT } from './chat-clients.module.js';
+
+@Injectable()
+export class ChatRouter {
+  constructor(
+    @Inject(OPENAI_CHAT_CLIENT) private readonly openAi: ChatClient,
+    @Inject(ANTHROPIC_CHAT_CLIENT) private readonly anthropic: ChatClient,
+  ) {}
+
+  async ask(provider: 'openai' | 'anthropic', input: string): Promise<string | null> {
+    const client = provider === 'openai' ? this.openAi : this.anthropic;
+    return client.prompt(input).call().content();
+  }
 }
 ----
-
-You can then inject these beans into your application components using the `@Qualifier` annotation:
-
-[source,java]
-----
-
-@Configuration
-public class ChatClientExample {
-    
-    @Bean
-    CommandLineRunner cli(
-            @Qualifier("openAiChatClient") ChatClient openAiChatClient,
-            @Qualifier("anthropicChatClient") ChatClient anthropicChatClient) {
-        
-        return args -> {
-            var scanner = new Scanner(System.in);
-            ChatClient chat;
-            
-            // Model selection
-            System.out.println("\nSelect your AI model:");
-            System.out.println("1. OpenAI");
-            System.out.println("2. Anthropic");
-            System.out.print("Enter your choice (1 or 2): ");
-            
-            String choice = scanner.nextLine().trim();
-            
-            if (choice.equals("1")) {
-                chat = openAiChatClient;
-                System.out.println("Using OpenAI model");
-            } else {
-                chat = anthropicChatClient;
-                System.out.println("Using Anthropic model");
-            }
-            
-            // Use the selected chat client
-            System.out.print("\nEnter your question: ");
-            String input = scanner.nextLine();
-            String response = chat.prompt(input).call().content();
-            System.out.println("ASSISTANT: " + response);
-            
-            scanner.close();
-        };
-    }
-}
-----
-
-==== Multiple OpenAI-Compatible API Endpoints
-
-The `OpenAiApi` and `OpenAiChatModel` classes provide a `mutate()` method that allows you to create variations of existing instances with different properties.
-This is particularly useful when you need to work with multiple OpenAI-compatible APIs.
-
-[source,java]
-----
-
-@Service
-public class MultiModelService {
-    
-    private static final Logger logger = LoggerFactory.getLogger(MultiModelService.class);
-    
-    @Autowired
-    private OpenAiChatModel baseChatModel;
-    
-    @Autowired
-    private OpenAiApi baseOpenAiApi;
-    
-    public void multiClientFlow() {
-        try {
-            // Derive a new OpenAiApi for Groq (Llama3)
-            OpenAiApi groqApi = baseOpenAiApi.mutate()
-                .baseUrl("https://api.groq.com/openai")
-                .apiKey(System.getenv("GROQ_API_KEY"))
-                .build();
-            
-            // Derive a new OpenAiApi for OpenAI GPT-4
-            OpenAiApi gpt4Api = baseOpenAiApi.mutate()
-                .baseUrl("https://api.openai.com")
-                .apiKey(System.getenv("OPENAI_API_KEY"))
-                .build();
-            
-            // Derive a new OpenAiChatModel for Groq
-            OpenAiChatModel groqModel = baseChatModel.mutate()
-                .openAiApi(groqApi)
-                .defaultOptions(OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.5).build())
-                .build();
-            
-            // Derive a new OpenAiChatModel for GPT-4
-            OpenAiChatModel gpt4Model = baseChatModel.mutate()
-                .openAiApi(gpt4Api)
-                .defaultOptions(OpenAiChatOptions.builder().model("gpt-4").temperature(0.7).build())
-                .build();
-            
-            // Simple prompt for both models
-            String prompt = "What is the capital of France?";
-            
-            String groqResponse = ChatClient.builder(groqModel).build().prompt(prompt).call().content();
-            String gpt4Response = ChatClient.builder(gpt4Model).build().prompt(prompt).call().content();
-            
-            logger.info("Groq (Llama3) response: {}", groqResponse);
-            logger.info("OpenAI GPT-4 response: {}", gpt4Response);
-        }
-        catch (Exception e) {
-            logger.error("Error in multi-client flow", e);
-        }
-    }
-}
-----
-
 
 == ChatClient Fluent API
 
-The `ChatClient` fluent API allows you to create a prompt in three distinct ways using an overloaded `prompt` method to initiate the fluent API:
+The `ChatClient` fluent API allows you to create a prompt in four distinct ways using overloads of the `prompt` method:
 
-* `prompt()`: This method with no arguments lets you start using the fluent API, allowing you to build up user, system, and other parts of the prompt.
+* `prompt()`: Starts the fluent API with no preset content, allowing you to build up user, system, and other parts of the prompt.
+* `prompt(prompt: Prompt)`: Accepts a `Prompt` instance built using the non-fluent `Prompt` API.
+* `prompt(content: string)`: Convenience overload that takes the user's text content.
+* `prompt(props: ChatClient.ChatClientRequestProps)`: Accepts an object literal describing user/system text, messages, advisors, tools, and options. This is unique to NestJS AI and lets you compose a request without chaining methods.
 
-* `prompt(Prompt prompt)`: This method accepts a `Prompt` argument, letting you pass in a `Prompt` instance that you have created using the Prompt's non-fluent APIs.
-
-* `prompt(String content)`: This is a convenience method similar to the previous overload. It takes the user's text content.
+[source,typescript]
+----
+// Object-literal form
+const response = await chatClient
+  .prompt({
+    system: 'You are a helpful assistant.',
+    user: { text: 'Tell me a joke about {topic}', params: { topic: 'space' } },
+    options: ChatOptions.builder().temperature(0.7),
+  })
+  .call()
+  .content();
+----
 
 == ChatClient Responses
 
 The `ChatClient` API offers several ways to format the response from the AI Model using the fluent API.
 
-=== Returning a ChatResponse
+=== Returning a `ChatResponse`
 
 The response from the AI model is a rich structure defined by the type `xref:api/chatmodel.adoc#ChatResponse[ChatResponse]`.
 It includes metadata about how the response was generated and can also contain multiple responses, known as xref:api/chatmodel.adoc#Generation[Generation]s, each with its own metadata.
@@ -242,310 +230,382 @@ This information is important because hosted AI models charge based on the numbe
 
 An example to return the `ChatResponse` object that contains the metadata is shown below by invoking `chatResponse()` after the `call()` method.
 
-[source,java]
+[source,typescript]
 ----
-ChatResponse chatResponse = chatClient.prompt()
-    .user("Tell me a joke")
-    .call()
-    .chatResponse();
+const chatResponse = await chatClient
+  .prompt()
+  .user('Tell me a joke')
+  .call()
+  .chatResponse();
 ----
-
 
 === Returning an Entity
 
-You often want to return an entity class that is mapped from the returned `String`.
-The `entity()` method provides this functionality.
+You often want to return a typed object that is mapped from the returned `String`.
+The `entity()` method provides this functionality and accepts any https://standardschema.dev/[Standard Schema]–compatible schema (Zod, Valibot, ArkType, ...) or a JSON Schema literal typed via `json-schema-to-ts`.
 
-For example, given the Java record:
+For example, given the Zod schema:
 
-[source,java]
+[source,typescript]
 ----
-record ActorFilms(String actor, List<String> movies) {}
-----
+import { z } from 'zod';
 
-You can easily map the AI model's output to this record using the `entity()` method, as shown below:
-
-[source,java]
-----
-ActorFilms actorFilms = chatClient.prompt()
-    .user("Generate the filmography for a random actor.")
-    .call()
-    .entity(ActorFilms.class);
+const ActorFilms = z.object({
+  actor: z.string(),
+  movies: z.array(z.string()),
+});
 ----
 
-There is also an overloaded `entity` method with the signature `entity(ParameterizedTypeReference<T> type)` that lets you specify types such as generic Lists:
+You can map the AI model's output to that schema using the `entity()` method:
 
-[source,java]
+[source,typescript]
 ----
-List<ActorFilms> actorFilms = chatClient.prompt()
-    .user("Generate the filmography of 5 movies for Tom Hanks and Bill Murray.")
-    .call()
-    .entity(new ParameterizedTypeReference<List<ActorFilms>>() {});
+const actorFilms = await chatClient
+  .prompt()
+  .user('Generate the filmography for a random actor.')
+  .call()
+  .entity(ActorFilms);
+// actorFilms is typed as { actor: string; movies: string[] } | null
+----
+
+To return a collection, declare the schema as an array — there is no separate `ParameterizedTypeReference` overload because TypeScript's type system already carries the element type:
+
+[source,typescript]
+----
+const ActorFilmsList = z.array(ActorFilms);
+
+const actorFilms = await chatClient
+  .prompt()
+  .user('Generate the filmography of 5 movies for Tom Hanks and Bill Murray.')
+  .call()
+  .entity(ActorFilmsList);
+----
+
+You can also pass a plain JSON Schema literal:
+
+[source,typescript]
+----
+import type { JSONSchema } from 'json-schema-to-ts';
+
+const schema = {
+  type: 'object',
+  properties: {
+    actor: { type: 'string' },
+    movies: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['actor', 'movies'],
+} as const satisfies JSONSchema;
+
+const actorFilms = await chatClient
+  .prompt()
+  .user('Generate the filmography for a random actor.')
+  .call()
+  .entity(schema);
 ----
 
 ==== Native Structured Output
 
 As more AI models support structured output natively, you can take advantage of this feature by using the `AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT` advisor parameter when calling the `ChatClient`.
-You can use the `defaultAdvisors()` method on the `ChatClient.Builder` to set this parameter globally for all calls or set it per call as shown below:
+Use `defaultAdvisors()` on the `ChatClient.Builder` to set this parameter globally for all calls or set it per call as shown below:
 
-[source,java]
+[source,typescript]
 ----
-ActorFilms actorFilms = chatClient.prompt()
-    .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
-    .user("Generate the filmography for a random actor.")
-    .call()
-    .entity(ActorFilms.class);
+import { AdvisorParams } from '@nestjs-ai/client-chat';
+
+const actorFilms = await chatClient
+  .prompt()
+  .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+  .user('Generate the filmography for a random actor.')
+  .call()
+  .entity(ActorFilms);
 ----
 
 NOTE: Some AI models such as OpenAI don't support arrays of objects natively.
-In such cases, you can use the Spring AI default structured output conversion.
+In such cases, you can use the NestJS AI default structured output conversion.
 
 === Streaming Responses
 
-The `stream()` method lets you get an asynchronous response as shown below:
+The `stream()` method returns an RxJS `Observable` of incremental tokens. The terminal method shape mirrors `call()`:
 
-[source,java]
+[source,typescript]
+----
+import type { Observable } from 'rxjs';
+
+const output: Observable<string> = chatClient
+  .prompt()
+  .user('Tell me a joke')
+  .stream()
+  .content();
 ----
 
-Flux<String> output = chatClient.prompt()
-    .user("Tell me a joke")
+You can also stream the `ChatResponse` directly with `chatResponse(): Observable<ChatResponse>`, or consume the stream as an `AsyncIterable` to integrate with `for await ... of`:
+
+[source,typescript]
+----
+for await (const chunk of chatClient
+  .prompt()
+  .user('Tell me a joke')
+  .stream()
+  .contentIterable()) {
+  process.stdout.write(chunk);
+}
+----
+
+There is no streaming `entity()` overload yet. To convert an aggregated stream into an entity today, collect the chunks and pass the result through the xref:api/structured-output-converter.adoc#StructuredOutputConverter[Structured Output Converter]:
+
+[source,typescript]
+----
+import { firstValueFrom } from 'rxjs';
+import { toArray } from 'rxjs/operators';
+import { StandardSchemaOutputConverter } from '@nestjs-ai/model';
+import { z } from 'zod';
+
+const ActorsFilms = z.array(z.object({ actor: z.string(), movies: z.array(z.string()) }));
+const converter = new StandardSchemaOutputConverter({ schema: ActorsFilms });
+
+const chunks = await firstValueFrom(
+  chatClient
+    .prompt()
+    .user((u) =>
+      u
+        .text('Generate the filmography for a random actor.\n{format}')
+        .param('format', converter.format),
+    )
     .stream()
-    .content();
-----
+    .content()
+    .pipe(toArray()),
+);
 
-You can also stream the `ChatResponse` using the method `Flux<ChatResponse> chatResponse()`.
-
-In the future, we will offer a convenience method that will let you return a Java entity with the reactive `stream()` method.
-In the meantime, you should use the xref:api/structured-output-converter.adoc#StructuredOutputConverter[Structured Output Converter] to convert the aggregated response explicitly as shown below.
-This also demonstrates the use of parameters in the fluent API that will be discussed in more detail in a later section of the documentation.
-
-[source,java]
-----
-var converter = new BeanOutputConverter<>(new ParameterizedTypeReference<List<ActorsFilms>>() {});
-
-Flux<String> flux = this.chatClient.prompt()
-    .user(u -> u.text("""
-                        Generate the filmography for a random actor.
-                        {format}
-                      """)
-            .param("format", this.converter.getFormat()))
-    .stream()
-    .content();
-
-String content = this.flux.collectList().block().stream().collect(Collectors.joining());
-
-List<ActorsFilms> actorFilms = this.converter.convert(this.content);
+const actorFilms = await converter.convert(chunks.join(''));
 ----
 
 == Prompt Templates
 
 The `ChatClient` fluent API lets you provide user and system text as templates with variables that are replaced at runtime.
 
-[source,java]
+[source,typescript]
 ----
-String answer = ChatClient.create(chatModel).prompt()
-    .user(u -> u
-            .text("Tell me the names of 5 movies whose soundtrack was composed by {composer}")
-            .param("composer", "John Williams"))
-    .call()
-    .content();
+const answer = await ChatClient.create(chatModel)
+  .prompt()
+  .user((u) =>
+    u
+      .text('Tell me the names of 5 movies whose soundtrack was composed by {composer}')
+      .param('composer', 'John Williams'),
+  )
+  .call()
+  .content();
 ----
 
-Internally, the ChatClient uses the `PromptTemplate` class to handle the user and system text and replace the variables with the values provided at runtime relying on a given `TemplateRenderer` implementation.
-By default, Spring AI uses the `StTemplateRenderer` implementation, which is based on the open-source https://www.stringtemplate.org/[StringTemplate] engine developed by Terence Parr.
+Internally, `ChatClient` resolves a `TemplateRenderer` implementation through `TemplateRendererFactory` (from `@nestjs-ai/commons`). The factory returns a delegating renderer that picks an underlying engine at request time:
 
-Spring AI also provides a `NoOpTemplateRenderer` for cases where no template processing is desired.
+* When `@nestjs-ai/template-st` is installed and `NestAiModule.forRoot()` is imported into your module graph, the platform binds `StTemplateRenderer` at module init. This implementation is built on top of the open-source https://github.com/mike-lischke/stringtemplate4ts[stringtemplate4ts] library — a TypeScript port of Terence Parr's https://www.stringtemplate.org/[StringTemplate] engine — and supports the full StringTemplate feature set (custom delimiters, ST functions, validation modes).
+* Otherwise, the factory falls back to `SimpleTemplateRenderer` (in `@nestjs-ai/commons`), a lightweight `{var}` placeholder renderer with no StringTemplate features.
+
+NestJS AI also provides a `NoOpTemplateRenderer` (in `@nestjs-ai/commons`) for cases where no template processing is desired.
 
 NOTE: The `TemplateRenderer` configured directly on the `ChatClient` (via `.templateRenderer()`) applies only to the prompt content defined directly in the `ChatClient` builder chain (e.g., via `.user()`, `.system()`).
 It does *not* affect templates used internally by xref:api/retrieval-augmented-generation.adoc#_questionansweradvisor[Advisors] like `QuestionAnswerAdvisor`, which have their own template customization mechanisms (see xref:api/retrieval-augmented-generation.adoc#_custom_template[Custom Advisor Templates]).
 
-If you'd rather use a different template engine, you can provide a custom implementation of the `TemplateRenderer` interface directly to the ChatClient. You can also keep using the default `StTemplateRenderer`, but with a custom configuration.
+If you'd rather use a different template engine, you can provide a custom implementation of the `TemplateRenderer` interface directly to `ChatClient`. You can also keep using the default `StTemplateRenderer`, but with a custom configuration.
 
 For example, by default, template variables are identified by the `{}` syntax.
 If you're planning to include JSON in your prompt, you might want to use a different syntax to avoid conflicts with JSON syntax. For example, you can use the `<` and `>` delimiters.
 
-[source,java]
+[source,typescript]
 ----
-String answer = ChatClient.create(chatModel).prompt()
-    .user(u -> u
-            .text("Tell me the names of 5 movies whose soundtrack was composed by <composer>")
-            .param("composer", "John Williams"))
-    .templateRenderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
-    .call()
-    .content();
+import { StTemplateRenderer } from '@nestjs-ai/template-st';
+
+const answer = await ChatClient.create(chatModel)
+  .prompt()
+  .user((u) =>
+    u
+      .text('Tell me the names of 5 movies whose soundtrack was composed by <composer>')
+      .param('composer', 'John Williams'),
+  )
+  .templateRenderer(
+    new StTemplateRenderer({ startDelimiterToken: '<', endDelimiterToken: '>' }),
+  )
+  .call()
+  .content();
 ----
 
-== call() return values
+== `call()` return values
 
-After specifying the `call()` method on `ChatClient`, there are a few different options for the response type.
+After invoking `call()` on `ChatClient`, the following methods are available on the returned `CallResponseSpec`:
 
-* `String content()`: returns the String content of the response
-* `ChatResponse chatResponse()`: returns the `ChatResponse` object that contains multiple generations and also metadata about the response, for example how many token were used to create the response.
-* `ChatClientResponse chatClientResponse()`: returns a `ChatClientResponse` object that contains the `ChatResponse` object and the ChatClient execution context, giving you access to additional data used during the execution of advisors (e.g. the relevant documents retrieved in a RAG flow).
-* `entity()` to return a Java type
-** `entity(ParameterizedTypeReference<T> type)`: used to return a `Collection` of entity types.
-** `entity(Class<T> type)`:  used to return a specific entity type.
-** `entity(StructuredOutputConverter<T> structuredOutputConverter)`: used to specify an instance of a `StructuredOutputConverter` to convert a `String` to an entity type.
-* `responseEntity()` to return both the `ChatResponse` and a Java type. This is useful when you need access to both the complete AI model response (with metadata and generations) and the structured output entity in a single call.
-** `responseEntity(Class<T> type)`: used to return a `ResponseEntity` containing both the complete `ChatResponse` object and a specific entity type.
-** `responseEntity(ParameterizedTypeReference<T> type)`: used to return a `ResponseEntity` containing both the complete `ChatResponse` object and a `Collection` of entity types.
-** `responseEntity(StructuredOutputConverter<T> structuredOutputConverter)`: used to return a `ResponseEntity` containing both the complete `ChatResponse` object and an entity converted using a specified `StructuredOutputConverter`.
+* `content(): Promise<string | null>` — returns the string content of the response.
+* `chatResponse(): Promise<ChatResponse | null>` — returns the `ChatResponse` object that contains multiple generations and also metadata about the response, for example how many tokens were used to create the response.
+* `chatClientResponse(): Promise<ChatClientResponse>` — returns a `ChatClientResponse` object that contains the `ChatResponse` and the ChatClient execution context, giving you access to additional data used during the execution of advisors (e.g. the relevant documents retrieved in a RAG flow).
+* `entity(...)` — returns a typed value:
+** `entity(schema)` — accepts any Standard Schema (Zod, Valibot, ArkType, ...) or a JSON Schema literal.
+** `entity(schema, transformer)` — runs the transformer on the inferred output type.
+** `entity(structuredOutputConverter)` — accepts an instance of `StructuredOutputConverter` for full control over conversion.
+* `responseEntity(...)` — returns a `ResponseEntity<ChatResponse, T>` that holds *both* the complete `ChatResponse` and the structured output. Useful when you need access to both the raw model metadata and the typed result in a single call. The same overloads as `entity(...)` are available.
 
 You can also invoke the `stream()` method instead of `call()`.
 
-NOTE: Calling the `call()` method does not actually trigger the AI model execution. Instead, it only instructs Spring AI whether to use synchronous or streaming calls.
-The actual AI model invocation occurs when methods such as `content()`, `chatResponse()`, and `responseEntity()` are called.
+NOTE: Calling `call()` does not actually trigger the AI model execution. Instead, it only instructs `ChatClient` to use the Promise-based call path. The actual AI model invocation occurs when methods such as `content()`, `chatResponse()`, `entity()`, or `responseEntity()` are awaited.
 
-== stream() return values
+== `stream()` return values
 
-After specifying the `stream()` method on `ChatClient`, there are a few options for the response type:
+After invoking `stream()` on `ChatClient`, the following methods are available on the returned `StreamResponseSpec`:
 
-* `Flux<String> content()`: Returns a `Flux` of the string being generated by the AI model.
-* `Flux<ChatResponse> chatResponse()`: Returns a `Flux` of the `ChatResponse` object, which contains additional metadata about the response.
-* `Flux<ChatClientResponse> chatClientResponse()`: returns a `Flux` of the `ChatClientResponse` object that contains the `ChatResponse` object and the ChatClient execution context, giving you access to additional data used during the execution of advisors (e.g. the relevant documents retrieved in a RAG flow).
+* `content(): Observable<string>` — returns an RxJS `Observable` of the string being generated by the AI model.
+* `chatResponse(): Observable<ChatResponse>` — returns an `Observable` of `ChatResponse`, which contains additional metadata about the response.
+* `chatClientResponse(): Observable<ChatClientResponse>` — returns an `Observable` of `ChatClientResponse`, giving you access to advisor execution context (e.g. retrieved RAG documents).
+* `contentIterable(): AsyncIterable<string>` — `for await` adapter over `content()`.
+* `chatResponseIterable(): AsyncIterable<ChatResponse>` — `for await` adapter over `chatResponse()`.
+* `chatClientResponseIterable(): AsyncIterable<ChatClientResponse>` — `for await` adapter over `chatClientResponse()`.
 
 == Message Metadata
 
-The ChatClient supports adding metadata to both user and system messages.
+The `ChatClient` supports adding metadata to both user and system messages.
 Metadata provides additional context and information about messages that can be used by the AI model or downstream processing.
 
 === Adding Metadata to User Messages
 
 You can add metadata to user messages using the `metadata()` methods:
 
-[source,java]
+[source,typescript]
 ----
 // Adding individual metadata key-value pairs
-String response = chatClient.prompt()
-    .user(u -> u.text("What's the weather like?")
-        .metadata("messageId", "msg-123")
-        .metadata("userId", "user-456")
-        .metadata("priority", "high"))
-    .call()
-    .content();
+const response = await chatClient
+  .prompt()
+  .user((u) =>
+    u
+      .text("What's the weather like?")
+      .metadata('messageId', 'msg-123')
+      .metadata('userId', 'user-456')
+      .metadata('priority', 'high'),
+  )
+  .call()
+  .content();
 
 // Adding multiple metadata entries at once
-Map<String, Object> userMetadata = Map.of(
-    "messageId", "msg-123",
-    "userId", "user-456",
-    "timestamp", System.currentTimeMillis()
-);
+const userMetadata = new Map<string, unknown>([
+  ['messageId', 'msg-123'],
+  ['userId', 'user-456'],
+  ['timestamp', Date.now()],
+]);
 
-String response = chatClient.prompt()
-    .user(u -> u.text("What's the weather like?")
-        .metadata(userMetadata))
-    .call()
-    .content();
+const response2 = await chatClient
+  .prompt()
+  .user((u) => u.text("What's the weather like?").metadata(userMetadata))
+  .call()
+  .content();
 ----
 
 === Adding Metadata to System Messages
 
 Similarly, you can add metadata to system messages:
 
-[source,java]
+[source,typescript]
 ----
-// Adding metadata to system messages
-String response = chatClient.prompt()
-    .system(s -> s.text("You are a helpful assistant.")
-        .metadata("version", "1.0")
-        .metadata("model", "gpt-4"))
-    .user("Tell me a joke")
-    .call()
-    .content();
+const response = await chatClient
+  .prompt()
+  .system((s) =>
+    s
+      .text('You are a helpful assistant.')
+      .metadata('version', '1.0')
+      .metadata('model', 'gpt-4'),
+  )
+  .user('Tell me a joke')
+  .call()
+  .content();
 ----
 
 === Default Metadata Support
 
-You can also configure default metadata at the ChatClient builder level:
+You can also configure default metadata at the `ChatClient` builder level by passing a customizer to `ChatClientModule.forFeature()`:
 
-[source,java]
+[source,typescript]
 ----
-@Configuration
-class Config {
-    @Bean
-    ChatClient chatClient(ChatClient.Builder builder) {
-        return builder
-            .defaultSystem(s -> s.text("You are a helpful assistant")
-                .metadata("assistantType", "general")
-                .metadata("version", "1.0"))
-            .defaultUser(u -> u.text("Default user context")
-                .metadata("sessionId", "default-session"))
-            .build();
-    }
-}
+import { Module } from '@nestjs/common';
+import { ChatClientModule } from '@nestjs-ai/client-chat';
+
+@Module({
+  imports: [
+    ChatClientModule.forFeature({
+      customizer: (builder) =>
+        builder
+          .defaultSystem((s) =>
+            s
+              .text('You are a helpful assistant')
+              .metadata('assistantType', 'general')
+              .metadata('version', '1.0'),
+          )
+          .defaultUser((u) =>
+            u.text('Default user context').metadata('sessionId', 'default-session'),
+          ),
+    }),
+  ],
+})
+export class ChatModule {}
 ----
 
 === Metadata Validation
 
-The ChatClient validates metadata to ensure data integrity:
+`ChatClient` validates metadata to ensure data integrity:
 
-* Metadata keys cannot be null or empty
-* Metadata values cannot be null
-* When passing a Map, neither keys nor values can contain null elements
-
-[source,java]
-----
-// This will throw an IllegalArgumentException
-chatClient.prompt()
-    .user(u -> u.text("Hello")
-        .metadata(null, "value"))  // Invalid: null key
-    .call()
-    .content();
-
-// This will also throw an IllegalArgumentException
-chatClient.prompt()
-    .user(u -> u.text("Hello")
-        .metadata("key", null))    // Invalid: null value
-    .call()
-    .content();
-----
+* Metadata keys cannot be `null`, `undefined`, or empty
+* Metadata values cannot be `null` or `undefined`
+* When passing a `Map`, neither keys nor values can contain `null`/`undefined` elements
 
 === Accessing Metadata
 
-The metadata is included in the generated UserMessage and SystemMessage objects and can be accessed through the message's `getMetadata()` method.
+The metadata is included in the generated `UserMessage` and `SystemMessage` objects and can be accessed through the message's `metadata` property.
 This is particularly useful when processing messages in advisors or when examining the conversation history.
 
 == Using Defaults
 
-Creating a `ChatClient` with a default system text in an `@Configuration` class simplifies runtime code.
+Creating a `ChatClient` with a default system text via `ChatClientModule.forFeature({ customizer })` simplifies runtime code.
 By setting defaults, you only need to specify the user text when calling `ChatClient`, eliminating the need to set a system text for each request in your runtime code path.
 
 === Default System Text
 
 In the following example, we will configure the system text to always reply in a pirate's voice.
-To avoid repeating the system text in runtime code, we will create a `ChatClient` instance in a `@Configuration` class.
+To avoid repeating the system text in runtime code, we customize the builder once at module configuration time.
 
-[source,java]
+[source,typescript]
 ----
-@Configuration
-class Config {
+import { Module } from '@nestjs/common';
+import { ChatClientModule } from '@nestjs-ai/client-chat';
 
-    @Bean
-    ChatClient chatClient(ChatClient.Builder builder) {
-        return builder.defaultSystem("You are a friendly chat bot that answers question in the voice of a Pirate")
-                .build();
-    }
-
-}
+@Module({
+  imports: [
+    ChatClientModule.forFeature({
+      customizer: (builder) =>
+        builder.defaultSystem(
+          'You are a friendly chat bot that answers question in the voice of a Pirate',
+        ),
+    }),
+  ],
+})
+export class PirateChatModule {}
 ----
 
-and a `@RestController` to invoke it:
+…and a controller to invoke it:
 
-[source,java]
+[source,typescript]
 ----
-@RestController
-class AIController {
+import { Controller, Get, Query } from '@nestjs/common';
+import { ChatClient } from '@nestjs-ai/client-chat';
+import { InjectChatClientBuilder } from '@nestjs-ai/platform';
 
-	private final ChatClient chatClient;
+@Controller('ai')
+export class AiController {
+  private readonly chatClient: ChatClient;
 
-	AIController(ChatClient chatClient) {
-		this.chatClient = chatClient;
-	}
+  constructor(@InjectChatClientBuilder() builder: ChatClient.Builder) {
+    this.chatClient = builder.build();
+  }
 
-	@GetMapping("/ai/simple")
-	public Map<String, String> completion(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
-		return Map.of("completion", this.chatClient.prompt().user(message).call().content());
-	}
+  @Get('/simple')
+  async completion(
+    @Query('message') message = 'Tell me a joke',
+  ): Promise<{ completion: string | null }> {
+    return { completion: await this.chatClient.prompt().user(message).call().content() };
+  }
 }
 ----
 
@@ -553,7 +613,7 @@ When calling the application endpoint via curl, the result is:
 
 [source,bash]
 ----
-❯ curl localhost:8080/ai/simple
+❯ curl localhost:3000/ai/simple
 {"completion":"Why did the pirate go to the comedy club? To hear some arrr-rated jokes! Arrr, matey!"}
 ----
 
@@ -561,48 +621,53 @@ When calling the application endpoint via curl, the result is:
 
 In the following example, we will use a placeholder in the system text to specify the voice of the completion at runtime instead of design time.
 
-[source,java]
+[source,typescript]
 ----
-@Configuration
-class Config {
-
-    @Bean
-    ChatClient chatClient(ChatClient.Builder builder) {
-        return builder.defaultSystem("You are a friendly chat bot that answers question in the voice of a {voice}")
-                .build();
-    }
-
-}
+@Module({
+  imports: [
+    ChatClientModule.forFeature({
+      customizer: (builder) =>
+        builder.defaultSystem(
+          'You are a friendly chat bot that answers question in the voice of a {voice}',
+        ),
+    }),
+  ],
+})
+export class VoiceChatModule {}
 ----
 
-[source,java]
+[source,typescript]
 ----
-@RestController
-class AIController {
-	private final ChatClient chatClient;
+@Controller('ai')
+export class AiController {
+  private readonly chatClient: ChatClient;
 
-	AIController(ChatClient chatClient) {
-		this.chatClient = chatClient;
-	}
+  constructor(@InjectChatClientBuilder() builder: ChatClient.Builder) {
+    this.chatClient = builder.build();
+  }
 
-	@GetMapping("/ai")
-	Map<String, String> completion(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message, String voice) {
-		return Map.of("completion",
-				this.chatClient.prompt()
-						.system(sp -> sp.param("voice", voice))
-						.user(message)
-						.call()
-						.content());
-	}
-
+  @Get()
+  async completion(
+    @Query('message') message = 'Tell me a joke',
+    @Query('voice') voice = 'Robert DeNiro',
+  ): Promise<{ completion: string | null }> {
+    return {
+      completion: await this.chatClient
+        .prompt()
+        .system((sp) => sp.param('voice', voice))
+        .user(message)
+        .call()
+        .content(),
+    };
+  }
 }
 ----
 
 When calling the application endpoint via httpie, the result is:
 
-[source.bash]
+[source,bash]
 ----
-http localhost:8080/ai voice=='Robert DeNiro'
+http localhost:3000/ai voice=='Robert DeNiro'
 {
     "completion": "You talkin' to me? Okay, here's a joke for ya: Why couldn't the bicycle stand up by itself? Because it was two tired! Classic, right?"
 }
@@ -610,46 +675,32 @@ http localhost:8080/ai voice=='Robert DeNiro'
 
 === Other defaults
 
-At the `ChatClient.Builder` level, you can specify the default prompt configuration.
+At the `ChatClient.Builder` level, you can specify the default prompt configuration:
 
-* `defaultOptions(ChatOptions chatOptions)`: Pass in either portable options defined in the `ChatOptions` class or model-specific options such as those in `OpenAiChatOptions`.
-For more information on model-specific `ChatOptions` implementations, refer to the JavaDocs.
-
-* `defaultFunction(String name, String description, java.util.function.Function<I, O> function)`: The `name` is used to refer to the function in user text.
-The `description` explains the function's purpose and helps the AI model choose the correct function for an accurate response.
-The `function` argument is a Java function instance that the model will execute when necessary.
-
-* `defaultFunctions(String... functionNames)`: The bean names of `java.util.Function`s defined in the application context.
-
-* `defaultUser(String text)`, `defaultUser(Resource text)`, `defaultUser(Consumer<UserSpec> userSpecConsumer)`: These methods let you define the user text.
-The `Consumer<UserSpec>` allows you to use a lambda to specify the user text and any default parameters.
-
-* `defaultAdvisors(Advisor... advisor)`: Advisors allow modification of the data used to create the `Prompt`.
+* `defaultOptions(optionsCustomizer: ChatOptions.Builder)`: Pass in either portable options defined in the `ChatOptions` class or model-specific options such as those produced by `OpenAiChatOptions.builder()`.
+For more information on model-specific `ChatOptions` implementations, refer to the TypeDoc.
+* `defaultUser(text)` / `defaultUser(buffer, charset)` / `defaultUser((u) => ...)`: Defines the user text. The consumer overload lets you set the user text and any default parameters.
+* `defaultSystem(text)` / `defaultSystem(buffer, charset)` / `defaultSystem((s) => ...)`: Defines the system text. The consumer overload lets you set the system text and any default parameters.
+* `defaultTools(...toolObjects)` / `defaultToolNames(...toolNames)` / `defaultToolCallbacks(...callbacks)` / `defaultToolContext(toolContext)`: Configures default tools available to the model. See xref:api/tools.adoc[Tool Calling] for details on each form.
+* `defaultAdvisors(...advisor)`: Advisors allow modification of the data used to create the `Prompt`.
 The `QuestionAnswerAdvisor` implementation enables the pattern of `Retrieval Augmented Generation` by appending the prompt with context information related to the user text.
+* `defaultAdvisors((advisorSpec) => ...)`: Lets you configure multiple advisors using the `AdvisorSpec` consumer. Advisors can modify the data used to create the final `Prompt`.
+* `defaultTemplateRenderer(templateRenderer)`: Replaces the default `StTemplateRenderer` for the entire builder.
 
-* `defaultAdvisors(Consumer<AdvisorSpec> advisorSpecConsumer)`: This method allows you to define a `Consumer` to configure multiple advisors using the `AdvisorSpec`. Advisors can modify the data used to create the final `Prompt`.
-The `Consumer<AdvisorSpec>` lets you specify a lambda to add advisors, such as `QuestionAnswerAdvisor`, which supports `Retrieval Augmented Generation` by appending the prompt with relevant context information based on the user text.
+You can override these defaults at runtime using the corresponding methods without the `default` prefix:
 
-You can override these defaults at runtime using the corresponding methods without the `default` prefix.
-
-* `options(ChatOptions.Builder optionsCustomizer)`
-
-* `function(String name, String description,
-java.util.function.Function<I, O> function)`
-
-* `functions(String... functionNames)`
-
-* `user(String text)`, `user(Resource text)`, `user(Consumer<UserSpec> userSpecConsumer)`
-
-* `advisors(Advisor... advisor)`
-
-* `advisors(Consumer<AdvisorSpec> advisorSpecConsumer)`
+* `options(optionsCustomizer: ChatOptions.Builder)`
+* `user(text)` / `user(buffer, charset)` / `user((u) => ...)`
+* `system(text)` / `system(buffer, charset)` / `system((s) => ...)`
+* `tools(...toolObjects)` / `toolNames(...names)` / `toolCallbacks(...callbacks)` / `toolContext(toolContext)`
+* `advisors(...advisor)` / `advisors((advisorSpec) => ...)`
+* `templateRenderer(templateRenderer)`
 
 image::chat-client-options-merging.png[align="center"]
 
 == Advisors
 
-The xref:api/advisors.adoc[Advisors API] provides a flexible and powerful way to intercept, modify, and enhance AI-driven interactions in your Spring applications. 
+The xref:api/advisors.adoc[Advisors API] provides a flexible and powerful way to intercept, modify, and enhance AI-driven interactions in your NestJS applications.
 
 A common pattern when calling an AI model with user text is to append or augment the prompt with contextual data.
 
@@ -662,96 +713,107 @@ Even if the model has seen similar data, the appended contextual data takes prec
 If you tell the AI model your name, it won't remember it in subsequent interactions.
 Conversational history must be sent with each request to ensure previous interactions are considered when generating a response.
 
+=== Advisor Configuration in `ChatClient`
 
-=== Advisor Configuration in ChatClient
-
-The ChatClient fluent API provides an `AdvisorSpec` interface for configuring advisors.
+The `ChatClient` fluent API provides an `AdvisorSpec` interface for configuring advisors.
 This interface offers methods to add parameters, set multiple parameters at once, and add one or more advisors to the chain.
 
-[source,java]
+[source,typescript]
 ----
-interface AdvisorSpec {
-    AdvisorSpec param(String k, Object v);
-    AdvisorSpec params(Map<String, Object> p);
-    AdvisorSpec advisors(Advisor... advisors);
-    AdvisorSpec advisors(List<Advisor> advisors);
+export interface AdvisorSpec {
+  param(k: string, v: unknown): AdvisorSpec;
+  params(p: Map<string, unknown>): AdvisorSpec;
+  advisors(...advisors: Advisor[]): AdvisorSpec;
+  advisors(advisors: Advisor[]): AdvisorSpec;
 }
 ----
 
 IMPORTANT: The order in which advisors are added to the chain is crucial, as it determines the sequence of their execution.
 Each advisor modifies the prompt or the context in some way, and the changes made by one advisor are passed on to the next in the chain.
 
-[source,java]
+[source,typescript]
 ----
-ChatClient.builder(chatModel)
-    .build()
-    .prompt()
-    .advisors(
-        MessageChatMemoryAdvisor.builder(chatMemory).build(),
-        QuestionAnswerAdvisor.builder(vectorStore).build()
-    )
-    .user(userText)
-    .call()
-    .content();
+import { ChatClient, MessageChatMemoryAdvisor } from '@nestjs-ai/client-chat';
+import { QuestionAnswerAdvisor } from '@nestjs-ai/advisors-vector-store';
+import { SearchRequest } from '@nestjs-ai/vector-store';
+
+const response = await ChatClient.builder(chatModel)
+  .build()
+  .prompt()
+  .advisors(
+    new MessageChatMemoryAdvisor({ chatMemory }),
+    new QuestionAnswerAdvisor({
+      vectorStore,
+      searchRequest: SearchRequest.builder().topK(4).build(),
+    }),
+  )
+  .user(userText)
+  .call()
+  .content();
 ----
 
 In this configuration, the `MessageChatMemoryAdvisor` will be executed first, adding the conversation history to the prompt.
 Then, the `QuestionAnswerAdvisor` will perform its search based on the user's question and the added conversation history, potentially providing more relevant results.
 
-xref:ROOT:api/retrieval-augmented-generation.adoc#_questionansweradvisor[Learn about Question Answer Advisor]
+xref:api/retrieval-augmented-generation.adoc#_questionansweradvisor[Learn about Question Answer Advisor]
 
 === Retrieval Augmented Generation
 
-Refer to the xref:ROOT:api/retrieval-augmented-generation.adoc[Retrieval Augmented Generation] guide.
+Refer to the xref:api/retrieval-augmented-generation.adoc[Retrieval Augmented Generation] guide.
 
 === Logging
 
 The `SimpleLoggerAdvisor` is an advisor that logs the `request` and `response` data of the `ChatClient`.
 This can be useful for debugging and monitoring your AI interactions.
 
-TIP: Spring AI supports observability for LLM and vector store interactions.
+TIP: NestJS AI supports observability for LLM and vector store interactions.
 Refer to the xref:observability/index.adoc[Observability] guide for more information.
 
-To enable logging, add the `SimpleLoggerAdvisor` to the advisor chain when creating your ChatClient.
+To enable logging, add the `SimpleLoggerAdvisor` to the advisor chain when creating your `ChatClient`.
 It's recommended to add it toward the end of the chain:
 
-[source,java]
+[source,typescript]
 ----
-ChatResponse response = ChatClient.create(chatModel).prompt()
-        .advisors(new SimpleLoggerAdvisor())
-        .user("Tell me a joke?")
-        .call()
-        .chatResponse();
-----
+import { ChatClient, SimpleLoggerAdvisor } from '@nestjs-ai/client-chat';
 
-To see the logs, set the logging level for the advisor package to `DEBUG`:
-
-----
-logging.level.org.springframework.ai.chat.client.advisor=DEBUG
+const response = await ChatClient.create(chatModel)
+  .prompt()
+  .advisors(new SimpleLoggerAdvisor())
+  .user('Tell me a joke?')
+  .call()
+  .chatResponse();
 ----
 
-Add this to your `application.properties` or `application.yaml` file.
+`SimpleLoggerAdvisor` writes to the `@nestjs-port/core` `LoggerFactory` at `DEBUG` level. The platform module wires the logger factory to NestJS's `Logger` by default, so set the NestJS log level to include `debug` (or `verbose`) to see the output:
 
-You can customize what data from `AdvisedRequest` and `ChatResponse` is logged by using the following constructor:
-
-[source,java]
+[source,typescript]
 ----
-SimpleLoggerAdvisor(
-    Function<ChatClientRequest, String> requestToString,
-    Function<ChatResponse, String> responseToString,
-    int order
-)
+const app = await NestFactory.create(AppModule, {
+  logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+});
+----
+
+You can customize what data is logged by passing a props object to the constructor:
+
+[source,typescript]
+----
+export interface SimpleLoggerAdvisorProps {
+  requestToString?: (request: ChatClientRequest | null) => string;
+  responseToString?: (response: ChatResponse | null) => string;
+  order?: number;
+}
 ----
 
 Example usage:
 
-[source,java]
+[source,typescript]
 ----
-SimpleLoggerAdvisor customLogger = new SimpleLoggerAdvisor(
-    request -> "Custom request: " + request.prompt().getUserMessage(),
-    response -> "Custom response: " + response.getResult(),
-    0
-);
+const customLogger = new SimpleLoggerAdvisor({
+  requestToString: (request) =>
+    `Custom request: ${request?.prompt.lastUserOrToolResponseMessage.text ?? ''}`,
+  responseToString: (response) => `Custom response: ${response?.result?.output.text ?? ''}`,
+  order: 0,
+});
 ----
 
 This allows you to tailor the logged information to your specific needs.
@@ -760,7 +822,7 @@ TIP: Be cautious about logging sensitive information in production environments.
 
 == Chat Memory
 
-The interface `ChatMemory` represents a storage for chat conversation memory.
+The class `ChatMemory` represents a storage for chat conversation memory.
 It provides methods to add messages to a conversation, retrieve messages from a conversation, and clear the conversation history.
 
 There is currently one built-in implementation: `MessageWindowChatMemory`.
@@ -770,30 +832,17 @@ When the number of messages exceeds this limit, older messages are evicted, but 
 If a new system message is added, all previous system messages are removed from memory.
 This ensures that the most recent context is always available for the conversation while keeping memory usage bounded.
 
-The `MessageWindowChatMemory` is backed by the `ChatMemoryRepository` abstraction which provides storage implementations for the chat conversation memory.
-There are several implementations available, including the `InMemoryChatMemoryRepository`, `JdbcChatMemoryRepository`, `CassandraChatMemoryRepository`, `Neo4jChatMemoryRepository`, `CosmosDBChatMemoryRepository`, `MongoChatMemoryRepository`, and `RedisChatMemoryRepository`.
+`MessageWindowChatMemory` is backed by the `ChatMemoryRepository` abstraction which provides storage implementations for the chat conversation memory.
+The following implementations are currently available in NestJS AI: `InMemoryChatMemoryRepository` (in `@nestjs-ai/model`), `RedisChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-redis`), and `JdbcChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-jsdbc`, supporting MySQL, PostgreSQL, Oracle, SQL Server, and SQLite).
 
 For more details and usage examples, see the xref:api/chat-memory.adoc[Chat Memory] documentation.
 
 == Implementation Notes
 
-The combined use of imperative and reactive programming models in `ChatClient` is a unique aspect of the API.
-Often an application will be either reactive or imperative, but not both.
+The combined use of Promise-based and reactive (RxJS) programming models in `ChatClient` is a unique aspect of the API.
+A typical NestJS application uses Promises throughout, while `ChatClient` exposes both forms so callers can choose per request.
 
-
-* When customizing the HTTP client interactions of a Model implementation, both the RestClient and the WebClient must be configured. 
-
-[IMPORTANT]
-====
-Due to a bug in Spring Boot 3.4, the "spring.http.client.factory=jdk" property must be set.
-Otherwise, it's set to "reactor" by default, which breaks certain AI workflows like the ImageModel.
-====
-
-* Streaming is only supported via the Reactive stack.
-Imperative applications must include the Reactive stack for this reason (e.g. spring-boot-starter-webflux).
-* Non-streaming is only supportive via the Servlet stack.
-Reactive applications must include the Servlet stack for this reason (e.g. spring-boot-starter-web) and expect some calls to be blocking.
-* Tool calling is imperative, leading to blocking workflows.
-This also results in partial/interrupted Micrometer observations (e.g. the ChatClient spans and the tool calling spans are not connected, with the first one remaining incomplete for that reason).
-* The built-in advisors perform blocking operations for standards calls, and non-blocking operations for streaming calls.
-The Reactor Scheduler used for the advisor streaming calls can be configured via the Builder on each Advisor class.
+* Streaming is implemented on top of an RxJS `Observable`. The `stream()` spec also provides `*Iterable()` adapters that wrap the `Observable` in `AsyncIterable`, so consumers can use either RxJS operators or `for await ... of` without a separate code path.
+* Non-streaming `call()` uses Promises end to end. Awaiting `content()`, `chatResponse()`, or `entity()` triggers a single model invocation and resolves with the result.
+* Tool calling and the built-in advisors mix the two paths: `call()` performs blocking-style awaits, while `stream()` uses RxJS schedulers. Each advisor exposes a `scheduler` option (defaulting to `BaseAdvisor.DEFAULT_SCHEDULER`) so you can pick a different scheduler when running on tight event loops.
+* The HTTP client used by every model module can be replaced through `NestAiModule.forRoot({ httpClient })`. The default is `FetchHttpClient` from `@nestjs-port/core`, which uses the platform's global `fetch`.

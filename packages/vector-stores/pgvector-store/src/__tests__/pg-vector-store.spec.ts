@@ -15,7 +15,7 @@
  */
 
 import { Document } from "@nestjs-ai/commons";
-import { type EmbeddingModel } from "@nestjs-ai/model";
+import type { EmbeddingModel } from "@nestjs-ai/model";
 import type { JsdbcTemplate } from "@nestjs-port/jsdbc";
 import { expect, it, describe, vi } from "vitest";
 
@@ -88,9 +88,11 @@ describe("PgVectorStoreTests", () => {
       .build();
 
     // When
-    await (pgVectorStore as unknown as { doAdd(documents: Document[]): Promise<void> }).doAdd(
-      documents,
-    );
+    await (
+      pgVectorStore as unknown as {
+        doAdd(documents: Document[]): Promise<void>;
+      }
+    ).doAdd(documents);
 
     // Then
     expect(embeddingModel.embed).toHaveBeenCalledTimes(1);

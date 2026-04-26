@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-export { PgVectorFilterExpressionConverter } from "./pg-vector-filter-expression-converter.js";
-export { PgVectorSchemaValidator } from "./pg-vector-schema-validator.js";
-export * from "./module/index.js";
-export {
+import type {
   PgDistanceType,
   PgIdType,
   PgIndexType,
-  PgVectorStore,
-  PgVectorStoreBuilder,
-} from "./pg-vector-store.js";
+} from "../pg-vector-store.js";
+
+export interface PgVectorStoreProperties {
+  initializeSchema?: boolean;
+  dimensions?: number;
+  indexType?: PgIndexType;
+  distanceType?: PgDistanceType;
+  removeExistingVectorStoreTable?: boolean;
+  tableName?: string;
+  schemaName?: string;
+  idType?: PgIdType;
+  schemaValidation?: boolean;
+  maxDocumentBatchSize?: number;
+}

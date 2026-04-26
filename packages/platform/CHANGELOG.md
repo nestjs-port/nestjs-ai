@@ -1,6 +1,6 @@
 # @nestjs-ai/platform
 
-## 1.0.0
+## 0.1.0
 
 ### Minor Changes
 
@@ -10,8 +10,8 @@
 
 - Updated dependencies [ed9c6e0]
   - @nestjs-ai/commons@0.1.0
-  - @nestjs-ai/model@1.0.0
-  - @nestjs-ai/template-st@1.0.0
+  - @nestjs-ai/model@0.1.0
+  - @nestjs-ai/template-st@0.1.0
 
 ## 0.0.2
 

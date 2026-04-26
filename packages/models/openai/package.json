@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-openai",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "OpenAI model integration for NestJS AI",
   "keywords": [

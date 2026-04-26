@@ -40,7 +40,7 @@ The project faithfully mirrors Spring AI's module structure and API design while
 | Package Manager | pnpm 10.x                                                                      |
 | Build           | Turborepo + tsc                                                                |
 | Test            | Vitest 4.x + TestContainers                                                    |
-| Lint/Format     | Biomejs 2.x                                                                    |
+| Lint/Format     | Oxlint + Oxfmt                                                                 |
 | Reactive        | RxJS 7.x                                                                       |
 | Validation      | [Standard Schema](https://standardschema.dev/) (zod / valibot / arktype / ...) |
 

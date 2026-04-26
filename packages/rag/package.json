@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/rag",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "Retrieval Augmented Generation (RAG) support for NestJS AI",
   "keywords": [

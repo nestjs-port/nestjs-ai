@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/document-reader-cheerio",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "Cheerio-based document reader for NestJS AI",
   "keywords": [

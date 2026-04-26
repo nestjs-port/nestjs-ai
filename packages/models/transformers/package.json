@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-transformers",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "Transformers model integration for NestJS AI",
   "keywords": [

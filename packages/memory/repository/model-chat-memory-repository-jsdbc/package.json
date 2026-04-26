@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-chat-memory-repository-jsdbc",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "JSDbC-backed Chat Memory Repository for NestJS AI",
   "keywords": [

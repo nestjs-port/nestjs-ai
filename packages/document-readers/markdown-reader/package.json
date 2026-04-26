@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/document-reader-markdown",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "Markdown document reader for NestJS AI",
   "keywords": [

@@ -81,7 +81,7 @@ importers:
         specifier: ^0.0.4
         version: 0.0.4(rxjs@7.8.2)
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
 
   packages/client-chat:
@@ -112,7 +112,7 @@ importers:
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
       zod:
         specifier: 4.3.6
@@ -128,7 +128,7 @@ importers:
         version: 1.0.22
     devDependencies:
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
 
   packages/document-readers/cheerio-reader:
@@ -369,7 +369,7 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
       zod:
         specifier: 4.3.6
@@ -402,7 +402,7 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
       zod:
         specifier: ^4.3.6
@@ -429,7 +429,7 @@ importers:
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
 
   packages/models/openai:
@@ -462,7 +462,7 @@ importers:
         specifier: ^6.34.0
         version: 6.34.0(ws@8.19.0)(zod@4.3.6)
       rxjs:
-        specifier: ^7.0.0
+        specifier: ^7.8.2
         version: 7.8.2
       zod:
         specifier: ^4.3.6
@@ -571,12 +571,21 @@ importers:
 
   packages/vector-stores/pgvector-store:
     devDependencies:
+      '@nestjs-ai/advisors-vector-store':
+        specifier: workspace:*
+        version: link:../../advisors/advisors-vector-store
+      '@nestjs-ai/client-chat':
+        specifier: workspace:*
+        version: link:../../client-chat
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../commons
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-ai/model-openai':
+        specifier: workspace:*
+        version: link:../../models/openai
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
@@ -586,6 +595,9 @@ importers:
       '@nestjs-port/jsdbc':
         specifier: ^0.0.4
         version: 0.0.4(586d50e82a56a5eb9195d450704da245)
+      '@nestjs-port/testing':
+        specifier: ^0.0.3
+        version: 0.0.3(@nestjs-port/core@0.0.4(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -595,9 +607,15 @@ importers:
       pgvector:
         specifier: ^0.2.1
         version: 0.2.1
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
       testcontainers:
         specifier: ^11.13.0
         version: 11.14.0
+      typeorm:
+        specifier: ^0.3.28
+        version: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
 
   packages/vector-stores/redis-store:
     devDependencies:

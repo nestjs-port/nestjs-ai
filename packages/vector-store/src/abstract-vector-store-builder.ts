@@ -24,6 +24,13 @@ import {
 import type { VectorStoreObservationConvention } from "./observation/index.js";
 import type { VectorStore } from "./vector-store.js";
 
+/**
+ * Abstract base builder implementing common builder functionality for
+ * {@link VectorStore}. Provides default implementations for observation-related settings.
+ *
+ * @param <T> the concrete builder type, enabling method chaining with the correct return
+ * type
+ */
 export abstract class AbstractVectorStoreBuilder<
   T extends AbstractVectorStoreBuilder<T>,
 > implements VectorStore.Builder<T> {
@@ -40,19 +47,19 @@ export abstract class AbstractVectorStoreBuilder<
     this._embeddingModel = embeddingModel;
   }
 
-  get embeddingModel(): EmbeddingModel {
+  getEmbeddingModel(): EmbeddingModel {
     return this._embeddingModel;
   }
 
-  get configuredBatchingStrategy(): BatchingStrategy {
+  getBatchingStrategy(): BatchingStrategy {
     return this._batchingStrategy;
   }
 
-  get configuredObservationRegistry(): ObservationRegistry {
+  getObservationRegistry(): ObservationRegistry {
     return this._observationRegistry;
   }
 
-  get configuredObservationConvention(): VectorStoreObservationConvention | null {
+  getCustomObservationConvention(): VectorStoreObservationConvention | null {
     return this._customObservationConvention;
   }
 

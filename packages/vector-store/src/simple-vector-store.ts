@@ -41,10 +41,10 @@ export class SimpleVectorStore extends AbstractObservationVectorStore {
 
   constructor(builder: SimpleVectorStoreBuilder) {
     super({
-      embeddingModel: builder.embeddingModel,
-      observationRegistry: builder.configuredObservationRegistry,
-      customObservationConvention: builder.configuredObservationConvention,
-      batchingStrategy: builder.configuredBatchingStrategy,
+      embeddingModel: builder.getEmbeddingModel(),
+      observationRegistry: builder.getObservationRegistry(),
+      customObservationConvention: builder.getCustomObservationConvention(),
+      batchingStrategy: builder.getBatchingStrategy(),
     });
   }
 

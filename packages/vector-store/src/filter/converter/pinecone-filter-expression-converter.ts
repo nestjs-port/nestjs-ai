@@ -63,4 +63,11 @@ export class PineconeFilterExpressionConverter extends AbstractFilterExpressionC
       : filterKey.key;
     context.value += `"${identifier}": `;
   }
+
+  protected override doSingleValue(
+    value: unknown,
+    context: { value: string },
+  ): void {
+    AbstractFilterExpressionConverter.emitJsonValue(value, context);
+  }
 }

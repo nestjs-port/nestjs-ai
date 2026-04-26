@@ -51,4 +51,11 @@ export class PrintFilterExpressionConverter extends AbstractFilterExpressionConv
   ): void {
     context.value += ")";
   }
+
+  protected override doSingleValue(
+    value: unknown,
+    context: { value: string },
+  ): void {
+    AbstractFilterExpressionConverter.emitJsonValue(value, context);
+  }
 }

@@ -89,19 +89,6 @@ export class PgDistanceType {
   ) {}
 }
 
-const SIMILARITY_TYPE_MAPPING = new Map<
-  PgDistanceType,
-  VectorStoreSimilarityMetric
->([
-  [PgDistanceType.COSINE_DISTANCE, VectorStoreSimilarityMetric.COSINE],
-  [PgDistanceType.EUCLIDEAN_DISTANCE, VectorStoreSimilarityMetric.EUCLIDEAN],
-  [PgDistanceType.NEGATIVE_INNER_PRODUCT, VectorStoreSimilarityMetric.DOT],
-]);
-
-function toVectorSqlLiteral(values: number[]): string {
-  return `[${values.join(",")}]`;
-}
-
 export class PgVectorStore extends AbstractObservationVectorStore {
   static readonly OPENAI_EMBEDDING_DIMENSION_SIZE = 1536;
 
@@ -132,6 +119,8 @@ export class PgVectorStore extends AbstractObservationVectorStore {
   private readonly _schemaValidation: boolean;
   private readonly _initializeSchema: boolean;
   private readonly _dimensions: number;
+  private _embeddingDimensions: number =
+    PgVectorStore.INVALID_EMBEDDING_DIMENSION;
   private readonly _distanceType: PgDistanceType;
   private readonly _removeExistingVectorStoreTable: boolean;
   private readonly _createIndexMethod: PgIndexType;
@@ -140,14 +129,14 @@ export class PgVectorStore extends AbstractObservationVectorStore {
 
   constructor(builder: PgVectorStoreBuilder) {
     super({
-      embeddingModel: builder.embeddingModel,
-      observationRegistry: builder.configuredObservationRegistry,
-      customObservationConvention: builder.configuredObservationConvention,
-      batchingStrategy: builder.configuredBatchingStrategy,
+      embeddingModel: builder.getEmbeddingModel(),
+      observationRegistry: builder.getObservationRegistry(),
+      customObservationConvention: builder.getCustomObservationConvention(),
+      batchingStrategy: builder.getBatchingStrategy(),
     });
-    assert(builder.configuredJdbcTemplate, "JdbcTemplate must not be null");
+    assert(builder.getJdbcTemplate(), "JdbcTemplate must not be null");
 
-    const vectorTable = builder.configuredVectorTableName;
+    const vectorTable = builder.getVectorTableName();
     this._vectorTableName =
       vectorTable.length === 0
         ? PgVectorStore.DEFAULT_TABLE_NAME
@@ -161,19 +150,19 @@ export class PgVectorStore extends AbstractObservationVectorStore {
         ? PgVectorStore.DEFAULT_VECTOR_INDEX_NAME
         : `${this._vectorTableName}_index`;
 
-    this._schemaName = builder.configuredSchemaName;
-    this._idType = builder.configuredIdType;
-    this._schemaValidation = builder.configuredVectorTableValidationsEnabled;
+    this._schemaName = builder.getSchemaName();
+    this._idType = builder.getIdType();
+    this._schemaValidation = builder.getVectorTableValidationsEnabled();
 
-    this._jdbcTemplate = builder.configuredJdbcTemplate;
-    this._dimensions = builder.configuredDimensions;
-    this._distanceType = builder.configuredDistanceType;
+    this._jdbcTemplate = builder.getJdbcTemplate();
+    this._dimensions = builder.getDimensions();
+    this._distanceType = builder.getDistanceType();
     this._removeExistingVectorStoreTable =
-      builder.configuredRemoveExistingVectorStoreTable;
-    this._createIndexMethod = builder.configuredIndexType;
-    this._initializeSchema = builder.configuredInitializeSchema;
+      builder.getRemoveExistingVectorStoreTable();
+    this._createIndexMethod = builder.getIndexType();
+    this._initializeSchema = builder.getInitializeSchema();
     this._schemaValidator = new PgVectorSchemaValidator(this._jdbcTemplate);
-    this._maxDocumentBatchSize = builder.configuredMaxDocumentBatchSize;
+    this._maxDocumentBatchSize = builder.getMaxDocumentBatchSize();
   }
 
   get distanceType(): PgDistanceType {
@@ -249,7 +238,7 @@ export class PgVectorStore extends AbstractObservationVectorStore {
       case PgIdType.SERIAL:
         return Number.parseInt(id, 10);
       case PgIdType.BIGSERIAL:
-        return BigInt(id);
+        return id;
     }
   }
 
@@ -377,6 +366,7 @@ export class PgVectorStore extends AbstractObservationVectorStore {
     }
 
     const dimensions = await this.embeddingDimensions();
+    this._embeddingDimensions = dimensions;
     await this._jdbcTemplate.update(
       sql`CREATE TABLE IF NOT EXISTS ${() => this.getFullyQualifiedTableName()} (
         id ${() => this.getColumnTypeName()} PRIMARY KEY,
@@ -440,9 +430,21 @@ export class PgVectorStore extends AbstractObservationVectorStore {
       operationName,
     )
       .collectionName(this._vectorTableName)
-      .dimensions(this._dimensions > 0 ? this._dimensions : null)
+      .dimensions(this.getObservationDimensions())
       .namespace(this._schemaName)
       .similarityMetric(this.getSimilarityMetric());
+  }
+
+  private getObservationDimensions(): number | null {
+    if (this._dimensions > 0) {
+      return this._dimensions;
+    }
+
+    if (this._embeddingDimensions > 0) {
+      return this._embeddingDimensions;
+    }
+
+    return PgVectorStore.OPENAI_EMBEDDING_DIMENSION_SIZE;
   }
 
   private getSimilarityMetric(): string {
@@ -485,6 +487,19 @@ export class PgVectorStore extends AbstractObservationVectorStore {
   }
 }
 
+const SIMILARITY_TYPE_MAPPING = new Map<
+  PgDistanceType,
+  VectorStoreSimilarityMetric
+>([
+  [PgDistanceType.COSINE_DISTANCE, VectorStoreSimilarityMetric.COSINE],
+  [PgDistanceType.EUCLIDEAN_DISTANCE, VectorStoreSimilarityMetric.EUCLIDEAN],
+  [PgDistanceType.NEGATIVE_INNER_PRODUCT, VectorStoreSimilarityMetric.DOT],
+]);
+
+function toVectorSqlLiteral(values: number[]): string {
+  return `[${values.join(",")}]`;
+}
+
 export class PgVectorStoreBuilder extends AbstractVectorStoreBuilder<PgVectorStoreBuilder> {
   private readonly _jdbcTemplate: JsdbcTemplate;
   private _schemaName: string = PgVectorStore.DEFAULT_SCHEMA_NAME;
@@ -505,47 +520,47 @@ export class PgVectorStoreBuilder extends AbstractVectorStoreBuilder<PgVectorSto
     this._jdbcTemplate = jdbcTemplate;
   }
 
-  get configuredJdbcTemplate(): JsdbcTemplate {
+  getJdbcTemplate(): JsdbcTemplate {
     return this._jdbcTemplate;
   }
 
-  get configuredSchemaName(): string {
+  getSchemaName(): string {
     return this._schemaName;
   }
 
-  get configuredVectorTableName(): string {
+  getVectorTableName(): string {
     return this._vectorTableName;
   }
 
-  get configuredIdType(): PgIdType {
+  getIdType(): PgIdType {
     return this._idType;
   }
 
-  get configuredVectorTableValidationsEnabled(): boolean {
+  getVectorTableValidationsEnabled(): boolean {
     return this._vectorTableValidationsEnabled;
   }
 
-  get configuredDimensions(): number {
+  getDimensions(): number {
     return this._dimensions;
   }
 
-  get configuredDistanceType(): PgDistanceType {
+  getDistanceType(): PgDistanceType {
     return this._distanceType;
   }
 
-  get configuredRemoveExistingVectorStoreTable(): boolean {
+  getRemoveExistingVectorStoreTable(): boolean {
     return this._removeExistingVectorStoreTable;
   }
 
-  get configuredIndexType(): PgIndexType {
+  getIndexType(): PgIndexType {
     return this._indexType;
   }
 
-  get configuredInitializeSchema(): boolean {
+  getInitializeSchema(): boolean {
     return this._initializeSchema;
   }
 
-  get configuredMaxDocumentBatchSize(): number {
+  getMaxDocumentBatchSize(): number {
     return this._maxDocumentBatchSize;
   }
 

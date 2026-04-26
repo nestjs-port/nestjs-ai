@@ -217,6 +217,9 @@ importers:
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../vector-store
+      '@nestjs-ai/vector-store-pgvector':
+        specifier: workspace:*
+        version: link:../vector-stores/pgvector-store
       '@nestjs-ai/vector-store-redis':
         specifier: workspace:*
         version: link:../vector-stores/redis-store

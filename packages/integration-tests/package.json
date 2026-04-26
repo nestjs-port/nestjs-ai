@@ -34,6 +34,7 @@
     "@nestjs-ai/model-transformers": "workspace:*",
     "@nestjs-ai/platform": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
+    "@nestjs-ai/vector-store-pgvector": "workspace:*",
     "@nestjs-ai/vector-store-redis": "workspace:*",
     "@nestjs-port/core": "^0.0.4",
     "@nestjs-port/jsdbc": "^0.0.4",

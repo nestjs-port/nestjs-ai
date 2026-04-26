@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-google-genai",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "private": false,
   "description": "Google GenAI model integration for NestJS AI",
   "keywords": [

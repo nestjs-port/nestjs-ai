@@ -1,5 +1,11 @@
 # @nestjs-ai/retry
 
+## 0.1.0
+
+### Minor Changes
+
+- ed9c6e0: Migrate CJS to ESM
+
 ## 0.0.2
 
 ### Patch Changes

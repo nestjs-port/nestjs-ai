@@ -19,6 +19,7 @@ import {
   Media,
   type MimeType,
   type TemplateRenderer,
+  TemplateRendererFactory,
 } from "@nestjs-ai/commons";
 import {
   type ChatModel,
@@ -38,7 +39,6 @@ import type {
   StandardSchemaV1,
 } from "@standard-schema/spec";
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
-import { StTemplateRenderer } from "@nestjs-ai/template-st";
 import type { ObservationRegistry } from "@nestjs-port/core";
 import { StringUtils } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
@@ -134,7 +134,8 @@ export namespace DefaultChatClient {
   const DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION: ChatClientObservationConvention =
     new DefaultChatClientObservationConvention();
 
-  const DEFAULT_TEMPLATE_RENDERER: TemplateRenderer = new StTemplateRenderer();
+  const DEFAULT_TEMPLATE_RENDERER: TemplateRenderer =
+    TemplateRendererFactory.getTemplateRenderer();
 
   const CHAT_CLIENT_MESSAGE_AGGREGATOR = new ChatClientMessageAggregator();
 

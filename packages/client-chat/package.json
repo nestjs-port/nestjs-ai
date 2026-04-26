@@ -52,7 +52,6 @@
   "peerDependencies": {
     "@nestjs-ai/commons": "workspace:^",
     "@nestjs-ai/model": "workspace:^",
-    "@nestjs-ai/template-st": "workspace:^",
     "@nestjs-port/core": "^0.0.4",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.0.0"

@@ -19,6 +19,9 @@ import type { FilterExpressionConverter } from "../filter-expression-converter.j
 import { FilterHelper } from "../filter-helper.js";
 
 export abstract class AbstractFilterExpressionConverter implements FilterExpressionConverter {
+  private static readonly ISO_DATE_PATTERN =
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
+
   convertExpression(expression: Filter.Expression): string {
     return this.convertOperand(expression);
   }
@@ -98,7 +101,10 @@ export abstract class AbstractFilterExpressionConverter implements FilterExpress
       const values = filterValue.value as unknown[];
       this.doStartValueRange(filterValue, context);
       values.forEach((value, index) => {
-        this.doSingleValue(value, context);
+        this.doSingleValue(
+          AbstractFilterExpressionConverter.normalizeDateString(value),
+          context,
+        );
         if (index < values.length - 1) {
           this.doAddValueRangeSpitter(filterValue, context);
         }
@@ -107,7 +113,93 @@ export abstract class AbstractFilterExpressionConverter implements FilterExpress
       return;
     }
 
-    this.doSingleValue(filterValue.value, context);
+    this.doSingleValue(
+      AbstractFilterExpressionConverter.normalizeDateString(filterValue.value),
+      context,
+    );
+  }
+
+  protected static normalizeDateString(value: unknown): unknown {
+    if (
+      typeof value !== "string" ||
+      !AbstractFilterExpressionConverter.ISO_DATE_PATTERN.test(value)
+    ) {
+      return value;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      throw new Error(`Invalid date type: ${value}`);
+    }
+
+    return parsed;
+  }
+
+  protected static emitJsonValue(
+    value: unknown,
+    context: { value: string },
+  ): void {
+    try {
+      if (value == null) {
+        context.value += "null";
+        return;
+      }
+
+      if (value instanceof Date) {
+        context.value += String(value.getTime());
+        return;
+      }
+
+      if (typeof value === "bigint") {
+        context.value += value.toString();
+        return;
+      }
+
+      const json = JSON.stringify(value);
+      if (json == null) {
+        throw new Error("JSON serialization produced an empty result.");
+      }
+      context.value += json;
+    } catch (error) {
+      throw new Error("Error serializing value to JSON.", { cause: error });
+    }
+  }
+
+  protected static emitLuceneString(
+    value: string,
+    context: { value: string },
+  ): void {
+    for (const character of value) {
+      switch (character) {
+        case "+":
+        case "-":
+        case "=":
+        case "!":
+        case "(":
+        case ")":
+        case "{":
+        case "}":
+        case "[":
+        case "]":
+        case "^":
+        case '"':
+        case "~":
+        case "*":
+        case "?":
+        case ":":
+        case "\\":
+        case "/":
+        case "&":
+        case "|":
+        case "<":
+        case ">":
+          context.value += `\\${character}`;
+          break;
+        default:
+          context.value += character;
+          break;
+      }
+    }
   }
 
   protected doSingleValue(value: unknown, context: { value: string }): void {

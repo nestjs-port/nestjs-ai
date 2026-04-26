@@ -42,14 +42,14 @@
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-port/core": "^0.0.4",
-    "rxjs": "^7.0.0"
+    "rxjs": "^7.8.2"
   },
   "peerDependencies": {
     "@nestjs-ai/client-chat": "workspace:^",
     "@nestjs-ai/commons": "workspace:^",
     "@nestjs-ai/model": "workspace:^",
     "@nestjs-ai/vector-store": "workspace:^",
-    "rxjs": "^7.0.0"
+    "rxjs": "^7.8.2"
   },
   "engines": {
     "node": ">=22.12.0"

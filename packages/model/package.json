@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "private": false,
   "description": "Core model abstractions and tool support for NestJS AI",
   "keywords": [

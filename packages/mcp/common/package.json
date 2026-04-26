@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/mcp-common",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "private": false,
   "description": "Shared MCP primitives for NestJS AI",
   "keywords": [

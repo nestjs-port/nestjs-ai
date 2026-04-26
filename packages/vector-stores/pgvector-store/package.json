@@ -38,15 +38,21 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@nestjs-ai/advisors-vector-store": "workspace:*",
+    "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/model-openai": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-port/core": "^0.0.4",
     "@nestjs-port/jsdbc": "^0.0.4",
+    "@nestjs-port/testing": "^0.0.3",
     "@nestjs/common": "^11.1.11",
     "@testcontainers/postgresql": "^11.13.0",
     "pgvector": "^0.2.1",
-    "testcontainers": "^11.13.0"
+    "rxjs": "^7.8.2",
+    "testcontainers": "^11.13.0",
+    "typeorm": "^0.3.28"
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "workspace:^",

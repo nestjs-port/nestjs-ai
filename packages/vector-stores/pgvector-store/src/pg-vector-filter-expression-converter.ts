@@ -21,9 +21,6 @@ import {
 } from "@nestjs-ai/vector-store";
 
 export class PgVectorFilterExpressionConverter extends AbstractFilterExpressionConverter {
-  private static readonly ISO_DATE_PATTERN =
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
-
   protected override doExpression(
     expression: Filter.Expression,
     context: { value: string },
@@ -70,14 +67,17 @@ export class PgVectorFilterExpressionConverter extends AbstractFilterExpressionC
     const right = expression.right;
     if (!Array.isArray(right.value)) {
       const typeName =
-        right.value == null ? "null" : (right.value as object).constructor.name;
+        right.value == null ? "null" : right.value.constructor.name;
       throw new Error(`Expected a List, but got: ${typeName}`);
     }
     const values = right.value;
     for (let i = 0; i < values.length; i++) {
       this.convertOperandToContext(expression.left, context);
       context.value += " == ";
-      this.doSingleValue(this.normalizeDateString(values[i]), context);
+      this.doSingleValue(
+        AbstractFilterExpressionConverter.normalizeDateString(values[i]),
+        context,
+      );
       if (i < values.length - 1) {
         context.value += " || ";
       }
@@ -133,27 +133,12 @@ export class PgVectorFilterExpressionConverter extends AbstractFilterExpressionC
     context: { value: string },
   ): void {
     if (value instanceof Date) {
-      this.emitJsonValue(value.toISOString(), context);
+      AbstractFilterExpressionConverter.emitJsonValue(
+        value.toISOString(),
+        context,
+      );
     } else {
-      this.emitJsonValue(value, context);
+      AbstractFilterExpressionConverter.emitJsonValue(value, context);
     }
-  }
-
-  private emitJsonValue(value: unknown, context: { value: string }): void {
-    context.value += JSON.stringify(value);
-  }
-
-  private normalizeDateString(value: unknown): unknown {
-    if (
-      typeof value !== "string" ||
-      !PgVectorFilterExpressionConverter.ISO_DATE_PATTERN.test(value)
-    ) {
-      return value;
-    }
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      throw new Error(`Invalid date type: ${value}`);
-    }
-    return parsed;
   }
 }

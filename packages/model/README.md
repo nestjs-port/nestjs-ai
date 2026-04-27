@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/antora/modules/ROOT/images/nestjs-ai-logo.svg" alt="NestJS AI logo" width="160" style="display:block; margin:0 auto 0.25rem;" />
+</div>
+
 # NestJS AI
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
@@ -65,7 +69,7 @@ The project faithfully mirrors Spring AI's module structure and API design while
 |                         | spring-ai-vector-store                | `@nestjs-ai/vector-store`                       | 100%     |
 |                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                 | 100%     |
 |                         | spring-ai-advisors-vector-store       | `@nestjs-ai/advisors-vector-store`              | 100%     |
-|                         | spring-ai-pgvector-store              | —                                               | 0%       |
+|                         | spring-ai-pgvector-store              | `@nestjs-ai/vector-store-pgvector`              | 100%     |
 |                         | spring-ai-chroma-store                | —                                               | 0%       |
 |                         | spring-ai-pinecone-store              | —                                               | 0%       |
 |                         | spring-ai-milvus-store                | —                                               | 0%       |

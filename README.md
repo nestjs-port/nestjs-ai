@@ -69,7 +69,7 @@ The project faithfully mirrors Spring AI's module structure and API design while
 |                         | spring-ai-vector-store                | `@nestjs-ai/vector-store`                       | 100%     |
 |                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                 | 100%     |
 |                         | spring-ai-advisors-vector-store       | `@nestjs-ai/advisors-vector-store`              | 100%     |
-|                         | spring-ai-pgvector-store              | —                                               | 0%       |
+|                         | spring-ai-pgvector-store              | `@nestjs-ai/vector-store-pgvector`              | 100%     |
 |                         | spring-ai-chroma-store                | —                                               | 0%       |
 |                         | spring-ai-pinecone-store              | —                                               | 0%       |
 |                         | spring-ai-milvus-store                | —                                               | 0%       |

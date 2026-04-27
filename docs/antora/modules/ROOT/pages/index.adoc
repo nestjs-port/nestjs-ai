@@ -32,7 +32,7 @@ NestJS AI provides the following features:
 ** xref:api/audio/speech.adoc[Text to Speech]
 ** xref:api/moderation[Moderation]
 * xref:api/structured-output-converter.adoc[Structured Outputs] - Mapping of AI Model output to TypeScript interfaces.
-* Support for major xref:api/vectordbs.adoc[Vector Database providers] such as Redis.
+* Support for major xref:api/vectordbs.adoc[Vector Database providers] such as PostgreSQL/PGVector and Redis.
 * Portable API across Vector Store providers, including a novel SQL-like metadata filter API.
 * xref:api/tools.adoc[Tools/Function Calling] - Permits the model to request the execution of client-side tools and functions, thereby accessing necessary real-time information as required and taking action.
 * xref:observability/index.adoc[Observability] - Provides insights into AI-related operations.

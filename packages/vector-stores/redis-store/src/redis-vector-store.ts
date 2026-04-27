@@ -98,10 +98,10 @@ export class RedisVectorStore extends AbstractObservationVectorStore {
 
   constructor(builder: RedisVectorStoreBuilder) {
     super({
-      embeddingModel: builder.embeddingModel,
-      observationRegistry: builder.configuredObservationRegistry,
-      customObservationConvention: builder.configuredObservationConvention,
-      batchingStrategy: builder.configuredBatchingStrategy,
+      embeddingModel: builder.getEmbeddingModel(),
+      observationRegistry: builder.getObservationRegistry(),
+      customObservationConvention: builder.getCustomObservationConvention(),
+      batchingStrategy: builder.getBatchingStrategy(),
     });
     assert(builder.redisClient, "Redis client must not be null");
 

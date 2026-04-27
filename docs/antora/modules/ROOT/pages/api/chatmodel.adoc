@@ -5,8 +5,8 @@ The Chat Model API offers developers the ability to integrate AI-powered chat co
 
 The API typically works by sending a prompt or partial conversation to the AI model, which then generates a completion or continuation of the conversation based on its training data and understanding of natural language patterns. The completed response is then returned to the application, which can present it to the user or use it for further processing.
 
-The `Spring AI Chat Model API` is designed to be a simple and portable interface for interacting with various xref:concepts.adoc#_models[AI Models], allowing developers to switch between different models with minimal code changes.
-This design aligns with Spring's philosophy of modularity and interchangeability.
+The `NestJS AI Chat Model API` is designed to be a simple and portable interface for interacting with various xref:concepts.adoc#_models[AI Models], allowing developers to switch between different models with minimal code changes.
+This design aligns with NestJS's philosophy of modularity and interchangeability.
 
 Also with the help of companion classes like `Prompt` for input encapsulation and `ChatResponse` for output handling, the Chat Model API unifies the communication with AI Models.
 It manages the complexity of request preparation and response parsing, offering a direct and simplified API interaction.
@@ -15,64 +15,67 @@ You can find more about available implementations in the xref:api/chatmodel.adoc
 
 == API Overview
 
-This section provides a guide to the Spring AI Chat Model API interface and associated classes.
+This section provides a guide to the NestJS AI Chat Model API interface and associated classes.
 
 === ChatModel
 
-Here is the link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/model/ChatModel.java[ChatModel] interface definition:
+Here is the `ChatModel` abstract class definition:
 
-[source,java]
+[source,typescript]
 ----
-public interface ChatModel extends Model<Prompt, ChatResponse>, StreamingChatModel {
+export abstract class ChatModel
+  extends StreamingChatModel
+  implements Model<Prompt, ChatResponse>
+{
+  call(message: string): Promise<string | null>;
+  call(...messages: Message[]): Promise<string | null>;
+  call(prompt: Prompt): Promise<ChatResponse>;
 
-	default String call(String message) {...}
+  protected abstract callPrompt(prompt: Prompt): Promise<ChatResponse>;
 
-    @Override
-	ChatResponse call(Prompt prompt);
+  get defaultOptions(): ChatOptions;
 }
-
 ----
 
-The `call()` method with a `String` parameter simplifies initial use, avoiding the complexities of the more sophisticated `Prompt` and `ChatResponse` classes.
+The `call()` method with a `string` parameter simplifies initial use, avoiding the complexities of the more sophisticated `Prompt` and `ChatResponse` classes.
 In real-world applications, it is more common to use the `call()` method that takes a `Prompt` instance and returns a `ChatResponse`.
 
 === StreamingChatModel
 
-Here is the link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/model/StreamingChatModel.java[StreamingChatModel] interface definition:
+Here is the `StreamingChatModel` abstract class definition:
 
-[source,java]
+[source,typescript]
 ----
-public interface StreamingChatModel extends StreamingModel<Prompt, ChatResponse> {
+export abstract class StreamingChatModel
+  implements StreamingModel<Prompt, ChatResponse>
+{
+  stream(message: string): Observable<string>;
+  stream(...messages: Message[]): Observable<string>;
+  stream(prompt: Prompt): Observable<ChatResponse>;
 
-    default Flux<String> stream(String message) {...}
-
-    @Override
-	Flux<ChatResponse> stream(Prompt prompt);
+  protected abstract streamPrompt(prompt: Prompt): Observable<ChatResponse>;
 }
 ----
 
-The `stream()` method takes a `String` or `Prompt` parameter similar to `ChatModel` but it streams the responses using the reactive Flux API.
+The `stream()` method takes a `string` or `Prompt` parameter similar to `ChatModel` but it streams the responses using the reactive RxJS `Observable` API.
 
 === Prompt
 
-The https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/prompt/Prompt.java[Prompt] is a `ModelRequest` that encapsulates a list of https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/messages/Message.java[Message] objects and optional model request options.
+The `Prompt` is a `ModelRequest` that encapsulates a list of `Message` objects and optional model request options.
 The following listing shows a truncated version of the `Prompt` class, excluding constructors and other utility methods:
 
-[source,java]
+[source,typescript]
 ----
-public class Prompt implements ModelRequest<List<Message>> {
+export class Prompt implements ModelRequest<Message[]> {
 
-    private final List<Message> messages;
+  private readonly messages: Message[];
+  private readonly chatOptions: ChatOptions | null;
 
-    private ChatOptions modelOptions;
+  get options(): ChatOptions | null {...}
 
-	@Override
-	public ChatOptions getOptions() {...}
+  get instructions(): Message[] {...}
 
-	@Override
-	public List<Message> getInstructions() {...}
-
-    // constructors and utility methods omitted
+  // constructors and utility methods omitted
 }
 ----
 
@@ -82,35 +85,31 @@ The `Message` interface encapsulates a `Prompt` textual content, a collection of
 
 The interface is defined as follows:
 
-[source,java]
+[source,typescript]
 ----
-public interface Content {
+export interface Content {
+  get text(): string | null;
 
-	String getText();
-
-	Map<String, Object> getMetadata();
+  get metadata(): Record<string, unknown>;
 }
 
-public interface Message extends Content {
-
-	MessageType getMessageType();
+export interface Message extends Content {
+  get messageType(): MessageType;
 }
 ----
 
 The multimodal message types implement also the `MediaContent` interface providing a list of `Media` content objects.
 
-[source,java]
+[source,typescript]
 ----
-public interface MediaContent extends Content {
-
-	Collection<Media> getMedia();
-
+export interface MediaContent extends Content {
+  get media(): Media[];
 }
 ----
 
 The `Message` interface has various implementations that correspond to the categories of messages that an AI model can process:
 
-image::spring-ai-message-api.jpg[Spring AI Message API, width=800, align="center"]
+image::spring-ai-message-api.jpg[NestJS AI Message API, width=800, align="center"]
 
 The chat completion endpoint, distinguish between message categories based on conversational roles, effectively mapped by the `MessageType`.
 
@@ -123,37 +122,37 @@ To understand the practical application and the relationship between `Prompt` an
 
 ==== Chat Options
 
-Represents the options that can be passed to the AI model. The `ChatOptions` class is a subclass of `ModelOptions` and is used to define few portable options that can be passed to the AI model.
-The `ChatOptions` class is defined as follows:
+Represents the options that can be passed to the AI model. The `ChatOptions` interface extends `ModelOptions` and is used to define a few portable options that can be passed to the AI model.
+The `ChatOptions` interface is defined as follows:
 
-[source,java]
+[source,typescript]
 ----
-public interface ChatOptions extends ModelOptions {
+export interface ChatOptions extends ModelOptions {
+  model?: string | null;
+  frequencyPenalty?: number | null;
+  maxTokens?: number | null;
+  presencePenalty?: number | null;
+  stopSequences?: string[] | null;
+  temperature?: number | null;
+  topK?: number | null;
+  topP?: number | null;
 
-	String getModel();
-	Float getFrequencyPenalty();
-	Integer getMaxTokens();
-	Float getPresencePenalty();
-	List<String> getStopSequences();
-	Float getTemperature();
-	Integer getTopK();
-	Float getTopP();
-	ChatOptions copy();
-
+  copy(): ChatOptions;
+  mutate(): ChatOptions.Builder;
 }
 ----
 
-Additionally, every model specific ChatModel/StreamingChatModel implementation can have its own options that can be passed to the AI model. For example, the OpenAI Chat Completion model has its own options like `logitBias`, `seed`, and `user`.
+Additionally, every model specific `ChatModel` / `StreamingChatModel` implementation can have its own options that can be passed to the AI model. For example, the OpenAI Chat Completion model has its own options like `logitBias`, `seed`, and `user`.
 
-Spring AI provides a sophisticated system for configuring and using Chat Models. 
+NestJS AI provides a sophisticated system for configuring and using Chat Models.
 It allows for default configuration to be set at start-up, while also providing the flexibility to override these settings on a per-request basis.
-This approach enables developers to easily work with different AI models and adjust parameters as needed, all within a consistent interface provided by the Spring AI framework.
+This approach enables developers to easily work with different AI models and adjust parameters as needed, all within a consistent interface provided by the NestJS AI framework.
 
-When using `ChatModel.call() / ChatModel/stream()`, the passed prompt needs to contain a full set of options that will completely take precedence over options set in the model (or use `null` options in the `Prompt` to use the model's defaults).
+When using `ChatModel.call()` / `ChatModel.stream()`, the passed prompt needs to contain a full set of options that will completely take precedence over options set in the model (or use `null` options in the `Prompt` to use the model's defaults).
 
 The xref:api/chatclient.adoc[ChatClient] abstraction allows for an incremental approach where users can provide a "delta" customizer that
 
-Following flow diagram illustrates how Spring AI handles the configuration and execution of Chat Models:
+Following flow diagram illustrates how NestJS AI handles the configuration and execution of Chat Models:
 
 image::chat-model-conversions.png[align="center", width="800px"]
 
@@ -168,46 +167,44 @@ These options are set during the ChatModel initialization and are meant to provi
 
 The structure of the `ChatResponse` class is as follows:
 
-[source,java]
+[source,typescript]
 ----
-public class ChatResponse implements ModelResponse<Generation> {
+export class ChatResponse implements ModelResponse<Generation> {
 
-    private final ChatResponseMetadata chatResponseMetadata;
-	private final List<Generation> generations;
+  private readonly _generations: Generation[];
+  private readonly _chatResponseMetadata: ChatResponseMetadata;
 
-	@Override
-	public ChatResponseMetadata getMetadata() {...}
+  get result(): Generation | null {...}
 
-    @Override
-	public List<Generation> getResults() {...}
+  get results(): Generation[] {...}
 
-    // other methods omitted
+  get metadata(): ChatResponseMetadata {...}
+
+  // other methods omitted
 }
 ----
 
-The https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/model/ChatResponse.java[ChatResponse] class holds the AI Model's output, with each `Generation` instance containing one of potentially multiple outputs resulting from a single prompt.
+The `ChatResponse` class holds the AI Model's output, with each `Generation` instance containing one of potentially multiple outputs resulting from a single prompt.
 
 The `ChatResponse` class also carries a `ChatResponseMetadata` metadata about the AI Model's response.
 
 [[Generation]]
 === Generation
 
-Finally, the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/model/Generation.java[Generation] class extends from the `ModelResult` to represent the model output (assistant message) and related metadata:
+Finally, the `Generation` class implements `ModelResult` to represent the model output (assistant message) and related metadata:
 
-[source,java]
+[source,typescript]
 ----
-public class Generation implements ModelResult<AssistantMessage> {
+export class Generation implements ModelResult<AssistantMessage> {
 
-	private final AssistantMessage assistantMessage;
-	private ChatGenerationMetadata chatGenerationMetadata;
+  private readonly _assistantMessage: AssistantMessage;
+  private readonly _chatGenerationMetadata: ChatGenerationMetadata;
 
-	@Override
-	public AssistantMessage getOutput() {...}
+  get output(): AssistantMessage {...}
 
-	@Override
-	public ChatGenerationMetadata getMetadata() {...}
+  get metadata(): ChatGenerationMetadata {...}
 
-    // other methods omitted
+  // other methods omitted
 }
 ----
 
@@ -218,18 +215,21 @@ This diagram illustrates the unified interfaces, `ChatModel` and `StreamingChatM
 image::spring-ai-chat-completions-clients.jpg[align="center", width="1000px"]
 
 * xref:api/chat/openai-chat.adoc[OpenAI Chat Completion] (streaming, multi-modality & function-calling support)
-* xref:api/chat/ollama-chat.adoc[Ollama Chat Completion] (streaming, multi-modality & function-calling support)
-* xref:api/bedrock.adoc[Amazon Bedrock]
-* xref:api/chat/mistralai-chat.adoc[Mistral AI Chat Completion] (streaming & function-calling support)
-* xref:api/chat/anthropic-chat.adoc[Anthropic Chat Completion] (streaming & function-calling support)
+* xref:api/chat/google-genai-chat.adoc[Google GenAI Chat Completion] (streaming, multi-modality & function-calling support)
+
+[NOTE]
+====
+The following chat model integrations from Spring AI are not yet available in NestJS AI:
+Anthropic, Azure OpenAI, Amazon Bedrock, Mistral AI, Ollama, DeepSeek, Groq, MiniMax, Moonshot AI, NVIDIA, Perplexity AI, and QianFan.
+====
 
 TIP: Find a detailed comparison of the available Chat Models in the xref:api/chat/comparison.adoc[Chat Models Comparison] section.
 
 == Chat Model API
 
-The Spring AI Chat Model API is built on top of the Spring AI `Generic Model API` providing Chat specific abstractions and implementations.
+The NestJS AI Chat Model API is built on top of the NestJS AI `Generic Model API` providing Chat specific abstractions and implementations.
 This allows an easy integration and switching between different AI services while maintaining a consistent API for the client application.
-The following class diagram illustrates the main classes and interfaces of the Spring AI Chat Model API.
+The following class diagram illustrates the main classes and interfaces of the NestJS AI Chat Model API.
 
 image::spring-ai-chat-api.jpg[align="center", width="1000px"]
 

@@ -1,5 +1,13 @@
 # @nestjs-ai/vector-store-redis
 
+## 0.1.1
+
+### Patch Changes
+
+- change name of getter methods
+- Updated dependencies
+  - @nestjs-ai/vector-store@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

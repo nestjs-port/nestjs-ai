@@ -1,5 +1,11 @@
 # @nestjs-ai/vector-store
 
+## 0.1.1
+
+### Patch Changes
+
+- change name of getter methods
+
 ## 0.1.0
 
 ### Minor Changes

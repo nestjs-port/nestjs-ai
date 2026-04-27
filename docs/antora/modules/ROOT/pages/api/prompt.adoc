@@ -4,15 +4,15 @@
 Prompts are the inputs that guide an AI model to generate specific outputs.
 The design and phrasing of these prompts significantly influence the model's responses.
 
-At the lowest level of interaction with AI models in Spring AI, handling prompts in Spring AI is somewhat similar to managing the "View" in Spring MVC.
+At the lowest level of interaction with AI models in NestJS AI, handling prompts is somewhat similar to managing the "View" in a typical web framework.
 This involves creating extensive text with placeholders for dynamic content.
 These placeholders are then replaced based on user requests or other code in the application.
 Another analogy is a SQL statement that contain placeholders for certain expressions.
 
-As Spring AI evolves, it will introduce higher levels of abstraction for interacting with AI models.
-The foundational classes described in this section can be likened to JDBC in terms of their role and functionality.
-The `ChatModel` class, for instance, is analogous to the core JDBC library in the JDK.
-The `ChatClient` class can be likened to the `JdbcClient`, built on top of `ChatModel` and providing more advanced constructs via `Advisor`
+As NestJS AI evolves, it will introduce higher levels of abstraction for interacting with AI models.
+The foundational classes described in this section can be likened to a low-level database driver in terms of their role and functionality.
+The `ChatModel` class, for instance, is the core abstraction over a chat-style AI model.
+The `ChatClient` class can be likened to a higher-level client, built on top of `ChatModel` and providing more advanced constructs via `Advisor`
 to consider past interactions with the model, augment the prompt with additional contextual documents, and introduce agentic behavior.
 
 The structure of prompts has evolved over time within the AI field.
@@ -33,32 +33,31 @@ This arrangement enables intricate and detailed interactions with AI models, as 
 
 Below is a truncated version of the Prompt class, with constructors and utility methods omitted for brevity:
 
-[source,java]
+[source,typescript]
 ----
-public class Prompt implements ModelRequest<List<Message>> {
+export class Prompt implements ModelRequest<Message[]> {
 
-    private final List<Message> messages;
+    private readonly messages: Message[];
 
-    private ChatOptions chatOptions;
+    private readonly chatOptions: ChatOptions | null;
 }
 ----
 
-==== Convenience Methods
+==== Convenience Accessors
 
-The `Prompt` class provides several convenience methods for accessing messages by their role:
+The `Prompt` class provides several convenience getters for accessing messages by their role:
 
 **Single Message Access:**
 
-* `getUserMessage()`: Returns the last user message in the prompt, or an empty `UserMessage` if none exists
-* `getSystemMessage()`: Returns the first system message in the prompt, or an empty `SystemMessage` if none exists
-* `getLastUserOrToolResponseMessage()`: Returns the last user or tool response message, useful for conversation continuity
+* `userMessage`: Returns the last user message in the prompt, or an empty `UserMessage` if none exists
+* `systemMessage`: Returns the first system message in the prompt, or an empty `SystemMessage` if none exists
+* `lastUserOrToolResponseMessage`: Returns the last user or tool response message, useful for conversation continuity
 
 **Multiple Message Access:**
 
-* `getUserMessages()`: Returns a list of all user messages in the prompt, preserving their order
-* `getSystemMessages()`: Returns a list of all system messages in the prompt, preserving their order
+* `userMessages`: Returns an array of all user messages in the prompt, preserving their order
 
-These methods are particularly useful when working with multi-turn conversations or when you need to process messages by role.
+These accessors are particularly useful when working with multi-turn conversations or when you need to process messages by role.
 
 === Message
 
@@ -66,36 +65,35 @@ The `Message` interface encapsulates a `Prompt` textual content, a collection of
 
 The interface is defined as follows:
 
-[source,java]
+[source,typescript]
 ----
-public interface Content {
+export interface Content {
 
-	String getContent();
+    get text(): string | null;
 
-	Map<String, Object> getMetadata();
+    get metadata(): Record<string, unknown>;
 }
 
-public interface Message extends Content {
+export interface Message extends Content {
 
-	MessageType getMessageType();
+    get messageType(): MessageType;
 }
 ----
 
 The multimodal message types implement also the `MediaContent` interface providing a list of `Media` content objects.
 
-[source,java]
+[source,typescript]
 ----
-public interface MediaContent extends Content {
+export interface MediaContent extends Content {
 
-	Collection<Media> getMedia();
-
+    get media(): Media[];
 }
 ----
 
-Various implementations of the `Message` interface correspond to different categories of messages that an AI model can process. 
-The Models distinguish between message categories based on conversational roles. 
+Various implementations of the `Message` interface correspond to different categories of messages that an AI model can process.
+The Models distinguish between message categories based on conversational roles.
 
-image::spring-ai-message-api.jpg[Spring AI Message API, width=800, align="center"]
+image::spring-ai-message-api.jpg[NestJS AI Message API, width=800, align="center"]
 
 These roles are effectively mapped by the `MessageType`, as discussed below.
 
@@ -109,71 +107,77 @@ The primary roles are:
 
 * System Role: Guides the AI's behavior and response style, setting parameters or rules for how the AI interprets and replies to the input. It's akin to providing instructions to the AI before initiating a conversation.
 * User Role: Represents the user's input – their questions, commands, or statements to the AI. This role is fundamental as it forms the basis of the AI's response.
-* Assistant Role: The AI's response to the user's input. 
-More than just an answer or reaction, it's crucial for maintaining the flow of the conversation. 
+* Assistant Role: The AI's response to the user's input.
+More than just an answer or reaction, it's crucial for maintaining the flow of the conversation.
 By tracking the AI's previous responses (its 'Assistant Role' messages), the system ensures coherent and contextually relevant interactions.
 The Assistant message may contain Function Tool Call request information as well.
 It's like a special feature in the AI, used when needed to perform specific functions such as calculations, fetching data, or other tasks beyond just talking.
 * Tool/Function Role: The Tool/Function Role focuses on returning additional information in response to Tool Call Assistant Messages.
 
-Roles are represented as an enumeration in Spring AI as shown below
+Roles are represented in NestJS AI as a class with static constants, as shown below:
 
-[source,java]
+[source,typescript]
 ----
-public enum MessageType {
+export class MessageType {
 
-	USER("user"),
+    static readonly USER = new MessageType("USER", "user");
 
-	ASSISTANT("assistant"),
+    static readonly ASSISTANT = new MessageType("ASSISTANT", "assistant");
 
-	SYSTEM("system"),
+    static readonly SYSTEM = new MessageType("SYSTEM", "system");
 
-	TOOL("tool");
+    static readonly TOOL = new MessageType("TOOL", "tool");
 
-    ...
+    // ...
 }
 ----
 
 === PromptTemplate
 
-A key component for prompt templating in Spring AI is the `PromptTemplate` class, designed to facilitate the creation of structured prompts that are then sent to the AI model for processing
+A key component for prompt templating in NestJS AI is the `PromptTemplate` class, designed to facilitate the creation of structured prompts that are then sent to the AI model for processing.
 
-[source,java]
+[source,typescript]
 ----
-public class PromptTemplate implements PromptTemplateActions, PromptTemplateMessageActions {
+export class PromptTemplate
+    implements PromptTemplateActions, PromptTemplateMessageActions {
 
     // Other methods to be discussed later
 }
 ----
 
-This class uses the `TemplateRenderer` API to render templates. By default, Spring AI uses the `StTemplateRenderer` implementation, which is based on the open-source https://www.stringtemplate.org/[StringTemplate] engine developed by Terence Parr. Template variables are identified by the `{}` syntax, but you can configure the delimiters to use other syntax as well.
+This class uses the `TemplateRenderer` API to render templates. By default, NestJS AI uses the `StTemplateRenderer` implementation, which is based on the https://www.stringtemplate.org/[StringTemplate] engine developed by Terence Parr (ported to TypeScript via the `stringtemplate4ts` library). Template variables are identified by the `{}` syntax, but you can configure the delimiters to use other syntax as well.
 
-[source,java]
+[source,typescript]
 ----
-public interface TemplateRenderer extends BiFunction<String, Map<String, Object>, String> {
+export interface TemplateRenderer {
 
-	@Override
-	String apply(String template, Map<String, Object> variables);
+    apply(template: string, variables: Record<string, unknown | null>): string;
 
 }
 ----
 
-Spring AI uses the `TemplateRenderer` interface to handle the actual substitution of variables into the template string.
+NestJS AI uses the `TemplateRenderer` interface to handle the actual substitution of variables into the template string.
 The default implementation uses <<StringTemplate>>.
 You can provide your own implementation of `TemplateRenderer` if you need custom logic.
 For scenarios where no template rendering is required (e.g., the template string is already complete), you can use the provided `NoOpTemplateRenderer`.
 
 .Example using a custom StringTemplate renderer with '<' and '>' delimiters
-[source,java]
+[source,typescript]
 ----
-PromptTemplate promptTemplate = PromptTemplate.builder()
-    .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
-    .template("""
+import { PromptTemplate } from '@nestjs-ai/model';
+import { StTemplateRenderer } from '@nestjs-ai/template-st';
+
+const promptTemplate = PromptTemplate.builder()
+    .renderer(new StTemplateRenderer({
+        startDelimiterToken: '<',
+        endDelimiterToken: '>',
+    }))
+    .template(`
             Tell me the names of 5 movies whose soundtrack was composed by <composer>.
-            """)
+            `)
     .build();
 
-String prompt = promptTemplate.render(Map.of("composer", "John Williams"));
+const prompt = promptTemplate.render({ composer: 'John Williams' });
 ----
 
 The interfaces implemented by this class support different aspects of prompt creation:
@@ -188,140 +192,153 @@ While these interfaces might not be used extensively in many projects, they show
 
 The implemented interfaces are
 
-[source,java]
+[source,typescript]
 ----
-public interface PromptTemplateStringActions {
+export interface PromptTemplateStringActions {
 
-	String render();
+    render(): string;
 
-	String render(Map<String, Object> model);
+    render(additionalVariables: Record<string, unknown>): string;
 
 }
 ----
 
-The method `String render()`: Renders a prompt template into a final string format without external input, suitable for templates without placeholders or dynamic content.
+The method `render(): string`: Renders a prompt template into a final string format without external input, suitable for templates without placeholders or dynamic content.
 
-The method `String render(Map<String, Object> model)`: Enhances rendering functionality to include dynamic content. It uses a `Map<String, Object>` where map keys are placeholder names in the prompt template, and values are the dynamic content to be inserted.
+The method `render(additionalVariables: Record<string, unknown>): string`: Enhances rendering functionality to include dynamic content. It uses a `Record<string, unknown>` where keys are placeholder names in the prompt template, and values are the dynamic content to be inserted.
 
-[source,java]
+[source,typescript]
 ----
-public interface PromptTemplateMessageActions {
+export interface PromptTemplateMessageActions {
 
-	Message createMessage();
+    createMessage(): Message;
 
-    Message createMessage(List<Media> mediaList);
+    createMessage(mediaList: Media[]): Message;
 
-	Message createMessage(Map<String, Object> model);
+    createMessage(model: Record<string, unknown>): Message;
 
 }
 ----
 
-The method `Message createMessage()`: Creates a `Message` object without additional data, used for static or predefined message content.
+The method `createMessage(): Message`: Creates a `Message` object without additional data, used for static or predefined message content.
 
-The method `Message createMessage(List<Media> mediaList)`: Creates a `Message` object with static textual and media content.
+The method `createMessage(mediaList: Media[]): Message`: Creates a `Message` object with static textual and media content.
 
-The method `Message createMessage(Map<String, Object> model)`: Extends message creation to integrate dynamic content, accepting a `Map<String, Object>` where each entry represents a placeholder in the message template and its corresponding dynamic value.
+The method `createMessage(model: Record<string, unknown>): Message`: Extends message creation to integrate dynamic content, accepting a `Record<string, unknown>` where each entry represents a placeholder in the message template and its corresponding dynamic value.
 
 
-[source,java]
+[source,typescript]
 ----
-public interface PromptTemplateActions extends PromptTemplateStringActions {
+export interface PromptTemplateActions extends PromptTemplateStringActions {
 
-	Prompt create();
+    create(): Prompt;
 
-	Prompt create(ChatOptions modelOptions);
+    create(modelOptions: ChatOptions): Prompt;
 
-	Prompt create(Map<String, Object> model);
+    create(model: Record<string, unknown>): Prompt;
 
-	Prompt create(Map<String, Object> model, ChatOptions modelOptions);
+    create(model: Record<string, unknown>, modelOptions: ChatOptions): Prompt;
 
 }
 ----
 
-The method `Prompt create()`: Generates a `Prompt` object without external data inputs, ideal for static or predefined prompts.
+The method `create(): Prompt`: Generates a `Prompt` object without external data inputs, ideal for static or predefined prompts.
 
-The method `Prompt create(ChatOptions modelOptions)`: Generates a `Prompt` object without external data inputs and with specific options for the chat request.
+The method `create(modelOptions: ChatOptions): Prompt`: Generates a `Prompt` object without external data inputs and with specific options for the chat request.
 
-The method `Prompt create(Map<String, Object> model)`: Expands prompt creation capabilities to include dynamic content, taking a `Map<String, Object>` where each map entry is a placeholder in the prompt template and its associated dynamic value.
+The method `create(model: Record<string, unknown>): Prompt`: Expands prompt creation capabilities to include dynamic content, taking a `Record<string, unknown>` where each entry is a placeholder in the prompt template and its associated dynamic value.
 
-The method `Prompt create(Map<String, Object> model, ChatOptions modelOptions)`: Expands prompt creation capabilities to include dynamic content, taking a `Map<String, Object>` where each map entry is a placeholder in the prompt template and its associated dynamic value, and specific options for the chat request.
+The method `create(model: Record<string, unknown>, modelOptions: ChatOptions): Prompt`: Expands prompt creation capabilities to include dynamic content, taking a `Record<string, unknown>` where each entry is a placeholder in the prompt template and its associated dynamic value, and specific options for the chat request.
 
 == Example Usage
 
-A simple example taken from the https://github.com/Azure-Samples/spring-ai-azure-workshop/blob/main/2-README-prompt-templating.md[AI Workshop on PromptTemplates] is shown below.
+A simple example using a `PromptTemplate` is shown below.
 
-[source,java]
+[source,typescript]
 ----
-PromptTemplate promptTemplate = new PromptTemplate("Tell me a {adjective} joke about {topic}");
+import { PromptTemplate } from '@nestjs-ai/model';
 
-Prompt prompt = promptTemplate.create(Map.of("adjective", adjective, "topic", topic));
+const promptTemplate = new PromptTemplate('Tell me a {adjective} joke about {topic}');
 
-return chatModel.call(prompt).getResult();
+const prompt = promptTemplate.create({ adjective, topic });
+
+const response = await chatModel.call(prompt);
+return response.result;
 ----
 
-Another example taken from the https://github.com/Azure-Samples/spring-ai-azure-workshop/blob/main/3-README-prompt-roles.md[AI Workshop on Roles] is shown below.
+Another example using roles is shown below.
 
-[source,java]
+[source,typescript]
 ----
-String userText = """
+import {
+  Prompt,
+  SystemPromptTemplate,
+  UserMessage,
+} from '@nestjs-ai/model';
+
+const userText = `
     Tell me about three famous pirates from the Golden Age of Piracy and why they did.
     Write at least a sentence for each pirate.
-    """;
+    `;
 
-Message userMessage = new UserMessage(userText);
+const userMessage = UserMessage.of(userText);
 
-String systemText = """
+const systemText = `
   You are a helpful AI assistant that helps people find information.
   Your name is {name}
   You should reply to the user's request with your name and also in the style of a {voice}.
-  """;
+  `;
 
-SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemText);
-Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", name, "voice", voice));
+const systemPromptTemplate = new SystemPromptTemplate(systemText);
+const systemMessage = systemPromptTemplate.createMessage({ name, voice });
 
-Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
+const prompt = new Prompt([userMessage, systemMessage]);
 
-List<Generation> response = chatModel.call(prompt).getResults();
+const response = await chatModel.call(prompt);
+const generations = response.results;
 ----
 
 This shows how you can build up the `Prompt` instance by using the `SystemPromptTemplate` to create a `Message` with the system role passing in placeholder values.
 The message with the role `user` is then combined with the message of the role `system` to form the prompt.
-The prompt is then passed to the ChatModel to get a generative response.
+The prompt is then passed to the `ChatModel` to get a generative response.
 
 === Using a custom template renderer
 
-You can use a custom template renderer by implementing the `TemplateRenderer` interface and passing it to the `PromptTemplate` constructor. You can also keep using the default `StTemplateRenderer`, but with a custom configuration.
+You can use a custom template renderer by implementing the `TemplateRenderer` interface and passing it to the `PromptTemplate` builder. You can also keep using the default `StTemplateRenderer`, but with a custom configuration.
 
 By default, template variables are identified by the `{}` syntax. If you're planning to include JSON in your prompt, you might want to use a different syntax to avoid conflicts with JSON syntax. For example, you can use the `<` and `>` delimiters.
 
-[source,java]
+[source,typescript]
 ----
-PromptTemplate promptTemplate = PromptTemplate.builder()
-    .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
-    .template("""
+import { PromptTemplate } from '@nestjs-ai/model';
+import { StTemplateRenderer } from '@nestjs-ai/template-st';
+
+const promptTemplate = PromptTemplate.builder()
+    .renderer(new StTemplateRenderer({
+        startDelimiterToken: '<',
+        endDelimiterToken: '>',
+    }))
+    .template(`
             Tell me the names of 5 movies whose soundtrack was composed by <composer>.
-            """)
+            `)
     .build();
 
-String prompt = promptTemplate.render(Map.of("composer", "John Williams"));
+const prompt = promptTemplate.render({ composer: 'John Williams' });
 ----
 
-=== Using resources instead of raw Strings
+=== Using files instead of raw strings
 
-Spring AI supports the `org.springframework.core.io.Resource` abstraction, so you can put prompt data in a file that can directly be used in a `PromptTemplate`.
-For example, you can define a field in your Spring managed component to retrieve the `Resource`.
+The `PromptTemplate` constructor accepts a `Buffer` in place of a template string, so you can put prompt data in a file and load it directly into a `PromptTemplate`.
+For example, you can read a template file from disk and pass it to `SystemPromptTemplate`.
 
-[source,java]
+[source,typescript]
 ----
-@Value("classpath:/prompts/system-message.st")
-private Resource systemResource;
-----
+import { readFileSync } from 'node:fs';
+import { SystemPromptTemplate } from '@nestjs-ai/model';
 
-and then pass that resource to the `SystemPromptTemplate` directly.
+const systemResource = readFileSync('prompts/system-message.st');
 
-[source,java]
-----
-SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
+const systemPromptTemplate = new SystemPromptTemplate(systemResource);
 ----
 
 == Prompt Engineering

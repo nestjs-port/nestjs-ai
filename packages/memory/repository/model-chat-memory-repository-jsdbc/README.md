@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/antora/modules/ROOT/images/nestjs-ai-logo.svg" alt="NestJS AI logo" width="160" style="display:block; margin:0 auto 0.25rem;" />
+  <img src="https://raw.githubusercontent.com/nestjs-port/nestjs-ai/main/docs/antora/modules/ROOT/images/nestjs-ai-logo.svg" alt="NestJS AI logo" width="160" style="display:block; margin:0 auto 0.25rem;" />
 </div>
 
 # NestJS AI

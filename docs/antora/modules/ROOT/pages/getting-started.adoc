@@ -5,7 +5,7 @@ This section offers jumping off points for how to get started using NestJS AI.
 
 You should follow the steps in each of the following sections according to your needs.
 
-NOTE: NestJS AI targets NestJS 10+ or 11+ (peer dependency range `^10.0.0 || ^11.0.0`) and requires Node.js 20+.
+NOTE: NestJS AI targets NestJS 10+ or 11+ (peer dependency range `^10.0.0 || ^11.0.0`) and requires Node.js 22.12.0 or later, matching the `engines.node` constraint in `package.json`.
 
 [[installation]]
 == Installation
@@ -18,7 +18,7 @@ Install the platform package together with the chat model(s) and clients you nee
 [source,bash]
 ----
 pnpm add @nestjs-ai/platform @nestjs-ai/model-openai @nestjs-ai/client-chat \
-  @nestjs-ai/commons @nestjs-ai/model @nestjs-ai/template-st \
+  @nestjs-ai/commons @nestjs-ai/model \
   @nestjs-port/core @nestjs/common @nestjs/core \
   rxjs zod openai
 ----

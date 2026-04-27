@@ -6,55 +6,68 @@ _Tool calling_ (also known as _function calling_) is a common pattern in AI appl
 Tools are mainly used for:
 
 * **Information Retrieval**. Tools in this category can be used to retrieve information from external sources, such as a database, a web service, a file system, or a web search engine. The goal is to augment the knowledge of the model, allowing it to answer questions that it would not be able to answer otherwise. As such, they can be used in Retrieval Augmented Generation (RAG) scenarios. For example, a tool can be used to retrieve the current weather for a given location, to retrieve the latest news articles, or to query a database for a specific record.
-* **Taking Action**. Tools in this category can be used to take action in a software system, such as sending an email, creating a new record in a database, submitting a form, or triggering a workflow. The goal is to automate tasks that would otherwise require human intervention or explicit programming. For example, a tool can be used to book a flight for a customer interacting with a chatbot, to fill out a form on a web page, or to implement a Java class based on an automated test (TDD) in a code generation scenario.
+* **Taking Action**. Tools in this category can be used to take action in a software system, such as sending an email, creating a new record in a database, submitting a form, or triggering a workflow. The goal is to automate tasks that would otherwise require human intervention or explicit programming. For example, a tool can be used to book a flight for a customer interacting with a chatbot, to fill out a form on a web page, or to implement a TypeScript class based on an automated test (TDD) in a code generation scenario.
 
 Even though we typically refer to _tool calling_ as a model capability, it is actually up to the client application to provide the tool calling logic. The model can only request a tool call and provide the input arguments, whereas the application is responsible for executing the tool call from the input arguments and returning the result. The model never gets access to any of the APIs provided as tools, which is a critical security consideration.
 
-Spring AI provides convenient APIs to define tools, resolve tool call requests from a model, and execute the tool calls. The following sections provide an overview of the tool calling capabilities in Spring AI.
+NestJS AI provides convenient APIs to define tools, resolve tool call requests from a model, and execute the tool calls. The following sections provide an overview of the tool calling capabilities in NestJS AI.
 
 NOTE: Check the xref:api/chat/comparison.adoc[Chat Model Comparisons] to see which AI models support tool calling invocation.
 
-TIP: Follow the guide to migrate from the deprecated xref:api/tools-migration.adoc[FunctionCallback to ToolCallback API].
-
 == Quick Start
 
-Let's see how to start using tool calling in Spring AI. We'll implement two simple tools: one for information retrieval and one for taking action. The information retrieval tool will be used to get the current date and time in the user's time zone. The action tool will be used to set an alarm for a specified time.
+Let's see how to start using tool calling in NestJS AI. We'll implement two simple tools: one for information retrieval and one for taking action. The information retrieval tool will be used to get the current date and time in the system's time zone. The action tool will be used to set an alarm for a specified time.
+
+The examples below assume you have already configured a `ChatModel` via `OpenAiChatModelModule` (or another chat model module). See xref:_module_configuration[] below for the module setup.
 
 === Information Retrieval
 
 AI models don't have access to real-time information. Any question that assumes awareness of information such as the current date or weather forecast cannot be answered by the model. However, we can provide a tool that can retrieve this information, and let the model call this tool when access to real-time information is needed.
 
-Let's implement a tool to get the current date and time in the user's time zone in a `DateTimeTools` class. The tool will take no argument. The `LocaleContextHolder` from Spring Framework can provide the user's time zone. The tool will be defined as a method annotated with `@Tool`. To help the model understand if and when to call this tool, we'll provide a detailed description of what the tools does.
+Let's implement a tool to get the current date and time in the system's time zone in a `DateTimeTools` class. The tool will take no argument. The standard `Intl.DateTimeFormat().resolvedOptions().timeZone` API can provide the system time zone. The tool will be defined as a method decorated with `@Tool`. To help the model understand if and when to call this tool, we'll provide a detailed description of what the tool does.
 
-[source,java]
+[source,typescript]
 ----
-import java.time.LocalDateTime;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.context.i18n.LocaleContextHolder;
+import { Injectable } from '@nestjs/common';
+import { Tool } from '@nestjs-ai/model';
 
-class DateTimeTools {
-
-    @Tool(description = "Get the current date and time in the user's timezone")
-    String getCurrentDateTime() {
-        return LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()).toString();
-    }
-
+@Injectable()
+export class DateTimeTools {
+  @Tool({ description: "Get the current date and time in the user's timezone" })
+  getCurrentDateTime(): string {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return new Date().toLocaleString('sv-SE', { timeZone });
+  }
 }
 ----
 
 Next, let's make the tool available to the model. In this example, we'll use the `ChatClient` to interact with the model. We'll provide the tool to the model by passing an instance of `DateTimeTools` via the `tools()` method. When the model needs to know the current date and time, it will request the tool to be called. Internally, the `ChatClient` will call the tool and return the result to the model, which will then use the tool call result to generate the final response to the original question.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
+import { Controller, Get } from '@nestjs/common';
+import { ChatClient } from '@nestjs-ai/client-chat';
+import { InjectChatModel } from '@nestjs-ai/platform';
+import type { ChatModel } from '@nestjs-ai/model';
+import { DateTimeTools } from './date-time.tools.js';
 
-String response = ChatClient.create(chatModel)
-        .prompt("What day is tomorrow?")
-        .tools(new DateTimeTools())
-        .call()
-        .content();
+@Controller()
+export class TimeController {
+  private readonly chatClient: ChatClient;
 
-System.out.println(response);
+  constructor(@InjectChatModel() chatModel: ChatModel) {
+    this.chatClient = ChatClient.create(chatModel);
+  }
+
+  @Get('/tomorrow')
+  async tomorrow(): Promise<string | null> {
+    return this.chatClient
+      .prompt('What day is tomorrow?')
+      .tools(new DateTimeTools())
+      .call()
+      .content();
+  }
+}
 ----
 
 The output will be something like:
@@ -79,66 +92,144 @@ AI models can be used to generate plans for accomplishing certain goals. For exa
 
 In the previous example, we used a tool to determine the current date and time. In this example, we'll define a second tool for setting an alarm at a specific time. The goal is to set an alarm for 10 minutes from now, so we need to provide both tools to the model to accomplish this task.
 
-We'll add the new tool to the same `DateTimeTools` class as before. The new tool will take a single parameter, which is the time in ISO-8601 format. The tool will then print a message to the console indicating that the alarm has been set for the given time. Like before, the tool is defined as a method annotated with `@Tool`, which we also use to provide a detailed description to help the model understand when and how to use the tool.
+We'll add the new tool to the same `DateTimeTools` class as before. The new tool will take a single parameter, which is the time in ISO-8601 format. The tool will then print a message to the console indicating that the alarm has been set for the given time. Like before, the tool is defined as a method decorated with `@Tool`, which we also use to provide a detailed description to help the model understand when and how to use the tool.
 
-[source,java]
+[source,typescript]
 ----
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.context.i18n.LocaleContextHolder;
+import { Injectable } from '@nestjs/common';
+import { Tool } from '@nestjs-ai/model';
+import { z } from 'zod';
 
-class DateTimeTools {
+@Injectable()
+export class DateTimeTools {
+  @Tool({ description: "Get the current date and time in the user's timezone" })
+  getCurrentDateTime(): string {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return new Date().toLocaleString('sv-SE', { timeZone });
+  }
 
-    @Tool(description = "Get the current date and time in the user's timezone")
-    String getCurrentDateTime() {
-        return LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()).toString();
-    }
-
-    @Tool(description = "Set a user alarm for the given time, provided in ISO-8601 format")
-    void setAlarm(String time) {
-        LocalDateTime alarmTime = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME);
-        System.out.println("Alarm set for " + alarmTime);
-    }
-
+  @Tool({
+    description: 'Set a user alarm for the given time, provided in ISO-8601 format',
+    parameters: z.object({
+      time: z.string().describe('Time in ISO-8601 format'),
+    }),
+  })
+  setAlarm(input: { time: string }): void {
+    const alarmTime = new Date(input.time);
+    console.log(`Alarm set for ${alarmTime.toISOString()}`);
+  }
 }
 ----
 
 Next, let's make both tools available to the model. We'll use the `ChatClient` to interact with the model. We'll provide the tools to the model by passing an instance of `DateTimeTools` via the `tools()` method. When we ask to set up an alarm 10 minutes from now, the model will first need to know the current date and time. Then, it will use the current date and time to calculate the alarm time. Finally, it will use the alarm tool to set up the alarm. Internally, the `ChatClient` will handle any tool call request from the model and send back to it any tool call execution result, so that the model can generate the final response.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
+const response = await this.chatClient
+  .prompt('Can you set an alarm 10 minutes from now?')
+  .tools(new DateTimeTools())
+  .call()
+  .content();
 
-String response = ChatClient.create(chatModel)
-        .prompt("Can you set an alarm 10 minutes from now?")
-        .tools(new DateTimeTools())
-        .call()
-        .content();
-
-System.out.println(response);
+console.log(response);
 ----
 
 In the application logs, you can check the alarm has been set at the correct time.
 
+== Module Configuration
+
+Tool calling is part of the core `@nestjs-ai/model` package and is wired automatically by `NestAiModule.forRoot()`. To use tools with a `ChatClient`, you only need to import a chat model module and (optionally) `ChatClientModule`.
+
+=== Installation
+
+Install the platform, a chat model module, and the chat client:
+
+[source,bash]
+----
+pnpm add @nestjs-ai/platform @nestjs-ai/model-openai @nestjs-ai/client-chat
+----
+
+Tool definitions also rely on a Standard Schema-compatible validation library. The examples in this document use https://zod.dev[Zod]:
+
+[source,bash]
+----
+pnpm add zod
+----
+
+=== Basic Setup
+
+[source,typescript]
+----
+import { Module } from '@nestjs/common';
+import { NestAiModule } from '@nestjs-ai/platform';
+import { OpenAiChatModelModule } from '@nestjs-ai/model-openai';
+import { ChatClientModule } from '@nestjs-ai/client-chat';
+import { DateTimeTools } from './date-time.tools.js';
+import { TimeController } from './time.controller.js';
+
+@Module({
+  imports: [
+    NestAiModule.forRoot(),
+    OpenAiChatModelModule.forFeature({
+      apiKey: process.env.OPENAI_API_KEY,
+      options: { model: 'gpt-4o-mini' },
+    }),
+    ChatClientModule.forFeature(),
+  ],
+  controllers: [TimeController],
+  providers: [DateTimeTools],
+})
+export class AppModule {}
+----
+
+=== Async Configuration
+
+For dynamic configuration (e.g., loading API keys from environment or a config service):
+
+[source,typescript]
+----
+import { Module } from '@nestjs/common';
+import { NestAiModule } from '@nestjs-ai/platform';
+import { OpenAiChatModelModule } from '@nestjs-ai/model-openai';
+import { ChatClientModule } from '@nestjs-ai/client-chat';
+
+@Module({
+  imports: [
+    NestAiModule.forRoot(),
+    OpenAiChatModelModule.forFeatureAsync({
+      useFactory: () => ({
+        apiKey: process.env.OPENAI_API_KEY,
+        options: { model: 'gpt-4o-mini' },
+      }),
+    }),
+    ChatClientModule.forFeature(),
+  ],
+})
+export class AppModule {}
+----
+
+=== Module Dependency Chain
+
+`NestAiModule.forRoot()` should be imported before any chat model module. It binds the NestJS logger and registers the `ProviderInstanceExplorer` used by `ToolCallingModule` to discover `@Tool`-decorated NestJS providers (see xref:_dynamic_specification_nestjs_providers[]). `ChatClientModule.forFeature()` must be imported after a chat model module, since it depends on `CHAT_MODEL_TOKEN`.
+
 == Overview
 
-Spring AI supports tool calling through a set of flexible abstractions that allow you to define, resolve, and execute tools in a consistent way. This section provides an overview of the main concepts and components of tool calling in Spring AI.
+NestJS AI supports tool calling through a set of flexible abstractions that allow you to define, resolve, and execute tools in a consistent way. This section provides an overview of the main concepts and components of tool calling in NestJS AI.
 
 image::tools/tool-calling-01.jpg[The main sequence of actions for tool calling, width=700, align="center"]
 
-1. When we want to make a tool available to the model, we include its definition in the chat request. Each tool definition comprises of a name, a description, and the schema of the input parameters.
+1. When we want to make a tool available to the model, we include its definition in the chat request. Each tool definition comprises a name, a description, and the schema of the input parameters.
 2. When the model decides to call a tool, it sends a response with the tool name and the input parameters modeled after the defined schema.
 3. The application is responsible for using the tool name to identify and execute the tool with the provided input parameters.
 4. The result of the tool call is processed by the application.
 5. The application sends the tool call result back to the model.
 6. The model generates the final response using the tool call result as additional context.
 
-Tools are the building blocks of tool calling and they are modeled by the `ToolCallback` interface. Spring AI provides built-in support for specifying `ToolCallback`(s) from methods and functions, but you can always define your own `ToolCallback` implementations to support more use cases.
+Tools are the building blocks of tool calling and they are modeled by the `ToolCallback` abstract class. NestJS AI provides built-in support for specifying `ToolCallback`(s) from methods and functions, but you can always define your own `ToolCallback` implementations to support more use cases.
 
 `ChatModel` implementations transparently dispatch tool call requests to the corresponding `ToolCallback` implementations and will send the tool call results back to the model, which will ultimately generate the final response. They do so using the `ToolCallingManager` interface, which is responsible for managing the tool execution lifecycle.
 
-Both `ChatClient` and `ChatModel` accept a list of `ToolCallback` objects to make the tools available to the model and the `ToolCallingManager` that will eventually execute them. 
+Both `ChatClient` and `ChatModel` accept a list of `ToolCallback` objects to make the tools available to the model and the `ToolCallingManager` that will eventually execute them.
 
 Besides passing the `ToolCallback` objects directly, you can also pass a list of tool names, that will be resolved dynamically using the `ToolCallbackResolver` interface.
 
@@ -146,89 +237,108 @@ The following sections will go into more details about all these concepts and AP
 
 == Methods as Tools
 
-Spring AI provides built-in support for specifying tools (i.e. `ToolCallback`(s)) from methods in two ways:
+NestJS AI provides built-in support for specifying tools (i.e. `ToolCallback`(s)) from methods in two ways:
 
-- declaratively, using the `@Tool` annotation
+- declaratively, using the `@Tool` decorator
 - programmatically, using the low-level `MethodToolCallback` implementation.
 
 === Declarative Specification: `@Tool`
 
-You can turn a method into a tool by annotating it with `@Tool`.
+You can turn a method into a tool by decorating it with `@Tool`.
 
-[source,java]
+[source,typescript]
 ----
+import { Tool } from '@nestjs-ai/model';
+
 class DateTimeTools {
-
-    @Tool(description = "Get the current date and time in the user's timezone")
-    String getCurrentDateTime() {
-        return LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()).toString();
-    }
-
+  @Tool({ description: "Get the current date and time in the user's timezone" })
+  getCurrentDateTime(): string {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return new Date().toLocaleString('sv-SE', { timeZone });
+  }
 }
 ----
 
-The `@Tool` annotation allows you to provide key information about the tool:
+The `@Tool` decorator allows you to provide key information about the tool:
 
 - `name`: The name of the tool. If not provided, the method name will be used. AI models use this name to identify the tool when calling it. Therefore, it's not allowed to have two tools with the same name in the same class. The name must be unique across all the tools available to the model for a specific chat request.
 - `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
 - `returnDirect`: Whether the tool result should be returned directly to the client or passed back to the model. See xref:_return_direct[] for more details.
-- `resultConverter`: The `ToolCallResultConverter` implementation to use for converting the result of a tool call to a `String object` to send back to the AI model. See xref:_result_conversion[] for more details.
+- `resultConverter`: The `ToolCallResultConverter` class to use for converting the result of a tool call to a `string` to send back to the AI model. See xref:_result_conversion[] for more details.
+- `parameters`: A Standard Schema describing the tool's input. When omitted, the tool is treated as a no-argument tool. See xref:_json_schema[] for more details.
+- `returns`: A Standard Schema describing the tool's return value. Used by the result converter when serializing the response.
 
-The method can be either static or instance, and it can have any visibility (public, protected, package-private, or private). The class that contains the method can be either a top-level class or a nested class, and it can also have any visibility (as long as it's accessible where you're planning to instantiate it).
+The method can have any visibility (public, protected, or private). The class that contains the method can be a top-level class or a nested class.
 
-NOTE: Spring AI provides built-in support for AOT compilation of the `@Tool`-annotated methods as long as the class containing the methods is a Spring bean (e.g. `@Component`). Otherwise, you'll need to provide the necessary configuration to the GraalVM compiler. For example, by annotating the class with `@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_METHODS)`.
+You can define an input parameter for the method (or no input at all) using a Standard Schema. NestJS AI uses the schema to generate the JSON schema sent to the model and to validate the input arguments at execution time. Most validation libraries that implement Standard Schema work, including https://zod.dev[Zod], https://valibot.dev[Valibot], and https://arktype.io[ArkType].
 
-You can define any number of arguments for the method (including no argument) with most types (primitives, POJOs, enums, lists, arrays, maps, and so on). Similarly, the method can return most types, including `void`. If the method returns a value, the return type must be a serializable type, as the result will be serialized and sent back to the model.
+When `parameters` is set, the decorated method receives the validated input as its first argument and (optionally) a `ToolContext` as its second argument. When `parameters` is omitted, the method receives no arguments (or just a `ToolContext`).
 
-NOTE: Some types are not supported. See xref:_method_tool_limitations[] for more details.
-
-Spring AI will generate the JSON schema for the input parameters of the `@Tool`-annotated method automatically. The schema is used by the model to understand how to call the tool and prepare the tool request. The `@ToolParam` annotation can be used to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required.
-
-[source,java]
+[source,typescript]
 ----
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import { Tool } from '@nestjs-ai/model';
+import { z } from 'zod';
 
 class DateTimeTools {
-
-    @Tool(description = "Set a user alarm for the given time")
-    void setAlarm(@ToolParam(description = "Time in ISO-8601 format") String time) {
-        LocalDateTime alarmTime = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME);
-        System.out.println("Alarm set for " + alarmTime);
-    }
-
+  @Tool({
+    description: 'Set a user alarm for the given time',
+    parameters: z.object({
+      time: z.string().describe('Time in ISO-8601 format'),
+    }),
+  })
+  setAlarm(input: { time: string }): void {
+    const alarmTime = new Date(input.time);
+    console.log(`Alarm set for ${alarmTime.toISOString()}`);
+  }
 }
 ----
 
-The `@ToolParam` annotation allows you to provide key information about a tool parameter:
+Per-parameter information is supplied through the underlying schema library. With Zod, use:
 
-- `description`: The description for the parameter, which can be used by the model to understand better how to use it. For example, what format the parameter should be in, what values are allowed, and so on.
-- `required`: Whether the parameter is required or optional. By default, all parameters are considered required. 
+- `.describe('...')` — adds a description used by the model to understand how to use the parameter, such as the expected format or allowed values.
+- `.optional()` or `.nullable()` — marks the parameter as optional. By default, all input parameters are considered required.
 
-If a parameter is annotated as `@Nullable`, it will be considered optional unless explicitly marked as required using the `@ToolParam` annotation.
+WARNING: Defining the correct required status for the input parameter is crucial to mitigate the risk of hallucinations and ensure the model provides the right input when calling the tool.
 
-Besides the `@ToolParam` annotation, you can also use the `@Schema` annotation from Swagger or `@JsonProperty` from Jackson. See xref:_json_schema[] for more details.
+The tool method signature differs from Spring AI in a few important ways:
+
+[cols="1,1,1"]
+|====
+| Aspect | Spring AI | NestJS AI
+
+| Per-parameter metadata
+| `@ToolParam` annotation on each method argument
+| No `@ToolParam` decorator. Parameter description and required status are declared on the schema passed to `@Tool({ parameters })`
+
+| Method input arity
+| Multiple positional arguments — each declared method parameter maps to a top-level property of the JSON input
+| A single input object — every property the model can supply must live under one Standard Schema object passed to the method's first argument
+
+| `ToolContext` position
+| Any argument with type `ToolContext`
+| Always the last argument (after the input object, or as the only argument when `parameters` is omitted)
+|====
 
 ==== Adding Tools to `ChatClient`
 
 When using the declarative specification approach, you can pass the tool class instance to the `tools()` method when invoking a `ChatClient`. Such tools will only be available for the specific chat request they are added to.
 
-[source,java]
+[source,typescript]
 ----
-ChatClient.create(chatModel)
-    .prompt("What day is tomorrow?")
-    .tools(new DateTimeTools())
-    .call()
-    .content();
+await ChatClient.create(chatModel)
+  .prompt('What day is tomorrow?')
+  .tools(new DateTimeTools())
+  .call()
+  .content();
 ----
 
-Under the hood, the `ChatClient` will generate a `ToolCallback` from each `@Tool`-annotated method in the tool class instance and pass them to the model. In case you prefer to generate the `ToolCallback`(s) yourself, you can use the `ToolCallbacks` utility class.
+Under the hood, the `ChatClient` will generate a `ToolCallback` from each `@Tool`-decorated method in the tool class instance and pass them to the model. In case you prefer to generate the `ToolCallback`(s) yourself, you can use the `ToolCallbacks` utility class.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback[] dateTimeTools = ToolCallbacks.from(new DateTimeTools());
+import { ToolCallbacks } from '@nestjs-ai/model';
+
+const dateTimeTools = ToolCallbacks.from(new DateTimeTools());
 ----
 
 ==== Adding Default Tools to `ChatClient`
@@ -238,164 +348,164 @@ If both default and runtime tools are provided, the runtime tools will completel
 
 WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ChatClient chatClient = ChatClient.builder(chatModel)
-    .defaultTools(new DateTimeTools())
-    .build();
+const chatClient = ChatClient.builder(chatModel)
+  .defaultTools(new DateTimeTools())
+  .build();
 ----
 
 ==== Adding Tools to `ChatModel`
 
-When using the declarative specification approach, you can pass the tool class instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` you use to call a `ChatModel`. Such tools will only be available for the specific chat request they are added to.
+When using the declarative specification approach, you can pass the tool callbacks to the `toolCallbacks` option of the `ChatOptions` you use to call a `ChatModel`. Such tools will only be available for the specific chat request they are added to.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallback[] dateTimeTools = ToolCallbacks.from(new DateTimeTools());
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolCallbacks(dateTimeTools)
-    .build();
-Prompt prompt = new Prompt("What day is tomorrow?", chatOptions);
-chatModel.call(prompt);
+import { Prompt, ToolCallbacks } from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const dateTimeTools = ToolCallbacks.from(new DateTimeTools());
+const chatOptions = new OpenAiChatOptions({
+  toolCallbacks: dateTimeTools,
+});
+const prompt = new Prompt('What day is tomorrow?', chatOptions);
+await chatModel.call(prompt);
 ----
 
 ==== Adding Default Tools to `ChatModel`
 
-When using the declarative specification approach, you can add default tools to `ChatModel` at construction time by passing the tool class instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
+When using the declarative specification approach, you can add default tools to a `ChatModel` at construction time by passing the tool callbacks to the `toolCallbacks` option of the default `ChatOptions` instance used to create the `ChatModel`.
 If both default and runtime tools are provided, the runtime tools will completely override the default tools.
 
 WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback[] dateTimeTools = ToolCallbacks.from(new DateTimeTools());
-ChatModel chatModel = OllamaChatModel.builder()
-    .ollamaApi(OllamaApi.builder().build())
-    .defaultOptions(ToolCallingChatOptions.builder()
-            .toolCallbacks(dateTimeTools)
-            .build())
-    .build();
+import { ToolCallbacks } from '@nestjs-ai/model';
+import { OpenAiChatModel, OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const dateTimeTools = ToolCallbacks.from(new DateTimeTools());
+const chatModel = new OpenAiChatModel({
+  options: new OpenAiChatOptions({
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+    model: 'gpt-4o-mini',
+    toolCallbacks: dateTimeTools,
+  }),
+});
 ----
 
 === Programmatic Specification: `MethodToolCallback`
 
 You can turn a method into a tool by building a `MethodToolCallback` programmatically.
 
-[source,java]
+[source,typescript]
 ----
 class DateTimeTools {
-
-    String getCurrentDateTime() {
-        return LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()).toString();
-    }
-
+  getCurrentDateTime(): string {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return new Date().toLocaleString('sv-SE', { timeZone });
+  }
 }
 ----
 
-The `MethodToolCallback.Builder` allows you to build a `MethodToolCallback` instance and provide key information about the tool:
+The `MethodToolCallback.builder()` allows you to build a `MethodToolCallback` instance and provide key information about the tool:
 
-- `toolDefinition`: The `ToolDefinition` instance that defines the tool name, description, and input schema. You can build it using the `ToolDefinition.Builder` class. Required.
-- `toolMetadata`: The `ToolMetadata` instance that defines additional settings such as whether the result should be returned directly to the client, and the result converter to use. You can build it using the `ToolMetadata.Builder` class.
-- `toolMethod`: The `Method` instance that represents the tool method. Required.
-- `toolObject`: The object instance that contains the tool method. If the method is static, you can omit this parameter.
-- `toolCallResultConverter`: The `ToolCallResultConverter` instance to use for converting the result of a tool call to a `String` object to send back to the AI model. If not provided, the default converter will be used (`DefaultToolCallResultConverter`).
+- `toolDefinition`: The `ToolDefinition` instance that defines the tool name, description, and input schema. You can build it using `ToolDefinition.builder()` or `ToolDefinitions.builder({ methodName, metadata })`. Required.
+- `toolMetadata`: The `ToolMetadata` instance that defines additional settings such as whether the result should be returned directly to the client. Created via `ToolMetadata.create({ ... })`.
+- `toolMethod`: The function reference for the tool method. Required.
+- `toolObject`: The instance that owns the method. If the method is static, you can omit this parameter.
+- `toolInputSchema`: The Standard Schema describing the input. Required when the method takes an input object.
+- `toolResultSchema`: The Standard Schema describing the return value (optional).
+- `toolCallResultConverter`: The `ToolCallResultConverter` instance to use for converting the result of a tool call to a `string` to send back to the AI model. If not provided, the default converter will be used (`DefaultToolCallResultConverter`).
 
-The `ToolDefinition.Builder` allows you to build a `ToolDefinition` instance and define the tool name, description, and input schema:
+The `ToolDefinition.builder()` allows you to build a `ToolDefinition` instance and define the tool name, description, and input schema:
 
-- `name`: The name of the tool. If not provided, the method name will be used. AI models use this name to identify the tool when calling it. Therefore, it's not allowed to have two tools with the same name in the same class. The name must be unique across all the tools available to the model for a specific chat request.
-- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
-- `inputSchema`: The JSON schema for the input parameters of the tool. If not provided, the schema will be generated automatically based on the method parameters. You can use the `@ToolParam` annotation to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required. See xref:_json_schema[] for more details.
+- `name`: The name of the tool. If not provided, the method name will be used.
+- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool.
+- `inputSchema`: The JSON schema for the input parameters of the tool, as a string. If not provided, the schema will be generated automatically from the input Standard Schema.
 
-The `ToolMetadata.Builder` allows you to build a `ToolMetadata` instance and define additional settings for the tool:
+`ToolMetadata.create({ ... })` accepts:
 
 - `returnDirect`: Whether the tool result should be returned directly to the client or passed back to the model. See xref:_return_direct[] for more details.
 
-[source,java]
+[source,typescript]
 ----
-Method method = ReflectionUtils.findMethod(DateTimeTools.class, "getCurrentDateTime");
-ToolCallback toolCallback = MethodToolCallback.builder()
-    .toolDefinition(ToolDefinitions.builder(method)
-            .description("Get the current date and time in the user's timezone")
-            .build())
-    .toolMethod(method)
-    .toolObject(new DateTimeTools())
-    .build();
-----
+import {
+  MethodToolCallback,
+  ToolDefinitions,
+  ToolMetadata,
+} from '@nestjs-ai/model';
+import { z } from 'zod';
 
-The method can be either static or instance, and it can have any visibility (public, protected, package-private, or private). The class that contains the method can be either a top-level class or a nested class, and it can also have any visibility (as long as it's accessible where you're planning to instantiate it).
-
-NOTE: Spring AI provides built-in support for AOT compilation of the tool methods as long as the class containing the methods is a Spring bean (e.g. `@Component`). Otherwise, you'll need to provide the necessary configuration to the GraalVM compiler. For example, by annotating the class with `@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_METHODS)`.
-
-You can define any number of arguments for the method (including no argument) with most types (primitives, POJOs, enums, lists, arrays, maps, and so on). Similarly, the method can return most types, including `void`. If the method returns a value, the return type must be a serializable type, as the result will be serialized and sent back to the model.
-
-NOTE: Some types are not supported. See xref:_method_tool_limitations[] for more details.
-
-If the method is static, you can omit the `toolObject()` method, as it's not needed.
-
-[source,java]
-----
-class DateTimeTools {
-
-    static String getCurrentDateTime() {
-        return LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()).toString();
-    }
-
-}
+const tools = new DateTimeTools();
+const toolCallback = MethodToolCallback.builder()
+  .toolDefinition(
+    ToolDefinitions.builder({
+      methodName: 'getCurrentDateTime',
+      metadata: { returns: z.string() },
+    })
+      .description("Get the current date and time in the user's timezone")
+      .build(),
+  )
+  .toolMethod(tools.getCurrentDateTime)
+  .toolObject(tools)
+  .toolMetadata(ToolMetadata.create({}))
+  .build();
 ----
 
-[source,java]
-----
-Method method = ReflectionUtils.findMethod(DateTimeTools.class, "getCurrentDateTime");
-ToolCallback toolCallback = MethodToolCallback.builder()
-    .toolDefinition(ToolDefinitions.builder(method)
-            .description("Get the current date and time in the user's timezone")
-            .build())
-    .toolMethod(method)
-    .build();
-----
+The method can have any visibility. The class that contains the method can be either a top-level class or a nested class.
 
-Spring AI will generate the JSON schema for the input parameters of the method automatically. The schema is used by the model to understand how to call the tool and prepare the tool request. The `@ToolParam` annotation can be used to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required.
+You can define any number of arguments for the method (including no argument) with most types (primitives, plain objects, enums, arrays, maps, and so on) — provided they can be expressed by the input Standard Schema. Similarly, the method can return most types, including `void`. If the method returns a value, the return type must be JSON-serializable, as the result will be serialized and sent back to the model.
 
-[source,java]
+NestJS AI will generate the JSON schema for the input parameters of the method automatically from the schema you provide via `toolInputSchema()`. The schema is used by the model to understand how to call the tool and prepare the tool request.
+
+[source,typescript]
 ----
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import org.springframework.ai.tool.annotation.ToolParam;
+import {
+  MethodToolCallback,
+  ToolDefinitions,
+} from '@nestjs-ai/model';
+import { z } from 'zod';
 
 class DateTimeTools {
-
-    void setAlarm(@ToolParam(description = "Time in ISO-8601 format") String time) {
-        LocalDateTime alarmTime = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME);
-        System.out.println("Alarm set for " + alarmTime);
-    }
-
+  setAlarm(input: { time: string }): void {
+    const alarmTime = new Date(input.time);
+    console.log(`Alarm set for ${alarmTime.toISOString()}`);
+  }
 }
+
+const tools = new DateTimeTools();
+const setAlarmInput = z.object({
+  time: z.string().describe('Time in ISO-8601 format'),
+});
+
+const toolCallback = MethodToolCallback.builder()
+  .toolDefinition(
+    ToolDefinitions.builder({
+      methodName: 'setAlarm',
+      metadata: { parameters: setAlarmInput },
+    })
+      .description('Set a user alarm for the given time')
+      .build(),
+  )
+  .toolMethod(tools.setAlarm)
+  .toolObject(tools)
+  .toolInputSchema(setAlarmInput)
+  .build();
 ----
-
-The `@ToolParam` annotation allows you to provide key information about a tool parameter:
-
-- `description`: The description for the parameter, which can be used by the model to understand better how to use it. For example, what format the parameter should be in, what values are allowed, and so on.
-- `required`: Whether the parameter is required or optional. By default, all parameters are considered required. 
-
-If a parameter is annotated as `@Nullable`, it will be considered optional unless explicitly marked as required using the `@ToolParam` annotation.
-
-Besides the `@ToolParam` annotation, you can also use the `@Schema` annotation from Swagger or `@JsonProperty` from Jackson. See xref:_json_schema[] for more details.
 
 ==== Adding Tools to `ChatClient` and `ChatModel`
 
 When using the programmatic specification approach, you can pass the `MethodToolCallback` instance to the `toolCallbacks()` method of `ChatClient`.
 The tool will only be available for the specific chat request it's added to.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback toolCallback = ...
-ChatClient.create(chatModel)
-    .prompt("What day is tomorrow?")
-    .toolCallbacks(toolCallback)
-    .call()
-    .content();
+await ChatClient.create(chatModel)
+  .prompt('What day is tomorrow?')
+  .toolCallbacks(toolCallback)
+  .call()
+  .content();
 ----
 
 ==== Adding Default Tools to `ChatClient`
@@ -405,119 +515,127 @@ If both default and runtime tools are provided, the runtime tools will completel
 
 WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallback toolCallback = ...
-ChatClient chatClient = ChatClient.builder(chatModel)
-    .defaultToolCallbacks(toolCallback)
-    .build();
+const chatClient = ChatClient.builder(chatModel)
+  .defaultToolCallbacks(toolCallback)
+  .build();
 ----
 
 ==== Adding Tools to `ChatModel`
 
-When using the programmatic specification approach, you can pass the `MethodToolCallback` instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` you use to call a `ChatModel`. The tool will only be available for the specific chat request it's added to.
+When using the programmatic specification approach, you can pass the `MethodToolCallback` instance to the `toolCallbacks` option of the `ChatOptions` you use to call a `ChatModel`. The tool will only be available for the specific chat request it's added to.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallback toolCallback = ...
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolCallbacks(toolCallback)
-    .build();
-Prompt prompt = new Prompt("What day is tomorrow?", chatOptions);
-chatModel.call(prompt);
+import { Prompt } from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const chatOptions = new OpenAiChatOptions({ toolCallbacks: [toolCallback] });
+const prompt = new Prompt('What day is tomorrow?', chatOptions);
+await chatModel.call(prompt);
 ----
 
 ==== Adding Default Tools to `ChatModel`
 
-When using the programmatic specification approach, you can add default tools to a `ChatModel` at construction time by passing the `MethodToolCallback` instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
+When using the programmatic specification approach, you can add default tools to a `ChatModel` at construction time by passing the `MethodToolCallback` instance to the `toolCallbacks` option of the default `ChatOptions` instance used to create the `ChatModel`.
 If both default and runtime tools are provided, the runtime tools will completely override the default tools.
 
 WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback toolCallback = ...
-ChatModel chatModel = OllamaChatModel.builder()
-    .ollamaApi(OllamaApi.builder().build())
-    .defaultOptions(ToolCallingChatOptions.builder()
-            .toolCallbacks(toolCallback)
-            .build())
-    .build();
+import { OpenAiChatModel, OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const chatModel = new OpenAiChatModel({
+  options: new OpenAiChatOptions({
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+    model: 'gpt-4o-mini',
+    toolCallbacks: [toolCallback],
+  }),
+});
 ----
 
 === Method Tool Limitations
 
 The following types are not currently supported as parameters or return types for methods used as tools:
 
-- `Optional`
-- Asynchronous types (e.g. `CompletableFuture`, `Future`)
-- Reactive types (e.g. `Flow`, `Mono`, `Flux`)
-- Functional types (e.g. `Function`, `Supplier`, `Consumer`).
+- Asynchronous types other than `Promise` (e.g. raw `EventEmitter` or `Generator`)
+- Reactive types (e.g. `Observable`)
+- Functional types (e.g. raw `Function` references without a Standard Schema)
 
-Functional types are supported using the function-based tool specification approach. See xref:_functions_as_tools[] for more details.
+`Promise` return types are fully supported — the returned value is awaited automatically before being passed to the result converter.
+
+Functional types (i.e. plain functions) are supported through the function-based tool specification approach. See xref:_functions_as_tools[] for more details.
 
 == Functions as Tools
 
-Spring AI provides built-in support for specifying tools from functions, either programmatically using the low-level `FunctionToolCallback` implementation or dynamically as `@Bean`(s) resolved at runtime.
+NestJS AI provides built-in support for specifying tools from functions using the low-level `FunctionToolCallback` implementation, or by registering a function as a NestJS provider that NestJS AI can resolve at runtime.
 
 === Programmatic Specification: `FunctionToolCallback`
 
-You can turn a functional type (`Function`, `Supplier`, `Consumer`, or `BiFunction`) into a tool by building a `FunctionToolCallback` programmatically.
+You can turn a function (`ToolFunction`, `ToolBiFunction`, `ToolSupplier`, or `ToolConsumer`) into a tool by building a `FunctionToolCallback` programmatically.
 
-[source,java]
+[source,typescript]
 ----
-public class WeatherService implements Function<WeatherRequest, WeatherResponse> {
-    public WeatherResponse apply(WeatherRequest request) {
-        return new WeatherResponse(30.0, Unit.C);
-    }
+import { z } from 'zod';
+
+const WeatherRequestSchema = z.object({
+  location: z.string(),
+  unit: z.enum(['C', 'F']),
+});
+
+type WeatherRequest = z.infer<typeof WeatherRequestSchema>;
+type WeatherResponse = { temp: number; unit: 'C' | 'F' };
+
+class WeatherService {
+  apply(request: WeatherRequest): WeatherResponse {
+    return { temp: 30.0, unit: 'C' };
+  }
 }
-
-public enum Unit { C, F }
-public record WeatherRequest(String location, Unit unit) {}
-public record WeatherResponse(double temp, Unit unit) {}
 ----
 
-The `FunctionToolCallback.Builder` allows you to build a `FunctionToolCallback` instance and provide key information about the tool:
+The `FunctionToolCallback.builder()` allows you to build a `FunctionToolCallback` instance and provide key information about the tool:
 
 - `name`: The name of the tool. AI models use this name to identify the tool when calling it. Therefore, it's not allowed to have two tools with the same name in the same context. The name must be unique across all the tools available to the model for a specific chat request. Required.
-- `toolFunction`: The functional object that represents the tool method (`Function`, `Supplier`, `Consumer`, or `BiFunction`). Required.
-- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
-- `inputType`: The type of the function input. Required.
-- `inputSchema`: The JSON schema for the input parameters of the tool. If not provided, the schema will be generated automatically based on the `inputType`. You can use the `@ToolParam` annotation to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required. See xref:_json_schema[] for more details.
-- `toolMetadata`: The `ToolMetadata` instance that defines additional settings such as whether the result should be returned directly to the client, and the result converter to use. You can build it using the `ToolMetadata.Builder` class.
-- `toolCallResultConverter`: The `ToolCallResultConverter` instance to use for converting the result of a tool call to a `String` object to send back to the AI model. If not provided, the default converter will be used (`DefaultToolCallResultConverter`).
+- `function`: The function that implements the tool (`ToolFunction`, `ToolBiFunction`, `ToolSupplier`, or `ToolConsumer`). Required (passed as the second positional argument to `builder()`).
+- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the function name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it.
+- `inputType`: The Standard Schema describing the function input. Required for functions that take an input.
+- `inputSchema`: The JSON schema string for the input parameters. If not provided, the schema will be generated automatically from `inputType`.
+- `toolMetadata`: The `ToolMetadata` instance that defines additional settings such as whether the result should be returned directly to the client.
+- `toolCallResultConverter`: The `ToolCallResultConverter` instance to use for converting the result of a tool call to a `string` to send back to the AI model. If not provided, the default converter will be used (`DefaultToolCallResultConverter`).
 
-The `ToolMetadata.Builder` allows you to build a `ToolMetadata` instance and define additional settings for the tool:
+`ToolMetadata.create({ ... })` accepts:
 
 - `returnDirect`: Whether the tool result should be returned directly to the client or passed back to the model. See xref:_return_direct[] for more details.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback toolCallback = FunctionToolCallback
-    .builder("currentWeather", new WeatherService())
-    .description("Get the weather in location")
-    .inputType(WeatherRequest.class)
-    .build();
+import { FunctionToolCallback } from '@nestjs-ai/model';
+
+const weatherService = new WeatherService();
+const toolCallback = FunctionToolCallback.builder<WeatherRequest, WeatherResponse>(
+  'currentWeather',
+  (request) => weatherService.apply(request),
+)
+  .description('Get the weather in location')
+  .inputType(WeatherRequestSchema)
+  .build();
 ----
 
-The function inputs and outputs can be either `Void` or POJOs. The input and output POJOs must be serializable, as the result will be serialized and sent back to the model. The function as well as the input and output types must be public.
-
-NOTE: Some types are not supported. See xref:_function_tool_limitations[] for more details.
+The function inputs and outputs must be JSON-serializable, as the result will be serialized and sent back to the model. The input must be an object type (i.e. it must be expressible as a Standard Schema for an object).
 
 ==== Adding Tools to `ChatClient`
 
 When using the programmatic specification approach, you can pass the `FunctionToolCallback` instance to the `toolCallbacks()` method of `ChatClient`. The tool will only be available for the specific chat request it's added to.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback toolCallback = ...
-ChatClient.create(chatModel)
-    .prompt("What's the weather like in Copenhagen?")
-    .toolCallbacks(toolCallback)
-    .call()
-    .content();
+await ChatClient.create(chatModel)
+  .prompt("What's the weather like in Copenhagen?")
+  .toolCallbacks(toolCallback)
+  .call()
+  .content();
 ----
 
 ==== Adding Default Tools to `ChatClient`
@@ -527,107 +645,102 @@ If both default and runtime tools are provided, the runtime tools will completel
 
 WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallback toolCallback = ...
-ChatClient chatClient = ChatClient.builder(chatModel)
-    .defaultToolCallbacks(toolCallback)
-    .build();
+const chatClient = ChatClient.builder(chatModel)
+  .defaultToolCallbacks(toolCallback)
+  .build();
 ----
 
 ==== Adding Tools to `ChatModel`
 
-When using the programmatic specification approach, you can pass the `FunctionToolCallback` instance to the `toolCallbacks()` method of `ToolCallingChatOptions`. The tool will only be available for the specific chat request it's added to.
+When using the programmatic specification approach, you can pass the `FunctionToolCallback` instance to the `toolCallbacks` option of the `ChatOptions` you use. The tool will only be available for the specific chat request it's added to.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallback toolCallback = ...
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolCallbacks(toolCallback)
-    .build();
-Prompt prompt = new Prompt("What's the weather like in Copenhagen?", chatOptions);
-chatModel.call(prompt);
+import { Prompt } from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const chatOptions = new OpenAiChatOptions({ toolCallbacks: [toolCallback] });
+const prompt = new Prompt("What's the weather like in Copenhagen?", chatOptions);
+await chatModel.call(prompt);
 ----
 
 ==== Adding Default Tools to `ChatModel`
 
-When using the programmatic specification approach, you can add default tools to a `ChatModel` at construction time by passing the `FunctionToolCallback` instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
+When using the programmatic specification approach, you can add default tools to a `ChatModel` at construction time by passing the `FunctionToolCallback` instance to the `toolCallbacks` option of the default `ChatOptions` instance used to create the `ChatModel`.
 If both default and runtime tools are provided, the runtime tools will completely override the default tools.
 
 WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ToolCallback toolCallback = ...
-ChatModel chatModel = OllamaChatModel.builder()
-    .ollamaApi(OllamaApi.builder().build())
-    .defaultOptions(ToolCallingChatOptions.builder()
-            .toolCallbacks(toolCallback)
-            .build())
-    .build();
+import { OpenAiChatModel, OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const chatModel = new OpenAiChatModel({
+  options: new OpenAiChatOptions({
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+    model: 'gpt-4o-mini',
+    toolCallbacks: [toolCallback],
+  }),
+});
 ----
 
-=== Dynamic Specification: `@Bean`
+=== Dynamic Specification: NestJS Providers
 
-Instead of specifying tools programmatically, you can define tools as Spring beans and let Spring AI resolve them dynamically at runtime using the `ToolCallbackResolver` interface (via the `SpringBeanToolCallbackResolver` implementation). This option gives you the possibility to use any `Function`, `Supplier`, `Consumer`, or `BiFunction` bean as a tool. The bean name will be used as the tool name, and the `@Description` annotation from Spring Framework can be used to provide a description for the tool, used by the model to understand when and how to call the tool. If you don't provide a description, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
+Instead of specifying tools programmatically, you can register tools as NestJS providers and let NestJS AI resolve them dynamically at runtime using the `ToolCallbackResolver` interface (via the `NestProviderToolCallbackResolver` implementation). Any provider that exposes `@Tool`-decorated methods is discovered automatically once `NestAiModule.forRoot()` and `ChatClientModule.forFeature()` are imported. The tool name resolves to either the explicit `name` set on `@Tool({ name: '...' })` or the method name when omitted.
 
-[source,java]
+[source,typescript]
 ----
-@Configuration(proxyBeanMethods = false)
-class WeatherTools {
+import { Injectable } from '@nestjs/common';
+import { Tool } from '@nestjs-ai/model';
+import { z } from 'zod';
 
-    WeatherService weatherService = new WeatherService();
-
-	@Bean
-	@Description("Get the weather in location")
-	Function<WeatherRequest, WeatherResponse> currentWeather() {
-		return weatherService;
-	}
-
+@Injectable()
+export class WeatherTools {
+  @Tool({
+    name: 'currentWeather',
+    description: 'Get the weather in location',
+    parameters: z.object({
+      location: z.string().describe('The name of a city or a country'),
+      unit: z.enum(['C', 'F']),
+    }),
+  })
+  currentWeather(input: { location: string; unit: 'C' | 'F' }) {
+    return { temp: 30.0, unit: input.unit };
+  }
 }
 ----
 
-NOTE: Some types are not supported. See xref:_function_tool_limitations[] for more details.
+The JSON schema for the input parameters of the tool will be generated automatically from the Standard Schema declared in `parameters`. With Zod, use `.describe('...')` for parameter descriptions and `.optional()` for optional parameters.
 
-The JSON schema for the input parameters of the tool will be generated automatically. You can use the `@ToolParam` annotation to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required. See xref:_json_schema[] for more details.
+This tool specification approach has the drawback of not guaranteeing type safety, as the tool resolution is done at runtime. To mitigate this, you can specify the tool name explicitly in the `@Tool` decorator and store the value in a constant, so that you can use it in a chat request instead of hard-coding the tool name.
 
-[source,java]
+[source,typescript]
 ----
-record WeatherRequest(@ToolParam(description = "The name of a city or a country") String location, Unit unit) {}
-----
+export const CURRENT_WEATHER_TOOL = 'currentWeather';
 
-This tool specification approach has the drawback of not guaranteeing type safety, as the tool resolution is done at runtime. To mitigate this, you can specify the tool name explicitly using the `@Bean` annotation and storing the value in a constant, so that you can use it in a chat request instead of hard-coding the tool name.
-
-[source,java]
-----
-@Configuration(proxyBeanMethods = false)
-class WeatherTools {
-
-    public static final String CURRENT_WEATHER_TOOL = "currentWeather";
-
-	@Bean(CURRENT_WEATHER_TOOL)
-	@Description("Get the weather in location")
-	Function<WeatherRequest, WeatherResponse> currentWeather() {
-		...
-	}
-
+@Injectable()
+export class WeatherTools {
+  @Tool({ name: CURRENT_WEATHER_TOOL, description: 'Get the weather in location' })
+  currentWeather(/* ... */) {
+    /* ... */
+  }
 }
 ----
 
 ==== Adding Tools to `ChatClient`
 
-When using the dynamic specification approach, you can pass the tool name (i.e. the function bean name) to the `toolNames()` method of `ChatClient`.
+When using the dynamic specification approach, you can pass the tool name to the `toolNames()` method of `ChatClient`.
 The tool will only be available for the specific chat request it's added to.
 
-[source,java]
+[source,typescript]
 ----
-ChatClient.create(chatModel)
-    .prompt("What's the weather like in Copenhagen?")
-    .toolNames("currentWeather")
-    .call()
-    .content();
+await ChatClient.create(chatModel)
+  .prompt("What's the weather like in Copenhagen?")
+  .toolNames('currentWeather')
+  .call()
+  .content();
 ----
 
 ==== Adding Default Tools to `ChatClient`
@@ -637,241 +750,242 @@ If both default and runtime tools are provided, the runtime tools will completel
 
 WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ChatClient chatClient = ChatClient.builder(chatModel)
-    .defaultToolNames("currentWeather")
-    .build();
+const chatClient = ChatClient.builder(chatModel)
+  .defaultToolNames('currentWeather')
+  .build();
 ----
 
 ==== Adding Tools to `ChatModel`
 
-When using the dynamic specification approach, you can pass the tool name to the `toolNames()` method of the `ToolCallingChatOptions` you use to call the `ChatModel`. The tool will only be available for the specific chat request it's added to.
+When using the dynamic specification approach, you can pass the tool name to the `toolNames` option of the `ChatOptions` you use to call the `ChatModel`. The tool will only be available for the specific chat request it's added to.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolNames("currentWeather")
-    .build();
-Prompt prompt = new Prompt("What's the weather like in Copenhagen?", chatOptions);
-chatModel.call(prompt);
+import { Prompt } from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const chatOptions = new OpenAiChatOptions({ toolNames: ['currentWeather'] });
+const prompt = new Prompt("What's the weather like in Copenhagen?", chatOptions);
+await chatModel.call(prompt);
 ----
 
 ==== Adding Default Tools to `ChatModel`
 
-When using the dynamic specification approach, you can add default tools to `ChatModel` at construction time by passing the tool name to the `toolNames()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
+When using the dynamic specification approach, you can add default tools to `ChatModel` at construction time by passing the tool name to the `toolNames` option of the default `ChatOptions` instance used to create the `ChatModel`.
 If both default and runtime tools are provided, the runtime tools will completely override the default tools.
 
 WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = OllamaChatModel.builder()
-    .ollamaApi(OllamaApi.builder().build())
-    .defaultOptions(ToolCallingChatOptions.builder()
-            .toolNames("currentWeather")
-            .build())
-    .build();
+import { OpenAiChatModel, OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const chatModel = new OpenAiChatModel({
+  options: new OpenAiChatOptions({
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+    model: 'gpt-4o-mini',
+    toolNames: ['currentWeather'],
+  }),
+});
 ----
 
 === Function Tool Limitations
 
 The following types are not currently supported as input or output types for functions used as tools:
 
-- Primitive types
-- `Optional`
-- Collection types (e.g. `List`, `Map`, `Array`, `Set`) 
-- Asynchronous types (e.g. `CompletableFuture`, `Future`)
-- Reactive types (e.g. `Flow`, `Mono`, `Flux`).
+- Primitive types (the function input must be an object Standard Schema)
+- Asynchronous types other than `Promise`
+- Reactive types (e.g. `Observable`)
 
-Primitive types and collections are supported using the method-based tool specification approach. See xref:_methods_as_tools[] for more details.
+Primitive types are supported through the method-based tool specification approach. See xref:_methods_as_tools[] for more details.
 
 == Tool Specification
 
-In Spring AI, tools are modeled via the `ToolCallback` interface. In the previous sections, we've seen how to define tools from methods and functions using the built-in support provided by Spring AI (see xref:_methods_as_tools[] and xref:_functions_as_tools[]). This section will dive deeper into the tool specification and how to customize and extend it to support more use cases.
+In NestJS AI, tools are modeled via the `ToolCallback` abstract class. In the previous sections, we've seen how to define tools from methods and functions using the built-in support provided by NestJS AI (see xref:_methods_as_tools[] and xref:_functions_as_tools[]). This section will dive deeper into the tool specification and how to customize and extend it to support more use cases.
 
 === Tool Callback
 
-The `ToolCallback` interface provides a way to define a tool that can be called by the AI model, including both definition and execution logic. It's the main interface to implement when you want to define a tool from scratch. For example, you can define a `ToolCallback` from an MCP Client (using the Model Context Protocol) or a `ChatClient` (to build a modular agentic application).
+The `ToolCallback` class provides a way to define a tool that can be called by the AI model, including both definition and execution logic. It's the main class to extend when you want to define a tool from scratch. For example, you can define a `ToolCallback` from an MCP Client (using the Model Context Protocol) or a `ChatClient` (to build a modular agentic application).
 
-The interface provides the following methods:
+The class provides the following members:
 
-[source,java]
+[source,typescript]
 ----
-public interface ToolCallback {
+export abstract class ToolCallback {
+  /**
+   * Definition used by the AI model to determine when and how to call the tool.
+   */
+  abstract get toolDefinition(): ToolDefinition;
 
-	/**
-	 * Definition used by the AI model to determine when and how to call the tool.
-	 */
-	ToolDefinition getToolDefinition();
+  /**
+   * Metadata providing additional information on how to handle the tool.
+   */
+  get toolMetadata(): ToolMetadata;
 
-	/**
-	 * Metadata providing additional information on how to handle the tool.
-	 */
-	ToolMetadata getToolMetadata();
-
-    /**
-	 * Execute tool with the given input and return the result to send back to the AI model.
-	 */
-	String call(String toolInput);
-
-    /**
-	 * Execute tool with the given input and context, and return the result to send back to the AI model.
-	 */
-	String call(String toolInput, ToolContext tooContext);
-
+  /**
+   * Execute tool with the given input and return the result to send back to the AI model.
+   */
+  abstract call(toolInput: string): Promise<string>;
+  abstract call(
+    toolInput: string,
+    toolContext: ToolContext | null,
+  ): Promise<string>;
 }
 ----
 
-Spring AI provides built-in implementations for tool methods (`MethodToolCallback`) and tool functions (`FunctionToolCallback`).
+NestJS AI provides built-in implementations for tool methods (`MethodToolCallback`) and tool functions (`FunctionToolCallback`).
 
 === Tool Definition
 
 The `ToolDefinition` interface provides the required information for the AI model to know about the availability of the tool, including the tool name, description, and input schema. Each `ToolCallback` implementation must provide a `ToolDefinition` instance to define the tool.
 
-The interface provides the following methods:
+The interface provides the following properties:
 
-[source,java]
+[source,typescript]
 ----
-public interface ToolDefinition {
+export interface ToolDefinition {
+  /**
+   * The tool name. Unique within the tool set provided to a model.
+   */
+  readonly name: string;
 
-	/**
-	 * The tool name. Unique within the tool set provided to a model.
-	 */
-	String name();
+  /**
+   * The tool description, used by the AI model to determine what the tool does.
+   */
+  readonly description: string;
 
-	/**
-	 * The tool description, used by the AI model to determine what the tool does.
-	 */
-	String description();
-
-	/**
-	 * The schema of the parameters used to call the tool.
-	 */
-	String inputSchema();
-
+  /**
+   * The schema of the parameters used to call the tool, as a JSON schema string.
+   */
+  readonly inputSchema: string;
 }
 ----
 
 NOTE: See xref:_json_schema[] for more details on the input schema.
 
-The `ToolDefinition.Builder` lets you build a `ToolDefinition` instance using the default implementation (`DefaultToolDefinition`).
+`ToolDefinition.builder()` lets you build a `ToolDefinition` instance using the default implementation (`DefaultToolDefinition`).
 
-[source,java]
+[source,typescript]
 ----
-ToolDefinition toolDefinition = ToolDefinition.builder()
-    .name("currentWeather")
-    .description("Get the weather in location")
-    .inputSchema("""
-        {
-            "type": "object",
-            "properties": {
-                "location": {
-                    "type": "string"
-                },
-                "unit": {
-                    "type": "string",
-                    "enum": ["C", "F"]
-                }
-            },
-            "required": ["location", "unit"]
-        }
-    """)
-    .build();
+import { ToolDefinition } from '@nestjs-ai/model';
+
+const toolDefinition = ToolDefinition.builder()
+  .name('currentWeather')
+  .description('Get the weather in location')
+  .inputSchema(`
+    {
+      "type": "object",
+      "properties": {
+        "location": { "type": "string" },
+        "unit": { "type": "string", "enum": ["C", "F"] }
+      },
+      "required": ["location", "unit"]
+    }
+  `)
+  .build();
 ----
 
 ==== Method Tool Definition
 
-When building tools from a method, the `ToolDefinition` is automatically generated for you. In case you prefer to generate the `ToolDefinition` yourself, you can use this convenient builder.
+When building tools from a method, the `ToolDefinition` is automatically generated for you. In case you prefer to generate the `ToolDefinition` yourself, you can use the convenient `ToolDefinitions` builder.
 
-[source,java]
+[source,typescript]
 ----
-Method method = ReflectionUtils.findMethod(DateTimeTools.class, "getCurrentDateTime");
-ToolDefinition toolDefinition = ToolDefinitions.from(method);
+import { ToolDefinitions } from '@nestjs-ai/model';
+import { z } from 'zod';
+
+const toolDefinition = ToolDefinitions.builder({
+  methodName: 'getCurrentDateTime',
+  metadata: { returns: z.string() },
+}).build();
 ----
 
-The `ToolDefinition` generated from a method includes the method name as the tool name, the method name as the tool description, and the JSON schema of the method input parameters. If the method is annotated with `@Tool`, the tool name and description will be taken from the annotation, if set.
+The `ToolDefinition` generated from a method includes the method name as the tool name, the method name as the tool description, and the JSON schema derived from the method's `parameters` Standard Schema. If the method is decorated with `@Tool`, the tool name and description will be taken from the decorator options when set.
 
 NOTE: See xref:_methods_as_tools[] for more details.
 
-If you'd rather provide some or all of the attributes explicitly, you can use the `ToolDefinition.Builder` to build a custom `ToolDefinition` instance.
+If you'd rather provide some or all of the attributes explicitly, you can use the `ToolDefinitions.builder()` to build a custom `ToolDefinition` instance.
 
-[source,java]
+[source,typescript]
 ----
-Method method = ReflectionUtils.findMethod(DateTimeTools.class, "getCurrentDateTime");
-ToolDefinition toolDefinition = ToolDefinitions.builder(method)
-    .name("currentDateTime")
-    .description("Get the current date and time in the user's timezone")
-    .inputSchema(JsonSchemaGenerator.generateForMethodInput(method))
-    .build();
+import { JsonSchemaGenerator, ToolDefinitions } from '@nestjs-ai/model';
+import { z } from 'zod';
+
+const parameters = z.object({ city: z.string() });
+const toolDefinition = ToolDefinitions.builder({
+  methodName: 'getCurrentDateTime',
+  metadata: { parameters },
+})
+  .name('currentDateTime')
+  .description("Get the current date and time in the user's timezone")
+  .inputSchema(JsonSchemaGenerator.generateForMethodInput(parameters))
+  .build();
 ----
 
 ==== Function Tool Definition
 
-When building tools from a function, the `ToolDefinition` is automatically generated for you. When you use the `FunctionToolCallback.Builder` to build a `FunctionToolCallback` instance, you can provide the tool name, description, and input schema that will be used to generate the `ToolDefinition`. See xref:_functions_as_tools[] for more details.
+When building tools from a function, the `ToolDefinition` is automatically generated for you. When you use `FunctionToolCallback.builder()` to build a `FunctionToolCallback` instance, you can provide the tool name, description, and input schema that will be used to generate the `ToolDefinition`. See xref:_functions_as_tools[] for more details.
 
 === JSON Schema
 
-When providing a tool to the AI model, the model needs to know the schema of the input type for calling the tool. The schema is used to understand how to call the tool and prepare the tool request. Spring AI provides built-in support for generating the JSON Schema of the input type for a tool via the `JsonSchemaGenerator` class. The schema is provided as part of the `ToolDefinition`.
+When providing a tool to the AI model, the model needs to know the schema of the input type for calling the tool. The schema is used to understand how to call the tool and prepare the tool request. NestJS AI provides built-in support for generating the JSON Schema of the input type for a tool via the `JsonSchemaGenerator` class. The schema is provided as part of the `ToolDefinition`.
 
 NOTE: See xref:_tool_definition[] for more details on the `ToolDefinition` and how to pass the input schema to it.
 
-The `JsonSchemaGenerator` class is used under the hood to generate the JSON schema for the input parameters of a method or a function, using any of the strategies described in xref:_methods_as_tools[] and xref:_functions_as_tools[]. The JSON schema generation logic supports a series of annotations that you can use on the input parameters for methods and functions to customize the resulting schema.
+The `JsonSchemaGenerator` class is used under the hood to generate the JSON schema for the input parameters of a method or a function from any Standard Schema. The schema is derived from your validation library — Zod, Valibot, or any other Standard Schema-compatible library — so per-parameter customization (description, optionality, and so on) lives on the schema itself.
 
 This section describes two main options you can customize when generating the JSON schema for the input parameters of a tool: description and required status.
 
 ==== Description
 
-Besides providing a description for the tool itself, you can also provide a description for the input parameters of a tool. The description can be used to provide key information about the input parameters, such as what format the parameter should be in, what values are allowed, and so on. This is useful to help the model understand the input schema and how to use it. Spring AI provides built-in support for generating the description for an input parameter using one of the following annotations:
+Besides providing a description for the tool itself, you can also provide a description for the input parameters of a tool. The description can be used to provide key information about the input parameters, such as what format the parameter should be in, what values are allowed, and so on. This is useful to help the model understand the input schema and how to use it.
 
-- `@ToolParam(description = "...")` from Spring AI
-- `@JsonClassDescription(description = "...")` from Jackson
-- `@JsonPropertyDescription(description = "...")` from Jackson
-- `@Schema(description = "...")` from Swagger.
+With Zod, attach descriptions using `.describe('...')`:
 
-This approach works for both methods and functions, and you can use it recursively for nested types.
-
-[source,java]
+[source,typescript]
 ----
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
-import org.springframework.context.i18n.LocaleContextHolder;
+import { Tool } from '@nestjs-ai/model';
+import { z } from 'zod';
 
 class DateTimeTools {
-
-    @Tool(description = "Set a user alarm for the given time")
-    void setAlarm(@ToolParam(description = "Time in ISO-8601 format") String time) {
-        LocalDateTime alarmTime = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME);
-        System.out.println("Alarm set for " + alarmTime);
-    }
-
+  @Tool({
+    description: 'Set a user alarm for the given time',
+    parameters: z.object({
+      time: z.string().describe('Time in ISO-8601 format'),
+    }),
+  })
+  setAlarm(input: { time: string }): void {
+    const alarmTime = new Date(input.time);
+    console.log(`Alarm set for ${alarmTime.toISOString()}`);
+  }
 }
 ----
 
-==== Required/Optional
-
-By default, each input parameter is considered required, which forces the AI model to provide a value for it when calling the tool. However, you can make an input parameter optional by using one of the following annotations, in this order of precedence:
-
-- `@ToolParam(required = false)` from Spring AI
-- `@JsonProperty(required = false)` from Jackson
-- `@Schema(required = false)` from Swagger
-- `@Nullable` from Spring Framework.
-
 This approach works for both methods and functions, and you can use it recursively for nested types.
 
-[source,java]
+==== Required/Optional
+
+By default, each input parameter is considered required, which forces the AI model to provide a value for it when calling the tool. With Zod, mark a property as optional by using `.optional()` (or `.nullable()`):
+
+[source,typescript]
 ----
+import { Tool } from '@nestjs-ai/model';
+import { z } from 'zod';
+
 class CustomerTools {
-
-    @Tool(description = "Update customer information")
-    void updateCustomerInfo(Long id, String name, @ToolParam(required = false) String email) {
-        System.out.println("Updated info for customer with id: " + id);
-    }
-
+  @Tool({
+    description: 'Update customer information',
+    parameters: z.object({
+      id: z.number(),
+      name: z.string(),
+      email: z.string().optional(),
+    }),
+  })
+  updateCustomerInfo(input: { id: number; name: string; email?: string }): void {
+    console.log(`Updated info for customer with id: ${input.id}`);
+  }
 }
 ----
 
@@ -879,102 +993,113 @@ WARNING: Defining the correct required status for the input parameter is crucial
 
 === Result Conversion
 
-The result of a tool call is serialized using a `ToolCallResultConverter` and then sent back to the AI model. The `ToolCallResultConverter` interface provides a way to convert the result of a tool call to a `String` object.
+The result of a tool call is serialized using a `ToolCallResultConverter` and then sent back to the AI model. The `ToolCallResultConverter` interface provides a way to convert the result of a tool call to a `string`.
 
 The interface provides the following method:
 
-[source,java]
+[source,typescript]
 ----
-@FunctionalInterface
-public interface ToolCallResultConverter {
+import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
 
-	/**
-	 * Given an Object returned by a tool, convert it to a String compatible with the
-	 * given class type.
-	 */
-	String convert(@Nullable Object result, @Nullable Type returnType);
-
+export interface ToolCallResultConverter {
+  /**
+   * Given a value returned by a tool, convert it to a string compatible with the
+   * given schema (when supplied).
+   */
+  convert(
+    result?: unknown | null,
+    returnType?: (StandardSchemaV1 & StandardJSONSchemaV1) | null,
+  ): Promise<string>;
 }
 ----
 
-The result must be a serializable type. By default, the result is serialized to JSON using Jackson (`DefaultToolCallResultConverter`), but you can customize the serialization process by providing your own `ToolCallResultConverter` implementation.
+The result must be JSON-serializable. By default, the result is serialized to JSON (`DefaultToolCallResultConverter`), but you can customize the serialization process by providing your own `ToolCallResultConverter` implementation.
 
-Spring AI relies on the `ToolCallResultConverter` in both method and function tools.
+NestJS AI relies on the `ToolCallResultConverter` in both method and function tools.
 
 ==== Method Tool Call Result Conversion
 
-When building tools from a method with the declarative approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter()` attribute of the `@Tool` annotation.
+When building tools from a method with the declarative approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter` option of the `@Tool` decorator. The value is the converter class (NestJS AI instantiates it internally).
 
-[source,java]
+[source,typescript]
 ----
+import { Tool } from '@nestjs-ai/model';
+import { CustomToolCallResultConverter } from './custom-result-converter.js';
+
 class CustomerTools {
-
-    @Tool(description = "Retrieve customer information", resultConverter = CustomToolCallResultConverter.class)
-    Customer getCustomerInfo(Long id) {
-        return customerRepository.findById(id);
-    }
-
+  @Tool({
+    description: 'Retrieve customer information',
+    resultConverter: CustomToolCallResultConverter,
+  })
+  getCustomerInfo(input: { id: number }) {
+    return customerRepository.findById(input.id);
+  }
 }
 ----
 
-If using the programmatic approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter()` attribute of the `MethodToolCallback.Builder`.
+If using the programmatic approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `toolCallResultConverter()` of the `MethodToolCallback.builder()`.
 
 See xref:_methods_as_tools[] for more details.
 
 ==== Function Tool Call Result Conversion
 
-When building tools from a function using the programmatic approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter()` attribute of the `FunctionToolCallback.Builder`.
+When building tools from a function using the programmatic approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `toolCallResultConverter()` of the `FunctionToolCallback.builder()`.
 
 See xref:_functions_as_tools[] for more details.
 
 === Tool Context
 
-Spring AI supports passing additional contextual information to tools through the `ToolContext` API. This feature allows you to provide extra, user-provided data that can be used within the tool execution along with the tool arguments passed by the AI model. 
+NestJS AI supports passing additional contextual information to tools through the `ToolContext` API. This feature allows you to provide extra, user-provided data that can be used within the tool execution along with the tool arguments passed by the AI model.
 
 image::tools/tool-context.jpg[Providing additional contextual info to tools, width=700, align="center"]
 
-[source,java]
+[source,typescript]
 ----
+import { Tool, ToolContext } from '@nestjs-ai/model';
+import { z } from 'zod';
+
 class CustomerTools {
-
-    @Tool(description = "Retrieve customer information")
-    Customer getCustomerInfo(Long id, ToolContext toolContext) {
-        return customerRepository.findById(id, toolContext.getContext().get("tenantId"));
-    }
-
+  @Tool({
+    description: 'Retrieve customer information',
+    parameters: z.object({ id: z.number() }),
+  })
+  getCustomerInfo(input: { id: number }, toolContext: ToolContext) {
+    const tenantId = toolContext.context.tenantId as string;
+    return customerRepository.findById(input.id, tenantId);
+  }
 }
 ----
 
 The `ToolContext` is populated with the data provided by the user when invoking `ChatClient`.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
+const response = await ChatClient.create(chatModel)
+  .prompt('Tell me more about the customer with ID 42')
+  .tools(new CustomerTools())
+  .toolContext({ tenantId: 'acme' })
+  .call()
+  .content();
 
-String response = ChatClient.create(chatModel)
-        .prompt("Tell me more about the customer with ID 42")
-        .tools(new CustomerTools())
-        .toolContext(Map.of("tenantId", "acme"))
-        .call()
-        .content();
-
-System.out.println(response);
+console.log(response);
 ----
 
 NOTE: None of the data provided in the `ToolContext` is sent to the AI model.
 
 Similarly, you can define tool context data when invoking the `ChatModel` directly.
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallback[] customerTools = ToolCallbacks.from(new CustomerTools());
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolCallbacks(customerTools)
-    .toolContext(Map.of("tenantId", "acme"))
-    .build();
-Prompt prompt = new Prompt("Tell me more about the customer with ID 42", chatOptions);
-chatModel.call(prompt);
+import { Prompt, ToolCallbacks } from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
+
+const customerTools = ToolCallbacks.from(new CustomerTools());
+const chatOptions = new OpenAiChatOptions({
+  toolCallbacks: customerTools,
+  toolContext: { tenantId: 'acme' },
+});
+const prompt = new Prompt('Tell me more about the customer with ID 42', chatOptions);
+await chatModel.call(prompt);
 ----
 
 If the `toolContext` option is set both in the default options and in the runtime options, the resulting `ToolContext` will be the merge of the two,
@@ -1002,40 +1127,45 @@ image::tools/return-direct.jpg[Returning tool call results directly to the calle
 
 ==== Method Return Direct
 
-When building tools from a method with the declarative approach, you can mark a tool to return the result directly to the caller by setting the `returnDirect` attribute of the `@Tool` annotation to `true`.
+When building tools from a method with the declarative approach, you can mark a tool to return the result directly to the caller by setting the `returnDirect` option of the `@Tool` decorator to `true`.
 
-[source,java]
+[source,typescript]
 ----
+import { Tool } from '@nestjs-ai/model';
+import { z } from 'zod';
+
 class CustomerTools {
-
-    @Tool(description = "Retrieve customer information", returnDirect = true)
-    Customer getCustomerInfo(Long id) {
-        return customerRepository.findById(id);
-    }
-
+  @Tool({
+    description: 'Retrieve customer information',
+    returnDirect: true,
+    parameters: z.object({ id: z.number() }),
+  })
+  getCustomerInfo(input: { id: number }) {
+    return customerRepository.findById(input.id);
+  }
 }
 ----
 
-If using the programmatic approach, you can set the `returnDirect` attribute via the `ToolMetadata` interface and pass it to the `MethodToolCallback.Builder`.
+If using the programmatic approach, you can set the `returnDirect` attribute via the `ToolMetadata` interface and pass it to `MethodToolCallback.builder()`.
 
-[source,java]
+[source,typescript]
 ----
-ToolMetadata toolMetadata = ToolMetadata.builder()
-    .returnDirect(true)
-    .build();
+import { ToolMetadata } from '@nestjs-ai/model';
+
+const toolMetadata = ToolMetadata.create({ returnDirect: true });
 ----
 
 See xref:_methods_as_tools[] for more details.
 
 ==== Function Return Direct
 
-When building tools from a function with the programmatic approach, you can set the `returnDirect` attribute via the `ToolMetadata` interface and pass it to the `FunctionToolCallback.Builder`.
+When building tools from a function with the programmatic approach, you can set the `returnDirect` attribute via the `ToolMetadata` interface and pass it to `FunctionToolCallback.builder()`.
 
-[source,java]
+[source,typescript]
 ----
-ToolMetadata toolMetadata = ToolMetadata.builder()
-    .returnDirect(true)
-    .build();
+import { ToolMetadata } from '@nestjs-ai/model';
+
+const toolMetadata = ToolMetadata.create({ returnDirect: true });
 ----
 
 See xref:_functions_as_tools[] for more details.
@@ -1044,38 +1174,52 @@ See xref:_functions_as_tools[] for more details.
 
 The tool execution is the process of calling the tool with the provided input arguments and returning the result. The tool execution is handled by the `ToolCallingManager` interface, which is responsible for managing the tool execution lifecycle.
 
-[source,java]
+[source,typescript]
 ----
-public interface ToolCallingManager {
+export interface ToolCallingManager {
+  /**
+   * Resolve the tool definitions from the model's tool calling options.
+   */
+  resolveToolDefinitions(chatOptions: ToolCallingChatOptions): ToolDefinition[];
 
-	/**
-	 * Resolve the tool definitions from the model's tool calling options.
-	 */
-	List<ToolDefinition> resolveToolDefinitions(ToolCallingChatOptions chatOptions);
-
-	/**
-	 * Execute the tool calls requested by the model.
-	 */
-	ToolExecutionResult executeToolCalls(Prompt prompt, ChatResponse chatResponse);
-
+  /**
+   * Execute the tool calls requested by the model.
+   */
+  executeToolCalls(
+    prompt: Prompt,
+    chatResponse: ChatResponse,
+  ): Promise<ToolExecutionResult>;
 }
 ----
 
-If you're using any of the Spring AI Spring Boot Starters, `DefaultToolCallingManager` is the autoconfigured implementation of the `ToolCallingManager` interface. You can customize the tool execution behavior by providing your own `ToolCallingManager` bean.
+When you import `NestAiModule.forRoot()`, `DefaultToolCallingManager` is registered as the implementation of `ToolCallingManager` and provided under `TOOL_CALLING_MANAGER_TOKEN`. You can customize the tool execution behavior by providing your own `ToolCallingManager` provider.
 
-[source,java]
+[source,typescript]
 ----
-@Bean
-ToolCallingManager toolCallingManager() {
-    return ToolCallingManager.builder().build();
-}
+import { Module } from '@nestjs/common';
+import { NestAiModule } from '@nestjs-ai/platform';
+import {
+  DefaultToolCallingManager,
+  TOOL_CALLING_MANAGER_TOKEN,
+} from '@nestjs-ai/model';
+
+@Module({
+  imports: [NestAiModule.forRoot()],
+  providers: [
+    {
+      provide: TOOL_CALLING_MANAGER_TOKEN,
+      useFactory: () => new DefaultToolCallingManager(),
+    },
+  ],
+})
+export class AppModule {}
 ----
 
-By default, Spring AI manages the tool execution lifecycle transparently for you from within each `ChatModel` implementation. But you have the possibility to opt-out of this behavior and control the tool execution yourself. This section describes these two scenarios.
+By default, NestJS AI manages the tool execution lifecycle transparently for you from within each `ChatModel` implementation. But you have the possibility to opt-out of this behavior and control the tool execution yourself. This section describes these two scenarios.
 
 === Framework-Controlled Tool Execution
 
-When using the default behavior, Spring AI will automatically intercept any tool call request from the model, call the tool and return the result to the model. All of this is done transparently for you by each `ChatModel` implementation using a `ToolCallingManager`.
+When using the default behavior, NestJS AI will automatically intercept any tool call request from the model, call the tool and return the result to the model. All of this is done transparently for you by each `ChatModel` implementation using a `ToolCallingManager`.
 
 image::tools/framework-manager.jpg[Framework-controlled tool execution lifecycle, width=700, align="center"]
 
@@ -1090,24 +1234,9 @@ image::tools/framework-manager.jpg[Framework-controlled tool execution lifecycle
 
 WARNING: Currently, the internal messages exchanged with the model regarding the tool execution are not exposed to the user. If you need to access these messages, you should use the user-controlled tool execution approach.
 
-The logic determining whether a tool call is eligible for execution is handled by the `ToolExecutionEligibilityPredicate` interface. By default, the tool execution eligibility is determined by checking if the `internalToolExecutionEnabled` attribute of `ToolCallingChatOptions` is set to `true` (the default value), and if the `ChatResponse` contains any tool calls.
+The logic determining whether a tool call is eligible for execution checks if the `internalToolExecutionEnabled` attribute of `ToolCallingChatOptions` is set to `true` (the default value), and if the `ChatResponse` contains any tool calls.
 
-[source,java]
-----
-public class DefaultToolExecutionEligibilityPredicate implements ToolExecutionEligibilityPredicate {
-
-	@Override
-	public boolean test(ChatOptions promptOptions, ChatResponse chatResponse) {
-		return ToolCallingChatOptions.isInternalToolExecutionEnabled(promptOptions) && chatResponse != null
-				&& chatResponse.hasToolCalls();
-	}
-
-}
-----
-
-You can provide your custom implementation of `ToolExecutionEligibilityPredicate` when creating the `ChatModel` bean.
-
-=== Advisor-Controlled Tool Execution with ToolCallAdvisor
+=== Advisor-Controlled Tool Execution with `ToolCallAdvisor`
 
 As an alternative to the framework-controlled tool execution, you can use the `ToolCallAdvisor` to implement tool calling as part of the xref:api/chatclient.adoc#_advisors[advisor chain]. This approach provides several advantages:
 
@@ -1117,168 +1246,208 @@ As an alternative to the framework-controlled tool execution, you can use the `T
 
 The `ToolCallAdvisor` implements the tool calling loop and disables the model's internal tool execution. When the model requests a tool call, the advisor executes the tool and sends the result back to the model, continuing until no more tool calls are needed.
 
-[source,java]
+[source,typescript]
 ----
-var toolCallAdvisor = ToolCallAdvisor.builder()
-    .toolCallingManager(toolCallingManager)
-    .advisorOrder(BaseAdvisor.HIGHEST_PRECEDENCE + 300)
-    .build();
+import { ChatClient, ToolCallAdvisor } from '@nestjs-ai/client-chat';
 
-var chatClient = ChatClient.builder(chatModel)
-    .defaultAdvisors(toolCallAdvisor)
-    .build();
+const toolCallAdvisor = new ToolCallAdvisor({
+  toolCallingManager,
+});
 
-String response = chatClient.prompt("What day is tomorrow?")
-    .tools(new DateTimeTools())
-    .call()
-    .content();
+const chatClient = ChatClient.builder(chatModel)
+  .defaultAdvisors(toolCallAdvisor)
+  .build();
+
+const response = await chatClient
+  .prompt('What day is tomorrow?')
+  .tools(new DateTimeTools())
+  .call()
+  .content();
 ----
 
 ==== Configuration Options
 
-The `ToolCallAdvisor.Builder` supports the following configuration options:
+The `ToolCallAdvisor` constructor accepts the following options:
 
-- `toolCallingManager`: The `ToolCallingManager` instance to use for executing tool calls. If not provided, a default instance is used.
-- `advisorOrder`: The order in which the advisor is applied in the chain. Must be between `BaseAdvisor.HIGHEST_PRECEDENCE` and `BaseAdvisor.LOWEST_PRECEDENCE`.
+- `toolCallingManager`: The `ToolCallingManager` instance to use for executing tool calls. If not provided, a new `DefaultToolCallingManager` is created.
+- `advisorOrder`: The order in which the advisor is applied in the chain. Must be between `HIGHEST_PRECEDENCE` and `LOWEST_PRECEDENCE` from `@nestjs-port/core`. Defaults to `HIGHEST_PRECEDENCE + 300`.
 - `conversationHistoryEnabled`: Controls whether the advisor maintains conversation history internally during tool call iterations. Default is `true`.
+- `streamToolCallResponses`: Whether streaming responses include intermediate tool call iterations. Default is `false`.
 
 ==== Conversation History Management
 
-By default (`conversationHistoryEnabled=true`), the `ToolCallAdvisor` maintains the full conversation history internally during tool call iterations. Each subsequent LLM call includes all previous messages.
+By default (`conversationHistoryEnabled: true`), the `ToolCallAdvisor` maintains the full conversation history internally during tool call iterations. Each subsequent LLM call includes all previous messages.
 
-Use the `.disableInternalConversationHistory()` method to disable internal conversation history management. When disabled, only the last tool response message is passed to the next iteration. This is useful when integrating with a Chat Memory advisor that already manages conversation history:
+Set `conversationHistoryEnabled: false` to disable internal conversation history management. When disabled, only the last tool response message is passed to the next iteration. This is useful when integrating with a Chat Memory advisor that already manages conversation history:
 
-[source,java]
+[source,typescript]
 ----
-var toolCallAdvisor = ToolCallAdvisor.builder()
-    .toolCallingManager(toolCallingManager)
-    .disableInternalConversationHistory()  // Let ChatMemory handle history
-    .advisorOrder(BaseAdvisor.HIGHEST_PRECEDENCE + 300)
-    .build();
+import { ChatClient, ToolCallAdvisor, MessageChatMemoryAdvisor } from '@nestjs-ai/client-chat';
+import { HIGHEST_PRECEDENCE } from '@nestjs-port/core';
 
-var chatMemoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory)
-    .advisorOrder(BaseAdvisor.HIGHEST_PRECEDENCE + 200)  // Before ToolCallAdvisor
-    .build();
+const toolCallAdvisor = new ToolCallAdvisor({
+  toolCallingManager,
+  conversationHistoryEnabled: false, // Let ChatMemory handle history
+  advisorOrder: HIGHEST_PRECEDENCE + 300,
+});
 
-var chatClient = ChatClient.builder(chatModel)
-    .defaultAdvisors(chatMemoryAdvisor, toolCallAdvisor)
-    .build();
+const chatMemoryAdvisor = new MessageChatMemoryAdvisor({
+  chatMemory,
+  // Run before ToolCallAdvisor
+  order: HIGHEST_PRECEDENCE + 200,
+});
+
+const chatClient = ChatClient.builder(chatModel)
+  .defaultAdvisors(chatMemoryAdvisor, toolCallAdvisor)
+  .build();
 ----
 
 ==== Return Direct
 
 The `ToolCallAdvisor` supports the "return direct" feature, allowing tools to bypass the LLM and return results directly to the client. When a tool execution has `returnDirect=true`, the advisor breaks out of the tool calling loop and returns the tool result directly.
 
-For more details about `ToolCallAdvisor`, see xref:api/advisors-recursive.adoc#_toolcalladvisor[Recursive Advisors - ToolCallAdvisor].
+For more details about `ToolCallAdvisor`, see xref:api/advisors-recursive.adoc[Recursive Advisors].
 
 === User-Controlled Tool Execution
 
-There are cases where you'd rather control the tool execution lifecycle yourself. You can do so by setting the `internalToolExecutionEnabled` attribute of `ToolCallingChatOptions` to `false`.
+There are cases where you'd rather control the tool execution lifecycle yourself. You can do so by setting the `internalToolExecutionEnabled` attribute of the `ToolCallingChatOptions` to `false`.
 
 When you invoke a `ChatModel` with this option, the tool execution will be delegated to the caller, giving you full control over the tool execution lifecycle. It's your responsibility checking for tool calls in the `ChatResponse` and executing them using the `ToolCallingManager`.
 
 The following example demonstrates a minimal implementation of the user-controlled tool execution approach:
 
-[source,java]
+[source,typescript]
 ----
-ChatModel chatModel = ...
-ToolCallingManager toolCallingManager = ToolCallingManager.builder().build();
+import { DefaultToolCallingManager, Prompt, ToolCallbacks } from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
 
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolCallbacks(new CustomerTools())
-    .internalToolExecutionEnabled(false)
-    .build();
-Prompt prompt = new Prompt("Tell me more about the customer with ID 42", chatOptions);
+const toolCallingManager = new DefaultToolCallingManager();
 
-ChatResponse chatResponse = chatModel.call(prompt);
+const chatOptions = new OpenAiChatOptions({
+  toolCallbacks: ToolCallbacks.from(new CustomerTools()),
+  internalToolExecutionEnabled: false,
+});
+let prompt = new Prompt('Tell me more about the customer with ID 42', chatOptions);
+
+let chatResponse = await chatModel.call(prompt);
 
 while (chatResponse.hasToolCalls()) {
-    ToolExecutionResult toolExecutionResult = toolCallingManager.executeToolCalls(prompt, chatResponse);
+  const toolExecutionResult = await toolCallingManager.executeToolCalls(prompt, chatResponse);
 
-    prompt = new Prompt(toolExecutionResult.conversationHistory(), chatOptions);
+  prompt = new Prompt(toolExecutionResult.conversationHistory, chatOptions);
 
-    chatResponse = chatModel.call(prompt);
+  chatResponse = await chatModel.call(prompt);
 }
 
-System.out.println(chatResponse.getResult().getOutput().getText());
+console.log(chatResponse.result?.output.text);
 ----
 
-NOTE: When choosing the user-controlled tool execution approach, we recommend using a `ToolCallingManager` to manage the tool calling operations. This way, you can benefit from the built-in support provided by Spring AI for tool execution. However, nothing prevents you from implementing your own tool execution logic.
+NOTE: When choosing the user-controlled tool execution approach, we recommend using a `ToolCallingManager` to manage the tool calling operations. This way, you can benefit from the built-in support provided by NestJS AI for tool execution. However, nothing prevents you from implementing your own tool execution logic.
 
-The next examples shows a minimal implementation of the user-controlled tool execution approach combined with the usage of the `ChatMemory` API:
+The next example shows a minimal implementation of the user-controlled tool execution approach combined with the usage of the `ChatMemory` API:
 
-[source,java]
+[source,typescript]
 ----
-ToolCallingManager toolCallingManager = DefaultToolCallingManager.builder().build();
-ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
-String conversationId = UUID.randomUUID().toString();
+import { randomUUID } from 'node:crypto';
+import {
+  DefaultToolCallingManager,
+  InMemoryChatMemoryRepository,
+  MessageWindowChatMemory,
+  Prompt,
+  SystemMessage,
+  ToolCallbacks,
+  UserMessage,
+} from '@nestjs-ai/model';
+import { OpenAiChatOptions } from '@nestjs-ai/model-openai';
 
-ChatOptions chatOptions = ToolCallingChatOptions.builder()
-    .toolCallbacks(ToolCallbacks.from(new MathTools()))
-    .internalToolExecutionEnabled(false)
-    .build();
-Prompt prompt = new Prompt(
-        List.of(new SystemMessage("You are a helpful assistant."), new UserMessage("What is 6 * 8?")),
-        chatOptions);
-chatMemory.add(conversationId, prompt.getInstructions());
+const toolCallingManager = new DefaultToolCallingManager();
+const chatMemory = new MessageWindowChatMemory({
+  chatMemoryRepository: new InMemoryChatMemoryRepository(),
+});
+const conversationId = randomUUID();
 
-Prompt promptWithMemory = new Prompt(chatMemory.get(conversationId), chatOptions);
-ChatResponse chatResponse = chatModel.call(promptWithMemory);
-chatMemory.add(conversationId, chatResponse.getResult().getOutput());
+const chatOptions = new OpenAiChatOptions({
+  toolCallbacks: ToolCallbacks.from(new MathTools()),
+  internalToolExecutionEnabled: false,
+});
+let prompt = new Prompt(
+  [new SystemMessage('You are a helpful assistant.'), new UserMessage('What is 6 * 8?')],
+  chatOptions,
+);
+chatMemory.add(conversationId, prompt.instructions);
+
+let promptWithMemory = new Prompt(chatMemory.get(conversationId), chatOptions);
+let chatResponse = await chatModel.call(promptWithMemory);
+chatMemory.add(conversationId, chatResponse.result.output);
 
 while (chatResponse.hasToolCalls()) {
-    ToolExecutionResult toolExecutionResult = toolCallingManager.executeToolCalls(promptWithMemory,
-            chatResponse);
-    chatMemory.add(conversationId, toolExecutionResult.conversationHistory()
-        .get(toolExecutionResult.conversationHistory().size() - 1));
-    promptWithMemory = new Prompt(chatMemory.get(conversationId), chatOptions);
-    chatResponse = chatModel.call(promptWithMemory);
-    chatMemory.add(conversationId, chatResponse.getResult().getOutput());
+  const toolExecutionResult = await toolCallingManager.executeToolCalls(
+    promptWithMemory,
+    chatResponse,
+  );
+  const history = toolExecutionResult.conversationHistory;
+  chatMemory.add(conversationId, history[history.length - 1]);
+  promptWithMemory = new Prompt(chatMemory.get(conversationId), chatOptions);
+  chatResponse = await chatModel.call(promptWithMemory);
+  chatMemory.add(conversationId, chatResponse.result.output);
 }
 
-UserMessage newUserMessage = new UserMessage("What did I ask you earlier?");
+const newUserMessage = new UserMessage('What did I ask you earlier?');
 chatMemory.add(conversationId, newUserMessage);
 
-ChatResponse newResponse = chatModel.call(new Prompt(chatMemory.get(conversationId)));
+const newResponse = await chatModel.call(new Prompt(chatMemory.get(conversationId)));
 ----
 
 === Exception Handling
 
-When a tool call fails, the exception is propagated as a `ToolExecutionException` which can be caught to handle the error. 
+When a tool call fails, the exception is propagated as a `ToolExecutionException` which can be caught to handle the error.
 A `ToolExecutionExceptionProcessor` can be used to handle a `ToolExecutionException` with two outcomes: either producing an error message to be sent back to the AI model or throwing an exception to be handled by the caller.
 
-[source,java]
+[source,typescript]
 ----
-@FunctionalInterface
-public interface ToolExecutionExceptionProcessor {
-
-	/**
-	 * Convert an exception thrown by a tool to a String that can be sent back to the AI
-	 * model or throw an exception to be handled by the caller.
-	 */
-	String process(ToolExecutionException exception);
-
+export interface ToolExecutionExceptionProcessor {
+  /**
+   * Convert an exception thrown by a tool to a string that can be sent back to the AI
+   * model or throw an exception to be handled by the caller.
+   */
+  process(exception: ToolExecutionException): string;
 }
 ----
 
-If you're using any of the Spring AI Spring Boot Starters, `DefaultToolExecutionExceptionProcessor` is the autoconfigured implementation of the `ToolExecutionExceptionProcessor` interface. By default, the error message of `RuntimeException` is sent back to the model, while checked exceptions and Errors (e.g., `IOException`, `OutOfMemoryError`) are always thrown. The `DefaultToolExecutionExceptionProcessor` constructor lets you set the `alwaysThrow` attribute to `true` or `false`. If `true`, an exception will be thrown instead of sending an error message back to the model.
+`DefaultToolExecutionExceptionProcessor` is the default implementation. By default, the error message of any thrown `Error` is sent back to the model. The constructor lets you set the `alwaysThrow` flag to `true` or `false`. If `true`, an exception will be thrown instead of sending an error message back to the model. You can also pass an array of exception classes that should always be rethrown.
 
-You can use the ``spring.ai.tools.throw-exception-on-error` property to control the behavior of the `DefaultToolExecutionExceptionProcessor` bean:
-
-[cols="6,3,1", stripes=even]
-|====
-| Property | Description | Default
-
-| `spring.ai.tools.throw-exception-on-error` | If `true`, tool calling errors are thrown as exceptions for the caller to handle. If `false`, errors are converted to messages and sent back to the AI model, allowing it to process and respond to the error.| `false`
-|====
-
-
-[source,java]
+[source,typescript]
 ----
-@Bean
-ToolExecutionExceptionProcessor toolExecutionExceptionProcessor() {
-    return new DefaultToolExecutionExceptionProcessor(true);
-}
+import {
+  DefaultToolExecutionExceptionProcessor,
+} from '@nestjs-ai/model';
+
+const processor = new DefaultToolExecutionExceptionProcessor(
+  /* alwaysThrow */ true,
+);
+----
+
+To register a custom processor, override the corresponding provider when configuring `NestAiModule`:
+
+[source,typescript]
+----
+import { Module } from '@nestjs/common';
+import { NestAiModule } from '@nestjs-ai/platform';
+import {
+  DefaultToolExecutionExceptionProcessor,
+  TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
+} from '@nestjs-ai/model';
+
+@Module({
+  imports: [NestAiModule.forRoot()],
+  providers: [
+    {
+      provide: TOOL_EXECUTION_EXCEPTION_PROCESSOR_TOKEN,
+      useFactory: () => new DefaultToolExecutionExceptionProcessor(true),
+    },
+  ],
+})
+export class AppModule {}
 ----
 
 NOTE: If you defined your own `ToolCallback` implementation, make sure to throw a `ToolExecutionException` when an error occurs as part of the tool execution logic in the `call()` method.
@@ -1290,18 +1459,15 @@ The `ToolExecutionExceptionProcessor` is used internally by the default `ToolCal
 The main approach for passing tools to a model is by providing the `ToolCallback`(s) when invoking the `ChatClient` or the `ChatModel`,
 using one of the strategies described in xref:_methods_as_tools[] and xref:_functions_as_tools[].
 
-However, Spring AI also supports resolving tools dynamically at runtime using the `ToolCallbackResolver` interface. 
+However, NestJS AI also supports resolving tools dynamically at runtime using the `ToolCallbackResolver` interface.
 
-[source,java]
+[source,typescript]
 ----
-public interface ToolCallbackResolver {
-
-	/**
-	 * Resolve the {@link ToolCallback} for the given tool name.
-	 */
-	@Nullable
-	ToolCallback resolve(String toolName);
-
+export interface ToolCallbackResolver {
+  /**
+   * Resolve the {@link ToolCallback} for the given tool name.
+   */
+  resolve(toolName: string): ToolCallback | null;
 }
 ----
 
@@ -1310,98 +1476,48 @@ When using this approach:
 - On the client-side, you provide the tool names to the `ChatClient` or the `ChatModel` instead of the `ToolCallback`(s).
 - On the server-side, a `ToolCallbackResolver` implementation is responsible for resolving the tool names to the corresponding `ToolCallback` instances.
 
-By default, Spring AI relies on a `DelegatingToolCallbackResolver` that delegates the tool resolution to a list of `ToolCallbackResolver` instances:
+By default, NestJS AI relies on a `DelegatingToolCallbackResolver` that delegates the tool resolution to a list of `ToolCallbackResolver` instances:
 
-- The `SpringBeanToolCallbackResolver` resolves tools from Spring beans of type `Function`, `Supplier`, `Consumer`, or `BiFunction`. See xref:_dynamic_specification_bean[] for more details.
-- The `StaticToolCallbackResolver` resolves tools from a static list of `ToolCallback` instances. When using the Spring Boot Autoconfiguration, this resolver is automatically configured with all the beans of type `ToolCallback` defined in the application context.
+- The `NestProviderToolCallbackResolver` resolves tools from NestJS providers that contain `@Tool`-decorated methods. See xref:_dynamic_specification_nestjs_providers[] for more details.
+- The `StaticToolCallbackResolver` resolves tools from a static list of `ToolCallback` instances. When using `NestAiModule.forRoot()`, this resolver is automatically configured with all the providers of type `ToolCallback` registered in the application.
 
-If you rely on the Spring Boot Autoconfiguration, you can customize the resolution logic by providing a custom `ToolCallbackResolver` bean.
+You can customize the resolution logic by providing a custom `ToolCallbackResolver` provider:
 
-[source,java]
+[source,typescript]
 ----
-@Bean
-ToolCallbackResolver toolCallbackResolver(List<FunctionCallback> toolCallbacks) {
-    StaticToolCallbackResolver staticToolCallbackResolver = new StaticToolCallbackResolver(toolCallbacks);
-    return new DelegatingToolCallbackResolver(List.of(staticToolCallbackResolver));
-}
+import { Module } from '@nestjs/common';
+import { NestAiModule } from '@nestjs-ai/platform';
+import {
+  DelegatingToolCallbackResolver,
+  StaticToolCallbackResolver,
+  TOOL_CALLBACK_RESOLVER_TOKEN,
+  type ToolCallback,
+} from '@nestjs-ai/model';
+
+@Module({
+  imports: [NestAiModule.forRoot()],
+  providers: [
+    {
+      provide: TOOL_CALLBACK_RESOLVER_TOKEN,
+      useFactory: (toolCallbacks: ToolCallback[]) =>
+        new DelegatingToolCallbackResolver([
+          new StaticToolCallbackResolver(toolCallbacks),
+        ]),
+      inject: [/* tokens that resolve to ToolCallback[] */],
+    },
+  ],
+})
+export class AppModule {}
 ----
 
 The `ToolCallbackResolver` is used internally by the `ToolCallingManager` to resolve tools dynamically at runtime, supporting both xref:_framework_controlled_tool_execution[] and xref:_user_controlled_tool_execution[].
 
-[[tool-argument-augmentation]]
-== Tool Argument Augmentation
-
-Spring AI provides a utility for **dynamic augmentation of tool input schemas** with additional arguments. This allows capturing extra information from the model—such as reasoning or metadata—without modifying the underlying tool implementation.
-
-Common use cases include:
-
-* **Inner Thinking/Reasoning**: Capture the model's step-by-step reasoning before executing a tool
-* **Memory Enhancement**: Extract insights to store in long-term memory
-* **Analytics & Tracking**: Collect metadata, user intent, or usage patterns
-* **Multi-Agent Coordination**: Pass agent identifiers or coordination signals
-
-=== Quick Start
-
-**Define augmented arguments** as a Java Record:
-
-[source,java]
-----
-public record AgentThinking(
-    @ToolParam(description = "Your reasoning for calling this tool", required = true)
-    String innerThought,
-
-    @ToolParam(description = "Confidence level (low, medium, high)", required = false)
-    String confidence
-) {}
-----
-
-**Wrap your tool** with `AugmentedToolCallbackProvider`:
-
-[source,java]
-----
-AugmentedToolCallbackProvider<AgentThinking> provider = AugmentedToolCallbackProvider
-    .<AgentThinking>builder()
-    .toolObject(new MyTools())  // Your @Tool annotated class
-    .argumentType(AgentThinking.class)
-    .argumentConsumer(event -> {
-        AgentThinking thinking = event.arguments();
-        log.info("Tool: {} | Reasoning: {}", event.toolDefinition().name(), thinking.innerThought());
-    })
-    .removeExtraArgumentsAfterProcessing(true)
-    .build();
-----
-
-**Use with ChatClient**:
-
-[source,java]
-----
-ChatClient chatClient = ChatClient.builder(chatModel)
-    .defaultToolCallbacks(provider)
-    .build();
-----
-
-The LLM sees the augmented schema with your additional fields. Your consumer receives the `AgentThinking` record, while the original tool receives only its expected arguments.
-
-=== Core Components
-
-* `AugmentedToolCallbackProvider<T>` - Wraps tool objects or providers, augmenting all tools with the specified Record type
-* `AugmentedToolCallback<T>` - Wraps individual `ToolCallback` instances
-* `AugmentedArgumentEvent<T>` - Contains `toolDefinition()`, `rawInput()`, and `arguments()` for consumers
-* `ToolInputSchemaAugmenter` - Low-level utility for schema manipulation
-
-=== Configuration
-
-The `removeExtraArgumentsAfterProcessing` option controls whether augmented arguments are passed to the original tool:
-
-* `true` (default) - Remove augmented arguments before calling the tool
-* `false` - Preserve augmented arguments in the input (if the tool can ignore extra fields)
-
 == Observability
 
-Tool calling includes observability support with spring.ai.tool observations that measure completion time and propagate tracing information. See xref:observability/index.adoc#_tool_calling[Tool Calling Observability].
+Tool calling includes observability support with `spring.ai.tool` observations that measure completion time and propagate tracing information. See xref:observability/index.adoc#_tool_calling[Tool Calling Observability].
 
-Optionally, Spring AI can export tool call arguments and results as span attributes, disabled by default for sensitivity reasons. Details: xref:observability/index.adoc#_tool_call_arguments_and_result_data[Tool Call Arguments and Result Data].
+Optionally, NestJS AI can export tool call arguments and results as span attributes, disabled by default for sensitivity reasons. Details: xref:observability/index.adoc#_tool_call_arguments_and_result_data[Tool Call Arguments and Result Data].
 
 === Logging
 
-All the main operations of the tool calling features are logged at the `DEBUG` level. You can enable the logging by setting the log level to `DEBUG` for the `org.springframework.ai` package.
+All the main operations of the tool calling features are logged via the `LoggerFactory` from `@nestjs-port/core`. Configure the underlying logger to enable verbose output for tool calling components such as `MethodToolCallback`, `FunctionToolCallback`, and `DefaultToolCallingManager`.

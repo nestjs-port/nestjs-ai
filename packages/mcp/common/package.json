@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/mcp-common",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Shared MCP primitives for NestJS AI",
   "keywords": [
@@ -44,8 +44,8 @@
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
     "@nestjs-port/core": "^0.1.0"
   },
   "engines": {

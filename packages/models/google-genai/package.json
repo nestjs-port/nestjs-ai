@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-google-genai",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Google GenAI model integration for NestJS AI",
   "keywords": [
@@ -47,9 +47,9 @@
   },
   "peerDependencies": {
     "@google/genai": "^1.49.0",
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
-    "@nestjs-ai/retry": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
+    "@nestjs-ai/retry": "^0.1.1",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.8.2"

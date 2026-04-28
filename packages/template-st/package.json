@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/template-st",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "StringTemplate renderer for NestJS AI",
   "keywords": [
@@ -43,7 +43,7 @@
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
     "@nestjs-port/core": "^0.1.0"
   },
   "engines": {

@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/advisors-vector-store",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Vector store advisors for NestJS AI",
   "keywords": [
@@ -45,10 +45,10 @@
     "rxjs": "^7.8.2"
   },
   "peerDependencies": {
-    "@nestjs-ai/client-chat": "^0.1.0",
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
-    "@nestjs-ai/vector-store": "^0.1.0",
+    "@nestjs-ai/client-chat": "^0.1.1",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
+    "@nestjs-ai/vector-store": "^0.1.2",
     "rxjs": "^7.8.2"
   },
   "engines": {

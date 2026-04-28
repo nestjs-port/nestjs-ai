@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-anthropic",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Anthropic model integration for NestJS AI",
   "keywords": [
@@ -49,8 +49,8 @@
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.8.2"

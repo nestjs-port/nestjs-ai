@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/document-reader-cheerio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Cheerio-based document reader for NestJS AI",
   "keywords": [
@@ -43,7 +43,7 @@
     "@nestjs-ai/commons": "workspace:*"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0"
+    "@nestjs-ai/commons": "^0.1.1"
   },
   "engines": {
     "node": ">=22.12.0"

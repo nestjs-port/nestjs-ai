@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/vector-store-redis",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "description": "Redis vector store for NestJS AI",
   "keywords": [
@@ -49,9 +49,9 @@
     "testcontainers": "^11.13.0"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
-    "@nestjs-ai/vector-store": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
+    "@nestjs-ai/vector-store": "^0.1.2",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "redis": "^5.0.0"

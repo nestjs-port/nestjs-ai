@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/rag",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Retrieval Augmented Generation (RAG) support for NestJS AI",
   "keywords": [
@@ -42,10 +42,10 @@
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@nestjs-ai/client-chat": "^0.1.0",
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
-    "@nestjs-ai/vector-store": "^0.1.0",
+    "@nestjs-ai/client-chat": "^0.1.1",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
+    "@nestjs-ai/vector-store": "^0.1.2",
     "@nestjs-port/core": "^0.1.0"
   },
   "engines": {

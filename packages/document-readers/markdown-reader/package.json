@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/document-reader-markdown",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Markdown document reader for NestJS AI",
   "keywords": [
@@ -45,7 +45,7 @@
     "@types/commonmark": "^0.27.10"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0"
+    "@nestjs-ai/commons": "^0.1.1"
   },
   "engines": {
     "node": ">=22.12.0"

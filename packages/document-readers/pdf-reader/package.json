@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/document-reader-pdf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "PDF.js document reader for NestJS AI",
   "keywords": [
@@ -44,7 +44,7 @@
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
     "@nestjs-port/core": "^0.1.0"
   },
   "engines": {

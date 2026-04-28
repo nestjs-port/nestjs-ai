@@ -39,14 +39,14 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
-    "@nestjs-port/core": "^0.0.4"
+    "@nestjs-port/core": "^0.1.0"
   },
   "peerDependencies": {
-    "@nestjs-ai/client-chat": "workspace:^",
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-ai/vector-store": "workspace:^",
-    "@nestjs-port/core": "^0.0.4"
+    "@nestjs-ai/client-chat": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.0",
+    "@nestjs-ai/model": "^0.1.0",
+    "@nestjs-ai/vector-store": "^0.1.0",
+    "@nestjs-port/core": "^0.1.0"
   },
   "engines": {
     "node": ">=22.12.0"

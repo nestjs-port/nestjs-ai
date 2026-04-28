@@ -42,17 +42,17 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/template-st": "workspace:*",
-    "@nestjs-port/core": "^0.0.4",
-    "@nestjs-port/testing": "^0.0.3",
+    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "4.3.6"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/template-st": "workspace:^",
-    "@nestjs-port/core": "^0.0.4",
+    "@nestjs-ai/commons": "^0.1.0",
+    "@nestjs-ai/template-st": "^0.1.0",
+    "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "reflect-metadata": "^0.1.12 || ^0.2.0",
     "rxjs": "^7.8.2"

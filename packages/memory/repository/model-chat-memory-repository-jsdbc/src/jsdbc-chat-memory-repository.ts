@@ -112,7 +112,7 @@ export class JsdbcChatMemoryRepository implements ChatMemoryRepository {
 }
 
 class MessageRowMapper implements RowMapper<Message> {
-  mapRow(row: Record<string, unknown>, rowNum: number): Message {
+  async mapRow(row: Record<string, unknown>, rowNum: number): Promise<Message> {
     return this.toMessage(this.validateRow(row, rowNum));
   }
 

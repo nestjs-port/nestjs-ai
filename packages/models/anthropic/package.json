@@ -40,8 +40,8 @@
     "@nestjs-ai/client-chat": "workspace:*",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/core": "^0.0.4",
-    "@nestjs-port/testing": "^0.0.3",
+    "@nestjs-port/core": "^0.1.1",
+    "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -49,9 +49,9 @@
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-port/core": "^0.0.4",
+    "@nestjs-ai/commons": "^0.1.0",
+    "@nestjs-ai/model": "^0.1.0",
+    "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.8.2"
   },

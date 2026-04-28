@@ -41,7 +41,7 @@
     "testcontainers": "^11.13.0"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^"
+    "@nestjs-ai/commons": "^0.1.0"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -38,15 +38,15 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/core": "^0.0.4",
-    "@nestjs-port/testing": "^0.0.3",
+    "@nestjs-port/core": "^0.1.1",
+    "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
     "@xenova/transformers": "^2.17.2"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "workspace:^",
-    "@nestjs-ai/model": "workspace:^",
-    "@nestjs-port/core": "^0.0.4",
+    "@nestjs-ai/commons": "^0.1.0",
+    "@nestjs-ai/model": "^0.1.0",
+    "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@xenova/transformers": "^2.17.2"
   },

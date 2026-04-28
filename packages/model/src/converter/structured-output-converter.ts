@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import type { AsyncConverter } from "@nestjs-port/core";
 import type { FormatProvider } from "./format-provider.js";
 
-export abstract class StructuredOutputConverter<T> implements FormatProvider {
+export abstract class StructuredOutputConverter<T>
+  implements AsyncConverter<string, T>, FormatProvider
+{
   abstract convert(source: string): Promise<T>;
 
   abstract get format(): string;

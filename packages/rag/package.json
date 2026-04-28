@@ -39,7 +39,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
-    "@nestjs-port/core": "^0.1.0"
+    "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
     "@nestjs-ai/client-chat": "^0.1.0",

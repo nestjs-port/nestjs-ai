@@ -41,7 +41,7 @@
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/model-transformers": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
-    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/core": "^0.1.1",
     "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
     "@testcontainers/redis": "^11.13.0",

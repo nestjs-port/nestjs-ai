@@ -41,7 +41,7 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/core": "^0.1.1",
     "@nestjs/common": "^11.1.11",
     "@testcontainers/redis": "^11.13.0",
     "redis": "^5.11.0",

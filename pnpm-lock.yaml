@@ -78,8 +78,8 @@ importers:
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -103,11 +103,11 @@ importers:
         specifier: workspace:*
         version: link:../template-st
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -167,8 +167,8 @@ importers:
         specifier: workspace:*
         version: link:../../commons
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
 
   packages/document-readers/tika-reader:
     devDependencies:
@@ -224,17 +224,17 @@ importers:
         specifier: workspace:*
         version: link:../vector-stores/redis-store
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/jsdbc':
         specifier: ^0.1.0
-        version: 0.1.0(1f69b319b4da394835214e1fccd70321)
+        version: 0.1.0(6fdce7872911cd488778a89ac3a5f779)
       '@nestjs-port/observation':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -296,8 +296,8 @@ importers:
         specifier: workspace:*
         version: link:../../model
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
 
   packages/memory/repository/model-chat-memory-repository-jsdbc:
     devDependencies:
@@ -308,11 +308,11 @@ importers:
         specifier: workspace:*
         version: link:../../../model
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/jsdbc':
         specifier: ^0.1.0
-        version: 0.1.0(1f69b319b4da394835214e1fccd70321)
+        version: 0.1.0(6fdce7872911cd488778a89ac3a5f779)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -326,8 +326,8 @@ importers:
         specifier: workspace:*
         version: link:../../../model
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -360,11 +360,11 @@ importers:
         specifier: workspace:*
         version: link:../template-st
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -393,11 +393,11 @@ importers:
         specifier: workspace:*
         version: link:../../model
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -426,8 +426,8 @@ importers:
         specifier: workspace:*
         version: link:../../retry
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -453,11 +453,11 @@ importers:
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -480,11 +480,11 @@ importers:
         specifier: workspace:*
         version: link:../../model
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -504,8 +504,8 @@ importers:
         specifier: workspace:*
         version: link:../template-st
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -528,14 +528,14 @@ importers:
         specifier: workspace:*
         version: link:../vector-store
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
 
   packages/retry:
     devDependencies:
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.2)
@@ -550,8 +550,8 @@ importers:
         specifier: workspace:*
         version: link:../commons
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
 
   packages/vector-store:
     dependencies:
@@ -566,11 +566,11 @@ importers:
         specifier: workspace:*
         version: link:../model
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
 
   packages/vector-stores/pgvector-store:
     devDependencies:
@@ -593,14 +593,14 @@ importers:
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/jsdbc':
         specifier: ^0.1.0
-        version: 0.1.0(1f69b319b4da394835214e1fccd70321)
+        version: 0.1.0(6fdce7872911cd488778a89ac3a5f779)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -635,11 +635,11 @@ importers:
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
-        specifier: ^0.1.0
-        version: 0.1.0(rxjs@7.8.2)
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/testing':
         specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1275,6 +1275,12 @@ packages:
 
   '@nestjs-port/core@0.1.0':
     resolution: {integrity: sha512-Z0b8AIZNG8uBIx2pT+zlxKkvqaHhkFzI+MT22KEOIUbCSBJpYmpcFc4v1ee6plD8nJjvs/6dsQiy/Myjb7ItIQ==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      rxjs: ^7.0.0
+
+  '@nestjs-port/core@0.1.1':
+    resolution: {integrity: sha512-zMACw1nEK5jG6PxEc9MQnG0IW6Z35qUP49s/K/AShi/uGm+1RR9MCJYf12aG2D+G7Rk8GGGrrHhuKs/h+GYR3w==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       rxjs: ^7.0.0
@@ -6072,9 +6078,13 @@ snapshots:
     dependencies:
       rxjs: 7.8.2
 
-  '@nestjs-port/jsdbc@0.1.0(1f69b319b4da394835214e1fccd70321)':
+  '@nestjs-port/core@0.1.1(rxjs@7.8.2)':
     dependencies:
-      '@nestjs-port/core': 0.1.0(rxjs@7.8.2)
+      rxjs: 7.8.2
+
+  '@nestjs-port/jsdbc@0.1.0(6fdce7872911cd488778a89ac3a5f779)':
+    dependencies:
+      '@nestjs-port/core': 0.1.1(rxjs@7.8.2)
       '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
@@ -6088,15 +6098,15 @@ snapshots:
       sequelize: 6.37.8(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(sqlite3@5.1.7)
       typeorm: 0.3.28(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.0(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)(sqlite3@5.1.7)
 
-  '@nestjs-port/observation@0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)':
+  '@nestjs-port/observation@0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@nestjs-port/core': 0.1.0(rxjs@7.8.2)
+      '@nestjs-port/core': 0.1.1(rxjs@7.8.2)
       '@nestjs/common': 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@opentelemetry/api': 1.9.0
 
-  '@nestjs-port/testing@0.1.0(@nestjs-port/core@0.1.0(rxjs@7.8.2))':
+  '@nestjs-port/testing@0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))':
     dependencies:
-      '@nestjs-port/core': 0.1.0(rxjs@7.8.2)
+      '@nestjs-port/core': 0.1.1(rxjs@7.8.2)
 
   '@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     dependencies:

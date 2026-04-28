@@ -36,7 +36,7 @@
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-ai/vector-store-pgvector": "workspace:*",
     "@nestjs-ai/vector-store-redis": "workspace:*",
-    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/core": "^0.1.1",
     "@nestjs-port/jsdbc": "^0.1.0",
     "@nestjs-port/observation": "^0.1.0",
     "@nestjs-port/testing": "^0.1.0",

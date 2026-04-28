@@ -41,7 +41,7 @@
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
-    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/core": "^0.1.1",
     "rxjs": "^7.8.2"
   },
   "peerDependencies": {

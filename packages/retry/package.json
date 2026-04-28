@@ -36,7 +36,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/core": "^0.1.1",
     "vitest": "^3.0.0"
   },
   "peerDependencies": {

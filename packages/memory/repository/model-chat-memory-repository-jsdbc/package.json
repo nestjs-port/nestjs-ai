@@ -41,7 +41,7 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
-    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/core": "^0.1.1",
     "@nestjs-port/jsdbc": "^0.1.0",
     "@nestjs/common": "^11.1.11"
   },

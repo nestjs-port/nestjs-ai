@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/client-chat",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Chat client support for NestJS AI",
   "keywords": [
@@ -50,8 +50,8 @@
     "zod": "4.3.6"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.0",
-    "@nestjs-ai/model": "^0.1.0",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/model": "^0.1.1",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.8.2"

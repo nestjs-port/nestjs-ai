@@ -1,5 +1,11 @@
 # @nestjs-ai/retry
 
+## 0.1.1
+
+### Patch Changes
+
+- bfe6683: update peer dependencies
+
 ## 0.1.0
 
 ### Minor Changes

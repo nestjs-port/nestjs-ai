@@ -1,5 +1,13 @@
 # @nestjs-ai/document-reader-pdf
 
+## 0.1.1
+
+### Patch Changes
+
+- bfe6683: update peer dependencies
+- Updated dependencies [bfe6683]
+  - @nestjs-ai/commons@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

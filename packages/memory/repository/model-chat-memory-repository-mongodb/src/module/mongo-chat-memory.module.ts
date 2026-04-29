@@ -17,18 +17,21 @@
 import assert from "node:assert/strict";
 
 import {
+  Inject,
+  Injectable,
   type DynamicModule,
-  type FactoryProvider,
   type InjectionToken,
   Module,
   type ModuleMetadata,
+  type OnApplicationBootstrap,
   type Provider,
 } from "@nestjs/common";
 import { CHAT_MEMORY_TOKEN } from "@nestjs-ai/commons";
+import { LoggerFactory } from "@nestjs-port/core";
 import type { Collection, IndexDescriptionInfo } from "mongodb";
 
-import { MongoChatMemoryRepository } from "../mongo-chat-memory-repository.js";
 import type { Conversation } from "../conversation.js";
+import { MongoChatMemoryRepository } from "../mongo-chat-memory-repository.js";
 import type { MongoChatMemoryProperties } from "./mongo-chat-memory-properties.js";
 
 export const MONGO_CHAT_MEMORY_PROPERTIES_TOKEN = Symbol.for(
@@ -78,46 +81,63 @@ export class MongoChatMemoryModule {
         },
         ...providers,
       ],
-      exports: providers.map(
-        (provider) => (provider as FactoryProvider).provide,
-      ),
+      exports: [CHAT_MEMORY_TOKEN],
       global: options.global ?? false,
     };
   }
 }
 
 function createProviders(): Provider[] {
-  return [
-    {
-      provide: CHAT_MEMORY_TOKEN,
-      useFactory: async (
-        properties: MongoChatMemoryProperties,
-      ): Promise<MongoChatMemoryRepository> => {
-        const collection = await resolveCollection(properties);
+  return [createChatMemoryProvider(), MongoChatMemoryIndexInitializer];
+}
 
-        if (properties.createIndices) {
-          await initializeIndices(collection, properties.ttl);
-        }
+function createChatMemoryProvider(): Provider {
+  return {
+    provide: CHAT_MEMORY_TOKEN,
+    useFactory: async (
+      properties: MongoChatMemoryProperties,
+    ): Promise<MongoChatMemoryRepository> => {
+      const collection = await resolveCollection(properties);
 
-        return MongoChatMemoryRepository.builder()
-          .collection(collection)
-          .build();
-      },
-      inject: [MONGO_CHAT_MEMORY_PROPERTIES_TOKEN],
+      return MongoChatMemoryRepository.builder().collection(collection).build();
     },
-  ];
+    inject: [MONGO_CHAT_MEMORY_PROPERTIES_TOKEN],
+  };
+}
+
+@Injectable()
+class MongoChatMemoryIndexInitializer implements OnApplicationBootstrap {
+  private readonly _logger = LoggerFactory.getLogger(
+    MongoChatMemoryIndexInitializer.name,
+  );
+
+  constructor(
+    @Inject(MONGO_CHAT_MEMORY_PROPERTIES_TOKEN)
+    private readonly _properties: MongoChatMemoryProperties,
+  ) {}
+
+  async onApplicationBootstrap(): Promise<void> {
+    if (!this._properties.createIndices) {
+      return;
+    }
+
+    const collection = await resolveCollection(this._properties);
+
+    this._logger.info("Creating MongoDB indices for ChatMemory");
+    await initializeIndices(collection, this._properties.ttl, this._logger);
+  }
 }
 
 async function resolveCollection(
   properties: MongoChatMemoryProperties,
 ): Promise<Collection<Conversation>> {
-  if (properties.collection != null) {
-    return properties.collection;
-  }
-
   const collectionName =
     properties.collectionName ??
     MongoChatMemoryRepository.DEFAULT_COLLECTION_NAME;
+
+  if (properties.collection != null) {
+    return properties.collection;
+  }
 
   if (properties.db != null) {
     return properties.db.collection<Conversation>(collectionName);
@@ -133,48 +153,76 @@ async function resolveCollection(
 
 async function initializeIndices(
   collection: Collection<Conversation>,
-  ttl?: number | null,
+  ttl: number | null | undefined,
+  logger?: ReturnType<typeof LoggerFactory.getLogger>,
 ): Promise<void> {
-  await createMainIndex(collection);
+  await createMainIndex(collection, logger);
 
   if (ttl != null && ttl > 0) {
-    await createOrUpdateTtlIndex(collection, ttl);
+    await createOrUpdateTtlIndex(collection, ttl, logger);
   }
 }
 
 async function createMainIndex(
   collection: Collection<Conversation>,
+  logger?: ReturnType<typeof LoggerFactory.getLogger>,
 ): Promise<void> {
-  await collection.createIndex({ conversationId: 1, timestamp: -1 });
+  await createIndexSafely(collection, { conversationId: 1, timestamp: -1 });
+  logger?.debug("Created main MongoDB index for ChatMemory");
 }
 
 async function createOrUpdateTtlIndex(
   collection: Collection<Conversation>,
   ttl: number,
+  logger?: ReturnType<typeof LoggerFactory.getLogger>,
 ): Promise<void> {
   const existingIndexes = await collection.indexes();
-  const existingTtlIndex = existingIndexes.find(isTimestampTtlIndex);
-
-  if (
-    existingTtlIndex != null &&
-    existingTtlIndex.expireAfterSeconds != null &&
-    existingTtlIndex.expireAfterSeconds !== ttl
-  ) {
-    assert(
-      existingTtlIndex.name != null,
-      "existing TTL index must have a name",
-    );
-    await collection.dropIndex(existingTtlIndex.name);
+  for (const index of existingIndexes) {
+    if (isTimestampTtlIndex(index) && index.expireAfterSeconds !== ttl) {
+      assert(index.name != null, "existing TTL index must have a name");
+      logger?.warn("Dropping existing TTL index, because TTL is different");
+      await collection.dropIndex(index.name);
+    }
   }
 
-  await collection.createIndex({ timestamp: 1 }, { expireAfterSeconds: ttl });
+  await createIndexSafely(
+    collection,
+    { timestamp: 1 },
+    { expireAfterSeconds: ttl },
+  );
+  logger?.debug("Created TTL MongoDB index for ChatMemory");
+}
+
+async function createIndexSafely(
+  collection: Collection<Conversation>,
+  keys: Record<string, 1 | -1>,
+  options?: { expireAfterSeconds?: number },
+): Promise<void> {
+  if (typeof collection.createIndex === "function") {
+    await collection.createIndex(keys, options);
+    return;
+  }
+
+  const legacyCollection = collection as Collection<Conversation> & {
+    ensureIndex?: (
+      keys: Record<string, 1 | -1>,
+      options?: { expireAfterSeconds?: number },
+    ) => Promise<string>;
+  };
+
+  if (typeof legacyCollection.ensureIndex === "function") {
+    await legacyCollection.ensureIndex(keys, options);
+    return;
+  }
+
+  throw new Error(
+    "Neither createIndex() nor ensureIndex() method found on Collection",
+  );
 }
 
 function isTimestampTtlIndex(index: IndexDescriptionInfo): boolean {
-  const keys = Object.keys(index.key);
   return (
-    keys.length === 1 &&
-    keys[0] === "timestamp" &&
+    Object.keys(index.key).length === 1 &&
     index.key.timestamp === 1 &&
     index.expireAfterSeconds != null
   );

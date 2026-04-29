@@ -39,8 +39,10 @@
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-port/core": "^0.1.1",
     "@nestjs/common": "^11.1.11",
+    "@nestjs/testing": "^11.1.11",
     "@testcontainers/mongodb": "^11.14.0",
     "mongodb": "^6.19.0",
+    "reflect-metadata": "^0.2.2",
     "testcontainers": "^11.14.0"
   },
   "peerDependencies": {

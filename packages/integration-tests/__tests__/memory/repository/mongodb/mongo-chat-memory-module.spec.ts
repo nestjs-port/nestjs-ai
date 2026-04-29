@@ -21,7 +21,7 @@ import { Test } from "@nestjs/testing";
 import type { IndexDescriptionInfo } from "mongodb";
 import { assert, describe, expect, it, vi } from "vitest";
 
-import { MongoChatMemoryModule } from "../module/mongo-chat-memory.module.js";
+import { MongoChatMemoryModule } from "../../../../../memory/repository/model-chat-memory-repository-mongodb/src/module/mongo-chat-memory.module.js";
 
 describe("MongoChatMemoryModule", () => {
   it("should resolve CHAT_MEMORY_TOKEN via NestJS DI", async () => {

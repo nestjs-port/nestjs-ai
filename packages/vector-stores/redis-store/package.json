@@ -44,9 +44,9 @@
     "@nestjs-port/core": "^0.1.1",
     "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
-    "@testcontainers/redis": "^11.13.0",
+    "@testcontainers/redis": "^11.14.0",
     "redis": "^5.11.0",
-    "testcontainers": "^11.13.0"
+    "testcontainers": "^11.14.0"
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "^0.1.1",

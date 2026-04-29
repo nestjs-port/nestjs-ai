@@ -36,7 +36,7 @@ import {
   expect,
   it,
 } from "vitest";
-import { RedisChatMemoryRepository } from "../redis-chat-memory-repository.js";
+import { RedisChatMemoryRepository } from "@nestjs-ai/model-chat-memory-repository-redis";
 
 const sleep = async (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));

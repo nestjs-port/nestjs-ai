@@ -833,7 +833,7 @@ If a new system message is added, all previous system messages are removed from 
 This ensures that the most recent context is always available for the conversation while keeping memory usage bounded.
 
 `MessageWindowChatMemory` is backed by the `ChatMemoryRepository` abstraction which provides storage implementations for the chat conversation memory.
-The following implementations are currently available in NestJS AI: `InMemoryChatMemoryRepository` (in `@nestjs-ai/model`), `RedisChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-redis`), and `JdbcChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-jsdbc`, supporting MySQL, PostgreSQL, Oracle, SQL Server, and SQLite).
+The following implementations are currently available in NestJS AI: `InMemoryChatMemoryRepository` (in `@nestjs-ai/model`), `MongoChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-mongodb`), `RedisChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-redis`), and `JdbcChatMemoryRepository` (in `@nestjs-ai/model-chat-memory-repository-jsdbc`, supporting MySQL, PostgreSQL, Oracle, SQL Server, and SQLite).
 
 For more details and usage examples, see the xref:api/chat-memory.adoc[Chat Memory] documentation.
 

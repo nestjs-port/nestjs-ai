@@ -14,5 +14,14 @@
  * limitations under the License.
  */
 
-export * from "./common/index.js";
-export type { MetaProvider } from "./context/index.js";
+/**
+ * Common interface for classes that provide metadata for the `_meta` field.
+ *
+ * This metadata is used in tool, prompt, and resource declarations.
+ */
+export interface MetaProvider {
+  /**
+   * Returns metadata key-value pairs that will be included in the `_meta` field.
+   */
+  getMeta(): Record<string, unknown> | null;
+}

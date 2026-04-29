@@ -18,6 +18,10 @@ import type { Collection, Db, MongoClient } from "mongodb";
 
 import type { Conversation } from "../conversation.js";
 
+export const MONGO_CHAT_MEMORY_PROPERTIES_TOKEN = Symbol.for(
+  "MONGO_CHAT_MEMORY_PROPERTIES_TOKEN",
+);
+
 export interface MongoChatMemoryProperties {
   collection?: Collection<Conversation>;
   db?: Db;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-export { type Conversation, type ConversationMessage } from "./conversation.js";
-export {
-  MongoChatMemoryRepository,
-  MongoChatMemoryRepositoryBuilder,
-} from "./mongo-chat-memory-repository.js";
-export * from "./module/index.js";
+import type { Collection, Db, MongoClient } from "mongodb";
+
+import type { Conversation } from "../conversation.js";
+
+export interface MongoChatMemoryProperties {
+  collection?: Collection<Conversation>;
+  db?: Db;
+  mongoClient?: MongoClient;
+  collectionName?: string;
+  createIndices?: boolean;
+  ttl?: number | null;
+}

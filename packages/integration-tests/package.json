@@ -47,6 +47,7 @@
     "@testcontainers/mysql": "^11.13.0",
     "@testcontainers/oraclefree": "^11.13.0",
     "@testcontainers/postgresql": "^11.13.0",
+    "mongodb": "^6.19.0",
     "mssql": "^11.0.1",
     "pg": "^8.20.0",
     "redis": "^5.11.0",

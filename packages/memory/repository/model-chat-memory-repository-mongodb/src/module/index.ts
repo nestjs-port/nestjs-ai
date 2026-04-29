@@ -15,9 +15,11 @@
  */
 
 export {
-  MONGO_CHAT_MEMORY_PROPERTIES_TOKEN,
   MongoChatMemoryModule,
   type MongoChatMemoryModuleAsyncOptions,
   type MongoChatMemoryModuleOptions,
 } from "./mongo-chat-memory.module.js";
-export type { MongoChatMemoryProperties } from "./mongo-chat-memory-properties.js";
+export {
+  MONGO_CHAT_MEMORY_PROPERTIES_TOKEN,
+  type MongoChatMemoryProperties,
+} from "./mongo-chat-memory-properties.js";

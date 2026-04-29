@@ -221,7 +221,94 @@ NOTE: Azure Cosmos DB-backed chat memory is not yet available in NestJS AI.
 
 === MongoChatMemoryRepository
 
-NOTE: MongoDB-backed chat memory is not yet available in NestJS AI.
+`MongoChatMemoryRepository` is a built-in implementation that uses MongoDB to store chat messages.
+It is suitable for applications that need a flexible, document-oriented database for persistent chat memory.
+
+Messages are retrieved in ascending timestamp order (oldest-to-newest), which is the expected format for LLM conversation history.
+This ordering is consistent across all chat memory repository implementations.
+
+Install the package together with the MongoDB driver:
+
+[source,bash]
+----
+pnpm add @nestjs-ai/model-chat-memory-repository-mongodb mongodb
+----
+
+Register the module with a `MongoClient`, a `Db`, or a pre-built `Collection`. The module exposes `CHAT_MEMORY_TOKEN`, so it can be injected with `@InjectChatMemory()`.
+
+[source,typescript]
+----
+import { Module } from '@nestjs/common';
+import { MongoChatMemoryModule } from '@nestjs-ai/model-chat-memory-repository-mongodb';
+
+@Module({
+  imports: [
+    MongoChatMemoryModule.forFeature({
+      mongoClient,
+      createIndices: true,
+      ttl: 3600,
+    }),
+  ],
+})
+export class AppModule {}
+----
+
+For dynamic configuration, use `forFeatureAsync`:
+
+[source,typescript]
+----
+import { Module } from '@nestjs/common';
+import { MongoChatMemoryModule } from '@nestjs-ai/model-chat-memory-repository-mongodb';
+
+@Module({
+  imports: [
+    MongoChatMemoryModule.forFeatureAsync({
+      useFactory: () => ({
+        mongoClient,
+        createIndices: true,
+        ttl: 3600,
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+----
+
+If you want to create the repository manually, build it from a `Collection`:
+
+[source,typescript]
+----
+import { MongoChatMemoryRepository } from '@nestjs-ai/model-chat-memory-repository-mongodb';
+
+const chatMemoryRepository = MongoChatMemoryRepository.builder()
+  .collection(collection)
+  .build();
+
+const chatMemory = new MessageWindowChatMemory({
+  chatMemoryRepository,
+  maxMessages: 10,
+});
+----
+
+==== Module Options
+
+[cols="2,2,1,5"]
+|===
+|Property | Type | Default | Description
+
+| `collection` | `Collection` | `null` | Pre-configured MongoDB collection to use directly.
+| `db` | `Db` | `null` | MongoDB database used to resolve the collection by name.
+| `mongoClient` | `MongoClient` | `null` | MongoDB client used to resolve the collection by name.
+| `collectionName` | `string` | `ai_chat_memory` | Name of the collection used when resolving from `db` or `mongoClient`.
+| `createIndices` | `boolean` | `false` | When `true`, creates the chat memory indexes on startup.
+| `ttl` | `number` | `null` | When set, creates or updates the TTL index on the `timestamp` field.
+|===
+
+==== Index Initialization
+
+When `createIndices` is `true`, the module creates the compound index on `conversationId` and `timestamp`, plus a TTL index on `timestamp` when `ttl` is greater than zero.
+This index initialization also causes MongoDB to create the `ai_chat_memory` collection if it does not already exist.
+If an existing TTL index has a different expiration value, it is dropped and recreated with the configured TTL.
 
 === RedisChatMemoryRepository
 

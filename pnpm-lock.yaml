@@ -199,6 +199,9 @@ importers:
       '@nestjs-ai/model-chat-memory-repository-jsdbc':
         specifier: workspace:*
         version: link:../memory/repository/model-chat-memory-repository-jsdbc
+      '@nestjs-ai/model-chat-memory-repository-mongodb':
+        specifier: workspace:*
+        version: link:../memory/repository/model-chat-memory-repository-mongodb
       '@nestjs-ai/model-chat-memory-repository-redis':
         specifier: workspace:*
         version: link:../memory/repository/model-chat-memory-repository-redis
@@ -243,6 +246,9 @@ importers:
         version: 11.1.19(@nestjs/common@11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
       '@testcontainers/mariadb':
         specifier: ^11.13.0
+        version: 11.14.0
+      '@testcontainers/mongodb':
+        specifier: ^11.14.0
         version: 11.14.0
       '@testcontainers/mssqlserver':
         specifier: ^11.13.0
@@ -334,15 +340,9 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@testcontainers/mongodb':
-        specifier: ^11.14.0
-        version: 11.14.0
       mongodb:
         specifier: ^6.19.0
         version: 6.21.0(socks@2.8.7)
-      testcontainers:
-        specifier: ^11.14.0
-        version: 11.14.0
 
   packages/memory/repository/model-chat-memory-repository-redis:
     devDependencies:

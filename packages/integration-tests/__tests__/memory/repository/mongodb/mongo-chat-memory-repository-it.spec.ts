@@ -28,8 +28,8 @@ import {
   UserMessage,
   type Message,
 } from "@nestjs-ai/model";
-import type { Conversation } from "../conversation.js";
-import { MongoChatMemoryRepository } from "../mongo-chat-memory-repository.js";
+import type { Conversation } from "../../../../../memory/repository/model-chat-memory-repository-mongodb/src/conversation.js";
+import { MongoChatMemoryRepository } from "../../../../../memory/repository/model-chat-memory-repository-mongodb/src/mongo-chat-memory-repository.js";
 
 describe("MongoChatMemoryRepositoryIT", () => {
   let mongoDbContainer: StartedMongoDBContainer;

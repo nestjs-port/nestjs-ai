@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./common/index.js";
-export type { MetaProvider } from "./context/index.js";
+export abstract class ErrorUtils {
+  private constructor() {}
+
+  static findCauseUsingPlainJava(throwable: Error): Error {
+    if (throwable == null) {
+      throw new TypeError("throwable must not be null");
+    }
+
+    let rootCause: Error = throwable;
+    while (rootCause.cause instanceof Error && rootCause.cause !== rootCause) {
+      rootCause = rootCause.cause;
+    }
+
+    return rootCause;
+  }
+}

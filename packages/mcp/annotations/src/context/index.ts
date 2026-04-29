@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./common/index.js";
-export type { MetaProvider } from "./context/index.js";
+export type { MetaProvider } from "./meta-provider.js";

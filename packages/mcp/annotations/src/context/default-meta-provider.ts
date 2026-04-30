@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
-export type { MetaProvider } from "./meta-provider.js";
-export { DefaultMetaProvider } from "./default-meta-provider.js";
+import type { MetaProvider } from "./meta-provider.js";
+
+/**
+ * Default `MetaProvider` implementation that disables `_meta` output.
+ */
+export class DefaultMetaProvider implements MetaProvider {
+  getMeta(): Record<string, unknown> | null {
+    return null;
+  }
+}

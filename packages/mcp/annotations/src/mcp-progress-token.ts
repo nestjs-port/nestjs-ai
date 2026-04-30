@@ -18,7 +18,8 @@ import "reflect-metadata";
 import { MCP_PROGRESS_TOKEN_METADATA_KEY } from "./metadata.js";
 
 /**
- * Marks a method parameter as the MCP progress token receiver.
+ * Used to annotate a method parameter that should hold the progress token value as
+ * received from the requester.
  */
 export function McpProgressToken(): ParameterDecorator {
   return (

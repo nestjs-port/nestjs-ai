@@ -39,7 +39,7 @@ function assertJsonSchemaSupport(schema: StandardSchemaWithJsonSchema): void {
 }
 
 /**
- * Marks a method parameter as an MCP argument using Standard Schema.
+ * Marks a method parameter as an MCP Argument.
  */
 export function McpArg(
   schema: StandardSchemaWithJsonSchema,

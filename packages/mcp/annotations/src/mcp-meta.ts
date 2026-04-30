@@ -16,8 +16,8 @@
 
 /**
  * Special object used to represent the `_meta` field in MCP request,
- * notification, and result payloads as a method argument in client and server MCP
- * handlers.
+ * notification, and result payloads as a method argument in all client and server
+ * MCP request and notification handlers.
  *
  * The corresponding request, notification, and result types are defined in the MCP
  * TypeScript SDK.

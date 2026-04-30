@@ -17,9 +17,23 @@
 import type { MetaProvider } from "./meta-provider.js";
 
 /**
- * Default `MetaProvider` implementation that disables `_meta` output.
+ * Default {@link MetaProvider} implementation that disables the "_meta" field in
+ * tool, prompt, resource declarations.
+ *
+ * <p>
+ * This provider deliberately returns `null` from `getMeta()` to signal that no
+ * "_meta" information is included.
+ * </p>
+ *
+ * <p>
+ * Use this when your tool, prompt, or resource does not need to expose any meta
+ * information or you want to keep responses minimal by default.
+ * </p>
  */
 export class DefaultMetaProvider implements MetaProvider {
+  /**
+   * Returns `null` to indicate that no "_meta" field should be included.
+   */
   getMeta(): Record<string, unknown> | null {
     return null;
   }

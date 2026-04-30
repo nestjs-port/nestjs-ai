@@ -35,7 +35,17 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nestjs-port/core": "^0.1.1"
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@nestjs-port/core": "^0.1.1",
+    "reflect-metadata": "^0.2.2"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@nestjs-port/core": "^0.1.0",
+    "reflect-metadata": "^0.1.12 || ^0.2.0"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-export type { MetaProvider } from "./meta-provider.js";
-export { DefaultMetaProvider } from "./default-meta-provider.js";
+export const MCP_ARG_METADATA_KEY = Symbol("mcp:arg");
+
+export const MCP_PROGRESS_TOKEN_METADATA_KEY = Symbol("mcp:progress-token");
+
+export const MCP_TOOL_PARAM_METADATA_KEY = Symbol("mcp:tool-param");

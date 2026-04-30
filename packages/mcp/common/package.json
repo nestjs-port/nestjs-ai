@@ -35,15 +35,14 @@
     "clean": "rimraf dist",
     "test": "vitest run"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0"
-  },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
     "@nestjs-ai/commons": "^0.1.1",
     "@nestjs-ai/model": "^0.1.1",
     "@nestjs-port/core": "^0.1.0"

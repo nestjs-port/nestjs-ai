@@ -15,4 +15,14 @@
  */
 
 export * from "./common/index.js";
+export { DefaultMetaProvider } from "./context/index.js";
 export type { MetaProvider } from "./context/index.js";
+export {
+  MCP_ARG_METADATA_KEY,
+  MCP_PROGRESS_TOKEN_METADATA_KEY,
+  MCP_TOOL_PARAM_METADATA_KEY,
+} from "./metadata.js";
+export { McpArg } from "./mcp-arg.js";
+export { McpMeta } from "./mcp-meta.js";
+export { McpProgressToken } from "./mcp-progress-token.js";
+export { McpToolParam } from "./mcp-tool-param.js";

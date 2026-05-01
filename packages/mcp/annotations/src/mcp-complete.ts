@@ -1,0 +1,64 @@
+/*
+ * Copyright 2023-present the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import "reflect-metadata";
+import { MCP_COMPLETE_METADATA_KEY } from "./metadata.js";
+
+export interface McpCompleteOptions {
+  /**
+   * The name reference to a prompt. This is used when the completion method is intended
+   * to complete a prompt argument.
+   */
+  prompt?: string;
+
+  /**
+   * The name reference to a resource template URI. This is used when the completion
+   * method is intended to complete an expression within a URI template of a resource.
+   */
+  uri?: string;
+}
+
+export interface McpCompleteMetadata {
+  prompt: string;
+  uri: string;
+}
+
+/**
+ * Annotates a method used for completion functionality in the MCP framework. This
+ * annotation can be used in two mutually exclusive ways: 1. To complete an expression
+ * within a URI template of a resource 2. To complete a prompt argument
+ *
+ * Note: You must use either the prompt or the uri attribute, but not both simultaneously.
+ */
+export function McpComplete(options: McpCompleteOptions = {}): MethodDecorator {
+  const metadata: McpCompleteMetadata = {
+    prompt: options.prompt ?? "",
+    uri: options.uri ?? "",
+  };
+
+  return (
+    target: object,
+    propertyKey: string | symbol,
+    _descriptor: PropertyDescriptor,
+  ): void => {
+    Reflect.defineMetadata(
+      MCP_COMPLETE_METADATA_KEY,
+      metadata,
+      target,
+      propertyKey,
+    );
+  };
+}

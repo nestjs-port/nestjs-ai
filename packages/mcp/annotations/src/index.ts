@@ -15,14 +15,80 @@
  */
 
 export * from "./common/index.js";
+export * from "./adapter/index.js";
 export { DefaultMetaProvider } from "./context/index.js";
 export type { MetaProvider } from "./context/index.js";
 export {
   MCP_ARG_METADATA_KEY,
+  MCP_COMPLETE_METADATA_KEY,
+  MCP_ELICITATION_METADATA_KEY,
+  MCP_LOGGING_METADATA_KEY,
+  MCP_PROGRESS_METADATA_KEY,
   MCP_PROGRESS_TOKEN_METADATA_KEY,
+  MCP_PROMPT_LIST_CHANGED_METADATA_KEY,
+  MCP_PROMPT_METADATA_KEY,
+  MCP_RESOURCE_LIST_CHANGED_METADATA_KEY,
+  MCP_RESOURCE_METADATA_KEY,
+  MCP_SAMPLING_METADATA_KEY,
+  MCP_TOOL_LIST_CHANGED_METADATA_KEY,
+  MCP_TOOL_METADATA_KEY,
   MCP_TOOL_PARAM_METADATA_KEY,
 } from "./metadata.js";
 export { McpArg } from "./mcp-arg.js";
+export type { McpArgMetadata, McpArgOptions } from "./mcp-arg.js";
+export { McpComplete } from "./mcp-complete.js";
+export type {
+  McpCompleteMetadata,
+  McpCompleteOptions,
+} from "./mcp-complete.js";
+export { McpElicitation } from "./mcp-elicitation.js";
+export type {
+  McpElicitationMetadata,
+  McpElicitationOptions,
+} from "./mcp-elicitation.js";
+export { McpLogging } from "./mcp-logging.js";
+export type { McpLoggingMetadata, McpLoggingOptions } from "./mcp-logging.js";
 export { McpMeta } from "./mcp-meta.js";
+export { McpProgress } from "./mcp-progress.js";
+export type {
+  McpProgressMetadata,
+  McpProgressOptions,
+} from "./mcp-progress.js";
 export { McpProgressToken } from "./mcp-progress-token.js";
+export { McpPrompt } from "./mcp-prompt.js";
+export type { McpPromptMetadata, McpPromptOptions } from "./mcp-prompt.js";
+export { McpPromptListChanged } from "./mcp-prompt-list-changed.js";
+export type {
+  McpPromptListChangedMetadata,
+  McpPromptListChangedOptions,
+} from "./mcp-prompt-list-changed.js";
+export { McpResource } from "./mcp-resource.js";
+export type {
+  McpResourceAnnotationsMetadata,
+  McpResourceAnnotationsOptions,
+  McpResourceMetadata,
+  McpResourceOptions,
+} from "./mcp-resource.js";
+export { McpResourceListChanged } from "./mcp-resource-list-changed.js";
+export type {
+  McpResourceListChangedMetadata,
+  McpResourceListChangedOptions,
+} from "./mcp-resource-list-changed.js";
+export { McpSampling } from "./mcp-sampling.js";
+export type {
+  McpSamplingMetadata,
+  McpSamplingOptions,
+} from "./mcp-sampling.js";
+export { McpTool } from "./mcp-tool.js";
+export type {
+  McpToolAnnotationsMetadata,
+  McpToolAnnotationsOptions,
+  McpToolMetadata,
+  McpToolOptions,
+} from "./mcp-tool.js";
+export { McpToolListChanged } from "./mcp-tool-list-changed.js";
+export type {
+  McpToolListChangedMetadata,
+  McpToolListChangedOptions,
+} from "./mcp-tool-list-changed.js";
 export { McpToolParam } from "./mcp-tool-param.js";

@@ -19,3 +19,31 @@ export const MCP_ARG_METADATA_KEY = Symbol("mcp:arg");
 export const MCP_PROGRESS_TOKEN_METADATA_KEY = Symbol("mcp:progress-token");
 
 export const MCP_TOOL_PARAM_METADATA_KEY = Symbol("mcp:tool-param");
+
+export const MCP_TOOL_METADATA_KEY = Symbol("mcp:tool");
+
+export const MCP_COMPLETE_METADATA_KEY = Symbol("mcp:complete");
+
+export const MCP_ELICITATION_METADATA_KEY = Symbol("mcp:elicitation");
+
+export const MCP_LOGGING_METADATA_KEY = Symbol("mcp:logging");
+
+export const MCP_PROGRESS_METADATA_KEY = Symbol("mcp:progress");
+
+export const MCP_PROMPT_METADATA_KEY = Symbol("mcp:prompt");
+
+export const MCP_RESOURCE_METADATA_KEY = Symbol("mcp:resource");
+
+export const MCP_SAMPLING_METADATA_KEY = Symbol("mcp:sampling");
+
+export const MCP_TOOL_LIST_CHANGED_METADATA_KEY = Symbol(
+  "mcp:tool-list-changed",
+);
+
+export const MCP_PROMPT_LIST_CHANGED_METADATA_KEY = Symbol(
+  "mcp:prompt-list-changed",
+);
+
+export const MCP_RESOURCE_LIST_CHANGED_METADATA_KEY = Symbol(
+  "mcp:resource-list-changed",
+);

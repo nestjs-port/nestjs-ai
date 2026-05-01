@@ -15,36 +15,27 @@
  */
 
 import "reflect-metadata";
-import type {
-  StandardJSONSchemaV1,
-  StandardSchemaV1,
-} from "@standard-schema/spec";
 import { MCP_ARG_METADATA_KEY } from "./metadata.js";
 
-type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
-
 export interface McpArgMetadata {
-  schema: StandardSchemaWithJsonSchema;
+  name: string;
+  description: string;
+  required: boolean;
 }
 
-function assertJsonSchemaSupport(schema: StandardSchemaWithJsonSchema): void {
-  const standard = schema["~standard"] as {
-    jsonSchema?: { input?: (options?: { target?: string }) => unknown };
-  };
-  if (typeof standard?.jsonSchema?.input !== "function") {
-    throw new Error(
-      "@McpArg requires schema to expose ~standard.jsonSchema.input().",
-    );
-  }
+export interface McpArgOptions {
+  name: string;
+  description?: string;
+  required?: boolean;
 }
 
 /**
  * Marks a method parameter as an MCP Argument.
  */
-export function McpArg(
-  schema: StandardSchemaWithJsonSchema,
-): ParameterDecorator {
-  assertJsonSchemaSupport(schema);
+export function McpArg(options: McpArgOptions): ParameterDecorator {
+  if (options.name == null || options.name.trim().length === 0) {
+    throw new Error("@McpArg requires a non-empty name.");
+  }
 
   return (
     target: object,
@@ -57,7 +48,11 @@ export function McpArg(
         : Reflect.getMetadata(MCP_ARG_METADATA_KEY, target, propertyKey)
     ) as Record<number, McpArgMetadata> | undefined;
 
-    const metadata: McpArgMetadata = { schema };
+    const metadata: McpArgMetadata = {
+      name: options.name,
+      description: options.description ?? "",
+      required: options.required ?? false,
+    };
     const nextMetadata = existing
       ? { ...existing, [parameterIndex]: metadata }
       : { [parameterIndex]: metadata };

@@ -40,65 +40,35 @@ function assertJsonSchemaSupport(schema: StandardSchemaWithJsonSchema): void {
 
 export function McpToolParam(
   schema: StandardSchemaWithJsonSchema,
-): ParameterDecorator;
-export function McpToolParam(
-  schema: StandardSchemaWithJsonSchema,
-): PropertyDecorator;
-export function McpToolParam(
-  schema: StandardSchemaWithJsonSchema,
-): ParameterDecorator & PropertyDecorator {
+): ParameterDecorator {
   assertJsonSchemaSupport(schema);
-  const metadata: McpToolParamMetadata = { schema };
 
-  const decorator = (
+  return (
     target: object,
     propertyKey: string | symbol | undefined,
-    parameterIndexOrPropertyDescriptor?: number | PropertyDescriptor,
+    parameterIndex: number,
   ): void => {
-    if (typeof parameterIndexOrPropertyDescriptor === "number") {
-      const existing = (
-        propertyKey === undefined
-          ? Reflect.getMetadata(MCP_TOOL_PARAM_METADATA_KEY, target)
-          : Reflect.getMetadata(
-              MCP_TOOL_PARAM_METADATA_KEY,
-              target,
-              propertyKey,
-            )
-      ) as Record<number, McpToolParamMetadata> | undefined;
-      const nextMetadata = existing
-        ? { ...existing, [parameterIndexOrPropertyDescriptor]: metadata }
-        : { [parameterIndexOrPropertyDescriptor]: metadata };
+    const existing = (
+      propertyKey === undefined
+        ? Reflect.getMetadata(MCP_TOOL_PARAM_METADATA_KEY, target)
+        : Reflect.getMetadata(MCP_TOOL_PARAM_METADATA_KEY, target, propertyKey)
+    ) as Record<number, McpToolParamMetadata> | undefined;
 
-      if (propertyKey === undefined) {
-        Reflect.defineMetadata(
-          MCP_TOOL_PARAM_METADATA_KEY,
-          nextMetadata,
-          target,
-        );
-        return;
-      }
-
-      Reflect.defineMetadata(
-        MCP_TOOL_PARAM_METADATA_KEY,
-        nextMetadata,
-        target,
-        propertyKey,
-      );
-      return;
-    }
+    const metadata: McpToolParamMetadata = { schema };
+    const nextMetadata = existing
+      ? { ...existing, [parameterIndex]: metadata }
+      : { [parameterIndex]: metadata };
 
     if (propertyKey === undefined) {
-      Reflect.defineMetadata(MCP_TOOL_PARAM_METADATA_KEY, metadata, target);
+      Reflect.defineMetadata(MCP_TOOL_PARAM_METADATA_KEY, nextMetadata, target);
       return;
     }
 
     Reflect.defineMetadata(
       MCP_TOOL_PARAM_METADATA_KEY,
-      metadata,
+      nextMetadata,
       target,
       propertyKey,
     );
   };
-
-  return decorator as ParameterDecorator & PropertyDecorator;
 }

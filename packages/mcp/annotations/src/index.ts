@@ -16,8 +16,7 @@
 
 export * from "./common/index.js";
 export * from "./adapter/index.js";
-export { DefaultMetaProvider } from "./context/index.js";
-export type { MetaProvider } from "./context/index.js";
+export * from "./context/index.js";
 export {
   MCP_ARG_METADATA_KEY,
   MCP_COMPLETE_METADATA_KEY,

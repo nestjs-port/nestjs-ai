@@ -15,11 +15,11 @@
  */
 
 import assert from "node:assert/strict";
-import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
+import type { Client as McpClient } from "@modelcontextprotocol/client";
 import type {
   CallToolRequest,
   Tool as McpTool,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/client";
 import type { ToolContext, ToolDefinition } from "@nestjs-ai/model";
 import { ToolCallback, ToolExecutionException } from "@nestjs-ai/model";
 import { type Logger, LoggerFactory, StringUtils } from "@nestjs-port/core";

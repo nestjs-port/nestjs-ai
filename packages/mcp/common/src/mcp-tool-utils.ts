@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
+import type { Tool as McpTool } from "@modelcontextprotocol/client";
 import type { ToolDefinition } from "@nestjs-ai/model";
 import { DefaultToolDefinition } from "@nestjs-ai/model";
 

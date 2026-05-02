@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
-import type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
+import type { Client as McpClient } from "@modelcontextprotocol/client";
+import type { Tool as McpTool } from "@modelcontextprotocol/client";
 import { assert, describe, expect, it, vi } from "vitest";
 import { McpToolCallback } from "../mcp-tool-callback.js";
 

@@ -15,12 +15,12 @@
  */
 
 import assert from "node:assert/strict";
-import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
+import type { Client as McpClient } from "@modelcontextprotocol/client";
 import type {
   ClientCapabilities,
   Implementation,
   InitializeResult,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/client";
 import { type ToolCallback, ToolUtils } from "@nestjs-ai/model";
 import { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator.js";
 import { McpConnectionInfo } from "./mcp-connection-info.js";

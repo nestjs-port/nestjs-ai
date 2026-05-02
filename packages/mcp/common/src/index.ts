@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type { Tool as McpTool } from "@modelcontextprotocol/sdk/spec.types.js";
+export type { Tool as McpTool } from "@modelcontextprotocol/client";
 export * from "./customizer/index.js";
 export { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator.js";
 export {

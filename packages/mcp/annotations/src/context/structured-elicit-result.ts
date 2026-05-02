@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import type { ElicitResult } from "@modelcontextprotocol/sdk/types.js";
+import type { ElicitResult } from "@modelcontextprotocol/server";
 import { strict as assert } from "node:assert";
 
 export type ElicitResultAction = ElicitResult["action"];
+
+export interface StructuredElicitResultProps<T> {
+  action?: ElicitResultAction;
+  structuredContent?: T | null;
+  meta?: Record<string, unknown> | null;
+}
 
 /**
  * Represents the result of a structured elicit action.
@@ -31,55 +37,13 @@ export class StructuredElicitResult<T> {
 
   readonly meta: Record<string, unknown>;
 
-  constructor(
-    action: ElicitResultAction,
-    structuredContent: T | null,
-    meta: Record<string, unknown> = {},
-  ) {
+  constructor(props: StructuredElicitResultProps<T> = {}) {
+    const { action = "accept", structuredContent = null, meta = {} } = props;
+
+    assert(action != null, "Action must not be null");
+
     this.action = action;
     this.structuredContent = structuredContent;
-    this.meta = meta;
-  }
-
-  static builder<T>(): StructuredElicitResultBuilder<T> {
-    return new StructuredElicitResultBuilder<T>();
-  }
-}
-
-export class StructuredElicitResultBuilder<T> {
-  private _action: ElicitResultAction = "accept";
-
-  private _structuredContent: T | null = null;
-
-  private _meta: Record<string, unknown> = {};
-
-  action(action: ElicitResultAction): this {
-    assert(action != null, "Action must not be null");
-    this._action = action;
-    return this;
-  }
-
-  structuredContent<U>(structuredContent: U): StructuredElicitResultBuilder<U> {
-    const typedBuilder = this as unknown as StructuredElicitResultBuilder<U>;
-    typedBuilder._structuredContent = structuredContent;
-    return typedBuilder;
-  }
-
-  meta(meta: Record<string, unknown> | null | undefined): this {
-    this._meta = meta != null ? { ...meta } : {};
-    return this;
-  }
-
-  addMeta(key: string, value: unknown): this {
-    this._meta[key] = value;
-    return this;
-  }
-
-  build(): StructuredElicitResult<T> {
-    return new StructuredElicitResult<T>(
-      this._action,
-      this._structuredContent,
-      this._meta,
-    );
+    this.meta = meta != null ? { ...meta } : {};
   }
 }

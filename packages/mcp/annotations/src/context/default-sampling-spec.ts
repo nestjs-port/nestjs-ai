@@ -24,7 +24,7 @@ import type {
   SamplingMessage,
   SamplingMessageContentBlock,
   TextContent,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 
 import type {
   ContextInclusionStrategy,

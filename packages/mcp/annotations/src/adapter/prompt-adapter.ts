@@ -16,10 +16,7 @@
 
 import "reflect-metadata";
 import assert from "node:assert/strict";
-import type {
-  Prompt,
-  PromptArgument,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+import type { Prompt, PromptArgument } from "@modelcontextprotocol/server";
 import { MetaUtils } from "../common/index.js";
 import type { McpArgMetadata } from "../mcp-arg.js";
 import { MCP_ARG_METADATA_KEY } from "../metadata.js";

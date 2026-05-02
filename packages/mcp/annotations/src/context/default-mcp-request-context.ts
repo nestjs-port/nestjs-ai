@@ -28,7 +28,7 @@ import type {
   LoggingLevel,
   ProgressNotification,
   Request,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 
 import { DefaultElicitationSpec } from "./default-elicitation-spec.js";
 import { DefaultLoggingSpec } from "./default-logging-spec.js";
@@ -134,7 +134,7 @@ export class DefaultMcpRequestContext implements McpRequestContext {
       schema,
       undefined,
     );
-    return this.toStructuredResult(elicitResult, schema);
+    return this.toStructuredResult<T>(elicitResult);
   }
 
   private async elicitWithSpec<T>(
@@ -153,33 +153,24 @@ export class DefaultMcpRequestContext implements McpRequestContext {
       schema,
       paramSpec._meta,
     );
-    return this.toStructuredResult(elicitResult, schema);
+    return this.toStructuredResult<T>(elicitResult);
   }
 
-  private async toStructuredResult<T>(
+  private toStructuredResult<T>(
     elicitResult: ElicitResult,
-    schema: ElicitationSchema<T>,
-  ): Promise<StructuredElicitResult<T>> {
+  ): StructuredElicitResult<T> {
     if (elicitResult.action !== "accept") {
-      return new StructuredElicitResult<T>(
-        elicitResult.action,
-        null,
-        (elicitResult._meta ?? {}) as Record<string, unknown>,
-      );
+      return new StructuredElicitResult<T>({
+        action: elicitResult.action,
+        structuredContent: null,
+        meta: elicitResult._meta ?? {},
+      });
     }
-    const validated = await schema["~standard"].validate(
-      elicitResult.content ?? {},
-    );
-    if (validated.issues) {
-      throw new Error(
-        `Elicitation response validation failed: ${JSON.stringify(validated.issues)}`,
-      );
-    }
-    return new StructuredElicitResult<T>(
-      elicitResult.action,
-      validated.value,
-      (elicitResult._meta ?? {}) as Record<string, unknown>,
-    );
+    return new StructuredElicitResult<T>({
+      action: elicitResult.action,
+      structuredContent: elicitResult.content as T,
+      meta: elicitResult._meta ?? {},
+    });
   }
 
   private async elicitationInternal(
@@ -211,9 +202,9 @@ export class DefaultMcpRequestContext implements McpRequestContext {
     if (cached != null) {
       return cached;
     }
-    const jsonSchema = schema["~standard"].jsonSchema?.input?.({
+    const jsonSchema = schema["~standard"].jsonSchema.input({
       target: "draft-2020-12",
-    }) as Record<string, unknown> | undefined;
+    });
     if (jsonSchema == null) {
       throw new Error(
         "Elicitation schema must provide a JSON Schema via the StandardSchema spec",
@@ -323,7 +314,7 @@ export class DefaultMcpRequestContext implements McpRequestContext {
     return this._exchange.createMessage({
       method: "sampling/createMessage",
       params,
-    } as CreateMessageRequest);
+    });
   }
 
   // Progress
@@ -465,42 +456,10 @@ export class DefaultMcpRequestContext implements McpRequestContext {
   }
 
   requestMeta(): Record<string, unknown> | undefined {
-    return this._request.params?._meta as Record<string, unknown> | undefined;
+    return this._request.params?._meta;
   }
 
   private getProgressToken(): string | number | undefined {
-    const meta = this._request.params?._meta as
-      | { progressToken?: string | number }
-      | undefined;
-    return meta?.progressToken;
-  }
-
-  // Builder
-
-  static builder(): DefaultMcpRequestContextBuilder {
-    return new DefaultMcpRequestContextBuilder();
-  }
-}
-
-export class DefaultMcpRequestContextBuilder {
-  private _request?: Request;
-
-  private _exchange?: McpServerExchange;
-
-  request(request: Request): this {
-    this._request = request;
-    return this;
-  }
-
-  exchange(exchange: McpServerExchange): this {
-    this._exchange = exchange;
-    return this;
-  }
-
-  build(): McpRequestContext {
-    return new DefaultMcpRequestContext({
-      request: this._request as Request,
-      exchange: this._exchange as McpServerExchange,
-    });
+    return this._request.params?._meta?.progressToken;
   }
 }

@@ -25,7 +25,7 @@ import type {
   ElicitResult,
   ListRootsResult,
   ProgressNotification,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 
 import type {
   ElicitationSpec,

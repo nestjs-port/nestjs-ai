@@ -16,7 +16,7 @@
 
 export type { MetaProvider } from "./meta-provider.js";
 export { DefaultMetaProvider } from "./default-meta-provider.js";
-export type { McpServerExchange } from "./mcp-server-exchange.js";
+export { McpServerExchange } from "./mcp-server-exchange.js";
 export type {
   ContextInclusionStrategy,
   ElicitationSpec,
@@ -31,10 +31,7 @@ export type {
   ElicitationSchema,
   McpRequestContext,
 } from "./mcp-request-context.js";
-export {
-  DefaultMcpRequestContext,
-  DefaultMcpRequestContextBuilder,
-} from "./default-mcp-request-context.js";
+export { DefaultMcpRequestContext } from "./default-mcp-request-context.js";
 export type { DefaultMcpRequestContextProps } from "./default-mcp-request-context.js";
 export { DefaultElicitationSpec } from "./default-elicitation-spec.js";
 export { DefaultLoggingSpec } from "./default-logging-spec.js";
@@ -43,8 +40,8 @@ export {
   DefaultModelPreferenceSpec,
   DefaultSamplingSpec,
 } from "./default-sampling-spec.js";
-export {
-  StructuredElicitResult,
-  StructuredElicitResultBuilder,
+export { StructuredElicitResult } from "./structured-elicit-result.js";
+export type {
+  ElicitResultAction,
+  StructuredElicitResultProps,
 } from "./structured-elicit-result.js";
-export type { ElicitResultAction } from "./structured-elicit-result.js";

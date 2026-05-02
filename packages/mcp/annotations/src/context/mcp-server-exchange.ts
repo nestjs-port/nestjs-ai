@@ -24,30 +24,73 @@ import type {
   ListRootsResult,
   LoggingMessageNotification,
   ProgressNotification,
-} from "@modelcontextprotocol/sdk/types.js";
+  McpServer,
+  ServerContext,
+} from "@modelcontextprotocol/server";
 
 /**
  * Server-side exchange that abstracts the per-request capabilities surfaced by an
- * MCP server. Methods on this exchange perform out-of-band interactions with the
- * connected client (sampling, elicitation, listing roots, sending notifications,
- * pinging).
+ * MCP server.
+ *
+ * This mirrors the Java `McpAsyncServerExchange` shape, but is backed by the v2
+ * `Server` and `ServerContext` objects.
  */
-export interface McpServerExchange {
-  getClientCapabilities(): ClientCapabilities | undefined;
+export class McpServerExchange {
+  private readonly _sessionId: string | undefined;
 
-  getClientInfo(): Implementation | undefined;
+  private readonly _clientCapabilities: ClientCapabilities | undefined;
 
-  sessionId(): string | undefined;
+  private readonly _clientInfo: Implementation | undefined;
 
-  listRoots(): Promise<ListRootsResult>;
+  constructor(
+    public readonly mcpServer: McpServer,
+    public readonly serverContext: ServerContext,
+  ) {
+    this._sessionId = serverContext.sessionId;
+    this._clientCapabilities = mcpServer.server.getClientCapabilities();
+    this._clientInfo = mcpServer.server.getClientVersion();
+  }
 
-  createElicitation(request: ElicitRequest): Promise<ElicitResult>;
+  getClientCapabilities(): ClientCapabilities | undefined {
+    return this._clientCapabilities;
+  }
 
-  createMessage(request: CreateMessageRequest): Promise<CreateMessageResult>;
+  getClientInfo(): Implementation | undefined {
+    return this._clientInfo;
+  }
 
-  progressNotification(notification: ProgressNotification): Promise<void>;
+  sessionId(): string | undefined {
+    return this._sessionId;
+  }
 
-  loggingNotification(notification: LoggingMessageNotification): Promise<void>;
+  transportContext(): ServerContext {
+    return this.serverContext;
+  }
 
-  ping(): Promise<unknown>;
+  listRoots(): Promise<ListRootsResult> {
+    return this.mcpServer.server.listRoots();
+  }
+
+  createElicitation(request: ElicitRequest): Promise<ElicitResult> {
+    return this.mcpServer.server.elicitInput(request.params);
+  }
+
+  createMessage(request: CreateMessageRequest): Promise<CreateMessageResult> {
+    return this.mcpServer.server.createMessage(request.params);
+  }
+
+  progressNotification(notification: ProgressNotification): Promise<void> {
+    return this.serverContext.mcpReq.notify(notification);
+  }
+
+  loggingNotification(notification: LoggingMessageNotification): Promise<void> {
+    return this.mcpServer.server.sendLoggingMessage(
+      notification.params,
+      this.sessionId(),
+    );
+  }
+
+  ping(): Promise<unknown> {
+    return this.mcpServer.server.ping();
+  }
 }

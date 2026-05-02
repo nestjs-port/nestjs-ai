@@ -18,7 +18,7 @@ import assert from "node:assert/strict";
 import type {
   PromptReference,
   ResourceTemplateReference,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/server";
 import type { McpCompleteMetadata } from "../mcp-complete.js";
 
 export type CompleteReference = PromptReference | ResourceTemplateReference;

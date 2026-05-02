@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { LoggingLevel } from "@modelcontextprotocol/sdk/types.js";
+import type { LoggingLevel } from "@modelcontextprotocol/server";
 
 import type { LoggingSpec } from "./mcp-request-context-types.js";
 

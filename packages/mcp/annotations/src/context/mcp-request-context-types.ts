@@ -26,7 +26,7 @@ import type {
   Request,
   SamplingMessage,
   TextContent,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 
 import type { McpServerExchange } from "./mcp-server-exchange.js";
 

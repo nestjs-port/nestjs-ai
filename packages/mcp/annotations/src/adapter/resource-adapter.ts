@@ -16,8 +16,8 @@
 
 import type {
   Resource,
-  ResourceTemplate,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+  ResourceTemplateType,
+} from "@modelcontextprotocol/server";
 import { MetaUtils } from "../common/index.js";
 import type { McpResourceMetadata } from "../mcp-resource.js";
 
@@ -57,7 +57,7 @@ export abstract class ResourceAdapter {
 
   static asResourceTemplate(
     mcpResource: McpResourceMetadata,
-  ): ResourceTemplate {
+  ): ResourceTemplateType {
     let name = mcpResource.name;
     if (name == null || name.length === 0) {
       name = "resource"; // Default name when not specified

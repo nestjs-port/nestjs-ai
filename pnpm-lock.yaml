@@ -302,6 +302,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.28.0
         version: 1.28.0(zod@4.3.6)
+      '@modelcontextprotocol/server':
+        specifier: ^2.0.0-alpha.2
+        version: 2.0.0-alpha.2
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
@@ -1231,6 +1234,15 @@ packages:
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
       zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      '@cfworker/json-schema':
+        optional: true
+
+  '@modelcontextprotocol/server@2.0.0-alpha.2':
+    resolution: {integrity: sha512-gmLgdHzlYM8L7Aw/+VE0kxjT25WKamtUSLNhdOgrJq5CrESvqVSoAfWSJJeNPUXNTluQ+dYDGFbKVitdsJtbPA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@cfworker/json-schema': ^4.1.1
     peerDependenciesMeta:
       '@cfworker/json-schema':
         optional: true
@@ -6114,6 +6126,10 @@ snapshots:
       zod-to-json-schema: 3.25.2(zod@4.3.6)
     transitivePeerDependencies:
       - supports-color
+
+  '@modelcontextprotocol/server@2.0.0-alpha.2':
+    dependencies:
+      zod: 4.3.6
 
   '@mongodb-js/saslprep@1.4.9':
     dependencies:

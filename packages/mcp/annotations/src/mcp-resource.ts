@@ -15,7 +15,7 @@
  */
 
 import "reflect-metadata";
-import type { Role } from "@modelcontextprotocol/sdk/types.js";
+import type { Role } from "@modelcontextprotocol/server";
 import { DefaultMetaProvider } from "./context/index.js";
 import type { MetaProvider } from "./context/index.js";
 import { MCP_RESOURCE_METADATA_KEY } from "./metadata.js";

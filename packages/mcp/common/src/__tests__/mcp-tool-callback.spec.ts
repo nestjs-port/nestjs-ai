@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
+import type { Client as McpClient } from "@modelcontextprotocol/client";
 import type {
   CallToolRequest,
   Tool as McpTool,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/client";
 import { ToolContext, ToolExecutionException } from "@nestjs-ai/model";
 import { describe, expect, it, vi } from "vitest";
 import { McpToolCallback } from "../mcp-tool-callback.js";

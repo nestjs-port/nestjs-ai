@@ -19,7 +19,7 @@ import type {
   ClientCapabilities,
   Implementation,
   InitializeResult,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/client";
 
 export interface McpConnectionInfoProps {
   clientCapabilities: ClientCapabilities;

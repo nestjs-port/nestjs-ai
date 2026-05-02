@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 
 export interface McpServerCustomizer {
   customize(serverBuilder: McpServer): void;

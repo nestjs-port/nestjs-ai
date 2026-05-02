@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
+import type { Client as McpClient } from "@modelcontextprotocol/client";
 import type {
   ClientCapabilities,
   Implementation,
   Tool as McpTool,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/client";
 import { assert, describe, expect, it, vi } from "vitest";
 import { DefaultMcpToolNamePrefixGenerator } from "../default-mcp-tool-name-prefix-generator.js";
 import type { McpConnectionInfo } from "../mcp-connection-info.js";

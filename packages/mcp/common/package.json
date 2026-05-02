@@ -36,13 +36,15 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@modelcontextprotocol/client": "^2.0.0-alpha.2",
+    "@modelcontextprotocol/server": "^2.0.0-alpha.2",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@modelcontextprotocol/client": "^2.0.0-alpha.2",
+    "@modelcontextprotocol/server": "^2.0.0-alpha.2",
     "@nestjs-ai/commons": "^0.1.1",
     "@nestjs-ai/model": "^0.1.1",
     "@nestjs-port/core": "^0.1.0"

@@ -18,7 +18,7 @@ import type {
   Implementation,
   InitializeResult,
   Tool as McpTool,
-} from "@modelcontextprotocol/sdk/spec.types.js";
+} from "@modelcontextprotocol/client";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { McpConnectionInfo } from "./mcp-connection-info.js";
 import { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator.js";

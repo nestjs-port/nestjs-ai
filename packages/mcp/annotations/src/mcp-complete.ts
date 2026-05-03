@@ -86,6 +86,27 @@ type McpCompleteMethodDecoratorFor = <T extends (...args: any[]) => any>(
  * within a URI template of a resource 2. To complete a prompt argument
  *
  * Note: You must use either the prompt or the uri attribute, but not both simultaneously.
+ *
+ * @example
+ * ```ts
+ * class TravelProvider {
+ *   @McpComplete({ prompt: "travel-planner" })
+ *   completeCityName(args: McpCompleteMethodArguments): string[] {
+ *     return ["Amsterdam", "Athens"];
+ *   }
+ *
+ *   @McpComplete({ uri: "weather-api://{city}" })
+ *   async completeCityAsync(
+ *     args: McpCompleteMethodArguments,
+ *   ): Promise<CompleteResult["completion"]> {
+ *     return {
+ *       values: ["Seoul", "Seattle"],
+ *       total: 2,
+ *       hasMore: false,
+ *     };
+ *   }
+ * }
+ * ```
  */
 export function McpComplete(
   options: McpCompleteOptions,

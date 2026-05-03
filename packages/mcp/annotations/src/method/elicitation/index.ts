@@ -28,5 +28,5 @@ export {
 } from "./elicitation-specification.js";
 export {
   McpElicitationMethodCallback,
-  McpElicitationMethodCallbackBuilder,
+  type McpElicitationMethodCallbackProps,
 } from "./mcp-elicitation-method-callback.js";

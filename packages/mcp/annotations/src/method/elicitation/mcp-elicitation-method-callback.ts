@@ -15,14 +15,19 @@
  */
 
 import "reflect-metadata";
+import assert from "node:assert/strict";
 
 import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
 
-import type { McpElicitationMetadata } from "../../mcp-elicitation.js";
+import { StructuredElicitResult } from "../../context/index.js";
 import {
   AbstractMcpElicitationMethodCallback,
   McpElicitationMethodException,
+  type AbstractMcpElicitationMethodCallbackProps,
 } from "./abstract-mcp-elicitation-method-callback.js";
+
+export type McpElicitationMethodCallbackProps =
+  AbstractMcpElicitationMethodCallbackProps;
 
 /**
  * Class for creating Function callbacks around elicitation methods that return Promise.
@@ -32,8 +37,8 @@ import {
  * It supports methods with a single ElicitRequest parameter.
  */
 export class McpElicitationMethodCallback extends AbstractMcpElicitationMethodCallback {
-  constructor(bean: object, propertyKey: string | symbol) {
-    super({ bean, propertyKey });
+  constructor(props: McpElicitationMethodCallbackProps) {
+    super(props);
   }
 
   /**
@@ -57,9 +62,7 @@ export class McpElicitationMethodCallback extends AbstractMcpElicitationMethodCa
       const args = this.buildArgs(request);
 
       // Invoke the method
-      const result = await Promise.resolve(
-        this._method.apply(this._bean, args),
-      );
+      const result = await this._method.apply(this._provider, args);
       return this.toElicitResult(result);
     } catch (error) {
       throw new McpElicitationMethodException(
@@ -69,97 +72,45 @@ export class McpElicitationMethodCallback extends AbstractMcpElicitationMethodCa
     }
   }
 
-  /**
-   * Validates that the method return type is compatible with the elicitation callback.
-   * @param method The method to validate
-   * @throws Error if the return type is not compatible
-   */
-  protected override validateReturnType(): void {
-    const returnType = Reflect.getMetadata(
-      "design:returntype",
-      this._target,
-      this._propertyKey,
-    ) as { name?: string } | undefined;
-
-    if (returnType !== Promise) {
-      throw new Error(
-        `Method must return Promise<ElicitResult> or Promise<StructuredElicitResult>: ${this.methodName} in ${this.declaringClassName} returns ${returnType?.name ?? "unknown"}`,
-      );
+  private toElicitResult(result: unknown): ElicitResult {
+    if (result instanceof StructuredElicitResult) {
+      return {
+        action: result.action,
+        content:
+          result.structuredContent != null
+            ? this.toMap(result.structuredContent)
+            : undefined,
+        _meta: result.meta,
+      };
     }
-  }
 
-  /**
-   * Checks if a parameter type is compatible with the exchange type.
-   * @param paramType The parameter type to check
-   * @return true if the parameter type is compatible with the exchange type, false
-   * otherwise
-   */
-  protected override isExchangeType(paramType: unknown): boolean {
-    // No exchange type for elicitation methods
-    return false;
-  }
-
-  /**
-   * Create a new builder.
-   * @return A new builder instance
-   */
-  static builder(): McpElicitationMethodCallbackBuilder {
-    return new McpElicitationMethodCallbackBuilder();
-  }
-}
-
-/**
- * Builder for creating McpElicitationMethodCallback instances.
- *
- * This builder provides a fluent API for constructing
- * McpElicitationMethodCallback instances with the required parameters.
- */
-export class McpElicitationMethodCallbackBuilder {
-  private _bean: object | null = null;
-
-  private _propertyKey: string | symbol | null = null;
-
-  /**
-   * Set the property key of the method to create a callback for.
-   * @param propertyKey The property key of the method
-   * @returns This builder
-   */
-  method(propertyKey: string | symbol | null): this {
-    this._propertyKey = propertyKey;
-    return this;
-  }
-
-  /**
-   * Set the bean instance that contains the method.
-   * @param bean The bean instance
-   * @returns This builder
-   */
-  bean(bean: object | null): this {
-    this._bean = bean;
-    return this;
-  }
-
-  /**
-   * Set the elicitation annotation.
-   * @param _elicitation The elicitation metadata
-   * @returns This builder
-   */
-  elicitation(_elicitation: McpElicitationMetadata): this {
-    // No additional configuration needed from the annotation at this time
-    return this;
-  }
-
-  /**
-   * Build the callback.
-   * @return A new McpElicitationMethodCallback instance
-   */
-  build(): McpElicitationMethodCallback {
-    if (this._propertyKey == null) {
-      throw new Error("Method must not be null");
+    if (this.isElicitResult(result)) {
+      return result;
     }
-    if (this._bean == null) {
-      throw new Error("Bean must not be null");
+
+    throw new McpElicitationMethodException(
+      `Method must return ElicitResult or StructuredElicitResult: ${this.methodName}`,
+    );
+  }
+
+  private isElicitResult(value: unknown): value is ElicitResult {
+    return (
+      value != null &&
+      typeof value === "object" &&
+      "action" in value &&
+      "content" in value
+    );
+  }
+
+  private toMap(value: unknown): ElicitResult["content"] {
+    assert(value != null, "object cannot be null");
+
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return {
+        ...(value as Record<string, string | number | boolean | string[]>),
+      };
     }
-    return new McpElicitationMethodCallback(this._bean, this._propertyKey);
+
+    return { value: value as string | number | boolean | string[] };
   }
 }

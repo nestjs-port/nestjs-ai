@@ -28,6 +28,8 @@ import type {
   ServerContext,
 } from "@modelcontextprotocol/server";
 
+import { McpTransportContext } from "./mcp-transport-context.js";
+
 /**
  * Server-side exchange that abstracts the per-request capabilities surfaced by an
  * MCP server.
@@ -42,13 +44,17 @@ export class McpServerExchange {
 
   private readonly _clientInfo: Implementation | undefined;
 
+  private readonly _transportContext: McpTransportContext;
+
   constructor(
     public readonly mcpServer: McpServer,
     public readonly serverContext: ServerContext,
+    transportContext: McpTransportContext = McpTransportContext.EMPTY,
   ) {
     this._sessionId = serverContext.sessionId;
     this._clientCapabilities = mcpServer.server.getClientCapabilities();
     this._clientInfo = mcpServer.server.getClientVersion();
+    this._transportContext = transportContext;
   }
 
   getClientCapabilities(): ClientCapabilities | undefined {
@@ -63,8 +69,8 @@ export class McpServerExchange {
     return this._sessionId;
   }
 
-  transportContext(): ServerContext {
-    return this.serverContext;
+  transportContext(): McpTransportContext {
+    return this._transportContext;
   }
 
   listRoots(): Promise<ListRootsResult> {

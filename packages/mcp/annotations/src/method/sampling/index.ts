@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * Method callbacks and specifications for MCP sampling (LLM completion) requests.
+ */
+
 export {
   AbstractMcpSamplingMethodCallback,
   McpSamplingMethodException,
+  type AbstractMcpSamplingMethodCallbackProps,
 } from "./abstract-mcp-sampling-method-callback.js";
 export {
   McpSamplingMethodCallback,
-  McpSamplingMethodCallbackBuilder,
+  type McpSamplingMethodCallbackProps,
 } from "./mcp-sampling-method-callback.js";
 export {
   SamplingSpecification,

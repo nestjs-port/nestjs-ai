@@ -15,6 +15,11 @@
  */
 
 import "reflect-metadata";
+import type {
+  CreateMessageRequest,
+  CreateMessageResult,
+} from "@modelcontextprotocol/server";
+
 import { MCP_SAMPLING_METADATA_KEY } from "./metadata.js";
 
 export interface McpSamplingOptions {
@@ -28,6 +33,28 @@ export interface McpSamplingOptions {
 export interface McpSamplingMetadata {
   clients: string[];
 }
+
+type ExactSamplingMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpSamplingMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactSamplingMethodSignature<
+      T,
+      (
+        request: CreateMessageRequest,
+      ) => CreateMessageResult | Promise<CreateMessageResult>
+    >
+  >,
+) => void;
 
 /**
  * Annotation for methods that handle sampling requests from MCP servers. This annotation
@@ -56,6 +83,9 @@ export interface McpSamplingMetadata {
  * }
  * ```
  */
+export function McpSampling(
+  options: McpSamplingOptions,
+): McpSamplingMethodDecoratorFor;
 export function McpSampling(options: McpSamplingOptions): MethodDecorator {
   const metadata: McpSamplingMetadata = {
     clients: [...options.clients],

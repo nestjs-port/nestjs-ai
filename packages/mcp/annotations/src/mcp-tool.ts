@@ -15,9 +15,10 @@
  */
 
 import "reflect-metadata";
-import { DefaultMetaProvider } from "./context/default-meta-provider.js";
-import type { MetaProvider } from "./context/meta-provider.js";
+import { DefaultMetaProvider } from "./context/index.js";
+import type { MetaProvider } from "./context/index.js";
 import { MCP_TOOL_METADATA_KEY } from "./metadata.js";
+import type { McpToolMethodArguments } from "./method/tool/mcp-tool-method-arguments.js";
 
 /**
  * Additional properties describing a Tool to clients.
@@ -126,6 +127,27 @@ const DEFAULT_TOOL_ANNOTATIONS: McpToolAnnotationsMetadata = {
   openWorldHint: true,
 };
 
+type ExactToolMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpToolMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactToolMethodSignature<
+      T,
+      (args: McpToolMethodArguments) => unknown | Promise<unknown>
+    >
+  >,
+) => void;
+
+export function McpTool(options?: McpToolOptions): McpToolMethodDecoratorFor;
 export function McpTool(options: McpToolOptions = {}): MethodDecorator {
   const metadata: McpToolMetadata = {
     name: options.name ?? "",

@@ -15,6 +15,7 @@
  */
 
 import "reflect-metadata";
+import type { Resource } from "@modelcontextprotocol/server";
 import { MCP_RESOURCE_LIST_CHANGED_METADATA_KEY } from "./metadata.js";
 
 export interface McpResourceListChangedOptions {
@@ -28,6 +29,28 @@ export interface McpResourceListChangedOptions {
 export interface McpResourceListChangedMetadata {
   clients: string[];
 }
+
+type ExactResourceListChangedMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpResourceListChangedMethodDecoratorFor = <
+  T extends (...args: any[]) => any,
+>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactResourceListChangedMethodSignature<
+      T,
+      (updatedResources: Resource[]) => void | Promise<void>
+    >
+  >,
+) => void;
 
 /**
  * Annotation for methods that handle resource list change notifications from MCP servers.
@@ -61,6 +84,9 @@ export interface McpResourceListChangedMetadata {
  *
  * @see https://modelcontextprotocol.io/specification/2025-06-18/server/resources#list-changed-notification
  */
+export function McpResourceListChanged(
+  options: McpResourceListChangedOptions,
+): McpResourceListChangedMethodDecoratorFor;
 export function McpResourceListChanged(
   options: McpResourceListChangedOptions,
 ): MethodDecorator {

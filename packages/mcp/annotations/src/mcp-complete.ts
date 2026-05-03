@@ -15,7 +15,14 @@
  */
 
 import "reflect-metadata";
+import type {
+  CompleteRequest,
+  CompleteResult,
+} from "@modelcontextprotocol/server";
 import { MCP_COMPLETE_METADATA_KEY } from "./metadata.js";
+import type { McpServerExchange } from "./context/index.js";
+import type { McpTransportContext } from "./context/index.js";
+import type { McpMeta } from "./mcp-meta.js";
 
 export interface McpCompleteOptions {
   /**
@@ -36,6 +43,43 @@ export interface McpCompleteMetadata {
   uri: string;
 }
 
+export interface McpCompleteMethodArguments {
+  exchange?: McpServerExchange;
+  context: McpTransportContext;
+  request?: CompleteRequest;
+  argument?: CompleteRequest["params"]["argument"];
+  value?: string;
+  meta?: McpMeta;
+  progressToken?: unknown;
+}
+
+type CompleteMethodResult =
+  | CompleteResult
+  | CompleteResult["completion"]
+  | string
+  | string[]
+  | Promise<CompleteResult | CompleteResult["completion"] | string | string[]>;
+
+type ExactCompleteMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpCompleteMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactCompleteMethodSignature<
+      T,
+      (args: McpCompleteMethodArguments) => CompleteMethodResult
+    >
+  >,
+) => void;
+
 /**
  * Annotates a method used for completion functionality in the MCP framework. This
  * annotation can be used in two mutually exclusive ways: 1. To complete an expression
@@ -43,6 +87,9 @@ export interface McpCompleteMetadata {
  *
  * Note: You must use either the prompt or the uri attribute, but not both simultaneously.
  */
+export function McpComplete(
+  options: McpCompleteOptions,
+): McpCompleteMethodDecoratorFor;
 export function McpComplete(options: McpCompleteOptions = {}): MethodDecorator {
   const metadata: McpCompleteMetadata = {
     prompt: options.prompt ?? "",

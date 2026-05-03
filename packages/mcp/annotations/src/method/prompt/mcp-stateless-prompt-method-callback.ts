@@ -21,48 +21,46 @@ import type {
   GetPromptResult,
 } from "@modelcontextprotocol/server";
 
-import {
-  McpServerExchange,
-  type McpTransportContext,
-} from "../../context/index.js";
+import { McpTransportContext } from "../../context/index.js";
+import type { McpTransportContext as McpTransportContextType } from "../../context/index.js";
 import {
   AbstractMcpPromptMethodCallback,
   McpPromptMethodException,
   type AbstractMcpPromptMethodCallbackProps,
 } from "./abstract-mcp-prompt-method-callback.js";
 
-export interface McpPromptMethodCallbackProps extends AbstractMcpPromptMethodCallbackProps {}
+export interface McpStatelessPromptMethodCallbackProps extends AbstractMcpPromptMethodCallbackProps {}
 
 /**
- * Class for creating prompt callbacks around async methods that operate on an MCP
- * server exchange.
+ * Class for creating prompt callbacks around async methods that operate on a
+ * stateless server context.
  */
-export class McpPromptMethodCallback extends AbstractMcpPromptMethodCallback {
-  constructor(props: McpPromptMethodCallbackProps) {
+export class McpStatelessPromptMethodCallback extends AbstractMcpPromptMethodCallback {
+  constructor(props: McpStatelessPromptMethodCallbackProps) {
     super(props);
   }
 
   protected resolveTransportContext(
-    exchangeOrContext: unknown,
-  ): McpTransportContext | null {
-    if (exchangeOrContext instanceof McpServerExchange) {
-      return exchangeOrContext.transportContext();
+    context: unknown,
+  ): McpTransportContextType | null {
+    if (context instanceof McpTransportContext) {
+      return context;
     }
     return null;
   }
 
-  protected isExchangeType(paramType: unknown): boolean {
-    return paramType instanceof McpServerExchange;
+  protected isExchangeType(_paramType: unknown): boolean {
+    return false;
   }
 
   async apply(
-    exchange: McpServerExchange,
+    context: McpTransportContextType,
     request: GetPromptRequest,
   ): Promise<GetPromptResult> {
     assert(request != null, "Request must not be null");
 
     try {
-      const args = this.buildArgs(exchange, request);
+      const args = this.buildArgs(context, request);
       const result = await this._method.apply(this._provider, [args]);
       return this.convertToGetPromptResult(result);
     } catch (error) {

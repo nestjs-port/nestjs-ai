@@ -15,8 +15,19 @@
  */
 
 import "reflect-metadata";
+import type {
+  GetPromptRequest,
+  GetPromptResult,
+  Prompt,
+  PromptMessage,
+} from "@modelcontextprotocol/server";
 import { DefaultMetaProvider } from "./context/index.js";
+import type {
+  McpServerExchange,
+  McpTransportContext,
+} from "./context/index.js";
 import type { MetaProvider } from "./context/index.js";
+import type { McpMeta } from "./mcp-meta.js";
 import { MCP_PROMPT_METADATA_KEY } from "./metadata.js";
 
 export interface McpPromptOptions {
@@ -50,9 +61,52 @@ export interface McpPromptMetadata {
   metaProvider: new () => MetaProvider;
 }
 
+export interface McpPromptMethodArguments {
+  exchange?: McpServerExchange;
+  context: McpTransportContext | null;
+  request: GetPromptRequest;
+  prompt: Prompt;
+  arguments: Record<string, unknown>;
+  meta: McpMeta;
+  progressToken: unknown;
+}
+
+type McpPromptMethodResult =
+  | GetPromptResult
+  | PromptMessage
+  | string
+  | string[]
+  | PromptMessage[]
+  | Promise<
+      GetPromptResult | PromptMessage | string | string[] | PromptMessage[]
+    >;
+
+type ExactPromptMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactPromptMethodSignature<
+      T,
+      (args: McpPromptMethodArguments) => McpPromptMethodResult
+    >
+  >,
+) => void;
+
 /**
  * Marks a method as a MCP Prompt.
  */
+export function McpPrompt(
+  options: McpPromptOptions,
+): McpPromptMethodDecoratorFor;
 export function McpPrompt(options: McpPromptOptions = {}): MethodDecorator {
   const metadata: McpPromptMetadata = {
     name: options.name ?? "",

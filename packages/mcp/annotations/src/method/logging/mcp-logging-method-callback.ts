@@ -18,11 +18,14 @@ import "reflect-metadata";
 
 import type { LoggingMessageNotification } from "@modelcontextprotocol/server";
 
-import type { McpLoggingMetadata } from "../../mcp-logging.js";
 import {
   AbstractMcpLoggingMethodCallback,
   McpLoggingConsumerMethodException,
+  type AbstractMcpLoggingMethodCallbackProps,
 } from "./abstract-mcp-logging-method-callback.js";
+
+export type McpLoggingMethodCallbackProps =
+  AbstractMcpLoggingMethodCallbackProps;
 
 /**
  * Class for creating Function callbacks around logging consumer methods that return
@@ -35,8 +38,8 @@ import {
  * String).
  */
 export class McpLoggingMethodCallback extends AbstractMcpLoggingMethodCallback {
-  constructor(bean: object, propertyKey: string | symbol) {
-    super({ bean, propertyKey });
+  constructor(props: McpLoggingMethodCallbackProps) {
+    super(props);
   }
 
   async apply(notification: LoggingMessageNotification): Promise<void> {
@@ -46,91 +49,12 @@ export class McpLoggingMethodCallback extends AbstractMcpLoggingMethodCallback {
 
     try {
       const args = this.buildArgs(notification);
-      const result = await Promise.resolve(
-        this._method.apply(this._bean, args),
-      );
-
-      if (result != null) {
-        throw new TypeError(
-          `Expected Promise<void> but got Promise<${typeof result === "object" ? ((result as { constructor?: { name?: string } }).constructor?.name ?? "object") : typeof result}>`,
-        );
-      }
+      await this._method.apply(this._provider, args);
     } catch (error) {
       throw new McpLoggingConsumerMethodException(
         `Error invoking logging consumer method: ${this.methodName}`,
         { cause: error instanceof Error ? error : undefined },
       );
     }
-  }
-
-  protected override validateReturnType(): void {
-    const returnType = Reflect.getMetadata(
-      "design:returntype",
-      this._target,
-      this._propertyKey,
-    ) as { name?: string } | undefined;
-
-    if (returnType !== undefined && returnType !== Promise) {
-      throw new Error(
-        `Method must have void or Promise<void> return type: ${this.methodName} in ${this.declaringClassName} returns ${returnType.name ?? "unknown"}`,
-      );
-    }
-  }
-
-  protected override isExchangeType(paramType: unknown): boolean {
-    // No exchange type for logging methods
-    return false;
-  }
-
-  static builder(): McpLoggingMethodCallbackBuilder {
-    return new McpLoggingMethodCallbackBuilder();
-  }
-}
-
-abstract class AbstractMcpLoggingMethodCallbackBuilder<
-  T extends AbstractMcpLoggingMethodCallbackBuilder<T, R>,
-  R,
-> {
-  protected _bean: object | null = null;
-
-  protected _propertyKey: string | symbol | null = null;
-
-  method(propertyKey: string | symbol | null): T {
-    this._propertyKey = propertyKey;
-    return this as unknown as T;
-  }
-
-  bean(bean: object | null): T {
-    this._bean = bean;
-    return this as unknown as T;
-  }
-
-  loggingConsumer(_loggingConsumer: McpLoggingMetadata): T {
-    // No additional configuration needed from the annotation at this time
-    return this as unknown as T;
-  }
-
-  protected validate(): void {
-    if (this._propertyKey == null) {
-      throw new Error("Method must not be null");
-    }
-    if (this._bean == null) {
-      throw new Error("Bean must not be null");
-    }
-  }
-
-  abstract build(): R;
-}
-
-export class McpLoggingMethodCallbackBuilder extends AbstractMcpLoggingMethodCallbackBuilder<
-  McpLoggingMethodCallbackBuilder,
-  McpLoggingMethodCallback
-> {
-  build(): McpLoggingMethodCallback {
-    this.validate();
-    return new McpLoggingMethodCallback(
-      this._bean as object,
-      this._propertyKey as string | symbol,
-    );
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,89 +14,81 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
+
 import type {
   CallToolRequest,
   CallToolResult,
 } from "@modelcontextprotocol/server";
+
 import {
   DefaultMcpRequestContext,
   type McpRequestContext,
   McpServerExchange,
+  type McpTransportContext,
 } from "../../context/index.js";
-import { AbstractAsyncMcpToolMethodCallback } from "./abstract-async-mcp-tool-method-callback.js";
-import type { ReturnMode } from "./return-mode.js";
+import {
+  AbstractMcpToolMethodCallback,
+  type AbstractMcpToolMethodCallbackProps,
+} from "./abstract-mcp-tool-method-callback.js";
+
+export interface McpToolMethodCallbackProps extends AbstractMcpToolMethodCallbackProps {}
 
 /**
- * Class for creating Function callbacks around tool methods.
+ * Class for creating callbacks around tool methods that operate on an MCP server
+ * exchange.
  *
- * This class provides a way to convert methods annotated with `McpTool` into
- * callback functions that can be used to handle tool requests.
+ * Methods registered with this callback are expected to accept a single
+ * `McpToolMethodArguments` object. Errors that match the configured
+ * `toolCallExceptionClass` (defaulting to `Error`) are converted into error
+ * `CallToolResult` payloads; other exceptions propagate to the caller.
  */
-export class McpToolMethodCallback extends AbstractAsyncMcpToolMethodCallback<
-  McpServerExchange,
-  McpRequestContext
-> {
-  constructor(
-    returnMode: ReturnMode,
-    bean: object,
-    propertyKey: string | symbol,
-    toolCallExceptionClass: new (...args: never[]) => Error = Error,
-  ) {
-    super(returnMode, bean, propertyKey, toolCallExceptionClass);
+export class McpToolMethodCallback extends AbstractMcpToolMethodCallback<McpServerExchange> {
+  constructor(props: McpToolMethodCallbackProps) {
+    super(props);
   }
 
-  protected override isExchangeOrContextType(paramType: unknown): boolean {
-    return paramType === McpServerExchange;
+  protected isExchangeType(value: unknown): boolean {
+    return value instanceof McpServerExchange;
   }
 
-  protected override createRequestContext(
+  protected createRequestContext(
     exchange: McpServerExchange,
-    request: CallToolRequest | null,
+    request: CallToolRequest,
   ): McpRequestContext {
-    if (request == null) {
-      throw new Error(
-        "Cannot create McpRequestContext without a CallToolRequest",
-      );
-    }
     return new DefaultMcpRequestContext({ exchange, request });
   }
 
-  protected override resolveTransportContext(
-    exchangeOrContext: McpServerExchange,
-  ): unknown {
-    return exchangeOrContext.transportContext();
+  protected resolveTransportContext(
+    exchange: McpServerExchange,
+  ): McpTransportContext | null {
+    if (exchange instanceof McpServerExchange) {
+      return exchange.transportContext();
+    }
+    return null;
   }
 
   /**
    * Apply the callback to the given request.
    *
-   * This method builds the arguments for the method call, invokes the method, and
-   * returns the result.
+   * Builds the typed arguments object, invokes the user method, and converts the
+   * resolved value into a `CallToolResult`. Errors of the configured class type are
+   * caught and converted into error results.
    */
   async apply(
     exchange: McpServerExchange,
     request: CallToolRequest,
   ): Promise<CallToolResult> {
-    this.validateRequest(request);
+    assert(request != null, "Request must not be null");
 
     try {
-      // Build arguments for the method call, passing the full request for
-      // CallToolRequest parameter support
-      const args = this.buildMethodArguments(
-        exchange,
-        request.params.arguments ?? {},
-        request,
-      );
-
-      // Invoke the method
+      const args = this.buildArgs(exchange, request);
       const result = this.callMethod(args);
-
-      // Handle reactive types - method return types should always be reactive
       return await this.convertToCallToolResult(result);
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
       if (error instanceof this._toolCallExceptionClass) {
-        return this.createAsyncErrorResult(error);
+        return this.createErrorResult(error);
       }
       throw error;
     }

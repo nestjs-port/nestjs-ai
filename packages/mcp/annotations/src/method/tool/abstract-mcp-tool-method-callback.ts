@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,50 +14,56 @@
  * limitations under the License.
  */
 
-import "reflect-metadata";
+import assert from "node:assert/strict";
+
 import type {
   CallToolRequest,
   CallToolResult,
 } from "@modelcontextprotocol/server";
+
+import type {
+  McpRequestContext,
+  McpTransportContext,
+} from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
-import { MCP_PROGRESS_TOKEN_METADATA_KEY } from "../../metadata.js";
+import type { McpToolMethodArguments } from "./mcp-tool-method-arguments.js";
 import { ReturnMode } from "./return-mode.js";
 
+export interface AbstractMcpToolMethodCallbackProps {
+  provider: object;
+  propertyKey: string | symbol;
+  returnMode: ReturnMode;
+  toolCallExceptionClass?: new (...args: never[]) => Error;
+}
+
 /**
- * Abstract base class for creating Function callbacks around tool methods.
+ * Abstract base class for creating callbacks around tool methods.
  *
  * This class provides common functionality for converting methods annotated with
- * `McpTool` into callback functions that can be used to handle tool requests. It
- * contains all the shared logic between synchronous and asynchronous implementations.
+ * `@McpTool` into callback functions that can be used to handle tool requests. It
+ * contains all the shared logic between stateful and stateless implementations.
  */
-export abstract class AbstractMcpToolMethodCallback<TContext, TRequestContext> {
-  protected readonly _bean: object;
+export abstract class AbstractMcpToolMethodCallback<TContext> {
+  protected readonly _provider: object;
 
   protected readonly _propertyKey: string | symbol;
-
-  protected readonly _target: object;
 
   protected readonly _method: (...args: unknown[]) => unknown;
 
   protected readonly _returnMode: ReturnMode;
 
-  protected constructor(
-    returnMode: ReturnMode,
-    bean: object,
-    propertyKey: string | symbol,
-  ) {
-    this._returnMode = returnMode;
-    this._bean = bean;
-    this._propertyKey = propertyKey;
-    this._target = Object.getPrototypeOf(bean) as object;
+  protected readonly _toolCallExceptionClass: new (...args: never[]) => Error;
 
-    const candidate = (bean as Record<string | symbol, unknown>)[propertyKey];
-    if (typeof candidate !== "function") {
-      throw new Error(
-        `Method must not be null: ${String(propertyKey)} in ${this.declaringClassName}`,
-      );
-    }
-    this._method = candidate as (...args: unknown[]) => unknown;
+  protected constructor(props: AbstractMcpToolMethodCallbackProps) {
+    assert(props.provider != null, "Provider can't be null!");
+    assert(props.propertyKey != null, "Property key can't be null!");
+    assert(props.returnMode != null, "Return mode can't be null!");
+
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
+    this._returnMode = props.returnMode;
+    this._toolCallExceptionClass = props.toolCallExceptionClass ?? Error;
+    this._method = this.resolveMethod();
   }
 
   protected get methodName(): string {
@@ -67,139 +73,71 @@ export abstract class AbstractMcpToolMethodCallback<TContext, TRequestContext> {
   }
 
   protected get declaringClassName(): string {
-    return this._bean.constructor?.name ?? "<anonymous>";
+    return this._provider.constructor?.name ?? "<anonymous>";
   }
 
-  protected get paramTypes(): unknown[] {
-    return (
-      (Reflect.getMetadata(
-        "design:paramtypes",
-        this._target,
-        this._propertyKey,
-      ) as unknown[] | undefined) ?? []
+  protected resolveMethod(): (...args: unknown[]) => unknown {
+    const candidate = (this._provider as Record<string | symbol, unknown>)[
+      this._propertyKey
+    ];
+    assert(
+      typeof candidate === "function",
+      `Method not found: ${String(this._propertyKey)} in ${this.declaringClassName}`,
     );
-  }
-
-  protected get paramNames(): string[] {
-    const source = Function.prototype.toString.call(this._method);
-    const cleaned = source
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/\/\/.*$/gm, "");
-    const match = cleaned.match(/^[^(]*\(([^)]*)\)/s);
-    if (match == null || match[1].trim().length === 0) {
-      return [];
-    }
-    return match[1]
-      .split(",")
-      .map((part) => part.trim())
-      .map((part) => part.replace(/=.*$/, "").replace(/^\.\.\./, ""))
-      .filter((part) => part.length > 0);
-  }
-
-  protected get progressTokenIndices(): Set<number> {
-    const map =
-      (Reflect.getMetadata(
-        MCP_PROGRESS_TOKEN_METADATA_KEY,
-        this._target,
-        this._propertyKey,
-      ) as Record<number, true> | undefined) ?? {};
-    return new Set(Object.keys(map).map((index) => Number(index)));
+    return candidate as (...args: unknown[]) => unknown;
   }
 
   /**
-   * Invokes the tool method with the provided arguments.
-   * @param methodArguments The arguments to pass to the method
-   * @returns The result of the method invocation
+   * Builds the single arguments object that is passed to the user method.
    */
-  protected callMethod(methodArguments: unknown[]): unknown {
-    try {
-      return this._method.apply(this._bean, methodArguments);
-    } catch (ex) {
-      throw new Error(`Error invoking method: ${this.methodName}`, {
-        cause: ex,
-      });
-    }
-  }
-
-  /**
-   * Builds the method arguments from the context, tool input arguments, and optionally
-   * the full request.
-   */
-  protected buildMethodArguments(
+  protected buildArgs(
     exchangeOrContext: TContext,
-    toolInputArguments: Record<string, unknown>,
-    request: CallToolRequest | null,
-  ): unknown[] {
-    const paramTypes = this.paramTypes;
-    const paramNames = this.paramNames;
-    const progressTokens = this.progressTokenIndices;
-    const args: unknown[] = Array.from({ length: paramTypes.length });
+    request: CallToolRequest,
+  ): McpToolMethodArguments {
+    const meta =
+      (request.params._meta as Record<string, unknown> | undefined) ?? null;
+    const progressToken =
+      (meta as { progressToken?: unknown } | null)?.progressToken ?? null;
 
-    for (let i = 0; i < paramTypes.length; i += 1) {
-      const paramType = paramTypes[i];
-      const paramName = paramNames[i] ?? "";
+    const args: McpToolMethodArguments = {
+      context: this.resolveTransportContext(exchangeOrContext),
+      request,
+      arguments: { ...request.params.arguments },
+      meta: new McpMeta(meta),
+      progressToken,
+    };
 
-      if (this.isRequestContextName(paramName)) {
-        args[i] = this.createRequestContext(exchangeOrContext, request);
-        continue;
-      }
+    if (this.isExchangeType(exchangeOrContext)) {
+      args.exchange = exchangeOrContext as never;
+    }
 
-      // Check if parameter is annotated with @McpProgressToken
-      if (progressTokens.has(i)) {
-        args[i] =
-          (request?.params._meta as { progressToken?: unknown } | undefined)
-            ?.progressToken ?? null;
-        continue;
-      }
-
-      // Check if parameter is McpMeta type
-      if (paramType === McpMeta) {
-        args[i] = new McpMeta(
-          (request?.params._meta as Record<string, unknown> | undefined) ??
-            null,
-        );
-        continue;
-      }
-
-      // Check if parameter is CallToolRequest type (interface, identified by name)
-      if (
-        paramType === Object &&
-        (paramName.toLowerCase() === "request" ||
-          paramName.toLowerCase() === "req")
-      ) {
-        args[i] = request;
-        continue;
-      }
-
-      // Check if parameter is the exchange or context type
-      if (this.isExchangeOrContextType(paramType)) {
-        args[i] = exchangeOrContext;
-        continue;
-      }
-
-      // Otherwise, look up the value from the tool input arguments by name.
-      args[i] = this.buildTypedArgument(toolInputArguments[paramName]);
+    const requestContext = this.createRequestContext(
+      exchangeOrContext,
+      request,
+    );
+    if (requestContext !== undefined) {
+      args.requestContext = requestContext;
     }
 
     return args;
   }
 
   /**
-   * Builds a typed argument from a raw value. TypeScript erases generics at runtime,
-   * so unlike Java this implementation passes through the parsed value without further
-   * conversion.
+   * Invokes the underlying method with the prebuilt arguments object.
    */
-  protected buildTypedArgument(value: unknown): unknown {
-    return value ?? null;
+  protected callMethod(args: McpToolMethodArguments): unknown {
+    return this._method.apply(this._provider, [args]);
   }
 
   /**
-   * Converts a method result value to a CallToolResult based on the return mode and
-   * type. This method contains the common logic for processing results that is shared
-   * between synchronous and asynchronous implementations.
+   * Converts a method result value to a CallToolResult based on the return mode.
+   *
+   * Mirrors the Java implementation: if the result is already a CallToolResult, pass
+   * it through; for VOID return mode (or undefined results) emit a JSON `"Done"` text
+   * block; for STRUCTURED emit a structuredContent block; otherwise serialize to
+   * text content (strings pass through, other values are JSON serialized).
    */
   protected convertValueToCallToolResult(result: unknown): CallToolResult {
-    // Return the result if it's already a CallToolResult
     if (this.isCallToolResult(result)) {
       return result;
     }
@@ -217,55 +155,51 @@ export abstract class AbstractMcpToolMethodCallback<TContext, TRequestContext> {
       };
     }
 
-    // Default to text output
-    if (result == null) {
+    if (result === null) {
       return { content: [{ type: "text", text: "null" }] };
     }
 
-    // For string results in TEXT mode, return the string directly without JSON
-    // serialization
     if (typeof result === "string") {
       return { content: [{ type: "text", text: result }] };
     }
 
-    // For other types, serialize to JSON
     return { content: [{ type: "text", text: JSON.stringify(result) }] };
   }
 
   /**
-   * Creates the base error message for exceptions that occur during method invocation.
+   * Awaits a possibly-async result and converts it to a CallToolResult.
    */
-  protected createErrorMessage(error: unknown): string {
-    const message =
-      error instanceof Error ? error.message : String(error ?? "");
-    return `Error invoking method: ${message}`;
+  protected async convertToCallToolResult(
+    result: unknown,
+  ): Promise<CallToolResult> {
+    const resolved = result instanceof Promise ? await result : result;
+    return this.convertValueToCallToolResult(resolved);
   }
 
   /**
-   * Determines if the given parameter type is an exchange or context type that should
-   * be injected.
+   * Walks the cause chain to surface the deepest cause for error messages.
    */
-  protected abstract isExchangeOrContextType(paramType: unknown): boolean;
-
-  /**
-   * Determines whether the given parameter name refers to the request context.
-   */
-  protected isRequestContextName(name: string): boolean {
-    const lower = name.toLowerCase();
-    return (
-      lower === "ctx" ||
-      lower === "context" ||
-      lower.endsWith("requestcontext") ||
-      lower.endsWith("context")
-    );
-  }
-
-  protected findCauseUsingPlainJava(throwable: Error): Error {
-    let rootCause: Error = throwable;
+  protected findRootCause(error: Error): Error {
+    let rootCause: Error = error;
     while (rootCause.cause instanceof Error && rootCause.cause !== rootCause) {
       rootCause = rootCause.cause;
     }
     return rootCause;
+  }
+
+  /**
+   * Builds an error CallToolResult mirroring the Java sync error formatter.
+   */
+  protected createErrorResult(error: Error): CallToolResult {
+    const rootCause = this.findRootCause(error);
+    const text =
+      rootCause === error || rootCause.message === error.message
+        ? error.message
+        : `${error.message}\n${rootCause.message}`;
+    return {
+      content: [{ type: "text", text }],
+      isError: true,
+    };
   }
 
   protected isCallToolResult(value: unknown): value is CallToolResult {
@@ -277,15 +211,25 @@ export abstract class AbstractMcpToolMethodCallback<TContext, TRequestContext> {
     );
   }
 
+  /**
+   * Determines whether the supplied object is the exchange/context type used to
+   * populate `args.exchange`.
+   */
+  protected abstract isExchangeType(value: unknown): boolean;
+
+  /**
+   * Creates a request context for stateful callbacks. Stateless implementations may
+   * return `null` (or `undefined` to omit the field entirely).
+   */
   protected abstract createRequestContext(
-    exchange: TContext,
-    request: CallToolRequest | null,
-  ): TRequestContext;
+    exchangeOrContext: TContext,
+    request: CallToolRequest,
+  ): McpRequestContext | null | undefined;
 
   /**
    * Resolves the transport context from the exchange or context object.
    */
   protected abstract resolveTransportContext(
     exchangeOrContext: TContext,
-  ): unknown;
+  ): McpTransportContext | null;
 }

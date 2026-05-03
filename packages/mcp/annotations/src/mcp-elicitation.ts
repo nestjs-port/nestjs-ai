@@ -15,7 +15,10 @@
  */
 
 import "reflect-metadata";
+import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
+
 import { MCP_ELICITATION_METADATA_KEY } from "./metadata.js";
+import type { StructuredElicitResult } from "./context/index.js";
 
 export interface McpElicitationOptions {
   /**
@@ -28,6 +31,31 @@ export interface McpElicitationOptions {
 export interface McpElicitationMetadata {
   clients: string[];
 }
+
+type ExactElicitationMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpElicitationMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactElicitationMethodSignature<
+      T,
+      (
+        request: ElicitRequest,
+      ) =>
+        | ElicitResult
+        | StructuredElicitResult<unknown>
+        | Promise<ElicitResult | StructuredElicitResult<unknown>>
+    >
+  >,
+) => void;
 
 /**
  * Annotation for methods that handle elicitation requests from MCP servers. This
@@ -64,6 +92,9 @@ export interface McpElicitationMetadata {
  * }
  * ```
  */
+export function McpElicitation(
+  options: McpElicitationOptions,
+): McpElicitationMethodDecoratorFor;
 export function McpElicitation(
   options: McpElicitationOptions,
 ): MethodDecorator {

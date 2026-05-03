@@ -15,6 +15,10 @@
  */
 
 import "reflect-metadata";
+import type {
+  LoggingLevel,
+  LoggingMessageNotification,
+} from "@modelcontextprotocol/server";
 import { MCP_LOGGING_METADATA_KEY } from "./metadata.js";
 
 export interface McpLoggingOptions {
@@ -28,6 +32,36 @@ export interface McpLoggingOptions {
 export interface McpLoggingMetadata {
   clients: string[];
 }
+
+type McpLoggingNotificationMethod = (
+  notification: LoggingMessageNotification,
+) => void | Promise<void>;
+
+type McpLoggingParameterMethod = (
+  level: LoggingLevel,
+  logger: string,
+  data: string,
+) => void | Promise<void>;
+
+type ExactLoggingMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpLoggingMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactLoggingMethodSignature<
+      T,
+      McpLoggingNotificationMethod | McpLoggingParameterMethod
+    >
+  >,
+) => void;
 
 /**
  * Annotation for methods that handle logging message notifications from MCP servers. This
@@ -54,6 +88,9 @@ export interface McpLoggingMetadata {
  * }
  * ```
  */
+export function McpLogging(
+  options: McpLoggingOptions,
+): McpLoggingMethodDecoratorFor;
 export function McpLogging(options: McpLoggingOptions): MethodDecorator {
   const metadata: McpLoggingMetadata = {
     clients: [...options.clients],

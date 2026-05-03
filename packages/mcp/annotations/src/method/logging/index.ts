@@ -28,5 +28,5 @@ export {
 } from "./logging-specification.js";
 export {
   McpLoggingMethodCallback,
-  McpLoggingMethodCallbackBuilder,
+  type McpLoggingMethodCallbackProps,
 } from "./mcp-logging-method-callback.js";

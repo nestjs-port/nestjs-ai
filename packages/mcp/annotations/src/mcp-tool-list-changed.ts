@@ -15,6 +15,7 @@
  */
 
 import "reflect-metadata";
+import type { Tool } from "@modelcontextprotocol/server";
 import { MCP_TOOL_LIST_CHANGED_METADATA_KEY } from "./metadata.js";
 
 export interface McpToolListChangedOptions {
@@ -28,6 +29,26 @@ export interface McpToolListChangedOptions {
 export interface McpToolListChangedMetadata {
   clients: string[];
 }
+
+type ExactToolListChangedMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpToolListChangedMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactToolListChangedMethodSignature<
+      T,
+      (updatedTools: Tool[]) => void | Promise<void>
+    >
+  >,
+) => void;
 
 /**
  * Annotation for methods that handle tool list change notifications from MCP servers.
@@ -61,6 +82,9 @@ export interface McpToolListChangedMetadata {
  *
  * @see https://modelcontextprotocol.io/specification/2025-06-18/server/tools#list-changed-notification
  */
+export function McpToolListChanged(
+  options: McpToolListChangedOptions,
+): McpToolListChangedMethodDecoratorFor;
 export function McpToolListChanged(
   options: McpToolListChangedOptions,
 ): MethodDecorator {

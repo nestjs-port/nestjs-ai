@@ -17,15 +17,19 @@
 import assert from "node:assert/strict";
 import type { Tool } from "@modelcontextprotocol/server";
 
+export type ToolListChangedHandler = (
+  updatedTools: Tool[],
+) => void | Promise<void>;
+
 export interface ToolListChangedSpecificationProps {
   clients: string[];
-  toolListChangeHandler: (updatedTools: Tool[]) => Promise<void>;
+  toolListChangeHandler: ToolListChangedHandler;
 }
 
 export class ToolListChangedSpecification {
   readonly clients: string[];
 
-  readonly toolListChangeHandler: (updatedTools: Tool[]) => Promise<void>;
+  readonly toolListChangeHandler: ToolListChangedHandler;
 
   constructor(props: ToolListChangedSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

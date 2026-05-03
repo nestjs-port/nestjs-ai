@@ -45,7 +45,7 @@ export interface McpCompleteMetadata {
 
 export interface McpCompleteMethodArguments {
   exchange?: McpServerExchange;
-  context: McpTransportContext;
+  context: McpTransportContext | null;
   request?: CompleteRequest;
   argument?: CompleteRequest["params"]["argument"];
   value?: string;

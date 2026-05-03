@@ -25,7 +25,6 @@ import type {
   McpCompleteMetadata,
   McpCompleteMethodArguments,
 } from "../../mcp-complete.js";
-import type { McpServerExchange } from "../../context/index.js";
 import type { McpTransportContext } from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
 
@@ -42,7 +41,7 @@ export class McpCompleteMethodException extends Error {
   }
 }
 
-export abstract class AbstractMcpCompleteMethodCallback<TContext> {
+export abstract class AbstractMcpCompleteMethodCallback {
   protected readonly _provider: object;
 
   protected readonly _propertyKey: string | symbol;
@@ -63,14 +62,12 @@ export abstract class AbstractMcpCompleteMethodCallback<TContext> {
   }
 
   protected buildArgs(
-    context: TContext,
+    context: unknown,
     request: CompleteRequest,
   ): McpCompleteMethodArguments {
     const argument = request.params.argument;
     return {
-      exchange: this.isExchangeType(context)
-        ? (context as McpServerExchange)
-        : undefined,
+      exchange: this.isExchangeType(context) ? (context as never) : undefined,
       context: this.resolveTransportContext(context),
       request,
       argument,
@@ -82,9 +79,9 @@ export abstract class AbstractMcpCompleteMethodCallback<TContext> {
 
   protected abstract resolveTransportContext(
     exchangeOrContext: unknown,
-  ): McpTransportContext;
+  ): McpTransportContext | null;
 
-  protected abstract isExchangeType(paramType: TContext): boolean;
+  protected abstract isExchangeType(paramType: unknown): boolean;
 
   protected toCompleteResult(result: unknown): CompleteResult {
     if (result == null) {

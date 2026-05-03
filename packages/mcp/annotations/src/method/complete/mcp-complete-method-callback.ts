@@ -21,7 +21,8 @@ import type {
   CompleteResult,
 } from "@modelcontextprotocol/server";
 
-import { McpServerExchange, McpTransportContext } from "../../context/index.js";
+import { McpServerExchange } from "../../context/index.js";
+import type { McpTransportContext } from "../../context/index.js";
 import type { McpCompleteMetadata } from "../../mcp-complete.js";
 import {
   AbstractMcpCompleteMethodCallback,
@@ -37,20 +38,22 @@ export interface McpCompleteMethodCallbackProps extends AbstractMcpCompleteMetho
  * Class for creating completion callbacks around async methods that operate on an MCP
  * server exchange.
  */
-export class McpCompleteMethodCallback extends AbstractMcpCompleteMethodCallback<McpServerExchange> {
+export class McpCompleteMethodCallback extends AbstractMcpCompleteMethodCallback {
   constructor(props: McpCompleteMethodCallbackProps) {
     super(props);
   }
 
   protected resolveTransportContext(
     exchangeOrContext: unknown,
-  ): McpTransportContext {
-    void exchangeOrContext;
-    return McpTransportContext.EMPTY;
+  ): McpTransportContext | null {
+    if (exchangeOrContext instanceof McpServerExchange) {
+      return exchangeOrContext.transportContext();
+    }
+    return null;
   }
 
   protected isExchangeType(paramType: unknown): boolean {
-    return paramType === McpServerExchange;
+    return paramType instanceof McpServerExchange;
   }
 
   async apply(

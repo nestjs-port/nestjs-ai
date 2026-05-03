@@ -38,6 +38,7 @@
     "@standard-schema/spec": "^1.1.0"
   },
   "devDependencies": {
+    "@cfworker/json-schema": "^4.1.1",
     "@modelcontextprotocol/server": "^2.0.0-alpha.2",
     "@nestjs-port/core": "^0.1.1",
     "reflect-metadata": "^0.2.2"

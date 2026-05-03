@@ -70,6 +70,7 @@ export type {
   McpResourceAnnotationsMetadata,
   McpResourceAnnotationsOptions,
   McpResourceMetadata,
+  McpResourceMethodArguments,
   McpResourceOptions,
 } from "./mcp-resource.js";
 export { McpResourceListChanged } from "./mcp-resource-list-changed.js";

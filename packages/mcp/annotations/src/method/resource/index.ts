@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 export {
   AbstractMcpResourceMethodCallback,
-  type AbstractMcpResourceMethodCallbackProps,
+  McpResourceMethodException,
 } from "./abstract-mcp-resource-method-callback.js";
+export type { AbstractMcpResourceMethodCallbackProps } from "./abstract-mcp-resource-method-callback.js";
 export { DefaultMcpReadResourceResultConverter } from "./default-mcp-read-resource-result-converter.js";
 export { McpReadResourceResultConverter } from "./mcp-read-resource-result-converter.js";
-export {
-  McpResourceMethodCallback,
-  McpResourceMethodCallbackBuilder,
-} from "./mcp-resource-method-callback.js";
-export {
-  McpStatelessResourceMethodCallback,
-  McpStatelessResourceMethodCallbackBuilder,
-} from "./mcp-stateless-resource-method-callback.js";
+export { McpResourceMethodCallback } from "./mcp-resource-method-callback.js";
+export type { McpResourceMethodCallbackProps } from "./mcp-resource-method-callback.js";
+export { McpStatelessResourceMethodCallback } from "./mcp-stateless-resource-method-callback.js";
+export type { McpStatelessResourceMethodCallbackProps } from "./mcp-stateless-resource-method-callback.js";
 export { ResourceContentType } from "./resource-content-type.js";

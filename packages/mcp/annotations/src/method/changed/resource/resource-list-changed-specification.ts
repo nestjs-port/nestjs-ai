@@ -17,17 +17,19 @@
 import assert from "node:assert/strict";
 import type { Resource } from "@modelcontextprotocol/server";
 
+export type ResourceListChangedHandler = (
+  updatedResources: Resource[],
+) => void | Promise<void>;
+
 export interface ResourceListChangedSpecificationProps {
   clients: string[];
-  resourceListChangeHandler: (updatedResources: Resource[]) => Promise<void>;
+  resourceListChangeHandler: ResourceListChangedHandler;
 }
 
 export class ResourceListChangedSpecification {
   readonly clients: string[];
 
-  readonly resourceListChangeHandler: (
-    updatedResources: Resource[],
-  ) => Promise<void>;
+  readonly resourceListChangeHandler: ResourceListChangedHandler;
 
   constructor(props: ResourceListChangedSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

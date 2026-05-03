@@ -20,7 +20,7 @@ export {
 } from "./abstract-mcp-resource-list-changed-method-callback.js";
 export {
   McpResourceListChangedMethodCallback,
-  McpResourceListChangedMethodCallbackBuilder,
+  type McpResourceListChangedMethodCallbackProps,
 } from "./mcp-resource-list-changed-method-callback.js";
 export {
   ResourceListChangedSpecification,

@@ -15,6 +15,7 @@
  */
 
 import "reflect-metadata";
+import type { ProgressNotification } from "@modelcontextprotocol/server";
 import { MCP_PROGRESS_METADATA_KEY } from "./metadata.js";
 
 export interface McpProgressOptions {
@@ -29,12 +30,48 @@ export interface McpProgressMetadata {
   clients: string[];
 }
 
+type McpProgressNotificationMethod = (
+  notification: ProgressNotification,
+) => void | Promise<void>;
+
+type McpProgressParameterMethod = (
+  progress: number,
+  progressToken: string,
+  total: string | null,
+) => void | Promise<void>;
+
+type ExactProgressMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpProgressMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactProgressMethodSignature<
+      T,
+      McpProgressNotificationMethod | McpProgressParameterMethod
+    >
+  >,
+) => void;
+
 /**
  * Annotation for methods that handle progress notifications from MCP servers. This
  * annotation is applicable only for MCP clients.
  *
  * Methods annotated with this annotation can be used to consume progress messages from
- * MCP servers. The methods takes a single parameter of type `ProgressNotification`.
+ * MCP servers. The methods can have one of two signatures:
+ * - A single parameter of type `ProgressNotification`
+ * - Three parameters of types `number` (progress), `string` (progressToken), and
+ *   `string | null` (total)
+ *
+ * For synchronous consumers, the method must have a void return type. For asynchronous
+ * consumers, the method can have either a void return type or return `Promise<void>`.
  *
  * @example
  * ```ts
@@ -42,8 +79,16 @@ export interface McpProgressMetadata {
  * handleProgressMessage(notification: ProgressNotification): void {
  *   // Handle the progress notification
  * }
+ *
+ * @McpProgress({ clients: ["my-client-id"] })
+ * handleProgressWithParams(progress: number, progressToken: string, total: string | null): void {
+ *   // Handle the progress notification
+ * }
  * ```
  */
+export function McpProgress(
+  options: McpProgressOptions,
+): McpProgressMethodDecoratorFor;
 export function McpProgress(options: McpProgressOptions): MethodDecorator {
   const metadata: McpProgressMetadata = {
     clients: [...options.clients],

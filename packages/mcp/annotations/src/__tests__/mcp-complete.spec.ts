@@ -27,8 +27,11 @@ import type {
   McpCompleteMetadata,
   McpCompleteMethodArguments,
 } from "../mcp-complete.js";
-import { McpTransportContext } from "../context/index.js";
-import { McpStatelessCompleteMethodCallback } from "../method/complete/index.js";
+import { McpServerExchange, McpTransportContext } from "../context/index.js";
+import {
+  McpCompleteMethodCallback,
+  McpStatelessCompleteMethodCallback,
+} from "../method/index.js";
 
 class McpCompleteTypeExamples {
   @McpComplete({ prompt: "test-prompt" })
@@ -211,8 +214,72 @@ describe("McpComplete", () => {
     );
     expect(receivedArgs?.meta).toBeInstanceOf(McpMeta);
     expect(receivedArgs?.meta?.get("test")).toBe("meta-value");
-    expect(receivedArgs?.context).toBeInstanceOf(McpTransportContext);
-    expect(receivedArgs?.context.get("anything")).toBeUndefined();
+    expect(receivedArgs?.context).toBeNull();
     expect(receivedArgs?.exchange).toBeUndefined();
+  });
+
+  it("passes the exchange transport context into stateful completion handlers", async () => {
+    let receivedArgs: McpCompleteMethodArguments | undefined;
+
+    class CompletionHandler {
+      @McpComplete({ prompt: "test-prompt" })
+      async onComplete(
+        args: McpCompleteMethodArguments,
+      ): Promise<CompleteResult> {
+        receivedArgs = args;
+
+        return {
+          completion: {
+            values: ["done"],
+            total: 1,
+            hasMore: false,
+          },
+        };
+      }
+    }
+
+    const transportContext = McpTransportContext.create({
+      traceId: "trace-1",
+    });
+
+    const exchange = new McpServerExchange(
+      {
+        server: {
+          getClientCapabilities: () => undefined,
+          getClientVersion: () => undefined,
+        },
+      } as never,
+      {
+        sessionId: "session-1",
+        mcpReq: {
+          notify: async () => undefined,
+        },
+      } as never,
+      transportContext,
+    );
+
+    const callback = new McpCompleteMethodCallback({
+      provider: new CompletionHandler(),
+      propertyKey: "onComplete",
+      complete: { prompt: "test-prompt", uri: "" },
+    });
+
+    const request = {
+      params: {
+        ref: {
+          type: "ref/prompt",
+          name: "example",
+        },
+        argument: { value: "alpha" },
+        _meta: { progressToken: "token-1", test: "meta-value" },
+      },
+    } as unknown as CompleteRequest;
+
+    const result = await callback.apply(exchange, request);
+
+    expect(result.completion.values).toEqual(["done"]);
+    expect(receivedArgs?.context).toBe(transportContext);
+    expect(receivedArgs?.context?.get("traceId")).toBe("trace-1");
+    expect(receivedArgs?.exchange).toBe(exchange);
   });
 });

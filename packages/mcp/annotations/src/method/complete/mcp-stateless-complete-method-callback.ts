@@ -38,14 +38,18 @@ export interface McpStatelessCompleteMethodCallbackProps extends AbstractMcpComp
  * Class for creating completion callbacks around async methods that operate on a
  * stateless server context.
  */
-export class McpStatelessCompleteMethodCallback extends AbstractMcpCompleteMethodCallback<ServerContext> {
+export class McpStatelessCompleteMethodCallback extends AbstractMcpCompleteMethodCallback {
   constructor(props: McpStatelessCompleteMethodCallbackProps) {
     super(props);
   }
 
-  protected resolveTransportContext(context: unknown): McpTransportContext {
-    void context;
-    return McpTransportContext.EMPTY;
+  protected resolveTransportContext(
+    context: unknown,
+  ): McpTransportContext | null {
+    if (context instanceof McpTransportContext) {
+      return context;
+    }
+    return null;
   }
 
   protected isExchangeType(_paramType: unknown): boolean {

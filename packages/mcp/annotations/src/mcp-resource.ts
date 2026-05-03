@@ -15,9 +15,21 @@
  */
 
 import "reflect-metadata";
-import type { Role } from "@modelcontextprotocol/server";
+import type {
+  BlobResourceContents,
+  ReadResourceRequest,
+  ReadResourceResult,
+  Resource,
+  Role,
+  TextResourceContents,
+} from "@modelcontextprotocol/server";
 import { DefaultMetaProvider } from "./context/index.js";
+import type {
+  McpServerExchange,
+  McpTransportContext,
+} from "./context/index.js";
 import type { MetaProvider } from "./context/index.js";
+import type { McpMeta } from "./mcp-meta.js";
 import { MCP_RESOURCE_METADATA_KEY } from "./metadata.js";
 
 export interface McpResourceAnnotationsOptions {
@@ -101,8 +113,65 @@ export interface McpResourceMetadata {
 }
 
 /**
+ * Arguments object passed to methods annotated with `@McpResource`.
+ *
+ * The decorator dispatches a single object literal containing the resource exchange,
+ * transport context, original request, URI variables extracted from the URI template,
+ * meta data and progress token.
+ */
+export interface McpResourceMethodArguments {
+  exchange?: McpServerExchange;
+  context: McpTransportContext | null;
+  request: ReadResourceRequest;
+  resource: Resource;
+  uri: string;
+  uriVariables: Record<string, string>;
+  meta: McpMeta;
+  progressToken: unknown;
+}
+
+type McpResourceMethodResult =
+  | ReadResourceResult
+  | TextResourceContents
+  | BlobResourceContents
+  | string
+  | string[]
+  | Array<TextResourceContents | BlobResourceContents>
+  | Promise<
+      | ReadResourceResult
+      | TextResourceContents
+      | BlobResourceContents
+      | string
+      | string[]
+      | Array<TextResourceContents | BlobResourceContents>
+    >;
+
+type ExactResourceMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpResourceMethodDecoratorFor = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactResourceMethodSignature<
+      T,
+      (args: McpResourceMethodArguments) => McpResourceMethodResult
+    >
+  >,
+) => void;
+
+/**
  * Marks a method as a MCP Resource.
  */
+export function McpResource(
+  options?: McpResourceOptions,
+): McpResourceMethodDecoratorFor;
 export function McpResource(options: McpResourceOptions = {}): MethodDecorator {
   const annotations: McpResourceAnnotationsMetadata | null = options.annotations
     ? {

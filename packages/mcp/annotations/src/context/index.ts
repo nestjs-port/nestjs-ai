@@ -17,6 +17,10 @@
 export type { MetaProvider } from "./meta-provider.js";
 export { DefaultMetaProvider } from "./default-meta-provider.js";
 export { McpServerExchange } from "./mcp-server-exchange.js";
+export {
+  McpTransportContext,
+  type McpTransportContextExtractor,
+} from "./mcp-transport-context.js";
 export type {
   ContextInclusionStrategy,
   ElicitationSpec,

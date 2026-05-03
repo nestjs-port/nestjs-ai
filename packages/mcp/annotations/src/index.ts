@@ -40,6 +40,7 @@ export type { McpArgMetadata, McpArgOptions } from "./mcp-arg.js";
 export { McpComplete } from "./mcp-complete.js";
 export type {
   McpCompleteMetadata,
+  McpCompleteMethodArguments,
   McpCompleteOptions,
 } from "./mcp-complete.js";
 export { McpElicitation } from "./mcp-elicitation.js";

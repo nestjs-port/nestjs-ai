@@ -32,7 +32,7 @@ import type { McpCompleteMetadata } from "../../mcp-complete.js";
 import {
   McpCompleteMethodCallback,
   McpStatelessCompleteMethodCallback,
-} from "../../method/complete/complete-method-callback.js";
+} from "../../method/complete/index.js";
 import type { McpServerExchange } from "../../context/index.js";
 
 export interface CompleteSpecification<TContext> {
@@ -69,7 +69,7 @@ export class McpCompleteProvider {
             throw new Error("complete metadata cannot be null");
           }
           const callback = new McpCompleteMethodCallback({
-            bean: completeObject,
+            provider: completeObject,
             propertyKey,
             complete,
           });
@@ -143,7 +143,7 @@ export class McpStatelessCompleteProvider {
             throw new Error("complete metadata cannot be null");
           }
           const callback = new McpStatelessCompleteMethodCallback({
-            bean: completeObject,
+            provider: completeObject,
             propertyKey,
             complete,
           });

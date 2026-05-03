@@ -20,7 +20,7 @@ export {
 } from "./abstract-mcp-tool-list-changed-method-callback.js";
 export {
   McpToolListChangedMethodCallback,
-  McpToolListChangedMethodCallbackBuilder,
+  type McpToolListChangedMethodCallbackProps,
 } from "./mcp-tool-list-changed-method-callback.js";
 export {
   ToolListChangedSpecification,

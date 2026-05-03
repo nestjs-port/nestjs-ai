@@ -59,6 +59,7 @@ export type {
 export { McpProgressToken } from "./mcp-progress-token.js";
 export { McpPrompt } from "./mcp-prompt.js";
 export type { McpPromptMetadata, McpPromptOptions } from "./mcp-prompt.js";
+export type { McpPromptMethodArguments } from "./mcp-prompt.js";
 export { McpPromptListChanged } from "./mcp-prompt-list-changed.js";
 export type {
   McpPromptListChangedMetadata,

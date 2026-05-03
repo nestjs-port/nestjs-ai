@@ -14,46 +14,66 @@
  * limitations under the License.
  */
 
-import "reflect-metadata";
-
 import type {
   CreateMessageRequest,
   CreateMessageResult,
 } from "@modelcontextprotocol/server";
 
-import type { McpSamplingMetadata } from "../../mcp-sampling.js";
 import {
   AbstractMcpSamplingMethodCallback,
   McpSamplingMethodException,
+  type AbstractMcpSamplingMethodCallbackProps,
 } from "./abstract-mcp-sampling-method-callback.js";
 
+export type McpSamplingMethodCallbackProps =
+  AbstractMcpSamplingMethodCallbackProps;
+
 /**
- * Promise-based implementation of a sampling method callback.
+ * Class for creating Function callbacks around sampling methods that return Promise.
+ *
+ * This class provides a way to convert methods annotated with `McpSampling` into
+ * callback functions that can be used to handle sampling requests. It supports methods
+ * with a single CreateMessageRequest parameter.
  */
 export class McpSamplingMethodCallback extends AbstractMcpSamplingMethodCallback {
-  constructor(bean: object, propertyKey: string | symbol) {
-    super(bean, propertyKey);
+  constructor(props: McpSamplingMethodCallbackProps) {
+    super(props);
   }
 
+  /**
+   * Apply the callback to the given request.
+   *
+   * This method builds the arguments for the method call, invokes the method, and
+   * returns a Promise that resolves with the result of the method invocation. The
+   * method may return a `CreateMessageResult` directly or a `Promise<CreateMessageResult>`.
+   * @param request The sampling request, must not be null
+   * @return A Promise that resolves with the result of the method invocation
+   * @throws McpSamplingMethodException if there is an error invoking the sampling method
+   * @throws TypeError if the request is null
+   */
   async apply(request: CreateMessageRequest): Promise<CreateMessageResult> {
     if (request == null) {
       throw new TypeError("Request must not be null");
     }
 
     try {
+      // Build arguments for the method call
       const args = this.buildArgs(request);
-      const result = await Promise.resolve(
-        this._method.apply(this._bean, args),
-      );
 
-      if (result == null || typeof result !== "object") {
-        throw new TypeError(
+      // Invoke the method
+      const result = await this._method.apply(this._provider, args);
+
+      if (!this.isCreateMessageResult(result)) {
+        throw new McpSamplingMethodException(
           `Method must return CreateMessageResult or Promise<CreateMessageResult>: ${this.methodName}`,
         );
       }
 
-      return result as CreateMessageResult;
+      return result;
     } catch (error) {
+      if (error instanceof McpSamplingMethodException) {
+        throw error;
+      }
       throw new McpSamplingMethodException(
         `Error invoking sampling method: ${this.methodName}`,
         { cause: error instanceof Error ? error : undefined },
@@ -61,61 +81,13 @@ export class McpSamplingMethodCallback extends AbstractMcpSamplingMethodCallback
     }
   }
 
-  protected override validateReturnType(): void {
-    const returnType = Reflect.getMetadata(
-      "design:returntype",
-      this._target,
-      this._propertyKey,
-    ) as { name?: string } | undefined;
-
-    if (returnType === Promise || returnType === Object) {
-      return;
-    }
-
-    throw new Error(
-      `Method must return CreateMessageResult or Promise<CreateMessageResult>: ${this.methodName} in ${this.declaringClassName} returns ${returnType?.name ?? "unknown"}`,
+  private isCreateMessageResult(value: unknown): value is CreateMessageResult {
+    return (
+      value != null &&
+      typeof value === "object" &&
+      "role" in value &&
+      "content" in value &&
+      "model" in value
     );
-  }
-
-  protected override isExchangeType(_paramType: unknown): boolean {
-    return false;
-  }
-
-  static builder(): McpSamplingMethodCallbackBuilder {
-    return new McpSamplingMethodCallbackBuilder();
-  }
-}
-
-/**
- * Builder for creating McpSamplingMethodCallback instances.
- */
-export class McpSamplingMethodCallbackBuilder {
-  private _bean: object | null = null;
-
-  private _propertyKey: string | symbol | null = null;
-
-  method(propertyKey: string | symbol | null): this {
-    this._propertyKey = propertyKey;
-    return this;
-  }
-
-  bean(bean: object | null): this {
-    this._bean = bean;
-    return this;
-  }
-
-  sampling(_sampling: McpSamplingMetadata): this {
-    return this;
-  }
-
-  build(): McpSamplingMethodCallback {
-    if (this._propertyKey == null) {
-      throw new Error("Method must not be null");
-    }
-    if (this._bean == null) {
-      throw new Error("Bean must not be null");
-    }
-
-    return new McpSamplingMethodCallback(this._bean, this._propertyKey);
   }
 }

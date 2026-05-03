@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,81 +14,74 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
+
 import type {
   CallToolRequest,
   CallToolResult,
-  ServerContext,
 } from "@modelcontextprotocol/server";
-import type { McpRequestContext } from "../../context/index.js";
-import { AbstractAsyncMcpToolMethodCallback } from "./abstract-async-mcp-tool-method-callback.js";
-import type { ReturnMode } from "./return-mode.js";
+
+import { McpTransportContext } from "../../context/index.js";
+import {
+  AbstractMcpToolMethodCallback,
+  type AbstractMcpToolMethodCallbackProps,
+} from "./abstract-mcp-tool-method-callback.js";
+
+export interface McpStatelessToolMethodCallbackProps extends AbstractMcpToolMethodCallbackProps {}
 
 /**
- * Class for creating Function callbacks around async stateless tool methods.
+ * Class for creating callbacks around tool methods that operate on a stateless
+ * transport context.
  *
- * This class provides a way to convert methods annotated with `McpTool` into
- * callback functions that can be used to handle tool requests asynchronously in a
- * stateless manner using `ServerContext`.
+ * Stateless callbacks never populate `args.exchange` or `args.requestContext`. The
+ * remaining contract matches `McpToolMethodCallback`.
  */
-export class McpStatelessToolMethodCallback extends AbstractAsyncMcpToolMethodCallback<
-  ServerContext,
-  McpRequestContext
-> {
-  constructor(
-    returnMode: ReturnMode,
-    bean: object,
-    propertyKey: string | symbol,
-    toolCallExceptionClass: new (...args: never[]) => Error = Error,
-  ) {
-    super(returnMode, bean, propertyKey, toolCallExceptionClass);
+export class McpStatelessToolMethodCallback extends AbstractMcpToolMethodCallback<McpTransportContext> {
+  constructor(props: McpStatelessToolMethodCallbackProps) {
+    super(props);
   }
 
-  protected override isExchangeOrContextType(_paramType: unknown): boolean {
-    // ServerContext is an interface, identified by parameter name in build args.
+  protected isExchangeType(_value: unknown): boolean {
     return false;
   }
 
-  protected override createRequestContext(
-    _exchange: ServerContext,
-    _request: CallToolRequest | null,
-  ): McpRequestContext {
-    throw new Error(
-      "Stateless tool methods do not support McpRequestContext parameter.",
-    );
+  protected createRequestContext(
+    _context: McpTransportContext,
+    _request: CallToolRequest,
+  ): undefined {
+    return undefined;
   }
 
-  protected override resolveTransportContext(
-    exchangeOrContext: ServerContext,
-  ): unknown {
-    return exchangeOrContext;
+  protected resolveTransportContext(
+    context: McpTransportContext,
+  ): McpTransportContext | null {
+    if (context instanceof McpTransportContext) {
+      return context;
+    }
+    return null;
   }
 
   /**
    * Apply the callback to the given request.
    *
-   * This method builds the arguments for the method call, invokes the method, and
-   * returns the result asynchronously.
+   * Builds the typed arguments object, invokes the user method, and converts the
+   * resolved value into a `CallToolResult`. Errors of the configured class type are
+   * caught and converted into error results.
    */
   async apply(
-    transportContext: ServerContext,
+    context: McpTransportContext,
     request: CallToolRequest,
   ): Promise<CallToolResult> {
-    this.validateRequest(request);
+    assert(request != null, "Request must not be null");
 
     try {
-      const args = this.buildMethodArguments(
-        transportContext,
-        request.params.arguments ?? {},
-        request,
-      );
-
+      const args = this.buildArgs(context, request);
       const result = this.callMethod(args);
-
       return await this.convertToCallToolResult(result);
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
       if (error instanceof this._toolCallExceptionClass) {
-        return this.createAsyncErrorResult(error);
+        return this.createErrorResult(error);
       }
       throw error;
     }

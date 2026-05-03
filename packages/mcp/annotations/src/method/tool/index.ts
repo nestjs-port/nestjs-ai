@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-export { AbstractAsyncMcpToolMethodCallback } from "./abstract-async-mcp-tool-method-callback.js";
-export { AbstractMcpToolMethodCallback } from "./abstract-mcp-tool-method-callback.js";
-export { McpStatelessToolMethodCallback } from "./mcp-stateless-tool-method-callback.js";
-export { McpToolMethodCallback } from "./mcp-tool-method-callback.js";
+export {
+  AbstractMcpToolMethodCallback,
+  type AbstractMcpToolMethodCallbackProps,
+} from "./abstract-mcp-tool-method-callback.js";
+export {
+  McpStatelessToolMethodCallback,
+  type McpStatelessToolMethodCallbackProps,
+} from "./mcp-stateless-tool-method-callback.js";
+export {
+  McpToolMethodCallback,
+  type McpToolMethodCallbackProps,
+} from "./mcp-tool-method-callback.js";
+export type { McpToolMethodArguments } from "./mcp-tool-method-arguments.js";
 export { ReturnMode } from "./return-mode.js";

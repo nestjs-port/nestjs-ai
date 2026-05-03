@@ -19,7 +19,7 @@ import type {
   ReadResourceResult,
   TextResourceContents,
 } from "@modelcontextprotocol/server";
-import { McpReadResourceResultConverter } from "./mcp-read-resource-result-converter.js";
+import type { McpReadResourceResultConverter } from "./mcp-read-resource-result-converter.js";
 import { ResourceContentType } from "./resource-content-type.js";
 
 type ReadResourceContent = TextResourceContents | BlobResourceContents;
@@ -35,7 +35,7 @@ const DEFAULT_MIME_TYPE = "text/plain";
  * This class provides a standard implementation for converting various return types from
  * resource methods to a standardized `ReadResourceResult` format.
  */
-export class DefaultMcpReadResourceResultConverter extends McpReadResourceResultConverter {
+export class DefaultMcpReadResourceResultConverter implements McpReadResourceResultConverter {
   /**
    * Converts the method's return value to a `ReadResourceResult`, propagating
    * resource-level metadata to the content items.
@@ -47,7 +47,7 @@ export class DefaultMcpReadResourceResultConverter extends McpReadResourceResult
    * @returns A `ReadResourceResult` containing the appropriate resource contents
    * @throws Error if the return type is not supported
    */
-  override convertToReadResourceResult(
+  convertToReadResourceResult(
     result: unknown,
     requestUri: string,
     mimeType: string | null,

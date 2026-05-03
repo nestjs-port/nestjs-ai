@@ -20,9 +20,9 @@ export {
 } from "./abstract-mcp-resource-method-callback.js";
 export type { AbstractMcpResourceMethodCallbackProps } from "./abstract-mcp-resource-method-callback.js";
 export { DefaultMcpReadResourceResultConverter } from "./default-mcp-read-resource-result-converter.js";
-export { McpReadResourceResultConverter } from "./mcp-read-resource-result-converter.js";
+export type { McpReadResourceResultConverter } from "./mcp-read-resource-result-converter.js";
+export { ResourceContentType } from "./resource-content-type.js";
 export { McpResourceMethodCallback } from "./mcp-resource-method-callback.js";
 export type { McpResourceMethodCallbackProps } from "./mcp-resource-method-callback.js";
 export { McpStatelessResourceMethodCallback } from "./mcp-stateless-resource-method-callback.js";
 export type { McpStatelessResourceMethodCallbackProps } from "./mcp-stateless-resource-method-callback.js";
-export { ResourceContentType } from "./resource-content-type.js";

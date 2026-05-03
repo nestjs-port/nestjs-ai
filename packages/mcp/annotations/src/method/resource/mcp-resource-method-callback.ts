@@ -67,9 +67,7 @@ export class McpResourceMethodCallback extends AbstractMcpResourceMethodCallback
 
     try {
       const args = this.buildArgs(exchange, request);
-      const result = await Promise.resolve(
-        this._method.apply(this._provider, [args]),
-      );
+      const result = await this._method.apply(this._provider, [args]);
       return this._resultConverter.convertToReadResourceResult(
         result,
         request.params.uri,

@@ -65,9 +65,7 @@ export class McpStatelessResourceMethodCallback extends AbstractMcpResourceMetho
 
     try {
       const args = this.buildArgs(context, request);
-      const result = await Promise.resolve(
-        this._method.apply(this._provider, [args]),
-      );
+      const result = await this._method.apply(this._provider, [args]);
       return this._resultConverter.convertToReadResourceResult(
         result,
         request.params.uri,

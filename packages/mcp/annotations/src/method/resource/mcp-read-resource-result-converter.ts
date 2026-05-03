@@ -23,7 +23,7 @@ import type { ResourceContentType } from "./resource-content-type.js";
  * This interface defines a contract for converting various return types from resource
  * methods to a standardized `ReadResourceResult` format.
  */
-export abstract class McpReadResourceResultConverter {
+export interface McpReadResourceResultConverter {
   /**
    * Converts the method's return value to a `ReadResourceResult`, propagating
    * resource-level metadata to the content items when provided.
@@ -35,7 +35,7 @@ export abstract class McpReadResourceResultConverter {
    * @returns A `ReadResourceResult` containing the appropriate resource contents
    * @throws Error if the return type is not supported
    */
-  abstract convertToReadResourceResult(
+  convertToReadResourceResult(
     result: unknown,
     requestUri: string,
     mimeType: string | null,

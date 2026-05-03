@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import "reflect-metadata";
 import assert from "node:assert/strict";
 import type { CreateMessageRequest } from "@modelcontextprotocol/server";
+
+export interface AbstractMcpSamplingMethodCallbackProps {
+  provider: object;
+  propertyKey: string | symbol;
+}
 
 export class McpSamplingMethodException extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
@@ -27,32 +31,35 @@ export class McpSamplingMethodException extends Error {
 
 /**
  * Abstract base class for creating callbacks around sampling methods.
+ *
+ * This class provides common functionality for both synchronous and asynchronous
+ * sampling method callbacks. It contains shared logic for argument building and other
+ * common operations.
  */
 export abstract class AbstractMcpSamplingMethodCallback {
-  protected readonly _bean: object;
+  protected readonly _provider: object;
 
   protected readonly _propertyKey: string | symbol;
 
-  protected readonly _target: object;
-
   protected readonly _method: (...args: unknown[]) => unknown;
 
-  protected constructor(bean: object, propertyKey: string | symbol) {
-    assert(propertyKey != null, "Method can't be null!");
-    assert(bean != null, "Bean can't be null!");
+  protected constructor(props: AbstractMcpSamplingMethodCallbackProps) {
+    assert(props.propertyKey != null, "Method can't be null!");
+    assert(props.provider != null, "Provider can't be null!");
 
-    this._bean = bean;
-    this._propertyKey = propertyKey;
-    this._target = Object.getPrototypeOf(bean) as object;
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
 
-    const candidate = (bean as Record<string | symbol, unknown>)[propertyKey];
+    const candidate = (props.provider as Record<string | symbol, unknown>)[
+      props.propertyKey
+    ];
     if (typeof candidate !== "function") {
       throw new Error(
-        `Method must not be null: ${String(propertyKey)} in ${this.declaringClassName}`,
+        `Method must not be null: ${String(props.propertyKey)} in ${this.declaringClassName}`,
       );
     }
+
     this._method = candidate as (...args: unknown[]) => unknown;
-    this.validateMethod();
   }
 
   protected get methodName(): string {
@@ -62,47 +69,15 @@ export abstract class AbstractMcpSamplingMethodCallback {
   }
 
   protected get declaringClassName(): string {
-    return this._bean.constructor?.name ?? "<anonymous>";
+    return this._provider.constructor?.name ?? "<anonymous>";
   }
 
-  protected validateMethod(): void {
-    this.validateReturnType();
-    this.validateParameters();
-  }
-
-  protected abstract validateReturnType(): void;
-
-  protected validateParameters(): void {
-    const paramTypes =
-      (Reflect.getMetadata(
-        "design:paramtypes",
-        this._target,
-        this._propertyKey,
-      ) as unknown[] | undefined) ?? [];
-
-    if (paramTypes.length < 1) {
-      throw new Error(
-        `Method must have at least 1 parameter (CreateMessageRequest): ${this.methodName} in ${this.declaringClassName} has ${paramTypes.length} parameters`,
-      );
-    }
-
-    if (paramTypes.length !== 1) {
-      throw new Error(
-        `Currently only methods with a single CreateMessageRequest parameter are supported: ${this.methodName} in ${this.declaringClassName} has ${paramTypes.length} parameters`,
-      );
-    }
-
-    const paramType = paramTypes[0] as { name?: string } | undefined;
-    if (paramType !== Object) {
-      throw new Error(
-        `Single parameter must be of type CreateMessageRequest: ${this.methodName} in ${this.declaringClassName} has parameter of type ${paramType?.name ?? "unknown"}`,
-      );
-    }
-  }
-
+  /**
+   * Builds the arguments array for invoking the method.
+   * @param request The sampling request
+   * @return An array of arguments for the method invocation
+   */
   protected buildArgs(request: CreateMessageRequest): unknown[] {
     return [request];
   }
-
-  protected abstract isExchangeType(paramType: unknown): boolean;
 }

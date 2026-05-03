@@ -20,7 +20,7 @@ export {
 } from "./abstract-mcp-progress-method-callback.js";
 export {
   McpProgressMethodCallback,
-  McpProgressMethodCallbackBuilder,
+  type McpProgressMethodCallbackProps,
 } from "./mcp-progress-method-callback.js";
 export {
   ProgressSpecification,

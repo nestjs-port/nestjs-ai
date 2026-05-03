@@ -16,11 +16,14 @@
 
 import "reflect-metadata";
 import type { ProgressNotification } from "@modelcontextprotocol/server";
-import type { McpProgressMetadata } from "../../mcp-progress.js";
 import {
   AbstractMcpProgressMethodCallback,
   McpProgressMethodException,
+  type AbstractMcpProgressMethodCallbackProps,
 } from "./abstract-mcp-progress-method-callback.js";
+
+export type McpProgressMethodCallbackProps =
+  AbstractMcpProgressMethodCallbackProps;
 
 /**
  * Asynchronous implementation of a progress method callback.
@@ -29,31 +32,8 @@ import {
  * asynchronously when a progress notification is received, returning a `Promise<void>`.
  */
 export class McpProgressMethodCallback extends AbstractMcpProgressMethodCallback {
-  constructor(bean: object, propertyKey: string | symbol) {
-    super(bean, propertyKey);
-  }
-
-  protected override validateReturnType(): void {
-    const returnType = Reflect.getMetadata(
-      "design:returntype",
-      this._target,
-      this._propertyKey,
-    ) as { name?: string } | undefined;
-
-    // Check if return type is void or Promise<void>
-    if (returnType === undefined) {
-      // void is acceptable - we'll wrap it in Promise
-      return;
-    }
-
-    if (returnType === Promise) {
-      // Promise<void> is acceptable; the generic argument cannot be checked at runtime.
-      return;
-    }
-
-    throw new Error(
-      `Asynchronous progress methods must return void or Mono<Void>: ${this.methodName} in ${this.declaringClassName} returns ${returnType.name ?? "unknown"}`,
-    );
+  constructor(props: McpProgressMethodCallbackProps) {
+    super(props);
   }
 
   /**
@@ -71,88 +51,14 @@ export class McpProgressMethodCallback extends AbstractMcpProgressMethodCallback
       throw new TypeError("Notification must not be null");
     }
 
-    let result: unknown;
     try {
-      // Build arguments for the method call
-      const args = this.buildArgs(null, notification);
-
-      // Invoke the method
-      result = this._method.apply(this._bean, args);
+      const args = this.buildArgs(notification);
+      await this._method.apply(this._provider, args);
     } catch (e) {
       throw new McpProgressMethodException(
         `Error invoking progress method: ${this.methodName}`,
         { cause: e },
       );
     }
-
-    // Handle return type
-    if (result instanceof Promise) {
-      await result;
-    }
-    // void return type
-  }
-
-  /**
-   * Create a new builder.
-   * @returns A new builder instance
-   */
-  static builder(): McpProgressMethodCallbackBuilder {
-    return new McpProgressMethodCallbackBuilder();
-  }
-}
-
-/**
- * Builder for creating McpProgressMethodCallback instances.
- *
- * This builder provides a fluent API for constructing McpProgressMethodCallback
- * instances with the required parameters.
- */
-export class McpProgressMethodCallbackBuilder {
-  private _bean: object | null = null;
-
-  private _propertyKey: string | symbol | null = null;
-
-  /**
-   * Set the property key of the method to create a callback for.
-   * @param propertyKey The property key of the method
-   * @returns This builder
-   */
-  method(propertyKey: string | symbol | null): this {
-    this._propertyKey = propertyKey;
-    return this;
-  }
-
-  /**
-   * Set the bean instance that contains the method.
-   * @param bean The bean instance
-   * @returns This builder
-   */
-  bean(bean: object | null): this {
-    this._bean = bean;
-    return this;
-  }
-
-  /**
-   * Set the progress annotation metadata.
-   * @param _progress The progress metadata
-   * @returns This builder
-   */
-  progress(_progress: McpProgressMetadata): this {
-    // No additional configuration needed from the annotation at this time
-    return this;
-  }
-
-  /**
-   * Build the callback.
-   * @returns A new McpProgressMethodCallback instance
-   */
-  build(): McpProgressMethodCallback {
-    if (this._propertyKey == null) {
-      throw new Error("Method must not be null");
-    }
-    if (this._bean == null) {
-      throw new Error("Bean must not be null");
-    }
-    return new McpProgressMethodCallback(this._bean, this._propertyKey);
   }
 }

@@ -20,7 +20,7 @@ export {
 } from "./abstract-mcp-prompt-list-changed-method-callback.js";
 export {
   McpPromptListChangedMethodCallback,
-  McpPromptListChangedMethodCallbackBuilder,
+  type McpPromptListChangedMethodCallbackProps,
 } from "./mcp-prompt-list-changed-method-callback.js";
 export {
   PromptListChangedSpecification,

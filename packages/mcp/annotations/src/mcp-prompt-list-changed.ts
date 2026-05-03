@@ -15,6 +15,7 @@
  */
 
 import "reflect-metadata";
+import type { Prompt } from "@modelcontextprotocol/server";
 import { MCP_PROMPT_LIST_CHANGED_METADATA_KEY } from "./metadata.js";
 
 export interface McpPromptListChangedOptions {
@@ -29,6 +30,28 @@ export interface McpPromptListChangedOptions {
 export interface McpPromptListChangedMetadata {
   clients: string[];
 }
+
+type ExactPromptListChangedMethodSignature<
+  T extends (...args: any[]) => any,
+  Signature extends (...args: any[]) => any,
+> = T extends Signature
+  ? Parameters<T> extends Parameters<Signature>
+    ? T
+    : never
+  : never;
+
+type McpPromptListChangedMethodDecoratorFor = <
+  T extends (...args: any[]) => any,
+>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactPromptListChangedMethodSignature<
+      T,
+      (updatedPrompts: Prompt[]) => void | Promise<void>
+    >
+  >,
+) => void;
 
 /**
  * Annotation for methods that handle prompt list change notifications from MCP servers.
@@ -62,6 +85,9 @@ export interface McpPromptListChangedMetadata {
  *
  * @see https://modelcontextprotocol.io/specification/2025-06-18/server/prompts#list-changed-notification
  */
+export function McpPromptListChanged(
+  options: McpPromptListChangedOptions,
+): McpPromptListChangedMethodDecoratorFor;
 export function McpPromptListChanged(
   options: McpPromptListChangedOptions,
 ): MethodDecorator {

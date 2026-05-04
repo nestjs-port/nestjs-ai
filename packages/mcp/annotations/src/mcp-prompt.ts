@@ -52,6 +52,16 @@ export interface McpPromptOptions {
    * if not specified.
    */
   metaProvider?: new () => MetaProvider;
+
+  /**
+   * Optional prompt arguments exposed to MCP clients, keyed by argument name.
+   */
+  arguments?: Record<string, McpPromptArgumentMetadata>;
+}
+
+export interface McpPromptArgumentMetadata {
+  description?: string;
+  required?: boolean;
 }
 
 export interface McpPromptMetadata {
@@ -59,6 +69,7 @@ export interface McpPromptMetadata {
   title: string;
   description: string;
   metaProvider: new () => MetaProvider;
+  arguments: Record<string, McpPromptArgumentMetadata>;
 }
 
 export interface McpPromptMethodArguments {
@@ -113,6 +124,7 @@ export function McpPrompt(options: McpPromptOptions = {}): MethodDecorator {
     title: options.title ?? "",
     description: options.description ?? "",
     metaProvider: options.metaProvider ?? DefaultMetaProvider,
+    arguments: options.arguments ?? {},
   };
 
   return (

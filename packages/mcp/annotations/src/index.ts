@@ -88,6 +88,8 @@ export type {
   McpToolAnnotationsMetadata,
   McpToolAnnotationsOptions,
   McpToolMetadata,
+  McpToolMethodArguments,
+  McpToolMethodArgumentsFor,
   McpToolOptions,
 } from "./mcp-tool.js";
 export { McpToolListChanged } from "./mcp-tool-list-changed.js";

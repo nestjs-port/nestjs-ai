@@ -20,19 +20,24 @@ import type {
   CallToolRequest,
   CallToolResult,
 } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 
 import type {
   McpRequestContext,
   McpTransportContext,
 } from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
-import type { McpToolMethodArguments } from "./mcp-tool-method-arguments.js";
+import type { McpToolMethodArguments } from "../../mcp-tool.js";
 import { ReturnMode } from "./return-mode.js";
 
 export interface AbstractMcpToolMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
   returnMode: ReturnMode;
+  returnSchema?: StandardSchemaWithJsonSchema | null;
   toolCallExceptionClass?: new (...args: never[]) => Error;
 }
 
@@ -52,6 +57,8 @@ export abstract class AbstractMcpToolMethodCallback<TContext> {
 
   protected readonly _returnMode: ReturnMode;
 
+  protected readonly _returnSchema: StandardSchemaWithJsonSchema | null;
+
   protected readonly _toolCallExceptionClass: new (...args: never[]) => Error;
 
   protected constructor(props: AbstractMcpToolMethodCallbackProps) {
@@ -62,6 +69,7 @@ export abstract class AbstractMcpToolMethodCallback<TContext> {
     this._provider = props.provider;
     this._propertyKey = props.propertyKey;
     this._returnMode = props.returnMode;
+    this._returnSchema = props.returnSchema ?? null;
     this._toolCallExceptionClass = props.toolCallExceptionClass ?? Error;
     this._method = this.resolveMethod();
   }
@@ -102,7 +110,7 @@ export abstract class AbstractMcpToolMethodCallback<TContext> {
     const args: McpToolMethodArguments = {
       context: this.resolveTransportContext(exchangeOrContext),
       request,
-      arguments: { ...request.params.arguments },
+      toolArguments: { ...request.params.arguments },
       meta: new McpMeta(meta),
       progressToken,
     };
@@ -130,14 +138,18 @@ export abstract class AbstractMcpToolMethodCallback<TContext> {
   }
 
   /**
-   * Converts a method result value to a CallToolResult based on the return mode.
+   * Converts a method result value to a CallToolResult based on the return mode and
+   * return schema.
    *
    * Mirrors the Java implementation: if the result is already a CallToolResult, pass
    * it through; for VOID return mode (or undefined results) emit a JSON `"Done"` text
-   * block; for STRUCTURED emit a structuredContent block; otherwise serialize to
-   * text content (strings pass through, other values are JSON serialized).
+   * block; if a return schema is configured, validate/parse the result and emit a
+   * structuredContent block; otherwise serialize to text content (strings pass
+   * through, other values are JSON serialized).
    */
-  protected convertValueToCallToolResult(result: unknown): CallToolResult {
+  protected async convertValueToCallToolResult(
+    result: unknown,
+  ): Promise<CallToolResult> {
     if (this.isCallToolResult(result)) {
       return result;
     }
@@ -148,10 +160,22 @@ export abstract class AbstractMcpToolMethodCallback<TContext> {
       };
     }
 
-    if (this._returnMode === ReturnMode.STRUCTURED) {
+    if (this._returnSchema != null) {
+      const validated = await this._returnSchema["~standard"].validate(result);
+      if (validated.issues) {
+        const messages = validated.issues
+          .map((issue) => issue.message)
+          .filter((message) => message != null && message !== "");
+        throw new Error(
+          messages.length > 0
+            ? `Return value does not match the configured return schema: ${messages.join("; ")}`
+            : "Return value does not match the configured return schema.",
+        );
+      }
+
       return {
         content: [],
-        structuredContent: result as Record<string, unknown>,
+        structuredContent: validated.value as Record<string, unknown>,
       };
     }
 
@@ -233,3 +257,5 @@ export abstract class AbstractMcpToolMethodCallback<TContext> {
     exchangeOrContext: TContext,
   ): McpTransportContext | null;
 }
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;

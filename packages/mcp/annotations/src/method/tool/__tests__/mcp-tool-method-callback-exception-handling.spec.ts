@@ -28,7 +28,7 @@ import {
 } from "../../../context/index.js";
 import { McpTool } from "../../../mcp-tool.js";
 import { McpToolMethodCallback } from "../mcp-tool-method-callback.js";
-import type { McpToolMethodArguments } from "../mcp-tool-method-arguments.js";
+import type { McpToolMethodArguments } from "../../../mcp-tool.js";
 import { ReturnMode } from "../return-mode.js";
 
 describe("McpToolMethodCallback exception handling", () => {
@@ -301,7 +301,7 @@ class ExceptionTestToolProvider {
     description: "Tool that throws Error",
   })
   runtimeExceptionTool(args: McpToolMethodArguments): string {
-    throw new Error(`Runtime error: ${String(args.arguments.input)}`);
+    throw new Error(`Runtime error: ${String(args.toolArguments.input)}`);
   }
 
   @McpTool({
@@ -310,7 +310,7 @@ class ExceptionTestToolProvider {
   })
   customRuntimeExceptionTool(args: McpToolMethodArguments): string {
     throw new CustomRuntimeException(
-      `Custom runtime error: ${String(args.arguments.input)}`,
+      `Custom runtime error: ${String(args.toolArguments.input)}`,
     );
   }
 
@@ -320,13 +320,13 @@ class ExceptionTestToolProvider {
   })
   checkedExceptionTool(args: McpToolMethodArguments): string {
     throw new BusinessException(
-      `Business error: ${String(args.arguments.input)}`,
+      `Business error: ${String(args.toolArguments.input)}`,
     );
   }
 
   @McpTool({ name: "success-tool", description: "Tool that succeeds" })
   successTool(args: McpToolMethodArguments): string {
-    return `Success: ${String(args.arguments.input)}`;
+    return `Success: ${String(args.toolArguments.input)}`;
   }
 
   @McpTool({
@@ -334,7 +334,7 @@ class ExceptionTestToolProvider {
     description: "Tool that throws TypeError",
   })
   nullPointerTool(args: McpToolMethodArguments): string {
-    throw new TypeError(`Null pointer: ${String(args.arguments.input)}`);
+    throw new TypeError(`Null pointer: ${String(args.toolArguments.input)}`);
   }
 
   @McpTool({
@@ -343,7 +343,7 @@ class ExceptionTestToolProvider {
   })
   illegalArgumentTool(args: McpToolMethodArguments): string {
     throw new IllegalArgumentLikeError(
-      `Illegal argument: ${String(args.arguments.input)}`,
+      `Illegal argument: ${String(args.toolArguments.input)}`,
     );
   }
 }

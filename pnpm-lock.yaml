@@ -311,6 +311,9 @@ importers:
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
 
   packages/mcp/common:
     devDependencies:

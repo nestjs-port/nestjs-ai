@@ -35,7 +35,7 @@ import { McpPrompt } from "../../../mcp-prompt.js";
 import type {
   McpPromptArgumentsFor,
   McpPromptMetadata,
-  McpPromptMethodArguments,
+  McpPromptMethodContext,
 } from "../../../mcp-prompt.js";
 import { McpPromptMethodCallback } from "../mcp-prompt-method-callback.js";
 
@@ -182,9 +182,9 @@ class AsyncPromptProvider {
   })
   async asyncGreetingPrompt(
     args: {},
-    promptArgs: McpPromptMethodArguments,
+    methodContext: McpPromptMethodContext,
   ): Promise<GetPromptResult> {
-    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const name = String(methodContext.request.params.arguments?.name ?? "");
     return Promise.resolve({
       description: "Async Greeting",
       messages: [
@@ -205,9 +205,9 @@ class AsyncPromptProvider {
   })
   async asyncStringPrompt(
     args: {},
-    promptArgs: McpPromptMethodArguments,
+    methodContext: McpPromptMethodContext,
   ): Promise<string> {
-    const request = promptArgs.request;
+    const request = methodContext.request;
     const name = String(request.params.arguments?.name ?? "");
     return Promise.resolve(`Async string response for ${name}`);
   }
@@ -218,9 +218,9 @@ class AsyncPromptProvider {
   })
   async asyncMessagePrompt(
     args: {},
-    promptArgs: McpPromptMethodArguments,
+    methodContext: McpPromptMethodContext,
   ): Promise<PromptMessage> {
-    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const name = String(methodContext.request.params.arguments?.name ?? "");
     return Promise.resolve({
       role: "assistant",
       content: {
@@ -236,9 +236,9 @@ class AsyncPromptProvider {
   })
   async asyncMessageListPrompt(
     args: {},
-    promptArgs: McpPromptMethodArguments,
+    methodContext: McpPromptMethodContext,
   ): Promise<PromptMessage[]> {
-    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const name = String(methodContext.request.params.arguments?.name ?? "");
     return Promise.resolve([
       {
         role: "assistant",
@@ -263,9 +263,9 @@ class AsyncPromptProvider {
   })
   async asyncStringListPrompt(
     args: {},
-    promptArgs: McpPromptMethodArguments,
+    methodContext: McpPromptMethodContext,
   ): Promise<string[]> {
-    const topic = String(promptArgs.request.params.arguments?.topic ?? "");
+    const topic = String(methodContext.request.params.arguments?.topic ?? "");
     return Promise.resolve(
       topic.toUpperCase() === "MCP"
         ? [
@@ -287,9 +287,9 @@ class AsyncPromptProvider {
   })
   schemaArgsPrompt(
     args: { name: string; enabled: boolean },
-    promptArgs?: McpPromptMethodArguments,
+    methodContext?: McpPromptMethodContext,
   ): string {
-    void promptArgs;
+    void methodContext;
     return `${String(args.name)}:${String(args.enabled)}`;
   }
 
@@ -356,7 +356,7 @@ class AsyncPromptProvider {
     name: "invalid-return-type",
     description: "Invalid return type",
   })
-  invalidReturnType(_args: {}, _promptArgs: McpPromptMethodArguments): number {
+  invalidReturnType(_args: {}, _methodContext: McpPromptMethodContext): number {
     // Invalid return type
     void _args;
 
@@ -369,7 +369,7 @@ class AsyncPromptProvider {
   })
   async invalidPromiseReturnType(
     _args: {},
-    _promptArgs: McpPromptMethodArguments,
+    _methodContext: McpPromptMethodContext,
   ): Promise<number> {
     void _args;
 
@@ -407,7 +407,7 @@ class AsyncPromptProvider {
   })
   tooManyParameters(
     _args: {},
-    promptArgs: McpPromptMethodArguments,
+    methodContext: McpPromptMethodContext,
     _extra: string,
   ): Promise<GetPromptResult> {
     void _args;

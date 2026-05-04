@@ -56,8 +56,8 @@ export { McpPrompt } from "./mcp-prompt.js";
 export type {
   McpPromptArgumentsFor,
   McpPromptMetadata,
-  McpPromptMethodArguments,
-  McpPromptMethodArgumentsFor,
+  McpPromptMethodContext,
+  McpPromptMethodContextFor,
   McpPromptOptions,
 } from "./mcp-prompt.js";
 export { McpPromptListChanged } from "./mcp-prompt-list-changed.js";

@@ -30,7 +30,7 @@ import type {
 
 import type { McpTransportContext } from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
-import type { McpPromptMethodArguments } from "../../mcp-prompt.js";
+import type { McpPromptMethodContext } from "../../mcp-prompt.js";
 
 type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
@@ -87,13 +87,13 @@ export abstract class AbstractMcpPromptMethodCallback {
   protected async buildArgs(
     exchangeOrContext: unknown,
     request: GetPromptRequest,
-  ): Promise<[Record<string, unknown>, McpPromptMethodArguments]> {
+  ): Promise<[Record<string, unknown>, McpPromptMethodContext]> {
     const rawArguments = { ...request.params.arguments };
-    const promptArguments: McpPromptMethodArguments = {
+    const promptArguments: McpPromptMethodContext = {
       exchange: this.isExchangeType(exchangeOrContext)
         ? (exchangeOrContext as never)
         : undefined,
-      context: this.resolveTransportContext(exchangeOrContext),
+      transportContext: this.resolveTransportContext(exchangeOrContext),
       request,
       prompt: this._prompt,
       meta: new McpMeta(request.params._meta ?? null),

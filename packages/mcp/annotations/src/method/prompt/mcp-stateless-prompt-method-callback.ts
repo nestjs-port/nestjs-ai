@@ -60,8 +60,8 @@ export class McpStatelessPromptMethodCallback extends AbstractMcpPromptMethodCal
     assert(request != null, "Request must not be null");
 
     try {
-      const args = this.buildArgs(context, request);
-      const result = await this._method.apply(this._provider, [args]);
+      const args = await this.buildArgs(context, request);
+      const result = await this._method.apply(this._provider, args);
       return this.convertToGetPromptResult(result);
     } catch (error) {
       throw new McpPromptMethodException(

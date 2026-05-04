@@ -23,19 +23,32 @@ import type {
   PromptMessage,
   TextContent,
 } from "@modelcontextprotocol/server";
+import { z } from "zod";
 
 import {
   McpServerExchange,
   McpTransportContext,
 } from "../../../context/index.js";
-import { PromptAdapter } from "../../../adapter/prompt-adapter.js";
+import { PromptAdapter } from "../../../adapter/index.js";
 import { MCP_PROMPT_METADATA_KEY } from "../../../metadata.js";
 import { McpPrompt } from "../../../mcp-prompt.js";
 import type {
+  McpPromptArgumentsFor,
   McpPromptMetadata,
   McpPromptMethodArguments,
 } from "../../../mcp-prompt.js";
 import { McpPromptMethodCallback } from "../mcp-prompt-method-callback.js";
+
+const ExampleInputSchema = z.object({
+  name: z.string(),
+  enabled: z.boolean(),
+});
+
+const ExamplePersonalizedMessageSchema = z.object({
+  name: z.string(),
+  age: z.number().optional(),
+  interests: z.string().optional(),
+});
 
 /**
  * Example demonstrating how to use the prompt method callback.
@@ -168,9 +181,10 @@ class AsyncPromptProvider {
     description: "An asynchronous greeting prompt",
   })
   async asyncGreetingPrompt(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return Promise.resolve({
       description: "Async Greeting",
       messages: [
@@ -189,8 +203,11 @@ class AsyncPromptProvider {
     name: "async-string",
     description: "A prompt returning a Mono<String>",
   })
-  async asyncStringPrompt(args: McpPromptMethodArguments): Promise<string> {
-    const request = args.request;
+  async asyncStringPrompt(
+    args: {},
+    promptArgs: McpPromptMethodArguments,
+  ): Promise<string> {
+    const request = promptArgs.request;
     const name = String(request.params.arguments?.name ?? "");
     return Promise.resolve(`Async string response for ${name}`);
   }
@@ -200,9 +217,10 @@ class AsyncPromptProvider {
     description: "A prompt returning a Mono<PromptMessage>",
   })
   async asyncMessagePrompt(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<PromptMessage> {
-    const name = String(args.request.params.arguments?.name ?? "");
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return Promise.resolve({
       role: "assistant",
       content: {
@@ -217,9 +235,10 @@ class AsyncPromptProvider {
     description: "A prompt returning a Mono<List<PromptMessage>>",
   })
   async asyncMessageListPrompt(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<PromptMessage[]> {
-    const name = String(args.request.params.arguments?.name ?? "");
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return Promise.resolve([
       {
         role: "assistant",
@@ -243,9 +262,10 @@ class AsyncPromptProvider {
     description: "A prompt returning a Mono<List<String>>",
   })
   async asyncStringListPrompt(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<string[]> {
-    const topic = String(args.arguments.topic ?? "");
+    const topic = String(promptArgs.request.params.arguments?.topic ?? "");
     return Promise.resolve(
       topic.toUpperCase() === "MCP"
         ? [
@@ -261,30 +281,30 @@ class AsyncPromptProvider {
   }
 
   @McpPrompt({
+    name: "schema-args-prompt",
+    description: "A prompt backed by args schema",
+    argsSchema: ExampleInputSchema,
+  })
+  schemaArgsPrompt(
+    args: { name: string; enabled: boolean },
+    promptArgs?: McpPromptMethodArguments,
+  ): string {
+    void promptArgs;
+    return `${String(args.name)}:${String(args.enabled)}`;
+  }
+
+  @McpPrompt({
     name: "async-personalized-message",
     description:
       "Generates a personalized message based on user information asynchronously",
-    arguments: {
-      name: {
-        description: "The user's name",
-        required: true,
-      },
-      age: {
-        description: "The user's age",
-        required: false,
-      },
-      interests: {
-        description: "The user's interests",
-        required: false,
-      },
-    },
+    argsSchema: ExamplePersonalizedMessageSchema,
   })
   async asyncPersonalizedMessage(
-    args: McpPromptMethodArguments,
+    args: McpPromptArgumentsFor<typeof ExamplePersonalizedMessageSchema>,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
-    const ageValue = args.arguments.age;
-    const interests = String(args.arguments.interests ?? "");
+    const name = String(args.name ?? "");
+    const ageValue = args.age;
+    const interests = String(args.interests ?? "");
     const age =
       typeof ageValue === "number"
         ? ageValue
@@ -332,32 +352,31 @@ class AsyncPromptProvider {
 
   // Invalid signatures for compile-time validation only
 
-  // @ts-expect-error @McpPrompt only supports methods returning GetPromptResult, PromptMessage, List<PromptMessage>, String, List<String>, or Promise thereof
   @McpPrompt({
     name: "invalid-return-type",
     description: "Invalid return type",
   })
-  invalidReturnType(_args: McpPromptMethodArguments): number {
+  invalidReturnType(_args: {}, _promptArgs: McpPromptMethodArguments): number {
     // Invalid return type
     void _args;
 
     return 1;
   }
 
-  // @ts-expect-error @McpPrompt only supports methods returning GetPromptResult, PromptMessage, List<PromptMessage>, String, List<String>, or Promise thereof
   @McpPrompt({
     name: "invalid-promise-return-type",
     description: "Invalid promise return type",
   })
   async invalidPromiseReturnType(
-    _args: McpPromptMethodArguments,
+    _args: {},
+    _promptArgs: McpPromptMethodArguments,
   ): Promise<number> {
     void _args;
 
     return 1;
   }
 
-  // @ts-expect-error @McpPrompt only supports methods with a single object parameter
+  // @ts-expect-error @McpPrompt only supports methods with a single object parameter and context
   @McpPrompt({
     name: "no-arguments",
     description: "Invalid no argument prompt",
@@ -368,7 +387,7 @@ class AsyncPromptProvider {
     });
   }
 
-  // @ts-expect-error @McpPrompt only supports methods with a single object parameter
+  // @ts-expect-error @McpPrompt only supports methods with a single object parameter and context
   @McpPrompt({
     name: "wrong-argument-type",
     description: "Invalid argument type prompt",
@@ -381,13 +400,14 @@ class AsyncPromptProvider {
     });
   }
 
-  // @ts-expect-error @McpPrompt only supports methods with a single object parameter
+  // @ts-expect-error @McpPrompt only supports methods with a single object parameter and context
   @McpPrompt({
     name: "too-many-arguments",
     description: "Invalid too many arguments prompt",
   })
   tooManyParameters(
-    _args: McpPromptMethodArguments,
+    _args: {},
+    promptArgs: McpPromptMethodArguments,
     _extra: string,
   ): Promise<GetPromptResult> {
     void _args;

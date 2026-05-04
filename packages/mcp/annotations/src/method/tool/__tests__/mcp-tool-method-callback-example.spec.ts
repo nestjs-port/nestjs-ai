@@ -17,9 +17,23 @@
 import "reflect-metadata";
 
 import type { CallToolResult } from "@modelcontextprotocol/server";
+import { z } from "zod";
 
 import { McpTool } from "../../../mcp-tool.js";
-import type { McpToolMethodArguments } from "../mcp-tool-method-arguments.js";
+import type {
+  McpToolMethodArguments,
+  McpToolMethodArgumentsFor,
+} from "../../../mcp-tool.js";
+
+const ExampleInputSchema = z.object({
+  name: z.string(),
+  enabled: z.boolean(),
+});
+
+const ExampleReturnSchema = z.object({
+  name: z.string(),
+  enabled: z.boolean(),
+});
 
 /**
  * Example class with methods annotated with `McpTool` for testing the tool method
@@ -28,21 +42,21 @@ import type { McpToolMethodArguments } from "../mcp-tool-method-arguments.js";
 export class McpToolMethodCallbackExample {
   @McpTool({ name: "simple-tool", description: "A simple tool" })
   simpleTool(args: McpToolMethodArguments): string {
-    const input = String(args.arguments.input ?? "");
+    const input = String(args.toolArguments.input ?? "");
     return `Processed: ${input}`;
   }
 
   @McpTool({ name: "structured-tool", description: "A structured tool" })
   structuredTool(args: McpToolMethodArguments): Record<string, unknown> {
     return {
-      input: args.arguments.input,
+      input: args.toolArguments.input,
       processed: true,
     };
   }
 
   @McpTool({ name: "async-tool", description: "An async tool" })
   async asyncTool(args: McpToolMethodArguments): Promise<string> {
-    const input = String(args.arguments.input ?? "");
+    const input = String(args.toolArguments.input ?? "");
     return Promise.resolve(`Async processed: ${input}`);
   }
 
@@ -51,9 +65,37 @@ export class McpToolMethodCallbackExample {
     description: "A tool returning CallToolResult",
   })
   resultTool(args: McpToolMethodArguments): CallToolResult {
-    const input = String(args.arguments.input ?? "");
+    const input = String(args.toolArguments.input ?? "");
     return {
       content: [{ type: "text", text: `Result: ${input}` }],
+    };
+  }
+
+  @McpTool({
+    name: "schema-input-tool",
+    description: "A schema-backed input tool",
+    inputSchema: ExampleInputSchema,
+  })
+  schemaInputTool(
+    args: McpToolMethodArgumentsFor<typeof ExampleInputSchema>,
+  ): string {
+    const name = String(args.toolArguments.name);
+    const enabled = Boolean(args.toolArguments.enabled);
+    return `${name}:${enabled}`;
+  }
+
+  @McpTool({
+    name: "schema-return-tool",
+    description: "A schema-backed return tool",
+    returnSchema: ExampleReturnSchema,
+  })
+  schemaReturnTool(args: McpToolMethodArguments): {
+    name: string;
+    enabled: boolean;
+  } {
+    return {
+      name: String(args.toolArguments.input ?? ""),
+      enabled: true,
     };
   }
 
@@ -86,6 +128,16 @@ export class McpToolMethodCallbackExample {
     void _extra;
 
     return "too many parameters";
+  }
+
+  // @ts-expect-error returnSchema-backed tools must return the inferred output type
+  @McpTool({
+    name: "mismatched-return-schema-tool",
+    description: "Invalid return schema tool",
+    returnSchema: ExampleReturnSchema,
+  })
+  mismatchedReturnSchemaTool(args: McpToolMethodArguments): string {
+    return String(args.toolArguments.input ?? "");
   }
 }
 

@@ -20,6 +20,10 @@ import type {
   CallToolRequest,
   CallToolResult,
 } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -28,8 +32,10 @@ import {
 } from "../../../context/index.js";
 import { McpTool } from "../../../mcp-tool.js";
 import { McpToolMethodCallback } from "../mcp-tool-method-callback.js";
-import type { McpToolMethodArguments } from "../mcp-tool-method-arguments.js";
+import type { McpToolMethodArguments } from "../../../mcp-tool.js";
 import { ReturnMode } from "../return-mode.js";
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 describe("McpToolMethodCallback", () => {
   it("testSimpleToolCallback", async () => {
@@ -694,22 +700,22 @@ describe("McpToolMethodCallback", () => {
 class TestToolProvider {
   @McpTool({ name: "simple-tool", description: "A simple tool" })
   simpleTool(args: McpToolMethodArguments): string {
-    const input = args.arguments.input;
+    const input = args.toolArguments.input;
     return `Processed: ${input == null ? "null" : String(input)}`;
   }
 
   @McpTool({ name: "math-tool", description: "A math tool" })
   addNumbers(args: McpToolMethodArguments): number {
-    const a = Number(args.arguments.a);
-    const b = Number(args.arguments.b);
+    const a = Number(args.toolArguments.a);
+    const b = Number(args.toolArguments.b);
     return a + b;
   }
 
   @McpTool({ name: "complex-tool", description: "A complex tool" })
   complexTool(args: McpToolMethodArguments): CallToolResult {
-    const name = String(args.arguments.name);
-    const age = Number(args.arguments.age);
-    const active = Boolean(args.arguments.active);
+    const name = String(args.toolArguments.name);
+    const age = Number(args.toolArguments.age);
+    const active = Boolean(args.toolArguments.active);
     return {
       content: [
         {
@@ -725,7 +731,7 @@ class TestToolProvider {
     description: "Tool with exchange parameter",
   })
   toolWithExchange(args: McpToolMethodArguments): string {
-    return `Exchange tool: ${String(args.arguments.message)}`;
+    return `Exchange tool: ${String(args.toolArguments.message)}`;
   }
 
   @McpTool({
@@ -735,7 +741,7 @@ class TestToolProvider {
   toolWithContext(args: McpToolMethodArguments): string {
     // The request context should be available to stateful tools
     void args.requestContext;
-    return `Context tool: ${String(args.arguments.message)}`;
+    return `Context tool: ${String(args.toolArguments.message)}`;
   }
 
   @McpTool({
@@ -744,18 +750,18 @@ class TestToolProvider {
   })
   toolWithTransportContext(args: McpToolMethodArguments): string {
     void args.context;
-    return `Transport context tool: ${String(args.arguments.message)}`;
+    return `Transport context tool: ${String(args.toolArguments.message)}`;
   }
 
   @McpTool({ name: "list-tool", description: "Tool with list parameter" })
   processList(args: McpToolMethodArguments): string {
-    const items = args.arguments.items as string[];
+    const items = args.toolArguments.items as string[];
     return `Items: ${items.join(", ")}`;
   }
 
   @McpTool({ name: "object-tool", description: "Tool with object parameter" })
   processObject(args: McpToolMethodArguments): string {
-    const obj = args.arguments.obj as { name: string; value: number };
+    const obj = args.toolArguments.obj as { name: string; value: number };
     return `Object: ${obj.name} - ${obj.value}`;
   }
 
@@ -772,7 +778,9 @@ class TestToolProvider {
     description: "Tool that throws exception",
   })
   exceptionTool(args: McpToolMethodArguments): string {
-    throw new Error(`Tool execution failed: ${String(args.arguments.input)}`);
+    throw new Error(
+      `Tool execution failed: ${String(args.toolArguments.input)}`,
+    );
   }
 
   @McpTool({
@@ -785,7 +793,7 @@ class TestToolProvider {
 
   @McpTool({ name: "enum-tool", description: "Tool with enum parameter" })
   enumTool(args: McpToolMethodArguments): string {
-    return `Enum: ${String(args.arguments.enumValue)}`;
+    return `Enum: ${String(args.toolArguments.enumValue)}`;
   }
 
   @McpTool({
@@ -793,13 +801,13 @@ class TestToolProvider {
     description: "Tool with primitive types",
   })
   primitiveTypesTool(args: McpToolMethodArguments): string {
-    const flag = Boolean(args.arguments.flag);
-    const b = Number(args.arguments.b);
-    const s = Number(args.arguments.s);
-    const i = Number(args.arguments.i);
-    const l = Number(args.arguments.l);
-    const f = Number(args.arguments.f);
-    const d = Number(args.arguments.d);
+    const flag = Boolean(args.toolArguments.flag);
+    const b = Number(args.toolArguments.b);
+    const s = Number(args.toolArguments.s);
+    const i = Number(args.toolArguments.i);
+    const l = Number(args.toolArguments.l);
+    const f = Number(args.toolArguments.f);
+    const d = Number(args.toolArguments.d);
     return `Primitives: ${flag}, ${b}, ${s}, ${i}, ${l}, ${f.toFixed(1)}, ${d.toFixed(1)}`;
   }
 
@@ -812,8 +820,8 @@ class TestToolProvider {
     value: number;
   } {
     return {
-      name: String(args.arguments.name),
-      value: Number(args.arguments.value),
+      name: String(args.toolArguments.name),
+      value: Number(args.toolArguments.value),
     };
   }
 
@@ -826,8 +834,8 @@ class TestToolProvider {
   ): Array<{ name: string; value: number }> {
     return [
       {
-        name: String(args.arguments.name),
-        value: Number(args.arguments.value),
+        name: String(args.toolArguments.name),
+        value: Number(args.toolArguments.value),
       },
     ];
   }
@@ -837,7 +845,7 @@ class TestToolProvider {
     description: "Tool that returns a list of complex objects",
   })
   returnListStringTool(args: McpToolMethodArguments): string[] {
-    return [String(args.arguments.name), String(args.arguments.value)];
+    return [String(args.toolArguments.name), String(args.toolArguments.value)];
   }
 
   @McpTool({
@@ -847,7 +855,7 @@ class TestToolProvider {
   dynamicTool(args: McpToolMethodArguments): CallToolResult {
     // Access full request details
     const toolName = args.request.params.name;
-    const argumentsMap = args.arguments;
+    const argumentsMap = args.toolArguments;
 
     // Custom validation
     if (!Object.prototype.hasOwnProperty.call(argumentsMap, "action")) {
@@ -875,7 +883,7 @@ class TestToolProvider {
     description: "Tool with context and request",
   })
   contextAwareTool(args: McpToolMethodArguments): CallToolResult {
-    const argumentsMap = args.arguments;
+    const argumentsMap = args.toolArguments;
     return {
       content: [
         {
@@ -891,7 +899,7 @@ class TestToolProvider {
     description: "Tool with progress token",
   })
   progressTokenTool(args: McpToolMethodArguments): CallToolResult {
-    const input = String(args.arguments.input);
+    const input = String(args.toolArguments.input);
     const token =
       args.progressToken == null ? "null" : String(args.progressToken);
     return {
@@ -912,7 +920,7 @@ class TestToolProvider {
     message: string;
     value: number;
   } {
-    const input = args.arguments.input;
+    const input = args.toolArguments.input;
     return {
       message: input != null ? String(input) : "default",
       value: 42,
@@ -921,7 +929,7 @@ class TestToolProvider {
 
   @McpTool({ name: "meta-tool", description: "Tool with meta parameter" })
   metaTool(args: McpToolMethodArguments): string {
-    const input = String(args.arguments.input);
+    const input = String(args.toolArguments.input);
     const metaInfo = JSON.stringify(args.meta.meta);
     return `Input: ${input}, Meta: ${metaInfo}`;
   }
@@ -931,7 +939,7 @@ class TestToolProvider {
     description: "Hello World Reactive Tool returning Mono<String>",
   })
   async simpleMonoTool(args: McpToolMethodArguments): Promise<string> {
-    return Promise.resolve(`Processed: ${String(args.arguments.input)}`);
+    return Promise.resolve(`Processed: ${String(args.toolArguments.input)}`);
   }
 
   @McpTool({ name: "void-tool", description: "Tool with void return" })
@@ -944,11 +952,19 @@ function createCallback(
   provider: TestToolProvider,
   propertyKey: keyof TestToolProvider,
   returnMode: ReturnMode,
+  returnSchema?: StandardSchemaWithJsonSchema | null,
 ): McpToolMethodCallback {
+  const structuredReturnSchema =
+    returnSchema ??
+    (returnMode === ReturnMode.STRUCTURED
+      ? ({} as StandardSchemaWithJsonSchema)
+      : null);
+
   return new McpToolMethodCallback({
     provider,
     propertyKey,
     returnMode,
+    returnSchema: structuredReturnSchema,
   });
 }
 

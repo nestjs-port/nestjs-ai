@@ -26,5 +26,8 @@ export {
   McpToolMethodCallback,
   type McpToolMethodCallbackProps,
 } from "./mcp-tool-method-callback.js";
-export type { McpToolMethodArguments } from "./mcp-tool-method-arguments.js";
+export type {
+  McpToolMethodArguments,
+  McpToolMethodArgumentsFor,
+} from "../../mcp-tool.js";
 export { ReturnMode } from "./return-mode.js";

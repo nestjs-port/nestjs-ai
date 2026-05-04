@@ -15,10 +15,21 @@
  */
 
 import "reflect-metadata";
+import type { CallToolRequest } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 import { DefaultMetaProvider } from "./context/index.js";
 import type { MetaProvider } from "./context/index.js";
+import type {
+  McpRequestContext,
+  McpServerExchange,
+  McpTransportContext,
+} from "./context/index.js";
 import { MCP_TOOL_METADATA_KEY } from "./metadata.js";
-import type { McpToolMethodArguments } from "./method/tool/mcp-tool-method-arguments.js";
+import type { McpMeta } from "./mcp-meta.js";
+import { ReturnMode } from "./method/index.js";
 
 /**
  * Additional properties describing a Tool to clients.
@@ -88,6 +99,21 @@ export interface McpToolOptions {
   generateOutputSchema?: boolean;
 
   /**
+   * Standard Schema describing the tool input object.
+   */
+  inputSchema?: StandardSchemaWithJsonSchema | null;
+
+  /**
+   * Controls how the tool result is serialized at runtime.
+   */
+  returnMode?: ReturnMode;
+
+  /**
+   * JSON schema used to recognize structured tool results.
+   */
+  returnSchema?: StandardSchemaWithJsonSchema | null;
+
+  /**
    * Intended for UI and end-user contexts — optimized to be human-readable and easily
    * understood, even by those unfamiliar with domain-specific terminology. If not
    * provided, the name should be used for display (except for Tool, where
@@ -115,9 +141,45 @@ export interface McpToolMetadata {
   description: string;
   annotations: McpToolAnnotationsMetadata;
   generateOutputSchema: boolean;
+  inputSchema: StandardSchemaWithJsonSchema | null;
+  returnMode: ReturnMode;
+  returnSchema: StandardSchemaWithJsonSchema | null;
   title: string;
   metaProvider: new () => MetaProvider;
 }
+
+/**
+ * Params object passed to methods annotated with `@McpTool`.
+ *
+ * The callback dispatches a single object literal containing the server exchange,
+ * transport context, original request, parsed tool input arguments, meta data and
+ * progress token. Stateless callbacks omit the `exchange` and `requestContext`
+ * fields.
+ */
+export interface McpToolMethodArguments<
+  TToolArguments = Record<string, unknown>,
+> {
+  exchange?: McpServerExchange;
+  context: McpTransportContext | null;
+  requestContext?: McpRequestContext | null;
+  request: CallToolRequest;
+  toolArguments: TToolArguments;
+  meta: McpMeta;
+  progressToken: unknown;
+}
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
+type McpToolInputParams<
+  TInputSchema extends StandardSchemaWithJsonSchema | null | undefined,
+> = TInputSchema extends StandardSchemaWithJsonSchema
+  ? StandardSchemaV1.InferOutput<TInputSchema>
+  : Record<string, unknown>;
+
+export type McpToolMethodArgumentsFor<
+  TInputSchema extends StandardSchemaWithJsonSchema | null | undefined =
+    undefined,
+> = McpToolMethodArguments<McpToolInputParams<TInputSchema>>;
 
 const DEFAULT_TOOL_ANNOTATIONS: McpToolAnnotationsMetadata = {
   title: "",
@@ -127,26 +189,45 @@ const DEFAULT_TOOL_ANNOTATIONS: McpToolAnnotationsMetadata = {
   openWorldHint: true,
 };
 
-type ExactToolMethodSignature<
+type SingleObjectToolMethodSignature<
   T extends (...args: any[]) => any,
-  Signature extends (...args: any[]) => any,
-> = T extends Signature
-  ? Parameters<T> extends Parameters<Signature>
-    ? T
-    : never
-  : never;
+  ExpectedReturn,
+> =
+  Parameters<T> extends [object]
+    ? Awaited<ReturnType<T>> extends ExpectedReturn
+      ? T
+      : never
+    : never;
 
-type McpToolMethodDecoratorFor = <T extends (...args: any[]) => any>(
+type McpToolMethodOutput<
+  TReturnSchema extends StandardSchemaWithJsonSchema | null | undefined,
+> = TReturnSchema extends StandardSchemaWithJsonSchema
+  ? StandardSchemaV1.InferOutput<TReturnSchema>
+  : unknown;
+
+type McpToolMethodDecoratorFor<
+  TReturnSchema extends StandardSchemaWithJsonSchema | null | undefined =
+    undefined,
+> = <T extends (...args: any[]) => any>(
   target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<
-    ExactToolMethodSignature<
-      T,
-      (args: McpToolMethodArguments) => unknown | Promise<unknown>
-    >
+    SingleObjectToolMethodSignature<T, McpToolMethodOutput<TReturnSchema>>
   >,
 ) => void;
 
+export function McpTool<TReturnSchema extends StandardSchemaWithJsonSchema>(
+  options: McpToolOptions & {
+    inputSchema: StandardSchemaWithJsonSchema;
+    returnSchema: TReturnSchema;
+  },
+): McpToolMethodDecoratorFor<TReturnSchema>;
+export function McpTool(
+  options: McpToolOptions & { inputSchema: StandardSchemaWithJsonSchema },
+): McpToolMethodDecoratorFor;
+export function McpTool<TReturnSchema extends StandardSchemaWithJsonSchema>(
+  options: McpToolOptions & { returnSchema: TReturnSchema },
+): McpToolMethodDecoratorFor<TReturnSchema>;
 export function McpTool(options?: McpToolOptions): McpToolMethodDecoratorFor;
 export function McpTool(options: McpToolOptions = {}): MethodDecorator {
   const metadata: McpToolMetadata = {
@@ -154,6 +235,11 @@ export function McpTool(options: McpToolOptions = {}): MethodDecorator {
     description: options.description ?? "",
     annotations: { ...DEFAULT_TOOL_ANNOTATIONS, ...options.annotations },
     generateOutputSchema: options.generateOutputSchema ?? false,
+    inputSchema: options.inputSchema ?? null,
+    returnMode:
+      options.returnMode ??
+      (options.returnSchema != null ? ReturnMode.STRUCTURED : ReturnMode.TEXT),
+    returnSchema: options.returnSchema ?? null,
     title: options.title ?? "",
     metaProvider: options.metaProvider ?? DefaultMetaProvider,
   };

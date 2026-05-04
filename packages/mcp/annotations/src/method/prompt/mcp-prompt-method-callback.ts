@@ -62,8 +62,8 @@ export class McpPromptMethodCallback extends AbstractMcpPromptMethodCallback {
     assert(request != null, "Request must not be null");
 
     try {
-      const args = this.buildArgs(exchange, request);
-      const result = await this._method.apply(this._provider, [args]);
+      const args = await this.buildArgs(exchange, request);
+      const result = await this._method.apply(this._provider, args);
       return this.convertToGetPromptResult(result);
     } catch (error) {
       throw new McpPromptMethodException(

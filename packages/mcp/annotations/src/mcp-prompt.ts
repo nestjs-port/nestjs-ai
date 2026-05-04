@@ -75,9 +75,9 @@ export interface McpPromptMetadata {
   argsSchema: StandardSchemaWithJsonSchema | null;
 }
 
-export interface McpPromptMethodArguments {
+export interface McpPromptMethodContext {
   exchange?: McpServerExchange;
-  context: McpTransportContext | null;
+  transportContext: McpTransportContext | null;
   request: GetPromptRequest;
   prompt: Prompt;
   meta: McpMeta;
@@ -90,7 +90,7 @@ export type McpPromptArgumentsFor<
   ? StandardSchemaV1.InferOutput<TArgsSchema>
   : unknown;
 
-export type McpPromptMethodArgumentsFor<
+export type McpPromptMethodContextFor<
   TArgsSchema extends StandardSchemaWithJsonSchema | null | undefined =
     undefined,
 > = McpPromptArgumentsFor<TArgsSchema>;
@@ -120,7 +120,7 @@ type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
   descriptor: TypedPropertyDescriptor<
     ExactPromptMethodSignature<
       T,
-      (args: {}, context: McpPromptMethodArguments) => any
+      (args: {}, context: McpPromptMethodContext) => any
     >
   >,
 ) => void;
@@ -135,7 +135,7 @@ type McpPromptMethodDecoratorForArgsSchema<
       T,
       (
         args: McpPromptArgumentsFor<TArgsSchema>,
-        context?: McpPromptMethodArguments,
+        context?: McpPromptMethodContext,
       ) => McpPromptMethodResult
     >
   >,

@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-export const MCP_ARG_METADATA_KEY = Symbol("mcp:arg");
-
 export const MCP_PROGRESS_TOKEN_METADATA_KEY = Symbol("mcp:progress-token");
-
-export const MCP_TOOL_PARAM_METADATA_KEY = Symbol("mcp:tool-param");
 
 export const MCP_TOOL_METADATA_KEY = Symbol("mcp:tool");
 

@@ -20,7 +20,6 @@ export * from "./context/index.js";
 export * from "./method/index.js";
 export * from "./provider/index.js";
 export {
-  MCP_ARG_METADATA_KEY,
   MCP_COMPLETE_METADATA_KEY,
   MCP_ELICITATION_METADATA_KEY,
   MCP_LOGGING_METADATA_KEY,
@@ -33,10 +32,7 @@ export {
   MCP_SAMPLING_METADATA_KEY,
   MCP_TOOL_LIST_CHANGED_METADATA_KEY,
   MCP_TOOL_METADATA_KEY,
-  MCP_TOOL_PARAM_METADATA_KEY,
 } from "./metadata.js";
-export { McpArg } from "./mcp-arg.js";
-export type { McpArgMetadata, McpArgOptions } from "./mcp-arg.js";
 export { McpComplete } from "./mcp-complete.js";
 export type {
   McpCompleteMetadata,
@@ -56,7 +52,6 @@ export type {
   McpProgressMetadata,
   McpProgressOptions,
 } from "./mcp-progress.js";
-export { McpProgressToken } from "./mcp-progress-token.js";
 export { McpPrompt } from "./mcp-prompt.js";
 export type { McpPromptMetadata, McpPromptOptions } from "./mcp-prompt.js";
 export type { McpPromptMethodArguments } from "./mcp-prompt.js";
@@ -97,4 +92,3 @@ export type {
   McpToolListChangedMetadata,
   McpToolListChangedOptions,
 } from "./mcp-tool-list-changed.js";
-export { McpToolParam } from "./mcp-tool-param.js";

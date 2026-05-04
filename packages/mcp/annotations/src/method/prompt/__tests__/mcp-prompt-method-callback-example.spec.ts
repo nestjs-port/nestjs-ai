@@ -28,9 +28,13 @@ import {
   McpServerExchange,
   McpTransportContext,
 } from "../../../context/index.js";
+import { PromptAdapter } from "../../../adapter/prompt-adapter.js";
 import { MCP_PROMPT_METADATA_KEY } from "../../../metadata.js";
 import { McpPrompt } from "../../../mcp-prompt.js";
-import type { McpPromptMethodArguments } from "../../../mcp-prompt.js";
+import type {
+  McpPromptMetadata,
+  McpPromptMethodArguments,
+} from "../../../mcp-prompt.js";
 import { McpPromptMethodCallback } from "../mcp-prompt-method-callback.js";
 
 /**
@@ -50,6 +54,9 @@ export class McpPromptMethodCallbackExample {
 
     console.log("\nExample 3: Method returning Promise<List<string>>");
     await demonstrateAsyncStringListPrompt(provider);
+
+    console.log("\nExample 4: Prompt metadata arguments");
+    await demonstrateMetadataArgumentsPrompt(provider);
   }
 }
 
@@ -117,6 +124,35 @@ async function demonstrateAsyncStringListPrompt(
   const request = createPromptRequest(prompt.name, { topic: "MCP" });
   const result = await callback.apply(createMockExchange(), request);
 
+  console.log("Messages:");
+  for (const message of result.messages) {
+    console.log(`  Role: ${message.role}`);
+    if (isTextContent(message.content)) {
+      console.log(`  Content: ${message.content.text}`);
+    }
+  }
+}
+
+async function demonstrateMetadataArgumentsPrompt(
+  provider: AsyncPromptProvider,
+): Promise<void> {
+  const methodName = "asyncPersonalizedMessage";
+  const prompt = resolvePrompt(methodName);
+
+  const callback = new McpPromptMethodCallback({
+    provider,
+    propertyKey: methodName,
+    prompt,
+  });
+
+  const request = createPromptRequest(prompt.name, {
+    name: "Jordan",
+    age: 34,
+    interests: "systems programming",
+  });
+  const result = await callback.apply(createMockExchange(), request);
+
+  console.log("Description:", result.description ?? "");
   console.log("Messages:");
   for (const message of result.messages) {
     console.log(`  Role: ${message.role}`);
@@ -228,6 +264,20 @@ class AsyncPromptProvider {
     name: "async-personalized-message",
     description:
       "Generates a personalized message based on user information asynchronously",
+    arguments: {
+      name: {
+        description: "The user's name",
+        required: true,
+      },
+      age: {
+        description: "The user's age",
+        required: false,
+      },
+      interests: {
+        description: "The user's interests",
+        required: false,
+      },
+    },
   })
   async asyncPersonalizedMessage(
     args: McpPromptMethodArguments,
@@ -354,23 +404,17 @@ function resolvePrompt(propertyKey: string): Prompt {
     MCP_PROMPT_METADATA_KEY,
     AsyncPromptProvider.prototype,
     propertyKey,
-  ) as
-    | {
-        name?: string;
-        title?: string;
-        description?: string;
-      }
-    | undefined;
+  ) as McpPromptMetadata | undefined;
 
   if (promptAnnotation == null) {
     throw new Error(`Missing prompt metadata for ${propertyKey}`);
   }
 
-  return {
-    name: promptAnnotation.name ?? propertyKey,
-    title: promptAnnotation.title || undefined,
-    description: promptAnnotation.description || undefined,
-  };
+  return PromptAdapter.asPrompt(
+    promptAnnotation,
+    AsyncPromptProvider.prototype,
+    propertyKey,
+  );
 }
 
 function createPromptRequest(

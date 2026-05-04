@@ -56,9 +56,7 @@ export abstract class PromptAdapter {
     target?: PromptMethodTarget,
     propertyKey?: PromptMethodPropertyKey,
   ): Prompt {
-    const promptArguments = PromptAdapter.toPromptArguments(
-      mcpPrompt.arguments,
-    );
+    const promptArguments = promptArgumentsFromSchema(mcpPrompt.argsSchema);
     return PromptAdapter.createPrompt(mcpPrompt, promptArguments, propertyKey);
   }
 
@@ -80,16 +78,6 @@ export abstract class PromptAdapter {
     };
   }
 
-  private static toPromptArguments(
-    promptArguments: McpPromptMetadata["arguments"],
-  ): PromptArgument[] {
-    return Object.entries(promptArguments).map(([name, metadata]) => ({
-      name,
-      description: metadata.description || undefined,
-      required: metadata.required ?? false,
-    }));
-  }
-
   private static getName(
     promptAnnotation: McpPromptMetadata | null | undefined,
     propertyKey: PromptMethodPropertyKey,
@@ -104,5 +92,34 @@ export abstract class PromptAdapter {
         : propertyKey.toString();
     }
     return promptAnnotation.name;
+  }
+}
+
+function promptArgumentsFromSchema(
+  schema: McpPromptMetadata["argsSchema"],
+): PromptArgument[] {
+  if (schema == null) {
+    return [];
+  }
+
+  try {
+    const jsonSchema = schema["~standard"].jsonSchema.input({
+      target: "draft-2020-12",
+    }) as Record<string, unknown>;
+    const properties = (jsonSchema.properties ?? {}) as Record<
+      string,
+      { description?: string }
+    >;
+    const required = Array.isArray(jsonSchema.required)
+      ? (jsonSchema.required as string[])
+      : [];
+
+    return Object.entries(properties).map(([name, prop]) => ({
+      name,
+      description: prop?.description,
+      required: required.includes(name),
+    }));
+  } catch {
+    return [];
   }
 }

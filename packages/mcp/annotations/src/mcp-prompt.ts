@@ -21,6 +21,10 @@ import type {
   Prompt,
   PromptMessage,
 } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 import { DefaultMetaProvider } from "./context/index.js";
 import type {
   McpServerExchange,
@@ -29,6 +33,8 @@ import type {
 import type { MetaProvider } from "./context/index.js";
 import type { McpMeta } from "./mcp-meta.js";
 import { MCP_PROMPT_METADATA_KEY } from "./metadata.js";
+
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 export interface McpPromptOptions {
   /**
@@ -54,14 +60,11 @@ export interface McpPromptOptions {
   metaProvider?: new () => MetaProvider;
 
   /**
-   * Optional prompt arguments exposed to MCP clients, keyed by argument name.
+   * Standard Schema describing the prompt arguments object for the method
+   * signature. When provided, the method receives the schema-backed arguments as
+   * its first parameter and the raw JSON arguments as its second parameter.
    */
-  arguments?: Record<string, McpPromptArgumentMetadata>;
-}
-
-export interface McpPromptArgumentMetadata {
-  description?: string;
-  required?: boolean;
+  argsSchema?: StandardSchemaWithJsonSchema | null;
 }
 
 export interface McpPromptMetadata {
@@ -69,7 +72,7 @@ export interface McpPromptMetadata {
   title: string;
   description: string;
   metaProvider: new () => MetaProvider;
-  arguments: Record<string, McpPromptArgumentMetadata>;
+  argsSchema: StandardSchemaWithJsonSchema | null;
 }
 
 export interface McpPromptMethodArguments {
@@ -77,10 +80,20 @@ export interface McpPromptMethodArguments {
   context: McpTransportContext | null;
   request: GetPromptRequest;
   prompt: Prompt;
-  arguments: Record<string, unknown>;
   meta: McpMeta;
   progressToken: unknown;
 }
+
+export type McpPromptArgumentsFor<
+  TArgsSchema extends StandardSchemaWithJsonSchema | null | undefined,
+> = TArgsSchema extends StandardSchemaWithJsonSchema
+  ? StandardSchemaV1.InferOutput<TArgsSchema>
+  : unknown;
+
+export type McpPromptMethodArgumentsFor<
+  TArgsSchema extends StandardSchemaWithJsonSchema | null | undefined =
+    undefined,
+> = McpPromptArgumentsFor<TArgsSchema>;
 
 type McpPromptMethodResult =
   | GetPromptResult
@@ -107,7 +120,23 @@ type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
   descriptor: TypedPropertyDescriptor<
     ExactPromptMethodSignature<
       T,
-      (args: McpPromptMethodArguments) => McpPromptMethodResult
+      (args: {}, context: McpPromptMethodArguments) => any
+    >
+  >,
+) => void;
+
+type McpPromptMethodDecoratorForArgsSchema<
+  TArgsSchema extends StandardSchemaWithJsonSchema,
+> = <T extends (...args: any[]) => any>(
+  target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    ExactPromptMethodSignature<
+      T,
+      (
+        args: McpPromptArgumentsFor<TArgsSchema>,
+        context?: McpPromptMethodArguments,
+      ) => McpPromptMethodResult
     >
   >,
 ) => void;
@@ -115,6 +144,9 @@ type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
 /**
  * Marks a method as a MCP Prompt.
  */
+export function McpPrompt<TArgsSchema extends StandardSchemaWithJsonSchema>(
+  options: McpPromptOptions & { argsSchema: TArgsSchema },
+): McpPromptMethodDecoratorForArgsSchema<TArgsSchema>;
 export function McpPrompt(
   options: McpPromptOptions,
 ): McpPromptMethodDecoratorFor;
@@ -124,7 +156,7 @@ export function McpPrompt(options: McpPromptOptions = {}): MethodDecorator {
     title: options.title ?? "",
     description: options.description ?? "",
     metaProvider: options.metaProvider ?? DefaultMetaProvider,
-    arguments: options.arguments ?? {},
+    argsSchema: options.argsSchema ?? null,
   };
 
   return (

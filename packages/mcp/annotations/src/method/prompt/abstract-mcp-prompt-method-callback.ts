@@ -23,15 +23,22 @@ import type {
   PromptMessage,
   TextContent,
 } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 
 import type { McpTransportContext } from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
 import type { McpPromptMethodArguments } from "../../mcp-prompt.js";
 
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
 export interface AbstractMcpPromptMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
   prompt: Prompt;
+  argsSchema?: StandardSchemaWithJsonSchema | null;
 }
 
 export class McpPromptMethodException extends Error {
@@ -53,6 +60,8 @@ export abstract class AbstractMcpPromptMethodCallback {
 
   protected readonly _prompt: Prompt;
 
+  protected readonly _argsSchema: StandardSchemaWithJsonSchema | null;
+
   protected constructor(props: AbstractMcpPromptMethodCallbackProps) {
     assert(props.provider != null, "Provider can't be null!");
     assert(props.propertyKey != null, "Property key can't be null!");
@@ -61,6 +70,7 @@ export abstract class AbstractMcpPromptMethodCallback {
     this._provider = props.provider;
     this._propertyKey = props.propertyKey;
     this._prompt = props.prompt;
+    this._argsSchema = props.argsSchema ?? null;
     this._method = this.resolveMethod();
   }
 
@@ -74,21 +84,32 @@ export abstract class AbstractMcpPromptMethodCallback {
     return this._provider.constructor?.name ?? "<anonymous>";
   }
 
-  protected buildArgs(
+  protected async buildArgs(
     exchangeOrContext: unknown,
     request: GetPromptRequest,
-  ): McpPromptMethodArguments {
-    return {
+  ): Promise<[Record<string, unknown>, McpPromptMethodArguments]> {
+    const rawArguments = { ...request.params.arguments };
+    const promptArguments: McpPromptMethodArguments = {
       exchange: this.isExchangeType(exchangeOrContext)
         ? (exchangeOrContext as never)
         : undefined,
       context: this.resolveTransportContext(exchangeOrContext),
       request,
       prompt: this._prompt,
-      arguments: { ...request.params.arguments },
       meta: new McpMeta(request.params._meta ?? null),
       progressToken: request.params._meta?.progressToken ?? null,
     };
+
+    if (this._argsSchema != null) {
+      const validated =
+        await this._argsSchema["~standard"].validate(rawArguments);
+      if (validated.issues) {
+        throw new Error("Invalid prompt arguments");
+      }
+      return [validated.value as Record<string, unknown>, promptArguments];
+    }
+
+    return [{}, promptArguments];
   }
 
   protected abstract resolveTransportContext(

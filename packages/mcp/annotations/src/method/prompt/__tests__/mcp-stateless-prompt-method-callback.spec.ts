@@ -491,7 +491,8 @@ class TestPromptProvider {
     description: "A simple greeting prompt",
   })
   async getPromptWithRequest(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
     return {
       description: "Greeting prompt",
@@ -500,7 +501,7 @@ class TestPromptProvider {
           role: "assistant",
           content: {
             type: "text",
-            text: `Hello from ${args.request.params.name}`,
+            text: `Hello from ${promptArgs.request.params.name}`,
           },
         },
       ],
@@ -512,9 +513,10 @@ class TestPromptProvider {
     description: "A greeting prompt with context",
   })
   async getPromptWithContext(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const traceId = String(args.context?.get("traceId") ?? "");
+    const traceId = String(promptArgs.context?.get("traceId") ?? "");
     return {
       description: "Greeting with context",
       messages: [
@@ -522,7 +524,7 @@ class TestPromptProvider {
           role: "assistant",
           content: {
             type: "text",
-            text: `Hello with context from ${args.request.params.name}${traceId ? ` (${traceId})` : ""}`,
+            text: `Hello with context from ${promptArgs.request.params.name}${traceId ? ` (${traceId})` : ""}`,
           },
         },
       ],
@@ -534,9 +536,10 @@ class TestPromptProvider {
     description: "A greeting prompt with arguments",
   })
   async getPromptWithArguments(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "unknown");
+    const name = String(promptArgs.request.params.arguments?.name ?? "unknown");
     return {
       description: "Greeting with arguments",
       messages: [
@@ -556,10 +559,11 @@ class TestPromptProvider {
     description: "A prompt with individual arguments",
   })
   async getPromptWithIndividualArgs(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
-    const age = Number(args.arguments.age ?? 0);
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const age = Number(promptArgs.request.params.arguments?.age ?? 0);
     return {
       description: "Individual arguments prompt",
       messages: [
@@ -579,10 +583,11 @@ class TestPromptProvider {
     description: "A prompt with mixed argument types",
   })
   async getPromptWithMixedArgs(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
-    const age = Number(args.arguments.age ?? 0);
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const age = Number(promptArgs.request.params.arguments?.age ?? 0);
     return {
       description: "Mixed arguments prompt",
       messages: [
@@ -602,9 +607,10 @@ class TestPromptProvider {
     description: "A prompt returning a list of messages",
   })
   async getPromptMessagesList(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<PromptMessage[]> {
-    const name = String(args.arguments.name ?? "");
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return [
       {
         role: "assistant",
@@ -627,8 +633,11 @@ class TestPromptProvider {
     name: "string-prompt",
     description: "A prompt returning a string",
   })
-  async getStringPrompt(args: McpPromptMethodArguments): Promise<string> {
-    return `Simple string response for ${args.request.params.name}`;
+  async getStringPrompt(
+    args: {},
+    promptArgs: McpPromptMethodArguments,
+  ): Promise<string> {
+    return `Simple string response for ${promptArgs.request.params.name}`;
   }
 
   @McpPrompt({
@@ -636,13 +645,14 @@ class TestPromptProvider {
     description: "A prompt returning a single message",
   })
   async getSingleMessage(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<PromptMessage> {
     return {
       role: "assistant",
       content: {
         type: "text",
-        text: `Single message for ${args.request.params.name}`,
+        text: `Single message for ${promptArgs.request.params.name}`,
       },
     };
   }
@@ -651,8 +661,11 @@ class TestPromptProvider {
     name: "string-list",
     description: "A prompt returning a list of strings",
   })
-  async getStringList(args: McpPromptMethodArguments): Promise<string[]> {
-    const name = String(args.arguments.name ?? "");
+  async getStringList(
+    args: {},
+    promptArgs: McpPromptMethodArguments,
+  ): Promise<string[]> {
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return [
       `String 1 for ${name}`,
       `String 2 for ${name}`,
@@ -665,9 +678,10 @@ class TestPromptProvider {
     description: "A prompt returning a Promise",
   })
   async getMonoPrompt(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return {
       description: "Mono prompt",
       messages: [
@@ -686,8 +700,11 @@ class TestPromptProvider {
     name: "mono-string",
     description: "A prompt returning a Promise<string>",
   })
-  async getMonoString(args: McpPromptMethodArguments): Promise<string> {
-    const name = String(args.arguments.name ?? "");
+  async getMonoString(
+    args: {},
+    promptArgs: McpPromptMethodArguments,
+  ): Promise<string> {
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return `Async string response for ${name}`;
   }
 
@@ -695,8 +712,11 @@ class TestPromptProvider {
     name: "mono-message",
     description: "A prompt returning a Promise<PromptMessage>",
   })
-  async getMonoMessage(args: McpPromptMethodArguments): Promise<PromptMessage> {
-    const name = String(args.arguments.name ?? "");
+  async getMonoMessage(
+    args: {},
+    promptArgs: McpPromptMethodArguments,
+  ): Promise<PromptMessage> {
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return {
       role: "assistant",
       content: {
@@ -711,9 +731,10 @@ class TestPromptProvider {
     description: "A prompt returning a Promise<PromptMessage[]>",
   })
   async getMonoMessageList(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<PromptMessage[]> {
-    const name = String(args.arguments.name ?? "");
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return [
       {
         role: "assistant",
@@ -736,8 +757,11 @@ class TestPromptProvider {
     name: "mono-string-list",
     description: "A prompt returning a Promise<string[]>",
   })
-  async getMonoStringList(args: McpPromptMethodArguments): Promise<string[]> {
-    const name = String(args.arguments.name ?? "");
+  async getMonoStringList(
+    args: {},
+    promptArgs: McpPromptMethodArguments,
+  ): Promise<string[]> {
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
     return [
       `Async string 1 for ${name}`,
       `Async string 2 for ${name}`,
@@ -750,10 +774,11 @@ class TestPromptProvider {
     description: "A prompt with meta parameter",
   })
   async getMonoPromptWithMeta(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
-    const metaInfo = JSON.stringify(args.meta.meta);
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const metaInfo = JSON.stringify(promptArgs.meta.meta);
     return {
       description: "Async stateless meta prompt",
       messages: [
@@ -773,10 +798,11 @@ class TestPromptProvider {
     description: "A prompt with mixed args and meta",
   })
   async getMonoPromptWithMixedAndMeta(
-    args: McpPromptMethodArguments,
+    args: {},
+    promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
-    const name = String(args.arguments.name ?? "");
-    const metaInfo = JSON.stringify(args.meta.meta);
+    const name = String(promptArgs.request.params.arguments?.name ?? "");
+    const metaInfo = JSON.stringify(promptArgs.meta.meta);
     return {
       description: "Async stateless mixed with meta prompt",
       messages: [
@@ -784,7 +810,7 @@ class TestPromptProvider {
           role: "assistant",
           content: {
             type: "text",
-            text: `Hello ${name} from ${args.request.params.name}, Meta: ${metaInfo}`,
+            text: `Hello ${name} from ${promptArgs.request.params.name}, Meta: ${metaInfo}`,
           },
         },
       ],
@@ -796,7 +822,8 @@ class TestPromptProvider {
     description: "A prompt that throws an exception",
   })
   async getFailingPrompt(
-    _args: McpPromptMethodArguments,
+    _args: {},
+    _promptArgs: McpPromptMethodArguments,
   ): Promise<GetPromptResult> {
     throw new Error("Test exception");
   }

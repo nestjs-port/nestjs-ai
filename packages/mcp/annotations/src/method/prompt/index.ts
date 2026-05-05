@@ -19,5 +19,4 @@ export {
   McpPromptMethodException,
   type McpPromptMethodCallbackProps,
   type PromptRegistration,
-  type PromptRegistrationConfig,
 } from "./mcp-prompt-method-callback.js";

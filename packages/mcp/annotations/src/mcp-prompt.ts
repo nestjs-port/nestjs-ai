@@ -18,11 +18,9 @@ import "reflect-metadata";
 import type {
   GetPromptResult,
   PromptMessage,
+  StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
-import type {
-  StandardJSONSchemaV1,
-  StandardSchemaV1,
-} from "@standard-schema/spec";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { DefaultMetaProvider } from "./context/index.js";
 import type {
   McpServerExchange,
@@ -31,8 +29,6 @@ import type {
 import type { MetaProvider } from "./context/index.js";
 import type { McpMeta } from "./mcp-meta.js";
 import { MCP_PROMPT_METADATA_KEY } from "./metadata.js";
-
-type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 export interface McpPromptOptions {
   /**
@@ -62,7 +58,7 @@ export interface McpPromptOptions {
    * signature. When provided, the method receives the schema-backed arguments as
    * its first parameter and the raw JSON arguments as its second parameter.
    */
-  argsSchema?: StandardSchemaWithJsonSchema | null;
+  argsSchema?: StandardSchemaWithJSON | null;
 }
 
 export interface McpPromptMetadata {
@@ -70,7 +66,7 @@ export interface McpPromptMetadata {
   title: string;
   description: string;
   metaProvider: new () => MetaProvider;
-  argsSchema: StandardSchemaWithJsonSchema | null;
+  argsSchema: StandardSchemaWithJSON | null;
 }
 
 export interface McpPromptMethodContext {
@@ -82,14 +78,13 @@ export interface McpPromptMethodContext {
 }
 
 export type McpPromptArgumentsFor<
-  TArgsSchema extends StandardSchemaWithJsonSchema | null | undefined,
-> = TArgsSchema extends StandardSchemaWithJsonSchema
+  TArgsSchema extends StandardSchemaWithJSON | null | undefined,
+> = TArgsSchema extends StandardSchemaWithJSON
   ? StandardSchemaV1.InferOutput<TArgsSchema>
   : unknown;
 
 export type McpPromptMethodContextFor<
-  TArgsSchema extends StandardSchemaWithJsonSchema | null | undefined =
-    undefined,
+  TArgsSchema extends StandardSchemaWithJSON | null | undefined = undefined,
 > = McpPromptArgumentsFor<TArgsSchema>;
 
 type McpPromptMethodResult =
@@ -105,11 +100,7 @@ type McpPromptMethodResult =
 type ExactPromptMethodSignature<
   T extends (...args: any[]) => any,
   Signature extends (...args: any[]) => any,
-> = T extends Signature
-  ? Parameters<T> extends Parameters<Signature>
-    ? T
-    : never
-  : never;
+> = T extends Signature ? T : never;
 
 type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
   target: object,
@@ -123,7 +114,7 @@ type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
 ) => void;
 
 type McpPromptMethodDecoratorForArgsSchema<
-  TArgsSchema extends StandardSchemaWithJsonSchema,
+  TArgsSchema extends StandardSchemaWithJSON,
 > = <T extends (...args: any[]) => any>(
   target: object,
   propertyKey: string | symbol,
@@ -132,18 +123,53 @@ type McpPromptMethodDecoratorForArgsSchema<
       T,
       (
         args: McpPromptArgumentsFor<TArgsSchema>,
-        context?: McpPromptMethodContext,
+        context: McpPromptMethodContext,
       ) => McpPromptMethodResult
     >
   >,
 ) => void;
 
 /**
- * Marks a method as a MCP Prompt.
+ * Marks a method as a MCP Prompt that receives schema-validated arguments.
+ *
+ * The decorated method may declare the trailing `ctx` parameter or omit it.
+ *
+ * @example
+ * ```ts
+ * @McpPrompt({
+ *   name: "review-code",
+ *   description: "Review code for best practices",
+ *   argsSchema: z.object({ code: z.string() }),
+ * })
+ * async reviewCode(args: { code: string }): Promise<GetPromptResult>;
+ *
+ * @McpPrompt({ ... })
+ * async reviewCode(
+ *   args: { code: string },
+ *   ctx: McpPromptMethodContext,
+ * ): Promise<GetPromptResult>;
+ * ```
  */
-export function McpPrompt<TArgsSchema extends StandardSchemaWithJsonSchema>(
+export function McpPrompt<TArgsSchema extends StandardSchemaWithJSON>(
   options: McpPromptOptions & { argsSchema: TArgsSchema },
 ): McpPromptMethodDecoratorForArgsSchema<TArgsSchema>;
+/**
+ * Marks a method as a MCP Prompt that takes no validated arguments.
+ *
+ * The decorated method may declare the `ctx` parameter or omit it entirely.
+ *
+ * @example
+ * ```ts
+ * @McpPrompt({
+ *   name: "greeting",
+ *   description: "A friendly greeting prompt",
+ * })
+ * async greeting(): Promise<GetPromptResult>;
+ *
+ * @McpPrompt({ ... })
+ * async greeting(ctx: McpPromptMethodContext): Promise<GetPromptResult>;
+ * ```
+ */
 export function McpPrompt(
   options: McpPromptOptions,
 ): McpPromptMethodDecoratorFor;

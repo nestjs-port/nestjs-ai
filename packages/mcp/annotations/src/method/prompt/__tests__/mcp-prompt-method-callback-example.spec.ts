@@ -126,7 +126,7 @@ export class ExamplePromptProvider {
   })
   async useArgsSchema(
     args: McpPromptArgumentsFor<typeof ExamplePromptArgsSchema>,
-    _methodContext?: McpPromptMethodContext,
+    _methodContext: McpPromptMethodContext,
   ): Promise<GetPromptResult> {
     return {
       description: "Schema prompt",
@@ -258,15 +258,6 @@ export class InvalidPromptProvider {
     return 1;
   }
 
-  // @ts-expect-error @McpPrompt without argsSchema requires a single context parameter
-  @McpPrompt({
-    name: "no-parameters",
-    description: "Missing parameters",
-  })
-  noParameters(): Promise<GetPromptResult> {
-    return Promise.resolve({ messages: [] });
-  }
-
   // @ts-expect-error @McpPrompt without argsSchema requires the context parameter to be McpPromptMethodContext
   @McpPrompt({
     name: "wrong-context-type",
@@ -277,7 +268,7 @@ export class InvalidPromptProvider {
     return Promise.resolve({ messages: [] });
   }
 
-  // @ts-expect-error @McpPrompt without argsSchema requires a single context parameter
+  // @ts-expect-error @McpPrompt without argsSchema does not allow extra required parameters
   @McpPrompt({
     name: "too-many-parameters",
     description: "Extra trailing parameter",

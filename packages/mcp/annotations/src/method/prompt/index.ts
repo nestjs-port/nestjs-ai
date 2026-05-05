@@ -15,8 +15,6 @@
  */
 
 export {
-  AbstractMcpPromptMethodCallback,
+  McpPromptMethodCallback,
   McpPromptMethodException,
-} from "./abstract-mcp-prompt-method-callback.js";
-export { McpPromptMethodCallback } from "./mcp-prompt-method-callback.js";
-export { McpStatelessPromptMethodCallback } from "./mcp-stateless-prompt-method-callback.js";
+} from "./mcp-prompt-method-callback.js";

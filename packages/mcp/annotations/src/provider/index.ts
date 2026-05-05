@@ -14,10 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpPromptMethodCallback,
-  McpPromptMethodException,
-  type McpPromptMethodCallbackProps,
-  type PromptRegistration,
-  type PromptRegistrationConfig,
-} from "./mcp-prompt-method-callback.js";
+export * from "./prompt/index.js";

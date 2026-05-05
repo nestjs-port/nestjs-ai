@@ -84,15 +84,7 @@ export class McpPromptMethodCallback {
 
   private readonly _method: (...args: unknown[]) => unknown;
 
-  private readonly _name: string;
-
-  private readonly _title: string | null;
-
-  private readonly _description: string | null;
-
-  private readonly _argsSchema: StandardSchemaWithJSON | null;
-
-  private readonly _meta: Record<string, unknown> | null;
+  private readonly _metadata: McpPromptMetadata;
 
   private readonly _mcpServer: McpServer;
 
@@ -104,18 +96,8 @@ export class McpPromptMethodCallback {
 
     this._provider = props.provider;
     this._propertyKey = props.propertyKey;
+    this._metadata = props.metadata;
     this._mcpServer = props.mcpServer;
-    this._name =
-      props.metadata.name.length > 0
-        ? props.metadata.name
-        : String(props.propertyKey);
-    this._title = props.metadata.title.length > 0 ? props.metadata.title : null;
-    this._description =
-      props.metadata.description.length > 0 ? props.metadata.description : null;
-    this._argsSchema = (props.metadata.argsSchema ??
-      null) as StandardSchemaWithJSON | null;
-    this._meta = (MetaUtils.getMeta(props.metadata.metaProvider) ??
-      null) as Record<string, unknown> | null;
     this._method = this.resolveMethod();
   }
 
@@ -124,14 +106,18 @@ export class McpPromptMethodCallback {
    * `mcpServer.registerPrompt(...)`.
    */
   apply(): PromptRegistration {
+    const { name, title, description, argsSchema, metaProvider } =
+      this._metadata;
+
     const config: PromptRegistrationConfig = {};
-    if (this._title != null) config.title = this._title;
-    if (this._description != null) config.description = this._description;
-    if (this._argsSchema != null) config.argsSchema = this._argsSchema;
-    if (this._meta != null) config._meta = this._meta;
+    if (title.length > 0) config.title = title;
+    if (description.length > 0) config.description = description;
+    if (argsSchema != null) config.argsSchema = argsSchema;
+    const meta = MetaUtils.getMeta(metaProvider);
+    if (meta != null) config._meta = meta;
 
     const callback: PromptCallback<StandardSchemaWithJSON | undefined> =
-      this._argsSchema != null
+      argsSchema != null
         ? (((args: Record<string, unknown>, ctx: ServerContext) =>
             this.handle(args, ctx)) as PromptCallback<
             StandardSchemaWithJSON | undefined
@@ -141,7 +127,8 @@ export class McpPromptMethodCallback {
             StandardSchemaWithJSON | undefined
           >);
 
-    return [this._name, config, callback];
+    const resolvedName = name.length > 0 ? name : String(this._propertyKey);
+    return [resolvedName, config, callback];
   }
 
   /**
@@ -171,7 +158,7 @@ export class McpPromptMethodCallback {
       };
 
       const invocationArgs =
-        this._argsSchema != null
+        this._metadata.argsSchema != null
           ? [args ?? {}, methodContext]
           : [methodContext];
       const result = await this._method.apply(this._provider, invocationArgs);

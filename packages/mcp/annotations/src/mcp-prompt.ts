@@ -16,9 +16,7 @@
 
 import "reflect-metadata";
 import type {
-  GetPromptRequest,
   GetPromptResult,
-  Prompt,
   PromptMessage,
 } from "@modelcontextprotocol/server";
 import type {
@@ -76,12 +74,11 @@ export interface McpPromptMetadata {
 }
 
 export interface McpPromptMethodContext {
-  exchange?: McpServerExchange;
+  exchange: McpServerExchange;
   transportContext: McpTransportContext | null;
-  request: GetPromptRequest;
-  prompt: Prompt;
   meta: McpMeta;
   progressToken: unknown;
+  signal: AbortSignal;
 }
 
 export type McpPromptArgumentsFor<
@@ -120,7 +117,7 @@ type McpPromptMethodDecoratorFor = <T extends (...args: any[]) => any>(
   descriptor: TypedPropertyDescriptor<
     ExactPromptMethodSignature<
       T,
-      (args: {}, context: McpPromptMethodContext) => any
+      (context: McpPromptMethodContext) => McpPromptMethodResult
     >
   >,
 ) => void;

@@ -15,9 +15,6 @@
  */
 
 export {
-  McpPromptMethodCallback,
-  McpPromptMethodException,
-  type McpPromptMethodCallbackProps,
-  type PromptRegistration,
-  type PromptRegistrationConfig,
-} from "./mcp-prompt-method-callback.js";
+  McpPromptProvider,
+  type McpPromptProviderProps,
+} from "./mcp-prompt-provider.js";

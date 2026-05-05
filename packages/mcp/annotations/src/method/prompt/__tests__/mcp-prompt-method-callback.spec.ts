@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import "reflect-metadata";
+
 import type {
   GetPromptRequest,
   GetPromptResult,
@@ -40,344 +42,410 @@ const ExamplePromptArgsSchema = z.object({
 });
 
 describe("McpPromptMethodCallback", () => {
-  it("test callback with mono prompt result", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithRequest",
-      createPrompt("mono-prompt", "A prompt returning a Promise"),
-    );
+  describe("result conversion", () => {
+    it("returns Promise<GetPromptResult> as-is", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "returnPromptResult",
+        createPrompt("prompt-result", "A prompt returning a Promise"),
+      );
 
-    const request = createRequest("mono-prompt", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("prompt-result", { name: "John" }),
+      );
 
-    expect(result.description).toBe("Mono prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.role).toBe("assistant");
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Async response for John",
+      expect(result.description).toBe("Prompt result");
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0]?.role).toBe("assistant");
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Async response for John",
+      });
+    });
+
+    it("wraps Promise<string> as a single assistant message", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "returnString",
+        createPrompt("string", "A prompt returning Promise<string>"),
+      );
+
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("string", { name: "John" }),
+      );
+
+      expect(result.description).toBeUndefined();
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0]?.role).toBe("assistant");
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Async string response for John",
+      });
+    });
+
+    it("wraps Promise<PromptMessage> as a single-message array", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "returnSingleMessage",
+        createPrompt(
+          "single-message",
+          "A prompt returning Promise<PromptMessage>",
+        ),
+      );
+
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("single-message", { name: "John" }),
+      );
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Async single message for John",
+      });
+    });
+
+    it("returns Promise<PromptMessage[]> as the messages array", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "returnMessageList",
+        createPrompt(
+          "message-list",
+          "A prompt returning Promise<PromptMessage[]>",
+        ),
+      );
+
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("message-list", { name: "John" }),
+      );
+
+      expect(result.messages).toHaveLength(2);
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Async message 1 for John",
+      });
+      expect(result.messages[1]?.content).toMatchObject({
+        type: "text",
+        text: "Async message 2 for John",
+      });
+    });
+
+    it("wraps Promise<string[]> as multiple assistant messages", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "returnStringList",
+        createPrompt("string-list", "A prompt returning Promise<string[]>"),
+      );
+
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("string-list", { name: "John" }),
+      );
+
+      expect(result.messages).toHaveLength(3);
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Async string 1 for John",
+      });
+      expect(result.messages[1]?.content).toMatchObject({
+        type: "text",
+        text: "Async string 2 for John",
+      });
+      expect(result.messages[2]?.content).toMatchObject({
+        type: "text",
+        text: "Async string 3 for John",
+      });
     });
   });
 
-  it("test callback with mono string", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getStringPrompt",
-      createPrompt("mono-string", "A prompt returning a Promise<string>"),
-    );
+  describe("argument resolution", () => {
+    it("validates and exposes args via argsSchema", async () => {
+      const provider = new TestPromptProvider();
+      const callback = new McpPromptMethodCallback({
+        provider,
+        propertyKey: "useArgsSchema",
+        prompt: createPrompt("schema-prompt", "A prompt backed by args schema"),
+        argsSchema: ExamplePromptArgsSchema,
+      });
 
-    const request = createRequest("mono-string", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("schema-prompt", { name: "Jordan", enabled: true }),
+      );
 
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.role).toBe("assistant");
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Async string response for John",
+      expect(result.description).toBe("Schema prompt");
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Jordan:true",
+      });
+    });
+
+    it("exposes raw arguments via methodContext.request.params.arguments", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useArguments",
+        createPrompt("arguments", "A prompt with arguments"),
+      );
+
+      const result = await callback.apply(
+        createContext(),
+        createRequest("arguments", { name: "John" }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Hello John from arguments",
+      });
+    });
+
+    it("makes individual argument values available", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useIndividualArgs",
+        createPrompt("individual-args", "A prompt with individual arguments"),
+      );
+
+      const result = await callback.apply(
+        createContext(),
+        createRequest("individual-args", { name: "John", age: 30 }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Hello John, you are 30 years old",
+      });
     });
   });
 
-  it("test callback with mono message", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getSingleMessage",
-      createPrompt(
-        "mono-message",
-        "A prompt returning a Promise<PromptMessage>",
-      ),
-    );
+  describe("context propagation", () => {
+    it("populates exchange when called with McpServerExchange", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "reportContextShape",
+        createPrompt(
+          "context-shape",
+          "Reports which context fields are populated",
+        ),
+      );
 
-    const request = createRequest("mono-message", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest("context-shape", { name: "John" }),
+      );
 
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.role).toBe("assistant");
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Async single message for John",
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "exchange=present transport=present",
+      });
+    });
+
+    it("forwards transportContext from exchange.transportContext()", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useTransportContext",
+        createPrompt(
+          "transport-via-exchange",
+          "Reads transportContext through exchange",
+        ),
+      );
+
+      const exchange = createMockExchange(
+        McpTransportContext.create({ traceId: "trace-1" }),
+      );
+
+      const result = await callback.apply(
+        exchange,
+        createRequest("transport-via-exchange", { name: "John" }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "traceId=trace-1",
+      });
+    });
+
+    it("populates transportContext when called with McpTransportContext", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useTransportContext",
+        createPrompt("transport-direct", "Reads transportContext directly"),
+      );
+
+      const result = await callback.apply(
+        createContext({ traceId: "trace-1" }),
+        createRequest("transport-direct", { name: "John" }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "traceId=trace-1",
+      });
+    });
+
+    it("leaves exchange undefined when called with McpTransportContext", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "reportContextShape",
+        createPrompt(
+          "context-shape-stateless",
+          "Reports context fields in stateless mode",
+        ),
+      );
+
+      const result = await callback.apply(
+        createContext(),
+        createRequest("context-shape-stateless", { name: "John" }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "exchange=missing transport=present",
+      });
     });
   });
 
-  it("test callback with mono message list", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getMessageList",
-      createPrompt(
-        "mono-message-list",
-        "A prompt returning a Promise<PromptMessage[]>",
-      ),
-    );
+  describe("meta and progress token", () => {
+    it("forwards _meta into McpMeta", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useMeta",
+        createPrompt("meta-prompt", "A prompt with meta parameter"),
+      );
 
-    const request = createRequest("mono-message-list", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest(
+          "meta-prompt",
+          { name: "John" },
+          { userId: "user123", sessionId: "session456" },
+        ),
+      );
 
-    expect(result.messages).toHaveLength(2);
-    expect(result.messages[0]?.role).toBe("assistant");
-    expect(result.messages[1]?.role).toBe("assistant");
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Async message 1 for John",
-    });
-    expect(result.messages[1]?.content).toMatchObject({
-      type: "text",
-      text: "Async message 2 for John",
-    });
-  });
-
-  it("test callback with mono string list", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getStringList",
-      createPrompt(
-        "mono-string-list",
-        "A prompt returning a Promise<string[]>",
-      ),
-    );
-
-    const request = createRequest("mono-string-list", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
-
-    expect(result.messages).toHaveLength(3);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Async string 1 for John",
-    });
-    expect(result.messages[1]?.content).toMatchObject({
-      type: "text",
-      text: "Async string 2 for John",
-    });
-    expect(result.messages[2]?.content).toMatchObject({
-      type: "text",
-      text: "Async string 3 for John",
-    });
-  });
-
-  it("test callback with args schema", async () => {
-    const provider = new TestPromptProvider();
-    const callback = new McpPromptMethodCallback({
-      provider,
-      propertyKey: "getPromptWithArgsSchema",
-      prompt: createPrompt("schema-prompt", "A prompt backed by args schema"),
-      argsSchema: ExamplePromptArgsSchema,
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: 'Hello John, Meta: {"userId":"user123","sessionId":"session456"}',
+      });
     });
 
-    const request = createRequest("schema-prompt", {
-      name: "Jordan",
-      enabled: true,
-    });
-    const result = await callback.apply(createMockExchange(), request);
+    it("yields an empty meta object when _meta is absent", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useMeta",
+        createPrompt("meta-prompt", "A prompt with meta parameter"),
+      );
 
-    expect(result.description).toBe("Schema prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Jordan:true",
+      const result = await callback.apply(
+        createContext(),
+        createRequest("meta-prompt", { name: "John" }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Hello John, Meta: {}",
+      });
+    });
+
+    it("combines meta with method arguments", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "useMixedAndMeta",
+        createPrompt("mixed-with-meta", "A prompt with mixed args and meta"),
+      );
+
+      const result = await callback.apply(
+        createMockExchange(),
+        createRequest(
+          "mixed-with-meta",
+          { name: "John" },
+          { userId: "user123" },
+        ),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: 'Hello John from mixed-with-meta, Meta: {"userId":"user123"}',
+      });
     });
   });
 
-  it("test null request", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithRequest",
-      createPrompt("mono-prompt", "A prompt returning a Promise"),
-    );
+  describe("error handling", () => {
+    it("rejects when request is null", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "returnPromptResult",
+        createPrompt("prompt-result", "A prompt returning a Promise"),
+      );
 
-    await expect(
-      callback.apply(createMockExchange(), null as never),
-    ).rejects.toThrow("Request must not be null");
-  });
-
-  it("test callback with mono meta", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithMeta",
-      createPrompt("mono-meta-prompt", "A prompt with meta parameter"),
-    );
-
-    const request = createRequest(
-      "mono-meta-prompt",
-      { name: "John" },
-      {
-        userId: "user123",
-        sessionId: "session456",
-      },
-    );
-    const result = await callback.apply(createMockExchange(), request);
-
-    expect(result.description).toBe("Mono meta prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: 'Hello John, Meta: {"userId":"user123","sessionId":"session456"}',
+      await expect(
+        callback.apply(createMockExchange(), null as never),
+      ).rejects.toThrow("Request must not be null");
     });
-  });
 
-  it("test callback with mono meta null", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithMeta",
-      createPrompt("mono-meta-prompt", "A prompt with meta parameter"),
-    );
+    it("wraps method exceptions in McpPromptMethodException", async () => {
+      const provider = new TestPromptProvider();
+      const callback = createCallback(
+        provider,
+        "failing",
+        createPrompt("failing-prompt", "A prompt that throws an exception"),
+      );
 
-    const request = createRequest("mono-meta-prompt", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
-
-    expect(result.description).toBe("Mono meta prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Hello John, Meta: {}",
-    });
-  });
-
-  it("test callback with mono mixed and meta", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithMixedAndMeta",
-      createPrompt("mono-mixed-with-meta", "A prompt with mixed args and meta"),
-    );
-
-    const request = createRequest(
-      "mono-mixed-with-meta",
-      { name: "John" },
-      {
-        userId: "user123",
-      },
-    );
-    const result = await callback.apply(createMockExchange(), request);
-
-    expect(result.description).toBe("Mono mixed with meta prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: 'Hello John from mono-mixed-with-meta, Meta: {"userId":"user123"}',
-    });
-  });
-
-  it("test method invocation error", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getFailingPrompt",
-      createPrompt("failing-prompt", "A prompt that throws an exception"),
-    );
-
-    const request = createRequest("failing-prompt", { name: "John" });
-
-    await expect(
-      callback.apply(createMockExchange(), request),
-    ).rejects.toMatchObject({
-      name: "McpPromptMethodException",
-      message: "Error invoking prompt method: getFailingPrompt",
-    });
-  });
-
-  it("test callback with transport context", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithTransportContext",
-      createPrompt(
-        "transport-context-prompt",
-        "A prompt with transport context",
-      ),
-    );
-
-    const context = McpTransportContext.create({ traceId: "trace-1" });
-    const exchange = createMockExchange(context);
-    const request = createRequest("transport-context-prompt", { name: "John" });
-    const result = await callback.apply(exchange, request);
-
-    expect(result.description).toBe("Transport context prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Hello with transport context from transport-context-prompt",
-    });
-  });
-
-  it("test callback with async request context", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithRequestContext",
-      createPrompt(
-        "async-request-context-prompt",
-        "A prompt with request context",
-      ),
-    );
-
-    const request = createRequest("async-request-context-prompt", {
-      name: "John",
-    });
-    const result = await callback.apply(createMockExchange(), request);
-
-    expect(result.description).toBe("Async request context prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Hello with request context from async-request-context-prompt",
-    });
-  });
-
-  it("test callback with async request context and args", async () => {
-    const provider = new TestPromptProvider();
-    const callback = createCallback(
-      provider,
-      "getPromptWithRequestContextAndArgs",
-      createPrompt("async-context-with-args", "A prompt with context and args"),
-    );
-
-    const request = createRequest("async-context-with-args", { name: "John" });
-    const result = await callback.apply(createMockExchange(), request);
-
-    expect(result.description).toBe("Async context with args prompt");
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0]?.content).toMatchObject({
-      type: "text",
-      text: "Hello John with request context from async-context-with-args",
+      await expect(
+        callback.apply(
+          createMockExchange(),
+          createRequest("failing-prompt", { name: "John" }),
+        ),
+      ).rejects.toMatchObject({
+        name: "McpPromptMethodException",
+        message: "Error invoking prompt method: failing",
+      });
     });
   });
 });
 
 class TestPromptProvider {
   @McpPrompt({
-    name: "mono-prompt",
+    name: "prompt-result",
     description: "A prompt returning a Promise",
   })
-  async getPromptWithRequest(
+  async returnPromptResult(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<GetPromptResult> {
     const name = String(methodContext.request.params.arguments?.name ?? "");
     return {
-      description: "Mono prompt",
+      description: "Prompt result",
       messages: [
         {
           role: "assistant",
-          content: {
-            type: "text",
-            text: `Async response for ${name}`,
-          },
+          content: { type: "text", text: `Async response for ${name}` },
         },
       ],
     };
   }
 
   @McpPrompt({
-    name: "mono-string",
-    description: "A prompt returning a Promise<string>",
+    name: "string",
+    description: "A prompt returning Promise<string>",
   })
-  async getStringPrompt(
+  async returnString(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<string> {
@@ -386,28 +454,25 @@ class TestPromptProvider {
   }
 
   @McpPrompt({
-    name: "mono-message",
-    description: "A prompt returning a Promise<PromptMessage>",
+    name: "single-message",
+    description: "A prompt returning Promise<PromptMessage>",
   })
-  async getSingleMessage(
+  async returnSingleMessage(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<PromptMessage> {
     const name = String(methodContext.request.params.arguments?.name ?? "");
     return {
       role: "assistant",
-      content: {
-        type: "text",
-        text: `Async single message for ${name}`,
-      },
+      content: { type: "text", text: `Async single message for ${name}` },
     };
   }
 
   @McpPrompt({
-    name: "mono-message-list",
-    description: "A prompt returning a Promise<PromptMessage[]>",
+    name: "message-list",
+    description: "A prompt returning Promise<PromptMessage[]>",
   })
-  async getMessageList(
+  async returnMessageList(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<PromptMessage[]> {
@@ -415,26 +480,20 @@ class TestPromptProvider {
     return [
       {
         role: "assistant",
-        content: {
-          type: "text",
-          text: `Async message 1 for ${name}`,
-        },
+        content: { type: "text", text: `Async message 1 for ${name}` },
       },
       {
         role: "assistant",
-        content: {
-          type: "text",
-          text: `Async message 2 for ${name}`,
-        },
+        content: { type: "text", text: `Async message 2 for ${name}` },
       },
     ];
   }
 
   @McpPrompt({
-    name: "mono-string-list",
-    description: "A prompt returning a Promise<string[]>",
+    name: "string-list",
+    description: "A prompt returning Promise<string[]>",
   })
-  async getStringList(
+  async returnStringList(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<string[]> {
@@ -447,17 +506,126 @@ class TestPromptProvider {
   }
 
   @McpPrompt({
-    name: "mono-meta-prompt",
+    name: "schema-prompt",
+    description: "A prompt backed by args schema",
+    argsSchema: ExamplePromptArgsSchema,
+  })
+  async useArgsSchema(
+    args: McpPromptArgumentsFor<typeof ExamplePromptArgsSchema>,
+    _methodContext?: McpPromptMethodContext,
+  ): Promise<GetPromptResult> {
+    return {
+      description: "Schema prompt",
+      messages: [
+        {
+          role: "assistant",
+          content: { type: "text", text: `${args.name}:${args.enabled}` },
+        },
+      ],
+    };
+  }
+
+  @McpPrompt({
+    name: "arguments",
+    description: "A prompt that reads request arguments",
+  })
+  async useArguments(
+    args: {},
+    methodContext: McpPromptMethodContext,
+  ): Promise<GetPromptResult> {
+    const name = String(methodContext.request.params.arguments?.name ?? "");
+    return {
+      description: "Greeting with arguments",
+      messages: [
+        {
+          role: "assistant",
+          content: { type: "text", text: `Hello ${name} from arguments` },
+        },
+      ],
+    };
+  }
+
+  @McpPrompt({
+    name: "individual-args",
+    description: "A prompt with individual arguments",
+  })
+  async useIndividualArgs(
+    args: {},
+    methodContext: McpPromptMethodContext,
+  ): Promise<GetPromptResult> {
+    const name = String(methodContext.request.params.arguments?.name ?? "");
+    const age = Number(methodContext.request.params.arguments?.age ?? 0);
+    return {
+      description: "Individual arguments prompt",
+      messages: [
+        {
+          role: "assistant",
+          content: {
+            type: "text",
+            text: `Hello ${name}, you are ${age} years old`,
+          },
+        },
+      ],
+    };
+  }
+
+  @McpPrompt({
+    name: "context-shape",
+    description: "Reports which context fields are populated",
+  })
+  async reportContextShape(
+    args: {},
+    methodContext: McpPromptMethodContext,
+  ): Promise<GetPromptResult> {
+    const exchangePresence =
+      methodContext.exchange != null ? "present" : "missing";
+    const transportPresence =
+      methodContext.transportContext != null ? "present" : "missing";
+    return {
+      messages: [
+        {
+          role: "assistant",
+          content: {
+            type: "text",
+            text: `exchange=${exchangePresence} transport=${transportPresence}`,
+          },
+        },
+      ],
+    };
+  }
+
+  @McpPrompt({
+    name: "transport-context",
+    description: "Reads a value out of the transport context",
+  })
+  async useTransportContext(
+    args: {},
+    methodContext: McpPromptMethodContext,
+  ): Promise<GetPromptResult> {
+    const traceId = String(
+      methodContext.transportContext?.get("traceId") ?? "",
+    );
+    return {
+      messages: [
+        {
+          role: "assistant",
+          content: { type: "text", text: `traceId=${traceId}` },
+        },
+      ],
+    };
+  }
+
+  @McpPrompt({
+    name: "meta-prompt",
     description: "A prompt with meta parameter",
   })
-  async getPromptWithMeta(
+  async useMeta(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<GetPromptResult> {
     const name = String(methodContext.request.params.arguments?.name ?? "");
     const metaInfo = JSON.stringify(methodContext.meta.meta);
     return {
-      description: "Mono meta prompt",
       messages: [
         {
           role: "assistant",
@@ -471,17 +639,16 @@ class TestPromptProvider {
   }
 
   @McpPrompt({
-    name: "mono-mixed-with-meta",
+    name: "mixed-with-meta",
     description: "A prompt with mixed args and meta",
   })
-  async getPromptWithMixedAndMeta(
+  async useMixedAndMeta(
     args: {},
     methodContext: McpPromptMethodContext,
   ): Promise<GetPromptResult> {
     const name = String(methodContext.request.params.arguments?.name ?? "");
     const metaInfo = JSON.stringify(methodContext.meta.meta);
     return {
-      description: "Mono mixed with meta prompt",
       messages: [
         {
           role: "assistant",
@@ -498,104 +665,11 @@ class TestPromptProvider {
     name: "failing-prompt",
     description: "A prompt that throws an exception",
   })
-  async getFailingPrompt(
+  async failing(
     _args: {},
     _methodContext: McpPromptMethodContext,
   ): Promise<GetPromptResult> {
     throw new Error("Test exception");
-  }
-
-  @McpPrompt({
-    name: "transport-context-prompt",
-    description: "A prompt with transport context",
-  })
-  async getPromptWithTransportContext(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const hasTransportContext =
-      methodContext.transportContext?.get("traceId") === "trace-1";
-    return {
-      description: "Transport context prompt",
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `Hello ${hasTransportContext ? "with" : "without"} transport context from ${methodContext.request.params.name}`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "async-request-context-prompt",
-    description: "A prompt with request context",
-  })
-  async getPromptWithRequestContext(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    return {
-      description: "Async request context prompt",
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `Hello with request context from ${methodContext.request.params.name}`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "async-context-with-args",
-    description: "A prompt with context and arguments",
-  })
-  async getPromptWithRequestContextAndArgs(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return {
-      description: "Async context with args prompt",
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `Hello ${name} with request context from ${methodContext.request.params.name}`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "schema-prompt",
-    description: "A prompt backed by args schema",
-    argsSchema: ExamplePromptArgsSchema,
-  })
-  async getPromptWithArgsSchema(
-    args: McpPromptArgumentsFor<typeof ExamplePromptArgsSchema>,
-    methodContext?: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    void methodContext;
-    return {
-      description: "Schema prompt",
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `${args.name}:${args.enabled}`,
-          },
-        },
-      ],
-    };
   }
 }
 
@@ -612,10 +686,7 @@ function createCallback(
 }
 
 function createPrompt(name: string, description: string): Prompt {
-  return {
-    name,
-    description,
-  };
+  return { name, description };
 }
 
 function createRequest(
@@ -638,4 +709,10 @@ function createMockExchange(
   return Object.assign(Object.create(McpServerExchange.prototype), {
     transportContext: () => context,
   }) as McpServerExchange;
+}
+
+function createContext(
+  metadata: Record<string, unknown> = {},
+): McpTransportContext {
+  return McpTransportContext.create(metadata);
 }

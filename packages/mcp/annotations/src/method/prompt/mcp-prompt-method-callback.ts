@@ -19,50 +19,74 @@ import assert from "node:assert/strict";
 import type {
   GetPromptRequest,
   GetPromptResult,
+  Prompt,
+  PromptMessage,
+  TextContent,
 } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 
-import {
-  McpServerExchange,
-  type McpTransportContext,
-} from "../../context/index.js";
-import {
-  AbstractMcpPromptMethodCallback,
-  McpPromptMethodException,
-  type AbstractMcpPromptMethodCallbackProps,
-} from "./abstract-mcp-prompt-method-callback.js";
+import { McpServerExchange, McpTransportContext } from "../../context/index.js";
+import { McpMeta } from "../../mcp-meta.js";
+import type { McpPromptMethodContext } from "../../mcp-prompt.js";
 
-export interface McpPromptMethodCallbackProps extends AbstractMcpPromptMethodCallbackProps {}
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
+export interface McpPromptMethodCallbackProps {
+  provider: object;
+  propertyKey: string | symbol;
+  prompt: Prompt;
+  argsSchema?: StandardSchemaWithJsonSchema | null;
+}
+
+export class McpPromptMethodException extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "McpPromptMethodException";
+  }
+}
 
 /**
- * Class for creating prompt callbacks around async methods that operate on an MCP
- * server exchange.
+ * Class for creating prompt callbacks around async methods.
+ *
+ * Accepts either an {@link McpServerExchange} (stateful, bidirectional) or an
+ * {@link McpTransportContext} (stateless) as the runtime context. The
+ * underlying method always receives a unified
+ * {@link McpPromptMethodContext}.
  */
-export class McpPromptMethodCallback extends AbstractMcpPromptMethodCallback {
+export class McpPromptMethodCallback {
+  protected readonly _provider: object;
+
+  protected readonly _propertyKey: string | symbol;
+
+  protected readonly _method: (...args: unknown[]) => unknown;
+
+  protected readonly _prompt: Prompt;
+
+  protected readonly _argsSchema: StandardSchemaWithJsonSchema | null;
+
   constructor(props: McpPromptMethodCallbackProps) {
-    super(props);
-  }
+    assert(props.provider != null, "Provider can't be null!");
+    assert(props.propertyKey != null, "Property key can't be null!");
+    assert(props.prompt != null, "Prompt can't be null!");
 
-  protected resolveTransportContext(
-    exchangeOrContext: unknown,
-  ): McpTransportContext | null {
-    if (exchangeOrContext instanceof McpServerExchange) {
-      return exchangeOrContext.transportContext();
-    }
-    return null;
-  }
-
-  protected isExchangeType(paramType: unknown): boolean {
-    return paramType instanceof McpServerExchange;
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
+    this._prompt = props.prompt;
+    this._argsSchema = props.argsSchema ?? null;
+    this._method = this.resolveMethod();
   }
 
   async apply(
-    exchange: McpServerExchange,
+    exchangeOrContext: McpServerExchange | McpTransportContext,
     request: GetPromptRequest,
   ): Promise<GetPromptResult> {
     assert(request != null, "Request must not be null");
 
     try {
-      const args = await this.buildArgs(exchange, request);
+      const args = await this.buildArgs(exchangeOrContext, request);
       const result = await this._method.apply(this._provider, args);
       return this.convertToGetPromptResult(result);
     } catch (error) {
@@ -71,5 +95,133 @@ export class McpPromptMethodCallback extends AbstractMcpPromptMethodCallback {
         { cause: error instanceof Error ? error : undefined },
       );
     }
+  }
+
+  protected get methodName(): string {
+    return typeof this._propertyKey === "string"
+      ? this._propertyKey
+      : this._propertyKey.toString();
+  }
+
+  protected get declaringClassName(): string {
+    return this._provider.constructor?.name ?? "<anonymous>";
+  }
+
+  protected async buildArgs(
+    exchangeOrContext: unknown,
+    request: GetPromptRequest,
+  ): Promise<[Record<string, unknown>, McpPromptMethodContext]> {
+    const rawArguments = { ...request.params.arguments };
+    const promptArguments: McpPromptMethodContext = {
+      exchange: this.isExchangeType(exchangeOrContext)
+        ? (exchangeOrContext as never)
+        : undefined,
+      transportContext: this.resolveTransportContext(exchangeOrContext),
+      request,
+      prompt: this._prompt,
+      meta: new McpMeta(request.params._meta ?? null),
+      progressToken: request.params._meta?.progressToken ?? null,
+    };
+
+    if (this._argsSchema != null) {
+      const validated =
+        await this._argsSchema["~standard"].validate(rawArguments);
+      if (validated.issues) {
+        throw new Error("Invalid prompt arguments");
+      }
+      return [validated.value as Record<string, unknown>, promptArguments];
+    }
+
+    return [{}, promptArguments];
+  }
+
+  protected resolveTransportContext(
+    exchangeOrContext: unknown,
+  ): McpTransportContext | null {
+    if (exchangeOrContext instanceof McpServerExchange) {
+      return exchangeOrContext.transportContext();
+    }
+    if (exchangeOrContext instanceof McpTransportContext) {
+      return exchangeOrContext;
+    }
+    return null;
+  }
+
+  protected isExchangeType(paramType: unknown): boolean {
+    return paramType instanceof McpServerExchange;
+  }
+
+  protected convertToGetPromptResult(result: unknown): GetPromptResult {
+    if (this.isGetPromptResult(result)) {
+      return result;
+    }
+
+    if (Array.isArray(result)) {
+      if (result.length === 0) {
+        return { messages: [] };
+      }
+
+      if (typeof result[0] === "string") {
+        return { messages: this.toPromptMessages(result as string[]) };
+      }
+
+      return { messages: result as PromptMessage[] };
+    }
+
+    if (this.isPromptMessage(result)) {
+      return { messages: [result] };
+    }
+
+    if (typeof result === "string") {
+      return { messages: this.toPromptMessages([result]) };
+    }
+
+    throw new Error(
+      `Unsupported result type: ${result == null ? "null" : this.getTypeName(result)}`,
+    );
+  }
+
+  protected resolveMethod(): (...args: unknown[]) => unknown {
+    const candidate = (this._provider as Record<string | symbol, unknown>)[
+      this._propertyKey
+    ];
+    assert(
+      typeof candidate === "function",
+      `Method not found: ${String(this._propertyKey)}`,
+    );
+    return candidate as (...args: unknown[]) => unknown;
+  }
+
+  protected toPromptMessages(values: string[]): PromptMessage[] {
+    return values.map((text) => ({
+      role: "assistant",
+      content: { type: "text", text } as TextContent,
+    }));
+  }
+
+  protected isGetPromptResult(value: unknown): value is GetPromptResult {
+    return typeof value === "object" && value != null && "messages" in value;
+  }
+
+  protected isPromptMessage(value: unknown): value is PromptMessage {
+    return (
+      typeof value === "object" &&
+      value != null &&
+      "role" in value &&
+      "content" in value
+    );
+  }
+
+  protected getTypeName(value: unknown): string {
+    if (value == null) {
+      return "unknown";
+    }
+    if (typeof value === "function" && value.name.length > 0) {
+      return value.name;
+    }
+    if (typeof value === "object" && value.constructor?.name) {
+      return value.constructor.name;
+    }
+    return typeof value;
   }
 }

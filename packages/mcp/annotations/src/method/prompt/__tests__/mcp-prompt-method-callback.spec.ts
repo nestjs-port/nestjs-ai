@@ -17,401 +17,297 @@
 import "reflect-metadata";
 
 import type {
-  GetPromptRequest,
   GetPromptResult,
-  Prompt,
-  PromptMessage,
+  McpServer,
+  ServerContext,
 } from "@modelcontextprotocol/server";
-import { z } from "zod";
 import { describe, expect, it } from "vitest";
 
-import {
-  McpServerExchange,
-  McpTransportContext,
-} from "../../../context/index.js";
-import { McpPrompt } from "../../../mcp-prompt.js";
-import type {
-  McpPromptArgumentsFor,
-  McpPromptMethodContext,
-} from "../../../mcp-prompt.js";
+import { DefaultMetaProvider } from "../../../context/index.js";
+import type { MetaProvider } from "../../../context/index.js";
+import type { McpPromptMetadata } from "../../../mcp-prompt.js";
 import { McpPromptMethodCallback } from "../mcp-prompt-method-callback.js";
-
-const ExamplePromptArgsSchema = z.object({
-  name: z.string(),
-  enabled: z.boolean(),
-});
+import {
+  ExamplePromptArgsSchema,
+  ExamplePromptProvider,
+} from "./mcp-prompt-method-callback-example.spec.js";
 
 describe("McpPromptMethodCallback", () => {
-  describe("result conversion", () => {
-    it("returns Promise<GetPromptResult> as-is", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "returnPromptResult",
-        createPrompt("prompt-result", "A prompt returning a Promise"),
-      );
+  describe("apply()", () => {
+    it("returns [name, config, callback] tuple ready for registerPrompt", () => {
+      const callback = new McpPromptMethodCallback({
+        provider: new ExamplePromptProvider(),
+        propertyKey: "useArgsSchema",
+        metadata: createMetadata({
+          name: "schema-prompt",
+          title: "Schema prompt",
+          description: "A prompt backed by args schema",
+          argsSchema: ExamplePromptArgsSchema,
+          metaProvider: createMetaProvider({ source: "test" }),
+        }),
+        mcpServer: createMockMcpServer(),
+      });
 
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("prompt-result", { name: "John" }),
-      );
+      const [name, config, cb] = callback.apply();
+
+      expect(name).toBe("schema-prompt");
+      expect(config.title).toBe("Schema prompt");
+      expect(config.description).toBe("A prompt backed by args schema");
+      expect(config.argsSchema).toBe(ExamplePromptArgsSchema);
+      expect(config._meta).toEqual({ source: "test" });
+      expect(typeof cb).toBe("function");
+    });
+
+    it("omits config fields when metadata leaves them empty", () => {
+      const callback = new McpPromptMethodCallback({
+        provider: new ExamplePromptProvider(),
+        propertyKey: "returnPromptResult",
+        metadata: createMetadata({ name: "prompt-result" }),
+        mcpServer: createMockMcpServer(),
+      });
+
+      const [name, config] = callback.apply();
+
+      expect(name).toBe("prompt-result");
+      expect(config).toEqual({});
+    });
+
+    it("falls back to propertyKey when metadata.name is empty", () => {
+      const callback = new McpPromptMethodCallback({
+        provider: new ExamplePromptProvider(),
+        propertyKey: "returnPromptResult",
+        metadata: createMetadata(),
+        mcpServer: createMockMcpServer(),
+      });
+
+      const [name] = callback.apply();
+
+      expect(name).toBe("returnPromptResult");
+    });
+
+    it("returns a 1-arg callback when no argsSchema is configured", async () => {
+      const callback = createCallback("returnPromptResult", "prompt-result");
+
+      const [, , cb] = callback.apply();
+      const result = await (
+        cb as (ctx: ServerContext) => Promise<GetPromptResult>
+      )(createMockCtx());
+
+      expect(result.description).toBe("Prompt result");
+    });
+
+    it("returns a 2-arg callback when argsSchema is configured", async () => {
+      const callback = new McpPromptMethodCallback({
+        provider: new ExamplePromptProvider(),
+        propertyKey: "useArgsSchema",
+        metadata: createMetadata({
+          name: "schema-prompt",
+          argsSchema: ExamplePromptArgsSchema,
+        }),
+        mcpServer: createMockMcpServer(),
+      });
+
+      const [, , cb] = callback.apply();
+      const result = await (
+        cb as (
+          args: Record<string, unknown>,
+          ctx: ServerContext,
+        ) => Promise<GetPromptResult>
+      )({ name: "Jordan", enabled: true }, createMockCtx());
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "Jordan:true",
+      });
+    });
+  });
+
+  describe("handle() — result conversion", () => {
+    it("returns Promise<GetPromptResult> as-is", async () => {
+      const callback = createCallback("returnPromptResult", "prompt-result");
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.description).toBe("Prompt result");
       expect(result.messages).toHaveLength(1);
       expect(result.messages[0]?.role).toBe("assistant");
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Async response for John",
+        text: "Async prompt result",
       });
     });
 
     it("wraps Promise<string> as a single assistant message", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "returnString",
-        createPrompt("string", "A prompt returning Promise<string>"),
-      );
+      const callback = createCallback("returnString", "string");
+      const result = await callback.handle(undefined, createMockCtx());
 
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("string", { name: "John" }),
-      );
-
-      expect(result.description).toBeUndefined();
       expect(result.messages).toHaveLength(1);
-      expect(result.messages[0]?.role).toBe("assistant");
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Async string response for John",
+        text: "Async string response",
       });
     });
 
     it("wraps Promise<PromptMessage> as a single-message array", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "returnSingleMessage",
-        createPrompt(
-          "single-message",
-          "A prompt returning Promise<PromptMessage>",
-        ),
-      );
-
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("single-message", { name: "John" }),
-      );
+      const callback = createCallback("returnSingleMessage", "single-message");
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.messages).toHaveLength(1);
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Async single message for John",
+        text: "Async single message",
       });
     });
 
     it("returns Promise<PromptMessage[]> as the messages array", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "returnMessageList",
-        createPrompt(
-          "message-list",
-          "A prompt returning Promise<PromptMessage[]>",
-        ),
-      );
-
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("message-list", { name: "John" }),
-      );
+      const callback = createCallback("returnMessageList", "message-list");
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.messages).toHaveLength(2);
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Async message 1 for John",
+        text: "Async message 1",
       });
       expect(result.messages[1]?.content).toMatchObject({
         type: "text",
-        text: "Async message 2 for John",
+        text: "Async message 2",
       });
     });
 
     it("wraps Promise<string[]> as multiple assistant messages", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "returnStringList",
-        createPrompt("string-list", "A prompt returning Promise<string[]>"),
-      );
-
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("string-list", { name: "John" }),
-      );
+      const callback = createCallback("returnStringList", "string-list");
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.messages).toHaveLength(3);
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Async string 1 for John",
+        text: "Async string 1",
       });
       expect(result.messages[1]?.content).toMatchObject({
         type: "text",
-        text: "Async string 2 for John",
+        text: "Async string 2",
       });
       expect(result.messages[2]?.content).toMatchObject({
         type: "text",
-        text: "Async string 3 for John",
+        text: "Async string 3",
       });
     });
   });
 
-  describe("argument resolution", () => {
-    it("validates and exposes args via argsSchema", async () => {
-      const provider = new TestPromptProvider();
+  describe("handle() — argument resolution", () => {
+    it("forwards SDK-validated args to the user method", async () => {
       const callback = new McpPromptMethodCallback({
-        provider,
+        provider: new ExamplePromptProvider(),
         propertyKey: "useArgsSchema",
-        prompt: createPrompt("schema-prompt", "A prompt backed by args schema"),
-        argsSchema: ExamplePromptArgsSchema,
+        metadata: createMetadata({
+          name: "schema-prompt",
+          argsSchema: ExamplePromptArgsSchema,
+        }),
+        mcpServer: createMockMcpServer(),
       });
 
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("schema-prompt", { name: "Jordan", enabled: true }),
+      const result = await callback.handle(
+        { name: "Jordan", enabled: true },
+        createMockCtx(),
       );
 
-      expect(result.description).toBe("Schema prompt");
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
         text: "Jordan:true",
       });
     });
 
-    it("exposes raw arguments via methodContext.request.params.arguments", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useArguments",
-        createPrompt("arguments", "A prompt with arguments"),
-      );
-
-      const result = await callback.apply(
-        createContext(),
-        createRequest("arguments", { name: "John" }),
-      );
-
-      expect(result.messages[0]?.content).toMatchObject({
-        type: "text",
-        text: "Hello John from arguments",
+    it("substitutes an empty args object for schema-backed methods when undefined", async () => {
+      const callback = new McpPromptMethodCallback({
+        provider: new ExamplePromptProvider(),
+        propertyKey: "useArgsSchema",
+        metadata: createMetadata({
+          name: "schema-prompt",
+          argsSchema: ExamplePromptArgsSchema,
+        }),
+        mcpServer: createMockMcpServer(),
       });
-    });
 
-    it("makes individual argument values available", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useIndividualArgs",
-        createPrompt("individual-args", "A prompt with individual arguments"),
-      );
-
-      const result = await callback.apply(
-        createContext(),
-        createRequest("individual-args", { name: "John", age: 30 }),
-      );
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Hello John, you are 30 years old",
+        text: "undefined:undefined",
       });
     });
   });
 
-  describe("context propagation", () => {
-    it("populates exchange when called with McpServerExchange", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "reportContextShape",
-        createPrompt(
-          "context-shape",
-          "Reports which context fields are populated",
-        ),
-      );
-
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest("context-shape", { name: "John" }),
-      );
+  describe("handle() — context propagation", () => {
+    it("wraps the mcpServer into methodContext.exchange", async () => {
+      const callback = createCallback("captureExchange", "capture-exchange");
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "exchange=present transport=present",
-      });
-    });
-
-    it("forwards transportContext from exchange.transportContext()", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useTransportContext",
-        createPrompt(
-          "transport-via-exchange",
-          "Reads transportContext through exchange",
-        ),
-      );
-
-      const exchange = createMockExchange(
-        McpTransportContext.create({ traceId: "trace-1" }),
-      );
-
-      const result = await callback.apply(
-        exchange,
-        createRequest("transport-via-exchange", { name: "John" }),
-      );
-
-      expect(result.messages[0]?.content).toMatchObject({
-        type: "text",
-        text: "traceId=trace-1",
-      });
-    });
-
-    it("populates transportContext when called with McpTransportContext", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useTransportContext",
-        createPrompt("transport-direct", "Reads transportContext directly"),
-      );
-
-      const result = await callback.apply(
-        createContext({ traceId: "trace-1" }),
-        createRequest("transport-direct", { name: "John" }),
-      );
-
-      expect(result.messages[0]?.content).toMatchObject({
-        type: "text",
-        text: "traceId=trace-1",
-      });
-    });
-
-    it("leaves exchange undefined when called with McpTransportContext", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "reportContextShape",
-        createPrompt(
-          "context-shape-stateless",
-          "Reports context fields in stateless mode",
-        ),
-      );
-
-      const result = await callback.apply(
-        createContext(),
-        createRequest("context-shape-stateless", { name: "John" }),
-      );
-
-      expect(result.messages[0]?.content).toMatchObject({
-        type: "text",
-        text: "exchange=missing transport=present",
+        text: "exchange=McpServerExchange",
       });
     });
   });
 
-  describe("meta and progress token", () => {
+  describe("handle() — meta and signal", () => {
     it("forwards _meta into McpMeta", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useMeta",
-        createPrompt("meta-prompt", "A prompt with meta parameter"),
-      );
-
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest(
-          "meta-prompt",
-          { name: "John" },
-          { userId: "user123", sessionId: "session456" },
-        ),
+      const callback = createCallback("useMeta", "meta-prompt");
+      const result = await callback.handle(
+        undefined,
+        createMockCtx({
+          _meta: { userId: "user123", sessionId: "session456" },
+        }),
       );
 
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: 'Hello John, Meta: {"userId":"user123","sessionId":"session456"}',
+        text: 'Meta: {"userId":"user123","sessionId":"session456"}',
       });
     });
 
     it("yields an empty meta object when _meta is absent", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useMeta",
-        createPrompt("meta-prompt", "A prompt with meta parameter"),
-      );
-
-      const result = await callback.apply(
-        createContext(),
-        createRequest("meta-prompt", { name: "John" }),
-      );
+      const callback = createCallback("useMeta", "meta-prompt");
+      const result = await callback.handle(undefined, createMockCtx());
 
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: "Hello John, Meta: {}",
+        text: "Meta: {}",
       });
     });
 
-    it("combines meta with method arguments", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "useMixedAndMeta",
-        createPrompt("mixed-with-meta", "A prompt with mixed args and meta"),
-      );
-
-      const result = await callback.apply(
-        createMockExchange(),
-        createRequest(
-          "mixed-with-meta",
-          { name: "John" },
-          { userId: "user123" },
-        ),
+    it("exposes progressToken from _meta when present", async () => {
+      const callback = createCallback("useProgressToken", "progress-prompt");
+      const result = await callback.handle(
+        undefined,
+        createMockCtx({ _meta: { progressToken: "token-1" } }),
       );
 
       expect(result.messages[0]?.content).toMatchObject({
         type: "text",
-        text: 'Hello John from mixed-with-meta, Meta: {"userId":"user123"}',
+        text: "progressToken=token-1",
+      });
+    });
+
+    it("forwards the abort signal from ctx.mcpReq", async () => {
+      const callback = createCallback("captureSignal", "signal-prompt");
+      const controller = new AbortController();
+      const result = await callback.handle(
+        undefined,
+        createMockCtx({ signal: controller.signal }),
+      );
+
+      expect(result.messages[0]?.content).toMatchObject({
+        type: "text",
+        text: "signal=present aborted=false",
       });
     });
   });
 
-  describe("error handling", () => {
-    it("rejects when request is null", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "returnPromptResult",
-        createPrompt("prompt-result", "A prompt returning a Promise"),
-      );
-
-      await expect(
-        callback.apply(createMockExchange(), null as never),
-      ).rejects.toThrow("Request must not be null");
-    });
-
+  describe("handle() — error handling", () => {
     it("wraps method exceptions in McpPromptMethodException", async () => {
-      const provider = new TestPromptProvider();
-      const callback = createCallback(
-        provider,
-        "failing",
-        createPrompt("failing-prompt", "A prompt that throws an exception"),
-      );
+      const callback = createCallback("failing", "failing-prompt");
 
       await expect(
-        callback.apply(
-          createMockExchange(),
-          createRequest("failing-prompt", { name: "John" }),
-        ),
+        callback.handle(undefined, createMockCtx()),
       ).rejects.toMatchObject({
         name: "McpPromptMethodException",
         message: "Error invoking prompt method: failing",
@@ -420,299 +316,70 @@ describe("McpPromptMethodCallback", () => {
   });
 });
 
-class TestPromptProvider {
-  @McpPrompt({
-    name: "prompt-result",
-    description: "A prompt returning a Promise",
-  })
-  async returnPromptResult(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return {
-      description: "Prompt result",
-      messages: [
-        {
-          role: "assistant",
-          content: { type: "text", text: `Async response for ${name}` },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "string",
-    description: "A prompt returning Promise<string>",
-  })
-  async returnString(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<string> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return `Async string response for ${name}`;
-  }
-
-  @McpPrompt({
-    name: "single-message",
-    description: "A prompt returning Promise<PromptMessage>",
-  })
-  async returnSingleMessage(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<PromptMessage> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return {
-      role: "assistant",
-      content: { type: "text", text: `Async single message for ${name}` },
-    };
-  }
-
-  @McpPrompt({
-    name: "message-list",
-    description: "A prompt returning Promise<PromptMessage[]>",
-  })
-  async returnMessageList(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<PromptMessage[]> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return [
-      {
-        role: "assistant",
-        content: { type: "text", text: `Async message 1 for ${name}` },
-      },
-      {
-        role: "assistant",
-        content: { type: "text", text: `Async message 2 for ${name}` },
-      },
-    ];
-  }
-
-  @McpPrompt({
-    name: "string-list",
-    description: "A prompt returning Promise<string[]>",
-  })
-  async returnStringList(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<string[]> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return [
-      `Async string 1 for ${name}`,
-      `Async string 2 for ${name}`,
-      `Async string 3 for ${name}`,
-    ];
-  }
-
-  @McpPrompt({
-    name: "schema-prompt",
-    description: "A prompt backed by args schema",
-    argsSchema: ExamplePromptArgsSchema,
-  })
-  async useArgsSchema(
-    args: McpPromptArgumentsFor<typeof ExamplePromptArgsSchema>,
-    _methodContext?: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    return {
-      description: "Schema prompt",
-      messages: [
-        {
-          role: "assistant",
-          content: { type: "text", text: `${args.name}:${args.enabled}` },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "arguments",
-    description: "A prompt that reads request arguments",
-  })
-  async useArguments(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    return {
-      description: "Greeting with arguments",
-      messages: [
-        {
-          role: "assistant",
-          content: { type: "text", text: `Hello ${name} from arguments` },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "individual-args",
-    description: "A prompt with individual arguments",
-  })
-  async useIndividualArgs(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    const age = Number(methodContext.request.params.arguments?.age ?? 0);
-    return {
-      description: "Individual arguments prompt",
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `Hello ${name}, you are ${age} years old`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "context-shape",
-    description: "Reports which context fields are populated",
-  })
-  async reportContextShape(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const exchangePresence =
-      methodContext.exchange != null ? "present" : "missing";
-    const transportPresence =
-      methodContext.transportContext != null ? "present" : "missing";
-    return {
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `exchange=${exchangePresence} transport=${transportPresence}`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "transport-context",
-    description: "Reads a value out of the transport context",
-  })
-  async useTransportContext(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const traceId = String(
-      methodContext.transportContext?.get("traceId") ?? "",
-    );
-    return {
-      messages: [
-        {
-          role: "assistant",
-          content: { type: "text", text: `traceId=${traceId}` },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "meta-prompt",
-    description: "A prompt with meta parameter",
-  })
-  async useMeta(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    const metaInfo = JSON.stringify(methodContext.meta.meta);
-    return {
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `Hello ${name}, Meta: ${metaInfo}`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "mixed-with-meta",
-    description: "A prompt with mixed args and meta",
-  })
-  async useMixedAndMeta(
-    args: {},
-    methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    const name = String(methodContext.request.params.arguments?.name ?? "");
-    const metaInfo = JSON.stringify(methodContext.meta.meta);
-    return {
-      messages: [
-        {
-          role: "assistant",
-          content: {
-            type: "text",
-            text: `Hello ${name} from ${methodContext.request.params.name}, Meta: ${metaInfo}`,
-          },
-        },
-      ],
-    };
-  }
-
-  @McpPrompt({
-    name: "failing-prompt",
-    description: "A prompt that throws an exception",
-  })
-  async failing(
-    _args: {},
-    _methodContext: McpPromptMethodContext,
-  ): Promise<GetPromptResult> {
-    throw new Error("Test exception");
-  }
-}
-
 function createCallback(
-  provider: TestPromptProvider,
-  propertyKey: keyof TestPromptProvider,
-  prompt: Prompt,
+  propertyKey: keyof ExamplePromptProvider,
+  name: string,
 ): McpPromptMethodCallback {
   return new McpPromptMethodCallback({
-    provider,
+    provider: new ExamplePromptProvider(),
     propertyKey,
-    prompt,
+    metadata: createMetadata({ name }),
+    mcpServer: createMockMcpServer(),
   });
 }
 
-function createPrompt(name: string, description: string): Prompt {
-  return { name, description };
-}
-
-function createRequest(
-  promptName: string,
-  argumentsMap: Record<string, unknown>,
-  meta?: Record<string, unknown>,
-): GetPromptRequest {
+function createMetadata(
+  overrides: Partial<McpPromptMetadata> = {},
+): McpPromptMetadata {
   return {
-    params: {
-      name: promptName,
-      arguments: argumentsMap,
-      ...(meta == null ? {} : { _meta: meta }),
+    name: "",
+    title: "",
+    description: "",
+    metaProvider: DefaultMetaProvider,
+    argsSchema: null,
+    ...overrides,
+  };
+}
+
+function createMetaProvider(
+  meta: Record<string, unknown>,
+): new () => MetaProvider {
+  return class implements MetaProvider {
+    getMeta(): Record<string, unknown> {
+      return meta;
+    }
+  };
+}
+
+function createMockMcpServer(): McpServer {
+  return {
+    server: {
+      getClientCapabilities: () => undefined,
+      getClientVersion: () => undefined,
     },
-  } as unknown as GetPromptRequest;
+  } as unknown as McpServer;
 }
 
-function createMockExchange(
-  context: McpTransportContext = McpTransportContext.EMPTY,
-): McpServerExchange {
-  return Object.assign(Object.create(McpServerExchange.prototype), {
-    transportContext: () => context,
-  }) as McpServerExchange;
+interface MockCtxOverrides {
+  _meta?: Record<string, unknown>;
+  signal?: AbortSignal;
+  sessionId?: string;
 }
 
-function createContext(
-  metadata: Record<string, unknown> = {},
-): McpTransportContext {
-  return McpTransportContext.create(metadata);
+function createMockCtx(overrides: MockCtxOverrides = {}): ServerContext {
+  return {
+    sessionId: overrides.sessionId,
+    mcpReq: {
+      id: 1,
+      method: "prompts/get",
+      _meta: overrides._meta,
+      signal: overrides.signal ?? new AbortController().signal,
+      send: () => Promise.reject(new Error("send not mocked")),
+      notify: () => Promise.resolve(),
+      log: () => Promise.resolve(),
+      elicitInput: () => Promise.reject(new Error("elicitInput not mocked")),
+      requestSampling: () =>
+        Promise.reject(new Error("requestSampling not mocked")),
+    },
+  } as unknown as ServerContext;
 }

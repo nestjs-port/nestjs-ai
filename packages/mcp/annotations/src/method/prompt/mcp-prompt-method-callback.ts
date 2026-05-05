@@ -17,28 +17,48 @@
 import assert from "node:assert/strict";
 
 import type {
-  GetPromptRequest,
   GetPromptResult,
-  Prompt,
+  McpServer,
+  PromptCallback,
   PromptMessage,
+  ServerContext,
+  StandardSchemaWithJSON,
   TextContent,
 } from "@modelcontextprotocol/server";
-import type {
-  StandardJSONSchemaV1,
-  StandardSchemaV1,
-} from "@standard-schema/spec";
 
+import { MetaUtils } from "../../common/index.js";
 import { McpServerExchange, McpTransportContext } from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
-import type { McpPromptMethodContext } from "../../mcp-prompt.js";
+import type {
+  McpPromptMetadata,
+  McpPromptMethodContext,
+} from "../../mcp-prompt.js";
 
-type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+/**
+ * Configuration object that mirrors the `config` argument accepted by
+ * {@link McpServer.registerPrompt}.
+ */
+export interface PromptRegistrationConfig {
+  title?: string;
+  description?: string;
+  argsSchema?: StandardSchemaWithJSON;
+  _meta?: Record<string, unknown>;
+}
+
+/**
+ * Tuple compatible with `mcpServer.registerPrompt(...spec)` spread syntax.
+ */
+export type PromptRegistration = [
+  name: string,
+  config: PromptRegistrationConfig,
+  callback: PromptCallback<StandardSchemaWithJSON | undefined>,
+];
 
 export interface McpPromptMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
-  prompt: Prompt;
-  argsSchema?: StandardSchemaWithJsonSchema | null;
+  metadata: McpPromptMetadata;
+  mcpServer: McpServer;
 }
 
 export class McpPromptMethodException extends Error {
@@ -49,47 +69,117 @@ export class McpPromptMethodException extends Error {
 }
 
 /**
- * Class for creating prompt callbacks around async methods.
+ * Adapts a method annotated with `@McpPrompt` to the shape required by
+ * {@link McpServer.registerPrompt}.
  *
- * Accepts either an {@link McpServerExchange} (stateful, bidirectional) or an
- * {@link McpTransportContext} (stateless) as the runtime context. The
- * underlying method always receives a unified
- * {@link McpPromptMethodContext}.
+ * `apply()` produces a 3-tuple ready to spread into `registerPrompt`. The
+ * callback inside that tuple invokes {@link handle} per request, building a
+ * fresh {@link McpPromptMethodContext} from the {@link ServerContext} the SDK
+ * supplies.
  */
 export class McpPromptMethodCallback {
-  protected readonly _provider: object;
+  private readonly _provider: object;
 
-  protected readonly _propertyKey: string | symbol;
+  private readonly _propertyKey: string | symbol;
 
-  protected readonly _method: (...args: unknown[]) => unknown;
+  private readonly _method: (...args: unknown[]) => unknown;
 
-  protected readonly _prompt: Prompt;
+  private readonly _name: string;
 
-  protected readonly _argsSchema: StandardSchemaWithJsonSchema | null;
+  private readonly _title: string | null;
+
+  private readonly _description: string | null;
+
+  private readonly _argsSchema: StandardSchemaWithJSON | null;
+
+  private readonly _meta: Record<string, unknown> | null;
+
+  private readonly _mcpServer: McpServer;
 
   constructor(props: McpPromptMethodCallbackProps) {
     assert(props.provider != null, "Provider can't be null!");
     assert(props.propertyKey != null, "Property key can't be null!");
-    assert(props.prompt != null, "Prompt can't be null!");
+    assert(props.metadata != null, "Metadata can't be null!");
+    assert(props.mcpServer != null, "mcpServer can't be null!");
 
     this._provider = props.provider;
     this._propertyKey = props.propertyKey;
-    this._prompt = props.prompt;
-    this._argsSchema = props.argsSchema ?? null;
+    this._mcpServer = props.mcpServer;
+    this._name =
+      props.metadata.name.length > 0
+        ? props.metadata.name
+        : String(props.propertyKey);
+    this._title = props.metadata.title.length > 0 ? props.metadata.title : null;
+    this._description =
+      props.metadata.description.length > 0 ? props.metadata.description : null;
+    this._argsSchema = (props.metadata.argsSchema ??
+      null) as StandardSchemaWithJSON | null;
+    this._meta = (MetaUtils.getMeta(props.metadata.metaProvider) ??
+      null) as Record<string, unknown> | null;
     this._method = this.resolveMethod();
   }
 
-  async apply(
-    exchangeOrContext: McpServerExchange | McpTransportContext,
-    request: GetPromptRequest,
-  ): Promise<GetPromptResult> {
-    assert(request != null, "Request must not be null");
+  /**
+   * Build the registration tuple that can be spread into
+   * `mcpServer.registerPrompt(...)`.
+   */
+  apply(): PromptRegistration {
+    const config: PromptRegistrationConfig = {};
+    if (this._title != null) config.title = this._title;
+    if (this._description != null) config.description = this._description;
+    if (this._argsSchema != null) config.argsSchema = this._argsSchema;
+    if (this._meta != null) config._meta = this._meta;
 
+    const callback: PromptCallback<StandardSchemaWithJSON | undefined> =
+      this._argsSchema != null
+        ? (((args: Record<string, unknown>, ctx: ServerContext) =>
+            this.handle(args, ctx)) as PromptCallback<
+            StandardSchemaWithJSON | undefined
+          >)
+        : (((ctx: ServerContext) =>
+            this.handle(undefined, ctx)) as PromptCallback<
+            StandardSchemaWithJSON | undefined
+          >);
+
+    return [this._name, config, callback];
+  }
+
+  /**
+   * Per-request handler. Invoked once per `prompts/get` request.
+   *
+   * Constructs a fresh transport context, optional server exchange, and
+   * `McpPromptMethodContext`, then calls the underlying user method.
+   */
+  async handle(
+    args: Record<string, unknown> | undefined,
+    ctx: ServerContext,
+  ): Promise<GetPromptResult> {
     try {
-      const args = await this.buildArgs(exchangeOrContext, request);
-      const result = await this._method.apply(this._provider, args);
+      const transportContext = McpTransportContext.EMPTY;
+      const exchange = new McpServerExchange(
+        this._mcpServer,
+        ctx,
+        transportContext,
+      );
+
+      const methodContext: McpPromptMethodContext = {
+        exchange,
+        transportContext,
+        meta: new McpMeta(ctx.mcpReq._meta ?? null),
+        progressToken: ctx.mcpReq._meta?.progressToken ?? null,
+        signal: ctx.mcpReq.signal,
+      };
+
+      const invocationArgs =
+        this._argsSchema != null
+          ? [args ?? {}, methodContext]
+          : [methodContext];
+      const result = await this._method.apply(this._provider, invocationArgs);
       return this.convertToGetPromptResult(result);
     } catch (error) {
+      if (error instanceof McpPromptMethodException) {
+        throw error;
+      }
       throw new McpPromptMethodException(
         `Error invoking prompt method: ${this.methodName}`,
         { cause: error instanceof Error ? error : undefined },
@@ -97,61 +187,24 @@ export class McpPromptMethodCallback {
     }
   }
 
-  protected get methodName(): string {
+  private get methodName(): string {
     return typeof this._propertyKey === "string"
       ? this._propertyKey
       : this._propertyKey.toString();
   }
 
-  protected get declaringClassName(): string {
-    return this._provider.constructor?.name ?? "<anonymous>";
+  private resolveMethod(): (...args: unknown[]) => unknown {
+    const candidate = (this._provider as Record<string | symbol, unknown>)[
+      this._propertyKey
+    ];
+    assert(
+      typeof candidate === "function",
+      `Method not found: ${String(this._propertyKey)}`,
+    );
+    return candidate as (...args: unknown[]) => unknown;
   }
 
-  protected async buildArgs(
-    exchangeOrContext: unknown,
-    request: GetPromptRequest,
-  ): Promise<[Record<string, unknown>, McpPromptMethodContext]> {
-    const rawArguments = { ...request.params.arguments };
-    const promptArguments: McpPromptMethodContext = {
-      exchange: this.isExchangeType(exchangeOrContext)
-        ? (exchangeOrContext as never)
-        : undefined,
-      transportContext: this.resolveTransportContext(exchangeOrContext),
-      request,
-      prompt: this._prompt,
-      meta: new McpMeta(request.params._meta ?? null),
-      progressToken: request.params._meta?.progressToken ?? null,
-    };
-
-    if (this._argsSchema != null) {
-      const validated =
-        await this._argsSchema["~standard"].validate(rawArguments);
-      if (validated.issues) {
-        throw new Error("Invalid prompt arguments");
-      }
-      return [validated.value as Record<string, unknown>, promptArguments];
-    }
-
-    return [{}, promptArguments];
-  }
-
-  protected resolveTransportContext(
-    exchangeOrContext: unknown,
-  ): McpTransportContext | null {
-    if (exchangeOrContext instanceof McpServerExchange) {
-      return exchangeOrContext.transportContext();
-    }
-    if (exchangeOrContext instanceof McpTransportContext) {
-      return exchangeOrContext;
-    }
-    return null;
-  }
-
-  protected isExchangeType(paramType: unknown): boolean {
-    return paramType instanceof McpServerExchange;
-  }
-
-  protected convertToGetPromptResult(result: unknown): GetPromptResult {
+  private convertToGetPromptResult(result: unknown): GetPromptResult {
     if (this.isGetPromptResult(result)) {
       return result;
     }
@@ -181,29 +234,18 @@ export class McpPromptMethodCallback {
     );
   }
 
-  protected resolveMethod(): (...args: unknown[]) => unknown {
-    const candidate = (this._provider as Record<string | symbol, unknown>)[
-      this._propertyKey
-    ];
-    assert(
-      typeof candidate === "function",
-      `Method not found: ${String(this._propertyKey)}`,
-    );
-    return candidate as (...args: unknown[]) => unknown;
-  }
-
-  protected toPromptMessages(values: string[]): PromptMessage[] {
+  private toPromptMessages(values: string[]): PromptMessage[] {
     return values.map((text) => ({
       role: "assistant",
       content: { type: "text", text } as TextContent,
     }));
   }
 
-  protected isGetPromptResult(value: unknown): value is GetPromptResult {
+  private isGetPromptResult(value: unknown): value is GetPromptResult {
     return typeof value === "object" && value != null && "messages" in value;
   }
 
-  protected isPromptMessage(value: unknown): value is PromptMessage {
+  private isPromptMessage(value: unknown): value is PromptMessage {
     return (
       typeof value === "object" &&
       value != null &&
@@ -212,7 +254,7 @@ export class McpPromptMethodCallback {
     );
   }
 
-  protected getTypeName(value: unknown): string {
+  private getTypeName(value: unknown): string {
     if (value == null) {
       return "unknown";
     }

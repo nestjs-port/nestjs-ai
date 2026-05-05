@@ -35,22 +35,11 @@ import type {
 } from "../../mcp-prompt.js";
 
 /**
- * Configuration object that mirrors the `config` argument accepted by
- * {@link McpServer.registerPrompt}.
- */
-export interface PromptRegistrationConfig {
-  title?: string;
-  description?: string;
-  argsSchema?: StandardSchemaWithJSON;
-  _meta?: Record<string, unknown>;
-}
-
-/**
  * Tuple compatible with `mcpServer.registerPrompt(...spec)` spread syntax.
  */
 export type PromptRegistration = [
   name: string,
-  config: PromptRegistrationConfig,
+  config: Parameters<McpServer["registerPrompt"]>[1],
   callback: PromptCallback<StandardSchemaWithJSON | undefined>,
 ];
 
@@ -109,7 +98,7 @@ export class McpPromptMethodCallback {
     const { name, title, description, argsSchema, metaProvider } =
       this._metadata;
 
-    const config: PromptRegistrationConfig = {};
+    const config: Parameters<McpServer["registerPrompt"]>[1] = {};
     if (title.length > 0) config.title = title;
     if (description.length > 0) config.description = description;
     if (argsSchema != null) config.argsSchema = argsSchema;

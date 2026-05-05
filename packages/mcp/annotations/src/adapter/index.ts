@@ -18,5 +18,4 @@
  * Adapters that bridge MCP annotation-based providers to the MCP SDK transport layer.
  */
 export { CompleteAdapter, type CompleteReference } from "./complete-adapter.js";
-export { PromptAdapter } from "./prompt-adapter.js";
 export { ResourceAdapter } from "./resource-adapter.js";

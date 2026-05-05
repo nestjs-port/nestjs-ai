@@ -18,7 +18,6 @@ export * from "./common/index.js";
 export * from "./adapter/index.js";
 export * from "./context/index.js";
 export * from "./method/index.js";
-export * from "./provider/index.js";
 export {
   MCP_COMPLETE_METADATA_KEY,
   MCP_ELICITATION_METADATA_KEY,

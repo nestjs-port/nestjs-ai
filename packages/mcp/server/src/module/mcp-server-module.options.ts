@@ -21,6 +21,34 @@ import type {
 } from "@modelcontextprotocol/server";
 import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
 
+export type McpServerTransportType = "stdio" | "streamable-http";
+
+export const DEFAULT_STREAMABLE_HTTP_ENDPOINT = "mcp";
+
+export interface McpServerStreamableHttpOptions {
+  /**
+   * When `true`, the server runs without session management (no
+   * `Mcp-Session-Id` header on responses, no session validation).
+   *
+   * Defaults to `false` (stateful mode).
+   */
+  statelessMode?: boolean;
+
+  /**
+   * When `true`, simple JSON responses are returned for non-streaming
+   * requests instead of SSE.
+   */
+  enableJsonResponse?: boolean;
+
+  /**
+   * Generates session identifiers in stateful mode. Ignored when
+   * `statelessMode` is `true`.
+   *
+   * Defaults to `crypto.randomUUID`.
+   */
+  sessionIdGenerator?: () => string;
+}
+
 export interface McpServerAnnotationRegistrationOptions {
   /**
    * Enables discovery and registration of methods annotated with `@McpPrompt`.
@@ -53,13 +81,45 @@ export interface McpServerModuleOptions {
    * bootstrap.
    */
   annotations?: McpServerAnnotationRegistrationOptions;
+
+  /**
+   * Streamable HTTP transport configuration. Only consulted when the module
+   * is configured with `transport: "streamable-http"`.
+   */
+  streamableHttp?: McpServerStreamableHttpOptions;
 }
 
-export interface McpServerModuleAsyncOptions {
+/**
+ * Synchronous-only options that influence module metadata (controllers, route
+ * paths) and therefore cannot be deferred to an async factory.
+ */
+export interface McpServerModuleSyncTransportOptions {
+  /**
+   * Transport to bind to the MCP server. Defaults to `"streamable-http"`.
+   */
+  transport?: McpServerTransportType;
+
+  /**
+   * HTTP endpoint path for the streamable-http controller. Ignored for
+   * `transport: "stdio"`.
+   *
+   * Defaults to `"mcp"`.
+   */
+  endpoint?: string;
+}
+
+/**
+ * Options resolved asynchronously through `useFactory`. The transport-shape
+ * options live on {@link McpServerModuleAsyncOptions} directly because
+ * controller registration must happen synchronously at module definition time.
+ */
+export type McpServerAsyncFactoryOptions = Omit<McpServerModuleOptions, never>;
+
+export interface McpServerModuleAsyncOptions extends McpServerModuleSyncTransportOptions {
   imports?: ModuleMetadata["imports"];
   inject?: InjectionToken[];
   useFactory: (
     ...args: never[]
-  ) => Promise<McpServerModuleOptions> | McpServerModuleOptions;
+  ) => Promise<McpServerAsyncFactoryOptions> | McpServerAsyncFactoryOptions;
   global?: boolean;
 }

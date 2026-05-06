@@ -36,6 +36,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@modelcontextprotocol/node": "^2.0.0-alpha.2",
     "@modelcontextprotocol/server": "^2.0.0-alpha.2",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/mcp-annotations": "workspace:*",
@@ -44,6 +45,7 @@
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {
+    "@modelcontextprotocol/node": "^2.0.0-alpha.2",
     "@modelcontextprotocol/server": "^2.0.0-alpha.2",
     "@nestjs-ai/commons": "^0.1.1",
     "@nestjs-ai/mcp-annotations": "^0.1.0",

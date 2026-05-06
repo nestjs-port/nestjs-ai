@@ -17,9 +17,7 @@
 import assert from "node:assert/strict";
 import { McpServer } from "@modelcontextprotocol/server";
 import { type DynamicModule, Module, type Provider } from "@nestjs/common";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
-import { McpNestProviderInstanceExplorer } from "./mcp-nest-provider-instance-explorer.js";
 import type {
   McpServerModuleAsyncOptions,
   McpServerModuleOptions,
@@ -63,10 +61,6 @@ export class McpServerModule {
 
 function createProviders(): Provider[] {
   return [
-    {
-      provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
-      useClass: McpNestProviderInstanceExplorer,
-    },
     {
       provide: MCP_SERVER_TOKEN,
       useFactory: (options: McpServerModuleOptions) => {

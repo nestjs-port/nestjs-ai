@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/mcp-server",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": false,
   "description": "MCP server support for NestJS AI",
   "keywords": [
@@ -34,6 +34,22 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/server": "^2.0.0-alpha.2",
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/mcp-annotations": "workspace:*",
+    "@nestjs-port/core": "^0.1.1",
+    "@nestjs/common": "^11.1.11",
+    "reflect-metadata": "^0.2.2"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/server": "^2.0.0-alpha.2",
+    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/mcp-annotations": "^0.1.0",
+    "@nestjs-port/core": "^0.1.0",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "reflect-metadata": "^0.1.12 || ^0.2.0"
   },
   "engines": {
     "node": ">=22.12.0"

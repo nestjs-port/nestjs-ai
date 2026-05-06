@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./module/index.js";
-export * from "./transport/index.js";
+export { McpServerStdioService } from "./stdio.service.js";
+export { createStreamableHttpController } from "./streamable-http.controller.factory.js";
+export { McpServerStreamableHttpService } from "./streamable-http.service.js";

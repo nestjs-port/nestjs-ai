@@ -15,13 +15,20 @@
  */
 
 export { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
-export type {
-  McpServerAnnotationRegistrationOptions,
-  McpServerModuleAsyncOptions,
-  McpServerModuleOptions,
+export {
+  DEFAULT_STREAMABLE_HTTP_ENDPOINT,
+  type McpServerAnnotationRegistrationOptions,
+  type McpServerAsyncFactoryOptions,
+  type McpServerModuleAsyncOptions,
+  type McpServerModuleOptions,
+  type McpServerModuleSyncTransportOptions,
+  type McpServerStreamableHttpOptions,
+  type McpServerTransportType,
 } from "./mcp-server-module.options.js";
 export { McpServerModule } from "./mcp-server.module.js";
 export {
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
+  MCP_SERVER_STREAMABLE_HTTP_ENDPOINT_TOKEN,
   MCP_SERVER_TOKEN,
+  MCP_SERVER_TRANSPORT_TYPE_TOKEN,
 } from "./mcp-server.tokens.js";

@@ -50,7 +50,10 @@ jobs:
             --filter=@nestjs-ai/document-reader-cheerio \
             --filter=@nestjs-ai/document-reader-markdown \
             --filter=@nestjs-ai/document-reader-pdf \
+            --filter=@nestjs-ai/mcp-annotations \
+            --filter=@nestjs-ai/mcp-client \
             --filter=@nestjs-ai/mcp-common \
+            --filter=@nestjs-ai/mcp-server \
             --filter=@nestjs-ai/model \
             --filter=@nestjs-ai/model-anthropic \
             --filter=@nestjs-ai/model-chat-memory-repository-jsdbc \
@@ -69,5 +72,7 @@ jobs:
             --filter=@nestjs-ai/document-reader-tika \
             --filter=@nestjs-ai/integration-tests \
             --filter=@nestjs-ai/model-chat-memory-repository-redis \
+            --filter=@nestjs-ai/model-chat-memory-repository-mongodb \
+            --filter=@nestjs-ai/vector-store-pgvector \
             --filter=@nestjs-ai/vector-store-redis \
             --concurrency=1

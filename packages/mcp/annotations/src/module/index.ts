@@ -15,7 +15,6 @@
  */
 
 export { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
-export { McpNestProviderInstanceExplorer } from "./mcp-nest-provider-instance-explorer.js";
 export type {
   McpServerAnnotationRegistrationOptions,
   McpServerModuleAsyncOptions,

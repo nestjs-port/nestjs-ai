@@ -36,13 +36,18 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "^2.0.0-alpha.2",
     "@modelcontextprotocol/node": "^2.0.0-alpha.2",
     "@modelcontextprotocol/server": "^2.0.0-alpha.2",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/mcp-annotations": "workspace:*",
     "@nestjs-port/core": "^0.1.1",
     "@nestjs/common": "^11.1.11",
-    "reflect-metadata": "^0.2.2"
+    "@nestjs/platform-express": "^11.1.11",
+    "@nestjs/platform-fastify": "^11.1.11",
+    "@nestjs/testing": "^11.1.11",
+    "reflect-metadata": "^0.2.2",
+    "tsx": "^4.19.2"
   },
   "peerDependencies": {
     "@modelcontextprotocol/node": "^2.0.0-alpha.2",

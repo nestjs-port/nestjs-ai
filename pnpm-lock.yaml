@@ -305,21 +305,17 @@ importers:
       '@modelcontextprotocol/server':
         specifier: ^2.0.0-alpha.2
         version: 2.0.0-alpha.2(@cfworker/json-schema@4.1.1)
-      '@nestjs-ai/commons':
-        specifier: workspace:*
-        version: link:../../commons
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
-      '@nestjs/common':
-        specifier: ^11.1.11
-        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
       zod:
         specifier: ^4.3.6
         version: 4.3.6
+
+  packages/mcp/client: {}
 
   packages/mcp/common:
     devDependencies:
@@ -338,6 +334,27 @@ importers:
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
+
+  packages/mcp/server:
+    devDependencies:
+      '@modelcontextprotocol/server':
+        specifier: ^2.0.0-alpha.2
+        version: 2.0.0-alpha.2(@cfworker/json-schema@4.1.1)
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
+      '@nestjs-ai/mcp-annotations':
+        specifier: workspace:*
+        version: link:../annotations
+      '@nestjs-port/core':
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
 
   packages/memory/repository/model-chat-memory-repository-jsdbc:
     devDependencies:

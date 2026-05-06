@@ -22,7 +22,7 @@ import {
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { McpPromptProvider } from "../provider/index.js";
+import { McpPromptProvider } from "@nestjs-ai/mcp-annotations";
 import type { McpServerModuleOptions } from "./mcp-server-module.options.js";
 import {
   MCP_SERVER_TOKEN,

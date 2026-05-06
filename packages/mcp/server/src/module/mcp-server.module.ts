@@ -16,50 +16,110 @@
 
 import assert from "node:assert/strict";
 import { McpServer } from "@modelcontextprotocol/server";
-import { type DynamicModule, Module, type Provider } from "@nestjs/common";
+import {
+  type DynamicModule,
+  Module,
+  type Provider,
+  type Type,
+} from "@nestjs/common";
+import { McpServerStdioService } from "../transport/index.js";
+import { createStreamableHttpController } from "../transport/index.js";
+import { McpServerStreamableHttpService } from "../transport/index.js";
 import { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
-import type {
-  McpServerModuleAsyncOptions,
-  McpServerModuleOptions,
+import {
+  DEFAULT_STREAMABLE_HTTP_ENDPOINT,
+  type McpServerModuleAsyncOptions,
+  type McpServerModuleOptions,
+  type McpServerModuleSyncTransportOptions,
+  type McpServerTransportType,
 } from "./mcp-server-module.options.js";
 import {
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
+  MCP_SERVER_STREAMABLE_HTTP_ENDPOINT_TOKEN,
   MCP_SERVER_TOKEN,
+  MCP_SERVER_TRANSPORT_TYPE_TOKEN,
 } from "./mcp-server.tokens.js";
+
+const DEFAULT_TRANSPORT: McpServerTransportType = "streamable-http";
 
 @Module({})
 export class McpServerModule {
   static forRoot(
-    options: McpServerModuleOptions,
+    options: McpServerModuleOptions & McpServerModuleSyncTransportOptions,
     moduleOptions: { global?: boolean } = {},
   ): DynamicModule {
-    return McpServerModule.forRootAsync({
-      useFactory: () => options,
-      global: moduleOptions.global,
+    const transport = options.transport ?? DEFAULT_TRANSPORT;
+    const endpoint = options.endpoint ?? DEFAULT_STREAMABLE_HTTP_ENDPOINT;
+    const { transport: _t, endpoint: _e, ...rest } = options;
+    void _t;
+    void _e;
+
+    return McpServerModule.buildDynamicModule({
+      transport,
+      endpoint,
+      global: moduleOptions.global ?? false,
+      imports: [],
+      optionsProvider: {
+        provide: MCP_SERVER_MODULE_OPTIONS_TOKEN,
+        useValue: rest,
+      },
     });
   }
 
   static forRootAsync(options: McpServerModuleAsyncOptions): DynamicModule {
-    const providers = createProviders();
+    const transport = options.transport ?? DEFAULT_TRANSPORT;
+    const endpoint = options.endpoint ?? DEFAULT_STREAMABLE_HTTP_ENDPOINT;
+
+    return McpServerModule.buildDynamicModule({
+      transport,
+      endpoint,
+      global: options.global ?? false,
+      imports: options.imports ?? [],
+      optionsProvider: {
+        provide: MCP_SERVER_MODULE_OPTIONS_TOKEN,
+        useFactory: options.useFactory,
+        inject: options.inject ?? [],
+      },
+    });
+  }
+
+  private static buildDynamicModule(args: {
+    transport: McpServerTransportType;
+    endpoint: string;
+    global: boolean;
+    imports: NonNullable<DynamicModule["imports"]>;
+    optionsProvider: Provider;
+  }): DynamicModule {
+    const { transport, endpoint, global, imports, optionsProvider } = args;
+
+    const baseProviders: Provider[] = [
+      optionsProvider,
+      {
+        provide: MCP_SERVER_TRANSPORT_TYPE_TOKEN,
+        useValue: transport,
+      },
+      {
+        provide: MCP_SERVER_STREAMABLE_HTTP_ENDPOINT_TOKEN,
+        useValue: endpoint,
+      },
+      ...createServerProviders(),
+    ];
+
+    const transportProviders = createTransportProviders(transport);
+    const controllers = createTransportControllers(transport, endpoint);
 
     return {
       module: McpServerModule,
-      imports: options.imports ?? [],
-      providers: [
-        {
-          provide: MCP_SERVER_MODULE_OPTIONS_TOKEN,
-          useFactory: options.useFactory,
-          inject: options.inject ?? [],
-        },
-        ...providers,
-      ],
+      imports,
+      controllers,
+      providers: [...baseProviders, ...transportProviders],
       exports: [MCP_SERVER_TOKEN, McpServer, McpServerAnnotationRegistrar],
-      global: options.global ?? false,
+      global,
     };
   }
 }
 
-function createProviders(): Provider[] {
+function createServerProviders(): Provider[] {
   return [
     {
       provide: MCP_SERVER_TOKEN,
@@ -83,4 +143,25 @@ function createProviders(): Provider[] {
     },
     McpServerAnnotationRegistrar,
   ];
+}
+
+function createTransportProviders(
+  transport: McpServerTransportType,
+): Provider[] {
+  switch (transport) {
+    case "stdio":
+      return [McpServerStdioService];
+    case "streamable-http":
+      return [McpServerStreamableHttpService];
+  }
+}
+
+function createTransportControllers(
+  transport: McpServerTransportType,
+  endpoint: string,
+): Type<unknown>[] {
+  if (transport === "streamable-http") {
+    return [createStreamableHttpController(endpoint)];
+  }
+  return [];
 }

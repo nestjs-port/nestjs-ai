@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Inject,
-  Injectable,
-  type OnApplicationBootstrap,
-} from "@nestjs/common";
+import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
@@ -30,7 +26,7 @@ import {
 } from "./mcp-server.tokens.js";
 
 @Injectable()
-export class McpServerAnnotationRegistrar implements OnApplicationBootstrap {
+export class McpServerAnnotationRegistrar implements OnModuleInit {
   private registered = false;
 
   constructor(
@@ -42,7 +38,7 @@ export class McpServerAnnotationRegistrar implements OnApplicationBootstrap {
     private readonly providerInstanceExplorer: ProviderInstanceExplorer,
   ) {}
 
-  onApplicationBootstrap(): void {
+  onModuleInit(): void {
     if (this.registered) {
       return;
     }

@@ -1,0 +1,41 @@
+{
+  "name": "@nestjs-ai/mcp-server",
+  "version": "0.0.0",
+  "private": false,
+  "description": "MCP server support for NestJS AI",
+  "keywords": [
+    "ai",
+    "mcp",
+    "nestjs",
+    "server"
+  ],
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/mcp/server"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

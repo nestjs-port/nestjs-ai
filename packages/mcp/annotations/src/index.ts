@@ -83,6 +83,10 @@ export type {
   McpSamplingMetadata,
   McpSamplingOptions,
 } from "./mcp-sampling.js";
+export {
+  McpSamplingProvider,
+  type McpSamplingProviderProps,
+} from "./provider/sampling/index.js";
 export { McpTool } from "./mcp-tool.js";
 export type {
   McpToolAnnotationsMetadata,

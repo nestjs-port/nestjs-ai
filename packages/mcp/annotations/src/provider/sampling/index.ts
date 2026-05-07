@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./module/index.js";
+export {
+  McpSamplingProvider,
+  type McpSamplingProviderProps,
+} from "./mcp-sampling-provider.js";

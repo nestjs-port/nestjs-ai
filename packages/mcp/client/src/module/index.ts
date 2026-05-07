@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export * from "./module/index.js";
+export { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
+export { McpClientSamplingScanner } from "./mcp-client-sampling-scanner.js";
+export {
+  type McpClientAnnotationRegistrationOptions,
+  type McpClientModuleAsyncOptions,
+  type McpClientModuleOptions,
+  type McpClientRegistration,
+  normalizeMcpClientRegistrations,
+} from "./mcp-client-module.options.js";
+export { McpClientModule } from "./mcp-client.module.js";
+export { MCP_CLIENT_REGISTRATIONS_TOKEN } from "./mcp-client.tokens.js";

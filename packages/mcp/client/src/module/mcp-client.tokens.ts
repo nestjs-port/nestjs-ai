@@ -14,4 +14,12 @@
  * limitations under the License.
  */
 
-export * from "./module/index.js";
+export const MCP_CLIENT_TOKEN = Symbol.for("MCP_CLIENT_TOKEN");
+
+export const MCP_CLIENT_MODULE_OPTIONS_TOKEN = Symbol.for(
+  "MCP_CLIENT_MODULE_OPTIONS_TOKEN",
+);
+
+export const MCP_CLIENT_REGISTRATIONS_TOKEN = Symbol.for(
+  "MCP_CLIENT_REGISTRATIONS_TOKEN",
+);

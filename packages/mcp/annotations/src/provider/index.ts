@@ -15,3 +15,4 @@
  */
 
 export * from "./prompt/index.js";
+export * from "./sampling/index.js";

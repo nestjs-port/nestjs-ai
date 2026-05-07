@@ -1,0 +1,95 @@
+/*
+ * Copyright 2023-present the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import "reflect-metadata";
+import assert from "node:assert/strict";
+
+import {
+  McpSamplingMethodCallback,
+  type SamplingSpecification,
+} from "../../method/index.js";
+import type { McpSamplingMetadata } from "../../mcp-sampling.js";
+import { MCP_SAMPLING_METADATA_KEY } from "../../metadata.js";
+
+export interface McpSamplingProviderProps {
+  samplingObjects: object[];
+}
+
+/**
+ * Discovers `@McpSampling`-annotated methods on a list of objects and produces
+ * {@link SamplingSpecification} entries for them.
+ */
+export class McpSamplingProvider {
+  private readonly _samplingObjects: readonly object[];
+
+  constructor(props: McpSamplingProviderProps) {
+    assert(props.samplingObjects != null, "samplingObjects can't be null!");
+
+    this._samplingObjects = [...props.samplingObjects];
+  }
+
+  /**
+   * Build the specification entry for each `@McpSampling`-decorated method on
+   * every supplied object. Entries are sorted by method name for deterministic
+   * output across runs.
+   */
+  getSamplingSpecifications(): SamplingSpecification[] {
+    return this._samplingObjects.flatMap((samplingObject) =>
+      this.discoverSamplingMethods(samplingObject).map((propertyKey) => {
+        const metadata = this.getSamplingMetadata(samplingObject, propertyKey);
+        if (metadata == null) {
+          throw new Error(
+            `@McpSampling metadata missing on ${String(propertyKey)}`,
+          );
+        }
+
+        const callback = new McpSamplingMethodCallback({
+          provider: samplingObject,
+          propertyKey,
+        });
+
+        return {
+          clients: [...metadata.clients],
+          samplingHandler: (request) => callback.apply(request),
+        } satisfies SamplingSpecification;
+      }),
+    );
+  }
+
+  private discoverSamplingMethods(bean: object): (string | symbol)[] {
+    const prototype = Object.getPrototypeOf(bean) as object;
+    return Object.getOwnPropertyNames(prototype)
+      .filter((name) => name !== "constructor")
+      .filter(
+        (name) => typeof (bean as Record<string, unknown>)[name] === "function",
+      )
+      .filter((name) => this.getSamplingMetadata(bean, name) != null)
+      .sort((a, b) => a.localeCompare(b));
+  }
+
+  private getSamplingMetadata(
+    bean: object,
+    propertyKey: string | symbol,
+  ): McpSamplingMetadata | null {
+    return (
+      (Reflect.getMetadata(
+        MCP_SAMPLING_METADATA_KEY,
+        Object.getPrototypeOf(bean),
+        propertyKey,
+      ) as McpSamplingMetadata | undefined) ?? null
+    );
+  }
+}

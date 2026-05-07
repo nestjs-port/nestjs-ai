@@ -57,13 +57,12 @@ type McpSamplingMethodDecoratorFor = <T extends (...args: any[]) => any>(
 ) => void;
 
 /**
- * Annotation for methods that handle sampling requests from MCP servers. This annotation
- * is applicable only for MCP clients.
+ * Annotation for methods that handle sampling requests from MCP clients. This
+ * annotation is applicable only for MCP clients.
  *
- * Methods annotated with this annotation can be used to process sampling requests from
- * MCP servers. The methods can have one of two signatures:
- * - A single parameter of type `CreateMessageRequest`
- * - Multiple parameters corresponding to the fields of `CreateMessageRequest`
+ * Methods annotated with this annotation can be used to process sampling requests
+ * from MCP servers. The decorated method must accept a single parameter of type
+ * `CreateMessageRequest`.
  *
  * For synchronous handlers, the method must return `CreateMessageResult`. For
  * asynchronous handlers, the method must return `Promise<CreateMessageResult>`.
@@ -73,13 +72,13 @@ type McpSamplingMethodDecoratorFor = <T extends (...args: any[]) => any>(
  * @McpSampling({ clients: ["test-client"] })
  * handleSamplingRequest(request: CreateMessageRequest): CreateMessageResult {
  *   // Process the request and return a result
- *   return { message: "Generated response" };
+ *   return { role: "assistant", content: { type: "text", text: "Generated response" }, model: "test-model" };
  * }
  *
  * @McpSampling({ clients: ["test-client"] })
  * async handleAsyncSamplingRequest(request: CreateMessageRequest): Promise<CreateMessageResult> {
  *   // Process the request asynchronously and return a result
- *   return { message: "Generated response" };
+ *   return { role: "assistant", content: { type: "text", text: "Generated response" }, model: "test-model" };
  * }
  * ```
  */

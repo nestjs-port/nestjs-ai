@@ -68,8 +68,19 @@ export class McpToolListChangedProvider {
 
         return new ToolListChangedSpecification({
           clients: [...metadata.clients],
-          toolListChangeHandler: (updatedTools: Tool[]): Promise<void> =>
-            callback.apply(updatedTools),
+          toolListChangeHandler: async (
+            error: Error | null,
+            updatedTools: Tool[] | null,
+          ): Promise<void> => {
+            if (error != null) {
+              throw error;
+            }
+            if (updatedTools == null) {
+              throw new TypeError("Updated tools list must not be null");
+            }
+
+            await callback.apply(updatedTools);
+          },
         });
       }),
     );

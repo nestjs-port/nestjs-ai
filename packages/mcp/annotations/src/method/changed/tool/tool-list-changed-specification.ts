@@ -15,21 +15,18 @@
  */
 
 import assert from "node:assert/strict";
+import type { ListChangedCallback } from "@modelcontextprotocol/client";
 import type { Tool } from "@modelcontextprotocol/server";
-
-export type ToolListChangedHandler = (
-  updatedTools: Tool[],
-) => void | Promise<void>;
 
 export interface ToolListChangedSpecificationProps {
   clients: string[];
-  toolListChangeHandler: ToolListChangedHandler;
+  toolListChangeHandler: ListChangedCallback<Tool>;
 }
 
 export class ToolListChangedSpecification {
   readonly clients: string[];
 
-  readonly toolListChangeHandler: ToolListChangedHandler;
+  readonly toolListChangeHandler: ListChangedCallback<Tool>;
 
   constructor(props: ToolListChangedSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

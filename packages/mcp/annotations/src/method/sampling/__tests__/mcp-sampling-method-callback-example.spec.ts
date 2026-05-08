@@ -17,7 +17,7 @@
 import type {
   CreateMessageRequest,
   CreateMessageResult,
-} from "@modelcontextprotocol/server";
+} from "@modelcontextprotocol/client";
 
 import { McpSampling } from "../../../mcp-sampling.js";
 

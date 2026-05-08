@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 import "reflect-metadata";
 
-import type { ProgressNotification } from "@modelcontextprotocol/server";
+import type { ProgressNotification } from "@modelcontextprotocol/client";
 
 export interface McpProgressMethodCallbackProps {
   provider: object;

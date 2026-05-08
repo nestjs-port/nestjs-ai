@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CreateMessageRequest } from "@modelcontextprotocol/server";
+import type { CreateMessageRequest } from "@modelcontextprotocol/client";
 
 /**
  * Test helper for sampling tests.

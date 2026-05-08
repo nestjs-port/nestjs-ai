@@ -52,14 +52,14 @@ describe("McpResourceListChangedProvider", () => {
     expect(consumers).toHaveLength(2);
     expect(specifications).toHaveLength(2);
 
-    await consumers[0]?.(TEST_RESOURCES);
+    await consumers[0]?.(null, TEST_RESOURCES);
 
     expect(handler.lastUpdatedResources).toEqual(TEST_RESOURCES);
     expect(handler.lastUpdatedResources).toHaveLength(2);
     expect(handler.lastUpdatedResources?.[0]?.name).toBe("test-resource-1");
     expect(handler.lastUpdatedResources?.[1]?.name).toBe("test-resource-2");
 
-    await consumers[1]?.(TEST_RESOURCES);
+    await consumers[1]?.(null, TEST_RESOURCES);
 
     expect(handler.lastUpdatedResources).toEqual(TEST_RESOURCES);
   });
@@ -109,11 +109,11 @@ describe("McpResourceListChangedProvider", () => {
     expect(consumer).toBeDefined();
 
     const emptyList: Resource[] = [];
-    await consumer?.(emptyList);
+    await consumer?.(null, emptyList);
     expect(handler.lastUpdatedResources).toEqual(emptyList);
     expect(handler.lastUpdatedResources).toHaveLength(0);
 
-    await consumer?.(TEST_RESOURCES);
+    await consumer?.(null, TEST_RESOURCES);
     expect(handler.lastUpdatedResources).toEqual(TEST_RESOURCES);
     expect(handler.lastUpdatedResources).toHaveLength(2);
   });

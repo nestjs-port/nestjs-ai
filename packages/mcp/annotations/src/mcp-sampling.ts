@@ -18,7 +18,7 @@ import "reflect-metadata";
 import type {
   CreateMessageRequest,
   CreateMessageResult,
-} from "@modelcontextprotocol/server";
+} from "@modelcontextprotocol/client";
 
 import { MCP_SAMPLING_METADATA_KEY } from "./metadata.js";
 

@@ -15,11 +15,15 @@
  */
 
 import assert from "node:assert/strict";
-import type { ProgressNotification } from "@modelcontextprotocol/server";
+import type { ProgressNotification } from "@modelcontextprotocol/client";
+
+export type McpProgressHandler = (
+  notification: ProgressNotification,
+) => Promise<void>;
 
 export interface ProgressSpecificationProps {
   clients: string[];
-  progressHandler: (notification: ProgressNotification) => Promise<void>;
+  progressHandler: McpProgressHandler;
 }
 
 /**
@@ -28,9 +32,7 @@ export interface ProgressSpecificationProps {
 export class ProgressSpecification {
   readonly clients: string[];
 
-  readonly progressHandler: (
-    notification: ProgressNotification,
-  ) => Promise<void>;
+  readonly progressHandler: McpProgressHandler;
 
   constructor(props: ProgressSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

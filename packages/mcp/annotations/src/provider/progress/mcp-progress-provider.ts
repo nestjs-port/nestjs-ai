@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ProgressNotification } from "@modelcontextprotocol/server";
+import type { ProgressNotification } from "@modelcontextprotocol/client";
 
 import { MCP_PROGRESS_METADATA_KEY } from "../../metadata.js";
 import {

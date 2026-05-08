@@ -15,21 +15,18 @@
  */
 
 import assert from "node:assert/strict";
+import type { ListChangedCallback } from "@modelcontextprotocol/client";
 import type { Resource } from "@modelcontextprotocol/server";
-
-export type ResourceListChangedHandler = (
-  updatedResources: Resource[],
-) => void | Promise<void>;
 
 export interface ResourceListChangedSpecificationProps {
   clients: string[];
-  resourceListChangeHandler: ResourceListChangedHandler;
+  resourceListChangeHandler: ListChangedCallback<Resource>;
 }
 
 export class ResourceListChangedSpecification {
   readonly clients: string[];
 
-  readonly resourceListChangeHandler: ResourceListChangedHandler;
+  readonly resourceListChangeHandler: ListChangedCallback<Resource>;
 
   constructor(props: ResourceListChangedSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

@@ -42,14 +42,14 @@ describe("McpPromptListChangedProvider", () => {
     expect(consumers).toHaveLength(2);
     expect(specifications).toHaveLength(2);
 
-    await consumers[0]?.(TEST_PROMPTS);
+    await consumers[0]?.(null, TEST_PROMPTS);
 
     expect(handler.lastUpdatedPrompts).toEqual(TEST_PROMPTS);
     expect(handler.lastUpdatedPrompts).toHaveLength(2);
     expect(handler.lastUpdatedPrompts?.[0]?.name).toBe("test-prompt-1");
     expect(handler.lastUpdatedPrompts?.[1]?.name).toBe("test-prompt-2");
 
-    await consumers[1]?.(TEST_PROMPTS);
+    await consumers[1]?.(null, TEST_PROMPTS);
 
     expect(handler.lastUpdatedPrompts).toEqual(TEST_PROMPTS);
   });
@@ -98,11 +98,11 @@ describe("McpPromptListChangedProvider", () => {
     expect(consumer).toBeDefined();
 
     const emptyList: Prompt[] = [];
-    await consumer?.(emptyList);
+    await consumer?.(null, emptyList);
     expect(handler.lastUpdatedPrompts).toEqual(emptyList);
     expect(handler.lastUpdatedPrompts).toHaveLength(0);
 
-    await consumer?.(TEST_PROMPTS);
+    await consumer?.(null, TEST_PROMPTS);
     expect(handler.lastUpdatedPrompts).toEqual(TEST_PROMPTS);
     expect(handler.lastUpdatedPrompts).toHaveLength(2);
   });

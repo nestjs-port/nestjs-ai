@@ -14,38 +14,74 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
 import "reflect-metadata";
-import type { ProgressNotification } from "@modelcontextprotocol/server";
-import {
-  AbstractMcpProgressMethodCallback,
-  McpProgressMethodException,
-  type AbstractMcpProgressMethodCallbackProps,
-} from "./abstract-mcp-progress-method-callback.js";
 
-export type McpProgressMethodCallbackProps =
-  AbstractMcpProgressMethodCallbackProps;
+import type { ProgressNotification } from "@modelcontextprotocol/server";
+
+export interface McpProgressMethodCallbackProps {
+  provider: object;
+  propertyKey: string | symbol;
+}
+
+export class McpProgressMethodException extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "McpProgressMethodException";
+  }
+}
 
 /**
  * Asynchronous implementation of a progress method callback.
- *
- * This class creates a Function that invokes a method annotated with `McpProgress`
- * asynchronously when a progress notification is received, returning a `Promise<void>`.
  */
-export class McpProgressMethodCallback extends AbstractMcpProgressMethodCallback {
+export class McpProgressMethodCallback {
+  protected readonly _provider: object;
+
+  protected readonly _propertyKey: string | symbol;
+
+  protected readonly _method: (...args: unknown[]) => unknown;
+
   constructor(props: McpProgressMethodCallbackProps) {
-    super(props);
+    assert(props.propertyKey != null, "Method can't be null!");
+    assert(props.provider != null, "Provider can't be null!");
+
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
+
+    const candidate = (props.provider as Record<string | symbol, unknown>)[
+      props.propertyKey
+    ];
+    if (typeof candidate !== "function") {
+      throw new Error(
+        `Method must not be null: ${String(props.propertyKey)} in ${this.declaringClassName}`,
+      );
+    }
+    this._method = candidate as (...args: unknown[]) => unknown;
   }
 
-  /**
-   * Apply the progress notification and process it asynchronously.
-   *
-   * This method builds the arguments for the method call and invokes the method,
-   * returning a `Promise<void>`.
-   * @param notification The progress notification, must not be null
-   * @returns A Promise that resolves when the asynchronous operation completes
-   * @throws McpProgressMethodException if there is an error invoking the progress method
-   * @throws TypeError if the notification is null
-   */
+  protected get methodName(): string {
+    return typeof this._propertyKey === "string"
+      ? this._propertyKey
+      : this._propertyKey.toString();
+  }
+
+  protected get declaringClassName(): string {
+    return this._provider.constructor?.name ?? "<anonymous>";
+  }
+
+  protected buildArgs(notification: ProgressNotification): unknown[] {
+    if (this._method.length === 1) {
+      return [notification];
+    }
+
+    const total = notification.params.total;
+    return [
+      notification.params.progress,
+      notification.params.progressToken,
+      total != null ? String(total) : null,
+    ];
+  }
+
   async apply(notification: ProgressNotification): Promise<void> {
     if (notification == null) {
       throw new TypeError("Notification must not be null");

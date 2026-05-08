@@ -18,7 +18,7 @@ import "reflect-metadata";
 import type { Tool } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import { McpToolListChanged } from "../../../../mcp-tool-list-changed.js";
-import { McpToolListChangedConsumerMethodException } from "../abstract-mcp-tool-list-changed-method-callback.js";
+import { McpToolListChangedConsumerMethodException } from "../mcp-tool-list-changed-method-callback.js";
 import { McpToolListChangedMethodCallback } from "../mcp-tool-list-changed-method-callback.js";
 
 const TEST_TOOLS = [

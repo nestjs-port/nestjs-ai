@@ -19,7 +19,7 @@ import type { Prompt } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import { McpPromptListChanged } from "../../../../mcp-prompt-list-changed.js";
 import { McpPromptListChangedMethodCallback } from "../mcp-prompt-list-changed-method-callback.js";
-import { McpPromptListChangedConsumerMethodException } from "../abstract-mcp-prompt-list-changed-method-callback.js";
+import { McpPromptListChangedConsumerMethodException } from "../mcp-prompt-list-changed-method-callback.js";
 
 const TEST_PROMPTS = [
   { name: "test-prompt-1", title: "Test Prompt 1" } as Prompt,

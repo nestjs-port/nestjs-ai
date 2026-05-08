@@ -21,7 +21,7 @@ import { describe, expect, it } from "vitest";
 
 import { ElicitationTestHelper } from "./elicitation-test-helper.js";
 import { McpElicitationMethodCallback } from "../mcp-elicitation-method-callback.js";
-import { McpElicitationMethodException } from "../abstract-mcp-elicitation-method-callback.js";
+import { McpElicitationMethodException } from "../mcp-elicitation-method-callback.js";
 import { McpElicitationMethodCallbackExample } from "./mcp-elicitation-method-callback-example.spec.js";
 
 const SAMPLE_REQUEST = ElicitationTestHelper.createSampleRequest();

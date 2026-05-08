@@ -77,7 +77,7 @@ export class McpResourceMethodCallbackExample {
         const uriPattern = annotation.uri;
 
         resourceHandlers.set(uriPattern, (exchange, request) =>
-          callback.apply(exchange, request),
+          callback.handle(exchange, request),
         );
 
         // Print information about URI variables if present

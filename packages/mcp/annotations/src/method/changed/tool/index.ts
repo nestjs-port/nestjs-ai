@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-export {
-  AbstractMcpToolListChangedMethodCallback,
-  McpToolListChangedConsumerMethodException,
-} from "./abstract-mcp-tool-list-changed-method-callback.js";
+export { McpToolListChangedConsumerMethodException } from "./mcp-tool-list-changed-method-callback.js";
 export {
   McpToolListChangedMethodCallback,
   type McpToolListChangedMethodCallbackProps,

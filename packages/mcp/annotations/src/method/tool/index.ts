@@ -15,15 +15,8 @@
  */
 
 export {
-  AbstractMcpToolMethodCallback,
-  type AbstractMcpToolMethodCallbackProps,
-} from "./abstract-mcp-tool-method-callback.js";
-export {
-  McpStatelessToolMethodCallback,
-  type McpStatelessToolMethodCallbackProps,
-} from "./mcp-stateless-tool-method-callback.js";
-export {
   McpToolMethodCallback,
+  type ToolRegistration,
   type McpToolMethodCallbackProps,
 } from "./mcp-tool-method-callback.js";
 export type {

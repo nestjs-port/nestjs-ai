@@ -16,14 +16,17 @@
 
 import "reflect-metadata";
 import type { Resource } from "@modelcontextprotocol/server";
-import {
-  AbstractMcpResourceListChangedMethodCallback,
-  McpResourceListChangedConsumerMethodException,
-} from "./abstract-mcp-resource-list-changed-method-callback.js";
 
 export interface McpResourceListChangedMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
+}
+
+export class McpResourceListChangedConsumerMethodException extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "McpResourceListChangedConsumerMethodException";
+  }
 }
 
 /**
@@ -34,9 +37,43 @@ export interface McpResourceListChangedMethodCallbackProps {
  * in an asynchronous way. It supports methods with a single `Resource[]` parameter and a
  * `void` or `Promise<void>` return type.
  */
-export class McpResourceListChangedMethodCallback extends AbstractMcpResourceListChangedMethodCallback {
+export class McpResourceListChangedMethodCallback {
+  protected readonly _provider: object;
+
+  protected readonly _propertyKey: string | symbol;
+
+  protected readonly _method: (...args: unknown[]) => unknown;
+
   constructor(props: McpResourceListChangedMethodCallbackProps) {
-    super(props.provider, props.propertyKey);
+    if (props.propertyKey == null) {
+      throw new Error("Method can't be null!");
+    }
+    if (props.provider == null) {
+      throw new Error("Provider can't be null!");
+    }
+
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
+
+    const candidate = (props.provider as Record<string | symbol, unknown>)[
+      props.propertyKey
+    ];
+    if (typeof candidate !== "function") {
+      throw new Error(
+        `Method must not be null: ${String(props.propertyKey)} in ${this.declaringClassName}`,
+      );
+    }
+    this._method = candidate as (...args: unknown[]) => unknown;
+  }
+
+  protected get methodName(): string {
+    return typeof this._propertyKey === "string"
+      ? this._propertyKey
+      : this._propertyKey.toString();
+  }
+
+  protected get declaringClassName(): string {
+    return this._provider.constructor?.name ?? "<anonymous>";
   }
 
   /**

@@ -25,6 +25,7 @@ import type {
   StandardSchemaV1,
 } from "@standard-schema/spec";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import {
   McpServerExchange,
@@ -32,12 +33,29 @@ import {
 } from "../../../context/index.js";
 import { McpTool } from "../../../mcp-tool.js";
 import { McpToolMethodCallback } from "../mcp-tool-method-callback.js";
+import type { ToolRegistration } from "../mcp-tool-method-callback.js";
 import type { McpToolMethodArguments } from "../../../mcp-tool.js";
 import { ReturnMode } from "../return-mode.js";
 
 type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
 
 describe("McpToolMethodCallback", () => {
+  it("returns [name, config, callback] tuple ready for registerTool", () => {
+    const callback = createCallback(
+      new TestToolProvider(),
+      "simpleTool",
+      ReturnMode.TEXT,
+    );
+
+    const [name, config, cb] = callback.apply();
+
+    expect(name).toBe("simple-tool");
+    expect(config.description).toBe("A simple tool");
+    expect(typeof cb).toBe("function");
+    const spec: ToolRegistration = [name, config, cb];
+    expect(spec).toHaveLength(3);
+  });
+
   it("testSimpleToolCallback", async () => {
     const provider = new TestToolProvider();
     const callback = createCallback(provider, "simpleTool", ReturnMode.TEXT);
@@ -45,7 +63,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("simple-tool", { input: "test message" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result).not.toBeNull();
     expect(result.isError).toBeFalsy();
@@ -63,7 +81,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("math-tool", { a: 5, b: 3 });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result).not.toBeNull();
     expect(result.isError).toBeFalsy();
@@ -82,7 +100,7 @@ describe("McpToolMethodCallback", () => {
       active: true,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result).not.toBeNull();
     expect(result.isError).toBeFalsy();
@@ -104,7 +122,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("exchange-tool", { message: "hello" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result).not.toBeNull();
     expect(result.isError).toBeFalsy();
@@ -123,7 +141,7 @@ describe("McpToolMethodCallback", () => {
       items: ["item1", "item2", "item3"],
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -141,7 +159,7 @@ describe("McpToolMethodCallback", () => {
       obj: { name: "test", value: 42 },
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -157,7 +175,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("no-params-tool", {});
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -173,7 +191,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("enum-tool", { enumValue: "OPTION_B" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -201,7 +219,7 @@ describe("McpToolMethodCallback", () => {
       d: 6.6,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -217,7 +235,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("simple-tool", { input: null });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -233,7 +251,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("simple-tool", {});
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -249,7 +267,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("exception-tool", { input: "test" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(result.content).toHaveLength(1);
@@ -267,7 +285,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("null-return-tool", {});
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({ type: "text", text: "null" });
@@ -278,7 +296,7 @@ describe("McpToolMethodCallback", () => {
     const callback = createCallback(provider, "simpleTool", ReturnMode.TEXT);
 
     await expect(
-      callback.apply(createMockExchange(), null as never),
+      callback.handle(createMockExchange(), null as never),
     ).rejects.toThrow("Request must not be null");
   });
 
@@ -293,7 +311,7 @@ describe("McpToolMethodCallback", () => {
       active: false,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -313,7 +331,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("context-tool", { message: "hello" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -336,7 +354,7 @@ describe("McpToolMethodCallback", () => {
       message: "hello",
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -361,7 +379,7 @@ describe("McpToolMethodCallback", () => {
       obj: { name: "test", value: 42 },
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -384,7 +402,7 @@ describe("McpToolMethodCallback", () => {
       value: 42,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     // For complex return types (non-primitive, non-wrapper, non-CallToolResult),
@@ -408,7 +426,7 @@ describe("McpToolMethodCallback", () => {
       value: 42,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     // For complex return types in TEXT mode, the result should be JSON serialized as
@@ -431,7 +449,7 @@ describe("McpToolMethodCallback", () => {
       value: 42,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.structuredContent).not.toBeUndefined();
@@ -461,7 +479,7 @@ describe("McpToolMethodCallback", () => {
       value: 42,
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     // For complex return types in TEXT mode, the result should be JSON serialized as
@@ -484,7 +502,7 @@ describe("McpToolMethodCallback", () => {
       data: "test-data",
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -502,7 +520,7 @@ describe("McpToolMethodCallback", () => {
       data: "test-data",
     }); // Missing 'action' parameter
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(textOf(result)).toBe("Missing required 'action' parameter");
@@ -522,7 +540,7 @@ describe("McpToolMethodCallback", () => {
       key2: "value2",
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -543,7 +561,7 @@ describe("McpToolMethodCallback", () => {
     });
 
     // The callback should properly inject the CallToolRequest
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     // The tool should have access to the full request including the tool name
@@ -567,7 +585,7 @@ describe("McpToolMethodCallback", () => {
       { progressToken: "test-progress-token-123" },
     );
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -590,7 +608,7 @@ describe("McpToolMethodCallback", () => {
       input: "test-input",
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -612,7 +630,7 @@ describe("McpToolMethodCallback", () => {
       input: "test-message",
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.structuredContent).not.toBeUndefined();
@@ -634,7 +652,7 @@ describe("McpToolMethodCallback", () => {
       { userId: "user123", sessionId: "session456" },
     );
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(textOf(result)).toContain("Input: test-input");
@@ -651,7 +669,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("meta-tool", { input: "test-input" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(textOf(result)).toBe("Input: test-input, Meta: {}");
@@ -674,7 +692,7 @@ describe("McpToolMethodCallback", () => {
       input: "test message",
     });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -690,7 +708,7 @@ describe("McpToolMethodCallback", () => {
     const exchange = createMockExchange();
     const request = createRequest("void-tool", { input: "test" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({ type: "text", text: '"Done"' });
@@ -957,7 +975,7 @@ function createCallback(
   const structuredReturnSchema =
     returnSchema ??
     (returnMode === ReturnMode.STRUCTURED
-      ? ({} as StandardSchemaWithJsonSchema)
+      ? (z.any() as StandardSchemaWithJsonSchema)
       : null);
 
   return new McpToolMethodCallback({

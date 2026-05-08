@@ -18,20 +18,16 @@ import { assert, describe, expect, it } from "vitest";
 import type {
   CompleteRequest,
   CompleteResult,
-  ServerContext,
 } from "@modelcontextprotocol/server";
 import { MCP_COMPLETE_METADATA_KEY } from "../metadata.js";
 import { McpComplete } from "../mcp-complete.js";
-import { McpMeta } from "../mcp-meta.js";
+import type { McpMeta } from "../mcp-meta.js";
 import type {
   McpCompleteMetadata,
   McpCompleteMethodArguments,
 } from "../mcp-complete.js";
 import { McpServerExchange, McpTransportContext } from "../context/index.js";
-import {
-  McpCompleteMethodCallback,
-  McpStatelessCompleteMethodCallback,
-} from "../method/index.js";
+import { McpCompleteMethodCallback } from "../method/index.js";
 
 class McpCompleteTypeExamples {
   @McpComplete({ prompt: "test-prompt" })
@@ -162,60 +158,6 @@ describe("McpComplete", () => {
     assert.exists(metadata);
     expect(metadata.prompt).toBe("test-prompt");
     expect(metadata.uri).toBe("");
-  });
-
-  it("passes a single object argument into completion handlers", async () => {
-    let receivedArgs: McpCompleteMethodArguments | undefined;
-
-    class CompletionHandler {
-      @McpComplete({ prompt: "test-prompt" })
-      async onComplete(
-        args: McpCompleteMethodArguments,
-      ): Promise<CompleteResult> {
-        receivedArgs = args;
-
-        return {
-          completion: {
-            values: ["done"],
-            total: 1,
-            hasMore: false,
-          },
-        };
-      }
-    }
-
-    const callback = new McpStatelessCompleteMethodCallback({
-      provider: new CompletionHandler(),
-      propertyKey: "onComplete",
-      complete: { prompt: "test-prompt", uri: "" },
-    });
-
-    const request = {
-      params: {
-        ref: {
-          type: "ref/prompt",
-          name: "example",
-        },
-        argument: { value: "alpha" },
-        _meta: { progressToken: "token-1", test: "meta-value" },
-      },
-    } as unknown as CompleteRequest;
-
-    const result = await callback.apply({} as ServerContext, request);
-
-    expect(result.completion.values).toEqual(["done"]);
-    expect(receivedArgs).toEqual(
-      expect.objectContaining({
-        request,
-        argument: request.params.argument,
-        value: "alpha",
-        progressToken: "token-1",
-      }),
-    );
-    expect(receivedArgs?.meta).toBeInstanceOf(McpMeta);
-    expect(receivedArgs?.meta?.get("test")).toBe("meta-value");
-    expect(receivedArgs?.context).toBeNull();
-    expect(receivedArgs?.exchange).toBeUndefined();
   });
 
   it("passes the exchange transport context into stateful completion handlers", async () => {

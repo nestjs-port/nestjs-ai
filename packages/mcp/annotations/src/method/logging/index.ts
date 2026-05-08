@@ -18,10 +18,7 @@
  * Method callbacks and specifications for MCP logging.
  */
 
-export {
-  AbstractMcpLoggingMethodCallback,
-  McpLoggingConsumerMethodException,
-} from "./abstract-mcp-logging-method-callback.js";
+export { McpLoggingConsumerMethodException } from "./mcp-logging-method-callback.js";
 export {
   LoggingSpecification,
   type LoggingSpecificationProps,

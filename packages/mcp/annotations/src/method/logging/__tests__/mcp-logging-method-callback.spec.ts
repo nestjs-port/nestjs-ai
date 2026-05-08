@@ -24,7 +24,7 @@ import { describe, expect, it } from "vitest";
 
 import { McpLogging } from "../../../mcp-logging.js";
 import { McpLoggingMethodCallback } from "../mcp-logging-method-callback.js";
-import { McpLoggingConsumerMethodException } from "../abstract-mcp-logging-method-callback.js";
+import { McpLoggingConsumerMethodException } from "../mcp-logging-method-callback.js";
 
 const TEST_NOTIFICATION = {
   method: "logging/message",

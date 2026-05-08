@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./prompt/index.js";
-export * from "./sampling/index.js";
-export * from "./elicitation/index.js";
-export * from "./logging/index.js";
-export * from "./progress/index.js";
-export * from "./changed/prompt/index.js";
-export * from "./changed/resource/index.js";
-export * from "./changed/tool/index.js";
+export {
+  McpPromptListChangedProvider,
+  type McpPromptListChangedProviderProps,
+} from "./mcp-prompt-list-changed-provider.js";

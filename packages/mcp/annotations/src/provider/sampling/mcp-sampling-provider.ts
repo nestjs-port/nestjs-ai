@@ -23,6 +23,10 @@ import {
 } from "../../method/index.js";
 import type { McpSamplingMetadata } from "../../mcp-sampling.js";
 import { MCP_SAMPLING_METADATA_KEY } from "../../metadata.js";
+import {
+  discoverAnnotatedMethodKeys,
+  getAnnotatedMethodMetadata,
+} from "../annotation-provider-utils.js";
 
 export interface McpSamplingProviderProps {
   samplingObjects: object[];
@@ -48,8 +52,15 @@ export class McpSamplingProvider {
    */
   getSamplingSpecifications(): SamplingSpecification[] {
     return this._samplingObjects.flatMap((samplingObject) =>
-      this.discoverSamplingMethods(samplingObject).map((propertyKey) => {
-        const metadata = this.getSamplingMetadata(samplingObject, propertyKey);
+      discoverAnnotatedMethodKeys(
+        samplingObject,
+        MCP_SAMPLING_METADATA_KEY,
+      ).map((propertyKey) => {
+        const metadata = getAnnotatedMethodMetadata<McpSamplingMetadata>(
+          samplingObject,
+          propertyKey,
+          MCP_SAMPLING_METADATA_KEY,
+        );
         if (metadata == null) {
           throw new Error(
             `@McpSampling metadata missing on ${String(propertyKey)}`,
@@ -66,30 +77,6 @@ export class McpSamplingProvider {
           samplingHandler: (request) => callback.apply(request),
         } satisfies SamplingSpecification;
       }),
-    );
-  }
-
-  private discoverSamplingMethods(bean: object): (string | symbol)[] {
-    const prototype = Object.getPrototypeOf(bean) as object;
-    return Object.getOwnPropertyNames(prototype)
-      .filter((name) => name !== "constructor")
-      .filter(
-        (name) => typeof (bean as Record<string, unknown>)[name] === "function",
-      )
-      .filter((name) => this.getSamplingMetadata(bean, name) != null)
-      .sort((a, b) => a.localeCompare(b));
-  }
-
-  private getSamplingMetadata(
-    bean: object,
-    propertyKey: string | symbol,
-  ): McpSamplingMetadata | null {
-    return (
-      (Reflect.getMetadata(
-        MCP_SAMPLING_METADATA_KEY,
-        Object.getPrototypeOf(bean),
-        propertyKey,
-      ) as McpSamplingMetadata | undefined) ?? null
     );
   }
 }

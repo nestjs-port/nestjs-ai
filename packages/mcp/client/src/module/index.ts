@@ -15,9 +15,9 @@
  */
 
 export { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
-export { McpClientSamplingScanner } from "./mcp-client-sampling-scanner.js";
 export {
   type McpClientAnnotationRegistrationOptions,
+  type McpClientCreationOptions,
   type McpClientModuleAsyncOptions,
   type McpClientModuleOptions,
   type McpClientRegistration,

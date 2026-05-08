@@ -48,14 +48,14 @@ describe("McpToolListChangedProvider", () => {
     expect(consumers).toHaveLength(2);
     expect(specifications).toHaveLength(2);
 
-    await consumers[0]?.(TEST_TOOLS);
+    await consumers[0]?.(null, TEST_TOOLS);
 
     expect(handler.lastUpdatedTools).toEqual(TEST_TOOLS);
     expect(handler.lastUpdatedTools).toHaveLength(2);
     expect(handler.lastUpdatedTools?.[0]?.name).toBe("test-tool-1");
     expect(handler.lastUpdatedTools?.[1]?.name).toBe("test-tool-2");
 
-    await consumers[1]?.(TEST_TOOLS);
+    await consumers[1]?.(null, TEST_TOOLS);
 
     expect(handler.lastUpdatedTools).toEqual(TEST_TOOLS);
   });
@@ -104,11 +104,11 @@ describe("McpToolListChangedProvider", () => {
     expect(consumer).toBeDefined();
 
     const emptyList: Tool[] = [];
-    await consumer?.(emptyList);
+    await consumer?.(null, emptyList);
     expect(handler.lastUpdatedTools).toEqual(emptyList);
     expect(handler.lastUpdatedTools).toHaveLength(0);
 
-    await consumer?.(TEST_TOOLS);
+    await consumer?.(null, TEST_TOOLS);
     expect(handler.lastUpdatedTools).toEqual(TEST_TOOLS);
     expect(handler.lastUpdatedTools).toHaveLength(2);
   });

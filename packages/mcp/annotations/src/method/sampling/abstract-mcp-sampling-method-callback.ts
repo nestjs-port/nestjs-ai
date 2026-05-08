@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { CreateMessageRequest } from "@modelcontextprotocol/server";
+import type { CreateMessageRequest } from "@modelcontextprotocol/client";
 
 export interface AbstractMcpSamplingMethodCallbackProps {
   provider: object;

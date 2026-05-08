@@ -15,21 +15,18 @@
  */
 
 import assert from "node:assert/strict";
+import type { ListChangedCallback } from "@modelcontextprotocol/client";
 import type { Prompt } from "@modelcontextprotocol/server";
-
-export type PromptListChangedHandler = (
-  updatedPrompts: Prompt[],
-) => void | Promise<void>;
 
 export interface PromptListChangedSpecificationProps {
   clients: string[];
-  promptListChangeHandler: PromptListChangedHandler;
+  promptListChangeHandler: ListChangedCallback<Prompt>;
 }
 
 export class PromptListChangedSpecification {
   readonly clients: string[];
 
-  readonly promptListChangeHandler: PromptListChangedHandler;
+  readonly promptListChangeHandler: ListChangedCallback<Prompt>;
 
   constructor(props: PromptListChangedSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

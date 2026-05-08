@@ -200,7 +200,7 @@ describe("provider scans", () => {
     const spec = specs[0];
     expect(spec).toBeDefined();
 
-    await spec!.promptListChangeHandler([{ name: "prompt-1" } as Prompt]);
+    await spec!.promptListChangeHandler(null, [{ name: "prompt-1" } as Prompt]);
 
     expect(specs).toHaveLength(1);
     expect(specs[0]?.clients).toEqual(["client-a"]);
@@ -226,7 +226,7 @@ describe("provider scans", () => {
     const spec = specs[0];
     expect(spec).toBeDefined();
 
-    await spec!.resourceListChangeHandler([
+    await spec!.resourceListChangeHandler(null, [
       { uri: "file:///resource.txt", name: "resource" } as Resource,
     ]);
 
@@ -254,7 +254,7 @@ describe("provider scans", () => {
     const spec = specs[0];
     expect(spec).toBeDefined();
 
-    await spec!.toolListChangeHandler([{ name: "tool-1" } as Tool]);
+    await spec!.toolListChangeHandler(null, [{ name: "tool-1" } as Tool]);
 
     expect(specs).toHaveLength(1);
     expect(specs[0]?.clients).toEqual(["client-a"]);

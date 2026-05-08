@@ -17,7 +17,7 @@
 import assert from "node:assert/strict";
 import "reflect-metadata";
 
-import type { LoggingMessageNotification } from "@modelcontextprotocol/server";
+import type { LoggingMessageNotification } from "@modelcontextprotocol/client";
 
 export interface McpLoggingMethodCallbackProps {
   provider: object;

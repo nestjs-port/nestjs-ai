@@ -17,7 +17,7 @@
 import type {
   LoggingLevel,
   LoggingMessageNotification,
-} from "@modelcontextprotocol/server";
+} from "@modelcontextprotocol/client";
 import { McpLogging } from "../../../mcp-logging.js";
 import { McpLoggingMethodCallback } from "../mcp-logging-method-callback.js";
 

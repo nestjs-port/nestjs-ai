@@ -16,7 +16,7 @@
 
 import "reflect-metadata";
 
-import type { ElicitRequest } from "@modelcontextprotocol/server";
+import type { ElicitRequest } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
 import { McpElicitation } from "../../../mcp-elicitation.js";

@@ -15,7 +15,7 @@
  */
 
 import "reflect-metadata";
-import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
+import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
 
 import { MCP_ELICITATION_METADATA_KEY } from "./metadata.js";
 import type { StructuredElicitResult } from "./context/index.js";

@@ -26,7 +26,6 @@ import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
-import { McpClientSamplingScanner } from "../mcp-client-sampling-scanner.js";
 
 describe("McpClientAnnotationRegistrar", () => {
   it("registers sampling handlers for matching clients", () => {
@@ -65,12 +64,22 @@ describe("McpClientAnnotationRegistrar", () => {
     };
 
     const registrar = new McpClientAnnotationRegistrar(
-      { annotations: { sampling: true } },
+      {
+        clients: [
+          {
+            clientInfo: {
+              name: "server-a",
+              version: "1.0.0",
+            },
+          },
+        ],
+        annotations: { sampling: true },
+      },
       [
         { clientName: "server-a", mcpClient: clientA },
         { clientName: "server-b", mcpClient: clientB },
       ],
-      new McpClientSamplingScanner(explorer),
+      explorer,
     );
 
     registrar.onModuleInit();
@@ -113,7 +122,17 @@ describe("McpClientAnnotationRegistrar", () => {
     };
 
     const registrar = new McpClientAnnotationRegistrar(
-      { annotations: { sampling: true } },
+      {
+        clients: [
+          {
+            clientInfo: {
+              name: "server-a",
+              version: "1.0.0",
+            },
+          },
+        ],
+        annotations: { sampling: true },
+      },
       [
         {
           clientName: "server-a",
@@ -122,7 +141,7 @@ describe("McpClientAnnotationRegistrar", () => {
           } as unknown as McpClient,
         },
       ],
-      new McpClientSamplingScanner(explorer),
+      explorer,
     );
 
     expect(() => registrar.onModuleInit()).toThrowError(

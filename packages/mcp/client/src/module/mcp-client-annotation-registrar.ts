@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import type {
   Client as McpClient,
   CreateMessageRequest,
 } from "@modelcontextprotocol/client";
+import {
+  LoggerFactory,
+  type ProviderInstanceExplorer,
+} from "@nestjs-port/core";
+import { McpSamplingProvider } from "@nestjs-ai/mcp-annotations";
 import type {
   McpClientModuleOptions,
   McpClientRegistration,
 } from "./mcp-client-module.options.js";
 import { MCP_CLIENT_MODULE_OPTIONS_TOKEN } from "./mcp-client.tokens.js";
 import { MCP_CLIENT_REGISTRATIONS_TOKEN } from "./mcp-client.tokens.js";
-import type { McpClientSamplingScanner } from "./mcp-client-sampling-scanner.js";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 
 @Injectable()
 export class McpClientAnnotationRegistrar implements OnModuleInit {
-  private readonly logger = new Logger(McpClientAnnotationRegistrar.name);
+  private readonly logger = LoggerFactory.getLogger(
+    McpClientAnnotationRegistrar.name,
+  );
 
   private registered = false;
 
@@ -38,7 +45,8 @@ export class McpClientAnnotationRegistrar implements OnModuleInit {
     private readonly options: McpClientModuleOptions,
     @Inject(MCP_CLIENT_REGISTRATIONS_TOKEN)
     private readonly clientRegistrations: McpClientRegistration[],
-    private readonly samplingScanner: McpClientSamplingScanner,
+    @Inject(PROVIDER_INSTANCE_EXPLORER_TOKEN)
+    private readonly providerInstanceExplorer: ProviderInstanceExplorer,
   ) {}
 
   onModuleInit(): void {
@@ -56,8 +64,9 @@ export class McpClientAnnotationRegistrar implements OnModuleInit {
       return;
     }
 
-    const samplingSpecifications =
-      this.samplingScanner.discoverSamplingSpecifications();
+    const samplingSpecifications = new McpSamplingProvider({
+      samplingObjects: this.providerInstanceExplorer.getProviderInstances(),
+    }).getSamplingSpecifications();
 
     if (samplingSpecifications.length === 0) {
       this.logger.warn("No @McpSampling methods found");
@@ -83,7 +92,7 @@ export class McpClientAnnotationRegistrar implements OnModuleInit {
     clientName: string,
     mcpClient: McpClient,
     samplingSpecifications: ReturnType<
-      McpClientSamplingScanner["discoverSamplingSpecifications"]
+      McpSamplingProvider["getSamplingSpecifications"]
     >,
   ): void {
     const matchingSpecifications = samplingSpecifications.filter((spec) =>

@@ -16,7 +16,6 @@
 
 import { Module, type DynamicModule, type Provider } from "@nestjs/common";
 import { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
-import { McpClientSamplingScanner } from "./mcp-client-sampling-scanner.js";
 import type {
   McpClientModuleAsyncOptions,
   McpClientModuleOptions,
@@ -81,14 +80,9 @@ export class McpClientModule {
       providers: [
         moduleOptionsProvider,
         optionsProvider,
-        McpClientSamplingScanner,
         McpClientAnnotationRegistrar,
       ],
-      exports: [
-        MCP_CLIENT_REGISTRATIONS_TOKEN,
-        McpClientAnnotationRegistrar,
-        McpClientSamplingScanner,
-      ],
+      exports: [MCP_CLIENT_REGISTRATIONS_TOKEN, McpClientAnnotationRegistrar],
       global,
     };
   }

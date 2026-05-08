@@ -16,7 +16,11 @@
 
 import assert from "node:assert/strict";
 
-import type { Client as McpClient } from "@modelcontextprotocol/client";
+import {
+  Client as McpClient,
+  type ClientOptions,
+  type Implementation,
+} from "@modelcontextprotocol/client";
 import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
 
 export interface McpClientAnnotationRegistrationOptions {
@@ -28,6 +32,11 @@ export interface McpClientAnnotationRegistrationOptions {
   sampling?: boolean;
 }
 
+export interface McpClientCreationOptions {
+  clientInfo: Implementation;
+  clientOptions?: ClientOptions;
+}
+
 export interface McpClientRegistration {
   clientName: string;
   mcpClient: McpClient;
@@ -35,17 +44,9 @@ export interface McpClientRegistration {
 
 export interface McpClientModuleOptions {
   /**
-   * Existing MCP client instances to register discovered annotations against.
-   * Each entry is associated with a logical client or connection name.
+   * MCP client creation specs.
    */
-  clients?: McpClientRegistration[];
-
-  /**
-   * Convenience fields for registering a single client without wrapping it in
-   * an array.
-   */
-  clientName?: string;
-  mcpClient?: McpClient;
+  clients: McpClientCreationOptions[];
 
   /**
    * Controls which annotation families are auto-registered on application bootstrap.
@@ -65,39 +66,19 @@ export interface McpClientModuleAsyncOptions {
 export function normalizeMcpClientRegistrations(
   options: McpClientModuleOptions,
 ): McpClientRegistration[] {
-  if (options.clients != null) {
-    if (options.clients.length === 0) {
-      throw new Error("clients must not be empty");
-    }
-
-    return options.clients.map((client) => {
-      assert(client.clientName != null, "clientName must not be null");
-      if (client.clientName.trim().length === 0) {
-        throw new Error("clientName must not be empty");
-      }
-      assert(client.mcpClient != null, "mcpClient must not be null");
-
-      return {
-        clientName: client.clientName,
-        mcpClient: client.mcpClient,
-      };
-    });
+  if (options.clients.length === 0) {
+    throw new Error("clients must not be empty");
   }
 
-  if (options.mcpClient != null) {
-    if (options.clientName == null || options.clientName.trim().length === 0) {
-      throw new Error(
-        "clientName must be provided when mcpClient is configured",
-      );
+  return options.clients.map((client) => {
+    assert(client.clientInfo != null, "clientInfo must not be null");
+    if (client.clientInfo.name.trim().length === 0) {
+      throw new Error("clientInfo.name must not be empty");
     }
 
-    return [
-      {
-        clientName: options.clientName,
-        mcpClient: options.mcpClient,
-      },
-    ];
-  }
-
-  throw new Error("Either clients or mcpClient must be provided");
+    return {
+      clientName: client.clientInfo.name,
+      mcpClient: new McpClient(client.clientInfo, client.clientOptions),
+    };
+  });
 }

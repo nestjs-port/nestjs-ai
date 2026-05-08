@@ -15,19 +15,21 @@
  */
 
 import assert from "node:assert/strict";
-import type { LoggingMessageNotification } from "@modelcontextprotocol/server";
+import type { LoggingMessageNotification } from "@modelcontextprotocol/client";
+
+export type McpLoggingHandler = (
+  notification: LoggingMessageNotification,
+) => Promise<void>;
 
 export interface LoggingSpecificationProps {
   clients: string[];
-  loggingHandler: (notification: LoggingMessageNotification) => Promise<void>;
+  loggingHandler: McpLoggingHandler;
 }
 
 export class LoggingSpecification {
   readonly clients: string[];
 
-  readonly loggingHandler: (
-    notification: LoggingMessageNotification,
-  ) => Promise<void>;
+  readonly loggingHandler: McpLoggingHandler;
 
   constructor(props: LoggingSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

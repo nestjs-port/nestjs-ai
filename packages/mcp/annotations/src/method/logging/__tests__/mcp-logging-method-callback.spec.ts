@@ -19,7 +19,7 @@ import "reflect-metadata";
 import type {
   LoggingLevel,
   LoggingMessageNotification,
-} from "@modelcontextprotocol/server";
+} from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
 import { McpLogging } from "../../../mcp-logging.js";

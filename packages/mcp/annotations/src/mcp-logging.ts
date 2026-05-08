@@ -18,7 +18,7 @@ import "reflect-metadata";
 import type {
   LoggingLevel,
   LoggingMessageNotification,
-} from "@modelcontextprotocol/server";
+} from "@modelcontextprotocol/client";
 import { MCP_LOGGING_METADATA_KEY } from "./metadata.js";
 
 export interface McpLoggingOptions {

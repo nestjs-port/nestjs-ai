@@ -18,21 +18,21 @@ import assert from "node:assert/strict";
 import type {
   CreateMessageRequest,
   CreateMessageResult,
-} from "@modelcontextprotocol/server";
+} from "@modelcontextprotocol/client";
+
+export type McpSamplingHandler = (
+  request: CreateMessageRequest,
+) => Promise<CreateMessageResult>;
 
 export interface SamplingSpecificationProps {
   clients: string[];
-  samplingHandler: (
-    request: CreateMessageRequest,
-  ) => Promise<CreateMessageResult>;
+  samplingHandler: McpSamplingHandler;
 }
 
 export class SamplingSpecification {
   readonly clients: string[];
 
-  readonly samplingHandler: (
-    request: CreateMessageRequest,
-  ) => Promise<CreateMessageResult>;
+  readonly samplingHandler: McpSamplingHandler;
 
   constructor(props: SamplingSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

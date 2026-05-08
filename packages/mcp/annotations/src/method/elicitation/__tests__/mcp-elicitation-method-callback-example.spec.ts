@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
+import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
 import { StructuredElicitResult } from "../../../context/index.js";
 import { McpElicitation } from "../../../mcp-elicitation.js";
 

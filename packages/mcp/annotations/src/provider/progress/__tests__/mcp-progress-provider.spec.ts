@@ -16,7 +16,7 @@
 
 import "reflect-metadata";
 
-import type { ProgressNotification } from "@modelcontextprotocol/server";
+import type { ProgressNotification } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
 import { McpProgress } from "../../../mcp-progress.js";

@@ -69,8 +69,19 @@ export class McpPromptListChangedProvider {
 
         return new PromptListChangedSpecification({
           clients: [...metadata.clients],
-          promptListChangeHandler: (updatedPrompts: Prompt[]): Promise<void> =>
-            callback.apply(updatedPrompts),
+          promptListChangeHandler: async (
+            error: Error | null,
+            updatedPrompts: Prompt[] | null,
+          ): Promise<void> => {
+            if (error != null) {
+              throw error;
+            }
+            if (updatedPrompts == null) {
+              throw new TypeError("Updated prompts list must not be null");
+            }
+
+            await callback.apply(updatedPrompts);
+          },
         });
       }),
     );

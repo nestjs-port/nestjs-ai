@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 
-import type { LoggingMessageNotification } from "@modelcontextprotocol/server";
+import type { LoggingMessageNotification } from "@modelcontextprotocol/client";
 
 import { MCP_LOGGING_METADATA_KEY } from "../../metadata.js";
 import {

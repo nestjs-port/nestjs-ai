@@ -15,19 +15,21 @@
  */
 
 import assert from "node:assert/strict";
-import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
+import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
+
+export type McpElicitationHandler = (
+  request: ElicitRequest,
+) => Promise<ElicitResult>;
 
 export interface ElicitationSpecificationProps {
   clients: string[];
-  elicitationHandler: (request: ElicitRequest) => Promise<ElicitResult>;
+  elicitationHandler: McpElicitationHandler;
 }
 
 export class ElicitationSpecification {
   readonly clients: string[];
 
-  readonly elicitationHandler: (
-    request: ElicitRequest,
-  ) => Promise<ElicitResult>;
+  readonly elicitationHandler: McpElicitationHandler;
 
   constructor(props: ElicitationSpecificationProps) {
     assert(props.clients != null, "clients must not be null");

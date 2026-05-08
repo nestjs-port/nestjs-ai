@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ElicitRequest } from "@modelcontextprotocol/server";
+import type { ElicitRequest } from "@modelcontextprotocol/client";
 
 export class ElicitationTestHelper {
   private constructor() {}

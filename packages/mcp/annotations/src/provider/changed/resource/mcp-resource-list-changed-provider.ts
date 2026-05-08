@@ -70,9 +70,19 @@ export class McpResourceListChangedProvider {
 
           return new ResourceListChangedSpecification({
             clients: [...metadata.clients],
-            resourceListChangeHandler: (
-              updatedResources: Resource[],
-            ): Promise<void> => callback.apply(updatedResources),
+            resourceListChangeHandler: async (
+              error: Error | null,
+              updatedResources: Resource[] | null,
+            ): Promise<void> => {
+              if (error != null) {
+                throw error;
+              }
+              if (updatedResources == null) {
+                throw new TypeError("Updated resources list must not be null");
+              }
+
+              await callback.apply(updatedResources);
+            },
           });
         }),
     );

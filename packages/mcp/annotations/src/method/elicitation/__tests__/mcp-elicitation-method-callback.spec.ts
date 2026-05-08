@@ -16,7 +16,7 @@
 
 import "reflect-metadata";
 
-import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
+import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
 import { ElicitationTestHelper } from "./elicitation-test-helper.js";

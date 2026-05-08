@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ElicitResult } from "@modelcontextprotocol/server";
+import type { ElicitResult } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
 import { ElicitationTestHelper } from "./elicitation-test-helper.js";

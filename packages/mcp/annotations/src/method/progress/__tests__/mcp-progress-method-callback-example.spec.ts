@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ProgressNotification } from "@modelcontextprotocol/server";
+import type { ProgressNotification } from "@modelcontextprotocol/client";
 import { McpProgress } from "../../../mcp-progress.js";
 import { McpProgressMethodCallback } from "../mcp-progress-method-callback.js";
 

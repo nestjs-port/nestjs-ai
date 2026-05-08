@@ -19,63 +19,274 @@ import assert from "node:assert/strict";
 import type {
   CallToolRequest,
   CallToolResult,
+  McpServer,
+  ServerContext,
 } from "@modelcontextprotocol/server";
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from "@standard-schema/spec";
 
+import { MetaUtils } from "../../common/index.js";
 import {
   DefaultMcpRequestContext,
   type McpRequestContext,
   McpServerExchange,
   type McpTransportContext,
 } from "../../context/index.js";
-import {
-  AbstractMcpToolMethodCallback,
-  type AbstractMcpToolMethodCallbackProps,
-} from "./abstract-mcp-tool-method-callback.js";
+import { MCP_TOOL_METADATA_KEY } from "../../metadata.js";
+import { McpMeta } from "../../mcp-meta.js";
+import type { McpToolMethodArguments } from "../../mcp-tool.js";
+import { ReturnMode } from "./return-mode.js";
+import type { McpToolMetadata } from "../../mcp-tool.js";
 
-export interface McpToolMethodCallbackProps extends AbstractMcpToolMethodCallbackProps {}
+type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
+
+export interface McpToolMethodCallbackProps {
+  provider: object;
+  propertyKey: string | symbol;
+  mcpServer?: McpServer | null;
+  returnMode: ReturnMode;
+  returnSchema?: StandardSchemaWithJsonSchema | null;
+  toolCallExceptionClass?: new (...args: never[]) => Error;
+}
+
+type ToolRegistrationConfig = {
+  title?: string;
+  description?: string;
+  inputSchema?: NonNullable<McpToolMetadata["inputSchema"]>;
+  outputSchema?: NonNullable<McpToolMetadata["returnSchema"]>;
+  annotations?: McpToolMetadata["annotations"];
+  _meta?: Record<string, unknown>;
+};
+
+export type ToolRegistration = [
+  name: string,
+  config: ToolRegistrationConfig,
+  callback: (
+    args: Record<string, unknown> | undefined,
+    ctx: ServerContext,
+  ) => Promise<CallToolResult>,
+];
+
+export class McpToolMethodException extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "McpToolMethodException";
+  }
+}
 
 /**
  * Class for creating callbacks around tool methods that operate on an MCP server
  * exchange.
- *
- * Methods registered with this callback are expected to accept a single
- * `McpToolMethodArguments` object. Errors that match the configured
- * `toolCallExceptionClass` (defaulting to `Error`) are converted into error
- * `CallToolResult` payloads; other exceptions propagate to the caller.
  */
-export class McpToolMethodCallback extends AbstractMcpToolMethodCallback<McpServerExchange> {
+export class McpToolMethodCallback {
+  protected readonly _provider: object;
+
+  protected readonly _propertyKey: string | symbol;
+
+  protected readonly _method: (...args: unknown[]) => unknown;
+
+  protected readonly _mcpServer: McpServer;
+
+  protected readonly _returnMode: ReturnMode;
+
+  protected readonly _returnSchema: StandardSchemaWithJsonSchema | null;
+
+  protected readonly _toolCallExceptionClass: new (...args: never[]) => Error;
+
+  private readonly _metadata: McpToolMetadata;
+
   constructor(props: McpToolMethodCallbackProps) {
-    super(props);
+    assert(props.provider != null, "Provider can't be null!");
+    assert(props.propertyKey != null, "Property key can't be null!");
+    assert(props.returnMode != null, "Return mode can't be null!");
+
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
+    this._mcpServer = props.mcpServer ?? ({} as McpServer);
+    this._returnMode = props.returnMode;
+    this._returnSchema = props.returnSchema ?? null;
+    this._toolCallExceptionClass = props.toolCallExceptionClass ?? Error;
+    this._method = this.resolveMethod();
+    this._metadata = this.resolveMetadata();
   }
 
-  protected isExchangeType(value: unknown): boolean {
-    return value instanceof McpServerExchange;
+  protected get methodName(): string {
+    return typeof this._propertyKey === "string"
+      ? this._propertyKey
+      : this._propertyKey.toString();
   }
 
-  protected createRequestContext(
-    exchange: McpServerExchange,
+  protected get declaringClassName(): string {
+    return this._provider.constructor?.name ?? "<anonymous>";
+  }
+
+  protected resolveMethod(): (...args: unknown[]) => unknown {
+    const candidate = (this._provider as Record<string | symbol, unknown>)[
+      this._propertyKey
+    ];
+    assert(
+      typeof candidate === "function",
+      `Method not found: ${String(this._propertyKey)} in ${this.declaringClassName}`,
+    );
+    return candidate as (...args: unknown[]) => unknown;
+  }
+
+  protected buildArgs(
+    exchangeOrContext: McpServerExchange,
     request: CallToolRequest,
-  ): McpRequestContext {
-    return new DefaultMcpRequestContext({ exchange, request });
-  }
+  ): McpToolMethodArguments {
+    const meta =
+      (request.params._meta as Record<string, unknown> | undefined) ?? null;
+    const progressToken =
+      (meta as { progressToken?: unknown } | null)?.progressToken ?? null;
 
-  protected resolveTransportContext(
-    exchange: McpServerExchange,
-  ): McpTransportContext | null {
-    if (exchange instanceof McpServerExchange) {
-      return exchange.transportContext();
+    const args: McpToolMethodArguments = {
+      context: this.resolveTransportContext(exchangeOrContext),
+      request,
+      toolArguments: { ...request.params.arguments },
+      meta: new McpMeta(meta),
+      progressToken,
+    };
+
+    if (this.isExchangeType(exchangeOrContext)) {
+      args.exchange = exchangeOrContext as never;
     }
-    return null;
+
+    const requestContext = this.createRequestContext(
+      exchangeOrContext,
+      request,
+    );
+    if (requestContext !== undefined) {
+      args.requestContext = requestContext;
+    }
+
+    return args;
   }
 
-  /**
-   * Apply the callback to the given request.
-   *
-   * Builds the typed arguments object, invokes the user method, and converts the
-   * resolved value into a `CallToolResult`. Errors of the configured class type are
-   * caught and converted into error results.
-   */
-  async apply(
+  protected callMethod(args: McpToolMethodArguments): unknown {
+    return this._method.apply(this._provider, [args]);
+  }
+
+  protected async convertValueToCallToolResult(
+    result: unknown,
+  ): Promise<CallToolResult> {
+    if (this.isCallToolResult(result)) {
+      return result;
+    }
+
+    if (this._returnMode === ReturnMode.VOID || result === undefined) {
+      return {
+        content: [{ type: "text", text: JSON.stringify("Done") }],
+      };
+    }
+
+    if (this._returnSchema != null) {
+      const validated = await this._returnSchema["~standard"].validate(result);
+      if (validated.issues) {
+        const messages = validated.issues
+          .map((issue) => issue.message)
+          .filter((message) => message != null && message !== "");
+        throw new Error(
+          messages.length > 0
+            ? `Return value does not match the configured return schema: ${messages.join("; ")}`
+            : "Return value does not match the configured return schema.",
+        );
+      }
+
+      return {
+        content: [],
+        structuredContent: validated.value as Record<string, unknown>,
+      };
+    }
+
+    if (result === null) {
+      return { content: [{ type: "text", text: "null" }] };
+    }
+
+    if (typeof result === "string") {
+      return { content: [{ type: "text", text: result }] };
+    }
+
+    return { content: [{ type: "text", text: JSON.stringify(result) }] };
+  }
+
+  protected async convertToCallToolResult(
+    result: unknown,
+  ): Promise<CallToolResult> {
+    const resolved = result instanceof Promise ? await result : result;
+    return this.convertValueToCallToolResult(resolved);
+  }
+
+  protected findRootCause(error: Error): Error {
+    let rootCause: Error = error;
+    while (rootCause.cause instanceof Error && rootCause.cause !== rootCause) {
+      rootCause = rootCause.cause;
+    }
+    return rootCause;
+  }
+
+  protected createErrorResult(error: Error): CallToolResult {
+    const rootCause = this.findRootCause(error);
+    const text =
+      rootCause === error || rootCause.message === error.message
+        ? error.message
+        : `${error.message}\n${rootCause.message}`;
+    return {
+      content: [{ type: "text", text }],
+      isError: true,
+    };
+  }
+
+  protected isCallToolResult(value: unknown): value is CallToolResult {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      "content" in value &&
+      Array.isArray((value as { content: unknown }).content)
+    );
+  }
+
+  apply(): ToolRegistration {
+    const {
+      name,
+      title,
+      description,
+      annotations,
+      inputSchema,
+      returnSchema,
+      metaProvider,
+    } = this._metadata;
+    const resolvedName = name.length > 0 ? name : this.methodName;
+    const config: ToolRegistrationConfig = {};
+    if (title.length > 0) config.title = title;
+    if (description.length > 0) config.description = description;
+    if (inputSchema != null) config.inputSchema = inputSchema;
+    if (returnSchema != null) config.outputSchema = returnSchema;
+    config.annotations = { ...annotations };
+    const meta = MetaUtils.getMeta(metaProvider);
+    if (meta != null) config._meta = meta;
+
+    const callback: ToolRegistration["2"] = async (
+      args: Record<string, unknown> | undefined,
+      ctx: ServerContext,
+    ): Promise<CallToolResult> => {
+      const request: CallToolRequest = {
+        params: {
+          name: resolvedName,
+          arguments: args ?? {},
+          ...(ctx.mcpReq._meta == null ? {} : { _meta: ctx.mcpReq._meta }),
+        },
+      } as CallToolRequest;
+      const exchange = new McpServerExchange(this._mcpServer, ctx);
+      return this.handle(exchange, request);
+    };
+
+    return [resolvedName, config, callback];
+  }
+
+  async handle(
     exchange: McpServerExchange,
     request: CallToolRequest,
   ): Promise<CallToolResult> {
@@ -92,5 +303,39 @@ export class McpToolMethodCallback extends AbstractMcpToolMethodCallback<McpServ
       }
       throw error;
     }
+  }
+
+  protected createRequestContext(
+    exchangeOrContext: McpServerExchange,
+    request: CallToolRequest,
+  ): McpRequestContext | null | undefined {
+    return new DefaultMcpRequestContext({
+      exchange: exchangeOrContext,
+      request,
+    });
+  }
+
+  protected resolveTransportContext(
+    exchangeOrContext: McpServerExchange,
+  ): McpTransportContext | null {
+    return exchangeOrContext.transportContext();
+  }
+
+  protected isExchangeType(value: unknown): boolean {
+    return value instanceof McpServerExchange;
+  }
+
+  private resolveMetadata(): McpToolMetadata {
+    const metadata = Reflect.getMetadata(
+      MCP_TOOL_METADATA_KEY,
+      Object.getPrototypeOf(this._provider),
+      this._propertyKey,
+    ) as McpToolMetadata | undefined;
+    if (metadata == null) {
+      throw new Error(
+        `@McpTool metadata missing on ${String(this._propertyKey)}`,
+      );
+    }
+    return metadata;
   }
 }

@@ -46,7 +46,7 @@ describe("McpToolMethodCallback exception handling", () => {
 
     // The Error thrown by the method should be caught and converted to error
     // result
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(result.content).toHaveLength(1);
@@ -69,7 +69,7 @@ describe("McpToolMethodCallback exception handling", () => {
     });
 
     // The CustomRuntimeException from callMethod should be caught
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain("Custom runtime error: test");
@@ -90,7 +90,7 @@ describe("McpToolMethodCallback exception handling", () => {
 
     // The Error from the method should NOT be caught (not an
     // IllegalArgumentLikeError)
-    await expect(callback.apply(exchange, request)).rejects.toThrow(
+    await expect(callback.handle(exchange, request)).rejects.toThrow(
       "Runtime error: test",
     );
   });
@@ -109,7 +109,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const request = createRequest("checked-exception-tool", { input: "test" });
 
     // The error wrapper should be caught
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain("Business error: test");
@@ -129,7 +129,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const request = createRequest("checked-exception-tool", { input: "test" });
 
     // The BusinessException should NOT be caught
-    await expect(callback.apply(exchange, request)).rejects.toBeInstanceOf(
+    await expect(callback.handle(exchange, request)).rejects.toBeInstanceOf(
       BusinessException,
     );
   });
@@ -148,7 +148,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const exchange = createMockExchange();
     const request = createRequest("success-tool", { input: "test" });
 
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBeFalsy();
     expect(result.content[0]).toMatchObject({
@@ -171,7 +171,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const request = createRequest("null-pointer-tool", { input: "test" });
 
     // Should catch the TypeError
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain("Null pointer: test");
@@ -191,7 +191,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const request = createRequest("illegal-argument-tool", { input: "test" });
 
     // Should catch the IllegalArgumentLikeError
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain("Illegal argument: test");
@@ -218,7 +218,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const exchange = createMockExchange();
 
     // Test success case
-    const successResult = await successCallback.apply(
+    const successResult = await successCallback.handle(
       exchange,
       createRequest("success-tool", { input: "success" }),
     );
@@ -226,7 +226,7 @@ describe("McpToolMethodCallback exception handling", () => {
     expect(textOf(successResult)).toBe("Success: success");
 
     // Test exception case
-    const exceptionResult = await exceptionCallback.apply(
+    const exceptionResult = await exceptionCallback.handle(
       exchange,
       createRequest("runtime-exception-tool", { input: "error" }),
     );
@@ -250,7 +250,7 @@ describe("McpToolMethodCallback exception handling", () => {
     });
 
     // Should catch the CustomRuntimeException (subclass of Error)
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
     expect(result.isError).toBe(true);
   });
 
@@ -267,7 +267,7 @@ describe("McpToolMethodCallback exception handling", () => {
     const request = createRequest("runtime-exception-tool", { input: "test" });
 
     // Should catch all exceptions (default is Error)
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
     expect(result.isError).toBe(true);
   });
 });

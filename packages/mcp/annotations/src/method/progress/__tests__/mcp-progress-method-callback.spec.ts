@@ -20,7 +20,7 @@ import type { ProgressNotification } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 
 import { McpProgress } from "../../../mcp-progress.js";
-import { McpProgressMethodException } from "../abstract-mcp-progress-method-callback.js";
+import { McpProgressMethodException } from "../mcp-progress-method-callback.js";
 import { McpProgressMethodCallback } from "../mcp-progress-method-callback.js";
 
 const TEST_NOTIFICATION = createProgressNotification(

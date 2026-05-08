@@ -18,10 +18,7 @@
  * Method callbacks and specifications for MCP elicitation (user input) requests.
  */
 
-export {
-  AbstractMcpElicitationMethodCallback,
-  McpElicitationMethodException,
-} from "./abstract-mcp-elicitation-method-callback.js";
+export { McpElicitationMethodException } from "./mcp-elicitation-method-callback.js";
 export {
   ElicitationSpecification,
   type ElicitationSpecificationProps,

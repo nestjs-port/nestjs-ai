@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-import "reflect-metadata";
 import assert from "node:assert/strict";
+import "reflect-metadata";
 
 import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/server";
 
 import { StructuredElicitResult } from "../../context/index.js";
-import {
-  AbstractMcpElicitationMethodCallback,
-  McpElicitationMethodException,
-  type AbstractMcpElicitationMethodCallbackProps,
-} from "./abstract-mcp-elicitation-method-callback.js";
 
-export type McpElicitationMethodCallbackProps =
-  AbstractMcpElicitationMethodCallbackProps;
+export interface McpElicitationMethodCallbackProps {
+  provider: object;
+  propertyKey: string | symbol;
+}
+
+export class McpElicitationMethodException extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "McpElicitationMethodException";
+  }
+}
 
 /**
  * Class for creating Function callbacks around elicitation methods that return Promise.
@@ -36,9 +40,40 @@ export type McpElicitationMethodCallbackProps =
  * callback functions that can be used to handle elicitation requests in a reactive way.
  * It supports methods with a single ElicitRequest parameter.
  */
-export class McpElicitationMethodCallback extends AbstractMcpElicitationMethodCallback {
+export class McpElicitationMethodCallback {
+  protected readonly _provider: object;
+
+  protected readonly _propertyKey: string | symbol;
+
+  protected readonly _method: (...args: unknown[]) => unknown;
+
   constructor(props: McpElicitationMethodCallbackProps) {
-    super(props);
+    assert(props.propertyKey != null, "Method can't be null!");
+    assert(props.provider != null, "Provider can't be null!");
+
+    this._provider = props.provider;
+    this._propertyKey = props.propertyKey;
+
+    const candidate = (props.provider as Record<string | symbol, unknown>)[
+      props.propertyKey
+    ];
+    if (typeof candidate !== "function") {
+      throw new Error(
+        `Method must not be null: ${String(props.propertyKey)} in ${this.declaringClassName}`,
+      );
+    }
+
+    this._method = candidate as (...args: unknown[]) => unknown;
+  }
+
+  protected get methodName(): string {
+    return typeof this._propertyKey === "string"
+      ? this._propertyKey
+      : this._propertyKey.toString();
+  }
+
+  protected get declaringClassName(): string {
+    return this._provider.constructor?.name ?? "<anonymous>";
   }
 
   /**
@@ -58,10 +93,7 @@ export class McpElicitationMethodCallback extends AbstractMcpElicitationMethodCa
     }
 
     try {
-      // Build arguments for the method call
       const args = this.buildArgs(request);
-
-      // Invoke the method
       const result = await this._method.apply(this._provider, args);
       return this.toElicitResult(result);
     } catch (error) {
@@ -70,6 +102,10 @@ export class McpElicitationMethodCallback extends AbstractMcpElicitationMethodCa
         { cause: error instanceof Error ? error : undefined },
       );
     }
+  }
+
+  protected buildArgs(request: ElicitRequest): unknown[] {
+    return [request];
   }
 
   private toElicitResult(result: unknown): ElicitResult {

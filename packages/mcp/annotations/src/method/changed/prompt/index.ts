@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-export {
-  AbstractMcpPromptListChangedMethodCallback,
-  McpPromptListChangedConsumerMethodException,
-} from "./abstract-mcp-prompt-list-changed-method-callback.js";
+export { McpPromptListChangedConsumerMethodException } from "./mcp-prompt-list-changed-method-callback.js";
 export {
   McpPromptListChangedMethodCallback,
   type McpPromptListChangedMethodCallbackProps,

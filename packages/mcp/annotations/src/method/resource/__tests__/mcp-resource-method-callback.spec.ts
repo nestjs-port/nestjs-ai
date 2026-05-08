@@ -31,10 +31,33 @@ import {
 } from "../../../context/index.js";
 import { McpResource } from "../../../mcp-resource.js";
 import type { McpResourceMethodArguments } from "../../../mcp-resource.js";
-import { McpResourceMethodCallback } from "../mcp-resource-method-callback.js";
+import {
+  McpResourceMethodCallback,
+  type ResourceRegistration,
+} from "../mcp-resource-method-callback.js";
 import { ResourceContentType } from "../resource-content-type.js";
 
 describe("McpResourceMethodCallback", () => {
+  it("returns [name, uri, config, callback] tuple ready for registerResource", () => {
+    const callback = createCallback(
+      new TestResourceProvider(),
+      "getResourceWithRequest",
+      createResource("test://resource"),
+    );
+
+    const [name, uri, config, cb] = callback.apply();
+
+    expect(name).toBe("testResource");
+    expect(uri).toBe("test://resource");
+    expect(config).toMatchObject({
+      description: "Test resource description",
+      mimeType: "text/plain",
+    });
+    expect(typeof cb).toBe("function");
+    const spec: ResourceRegistration = [name, uri, config, cb];
+    expect(spec).toHaveLength(4);
+  });
+
   it("test callback with request parameter", async () => {
     const provider = new TestResourceProvider();
     const callback = createCallback(
@@ -44,7 +67,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result).not.toBeNull();
     expect(result.contents).toHaveLength(1);
@@ -61,7 +84,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -77,7 +100,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -93,7 +116,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("users/123/posts/456");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -109,7 +132,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("users/789/profile");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -125,7 +148,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -141,7 +164,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(2);
     const textContent1 = result.contents[0] as TextResourceContents;
@@ -159,7 +182,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -175,7 +198,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -191,7 +214,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -209,7 +232,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const blobContent = result.contents[0] as BlobResourceContents;
@@ -226,7 +249,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(2);
     const textContent1 = result.contents[0] as TextResourceContents;
@@ -246,7 +269,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(2);
     const blobContent1 = result.contents[0] as BlobResourceContents;
@@ -269,7 +292,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("test/resource", {
       progressToken: "progress-123",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -287,7 +310,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -307,7 +330,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("test/resource", {
       progressToken: "progress-456",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -327,7 +350,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("users/123/posts/456", {
       progressToken: "progress-789",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -348,7 +371,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("test/resource", {
       key: "meta-value-123",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -366,7 +389,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     const request = createRequest("test/resource");
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -386,7 +409,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("test/resource", {
       key: "meta-value-456",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -404,7 +427,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("users/123/posts/456", {
       key: "meta-value-789",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -422,7 +445,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("test/resource", {
       key: "meta-value-abc",
     });
-    const result = await callback.apply(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -442,7 +465,7 @@ describe("McpResourceMethodCallback", () => {
     const request = createRequest("failing-resource://resource");
 
     await expect(
-      callback.apply(createMockExchange(), request),
+      callback.handle(createMockExchange(), request),
     ).rejects.toMatchObject({
       name: "McpResourceMethodException",
       message: "Error invoking resource method: getFailingResource",
@@ -458,7 +481,7 @@ describe("McpResourceMethodCallback", () => {
     );
 
     await expect(
-      callback.apply(createMockExchange(), null as never),
+      callback.handle(createMockExchange(), null as never),
     ).rejects.toThrow("Request must not be null");
   });
 
@@ -473,7 +496,7 @@ describe("McpResourceMethodCallback", () => {
     const transportContext = McpTransportContext.create({ traceId: "trace-1" });
     const exchange = createMockExchange(transportContext);
     const request = createRequest("transport-context://resource");
-    const result = await callback.apply(exchange, request);
+    const result = await callback.handle(exchange, request);
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;

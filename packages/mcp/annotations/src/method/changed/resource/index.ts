@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-export {
-  AbstractMcpResourceListChangedMethodCallback,
-  McpResourceListChangedConsumerMethodException,
-} from "./abstract-mcp-resource-list-changed-method-callback.js";
+export { McpResourceListChangedConsumerMethodException } from "./mcp-resource-list-changed-method-callback.js";
 export {
   McpResourceListChangedMethodCallback,
   type McpResourceListChangedMethodCallbackProps,

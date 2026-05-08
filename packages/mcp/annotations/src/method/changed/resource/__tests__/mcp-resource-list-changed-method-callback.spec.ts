@@ -18,7 +18,7 @@ import "reflect-metadata";
 import type { Resource } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import { McpResourceListChanged } from "../../../../mcp-resource-list-changed.js";
-import { McpResourceListChangedConsumerMethodException } from "../abstract-mcp-resource-list-changed-method-callback.js";
+import { McpResourceListChangedConsumerMethodException } from "../mcp-resource-list-changed-method-callback.js";
 import { McpResourceListChangedMethodCallback } from "../mcp-resource-list-changed-method-callback.js";
 
 const TEST_RESOURCES = [

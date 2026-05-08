@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-export {
-  AbstractMcpProgressMethodCallback,
-  McpProgressMethodException,
-} from "./abstract-mcp-progress-method-callback.js";
+export { McpProgressMethodException } from "./mcp-progress-method-callback.js";
 export {
   McpProgressMethodCallback,
   type McpProgressMethodCallbackProps,

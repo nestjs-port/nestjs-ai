@@ -18,12 +18,26 @@ import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import type {
   Client as McpClient,
   CreateMessageRequest,
+  ElicitRequest,
+  LoggingMessageNotification,
+  Prompt,
+  ProgressNotification,
+  Resource,
+  Tool,
 } from "@modelcontextprotocol/client";
 import {
   LoggerFactory,
   type ProviderInstanceExplorer,
 } from "@nestjs-port/core";
-import { McpSamplingProvider } from "@nestjs-ai/mcp-annotations";
+import {
+  McpPromptListChangedProvider,
+  McpResourceListChangedProvider,
+  McpToolListChangedProvider,
+  McpElicitationProvider,
+  McpLoggingProvider,
+  McpProgressProvider,
+  McpSamplingProvider,
+} from "@nestjs-ai/mcp-annotations";
 import type {
   McpClientModuleOptions,
   McpClientRegistration,
@@ -55,6 +69,12 @@ export class McpClientAnnotationRegistrar implements OnModuleInit {
     }
 
     this.registerSampling();
+    this.registerLogging();
+    this.registerProgress();
+    this.registerElicitation();
+    this.registerPromptListChanged();
+    this.registerResourceListChanged();
+    this.registerToolListChanged();
     this.registered = true;
   }
 
@@ -124,5 +144,473 @@ export class McpClientAnnotationRegistrar implements OnModuleInit {
       "sampling/createMessage",
       async (request: CreateMessageRequest) => spec.samplingHandler(request),
     );
+  }
+
+  private registerLogging(): void {
+    if (this.options.annotations?.logging === false) {
+      this.logger.debug("MCP logging registration is disabled");
+      return;
+    }
+
+    const loggingSpecifications = new McpLoggingProvider({
+      loggingObjects: this.providerInstanceExplorer.getProviderInstances(),
+    }).getLoggingSpecifications();
+
+    if (loggingSpecifications.length === 0) {
+      this.logger.warn("No @McpLogging methods found");
+      return;
+    }
+
+    if (this.clientRegistrations.length === 0) {
+      this.logger.warn(
+        "No MCP clients were provided; MCP logging methods were not registered.",
+      );
+      return;
+    }
+
+    for (const registration of this.clientRegistrations) {
+      this.registerLoggingForClient(
+        registration.clientName,
+        registration.mcpClient,
+        loggingSpecifications,
+      );
+    }
+  }
+
+  private registerLoggingForClient(
+    clientName: string,
+    mcpClient: McpClient,
+    loggingSpecifications: ReturnType<
+      McpLoggingProvider["getLoggingSpecifications"]
+    >,
+  ): void {
+    const matchingSpecifications = loggingSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      this.logger.debug(
+        `No @McpLogging methods matched client "${clientName}"`,
+      );
+      return;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpLogging methods matched client "${clientName}". Only one logging handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return;
+    }
+
+    this.logger.debug(`Registering logging handler for client "${clientName}"`);
+    mcpClient.setNotificationHandler(
+      "notifications/message",
+      async (notification: LoggingMessageNotification) => {
+        await spec.loggingHandler(notification);
+      },
+    );
+  }
+
+  private registerProgress(): void {
+    if (this.options.annotations?.progress === false) {
+      this.logger.debug("MCP progress registration is disabled");
+      return;
+    }
+
+    const progressSpecifications = new McpProgressProvider({
+      progressObjects: this.providerInstanceExplorer.getProviderInstances(),
+    }).getProgressSpecifications();
+
+    if (progressSpecifications.length === 0) {
+      this.logger.warn("No @McpProgress methods found");
+      return;
+    }
+
+    if (this.clientRegistrations.length === 0) {
+      this.logger.warn(
+        "No MCP clients were provided; MCP progress methods were not registered.",
+      );
+      return;
+    }
+
+    for (const registration of this.clientRegistrations) {
+      this.registerProgressForClient(
+        registration.clientName,
+        registration.mcpClient,
+        progressSpecifications,
+      );
+    }
+  }
+
+  private registerProgressForClient(
+    clientName: string,
+    mcpClient: McpClient,
+    progressSpecifications: ReturnType<
+      McpProgressProvider["getProgressSpecifications"]
+    >,
+  ): void {
+    const matchingSpecifications = progressSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      this.logger.debug(
+        `No @McpProgress methods matched client "${clientName}"`,
+      );
+      return;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpProgress methods matched client "${clientName}". Only one progress handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return;
+    }
+
+    this.logger.debug(
+      `Registering progress handler for client "${clientName}"`,
+    );
+    mcpClient.setNotificationHandler(
+      "notifications/progress",
+      async (notification: ProgressNotification) => {
+        await spec.progressHandler(notification);
+      },
+    );
+  }
+
+  private registerElicitation(): void {
+    if (this.options.annotations?.elicitation === false) {
+      this.logger.debug("MCP elicitation registration is disabled");
+      return;
+    }
+
+    const elicitationSpecifications = new McpElicitationProvider({
+      elicitationObjects: this.providerInstanceExplorer.getProviderInstances(),
+    }).getElicitationSpecifications();
+
+    if (elicitationSpecifications.length === 0) {
+      this.logger.warn("No @McpElicitation methods found");
+      return;
+    }
+
+    if (this.clientRegistrations.length === 0) {
+      this.logger.warn(
+        "No MCP clients were provided; MCP elicitation methods were not registered.",
+      );
+      return;
+    }
+
+    for (const registration of this.clientRegistrations) {
+      this.registerElicitationForClient(
+        registration.clientName,
+        registration.mcpClient,
+        elicitationSpecifications,
+      );
+    }
+  }
+
+  private registerElicitationForClient(
+    clientName: string,
+    mcpClient: McpClient,
+    elicitationSpecifications: ReturnType<
+      McpElicitationProvider["getElicitationSpecifications"]
+    >,
+  ): void {
+    const matchingSpecifications = elicitationSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      this.logger.debug(
+        `No @McpElicitation methods matched client "${clientName}"`,
+      );
+      return;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpElicitation methods matched client "${clientName}". Only one elicitation handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return;
+    }
+
+    this.logger.debug(
+      `Registering elicitation handler for client "${clientName}"`,
+    );
+    mcpClient.setRequestHandler(
+      "elicitation/create",
+      async (request: ElicitRequest) => spec.elicitationHandler(request),
+    );
+  }
+
+  private registerPromptListChanged(): void {
+    if (this.options.annotations?.promptListChanged === false) {
+      this.logger.debug("MCP prompt list changed registration is disabled");
+      return;
+    }
+
+    const promptListChangedSpecifications = new McpPromptListChangedProvider({
+      promptListChangedObjects:
+        this.providerInstanceExplorer.getProviderInstances(),
+    }).getPromptListChangedSpecifications();
+
+    if (promptListChangedSpecifications.length === 0) {
+      this.logger.warn("No @McpPromptListChanged methods found");
+      return;
+    }
+
+    if (this.clientRegistrations.length === 0) {
+      this.logger.warn(
+        "No MCP clients were provided; MCP prompt list changed methods were not registered.",
+      );
+      return;
+    }
+
+    for (const registration of this.clientRegistrations) {
+      this.registerPromptListChangedForClient(
+        registration.clientName,
+        registration.mcpClient,
+        promptListChangedSpecifications,
+      );
+    }
+  }
+
+  private registerPromptListChangedForClient(
+    clientName: string,
+    mcpClient: McpClient,
+    promptListChangedSpecifications: ReturnType<
+      McpPromptListChangedProvider["getPromptListChangedSpecifications"]
+    >,
+  ): void {
+    const matchingSpecifications = promptListChangedSpecifications.filter(
+      (spec) => spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      this.logger.debug(
+        `No @McpPromptListChanged methods matched client "${clientName}"`,
+      );
+      return;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpPromptListChanged methods matched client "${clientName}". Only one prompt list changed handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return;
+    }
+
+    this.logger.debug(
+      `Registering prompt list changed handler for client "${clientName}"`,
+    );
+    mcpClient.setNotificationHandler(
+      "notifications/prompts/list_changed",
+      async (): Promise<void> => {
+        const prompts = await this.collectAllPrompts(mcpClient);
+        await spec.promptListChangeHandler(null, prompts);
+      },
+    );
+  }
+
+  private registerResourceListChanged(): void {
+    if (this.options.annotations?.resourceListChanged === false) {
+      this.logger.debug("MCP resource list changed registration is disabled");
+      return;
+    }
+
+    const resourceListChangedSpecifications =
+      new McpResourceListChangedProvider({
+        resourceListChangedObjects:
+          this.providerInstanceExplorer.getProviderInstances(),
+      }).getResourceListChangedSpecifications();
+
+    if (resourceListChangedSpecifications.length === 0) {
+      this.logger.warn("No @McpResourceListChanged methods found");
+      return;
+    }
+
+    if (this.clientRegistrations.length === 0) {
+      this.logger.warn(
+        "No MCP clients were provided; MCP resource list changed methods were not registered.",
+      );
+      return;
+    }
+
+    for (const registration of this.clientRegistrations) {
+      this.registerResourceListChangedForClient(
+        registration.clientName,
+        registration.mcpClient,
+        resourceListChangedSpecifications,
+      );
+    }
+  }
+
+  private registerResourceListChangedForClient(
+    clientName: string,
+    mcpClient: McpClient,
+    resourceListChangedSpecifications: ReturnType<
+      McpResourceListChangedProvider["getResourceListChangedSpecifications"]
+    >,
+  ): void {
+    const matchingSpecifications = resourceListChangedSpecifications.filter(
+      (spec) => spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      this.logger.debug(
+        `No @McpResourceListChanged methods matched client "${clientName}"`,
+      );
+      return;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpResourceListChanged methods matched client "${clientName}". Only one resource list changed handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return;
+    }
+
+    this.logger.debug(
+      `Registering resource list changed handler for client "${clientName}"`,
+    );
+    mcpClient.setNotificationHandler(
+      "notifications/resources/list_changed",
+      async (): Promise<void> => {
+        const resources = await this.collectAllResources(mcpClient);
+        await spec.resourceListChangeHandler(null, resources);
+      },
+    );
+  }
+
+  private registerToolListChanged(): void {
+    if (this.options.annotations?.toolListChanged === false) {
+      this.logger.debug("MCP tool list changed registration is disabled");
+      return;
+    }
+
+    const toolListChangedSpecifications = new McpToolListChangedProvider({
+      toolListChangedObjects:
+        this.providerInstanceExplorer.getProviderInstances(),
+    }).getToolListChangedSpecifications();
+
+    if (toolListChangedSpecifications.length === 0) {
+      this.logger.warn("No @McpToolListChanged methods found");
+      return;
+    }
+
+    if (this.clientRegistrations.length === 0) {
+      this.logger.warn(
+        "No MCP clients were provided; MCP tool list changed methods were not registered.",
+      );
+      return;
+    }
+
+    for (const registration of this.clientRegistrations) {
+      this.registerToolListChangedForClient(
+        registration.clientName,
+        registration.mcpClient,
+        toolListChangedSpecifications,
+      );
+    }
+  }
+
+  private registerToolListChangedForClient(
+    clientName: string,
+    mcpClient: McpClient,
+    toolListChangedSpecifications: ReturnType<
+      McpToolListChangedProvider["getToolListChangedSpecifications"]
+    >,
+  ): void {
+    const matchingSpecifications = toolListChangedSpecifications.filter(
+      (spec) => spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      this.logger.debug(
+        `No @McpToolListChanged methods matched client "${clientName}"`,
+      );
+      return;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpToolListChanged methods matched client "${clientName}". Only one tool list changed handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return;
+    }
+
+    this.logger.debug(
+      `Registering tool list changed handler for client "${clientName}"`,
+    );
+    mcpClient.setNotificationHandler(
+      "notifications/tools/list_changed",
+      async (): Promise<void> => {
+        const tools = await this.collectAllTools(mcpClient);
+        await spec.toolListChangeHandler(null, tools);
+      },
+    );
+  }
+
+  private async collectAllPrompts(mcpClient: McpClient): Promise<Prompt[]> {
+    const prompts: Prompt[] = [];
+    let cursor: string | undefined;
+
+    do {
+      const result = await mcpClient.listPrompts({ cursor });
+      prompts.push(...result.prompts);
+      cursor = result.nextCursor;
+    } while (cursor);
+
+    return prompts;
+  }
+
+  private async collectAllResources(mcpClient: McpClient): Promise<Resource[]> {
+    const resources: Resource[] = [];
+    let cursor: string | undefined;
+
+    do {
+      const result = await mcpClient.listResources({ cursor });
+      resources.push(...result.resources);
+      cursor = result.nextCursor;
+    } while (cursor);
+
+    return resources;
+  }
+
+  private async collectAllTools(mcpClient: McpClient): Promise<Tool[]> {
+    const tools: Tool[] = [];
+    let cursor: string | undefined;
+
+    do {
+      const result = await mcpClient.listTools({ cursor });
+      tools.push(...result.tools);
+      cursor = result.nextCursor;
+    } while (cursor);
+
+    return tools;
   }
 }

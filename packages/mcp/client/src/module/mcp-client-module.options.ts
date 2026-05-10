@@ -30,6 +30,48 @@ export interface McpClientAnnotationRegistrationOptions {
    * Defaults to `true`.
    */
   sampling?: boolean;
+
+  /**
+   * Enables discovery and registration of methods annotated with `@McpLogging`.
+   *
+   * Defaults to `true`.
+   */
+  logging?: boolean;
+
+  /**
+   * Enables discovery and registration of methods annotated with `@McpElicitation`.
+   *
+   * Defaults to `true`.
+   */
+  elicitation?: boolean;
+
+  /**
+   * Enables discovery and registration of methods annotated with `@McpProgress`.
+   *
+   * Defaults to `true`.
+   */
+  progress?: boolean;
+
+  /**
+   * Enables discovery and registration of methods annotated with `@McpPromptListChanged`.
+   *
+   * Defaults to `true`.
+   */
+  promptListChanged?: boolean;
+
+  /**
+   * Enables discovery and registration of methods annotated with `@McpResourceListChanged`.
+   *
+   * Defaults to `true`.
+   */
+  resourceListChanged?: boolean;
+
+  /**
+   * Enables discovery and registration of methods annotated with `@McpToolListChanged`.
+   *
+   * Defaults to `true`.
+   */
+  toolListChanged?: boolean;
 }
 
 export interface McpClientCreationOptions {

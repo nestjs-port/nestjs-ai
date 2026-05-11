@@ -63,9 +63,7 @@ describe("provider scans", () => {
       }
     }
 
-    const provider = new McpSamplingProvider({
-      samplingObjects: [new SamplingBean()],
-    });
+    const provider = new McpSamplingProvider([new SamplingBean()]);
 
     const specs = provider.getSamplingSpecifications();
     const spec = specs[0];
@@ -87,9 +85,7 @@ describe("provider scans", () => {
       }
     }
 
-    const provider = new McpElicitationProvider({
-      elicitationObjects: [new ElicitationBean()],
-    });
+    const provider = new McpElicitationProvider([new ElicitationBean()]);
 
     const specs = provider.getElicitationSpecifications();
     const spec = specs[0];
@@ -127,9 +123,7 @@ describe("provider scans", () => {
       }
     }
 
-    const provider = new McpLoggingProvider({
-      loggingObjects: [new LoggingBean()],
-    });
+    const provider = new McpLoggingProvider([new LoggingBean()]);
 
     const specs = provider.getLoggingSpecifications();
     const spec = specs[0];
@@ -159,9 +153,7 @@ describe("provider scans", () => {
     }
 
     const bean = new ProgressBean();
-    const provider = new McpProgressProvider({
-      progressObjects: [bean],
-    });
+    const provider = new McpProgressProvider([bean]);
 
     const specs = provider.getProgressSpecifications();
     const spec = specs[0];
@@ -192,9 +184,7 @@ describe("provider scans", () => {
     }
 
     const bean = new PromptListChangedBean();
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [bean],
-    });
+    const provider = new McpPromptListChangedProvider([bean]);
 
     const specs = provider.getPromptListChangedSpecifications();
     const spec = specs[0];
@@ -218,9 +208,7 @@ describe("provider scans", () => {
     }
 
     const bean = new ResourceListChangedBean();
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [bean],
-    });
+    const provider = new McpResourceListChangedProvider([bean]);
 
     const specs = provider.getResourceListChangedSpecifications();
     const spec = specs[0];
@@ -246,9 +234,7 @@ describe("provider scans", () => {
     }
 
     const bean = new ToolListChangedBean();
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [bean],
-    });
+    const provider = new McpToolListChangedProvider([bean]);
 
     const specs = provider.getToolListChangedSpecifications();
     const spec = specs[0];

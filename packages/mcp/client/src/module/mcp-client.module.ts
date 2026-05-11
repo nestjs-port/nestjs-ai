@@ -20,7 +20,6 @@ import type {
   McpClientModuleAsyncOptions,
   McpClientModuleOptions,
 } from "./mcp-client-module.options.js";
-import { normalizeMcpClientRegistrations } from "./mcp-client-module.options.js";
 import {
   MCP_CLIENT_MODULE_OPTIONS_TOKEN,
   MCP_CLIENT_REGISTRATIONS_TOKEN,
@@ -41,9 +40,7 @@ export class McpClientModule {
       },
       optionsProvider: {
         provide: MCP_CLIENT_REGISTRATIONS_TOKEN,
-        useFactory: (resolved: McpClientModuleOptions) =>
-          normalizeMcpClientRegistrations(resolved),
-        inject: [MCP_CLIENT_MODULE_OPTIONS_TOKEN],
+        useValue: [],
       },
     });
   }
@@ -59,9 +56,7 @@ export class McpClientModule {
       },
       optionsProvider: {
         provide: MCP_CLIENT_REGISTRATIONS_TOKEN,
-        useFactory: (resolved: McpClientModuleOptions) =>
-          normalizeMcpClientRegistrations(resolved),
-        inject: [MCP_CLIENT_MODULE_OPTIONS_TOKEN],
+        useValue: [],
       },
     });
   }

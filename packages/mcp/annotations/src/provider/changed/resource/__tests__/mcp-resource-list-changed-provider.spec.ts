@@ -40,9 +40,7 @@ describe("McpResourceListChangedProvider", () => {
 
   it("testGetResourceListChangedSpecifications", async () => {
     const handler = new ResourceListChangedHandler();
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [handler],
-    });
+    const provider = new McpResourceListChangedProvider([handler]);
 
     const specifications = provider.getResourceListChangedSpecifications();
     const consumers = specifications.map(
@@ -66,9 +64,7 @@ describe("McpResourceListChangedProvider", () => {
 
   it("testClientIdSpecifications", () => {
     const handler = new ResourceListChangedHandler();
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [handler],
-    });
+    const provider = new McpResourceListChangedProvider([handler]);
 
     const specifications = provider.getResourceListChangedSpecifications();
 
@@ -79,29 +75,23 @@ describe("McpResourceListChangedProvider", () => {
   });
 
   it("testEmptyList", () => {
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [],
-    });
+    const provider = new McpResourceListChangedProvider([]);
 
     expect(provider.getResourceListChangedSpecifications()).toHaveLength(0);
   });
 
   it("testMultipleObjects", () => {
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [
-        new ResourceListChangedHandler(),
-        new ResourceListChangedHandler(),
-      ],
-    });
+    const provider = new McpResourceListChangedProvider([
+      new ResourceListChangedHandler(),
+      new ResourceListChangedHandler(),
+    ]);
 
     expect(provider.getResourceListChangedSpecifications()).toHaveLength(4);
   });
 
   it("testConsumerFunctionality", async () => {
     const handler = new ResourceListChangedHandler();
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [handler],
-    });
+    const provider = new McpResourceListChangedProvider([handler]);
 
     const consumer =
       provider.getResourceListChangedSpecifications()[0]
@@ -120,9 +110,7 @@ describe("McpResourceListChangedProvider", () => {
 
   it("testNonAnnotatedMethodsIgnored", () => {
     const handler = new ResourceListChangedHandler();
-    const provider = new McpResourceListChangedProvider({
-      resourceListChangedObjects: [handler],
-    });
+    const provider = new McpResourceListChangedProvider([handler]);
 
     expect(provider.getResourceListChangedSpecifications()).toHaveLength(2);
   });

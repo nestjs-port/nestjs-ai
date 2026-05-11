@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpToolListChangedProvider,
-  type McpToolListChangedProviderProps,
-} from "./mcp-tool-list-changed-provider.js";
+export { McpToolListChangedProvider } from "./mcp-tool-list-changed-provider.js";

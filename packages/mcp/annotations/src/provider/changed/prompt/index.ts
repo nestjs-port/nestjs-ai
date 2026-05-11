@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpPromptListChangedProvider,
-  type McpPromptListChangedProviderProps,
-} from "./mcp-prompt-list-changed-provider.js";
+export { McpPromptListChangedProvider } from "./mcp-prompt-list-changed-provider.js";

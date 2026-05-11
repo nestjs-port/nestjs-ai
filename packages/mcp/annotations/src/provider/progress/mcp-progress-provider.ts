@@ -27,16 +27,11 @@ import {
   getAnnotatedMethodMetadata,
 } from "../annotation-provider-utils.js";
 
-export interface McpProgressProviderProps {
-  progressObjects: object[];
-}
-
 export class McpProgressProvider {
   private readonly _progressObjects: readonly object[];
 
-  constructor(props: McpProgressProviderProps) {
-    this._progressObjects =
-      props.progressObjects != null ? [...props.progressObjects] : [];
+  constructor(progressObjects: object[]) {
+    this._progressObjects = progressObjects != null ? [...progressObjects] : [];
   }
 
   getProgressSpecifications(): ProgressSpecification[] {

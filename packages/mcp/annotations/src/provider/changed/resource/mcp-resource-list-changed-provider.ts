@@ -29,19 +29,15 @@ import {
   getAnnotatedMethodMetadata,
 } from "../../annotation-provider-utils.js";
 
-export interface McpResourceListChangedProviderProps {
-  resourceListChangedObjects: object[];
-}
-
 export class McpResourceListChangedProvider {
   private readonly _resourceListChangedObjects: readonly object[];
 
-  constructor(props: McpResourceListChangedProviderProps) {
+  constructor(resourceListChangedObjects: object[]) {
     assert(
-      props.resourceListChangedObjects != null,
+      resourceListChangedObjects != null,
       "resourceListChangedObjects can't be null!",
     );
-    this._resourceListChangedObjects = [...props.resourceListChangedObjects];
+    this._resourceListChangedObjects = [...resourceListChangedObjects];
   }
 
   getResourceListChangedSpecifications(): ResourceListChangedSpecification[] {

@@ -28,10 +28,6 @@ import {
   getAnnotatedMethodMetadata,
 } from "../annotation-provider-utils.js";
 
-export interface McpSamplingProviderProps {
-  samplingObjects: object[];
-}
-
 /**
  * Discovers `@McpSampling`-annotated methods on a list of objects and produces
  * {@link SamplingSpecification} entries for them.
@@ -39,10 +35,10 @@ export interface McpSamplingProviderProps {
 export class McpSamplingProvider {
   private readonly _samplingObjects: readonly object[];
 
-  constructor(props: McpSamplingProviderProps) {
-    assert(props.samplingObjects != null, "samplingObjects can't be null!");
+  constructor(samplingObjects: object[]) {
+    assert(samplingObjects != null, "samplingObjects can't be null!");
 
-    this._samplingObjects = [...props.samplingObjects];
+    this._samplingObjects = [...samplingObjects];
   }
 
   /**

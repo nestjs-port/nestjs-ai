@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpElicitationProvider,
-  type McpElicitationProviderProps,
-} from "./mcp-elicitation-provider.js";
+export { McpElicitationProvider } from "./mcp-elicitation-provider.js";

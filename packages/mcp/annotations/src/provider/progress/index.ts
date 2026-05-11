@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpProgressProvider,
-  type McpProgressProviderProps,
-} from "./mcp-progress-provider.js";
+export { McpProgressProvider } from "./mcp-progress-provider.js";

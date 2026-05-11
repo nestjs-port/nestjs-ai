@@ -27,19 +27,12 @@ import {
   getAnnotatedMethodMetadata,
 } from "../annotation-provider-utils.js";
 
-export interface McpElicitationProviderProps {
-  elicitationObjects: object[];
-}
-
 export class McpElicitationProvider {
   private readonly _elicitationObjects: readonly object[];
 
-  constructor(props: McpElicitationProviderProps) {
-    assert(
-      props.elicitationObjects != null,
-      "elicitationObjects can't be null!",
-    );
-    this._elicitationObjects = [...props.elicitationObjects];
+  constructor(elicitationObjects: object[]) {
+    assert(elicitationObjects != null, "elicitationObjects can't be null!");
+    this._elicitationObjects = [...elicitationObjects];
   }
 
   getElicitationSpecifications(): ElicitationSpecification[] {

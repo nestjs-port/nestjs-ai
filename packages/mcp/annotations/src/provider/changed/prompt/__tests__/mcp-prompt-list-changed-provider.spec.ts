@@ -30,9 +30,7 @@ describe("McpPromptListChangedProvider", () => {
 
   it("testGetPromptListChangedSpecifications", async () => {
     const handler = new PromptListChangedHandler();
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [handler],
-    });
+    const provider = new McpPromptListChangedProvider([handler]);
 
     const specifications = provider.getPromptListChangedSpecifications();
     const consumers = specifications.map(
@@ -56,9 +54,7 @@ describe("McpPromptListChangedProvider", () => {
 
   it("testClientIdSpecifications", () => {
     const handler = new PromptListChangedHandler();
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [handler],
-    });
+    const provider = new McpPromptListChangedProvider([handler]);
 
     const specifications = provider.getPromptListChangedSpecifications();
 
@@ -69,29 +65,23 @@ describe("McpPromptListChangedProvider", () => {
   });
 
   it("testEmptyList", () => {
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [],
-    });
+    const provider = new McpPromptListChangedProvider([]);
 
     expect(provider.getPromptListChangedSpecifications()).toHaveLength(0);
   });
 
   it("testMultipleObjects", () => {
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [
-        new PromptListChangedHandler(),
-        new PromptListChangedHandler(),
-      ],
-    });
+    const provider = new McpPromptListChangedProvider([
+      new PromptListChangedHandler(),
+      new PromptListChangedHandler(),
+    ]);
 
     expect(provider.getPromptListChangedSpecifications()).toHaveLength(4);
   });
 
   it("testConsumerFunctionality", async () => {
     const handler = new PromptListChangedHandler();
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [handler],
-    });
+    const provider = new McpPromptListChangedProvider([handler]);
 
     const consumer =
       provider.getPromptListChangedSpecifications()[0]?.promptListChangeHandler;
@@ -109,9 +99,7 @@ describe("McpPromptListChangedProvider", () => {
 
   it("testNonAnnotatedMethodsIgnored", () => {
     const handler = new PromptListChangedHandler();
-    const provider = new McpPromptListChangedProvider({
-      promptListChangedObjects: [handler],
-    });
+    const provider = new McpPromptListChangedProvider([handler]);
 
     expect(provider.getPromptListChangedSpecifications()).toHaveLength(2);
   });

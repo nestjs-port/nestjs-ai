@@ -45,9 +45,7 @@ describe("McpSamplingProvider", () => {
     }
 
     const example = new SingleValidMethod();
-    const provider = new McpSamplingProvider({
-      samplingObjects: [example],
-    });
+    const provider = new McpSamplingProvider([example]);
 
     const samplingSpecs = provider.getSamplingSpecifications();
 
@@ -69,12 +67,9 @@ describe("McpSamplingProvider", () => {
   });
 
   it("test null samplingObjects", () => {
-    expect(
-      () =>
-        new McpSamplingProvider({
-          samplingObjects: null as never,
-        }),
-    ).toThrow("samplingObjects can't be null!");
+    expect(() => new McpSamplingProvider(null as never)).toThrow(
+      "samplingObjects can't be null!",
+    );
   });
 
   it("test direct result method", async () => {
@@ -96,9 +91,7 @@ describe("McpSamplingProvider", () => {
     }
 
     const example = new DirectResultOnly();
-    const provider = new McpSamplingProvider({
-      samplingObjects: [example],
-    });
+    const provider = new McpSamplingProvider([example]);
 
     const samplingSpecs = provider.getSamplingSpecifications();
 

@@ -29,19 +29,15 @@ import {
   getAnnotatedMethodMetadata,
 } from "../../annotation-provider-utils.js";
 
-export interface McpToolListChangedProviderProps {
-  toolListChangedObjects: object[];
-}
-
 export class McpToolListChangedProvider {
   private readonly _toolListChangedObjects: readonly object[];
 
-  constructor(props: McpToolListChangedProviderProps) {
+  constructor(toolListChangedObjects: object[]) {
     assert(
-      props.toolListChangedObjects != null,
+      toolListChangedObjects != null,
       "toolListChangedObjects can't be null!",
     );
-    this._toolListChangedObjects = [...props.toolListChangedObjects];
+    this._toolListChangedObjects = [...toolListChangedObjects];
   }
 
   getToolListChangedSpecifications(): ToolListChangedSpecification[] {

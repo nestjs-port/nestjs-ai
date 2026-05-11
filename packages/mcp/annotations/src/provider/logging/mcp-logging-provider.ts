@@ -29,16 +29,12 @@ import {
   getAnnotatedMethodMetadata,
 } from "../annotation-provider-utils.js";
 
-export interface McpLoggingProviderProps {
-  loggingObjects: object[];
-}
-
 export class McpLoggingProvider {
   private readonly _loggingObjects: readonly object[];
 
-  constructor(props: McpLoggingProviderProps) {
-    assert(props.loggingObjects != null, "loggingObjects can't be null!");
-    this._loggingObjects = [...props.loggingObjects];
+  constructor(loggingObjects: object[]) {
+    assert(loggingObjects != null, "loggingObjects can't be null!");
+    this._loggingObjects = [...loggingObjects];
   }
 
   getLoggingSpecifications(): LoggingSpecification[] {

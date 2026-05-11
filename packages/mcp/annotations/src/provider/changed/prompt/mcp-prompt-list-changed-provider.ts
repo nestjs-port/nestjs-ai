@@ -29,19 +29,15 @@ import {
   getAnnotatedMethodMetadata,
 } from "../../annotation-provider-utils.js";
 
-export interface McpPromptListChangedProviderProps {
-  promptListChangedObjects: object[];
-}
-
 export class McpPromptListChangedProvider {
   private readonly _promptListChangedObjects: readonly object[];
 
-  constructor(props: McpPromptListChangedProviderProps) {
+  constructor(promptListChangedObjects: object[]) {
     assert(
-      props.promptListChangedObjects != null,
+      promptListChangedObjects != null,
       "promptListChangedObjects can't be null!",
     );
-    this._promptListChangedObjects = [...props.promptListChangedObjects];
+    this._promptListChangedObjects = [...promptListChangedObjects];
   }
 
   getPromptListChangedSpecifications(): PromptListChangedSpecification[] {

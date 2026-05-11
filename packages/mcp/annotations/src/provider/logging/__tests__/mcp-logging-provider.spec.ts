@@ -28,9 +28,7 @@ import { McpLoggingProvider } from "../mcp-logging-provider.js";
 describe("McpLoggingProvider", () => {
   it("testGetLoggingConsumers", async () => {
     const loggingHandler = new LoggingHandler();
-    const provider = new McpLoggingProvider({
-      loggingObjects: [loggingHandler],
-    });
+    const provider = new McpLoggingProvider([loggingHandler]);
 
     const specifications = provider.getLoggingSpecifications();
     const consumers = specifications.map((spec) => spec.loggingHandler);
@@ -56,34 +54,28 @@ describe("McpLoggingProvider", () => {
   });
 
   it("testEmptyList", () => {
-    const provider = new McpLoggingProvider({
-      loggingObjects: [],
-    });
+    const provider = new McpLoggingProvider([]);
 
     expect(provider.getLoggingSpecifications()).toHaveLength(0);
   });
 
   it("testMultipleObjects", () => {
-    const provider = new McpLoggingProvider({
-      loggingObjects: [new LoggingHandler(), new LoggingHandler()],
-    });
+    const provider = new McpLoggingProvider([
+      new LoggingHandler(),
+      new LoggingHandler(),
+    ]);
 
     expect(provider.getLoggingSpecifications()).toHaveLength(4);
   });
 
   it("testNullLoggingObjects", () => {
-    expect(
-      () =>
-        new McpLoggingProvider({
-          loggingObjects: null as never,
-        }),
-    ).toThrow("loggingObjects can't be null!");
+    expect(() => new McpLoggingProvider(null as never)).toThrow(
+      "loggingObjects can't be null!",
+    );
   });
 
   it("testNonAnnotatedMethodsIgnored", () => {
-    const provider = new McpLoggingProvider({
-      loggingObjects: [new LoggingHandler()],
-    });
+    const provider = new McpLoggingProvider([new LoggingHandler()]);
 
     expect(provider.getLoggingSpecifications()).toHaveLength(2);
   });

@@ -16,44 +16,52 @@
 
 import "reflect-metadata";
 
-import type {
-  CreateMessageRequest,
-  CreateMessageResult,
-  ElicitRequest,
-  ElicitResult,
-  Client as McpClient,
-  LoggingLevel,
-  ProgressNotification,
-  Tool,
-} from "@modelcontextprotocol/client";
 import type * as McpClientModule from "@modelcontextprotocol/client";
 import {
-  McpElicitation,
-  McpLogging,
-  McpProgress,
-  McpSampling,
-  McpToolListChanged,
-} from "@nestjs-ai/mcp-annotations";
+  StdioClientTransport,
+  StreamableHTTPClientTransport,
+  type Tool,
+} from "@modelcontextprotocol/client";
+import { McpToolListChanged } from "@nestjs-ai/mcp-annotations";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const constructedClients: any[] = [];
+const constructedClients: MockMcpClient[] = [];
 
 vi.mock("@modelcontextprotocol/client", async () => {
   const actual = await vi.importActual<typeof McpClientModule>(
     "@modelcontextprotocol/client",
   );
 
+  class MockStdioClientTransport {
+    constructor(public readonly options: unknown) {}
+  }
+
+  class MockStreamableHTTPClientTransport {
+    constructor(
+      public readonly url: URL,
+      public readonly options: unknown,
+    ) {}
+  }
+
   class MockMcpClient {
-    setRequestHandler = vi.fn();
+    public readonly setRequestHandler = vi.fn();
 
-    setNotificationHandler = vi.fn();
+    public readonly setNotificationHandler = vi.fn();
 
-    listPrompts = vi.fn();
+    public readonly listPrompts = vi.fn();
 
-    listResources = vi.fn();
+    public readonly listResources = vi.fn();
 
-    listTools = vi.fn();
+    public readonly listTools = vi.fn();
+
+    public readonly connect = vi.fn(async (transport: unknown) => {
+      this.connectedTransport = transport;
+    });
+
+    public readonly close = vi.fn(async () => undefined);
+
+    public connectedTransport: unknown;
 
     constructor(
       public readonly clientInfo: unknown,
@@ -66,305 +74,225 @@ vi.mock("@modelcontextprotocol/client", async () => {
   return {
     ...actual,
     Client: MockMcpClient,
+    StdioClientTransport: MockStdioClientTransport,
+    StreamableHTTPClientTransport: MockStreamableHTTPClientTransport,
   };
 });
 
 import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
 
+type MockMcpClient = any;
+
 describe("McpClientAnnotationRegistrar", () => {
-  it("registers sampling handlers for matching clients", () => {
-    class SamplingProvider {
-      @McpSampling({ clients: ["server-a"] })
-      handleServerA(_request: CreateMessageRequest): CreateMessageResult {
-        return {
-          role: "assistant",
-          content: { type: "text", text: "a" },
-          model: "test-model-a",
-        };
-      }
-
-      @McpSampling({ clients: ["server-b"] })
-      handleServerB(_request: CreateMessageRequest): CreateMessageResult {
-        return {
-          role: "assistant",
-          content: { type: "text", text: "b" },
-          model: "test-model-b",
-        };
-      }
-    }
-
-    const clientASetRequestHandler = vi.fn();
-    const clientBSetRequestHandler = vi.fn();
-
-    const clientA = {
-      setRequestHandler: clientASetRequestHandler,
-    } as unknown as McpClient;
-    const clientB = {
-      setRequestHandler: clientBSetRequestHandler,
-    } as unknown as McpClient;
-
-    const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [new SamplingProvider()],
-    };
-
-    const registrar = new McpClientAnnotationRegistrar(
-      {
-        clients: [
-          {
-            clientInfo: {
-              name: "server-a",
-              version: "1.0.0",
-            },
-          },
-        ],
-        annotations: { sampling: true },
-      },
-      [
-        {
-          clientName: "server-a",
-          mcpClient: clientA,
-        },
-        {
-          clientName: "server-b",
-          mcpClient: clientB,
-        },
-      ],
-      explorer,
-    );
-
-    registrar.onModuleInit();
-
-    expect(clientASetRequestHandler).toHaveBeenCalledTimes(1);
-    expect(clientASetRequestHandler).toHaveBeenCalledWith(
-      "sampling/createMessage",
-      expect.any(Function),
-    );
-    expect(clientBSetRequestHandler).toHaveBeenCalledTimes(1);
-    expect(clientBSetRequestHandler).toHaveBeenCalledWith(
-      "sampling/createMessage",
-      expect.any(Function),
-    );
-  });
-
-  it("registers logging, progress, and elicitation handlers for matching clients", () => {
-    class ClientHandlerProvider {
-      seenLevel: LoggingLevel | null = null;
-
-      seenLogger: string | null = null;
-
-      seenData: string | null = null;
-
-      seenProgress: ProgressNotification | null = null;
-
-      seenElicitation: ElicitRequest | null = null;
-
-      @McpLogging({ clients: ["logging-client"] })
-      handleLogging(level: LoggingLevel, logger: string, data: string): void {
-        this.seenLevel = level;
-        this.seenLogger = logger;
-        this.seenData = data;
-      }
-
-      @McpProgress({ clients: ["progress-client"] })
-      handleProgress(notification: ProgressNotification): void {
-        this.seenProgress = notification;
-      }
-
-      @McpElicitation({ clients: ["elicitation-client"] })
-      handleElicitation(request: ElicitRequest): ElicitResult {
-        this.seenElicitation = request;
-        return {
-          action: "accept",
-          content: { answer: "accepted" },
-        } as ElicitResult;
-      }
-    }
-
-    const clientLoggingSetNotificationHandler = vi.fn();
-    const clientProgressSetNotificationHandler = vi.fn();
-    const clientElicitationSetRequestHandler = vi.fn();
-
-    const clientLogging = {
-      setNotificationHandler: clientLoggingSetNotificationHandler,
-    } as unknown as McpClient;
-    const clientProgress = {
-      setNotificationHandler: clientProgressSetNotificationHandler,
-    } as unknown as McpClient;
-    const clientElicitation = {
-      setRequestHandler: clientElicitationSetRequestHandler,
-    } as unknown as McpClient;
-
-    const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [new ClientHandlerProvider()],
-    };
-
-    const registrar = new McpClientAnnotationRegistrar(
-      {
-        clients: [
-          {
-            clientInfo: {
-              name: "logging-client",
-              version: "1.0.0",
-            },
-          },
-          {
-            clientInfo: {
-              name: "progress-client",
-              version: "1.0.0",
-            },
-          },
-          {
-            clientInfo: {
-              name: "elicitation-client",
-              version: "1.0.0",
-            },
-          },
-        ],
-        annotations: {
-          logging: true,
-          progress: true,
-          elicitation: true,
-        },
-      },
-      [
-        {
-          clientName: "logging-client",
-          mcpClient: clientLogging,
-        },
-        {
-          clientName: "progress-client",
-          mcpClient: clientProgress,
-        },
-        {
-          clientName: "elicitation-client",
-          mcpClient: clientElicitation,
-        },
-      ],
-      explorer,
-    );
-
-    registrar.onModuleInit();
-
-    expect(clientLoggingSetNotificationHandler).toHaveBeenCalledTimes(1);
-    expect(clientLoggingSetNotificationHandler).toHaveBeenCalledWith(
-      "notifications/message",
-      expect.any(Function),
-    );
-    expect(clientProgressSetNotificationHandler).toHaveBeenCalledTimes(1);
-    expect(clientProgressSetNotificationHandler).toHaveBeenCalledWith(
-      "notifications/progress",
-      expect.any(Function),
-    );
-    expect(clientElicitationSetRequestHandler).toHaveBeenCalledTimes(1);
-    expect(clientElicitationSetRequestHandler).toHaveBeenCalledWith(
-      "elicitation/create",
-      expect.any(Function),
-    );
-  });
-
-  it("creates clients lazily with listChanged handlers when registrations are empty", async () => {
-    class RuntimeChangedProvider {
-      seenTools: Tool[] | null = null;
-
-      @McpToolListChanged({ clients: ["runtime-client"] })
-      handleToolListChanged(tools: Tool[]): void {
-        this.seenTools = tools;
-      }
-    }
-
-    const runtimeProvider = new RuntimeChangedProvider();
-    const registrations = [] as never[];
+  beforeEach(() => {
     constructedClients.length = 0;
+  });
 
+  it("creates clients from stdio and streamable-http connections", async () => {
     const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [runtimeProvider],
+      getProviderInstances: () => [],
     };
+    const getProviderInstances = vi.spyOn(explorer, "getProviderInstances");
+    const registrations: any[] = [];
 
     const registrar = new McpClientAnnotationRegistrar(
       {
-        clients: [
-          {
-            clientInfo: {
-              name: "runtime-client",
-              version: "1.0.0",
+        name: "my-client",
+        version: "1.0.0",
+        stdio: {
+          connections: {
+            stdioServer: {
+              command: "node",
+              args: ["stdio-server.js"],
             },
           },
-        ],
-        annotations: {
-          toolListChanged: true,
+        },
+        streamableHttp: {
+          connections: {
+            httpServer: {
+              url: "http://localhost:8080",
+              endpoint: "/mcp",
+            },
+          },
         },
       },
       registrations,
       explorer,
     );
 
-    registrar.onModuleInit();
+    await registrar.onModuleInit();
 
-    expect(constructedClients).toHaveLength(1);
-    expect(registrations).toHaveLength(1);
-
-    const [createdClient] = constructedClients;
-    const listChanged = createdClient.clientOptions.listChanged as {
-      tools?: {
-        onChanged: (error: Error | null, tools: Tool[] | null) => Promise<void>;
-      };
-    };
-
-    await listChanged.tools?.onChanged(null, [{ name: "tool-1" } as Tool]);
-
-    expect(runtimeProvider.seenTools).toEqual([{ name: "tool-1" } as Tool]);
+    expect(getProviderInstances).toHaveBeenCalledTimes(1);
+    expect(constructedClients).toHaveLength(2);
+    expect(registrations).toHaveLength(2);
+    expect(
+      registrations.map((registration) => registration.clientName),
+    ).toEqual(["stdioServer", "httpServer"]);
+    expect(constructedClients[0]?.clientInfo).toMatchObject({
+      name: "my-client - stdioServer",
+      version: "1.0.0",
+    });
+    expect(constructedClients[1]?.clientInfo).toMatchObject({
+      name: "my-client - httpServer",
+      version: "1.0.0",
+    });
+    expect(constructedClients[0]?.connectedTransport).toBeInstanceOf(
+      StdioClientTransport,
+    );
+    expect(constructedClients[1]?.connectedTransport).toBeInstanceOf(
+      StreamableHTTPClientTransport,
+    );
   });
 
-  it("throws when more than one sampling method targets the same client", () => {
-    class SamplingProvider {
-      @McpSampling({ clients: ["server-a"] })
-      handleServerA(_request: CreateMessageRequest): CreateMessageResult {
-        return {
-          role: "assistant",
-          content: { type: "text", text: "a" },
-          model: "test-model-a",
-        };
-      }
+  it("registers changed handlers only for the matching connection name", async () => {
+    class ToolProvider {
+      seenTools: Tool[] | null = null;
 
-      @McpSampling({ clients: ["server-a"] })
-      handleServerAAgain(_request: CreateMessageRequest): CreateMessageResult {
-        return {
-          role: "assistant",
-          content: { type: "text", text: "a2" },
-          model: "test-model-a2",
-        };
+      @McpToolListChanged({ clients: ["stdioServer"] })
+      handleToolListChanged(tools: Tool[]): void {
+        this.seenTools = tools;
       }
     }
 
+    const provider = new ToolProvider();
     const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [new SamplingProvider()],
+      getProviderInstances: () => [provider],
     };
+    const getProviderInstances = vi.spyOn(explorer, "getProviderInstances");
+    const registrations: any[] = [];
 
     const registrar = new McpClientAnnotationRegistrar(
       {
-        clients: [
-          {
-            clientInfo: {
-              name: "server-a",
-              version: "1.0.0",
+        name: "my-client",
+        version: "1.0.0",
+        stdio: {
+          connections: {
+            stdioServer: {
+              command: "node",
+            },
+            otherServer: {
+              command: "node",
             },
           },
-        ],
-        annotations: { sampling: true },
-      },
-      [
-        {
-          clientName: "server-a",
-          mcpClient: {
-            setRequestHandler: vi.fn(),
-          } as unknown as McpClient,
         },
-      ],
+      },
+      registrations,
       explorer,
     );
 
-    expect(() => registrar.onModuleInit()).toThrowError(
-      /Multiple @McpSampling methods matched client "server-a"/,
+    await registrar.onModuleInit();
+
+    expect(getProviderInstances).toHaveBeenCalledTimes(1);
+    expect(registrations).toHaveLength(2);
+
+    const [stdioClient, otherClient] = constructedClients;
+    const listChanged = stdioClient?.clientOptions as {
+      listChanged?: {
+        tools?: {
+          onChanged: (
+            error: Error | null,
+            tools: Tool[] | null,
+          ) => Promise<void>;
+        };
+      };
+    };
+
+    expect(listChanged.listChanged?.tools?.onChanged).toBeDefined();
+    const otherClientOptions = otherClient!.clientOptions as {
+      listChanged?: { tools?: unknown };
+    };
+    expect(otherClientOptions.listChanged?.tools).toBeUndefined();
+
+    stdioClient!.listTools
+      .mockResolvedValueOnce({
+        tools: [{ name: "tool-1" } as Tool],
+        nextCursor: "next",
+      })
+      .mockResolvedValueOnce({
+        tools: [{ name: "tool-2" } as Tool],
+        nextCursor: undefined,
+      });
+
+    await listChanged.listChanged!.tools!.onChanged(null, null);
+
+    expect(stdioClient!.listTools).toHaveBeenCalledTimes(2);
+    expect(provider.seenTools).toEqual([
+      { name: "tool-1" } as Tool,
+      { name: "tool-2" } as Tool,
+    ]);
+  });
+
+  it("skips annotation scanning when the scanner is disabled", async () => {
+    class ToolProvider {
+      seenTools: Tool[] | null = null;
+
+      @McpToolListChanged({ clients: ["stdioServer"] })
+      handleToolListChanged(tools: Tool[]): void {
+        this.seenTools = tools;
+      }
+    }
+
+    const provider = new ToolProvider();
+    const explorer: ProviderInstanceExplorer = {
+      getProviderInstances: () => [provider],
+    };
+    const getProviderInstances = vi.spyOn(explorer, "getProviderInstances");
+    const registrations: any[] = [];
+
+    const registrar = new McpClientAnnotationRegistrar(
+      {
+        name: "my-client",
+        version: "1.0.0",
+        annotationScanner: {
+          enabled: false,
+        },
+        stdio: {
+          connections: {
+            stdioServer: {
+              command: "node",
+            },
+          },
+        },
+      },
+      registrations,
+      explorer,
     );
+
+    await registrar.onModuleInit();
+
+    expect(getProviderInstances).not.toHaveBeenCalled();
+    expect(registrations).toHaveLength(1);
+
+    const [client] = constructedClients;
+    expect(client?.clientOptions).toMatchObject({ listChanged: undefined });
+  });
+
+  it("closes connected clients on module destroy", async () => {
+    const explorer: ProviderInstanceExplorer = {
+      getProviderInstances: () => [],
+    };
+    const registrations: any[] = [];
+
+    const registrar = new McpClientAnnotationRegistrar(
+      {
+        name: "my-client",
+        version: "1.0.0",
+        stdio: {
+          connections: {
+            stdioServer: {
+              command: "node",
+            },
+          },
+        },
+      },
+      registrations,
+      explorer,
+    );
+
+    await registrar.onModuleInit();
+    await registrar.onModuleDestroy();
+
+    expect(constructedClients).toHaveLength(1);
+    expect(constructedClients[0]?.close).toHaveBeenCalledTimes(1);
   });
 });

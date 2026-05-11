@@ -16,283 +16,330 @@
 
 import "reflect-metadata";
 
-import type * as McpClientModule from "@modelcontextprotocol/client";
-import {
-  StdioClientTransport,
-  StreamableHTTPClientTransport,
-  type Tool,
-} from "@modelcontextprotocol/client";
+import { fileURLToPath } from "node:url";
+
+import type { Client, Tool } from "@modelcontextprotocol/client";
 import { McpToolListChanged } from "@nestjs-ai/mcp-annotations";
-import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const constructedClients: MockMcpClient[] = [];
-
-vi.mock("@modelcontextprotocol/client", async () => {
-  const actual = await vi.importActual<typeof McpClientModule>(
-    "@modelcontextprotocol/client",
-  );
-
-  class MockStdioClientTransport {
-    constructor(public readonly options: unknown) {}
-  }
-
-  class MockStreamableHTTPClientTransport {
-    constructor(
-      public readonly url: URL,
-      public readonly options: unknown,
-    ) {}
-  }
-
-  class MockMcpClient {
-    public readonly setRequestHandler = vi.fn();
-
-    public readonly setNotificationHandler = vi.fn();
-
-    public readonly listPrompts = vi.fn();
-
-    public readonly listResources = vi.fn();
-
-    public readonly listTools = vi.fn();
-
-    public readonly connect = vi.fn(async (transport: unknown) => {
-      this.connectedTransport = transport;
-    });
-
-    public readonly close = vi.fn(async () => undefined);
-
-    public connectedTransport: unknown;
-
-    constructor(
-      public readonly clientInfo: unknown,
-      public readonly clientOptions: unknown,
-    ) {
-      constructedClients.push(this);
-    }
-  }
-
-  return {
-    ...actual,
-    Client: MockMcpClient,
-    StdioClientTransport: MockStdioClientTransport,
-    StreamableHTTPClientTransport: MockStreamableHTTPClientTransport,
-  };
-});
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import { Test, type TestingModule } from "@nestjs/testing";
+import { describe, expect, it, vi } from "vitest";
 
 import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
+import { MCP_CLIENT_MODULE_OPTIONS_TOKEN } from "../mcp-client.tokens.js";
+import { MCP_CLIENT_REGISTRATIONS_TOKEN } from "../mcp-client.tokens.js";
+import type {
+  McpClientModuleOptions,
+  McpClientRegistration,
+  McpClientStdioConnectionOptions,
+} from "../mcp-client-module.options.js";
+import {
+  TEST_PROMPT_NAME,
+  TEST_PROMPT_TEXT,
+  TEST_RESOURCE_TEXT,
+  TEST_RESOURCE_URI,
+  TEST_TOOL_NAME,
+  TEST_TOOL_TEXT,
+  startStreamableHttpTestServer,
+} from "./support/mcp-test-server.js";
 
-type MockMcpClient = any;
+class MatchingToolListChangedProvider {
+  @McpToolListChanged({
+    clients: ["stdio-server"],
+  })
+  onToolsChanged(_tools: Tool[]): void {}
+}
 
 describe("McpClientAnnotationRegistrar", () => {
-  beforeEach(() => {
-    constructedClients.length = 0;
-  });
+  it("creates real clients from stdio and streamable-http connections", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+    const { moduleRef, registrations } = await bootstrapClientModule({
+      annotationScanner: {
+        enabled: false,
+      },
+      stdio: {
+        connections: {
+          "stdio-server": createStdioConnection(),
+        },
+      },
+      streamableHttp: {
+        connections: {
+          "http-server": {
+            url: httpServer.baseUrl,
+          },
+        },
+      },
+    });
 
-  it("creates clients from stdio and streamable-http connections", async () => {
-    const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [],
-    };
-    const getProviderInstances = vi.spyOn(explorer, "getProviderInstances");
-    const registrations: any[] = [];
+    try {
+      expect(registrations).toHaveLength(2);
 
-    const registrar = new McpClientAnnotationRegistrar(
+      const stdioClient = getClient(registrations, "stdio-server");
+      const httpClient = getClient(registrations, "http-server");
+
+      await expect(stdioClient.listPrompts({})).resolves.toMatchObject({
+        prompts: [
+          {
+            name: TEST_PROMPT_NAME,
+            description: "Return a greeting prompt",
+          },
+        ],
+      });
+      await expect(
+        stdioClient.getPrompt({ name: TEST_PROMPT_NAME }),
+      ).resolves.toMatchObject({
+        messages: [
+          {
+            role: "assistant",
+            content: {
+              type: "text",
+              text: TEST_PROMPT_TEXT,
+            },
+          },
+        ],
+      });
+      await expect(stdioClient.listResources({})).resolves.toMatchObject({
+        resources: [
+          {
+            uri: TEST_RESOURCE_URI,
+          },
+        ],
+      });
+      await expect(
+        stdioClient.readResource({ uri: TEST_RESOURCE_URI }),
+      ).resolves.toMatchObject({
+        contents: [
+          {
+            uri: TEST_RESOURCE_URI,
+            text: TEST_RESOURCE_TEXT,
+          },
+        ],
+      });
+      await expect(stdioClient.listTools({})).resolves.toMatchObject({
+        tools: [
+          {
+            name: TEST_TOOL_NAME,
+            description: "Return a fixed tool response",
+          },
+        ],
+      });
+      await expect(
+        stdioClient.callTool({ name: TEST_TOOL_NAME, arguments: {} }),
+      ).resolves.toMatchObject({
+        content: [
+          {
+            type: "text",
+            text: TEST_TOOL_TEXT,
+          },
+        ],
+      });
+
+      await expect(httpClient.listPrompts({})).resolves.toMatchObject({
+        prompts: [
+          {
+            name: TEST_PROMPT_NAME,
+            description: "Return a greeting prompt",
+          },
+        ],
+      });
+      await expect(
+        httpClient.getPrompt({ name: TEST_PROMPT_NAME }),
+      ).resolves.toMatchObject({
+        messages: [
+          {
+            role: "assistant",
+            content: {
+              type: "text",
+              text: TEST_PROMPT_TEXT,
+            },
+          },
+        ],
+      });
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
+
+  it("registers changed handlers only for the matching connection name", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+    const provider = new MatchingToolListChangedProvider();
+    const { moduleRef, registrations } = await bootstrapClientModule(
       {
-        name: "my-client",
-        version: "1.0.0",
         stdio: {
           connections: {
-            stdioServer: {
-              command: "node",
-              args: ["stdio-server.js"],
-            },
+            "stdio-server": createStdioConnection(),
           },
         },
         streamableHttp: {
           connections: {
-            httpServer: {
-              url: "http://localhost:8080",
-              endpoint: "/mcp",
+            "http-server": {
+              url: httpServer.baseUrl,
             },
           },
         },
       },
-      registrations,
-      explorer,
+      [provider],
     );
 
-    await registrar.onModuleInit();
+    try {
+      expect(registrations).toHaveLength(2);
 
-    expect(getProviderInstances).toHaveBeenCalledTimes(1);
-    expect(constructedClients).toHaveLength(2);
-    expect(registrations).toHaveLength(2);
-    expect(
-      registrations.map((registration) => registration.clientName),
-    ).toEqual(["stdioServer", "httpServer"]);
-    expect(constructedClients[0]?.clientInfo).toMatchObject({
-      name: "my-client - stdioServer",
-      version: "1.0.0",
-    });
-    expect(constructedClients[1]?.clientInfo).toMatchObject({
-      name: "my-client - httpServer",
-      version: "1.0.0",
-    });
-    expect(constructedClients[0]?.connectedTransport).toBeInstanceOf(
-      StdioClientTransport,
-    );
-    expect(constructedClients[1]?.connectedTransport).toBeInstanceOf(
-      StreamableHTTPClientTransport,
-    );
-  });
+      const stdioClient = getClient(registrations, "stdio-server");
+      const httpClient = getClient(registrations, "http-server");
+      const stdioClientOptions = getClientOptions(stdioClient);
+      const httpClientOptions = getClientOptions(httpClient);
 
-  it("registers changed handlers only for the matching connection name", async () => {
-    class ToolProvider {
-      seenTools: Tool[] | null = null;
-
-      @McpToolListChanged({ clients: ["stdioServer"] })
-      handleToolListChanged(tools: Tool[]): void {
-        this.seenTools = tools;
-      }
+      expect(stdioClientOptions.listChanged).toBeDefined();
+      expect(httpClientOptions.listChanged).toEqual({});
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
     }
-
-    const provider = new ToolProvider();
-    const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [provider],
-    };
-    const getProviderInstances = vi.spyOn(explorer, "getProviderInstances");
-    const registrations: any[] = [];
-
-    const registrar = new McpClientAnnotationRegistrar(
-      {
-        name: "my-client",
-        version: "1.0.0",
-        stdio: {
-          connections: {
-            stdioServer: {
-              command: "node",
-            },
-            otherServer: {
-              command: "node",
-            },
-          },
-        },
-      },
-      registrations,
-      explorer,
-    );
-
-    await registrar.onModuleInit();
-
-    expect(getProviderInstances).toHaveBeenCalledTimes(1);
-    expect(registrations).toHaveLength(2);
-
-    const [stdioClient, otherClient] = constructedClients;
-    const listChanged = stdioClient?.clientOptions as {
-      listChanged?: {
-        tools?: {
-          onChanged: (
-            error: Error | null,
-            tools: Tool[] | null,
-          ) => Promise<void>;
-        };
-      };
-    };
-
-    expect(listChanged.listChanged?.tools?.onChanged).toBeDefined();
-    const otherClientOptions = otherClient!.clientOptions as {
-      listChanged?: { tools?: unknown };
-    };
-    expect(otherClientOptions.listChanged?.tools).toBeUndefined();
-
-    stdioClient!.listTools
-      .mockResolvedValueOnce({
-        tools: [{ name: "tool-1" } as Tool],
-        nextCursor: "next",
-      })
-      .mockResolvedValueOnce({
-        tools: [{ name: "tool-2" } as Tool],
-        nextCursor: undefined,
-      });
-
-    await listChanged.listChanged!.tools!.onChanged(null, null);
-
-    expect(stdioClient!.listTools).toHaveBeenCalledTimes(2);
-    expect(provider.seenTools).toEqual([
-      { name: "tool-1" } as Tool,
-      { name: "tool-2" } as Tool,
-    ]);
-  });
+  }, 30_000);
 
   it("skips annotation scanning when the scanner is disabled", async () => {
-    class ToolProvider {
-      seenTools: Tool[] | null = null;
-
-      @McpToolListChanged({ clients: ["stdioServer"] })
-      handleToolListChanged(tools: Tool[]): void {
-        this.seenTools = tools;
-      }
-    }
-
-    const provider = new ToolProvider();
-    const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [provider],
-    };
-    const getProviderInstances = vi.spyOn(explorer, "getProviderInstances");
-    const registrations: any[] = [];
-
-    const registrar = new McpClientAnnotationRegistrar(
+    const httpServer = await startStreamableHttpTestServer();
+    const provider = new MatchingToolListChangedProvider();
+    const getProviderInstances = vi.fn(() => [provider]);
+    const { moduleRef, registrations } = await bootstrapClientModule(
       {
-        name: "my-client",
-        version: "1.0.0",
         annotationScanner: {
           enabled: false,
         },
         stdio: {
           connections: {
-            stdioServer: {
-              command: "node",
+            "stdio-server": createStdioConnection(),
+          },
+        },
+        streamableHttp: {
+          connections: {
+            "http-server": {
+              url: httpServer.baseUrl,
             },
           },
         },
       },
-      registrations,
-      explorer,
+      [provider],
+      getProviderInstances,
     );
 
-    await registrar.onModuleInit();
+    try {
+      expect(getProviderInstances).not.toHaveBeenCalled();
+      expect(registrations).toHaveLength(2);
 
-    expect(getProviderInstances).not.toHaveBeenCalled();
-    expect(registrations).toHaveLength(1);
-
-    const [client] = constructedClients;
-    expect(client?.clientOptions).toMatchObject({ listChanged: undefined });
-  });
+      const stdioClient = getClient(registrations, "stdio-server");
+      expect(getClientOptions(stdioClient).listChanged).toBeUndefined();
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
 
   it("closes connected clients on module destroy", async () => {
-    const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [],
-    };
-    const registrations: any[] = [];
-
-    const registrar = new McpClientAnnotationRegistrar(
-      {
-        name: "my-client",
-        version: "1.0.0",
-        stdio: {
-          connections: {
-            stdioServer: {
-              command: "node",
-            },
+    const httpServer = await startStreamableHttpTestServer();
+    const { moduleRef, registrations } = await bootstrapClientModule({
+      stdio: {
+        connections: {
+          "stdio-server": createStdioConnection(),
+        },
+      },
+      streamableHttp: {
+        connections: {
+          "http-server": {
+            url: httpServer.baseUrl,
           },
         },
       },
-      registrations,
-      explorer,
-    );
+    });
 
-    await registrar.onModuleInit();
-    await registrar.onModuleDestroy();
+    try {
+      const stdioClient = getClient(registrations, "stdio-server");
+      const httpClient = getClient(registrations, "http-server");
+      const stdioCloseSpy = vi.spyOn(stdioClient, "close");
+      const httpCloseSpy = vi.spyOn(httpClient, "close");
 
-    expect(constructedClients).toHaveLength(1);
-    expect(constructedClients[0]?.close).toHaveBeenCalledTimes(1);
-  });
+      await moduleRef.close();
+
+      expect(stdioCloseSpy).toHaveBeenCalledTimes(1);
+      expect(httpCloseSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      await httpServer.close();
+    }
+  }, 30_000);
 });
+
+async function bootstrapClientModule(
+  options: McpClientModuleOptions,
+  providerInstances: object[] = [],
+  getProviderInstances: () => object[] = () => providerInstances,
+): Promise<{
+  moduleRef: TestingModule;
+  registrations: McpClientRegistration[];
+}> {
+  const moduleRef = await Test.createTestingModule({
+    providers: [
+      McpClientAnnotationRegistrar,
+      {
+        provide: MCP_CLIENT_MODULE_OPTIONS_TOKEN,
+        useValue: options,
+      },
+      {
+        provide: MCP_CLIENT_REGISTRATIONS_TOKEN,
+        useValue: [],
+      },
+      {
+        provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
+        useValue: {
+          getProviderInstances,
+        },
+      },
+    ],
+  }).compile();
+
+  await moduleRef.init();
+
+  return {
+    moduleRef,
+    registrations: moduleRef.get<McpClientRegistration[]>(
+      MCP_CLIENT_REGISTRATIONS_TOKEN,
+    ),
+  };
+}
+
+function createStdioConnection(): McpClientStdioConnectionOptions {
+  const fixtureUrl = fileURLToPath(
+    new URL("./fixtures/stdio-test-server.fixture.ts", import.meta.url),
+  );
+  const serverPackageDir = fileURLToPath(
+    new URL("../../../../server", import.meta.url),
+  );
+
+  return {
+    command: "pnpm",
+    args: ["--dir", serverPackageDir, "exec", "tsx", fixtureUrl],
+  };
+}
+
+function getClient(
+  registrations: McpClientRegistration[],
+  clientName: string,
+): Client {
+  const registration = registrations.find(
+    (candidate) => candidate.clientName === clientName,
+  );
+
+  if (registration == null) {
+    throw new Error(`Missing client registration for "${clientName}"`);
+  }
+
+  return registration.mcpClient as Client;
+}
+
+function getClientOptions(client: Client): {
+  listChanged?: unknown;
+} {
+  return (
+    (client as unknown as { _options?: { listChanged?: unknown } })._options ??
+    {}
+  );
+}

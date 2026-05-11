@@ -23,22 +23,51 @@ import type {
   ElicitResult,
   Client as McpClient,
   LoggingLevel,
-  Prompt,
   ProgressNotification,
-  Resource,
   Tool,
 } from "@modelcontextprotocol/client";
+import type * as McpClientModule from "@modelcontextprotocol/client";
 import {
   McpElicitation,
   McpLogging,
   McpProgress,
-  McpPromptListChanged,
   McpSampling,
-  McpResourceListChanged,
   McpToolListChanged,
 } from "@nestjs-ai/mcp-annotations";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { describe, expect, it, vi } from "vitest";
+
+const constructedClients: any[] = [];
+
+vi.mock("@modelcontextprotocol/client", async () => {
+  const actual = await vi.importActual<typeof McpClientModule>(
+    "@modelcontextprotocol/client",
+  );
+
+  class MockMcpClient {
+    setRequestHandler = vi.fn();
+
+    setNotificationHandler = vi.fn();
+
+    listPrompts = vi.fn();
+
+    listResources = vi.fn();
+
+    listTools = vi.fn();
+
+    constructor(
+      public readonly clientInfo: unknown,
+      public readonly clientOptions: unknown,
+    ) {
+      constructedClients.push(this);
+    }
+  }
+
+  return {
+    ...actual,
+    Client: MockMcpClient,
+  };
+});
 
 import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
 
@@ -233,91 +262,22 @@ describe("McpClientAnnotationRegistrar", () => {
     );
   });
 
-  it("registers changed handlers and refreshes the full lists", async () => {
-    class ChangedProvider {
-      seenPrompts: Prompt[] | null = null;
-
-      seenResources: Resource[] | null = null;
-
+  it("creates clients lazily with listChanged handlers when registrations are empty", async () => {
+    class RuntimeChangedProvider {
       seenTools: Tool[] | null = null;
 
-      @McpPromptListChanged({ clients: ["changed-client"] })
-      handlePromptListChanged(prompts: Prompt[]): void {
-        this.seenPrompts = prompts;
-      }
-
-      @McpResourceListChanged({ clients: ["changed-client"] })
-      handleResourceListChanged(resources: Resource[]): void {
-        this.seenResources = resources;
-      }
-
-      @McpToolListChanged({ clients: ["changed-client"] })
+      @McpToolListChanged({ clients: ["runtime-client"] })
       handleToolListChanged(tools: Tool[]): void {
         this.seenTools = tools;
       }
     }
 
-    const changedProvider = new ChangedProvider();
-    let promptListChangedHandler: (() => Promise<void>) | undefined;
-    let resourceListChangedHandler: (() => Promise<void>) | undefined;
-    let toolListChangedHandler: (() => Promise<void>) | undefined;
-
-    const listPrompts = vi
-      .fn()
-      .mockResolvedValueOnce({
-        prompts: [{ name: "prompt-1" } as Prompt],
-        nextCursor: "next-prompts",
-      })
-      .mockResolvedValueOnce({
-        prompts: [{ name: "prompt-2" } as Prompt],
-        nextCursor: undefined,
-      });
-    const listResources = vi
-      .fn()
-      .mockResolvedValueOnce({
-        resources: [
-          { name: "resource-1", uri: "file:///resource-1" } as Resource,
-        ],
-        nextCursor: "next-resources",
-      })
-      .mockResolvedValueOnce({
-        resources: [
-          { name: "resource-2", uri: "file:///resource-2" } as Resource,
-        ],
-        nextCursor: undefined,
-      });
-    const listTools = vi
-      .fn()
-      .mockResolvedValueOnce({
-        tools: [{ name: "tool-1" } as Tool],
-        nextCursor: "next-tools",
-      })
-      .mockResolvedValueOnce({
-        tools: [{ name: "tool-2" } as Tool],
-        nextCursor: undefined,
-      });
-
-    const client = {
-      setNotificationHandler: vi.fn(
-        (method: string, handler: () => Promise<void>) => {
-          if (method === "notifications/prompts/list_changed") {
-            promptListChangedHandler = handler;
-          }
-          if (method === "notifications/resources/list_changed") {
-            resourceListChangedHandler = handler;
-          }
-          if (method === "notifications/tools/list_changed") {
-            toolListChangedHandler = handler;
-          }
-        },
-      ),
-      listPrompts,
-      listResources,
-      listTools,
-    } as unknown as McpClient;
+    const runtimeProvider = new RuntimeChangedProvider();
+    const registrations = [] as never[];
+    constructedClients.length = 0;
 
     const explorer: ProviderInstanceExplorer = {
-      getProviderInstances: () => [changedProvider],
+      getProviderInstances: () => [runtimeProvider],
     };
 
     const registrar = new McpClientAnnotationRegistrar(
@@ -325,38 +285,34 @@ describe("McpClientAnnotationRegistrar", () => {
         clients: [
           {
             clientInfo: {
-              name: "changed-client",
+              name: "runtime-client",
               version: "1.0.0",
             },
           },
         ],
         annotations: {
-          promptListChanged: true,
-          resourceListChanged: true,
           toolListChanged: true,
         },
       },
-      [{ clientName: "changed-client", mcpClient: client }],
+      registrations,
       explorer,
     );
 
     registrar.onModuleInit();
 
-    expect(promptListChangedHandler).toBeDefined();
-    expect(resourceListChangedHandler).toBeDefined();
-    expect(toolListChangedHandler).toBeDefined();
+    expect(constructedClients).toHaveLength(1);
+    expect(registrations).toHaveLength(1);
 
-    await promptListChangedHandler?.();
-    await resourceListChangedHandler?.();
-    await toolListChangedHandler?.();
+    const [createdClient] = constructedClients;
+    const listChanged = createdClient.clientOptions.listChanged as {
+      tools?: {
+        onChanged: (error: Error | null, tools: Tool[] | null) => Promise<void>;
+      };
+    };
 
-    expect(listPrompts).toHaveBeenCalledTimes(2);
-    expect(listResources).toHaveBeenCalledTimes(2);
-    expect(listTools).toHaveBeenCalledTimes(2);
+    await listChanged.tools?.onChanged(null, [{ name: "tool-1" } as Tool]);
 
-    expect(changedProvider.seenPrompts).toHaveLength(2);
-    expect(changedProvider.seenResources).toHaveLength(2);
-    expect(changedProvider.seenTools).toHaveLength(2);
+    expect(runtimeProvider.seenTools).toEqual([{ name: "tool-1" } as Tool]);
   });
 
   it("throws when more than one sampling method targets the same client", () => {

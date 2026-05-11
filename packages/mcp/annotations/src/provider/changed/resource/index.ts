@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpResourceListChangedProvider,
-  type McpResourceListChangedProviderProps,
-} from "./mcp-resource-list-changed-provider.js";
+export { McpResourceListChangedProvider } from "./mcp-resource-list-changed-provider.js";

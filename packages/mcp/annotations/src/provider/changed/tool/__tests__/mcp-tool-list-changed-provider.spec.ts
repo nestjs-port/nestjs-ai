@@ -38,9 +38,7 @@ describe("McpToolListChangedProvider", () => {
 
   it("testGetToolListChangedSpecifications", async () => {
     const handler = new ToolListChangedHandler();
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [handler],
-    });
+    const provider = new McpToolListChangedProvider([handler]);
 
     const specifications = provider.getToolListChangedSpecifications();
     const consumers = specifications.map((spec) => spec.toolListChangeHandler);
@@ -62,9 +60,7 @@ describe("McpToolListChangedProvider", () => {
 
   it("testClientIdSpecifications", () => {
     const handler = new ToolListChangedHandler();
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [handler],
-    });
+    const provider = new McpToolListChangedProvider([handler]);
 
     const specifications = provider.getToolListChangedSpecifications();
 
@@ -75,29 +71,23 @@ describe("McpToolListChangedProvider", () => {
   });
 
   it("testEmptyList", () => {
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [],
-    });
+    const provider = new McpToolListChangedProvider([]);
 
     expect(provider.getToolListChangedSpecifications()).toHaveLength(0);
   });
 
   it("testMultipleObjects", () => {
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [
-        new ToolListChangedHandler(),
-        new ToolListChangedHandler(),
-      ],
-    });
+    const provider = new McpToolListChangedProvider([
+      new ToolListChangedHandler(),
+      new ToolListChangedHandler(),
+    ]);
 
     expect(provider.getToolListChangedSpecifications()).toHaveLength(4);
   });
 
   it("testConsumerFunctionality", async () => {
     const handler = new ToolListChangedHandler();
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [handler],
-    });
+    const provider = new McpToolListChangedProvider([handler]);
 
     const consumer =
       provider.getToolListChangedSpecifications()[0]?.toolListChangeHandler;
@@ -115,9 +105,7 @@ describe("McpToolListChangedProvider", () => {
 
   it("testNonAnnotatedMethodsIgnored", () => {
     const handler = new ToolListChangedHandler();
-    const provider = new McpToolListChangedProvider({
-      toolListChangedObjects: [handler],
-    });
+    const provider = new McpToolListChangedProvider([handler]);
 
     expect(provider.getToolListChangedSpecifications()).toHaveLength(2);
   });

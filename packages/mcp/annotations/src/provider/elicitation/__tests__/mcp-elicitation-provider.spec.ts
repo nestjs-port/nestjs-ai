@@ -25,9 +25,7 @@ import { McpElicitationProvider } from "../mcp-elicitation-provider.js";
 
 describe("McpElicitationProvider", () => {
   it("testGetElicitationHandler", async () => {
-    const provider = new McpElicitationProvider({
-      elicitationObjects: [new TestElicitationHandler()],
-    });
+    const provider = new McpElicitationProvider([new TestElicitationHandler()]);
 
     const specification = provider.getElicitationSpecifications()[0];
     const handler = specification?.elicitationHandler;
@@ -55,29 +53,22 @@ describe("McpElicitationProvider", () => {
   });
 
   it("testNullElicitationObjects", () => {
-    expect(
-      () =>
-        new McpElicitationProvider({
-          elicitationObjects: null as never,
-        }),
-    ).toThrow("elicitationObjects can't be null!");
+    expect(() => new McpElicitationProvider(null as never)).toThrow(
+      "elicitationObjects can't be null!",
+    );
   });
 
   it("testMultipleObjects", () => {
-    const provider = new McpElicitationProvider({
-      elicitationObjects: [
-        new TestElicitationHandler(),
-        new TestElicitationHandler(),
-      ],
-    });
+    const provider = new McpElicitationProvider([
+      new TestElicitationHandler(),
+      new TestElicitationHandler(),
+    ]);
 
     expect(provider.getElicitationSpecifications()).toHaveLength(4);
   });
 
   it("testNonAnnotatedMethodsIgnored", () => {
-    const provider = new McpElicitationProvider({
-      elicitationObjects: [new TestElicitationHandler()],
-    });
+    const provider = new McpElicitationProvider([new TestElicitationHandler()]);
 
     expect(provider.getElicitationSpecifications()).toHaveLength(2);
   });

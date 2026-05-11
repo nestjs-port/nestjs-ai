@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export {
-  McpLoggingProvider,
-  type McpLoggingProviderProps,
-} from "./mcp-logging-provider.js";
+export { McpLoggingProvider } from "./mcp-logging-provider.js";

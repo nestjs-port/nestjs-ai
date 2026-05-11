@@ -25,9 +25,7 @@ import { McpProgressProvider } from "../mcp-progress-provider.js";
 describe("McpProgressProvider", () => {
   it("testGetProgressSpecifications", async () => {
     const progressHandler = new ProgressHandler();
-    const provider = new McpProgressProvider({
-      progressObjects: [progressHandler],
-    });
+    const provider = new McpProgressProvider([progressHandler]);
 
     const specifications = provider.getProgressSpecifications();
     const consumers = specifications.map((spec) => spec.progressHandler);
@@ -56,33 +54,28 @@ describe("McpProgressProvider", () => {
   });
 
   it("testEmptyList", () => {
-    const provider = new McpProgressProvider({
-      progressObjects: [],
-    });
+    const provider = new McpProgressProvider([]);
 
     expect(provider.getProgressSpecifications()).toHaveLength(0);
   });
 
   it("testMultipleObjects", () => {
-    const provider = new McpProgressProvider({
-      progressObjects: [new ProgressHandler(), new ProgressHandler()],
-    });
+    const provider = new McpProgressProvider([
+      new ProgressHandler(),
+      new ProgressHandler(),
+    ]);
 
     expect(provider.getProgressSpecifications()).toHaveLength(8);
   });
 
   it("testNullProgressObjects", () => {
-    const provider = new McpProgressProvider({
-      progressObjects: null as never,
-    });
+    const provider = new McpProgressProvider(null as never);
 
     expect(provider.getProgressSpecifications()).toHaveLength(0);
   });
 
   it("testClientIdExtraction", () => {
-    const provider = new McpProgressProvider({
-      progressObjects: [new ProgressHandler()],
-    });
+    const provider = new McpProgressProvider([new ProgressHandler()]);
 
     const specifications = provider.getProgressSpecifications();
 

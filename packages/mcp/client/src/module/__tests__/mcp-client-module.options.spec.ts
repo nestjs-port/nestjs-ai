@@ -14,49 +14,126 @@
  * limitations under the License.
  */
 
-import { Client } from "@modelcontextprotocol/client";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import {
+  StdioClientTransport,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
-import { normalizeMcpClientRegistrations } from "../mcp-client-module.options.js";
+import {
+  createMcpClientTransport,
+  normalizeMcpClientConnectionSpecs,
+} from "../mcp-client-module.options.js";
 
-describe("normalizeMcpClientRegistrations", () => {
-  it("creates client registrations from SDK client creation options", () => {
-    const registrations = normalizeMcpClientRegistrations({
-      clients: [
-        {
-          clientInfo: {
-            name: "sample-client",
-            version: "1.0.0",
+describe("normalizeMcpClientConnectionSpecs", () => {
+  it("creates connection specs from stdio and streamable-http transports", async () => {
+    const specs = await normalizeMcpClientConnectionSpecs({
+      name: "my-client",
+      version: "1.2.3",
+      stdio: {
+        connections: {
+          stdioServer: {
+            command: "node",
+            args: ["server.js"],
           },
         },
-      ],
+      },
+      streamableHttp: {
+        connections: {
+          httpServer: {
+            url: "http://localhost:9090",
+            endpoint: "/mcp",
+          },
+        },
+      },
     });
 
-    expect(registrations).toHaveLength(1);
-    expect(registrations[0]?.clientName).toBe("sample-client");
-    expect(registrations[0]?.mcpClient).toBeInstanceOf(Client);
+    expect(specs).toHaveLength(2);
+    expect(specs[0]).toMatchObject({
+      clientName: "stdioServer",
+      clientInfo: { name: "my-client - stdioServer", version: "1.2.3" },
+      transportType: "stdio",
+      transportOptions: {
+        command: "node",
+        args: ["server.js"],
+      },
+    });
+    expect(specs[1]).toMatchObject({
+      clientName: "httpServer",
+      clientInfo: { name: "my-client - httpServer", version: "1.2.3" },
+      transportType: "streamable-http",
+    });
   });
 
-  it("throws when no clients are configured", () => {
-    expect(() =>
-      normalizeMcpClientRegistrations({
-        clients: [],
-      }),
-    ).toThrowError("clients must not be empty");
-  });
+  it("loads stdio connections from a servers configuration file", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "nestjs-ai-mcp-"));
+    const configurationPath = join(directory, "claude-desktop-config.json");
 
-  it("throws when clientInfo.name is empty", () => {
-    expect(() =>
-      normalizeMcpClientRegistrations({
-        clients: [
-          {
-            clientInfo: {
-              name: "   ",
-              version: "1.0.0",
-            },
+    await writeFile(
+      configurationPath,
+      JSON.stringify({
+        mcpServers: {
+          fileServer: {
+            command: "node",
+            args: ["server.js"],
           },
-        ],
+        },
       }),
-    ).toThrowError("clientInfo.name must not be empty");
+      "utf8",
+    );
+
+    const specs = await normalizeMcpClientConnectionSpecs({
+      stdio: {
+        serversConfiguration: configurationPath,
+      },
+    });
+
+    expect(specs).toHaveLength(1);
+    expect(specs[0]).toMatchObject({
+      clientName: "fileServer",
+      clientInfo: {
+        name: "spring-ai-mcp-client - fileServer",
+        version: "1.0.0",
+      },
+      transportType: "stdio",
+      transportOptions: {
+        command: "node",
+        args: ["server.js"],
+      },
+    });
+  });
+
+  it("throws when no transport connections are configured", async () => {
+    await expect(normalizeMcpClientConnectionSpecs({})).rejects.toThrowError(
+      "At least one MCP client transport connection must be configured",
+    );
+  });
+});
+
+describe("createMcpClientTransport", () => {
+  it("creates stdio and streamable HTTP transports", () => {
+    const stdio = createMcpClientTransport({
+      clientName: "stdioServer",
+      clientInfo: { name: "client - stdioServer", version: "1.0.0" },
+      transportType: "stdio",
+      transportOptions: {
+        command: "node",
+      },
+    });
+    const streamableHttp = createMcpClientTransport({
+      clientName: "httpServer",
+      clientInfo: { name: "client - httpServer", version: "1.0.0" },
+      transportType: "streamable-http",
+      transportOptions: {
+        url: "http://localhost:9090",
+      },
+    });
+
+    expect(stdio).toBeInstanceOf(StdioClientTransport);
+    expect(streamableHttp).toBeInstanceOf(StreamableHTTPClientTransport);
   });
 });

@@ -16,12 +16,17 @@
 
 export { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
 export {
-  type McpClientAnnotationRegistrationOptions,
-  type McpClientCreationOptions,
+  type McpClientConnectionSpec,
+  type McpClientAnnotationScannerOptions,
   type McpClientModuleAsyncOptions,
   type McpClientModuleOptions,
   type McpClientRegistration,
-  normalizeMcpClientRegistrations,
+  type McpClientStdioConnectionOptions,
+  type McpClientStdioOptions,
+  type McpClientStreamableHttpConnectionOptions,
+  type McpClientStreamableHttpOptions,
+  normalizeMcpClientConnectionSpecs,
+  createMcpClientTransport,
 } from "./mcp-client-module.options.js";
 export { McpClientModule } from "./mcp-client.module.js";
 export { MCP_CLIENT_REGISTRATIONS_TOKEN } from "./mcp-client.tokens.js";

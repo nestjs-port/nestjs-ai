@@ -43,7 +43,8 @@
     "@nestjs-port/core": "^0.1.1",
     "@nestjs/common": "^11.1.11",
     "@nestjs/testing": "^11.1.19",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "tsx": "^4.19.2"
   },
   "peerDependencies": {
     "@modelcontextprotocol/client": "^2.0.0-alpha.2",

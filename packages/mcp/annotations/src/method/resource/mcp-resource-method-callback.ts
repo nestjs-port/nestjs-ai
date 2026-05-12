@@ -18,13 +18,15 @@ import assert from "node:assert/strict";
 
 import type {
   ReadResourceCallback,
+  ReadResourceTemplateCallback,
   ReadResourceRequest,
   ReadResourceResult,
   McpServer,
   Resource,
+  ResourceTemplate,
   ServerContext,
+  Variables,
 } from "@modelcontextprotocol/server";
-import { UriTemplate } from "@modelcontextprotocol/server";
 
 import type { McpTransportContext } from "../../context/index.js";
 import { McpServerExchange } from "../../context/index.js";
@@ -40,17 +42,29 @@ export interface McpResourceMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
   resource: Resource;
+  resourceTemplate?: ResourceTemplate | null;
   mcpServer?: McpServer | null;
   resultConverter?: McpReadResourceResultConverter | null;
   contentType?: ResourceContentType | null;
 }
 
-export type ResourceRegistration = [
+export type StaticResourceRegistration = [
   name: string,
-  uriOrTemplate: string,
+  uri: string,
   config: Parameters<McpServer["registerResource"]>[2],
   callback: ReadResourceCallback,
 ];
+
+export type TemplateResourceRegistration = [
+  name: string,
+  resourceTemplate: ResourceTemplate,
+  config: Parameters<McpServer["registerResource"]>[2],
+  callback: ReadResourceTemplateCallback,
+];
+
+export type ResourceRegistration =
+  | StaticResourceRegistration
+  | TemplateResourceRegistration;
 
 export class McpResourceMethodException extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
@@ -72,11 +86,9 @@ export class McpResourceMethodCallback {
 
   protected readonly _resource: Resource;
 
+  protected readonly _resourceTemplate: ResourceTemplate | null;
+
   protected readonly _mcpServer: McpServer;
-
-  protected readonly _uriTemplate: UriTemplate;
-
-  protected readonly _uriVariables: string[];
 
   protected readonly _mimeType: string;
 
@@ -98,9 +110,8 @@ export class McpResourceMethodCallback {
     this._provider = props.provider;
     this._propertyKey = props.propertyKey;
     this._resource = props.resource;
+    this._resourceTemplate = props.resourceTemplate ?? null;
     this._mcpServer = props.mcpServer ?? ({} as McpServer);
-    this._uriTemplate = new UriTemplate(props.resource.uri);
-    this._uriVariables = this._uriTemplate.variableNames;
     this._mimeType =
       props.resource.mimeType != null && props.resource.mimeType.length > 0
         ? props.resource.mimeType
@@ -126,13 +137,39 @@ export class McpResourceMethodCallback {
     return this._contentType;
   }
 
-  toResource(): Resource {
-    return this._resource;
+  toResource(): Resource | ResourceTemplate {
+    return this._resourceTemplate ?? this._resource;
   }
 
   apply(): ResourceRegistration {
-    const { name, uri, ...config } = this._resource;
+    const { name, uri, ...baseConfig } = this._resource;
+    void uri;
+    const config = baseConfig as Parameters<McpServer["registerResource"]>[2];
     const resolvedName = name.length > 0 ? name : this.methodName;
+    if (this._resourceTemplate != null) {
+      const callback: ReadResourceTemplateCallback = async (
+        resourceUri: URL,
+        variables: Variables,
+        ctx: ServerContext,
+      ): Promise<ReadResourceResult> => {
+        const request: ReadResourceRequest = {
+          params: {
+            uri: resourceUri.toString(),
+            ...(ctx.mcpReq._meta == null ? {} : { _meta: ctx.mcpReq._meta }),
+          },
+        } as ReadResourceRequest;
+        const exchange = new McpServerExchange(this._mcpServer, ctx);
+        return this.handle(exchange, request, variables);
+      };
+
+      return [
+        resolvedName,
+        this._resourceTemplate,
+        config,
+        callback,
+      ] as TemplateResourceRegistration;
+    }
+
     const callback: ReadResourceCallback = async (
       resourceUri: URL,
       ctx: ServerContext,
@@ -147,17 +184,23 @@ export class McpResourceMethodCallback {
       return this.handle(exchange, request);
     };
 
-    return [resolvedName, uri, config, callback];
+    return [
+      resolvedName,
+      this._resource.uri,
+      config,
+      callback,
+    ] as StaticResourceRegistration;
   }
 
   async handle(
     exchange: McpServerExchange,
     request: ReadResourceRequest,
+    uriVariables?: Record<string, string> | Variables,
   ): Promise<ReadResourceResult> {
     assert(request != null, "Request must not be null");
 
     try {
-      const args = this.buildArgs(exchange, request);
+      const args = this.buildArgs(exchange, request, uriVariables);
       const result = await this._method.apply(this._provider, [args]);
       return this._resultConverter.convertToReadResourceResult(
         result,
@@ -175,50 +218,23 @@ export class McpResourceMethodCallback {
   }
 
   protected buildArgs(
-    exchangeOrContext: unknown,
+    exchange: McpServerExchange,
     request: ReadResourceRequest,
+    uriVariables?: Record<string, string> | Variables,
   ): McpResourceMethodArguments {
-    const uriVariables = this.extractUriVariables(request.params.uri);
+    const resolvedUriVariables = this.normalizeUriVariables(uriVariables ?? {});
     return {
-      exchange: this.isExchangeType(exchangeOrContext)
-        ? (exchangeOrContext as never)
-        : undefined,
-      context: this.resolveTransportContext(exchangeOrContext),
+      exchange,
+      context: this.resolveTransportContext(exchange),
       request,
       resource: this._resource,
       uri: request.params.uri,
-      uriVariables,
+      uriVariables: resolvedUriVariables,
       meta: new McpMeta(
         (request.params._meta as Record<string, unknown> | undefined) ?? null,
       ),
       progressToken: request.params._meta?.progressToken ?? null,
     };
-  }
-
-  protected extractUriVariables(uri: string): Record<string, string> {
-    if (this._uriVariables.length === 0) {
-      return {};
-    }
-
-    const matched = this._uriTemplate.match(uri);
-    if (matched == null) {
-      throw new Error(
-        `Failed to extract all URI variables from request URI: ${uri}. Expected variables: ${this._uriVariables.join(", ")}, but found: <none>`,
-      );
-    }
-
-    const result: Record<string, string> = {};
-    for (const variableName of this._uriVariables) {
-      const value = matched[variableName];
-      if (value == null) {
-        throw new Error(
-          `Failed to extract all URI variables from request URI: ${uri}. Expected variables: ${this._uriVariables.join(", ")}, but found: ${Object.keys(matched).join(", ")}`,
-        );
-      }
-      result[variableName] = Array.isArray(value) ? (value[0] ?? "") : value;
-    }
-
-    return result;
   }
 
   protected resolveMethod(): (...args: unknown[]) => unknown {
@@ -233,15 +249,23 @@ export class McpResourceMethodCallback {
   }
 
   protected resolveTransportContext(
-    exchangeOrContext: unknown,
+    exchange: McpServerExchange,
   ): McpTransportContext | null {
-    if (exchangeOrContext instanceof McpServerExchange) {
-      return exchangeOrContext.transportContext();
-    }
-    return null;
+    return exchange.transportContext();
   }
 
-  protected isExchangeType(value: unknown): boolean {
-    return value instanceof McpServerExchange;
+  protected normalizeUriVariables(
+    uriVariables: Record<string, string> | Variables,
+  ): Record<string, string> {
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(uriVariables)) {
+      if (value == null) {
+        continue;
+      }
+      result[key] = Array.isArray(value)
+        ? String(value[0] ?? "")
+        : String(value);
+    }
+    return result;
   }
 }

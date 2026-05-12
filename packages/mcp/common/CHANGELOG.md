@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-common
 
+## 0.1.2
+
+### Patch Changes
+
+- mcp server/client suppor
+
 ## 0.1.1
 
 ### Patch Changes

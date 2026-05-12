@@ -41,7 +41,7 @@ The project faithfully mirrors Spring AI's module structure and API design while
 | Runtime         | Node.js >= 22.12                                                               |
 | Module format   | ESM only                                                                       |
 | Framework       | NestJS 11.x                                                                    |
-| Package Manager | pnpm 10.x                                                                      |
+| Package Manager | pnpm 11.x                                                                      |
 | Build           | Turborepo + tsc                                                                |
 | Test            | Vitest 4.x + TestContainers                                                    |
 | Lint/Format     | Oxlint + Oxfmt                                                                 |
@@ -50,39 +50,40 @@ The project faithfully mirrors Spring AI's module structure and API design while
 
 ## Porting Progress
 
-| Category                | Spring AI Module                      | nestjs-ai Package                               | Progress |
-| ----------------------- | ------------------------------------- | ----------------------------------------------- | -------- |
-| **Core**                | spring-ai-model                       | `@nestjs-ai/model`                              | 100%     |
-|                         | spring-ai-client-chat                 | `@nestjs-ai/client-chat`                        | 100%     |
-|                         | spring-ai-commons                     | `@nestjs-ai/commons`                            | 100%     |
-|                         | spring-ai-retry                       | `@nestjs-ai/retry`                              | 100%     |
-|                         | spring-ai-template-st                 | `@nestjs-ai/template-st`                        | 100%     |
-| **Model Providers**     | spring-ai-openai                      | `@nestjs-ai/model-openai`                       | 100%     |
-|                         | spring-ai-google-genai                | `@nestjs-ai/model-google-genai`                 | 100%     |
-|                         | spring-ai-transformers                | `@nestjs-ai/model-transformers`                 | 100%     |
-|                         | spring-ai-anthropic                   | `@nestjs-ai/model-anthropic`                    | 100%     |
-|                         | spring-ai-azure-openai                | —                                               | 0%       |
-|                         | spring-ai-bedrock                     | —                                               | 0%       |
-|                         | spring-ai-mistral-ai                  | —                                               | 0%       |
-|                         | spring-ai-ollama                      | —                                               | 0%       |
-| **RAG & Vector Stores** | spring-ai-rag                         | `@nestjs-ai/rag`                                | 100%     |
-|                         | spring-ai-vector-store                | `@nestjs-ai/vector-store`                       | 100%     |
-|                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                 | 100%     |
-|                         | spring-ai-advisors-vector-store       | `@nestjs-ai/advisors-vector-store`              | 100%     |
-|                         | spring-ai-pgvector-store              | `@nestjs-ai/vector-store-pgvector`              | 100%     |
-|                         | spring-ai-chroma-store                | —                                               | 0%       |
-|                         | spring-ai-pinecone-store              | —                                               | 0%       |
-|                         | spring-ai-milvus-store                | —                                               | 0%       |
-| **Document Readers**    | spring-ai-pdf-document-reader         | `@nestjs-ai/document-reader-pdf`                | 100%     |
-|                         | spring-ai-markdown-document-reader    | `@nestjs-ai/document-reader-markdown`           | 100%     |
-|                         | spring-ai-tika-document-reader        | `@nestjs-ai/document-reader-tika`               | 100%     |
-|                         | (cheerio - NestJS specific)           | `@nestjs-ai/document-reader-cheerio`            | 100%     |
-| **Memory**              | spring-ai-model-chat-memory-redis     | `@nestjs-ai/model-chat-memory-repository-redis` | 100%     |
-|                         | spring-ai-model-chat-memory-jdbc      | `@nestjs-ai/model-chat-memory-repository-jsdbc` | 100%     |
-|                         | spring-ai-model-chat-memory-cassandra | —                                               | 0%       |
-| **Platform**            | spring-ai-autoconfigure               | `@nestjs-ai/platform`                           | 100%     |
-|                         | spring-ai-mcp                         | `@nestjs-ai/mcp-common`                         | 10%      |
-|                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                    | 5%       |
+| Category                | Spring AI Module                      | nestjs-ai Package                                 | Progress |
+| ----------------------- | ------------------------------------- | ------------------------------------------------- | -------- |
+| **Core**                | spring-ai-model                       | `@nestjs-ai/model`                                | 100%     |
+|                         | spring-ai-client-chat                 | `@nestjs-ai/client-chat`                          | 100%     |
+|                         | spring-ai-commons                     | `@nestjs-ai/commons`                              | 100%     |
+|                         | spring-ai-retry                       | `@nestjs-ai/retry`                                | 100%     |
+|                         | spring-ai-template-st                 | `@nestjs-ai/template-st`                          | 100%     |
+| **Model Providers**     | spring-ai-openai                      | `@nestjs-ai/model-openai`                         | 100%     |
+|                         | spring-ai-google-genai                | `@nestjs-ai/model-google-genai`                   | 100%     |
+|                         | spring-ai-transformers                | `@nestjs-ai/model-transformers`                   | 100%     |
+|                         | spring-ai-anthropic                   | `@nestjs-ai/model-anthropic`                      | 100%     |
+|                         | spring-ai-azure-openai                | —                                                 | 0%       |
+|                         | spring-ai-bedrock                     | —                                                 | 0%       |
+|                         | spring-ai-mistral-ai                  | —                                                 | 0%       |
+|                         | spring-ai-ollama                      | —                                                 | 0%       |
+| **RAG & Vector Stores** | spring-ai-rag                         | `@nestjs-ai/rag`                                  | 100%     |
+|                         | spring-ai-vector-store                | `@nestjs-ai/vector-store`                         | 100%     |
+|                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                   | 100%     |
+|                         | spring-ai-advisors-vector-store       | `@nestjs-ai/advisors-vector-store`                | 100%     |
+|                         | spring-ai-pgvector-store              | `@nestjs-ai/vector-store-pgvector`                | 100%     |
+|                         | spring-ai-chroma-store                | —                                                 | 0%       |
+|                         | spring-ai-pinecone-store              | —                                                 | 0%       |
+|                         | spring-ai-milvus-store                | —                                                 | 0%       |
+| **Document Readers**    | spring-ai-pdf-document-reader         | `@nestjs-ai/document-reader-pdf`                  | 100%     |
+|                         | spring-ai-markdown-document-reader    | `@nestjs-ai/document-reader-markdown`             | 100%     |
+|                         | spring-ai-tika-document-reader        | `@nestjs-ai/document-reader-tika`                 | 100%     |
+|                         | (cheerio - NestJS specific)           | `@nestjs-ai/document-reader-cheerio`              | 100%     |
+| **Memory**              | spring-ai-model-chat-memory-redis     | `@nestjs-ai/model-chat-memory-repository-redis`   | 100%     |
+|                         | spring-ai-model-chat-memory-mongodb   | `@nestjs-ai/model-chat-memory-repository-mongodb` | 100%     |
+|                         | spring-ai-model-chat-memory-jdbc      | `@nestjs-ai/model-chat-memory-repository-jsdbc`   | 100%     |
+|                         | spring-ai-model-chat-memory-cassandra | —                                                 | 0%       |
+| **Platform**            | spring-ai-autoconfigure               | `@nestjs-ai/platform`                             | 100%     |
+|                         | spring-ai-mcp                         | `@nestjs-ai/mcp-common`                           | 10%      |
+|                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                      | 5%       |
 
 ## Differences from Spring AI
 
@@ -235,6 +236,7 @@ nestjs-ai/
 │   ├── memory/
 │   │   └── repository/
 │   │       ├── model-chat-memory-repository-redis/   # Redis-backed chat memory
+│   │       ├── model-chat-memory-repository-mongodb/  # MongoDB-backed chat memory
 │   │       └── model-chat-memory-repository-jsdbc/   # SQL-backed chat memory (MySQL/Postgres/Oracle/SQL Server/SQLite)
 │   ├── document-readers/
 │   │   ├── pdf-reader/           # PDF reader
@@ -252,7 +254,7 @@ nestjs-ai/
 ### Prerequisites
 
 - Node.js >= 22.12.0 (required for `require(esm)` support so ESM-only packages can be consumed from CJS)
-- pnpm >= 10.0.0
+- pnpm >= 11.0.0
 
 All packages are published as **ESM only**. Consumer apps running Node.js 22.12+ can import them from either ESM or CJS code.
 

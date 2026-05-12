@@ -18,7 +18,11 @@ import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { McpPromptProvider } from "@nestjs-ai/mcp-annotations";
+import {
+  McpPromptProvider,
+  McpResourceProvider,
+  McpToolProvider,
+} from "@nestjs-ai/mcp-annotations";
 import type { McpServerModuleOptions } from "./mcp-server-module.options.js";
 import {
   MCP_SERVER_TOKEN,
@@ -43,15 +47,19 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
       return;
     }
 
-    if (this.options.annotations?.prompts ?? true) {
-      this.registerPrompts();
+    const providerInstances =
+      this.providerInstanceExplorer.getProviderInstances();
+
+    if (this.options.annotations?.enabled ?? true) {
+      this.registerPrompts(providerInstances);
+      this.registerResources(providerInstances);
+      this.registerTools(providerInstances);
     }
 
     this.registered = true;
   }
 
-  private registerPrompts(): void {
-    const promptObjects = this.providerInstanceExplorer.getProviderInstances();
+  private registerPrompts(promptObjects: object[]): void {
     const promptProvider = new McpPromptProvider({
       promptObjects,
       mcpServer: this.mcpServer,
@@ -66,6 +74,55 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
         name,
         config,
         callback as Parameters<McpServer["registerPrompt"]>[2],
+      );
+    }
+  }
+
+  private registerResources(resourceObjects: object[]): void {
+    const resourceProvider = new McpResourceProvider({
+      resourceObjects,
+      mcpServer: this.mcpServer,
+    });
+
+    for (const [
+      name,
+      uriOrTemplate,
+      config,
+      callback,
+    ] of resourceProvider.getResourceRegistrations()) {
+      if (typeof uriOrTemplate === "string") {
+        this.mcpServer.registerResource(
+          name,
+          uriOrTemplate,
+          config,
+          callback as never,
+        );
+        continue;
+      }
+
+      this.mcpServer.registerResource(
+        name,
+        uriOrTemplate,
+        config,
+        callback as never,
+      );
+    }
+  }
+
+  private registerTools(toolObjects: object[]): void {
+    const toolProvider = new McpToolProvider({
+      toolObjects,
+    });
+
+    for (const [
+      name,
+      config,
+      callback,
+    ] of toolProvider.getToolRegistrations()) {
+      this.mcpServer.registerTool(
+        name,
+        config,
+        callback as Parameters<McpServer["registerTool"]>[2],
       );
     }
   }

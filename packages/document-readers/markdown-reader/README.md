@@ -50,6 +50,8 @@ The project faithfully mirrors Spring AI's module structure and API design while
 
 ## Porting Progress
 
+MCP-related work is now split into separate `common`, `client`, `server`, and `annotations` packages. Spring AI has matching MCP starter and base module names (`spring-ai-starter-mcp-client`, `spring-ai-starter-mcp-server`, `spring-ai-mcp`, and `spring-ai-mcp-annotations`), while the client and server implementations are split across additional autoconfiguration modules. The percentages below are approximate and track the current repository state.
+
 | Category                | Spring AI Module                      | nestjs-ai Package                                 | Progress |
 | ----------------------- | ------------------------------------- | ------------------------------------------------- | -------- |
 | **Core**                | spring-ai-model                       | `@nestjs-ai/model`                                | 100%     |
@@ -81,9 +83,11 @@ The project faithfully mirrors Spring AI's module structure and API design while
 |                         | spring-ai-model-chat-memory-mongodb   | `@nestjs-ai/model-chat-memory-repository-mongodb` | 100%     |
 |                         | spring-ai-model-chat-memory-jdbc      | `@nestjs-ai/model-chat-memory-repository-jsdbc`   | 100%     |
 |                         | spring-ai-model-chat-memory-cassandra | —                                                 | 0%       |
-| **Platform**            | spring-ai-autoconfigure               | `@nestjs-ai/platform`                             | 100%     |
-|                         | spring-ai-mcp                         | `@nestjs-ai/mcp-common`                           | 10%      |
-|                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                      | 5%       |
+| **MCP**                 | spring-ai-mcp                         | `@nestjs-ai/mcp-common`                           | 100%     |
+|                         | spring-ai-starter-mcp-client          | `@nestjs-ai/mcp-client`                           | 90%      |
+|                         | spring-ai-starter-mcp-server          | `@nestjs-ai/mcp-server`                           | 90%      |
+|                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                      | 100%     |
+| **Platform**            | —                                     | `@nestjs-ai/platform`                             | 100%     |
 
 ## Differences from Spring AI
 
@@ -230,7 +234,9 @@ nestjs-ai/
 │   │   └── transformers/         # Hugging Face local embeddings
 │   ├── mcp/
 │   │   ├── common/               # Model Context Protocol core
-│   │   └── annotations/          # MCP annotations (WIP)
+│   │   ├── client/               # MCP client support
+│   │   ├── server/               # MCP server support
+│   │   └── annotations/          # MCP annotations and decorators
 │   ├── vector-stores/
 │   │   └── redis-store/          # Redis vector store
 │   ├── memory/

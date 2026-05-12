@@ -42,6 +42,13 @@ import {
   startStreamableHttpTestServer,
 } from "./support/mcp-test-server.js";
 
+const tsxLoaderPath = fileURLToPath(
+  new URL(
+    "../../../../../../node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/loader.mjs",
+    import.meta.url,
+  ),
+);
+
 class MatchingToolListChangedProvider {
   @McpToolListChanged({
     clients: ["stdio-server"],
@@ -310,13 +317,10 @@ function createStdioConnection(): McpClientStdioConnectionOptions {
   const fixtureUrl = fileURLToPath(
     new URL("./fixtures/stdio-test-server.fixture.ts", import.meta.url),
   );
-  const serverPackageDir = fileURLToPath(
-    new URL("../../../../server", import.meta.url),
-  );
 
   return {
-    command: "pnpm",
-    args: ["--dir", serverPackageDir, "exec", "tsx", fixtureUrl],
+    command: process.execPath,
+    args: ["--import", tsxLoaderPath, fixtureUrl],
   };
 }
 

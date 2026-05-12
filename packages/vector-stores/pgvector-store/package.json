@@ -48,6 +48,7 @@
     "@nestjs-port/jsdbc": "^0.1.0",
     "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
+    "@nestjs/typeorm": "^11.0.1",
     "@testcontainers/postgresql": "^11.14.0",
     "pgvector": "^0.2.1",
     "rxjs": "^7.8.2",

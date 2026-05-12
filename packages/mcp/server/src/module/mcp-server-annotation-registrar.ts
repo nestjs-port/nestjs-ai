@@ -112,6 +112,7 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
   private registerTools(toolObjects: object[]): void {
     const toolProvider = new McpToolProvider({
       toolObjects,
+      mcpServer: this.mcpServer,
     });
 
     for (const [

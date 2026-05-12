@@ -16,6 +16,8 @@
 
 import assert from "node:assert/strict";
 
+import type { McpServer } from "@modelcontextprotocol/server";
+
 import { MCP_TOOL_METADATA_KEY } from "../../metadata.js";
 import {
   McpToolMethodCallback,
@@ -29,6 +31,7 @@ import {
 
 export interface McpToolProviderProps {
   toolObjects: object[];
+  mcpServer: McpServer;
 }
 
 /**
@@ -38,9 +41,13 @@ export interface McpToolProviderProps {
 export class McpToolProvider {
   private readonly _toolObjects: readonly object[];
 
+  private readonly _mcpServer: McpServer;
+
   constructor(props: McpToolProviderProps) {
     assert(props.toolObjects != null, "toolObjects can't be null!");
+    assert(props.mcpServer != null, "mcpServer can't be null!");
     this._toolObjects = [...props.toolObjects];
+    this._mcpServer = props.mcpServer;
   }
 
   /**
@@ -66,6 +73,7 @@ export class McpToolProvider {
           const callback = new McpToolMethodCallback({
             provider: toolObject,
             propertyKey,
+            mcpServer: this._mcpServer,
             returnMode: metadata.returnMode,
             returnSchema: metadata.returnSchema,
           });

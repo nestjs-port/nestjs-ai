@@ -35,8 +35,8 @@ import {
   MCP_SERVER_TOKEN,
   McpServerModule,
   type McpServerModuleOptions,
-} from "../../../../dist/index.js";
-import { McpServerStreamableHttpService } from "../../../../dist/transport/index.js";
+} from "../../../index.js";
+import { McpServerStreamableHttpService } from "../../../transport/index.js";
 import {
   PROMPT_NAME,
   PROMPT_TEXT,

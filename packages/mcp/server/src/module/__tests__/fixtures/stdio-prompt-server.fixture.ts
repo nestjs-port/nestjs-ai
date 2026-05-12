@@ -18,7 +18,7 @@ import "reflect-metadata";
 
 import { Test } from "@nestjs/testing";
 
-import { McpServerModule } from "../../../../dist/index.js";
+import { McpServerModule } from "../../../index.js";
 import { PromptFixtureModule, SERVER_INFO } from "./prompt-fixture.js";
 
 async function bootstrap(): Promise<void> {

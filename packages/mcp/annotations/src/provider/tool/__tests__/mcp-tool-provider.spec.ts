@@ -16,7 +16,7 @@
 
 import "reflect-metadata";
 
-import type { ServerContext } from "@modelcontextprotocol/server";
+import type { McpServer, ServerContext } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -44,6 +44,7 @@ describe("McpToolProvider", () => {
     it("produces a registration for each @McpTool-annotated method", async () => {
       const provider = new McpToolProvider({
         toolObjects: [new ExampleToolProvider()],
+        mcpServer: createMockServer(),
       });
 
       const registrations = provider.getToolRegistrations();
@@ -55,6 +56,7 @@ describe("McpToolProvider", () => {
     it("forwards decorator metadata into the registration config", () => {
       const provider = new McpToolProvider({
         toolObjects: [new ExampleToolProvider()],
+        mcpServer: createMockServer(),
       });
 
       const registrations = provider.getToolRegistrations();
@@ -80,6 +82,7 @@ describe("McpToolProvider", () => {
       const tool = new ExampleToolProvider();
       const provider = new McpToolProvider({
         toolObjects: [tool],
+        mcpServer: createMockServer(),
       });
 
       const registrations = provider.getToolRegistrations();
@@ -117,6 +120,7 @@ describe("McpToolProvider", () => {
 
       const provider = new McpToolProvider({
         toolObjects: [new MixedProvider()],
+        mcpServer: createMockServer(),
       });
 
       const names = provider.getToolRegistrations().map(([name]) => name);
@@ -133,6 +137,7 @@ describe("McpToolProvider", () => {
 
       const provider = new McpToolProvider({
         toolObjects: [new FallbackProvider()],
+        mcpServer: createMockServer(),
       });
 
       const names = provider.getToolRegistrations().map(([name]) => name);
@@ -148,6 +153,7 @@ describe("McpToolProvider", () => {
 
       const provider = new McpToolProvider({
         toolObjects: [new EmptyProvider()],
+        mcpServer: createMockServer(),
       });
 
       expect(provider.getToolRegistrations()).toEqual([]);
@@ -170,6 +176,7 @@ describe("McpToolProvider", () => {
 
       const provider = new McpToolProvider({
         toolObjects: [new FirstProvider(), new SecondProvider()],
+        mcpServer: createMockServer(),
       });
 
       const names = provider.getToolRegistrations().map(([name]) => name);
@@ -183,8 +190,19 @@ describe("McpToolProvider", () => {
         () =>
           new McpToolProvider({
             toolObjects: null as never,
+            mcpServer: createMockServer(),
           }),
       ).toThrow("toolObjects can't be null!");
+    });
+
+    it("rejects null mcpServer", () => {
+      expect(
+        () =>
+          new McpToolProvider({
+            toolObjects: [],
+            mcpServer: null as never,
+          }),
+      ).toThrow("mcpServer can't be null!");
     });
   });
 });
@@ -234,6 +252,21 @@ function createMockCtx(overrides: MockCtxOverrides = {}): ServerContext {
         Promise.reject(new Error("requestSampling not mocked")),
     },
   } as unknown as ServerContext;
+}
+
+function createMockServer(): McpServer {
+  return {
+    server: {
+      getClientCapabilities: () => undefined,
+      getClientVersion: () => undefined,
+      listRoots: () => Promise.resolve({ roots: [] }),
+      elicitInput: () => Promise.reject(new Error("elicitInput not mocked")),
+      createMessage: () =>
+        Promise.reject(new Error("createMessage not mocked")),
+      sendLoggingMessage: () => Promise.resolve(),
+      ping: () => Promise.resolve(undefined),
+    },
+  } as unknown as McpServer;
 }
 
 interface MockCtxOverrides {

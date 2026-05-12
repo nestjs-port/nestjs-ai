@@ -7,6 +7,15 @@ packages:
   - 'packages/advisors/*'
   - 'packages/document-readers/*'
 
-onlyBuiltDependencies:
-  - '@nestjs/core'
-  - 'sharp'
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  cpu-features: true
+  esbuild: true
+  oracledb: true
+  prisma: true
+  protobufjs: true
+  sharp: true
+  sqlite3: true
+  ssh2: true

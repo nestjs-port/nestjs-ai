@@ -20,19 +20,16 @@ import type {
   CallToolRequest,
   CallToolResult,
   McpServer,
+  StandardSchemaWithJSON,
+  ToolAnnotations,
   ServerContext,
 } from "@modelcontextprotocol/server";
-import type {
-  StandardJSONSchemaV1,
-  StandardSchemaV1,
-} from "@standard-schema/spec";
 
 import { MetaUtils } from "../../common/index.js";
 import {
   DefaultMcpRequestContext,
   type McpRequestContext,
   McpServerExchange,
-  type McpTransportContext,
 } from "../../context/index.js";
 import { MCP_TOOL_METADATA_KEY } from "../../metadata.js";
 import { McpMeta } from "../../mcp-meta.js";
@@ -40,41 +37,30 @@ import type { McpToolMethodArguments } from "../../mcp-tool.js";
 import { ReturnMode } from "./return-mode.js";
 import type { McpToolMetadata } from "../../mcp-tool.js";
 
-type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;
-
 export interface McpToolMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
   mcpServer?: McpServer | null;
   returnMode: ReturnMode;
-  returnSchema?: StandardSchemaWithJsonSchema | null;
+  returnSchema?: StandardSchemaWithJSON | null;
   toolCallExceptionClass?: new (...args: never[]) => Error;
 }
 
-type ToolRegistrationConfig = {
-  title?: string;
-  description?: string;
-  inputSchema?: NonNullable<McpToolMetadata["inputSchema"]>;
-  outputSchema?: NonNullable<McpToolMetadata["returnSchema"]>;
-  annotations?: McpToolMetadata["annotations"];
-  _meta?: Record<string, unknown>;
-};
-
 export type ToolRegistration = [
-  name: string,
-  config: ToolRegistrationConfig,
-  callback: (
+  string,
+  {
+    title?: string;
+    description?: string;
+    inputSchema?: StandardSchemaWithJSON;
+    outputSchema?: StandardSchemaWithJSON;
+    annotations?: ToolAnnotations;
+    _meta?: Record<string, unknown>;
+  },
+  (
     args: Record<string, unknown> | undefined,
     ctx: ServerContext,
   ) => Promise<CallToolResult>,
 ];
-
-export class McpToolMethodException extends Error {
-  constructor(message: string, options?: { cause?: unknown }) {
-    super(message, options);
-    this.name = "McpToolMethodException";
-  }
-}
 
 /**
  * Class for creating callbacks around tool methods that operate on an MCP server
@@ -91,7 +77,7 @@ export class McpToolMethodCallback {
 
   protected readonly _returnMode: ReturnMode;
 
-  protected readonly _returnSchema: StandardSchemaWithJsonSchema | null;
+  protected readonly _returnSchema: StandardSchemaWithJSON | null;
 
   protected readonly _toolCallExceptionClass: new (...args: never[]) => Error;
 
@@ -134,7 +120,7 @@ export class McpToolMethodCallback {
   }
 
   protected buildArgs(
-    exchangeOrContext: McpServerExchange,
+    exchange: McpServerExchange,
     request: CallToolRequest,
   ): McpToolMethodArguments {
     const meta =
@@ -143,21 +129,16 @@ export class McpToolMethodCallback {
       (meta as { progressToken?: unknown } | null)?.progressToken ?? null;
 
     const args: McpToolMethodArguments = {
-      context: this.resolveTransportContext(exchangeOrContext),
+      context: exchange.transportContext(),
       request,
       toolArguments: { ...request.params.arguments },
       meta: new McpMeta(meta),
       progressToken,
     };
 
-    if (this.isExchangeType(exchangeOrContext)) {
-      args.exchange = exchangeOrContext as never;
-    }
+    args.exchange = exchange as never;
 
-    const requestContext = this.createRequestContext(
-      exchangeOrContext,
-      request,
-    );
+    const requestContext = this.createRequestContext(exchange, request);
     if (requestContext !== undefined) {
       args.requestContext = requestContext;
     }
@@ -259,7 +240,7 @@ export class McpToolMethodCallback {
       metaProvider,
     } = this._metadata;
     const resolvedName = name.length > 0 ? name : this.methodName;
-    const config: ToolRegistrationConfig = {};
+    const config: ToolRegistration[1] = {};
     if (title.length > 0) config.title = title;
     if (description.length > 0) config.description = description;
     if (inputSchema != null) config.inputSchema = inputSchema;
@@ -268,7 +249,7 @@ export class McpToolMethodCallback {
     const meta = MetaUtils.getMeta(metaProvider);
     if (meta != null) config._meta = meta;
 
-    const callback: ToolRegistration["2"] = async (
+    const callback: ToolRegistration[2] = async (
       args: Record<string, unknown> | undefined,
       ctx: ServerContext,
     ): Promise<CallToolResult> => {
@@ -306,23 +287,13 @@ export class McpToolMethodCallback {
   }
 
   protected createRequestContext(
-    exchangeOrContext: McpServerExchange,
+    exchange: McpServerExchange,
     request: CallToolRequest,
   ): McpRequestContext | null | undefined {
     return new DefaultMcpRequestContext({
-      exchange: exchangeOrContext,
+      exchange,
       request,
     });
-  }
-
-  protected resolveTransportContext(
-    exchangeOrContext: McpServerExchange,
-  ): McpTransportContext | null {
-    return exchangeOrContext.transportContext();
-  }
-
-  protected isExchangeType(value: unknown): boolean {
-    return value instanceof McpServerExchange;
   }
 
   private resolveMetadata(): McpToolMetadata {

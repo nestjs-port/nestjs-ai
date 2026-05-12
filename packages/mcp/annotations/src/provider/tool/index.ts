@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./prompt/index.js";
-export * from "./tool/index.js";
-export * from "./resource/index.js";
-export * from "./sampling/index.js";
-export * from "./elicitation/index.js";
-export * from "./logging/index.js";
-export * from "./progress/index.js";
-export * from "./changed/prompt/index.js";
-export * from "./changed/resource/index.js";
-export * from "./changed/tool/index.js";
+export {
+  McpToolProvider,
+  type McpToolProviderProps,
+} from "./mcp-tool-provider.js";

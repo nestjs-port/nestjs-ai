@@ -51,11 +51,10 @@ export interface McpServerStreamableHttpOptions {
 
 export interface McpServerAnnotationRegistrationOptions {
   /**
-   * Enables discovery and registration of methods annotated with `@McpPrompt`.
-   *
-   * Defaults to `true`.
+   * Enables discovery and registration of server-side MCP annotations.
+   * When disabled, no annotated server methods are registered.
    */
-  prompts?: boolean;
+  enabled?: boolean;
 }
 
 export interface McpServerModuleOptions {

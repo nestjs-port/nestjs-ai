@@ -23,6 +23,7 @@ import type {
   Resource,
   TextResourceContents,
 } from "@modelcontextprotocol/server";
+import { ResourceTemplate } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -54,7 +55,7 @@ describe("McpResourceMethodCallback", () => {
       mimeType: "text/plain",
     });
     expect(typeof cb).toBe("function");
-    const spec: ResourceRegistration = [name, uri, config, cb];
+    const spec = [name, uri, config, cb] as ResourceRegistration;
     expect(spec).toHaveLength(4);
   });
 
@@ -113,10 +114,15 @@ describe("McpResourceMethodCallback", () => {
       provider,
       "getResourceWithUriVariables",
       createResource("users/{userId}/posts/{postId}"),
+      undefined,
+      createResourceTemplate("users/{userId}/posts/{postId}"),
     );
 
     const request = createRequest("users/123/posts/456");
-    const result = await callback.handle(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request, {
+      userId: "123",
+      postId: "456",
+    });
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -129,10 +135,14 @@ describe("McpResourceMethodCallback", () => {
       provider,
       "getResourceWithExchangeAndUriVariable",
       createResource("users/{userId}/profile"),
+      undefined,
+      createResourceTemplate("users/{userId}/profile"),
     );
 
     const request = createRequest("users/789/profile");
-    const result = await callback.handle(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request, {
+      userId: "789",
+    });
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -345,12 +355,17 @@ describe("McpResourceMethodCallback", () => {
       provider,
       "getResourceWithProgressTokenAndUriVariables",
       createResource("users/{userId}/posts/{postId}"),
+      undefined,
+      createResourceTemplate("users/{userId}/posts/{postId}"),
     );
 
     const request = createRequest("users/123/posts/456", {
       progressToken: "progress-789",
     });
-    const result = await callback.handle(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request, {
+      userId: "123",
+      postId: "456",
+    });
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -422,12 +437,17 @@ describe("McpResourceMethodCallback", () => {
       provider,
       "getResourceWithMetaAndUriVariables",
       createResource("users/{userId}/posts/{postId}"),
+      undefined,
+      createResourceTemplate("users/{userId}/posts/{postId}"),
     );
 
     const request = createRequest("users/123/posts/456", {
       key: "meta-value-789",
     });
-    const result = await callback.handle(createMockExchange(), request);
+    const result = await callback.handle(createMockExchange(), request, {
+      userId: "123",
+      postId: "456",
+    });
 
     expect(result.contents).toHaveLength(1);
     const textContent = result.contents[0] as TextResourceContents;
@@ -801,12 +821,14 @@ function createCallback(
   propertyKey: keyof TestResourceProvider,
   resource: Resource,
   contentType?: ResourceContentType,
+  resourceTemplate?: ResourceTemplate,
 ): McpResourceMethodCallback {
   return new McpResourceMethodCallback({
     provider,
     propertyKey,
     resource,
     contentType: contentType ?? null,
+    resourceTemplate: resourceTemplate ?? null,
   });
 }
 
@@ -817,6 +839,10 @@ function createResource(uri: string, mimeType?: string): Resource {
     description: "Test resource description",
     mimeType: mimeType ?? "text/plain",
   };
+}
+
+function createResourceTemplate(uri: string): ResourceTemplate {
+  return new ResourceTemplate(uri, { list: undefined });
 }
 
 function createRequest(

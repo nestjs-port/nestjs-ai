@@ -18,7 +18,6 @@ import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { LoggerFactory } from "@nestjs-port/core";
 import {
   McpPromptProvider,
   McpResourceProvider,
@@ -36,10 +35,6 @@ import { McpServerToolUtils } from "./mcp-server-tool-utils.js";
 
 @Injectable()
 export class McpServerAnnotationRegistrar implements OnModuleInit {
-  private readonly logger = LoggerFactory.getLogger(
-    McpServerAnnotationRegistrar.name,
-  );
-
   private registered = false;
 
   constructor(

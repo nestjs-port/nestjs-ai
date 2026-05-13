@@ -25,9 +25,9 @@ import type {
   StandardSchemaWithJSON,
   TextContent,
 } from "@modelcontextprotocol/server";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 
 import { MetaUtils } from "../../common/index.js";
-import { McpServerExchange, McpTransportContext } from "../../context/index.js";
 import { McpMeta } from "../../mcp-meta.js";
 import type {
   McpPromptMetadata,

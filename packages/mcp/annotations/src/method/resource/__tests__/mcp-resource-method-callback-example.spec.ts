@@ -24,10 +24,7 @@ import type {
 } from "@modelcontextprotocol/server";
 
 import { ResourceAdapter } from "../../../adapter/index.js";
-import {
-  McpServerExchange,
-  McpTransportContext,
-} from "../../../context/index.js";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { MCP_RESOURCE_METADATA_KEY } from "../../../metadata.js";
 import type { McpResourceMetadata } from "../../../mcp-resource.js";
 import { McpResource } from "../../../mcp-resource.js";

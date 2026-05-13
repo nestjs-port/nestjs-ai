@@ -21,6 +21,11 @@ export {
   McpConnectionInfo,
   type McpConnectionInfoProps,
 } from "./mcp-connection-info.js";
+export { McpServerExchange } from "./mcp-server-exchange.js";
+export {
+  McpTransportContext,
+  type McpTransportContextExtractor,
+} from "./mcp-transport-context.js";
 export {
   McpToolCallback,
   McpToolCallbackBuilder,

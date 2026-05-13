@@ -21,9 +21,8 @@ import type {
   CompleteRequest,
   CompleteResult,
 } from "@modelcontextprotocol/server";
-
-import type { McpTransportContext } from "../../context/index.js";
-import { McpServerExchange } from "../../context/index.js";
+import { McpServerExchange } from "@nestjs-ai/mcp-common";
+import type { McpTransportContext } from "@nestjs-ai/mcp-common";
 import { McpMeta } from "../../mcp-meta.js";
 import type {
   McpCompleteMetadata,

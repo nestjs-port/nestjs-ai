@@ -23,11 +23,11 @@ import type {
   Role,
   TextResourceContents,
 } from "@modelcontextprotocol/server";
-import { DefaultMetaProvider } from "./context/index.js";
 import type {
   McpServerExchange,
   McpTransportContext,
-} from "./context/index.js";
+} from "@nestjs-ai/mcp-common";
+import { DefaultMetaProvider } from "./context/index.js";
 import type { MetaProvider } from "./context/index.js";
 import type { McpMeta } from "./mcp-meta.js";
 import { MCP_RESOURCE_METADATA_KEY } from "./metadata.js";

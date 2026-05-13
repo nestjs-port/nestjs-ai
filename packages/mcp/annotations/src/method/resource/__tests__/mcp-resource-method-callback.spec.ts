@@ -26,10 +26,7 @@ import type {
 import { ResourceTemplate } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 
-import {
-  McpServerExchange,
-  McpTransportContext,
-} from "../../../context/index.js";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { McpResource } from "../../../mcp-resource.js";
 import type { McpResourceMethodArguments } from "../../../mcp-resource.js";
 import {

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import { ToolContext } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
+import { McpServerExchange } from "../mcp-server-exchange.js";
 import { McpToolUtils } from "../mcp-tool-utils.js";
 
 describe("McpToolUtils", () => {
@@ -174,5 +176,21 @@ describe("McpToolUtils", () => {
       "工具\u9fff名称\uf900",
     );
     expect(result).toBe("前_缀u3400_工具鿿名称豈");
+  });
+
+  it("get mcp exchange should return exchange from tool context", () => {
+    const exchange = Object.assign(
+      Object.create(McpServerExchange.prototype),
+      {},
+    ) as McpServerExchange;
+
+    const toolContext = new ToolContext({ exchange });
+
+    expect(McpToolUtils.getMcpExchange(toolContext)).toBe(exchange);
+  });
+
+  it("get mcp exchange should return undefined when missing", () => {
+    expect(McpToolUtils.getMcpExchange(new ToolContext({}))).toBeUndefined();
+    expect(McpToolUtils.getMcpExchange(undefined)).toBeUndefined();
   });
 });

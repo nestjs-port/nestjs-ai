@@ -24,12 +24,12 @@ import type {
   ToolAnnotations,
   ServerContext,
 } from "@modelcontextprotocol/server";
+import { McpServerExchange } from "@nestjs-ai/mcp-common";
 
 import { MetaUtils } from "../../common/index.js";
 import {
   DefaultMcpRequestContext,
   type McpRequestContext,
-  McpServerExchange,
 } from "../../context/index.js";
 import { MCP_TOOL_METADATA_KEY } from "../../metadata.js";
 import { McpMeta } from "../../mcp-meta.js";

@@ -27,6 +27,10 @@ export {
 } from "./mcp-server-module.options.js";
 export { McpServerModule } from "./mcp-server.module.js";
 export {
+  ToolCallbackUtils,
+  type AggregateToolCallbacksOptions,
+} from "./tool-callback-utils.js";
+export {
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
   MCP_SERVER_STREAMABLE_HTTP_ENDPOINT_TOKEN,
   MCP_SERVER_TOKEN,

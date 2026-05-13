@@ -18,19 +18,28 @@ import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
+import { LoggerFactory } from "@nestjs-port/core";
 import {
   McpPromptProvider,
   McpResourceProvider,
   McpToolProvider,
 } from "@nestjs-ai/mcp-annotations";
+import type { ToolRegistration } from "@nestjs-ai/mcp-annotations";
+import type { ToolCallbackProvider } from "@nestjs-ai/model";
 import type { McpServerModuleOptions } from "./mcp-server-module.options.js";
 import {
   MCP_SERVER_TOKEN,
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
 } from "./mcp-server.tokens.js";
+import { ToolCallbackUtils } from "./tool-callback-utils.js";
+import { McpServerToolUtils } from "./mcp-server-tool-utils.js";
 
 @Injectable()
 export class McpServerAnnotationRegistrar implements OnModuleInit {
+  private readonly logger = LoggerFactory.getLogger(
+    McpServerAnnotationRegistrar.name,
+  );
+
   private registered = false;
 
   constructor(
@@ -49,11 +58,20 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
 
     const providerInstances =
       this.providerInstanceExplorer.getProviderInstances();
+    const annotationsEnabled = this.options.annotations?.enabled ?? true;
+    const toolCallbacksEnabled = this.options.toolCallbacks?.enabled ?? true;
 
-    if (this.options.annotations?.enabled ?? true) {
+    if (annotationsEnabled) {
       this.registerPrompts(providerInstances);
       this.registerResources(providerInstances);
-      this.registerTools(providerInstances);
+    }
+
+    if (annotationsEnabled || toolCallbacksEnabled) {
+      this.registerTools(
+        providerInstances,
+        annotationsEnabled,
+        toolCallbacksEnabled,
+      );
     }
 
     this.registered = true;
@@ -109,22 +127,63 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
     }
   }
 
-  private registerTools(toolObjects: object[]): void {
-    const toolProvider = new McpToolProvider({
-      toolObjects,
-      mcpServer: this.mcpServer,
-    });
+  private registerTools(
+    toolObjects: object[],
+    annotationsEnabled: boolean,
+    toolCallbacksEnabled: boolean,
+  ): void {
+    const registrations: ToolRegistration[] = [];
+
+    if (annotationsEnabled) {
+      const toolProvider = new McpToolProvider({
+        toolObjects,
+        mcpServer: this.mcpServer,
+      });
+
+      registrations.push(...toolProvider.getToolRegistrations());
+    }
+
+    if (toolCallbacksEnabled) {
+      registrations.push(...this.getToolCallbackRegistrations(toolObjects));
+    }
 
     for (const [
       name,
       config,
       callback,
-    ] of toolProvider.getToolRegistrations()) {
-      this.mcpServer.registerTool(
-        name,
-        config,
-        callback as Parameters<McpServer["registerTool"]>[2],
-      );
+    ] of McpServerToolUtils.deduplicateRegistrations(registrations)) {
+      this.mcpServer.registerTool(name, config, callback as never);
+    }
+  }
+
+  private getToolCallbackRegistrations(
+    toolObjects: object[],
+  ): ToolRegistration[] {
+    const toolCallbackProviders = toolObjects.filter(
+      (toolObject): toolObject is ToolCallbackProvider =>
+        this.isToolCallbackProvider(toolObject),
+    );
+
+    const toolCallbacks = ToolCallbackUtils.aggregateToolCallbacks({
+      toolCallbacks: [],
+      toolCallbackProviders,
+      includeMcpTools: this.options.toolCallbacks?.includeMcpTools ?? false,
+    });
+
+    return McpServerToolUtils.toToolRegistrations(
+      this.mcpServer,
+      toolCallbacks,
+    );
+  }
+
+  private isToolCallbackProvider(
+    candidate: object,
+  ): candidate is ToolCallbackProvider {
+    try {
+      const toolCallbacks = (candidate as ToolCallbackProvider).toolCallbacks;
+      return Array.isArray(toolCallbacks);
+    } catch {
+      return false;
     }
   }
 }

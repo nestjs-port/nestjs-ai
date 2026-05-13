@@ -68,7 +68,7 @@ export abstract class ToolCallbackUtils {
 
     if (hasExcludedToolProvider) {
       ToolCallbackUtils._logger.warn(
-        "Found MCP Clients. The MCP Client tools will not be exposed by the MCP Server. If you would like to expose the tools, set {}.expose-mcp-client-tools=true.",
+        "Found MCP clients. The MCP client tools will not be exposed by the MCP server. If you would like to expose the tools, set includeMcpTools=true.",
       );
     }
 

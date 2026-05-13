@@ -27,8 +27,7 @@ import type {
   SamplingMessage,
   TextContent,
 } from "@modelcontextprotocol/server";
-
-import type { McpServerExchange } from "./mcp-server-exchange.js";
+import type { McpServerExchange } from "@nestjs-ai/mcp-common";
 
 export type ContextInclusionStrategy =
   CreateMessageRequest["params"]["includeContext"];

@@ -27,9 +27,8 @@ import type {
   ServerContext,
   Variables,
 } from "@modelcontextprotocol/server";
-
-import type { McpTransportContext } from "../../context/index.js";
-import { McpServerExchange } from "../../context/index.js";
+import { McpServerExchange } from "@nestjs-ai/mcp-common";
+import type { McpTransportContext } from "@nestjs-ai/mcp-common";
 import { McpMeta } from "../../mcp-meta.js";
 import type { McpResourceMethodArguments } from "../../mcp-resource.js";
 import { DefaultMcpReadResourceResultConverter } from "./default-mcp-read-resource-result-converter.js";

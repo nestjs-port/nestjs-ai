@@ -21,8 +21,8 @@ import type {
   StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
+import { McpServerExchange } from "@nestjs-ai/mcp-common";
 import type { ToolCallback } from "@nestjs-ai/model";
-import { McpServerExchange } from "@nestjs-ai/mcp-annotations";
 import { ToolContext } from "@nestjs-ai/model";
 import type { ToolRegistration } from "@nestjs-ai/mcp-annotations";
 

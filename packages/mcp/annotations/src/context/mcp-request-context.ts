@@ -26,6 +26,7 @@ import type {
   ListRootsResult,
   ProgressNotification,
 } from "@modelcontextprotocol/server";
+import type { McpServerExchange } from "@nestjs-ai/mcp-common";
 
 import type {
   ElicitationSpec,
@@ -34,7 +35,6 @@ import type {
   ProgressSpec,
   SamplingSpec,
 } from "./mcp-request-context-types.js";
-import type { McpServerExchange } from "./mcp-server-exchange.js";
 import type { StructuredElicitResult } from "./structured-elicit-result.js";
 
 export type ElicitationSchema<T> = StandardSchemaV1<unknown, T> &

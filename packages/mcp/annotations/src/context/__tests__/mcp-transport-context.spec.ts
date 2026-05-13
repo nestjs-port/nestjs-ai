@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { McpTransportContext } from "../index.js";
+import { McpTransportContext } from "@nestjs-ai/mcp-common";
 
 describe("McpTransportContext", () => {
   it("creates an immutable metadata context", () => {

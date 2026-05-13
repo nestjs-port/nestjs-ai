@@ -26,7 +26,7 @@ import type {
   McpCompleteMetadata,
   McpCompleteMethodArguments,
 } from "../mcp-complete.js";
-import { McpServerExchange, McpTransportContext } from "../context/index.js";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { McpCompleteMethodCallback } from "../method/index.js";
 
 class McpCompleteTypeExamples {

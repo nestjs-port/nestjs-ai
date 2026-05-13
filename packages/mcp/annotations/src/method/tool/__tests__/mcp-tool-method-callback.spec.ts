@@ -27,10 +27,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import {
-  McpServerExchange,
-  McpTransportContext,
-} from "../../../context/index.js";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { McpTool } from "../../../mcp-tool.js";
 import { McpToolMethodCallback } from "../mcp-tool-method-callback.js";
 import type { ToolRegistration } from "../mcp-tool-method-callback.js";

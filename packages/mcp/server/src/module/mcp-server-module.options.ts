@@ -57,6 +57,23 @@ export interface McpServerAnnotationRegistrationOptions {
   enabled?: boolean;
 }
 
+export interface McpServerToolCallbackRegistrationOptions {
+  /**
+   * Enables discovery and registration of `ToolCallbackProvider` instances
+   * discovered from the Nest provider explorer.
+   *
+   * Defaults to `true`.
+   */
+  enabled?: boolean;
+
+  /**
+   * When `true`, downstream MCP client tools are re-exposed by this server.
+   *
+   * Defaults to `false`.
+   */
+  includeMcpTools?: boolean;
+}
+
 export interface McpServerModuleOptions {
   /**
    * Existing MCP server instance to register discovered annotations against.
@@ -80,6 +97,12 @@ export interface McpServerModuleOptions {
    * bootstrap.
    */
   annotations?: McpServerAnnotationRegistrationOptions;
+
+  /**
+   * Controls discovery and registration of `ToolCallbackProvider` instances as
+   * MCP tools.
+   */
+  toolCallbacks?: McpServerToolCallbackRegistrationOptions;
 
   /**
    * Streamable HTTP transport configuration. Only consulted when the module

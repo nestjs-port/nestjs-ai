@@ -23,10 +23,8 @@ import type {
 } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
-import {
-  DefaultMetaProvider,
-  McpServerExchange,
-} from "../../../context/index.js";
+import { DefaultMetaProvider } from "../../../context/index.js";
+import { McpServerExchange } from "@nestjs-ai/mcp-common";
 import { McpPrompt } from "../../../mcp-prompt.js";
 import type {
   McpPromptArgumentsFor,

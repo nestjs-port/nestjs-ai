@@ -15,8 +15,10 @@
  */
 
 import type { Tool as McpTool } from "@modelcontextprotocol/client";
-import type { ToolDefinition } from "@nestjs-ai/model";
 import { DefaultToolDefinition } from "@nestjs-ai/model";
+import type { ToolContext, ToolDefinition } from "@nestjs-ai/model";
+
+import { McpServerExchange } from "./mcp-server-exchange.js";
 
 export abstract class McpToolUtils {
   static prefixedToolName(
@@ -87,6 +89,17 @@ export abstract class McpToolUtils {
       .description(tool.description ?? "")
       .inputSchema(JSON.stringify(tool.inputSchema ?? {}))
       .build();
+  }
+
+  static getMcpExchange(
+    toolContext: ToolContext | null | undefined,
+  ): McpServerExchange | undefined {
+    if (toolContext == null) {
+      return undefined;
+    }
+
+    const exchange = toolContext.context.exchange;
+    return exchange instanceof McpServerExchange ? exchange : undefined;
   }
 
   private static shorten(input: string): string {

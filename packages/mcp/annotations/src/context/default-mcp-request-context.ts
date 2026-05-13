@@ -29,6 +29,7 @@ import type {
   ProgressNotification,
   Request,
 } from "@modelcontextprotocol/server";
+import type { McpServerExchange } from "@nestjs-ai/mcp-common";
 
 import { DefaultElicitationSpec } from "./default-elicitation-spec.js";
 import { DefaultLoggingSpec } from "./default-logging-spec.js";
@@ -44,7 +45,6 @@ import type {
   ProgressSpec,
   SamplingSpec,
 } from "./mcp-request-context-types.js";
-import type { McpServerExchange } from "./mcp-server-exchange.js";
 import { StructuredElicitResult } from "./structured-elicit-result.js";
 
 const elicitSchemaCache = new WeakMap<object, Record<string, unknown>>();

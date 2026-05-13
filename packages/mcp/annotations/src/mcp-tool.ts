@@ -17,16 +17,16 @@
 import "reflect-metadata";
 import type { CallToolRequest } from "@modelcontextprotocol/server";
 import type {
+  McpServerExchange,
+  McpTransportContext,
+} from "@nestjs-ai/mcp-common";
+import type {
   StandardJSONSchemaV1,
   StandardSchemaV1,
 } from "@standard-schema/spec";
 import { DefaultMetaProvider } from "./context/index.js";
 import type { MetaProvider } from "./context/index.js";
-import type {
-  McpRequestContext,
-  McpServerExchange,
-  McpTransportContext,
-} from "./context/index.js";
+import type { McpRequestContext } from "./context/index.js";
 import { MCP_TOOL_METADATA_KEY } from "./metadata.js";
 import type { McpMeta } from "./mcp-meta.js";
 import { ReturnMode } from "./method/index.js";

@@ -21,10 +21,7 @@ import type {
   CompleteResult,
 } from "@modelcontextprotocol/server";
 
-import {
-  McpServerExchange,
-  McpTransportContext,
-} from "../../../context/index.js";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { MCP_COMPLETE_METADATA_KEY } from "../../../metadata.js";
 import { McpComplete } from "../../../mcp-complete.js";
 import type { McpCompleteMethodArguments } from "../../../mcp-complete.js";

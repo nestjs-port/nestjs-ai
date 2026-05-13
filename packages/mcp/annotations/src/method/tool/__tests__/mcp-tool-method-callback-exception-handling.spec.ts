@@ -22,10 +22,7 @@ import type {
 } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 
-import {
-  McpServerExchange,
-  McpTransportContext,
-} from "../../../context/index.js";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { McpTool } from "../../../mcp-tool.js";
 import { McpToolMethodCallback } from "../mcp-tool-method-callback.js";
 import type { McpToolMethodArguments } from "../../../mcp-tool.js";

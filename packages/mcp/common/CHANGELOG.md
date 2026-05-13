@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-common
 
+## 0.1.3
+
+### Patch Changes
+
+- support tool scan
+
 ## 0.1.2
 
 ### Patch Changes

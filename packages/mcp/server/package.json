@@ -27,6 +27,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./transport/streamable-http": {
+      "types": "./dist/transport/streamable-http/index.d.ts",
+      "default": "./dist/transport/streamable-http/index.js"
     }
   },
   "scripts": {
@@ -61,6 +65,11 @@
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "reflect-metadata": "^0.1.12 || ^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@modelcontextprotocol/node": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=22.12.0"

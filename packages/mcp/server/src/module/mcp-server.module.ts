@@ -23,8 +23,6 @@ import {
   type Type,
 } from "@nestjs/common";
 import { McpServerStdioService } from "../transport/index.js";
-import { createStreamableHttpController } from "../transport/index.js";
-import { McpServerStreamableHttpService } from "../transport/index.js";
 import { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
 import {
   DEFAULT_STREAMABLE_HTTP_ENDPOINT,
@@ -39,6 +37,10 @@ import {
   MCP_SERVER_TOKEN,
   MCP_SERVER_TRANSPORT_TYPE_TOKEN,
 } from "./mcp-server.tokens.js";
+import {
+  createStreamableHttpController,
+  McpServerStreamableHttpService,
+} from "../transport/streamable-http/index.js";
 
 const DEFAULT_TRANSPORT: McpServerTransportType = "streamable-http";
 

@@ -36,7 +36,7 @@ import {
   McpServerModule,
   type McpServerModuleOptions,
 } from "../../../index.js";
-import { McpServerStreamableHttpService } from "../../../transport/index.js";
+import { McpServerStreamableHttpService } from "../../../transport/streamable-http/index.js";
 import {
   PROMPT_NAME,
   PROMPT_TEXT,

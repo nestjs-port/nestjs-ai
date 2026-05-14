@@ -16,7 +16,7 @@
 
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
+import type { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import type { McpServer } from "@modelcontextprotocol/server";
 import {
   Inject,
@@ -46,6 +46,12 @@ export class McpServerStreamableHttpService
   async onApplicationBootstrap(): Promise<void> {
     const streamableHttp = this.options.streamableHttp ?? {};
     const stateless = streamableHttp.statelessMode === true;
+    const { NodeStreamableHTTPServerTransport } =
+      await import("@modelcontextprotocol/node").catch(() => {
+        throw new Error(
+          "@modelcontextprotocol/node is required when streamable-http transport is enabled",
+        );
+      });
 
     this.transport = new NodeStreamableHTTPServerTransport({
       sessionIdGenerator: stateless

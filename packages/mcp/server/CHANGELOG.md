@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-server
 
+## 0.1.2
+
+### Patch Changes
+
+- 5efe2b4: make mcp node dependency optional
+
 ## 0.1.1
 
 ### Patch Changes

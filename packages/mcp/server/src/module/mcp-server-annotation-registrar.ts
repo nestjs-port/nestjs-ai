@@ -15,9 +15,10 @@
  */
 
 import type { OnModuleInit } from "@nestjs/common";
-import type { McpServer } from "@modelcontextprotocol/server";
+import type { McpServer, RequestMethod } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import {
+  McpCompleteProvider,
   McpPromptProvider,
   McpResourceProvider,
   McpToolProvider,
@@ -50,6 +51,7 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
       this.providerInstanceExplorer?.getProviderInstances();
 
     if (annotationsEnabled && providerInstances != null) {
+      this.registerCompletes(providerInstances);
       this.registerPrompts(providerInstances);
       this.registerResources(providerInstances);
     }
@@ -63,6 +65,23 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
     }
 
     this.registered = true;
+  }
+
+  private registerCompletes(completeObjects: object[]): void {
+    const completeProvider = new McpCompleteProvider({
+      completeObjects,
+      mcpServer: this.mcpServer,
+    });
+
+    for (const [
+      method,
+      callback,
+    ] of completeProvider.getCompleteSpecifications()) {
+      this.mcpServer.server.setRequestHandler(
+        method as RequestMethod,
+        callback as never,
+      );
+    }
   }
 
   private registerPrompts(promptObjects: object[]): void {

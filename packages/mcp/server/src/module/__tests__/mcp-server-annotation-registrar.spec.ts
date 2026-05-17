@@ -19,9 +19,11 @@ import "reflect-metadata";
 import { Injectable } from "@nestjs/common";
 import type { McpServer } from "@modelcontextprotocol/server";
 import {
+  McpComplete,
   McpPrompt,
   McpResource,
   McpTool,
+  type McpCompleteMethodArguments,
   type McpPromptMethodContext,
   type McpResourceMethodArguments,
   type McpToolMethodArguments,
@@ -39,6 +41,7 @@ import { McpServerAnnotationRegistrar } from "../mcp-server-annotation-registrar
 import type { McpServerModuleOptions } from "../mcp-server-module.options.js";
 
 const PROMPT_NAME = "greeting";
+const COMPLETE_PROMPT_NAME = "prompt-complete";
 const RESOURCE_NAME = "profile";
 const RESOURCE_URI = "profile://current";
 const TOOL_NAME = "echo";
@@ -82,6 +85,13 @@ function createToolCallbackProvider(
 
 @Injectable()
 class AnnotatedProvider {
+  @McpComplete({
+    prompt: COMPLETE_PROMPT_NAME,
+  })
+  promptComplete(_args: McpCompleteMethodArguments): string[] {
+    return ["completed"];
+  }
+
   @McpPrompt({
     name: PROMPT_NAME,
     description: "Return a greeting prompt",
@@ -124,10 +134,17 @@ describe("McpServerAnnotationRegistrar", () => {
       getProviderInstances: vi.fn(() => [provider]),
     } as ProviderInstanceExplorer;
     mcpServer = {
+      server: {
+        setRequestHandler: vi.fn(),
+      },
       registerPrompt: vi.fn(),
       registerResource: vi.fn(),
       registerTool: vi.fn(),
-    } as unknown as McpServer;
+    } as unknown as McpServer & {
+      server: {
+        setRequestHandler: ReturnType<typeof vi.fn>;
+      };
+    };
     options = {};
     toolCallbacks = [];
     toolCallbackProviders = [];
@@ -146,6 +163,11 @@ describe("McpServerAnnotationRegistrar", () => {
 
     expect(providerInstanceExplorer.getProviderInstances).toHaveBeenCalledTimes(
       1,
+    );
+    expect(mcpServer.server.setRequestHandler).toHaveBeenCalledOnce();
+    expect(mcpServer.server.setRequestHandler).toHaveBeenCalledWith(
+      "completion/complete",
+      expect.any(Function),
     );
     expect(mcpServer.registerPrompt).toHaveBeenCalledOnce();
     expect(mcpServer.registerPrompt).toHaveBeenCalledWith(
@@ -196,6 +218,7 @@ describe("McpServerAnnotationRegistrar", () => {
     expect(mcpServer.registerPrompt).not.toHaveBeenCalled();
     expect(mcpServer.registerResource).not.toHaveBeenCalled();
     expect(mcpServer.registerTool).not.toHaveBeenCalled();
+    expect(mcpServer.server.setRequestHandler).not.toHaveBeenCalled();
   });
 
   it("registers tool callbacks from tokens when provider explorer is absent", () => {
@@ -220,6 +243,7 @@ describe("McpServerAnnotationRegistrar", () => {
     expect(mcpServer.registerPrompt).not.toHaveBeenCalled();
     expect(mcpServer.registerResource).not.toHaveBeenCalled();
     expect(mcpServer.registerTool).toHaveBeenCalledTimes(2);
+    expect(mcpServer.server.setRequestHandler).not.toHaveBeenCalled();
     expect(mcpServer.registerTool).toHaveBeenCalledWith(
       CALLBACK_NAME,
       expect.objectContaining({

@@ -17,6 +17,7 @@
 export * from "./prompt/index.js";
 export * from "./tool/index.js";
 export * from "./resource/index.js";
+export * from "./complete/index.js";
 export * from "./sampling/index.js";
 export * from "./elicitation/index.js";
 export * from "./logging/index.js";

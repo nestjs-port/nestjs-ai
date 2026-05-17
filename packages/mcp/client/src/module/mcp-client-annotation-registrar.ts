@@ -17,6 +17,7 @@
 import {
   Inject,
   Injectable,
+  Optional,
   type OnModuleDestroy,
   type OnModuleInit,
 } from "@nestjs/common";
@@ -30,6 +31,7 @@ import {
   LoggerFactory,
   type ProviderInstanceExplorer,
 } from "@nestjs-port/core";
+import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 import {
   McpPromptListChangedProvider,
   McpResourceListChangedProvider,
@@ -44,8 +46,10 @@ import {
   createMcpClientTransport,
   normalizeMcpClientConnectionSpecs,
 } from "./mcp-client-module.options.js";
-import { MCP_CLIENT_MODULE_OPTIONS_TOKEN } from "./mcp-client.tokens.js";
-import { MCP_CLIENT_REGISTRATIONS_TOKEN } from "./mcp-client.tokens.js";
+import {
+  MCP_CLIENT_MODULE_OPTIONS_TOKEN,
+  MCP_CLIENT_REGISTRATIONS_TOKEN,
+} from "./mcp-client.tokens.js";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 
 @Injectable()
@@ -65,6 +69,9 @@ export class McpClientAnnotationRegistrar
     private readonly clientRegistrations: McpClientRegistration[],
     @Inject(PROVIDER_INSTANCE_EXPLORER_TOKEN)
     private readonly providerInstanceExplorer: ProviderInstanceExplorer,
+    @Optional()
+    @Inject(McpClientCustomizer)
+    private readonly clientCustomizer?: McpClientCustomizer,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -162,6 +169,10 @@ export class McpClientAnnotationRegistrar
     });
 
     try {
+      if (this.clientCustomizer != null) {
+        this.clientCustomizer.customize(spec.clientName, mcpClient);
+      }
+
       await mcpClient.connect(createMcpClientTransport(spec));
     } catch (error) {
       await mcpClient.close().catch(() => undefined);

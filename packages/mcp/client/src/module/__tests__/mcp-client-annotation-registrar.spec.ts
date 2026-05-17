@@ -25,6 +25,7 @@ import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { describe, expect, it, vi } from "vitest";
 import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
+import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 
 import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
 import { MCP_CLIENT_MODULE_OPTIONS_TOKEN } from "../mcp-client.tokens.js";
@@ -331,7 +332,6 @@ async function bootstrapClientModule(
 }> {
   const moduleRef = await Test.createTestingModule({
     providers: [
-      McpClientAnnotationRegistrar,
       {
         provide: MCP_CLIENT_MODULE_OPTIONS_TOKEN,
         useValue: options,
@@ -345,6 +345,27 @@ async function bootstrapClientModule(
         useValue: {
           getProviderInstances,
         },
+      },
+      {
+        provide: McpClientAnnotationRegistrar,
+        useFactory: (
+          moduleOptions: McpClientModuleOptions,
+          clientRegistrations: McpClientRegistration[],
+          providerInstanceExplorer: ProviderInstanceExplorer,
+          clientCustomizer?: McpClientCustomizer,
+        ) =>
+          new McpClientAnnotationRegistrar(
+            moduleOptions,
+            clientRegistrations,
+            providerInstanceExplorer,
+            clientCustomizer,
+          ),
+        inject: [
+          MCP_CLIENT_MODULE_OPTIONS_TOKEN,
+          MCP_CLIENT_REGISTRATIONS_TOKEN,
+          PROVIDER_INSTANCE_EXPLORER_TOKEN,
+          { token: McpClientCustomizer, optional: true },
+        ],
       },
       ...extraProviders,
     ],

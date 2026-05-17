@@ -28,6 +28,12 @@ import {
 } from "@nestjs-ai/mcp-annotations";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  DefaultToolDefinition,
+  ToolCallback,
+  ToolMetadata,
+  type ToolCallbackProvider,
+} from "@nestjs-ai/model";
 
 import { McpServerAnnotationRegistrar } from "../mcp-server-annotation-registrar.js";
 import type { McpServerModuleOptions } from "../mcp-server-module.options.js";
@@ -36,6 +42,43 @@ const PROMPT_NAME = "greeting";
 const RESOURCE_NAME = "profile";
 const RESOURCE_URI = "profile://current";
 const TOOL_NAME = "echo";
+const CALLBACK_NAME = "callback";
+const PROVIDER_CALLBACK_NAME = "provider-callback";
+
+class TestToolCallback extends ToolCallback {
+  constructor(
+    private readonly name: string,
+    private readonly description: string,
+  ) {
+    super();
+  }
+
+  override get toolDefinition() {
+    return DefaultToolDefinition.builder()
+      .name(this.name)
+      .description(this.description)
+      .inputSchema("{}")
+      .build();
+  }
+
+  override get toolMetadata() {
+    return ToolMetadata.create({});
+  }
+
+  override async call(_toolInput: string): Promise<string> {
+    return this.name;
+  }
+}
+
+function createToolCallbackProvider(
+  toolCallbacks: ToolCallback[],
+): ToolCallbackProvider {
+  return {
+    get toolCallbacks() {
+      return toolCallbacks;
+    },
+  };
+}
 
 @Injectable()
 class AnnotatedProvider {
@@ -72,6 +115,8 @@ describe("McpServerAnnotationRegistrar", () => {
   let providerInstanceExplorer: ProviderInstanceExplorer;
   let mcpServer: McpServer;
   let options: McpServerModuleOptions;
+  let toolCallbacks: ToolCallback[];
+  let toolCallbackProviders: ToolCallbackProvider[];
 
   beforeEach(() => {
     provider = new AnnotatedProvider();
@@ -84,12 +129,16 @@ describe("McpServerAnnotationRegistrar", () => {
       registerTool: vi.fn(),
     } as unknown as McpServer;
     options = {};
+    toolCallbacks = [];
+    toolCallbackProviders = [];
   });
 
   it("registers prompt, resource, and tool annotations by default", () => {
     const registrar = new McpServerAnnotationRegistrar(
       mcpServer,
       options,
+      toolCallbacks,
+      toolCallbackProviders,
       providerInstanceExplorer,
     );
 
@@ -137,6 +186,8 @@ describe("McpServerAnnotationRegistrar", () => {
     const registrar = new McpServerAnnotationRegistrar(
       mcpServer,
       options,
+      toolCallbacks,
+      toolCallbackProviders,
       providerInstanceExplorer,
     );
 
@@ -145,5 +196,43 @@ describe("McpServerAnnotationRegistrar", () => {
     expect(mcpServer.registerPrompt).not.toHaveBeenCalled();
     expect(mcpServer.registerResource).not.toHaveBeenCalled();
     expect(mcpServer.registerTool).not.toHaveBeenCalled();
+  });
+
+  it("registers tool callbacks from tokens when provider explorer is absent", () => {
+    const directCallback = new TestToolCallback(
+      CALLBACK_NAME,
+      "Direct callback",
+    );
+    const providerCallback = new TestToolCallback(
+      PROVIDER_CALLBACK_NAME,
+      "Provider callback",
+    );
+
+    const registrar = new McpServerAnnotationRegistrar(
+      mcpServer,
+      options,
+      [directCallback],
+      [createToolCallbackProvider([providerCallback])],
+    );
+
+    registrar.onModuleInit();
+
+    expect(mcpServer.registerPrompt).not.toHaveBeenCalled();
+    expect(mcpServer.registerResource).not.toHaveBeenCalled();
+    expect(mcpServer.registerTool).toHaveBeenCalledTimes(2);
+    expect(mcpServer.registerTool).toHaveBeenCalledWith(
+      CALLBACK_NAME,
+      expect.objectContaining({
+        description: "Direct callback",
+      }),
+      expect.any(Function),
+    );
+    expect(mcpServer.registerTool).toHaveBeenCalledWith(
+      PROVIDER_CALLBACK_NAME,
+      expect.objectContaining({
+        description: "Provider callback",
+      }),
+      expect.any(Function),
+    );
   });
 });

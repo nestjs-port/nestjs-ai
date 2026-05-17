@@ -71,7 +71,7 @@ export interface McpServerToolCallbackRegistrationOptions {
    *
    * Defaults to `false`.
    */
-  includeMcpTools?: boolean;
+  exposeMcpClientTools?: boolean;
 }
 
 export interface McpServerModuleOptions {

@@ -102,7 +102,7 @@ export class McpClientModule {
           useFactory: (
             options: McpClientModuleOptions,
             clientRegistrations: McpClientRegistration[],
-            providerInstanceExplorer: ProviderInstanceExplorer,
+            providerInstanceExplorer?: ProviderInstanceExplorer,
             clientCustomizer?: McpClientCustomizer,
           ) =>
             new McpClientAnnotationRegistrar(
@@ -114,7 +114,7 @@ export class McpClientModule {
           inject: [
             MCP_CLIENT_MODULE_OPTIONS_TOKEN,
             MCP_CLIENT_REGISTRATIONS_TOKEN,
-            PROVIDER_INSTANCE_EXPLORER_TOKEN,
+            { token: PROVIDER_INSTANCE_EXPLORER_TOKEN, optional: true },
             {
               token:
                 (customizerProvider as FactoryProvider)?.provide ??

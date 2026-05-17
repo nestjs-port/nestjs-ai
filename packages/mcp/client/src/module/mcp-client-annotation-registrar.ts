@@ -53,7 +53,7 @@ export class McpClientAnnotationRegistrar
   constructor(
     private readonly options: McpClientModuleOptions,
     private readonly clientRegistrations: McpClientRegistration[],
-    private readonly providerInstanceExplorer: ProviderInstanceExplorer,
+    private readonly providerInstanceExplorer?: ProviderInstanceExplorer,
     private readonly clientCustomizer?: McpClientCustomizer,
   ) {}
 
@@ -64,9 +64,10 @@ export class McpClientAnnotationRegistrar
 
     const annotationScannerEnabled =
       this.options.annotationScanner?.enabled ?? true;
-    const providerInstances = annotationScannerEnabled
-      ? this.providerInstanceExplorer.getProviderInstances()
-      : [];
+    const providerInstances =
+      annotationScannerEnabled && this.providerInstanceExplorer != null
+        ? this.providerInstanceExplorer.getProviderInstances()
+        : [];
 
     await this.populateClientRegistrations(
       providerInstances,

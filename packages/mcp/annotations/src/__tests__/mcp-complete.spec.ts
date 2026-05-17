@@ -204,6 +204,19 @@ describe("McpComplete", () => {
       provider: new CompletionHandler(),
       propertyKey: "onComplete",
       complete: { prompt: "test-prompt", uri: "" },
+      mcpServer: {
+        server: {
+          getClientCapabilities: () => undefined,
+          getClientVersion: () => undefined,
+          listRoots: () => Promise.reject(new Error("listRoots not mocked")),
+          elicitInput: () =>
+            Promise.reject(new Error("elicitInput not mocked")),
+          createMessage: () =>
+            Promise.reject(new Error("createMessage not mocked")),
+          sendLoggingMessage: () => Promise.resolve(),
+          ping: () => Promise.resolve(),
+        },
+      } as never,
     });
 
     const request = {
@@ -217,7 +230,14 @@ describe("McpComplete", () => {
       },
     } as unknown as CompleteRequest;
 
-    const result = await callback.apply(exchange, request);
+    const result = await (
+      callback as unknown as {
+        handleWithExchange(
+          exchange: McpServerExchange,
+          request: CompleteRequest,
+        ): Promise<CompleteResult>;
+      }
+    ).handleWithExchange(exchange, request);
 
     expect(result.completion.values).toEqual(["done"]);
     expect(receivedArgs?.context).toBe(transportContext);

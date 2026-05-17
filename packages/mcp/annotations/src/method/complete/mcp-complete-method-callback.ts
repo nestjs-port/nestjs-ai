@@ -20,19 +20,34 @@ import "reflect-metadata";
 import type {
   CompleteRequest,
   CompleteResult,
+  McpServer,
+  ServerContext,
 } from "@modelcontextprotocol/server";
-import { McpServerExchange } from "@nestjs-ai/mcp-common";
-import type { McpTransportContext } from "@nestjs-ai/mcp-common";
+import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
+
+import { CompleteAdapter } from "../../adapter/index.js";
 import { McpMeta } from "../../mcp-meta.js";
 import type {
   McpCompleteMetadata,
   McpCompleteMethodArguments,
 } from "../../mcp-complete.js";
 
+/**
+ * Tuple compatible with internal completion-registration dispatch.
+ */
+export type CompleteRegistration = [
+  reference: ReturnType<typeof CompleteAdapter.asCompleteReference>,
+  callback: (
+    request: CompleteRequest,
+    ctx: ServerContext,
+  ) => Promise<CompleteResult>,
+];
+
 export interface McpCompleteMethodCallbackProps {
   provider: object;
   propertyKey: string | symbol;
   complete: McpCompleteMetadata;
+  mcpServer: McpServer;
 }
 
 export class McpCompleteMethodException extends Error {
@@ -43,27 +58,99 @@ export class McpCompleteMethodException extends Error {
 }
 
 /**
- * Class for creating completion callbacks around async methods that operate on an MCP
- * server exchange.
+ * Adapts a method annotated with `@McpComplete` to the internal completion
+ * registration shape used by the MCP annotations package.
+ *
+ * `apply()` produces a tuple containing the completion reference and a
+ * callback. The callback builds a fresh transport context and exchange from
+ * the {@link ServerContext} the SDK supplies, then dispatches the annotated
+ * method.
  */
 export class McpCompleteMethodCallback {
-  protected readonly _provider: object;
+  private readonly _provider: object;
 
-  protected readonly _propertyKey: string | symbol;
+  private readonly _propertyKey: string | symbol;
 
-  protected readonly _method: Function;
+  private readonly _method: (...args: unknown[]) => unknown;
 
-  protected readonly _complete: McpCompleteMetadata;
+  private readonly _complete: McpCompleteMetadata;
+
+  private readonly _mcpServer: McpServer;
 
   constructor(props: McpCompleteMethodCallbackProps) {
     assert(props.provider != null, "Provider can't be null!");
     assert(props.propertyKey != null, "Property key can't be null!");
     assert(props.complete != null, "Completion metadata can't be null!");
+    assert(props.mcpServer != null, "mcpServer can't be null!");
 
     this._provider = props.provider;
     this._propertyKey = props.propertyKey;
     this._complete = props.complete;
+    this._mcpServer = props.mcpServer;
     this._method = this.resolveMethod();
+  }
+
+  /**
+   * Build the registration tuple for the annotated completion method.
+   */
+  apply(): CompleteRegistration {
+    const reference = CompleteAdapter.asCompleteReference(this._complete);
+    const callback = async (
+      request: CompleteRequest,
+      ctx: ServerContext,
+    ): Promise<CompleteResult> => {
+      const transportContext = McpTransportContext.EMPTY;
+      const exchange = new McpServerExchange(
+        this._mcpServer,
+        ctx,
+        transportContext,
+      );
+
+      return this.handleWithExchange(exchange, request);
+    };
+
+    return [reference, callback];
+  }
+
+  /**
+   * Per-request handler. Invoked once per completion request.
+   *
+   * Constructs a fresh transport context and exchange, then calls the
+   * underlying user method.
+   */
+  async handle(
+    request: CompleteRequest,
+    ctx: ServerContext,
+  ): Promise<CompleteResult> {
+    assert(request != null, "Request must not be null");
+
+    const transportContext = McpTransportContext.EMPTY;
+    const exchange = new McpServerExchange(
+      this._mcpServer,
+      ctx,
+      transportContext,
+    );
+
+    return this.handleWithExchange(exchange, request);
+  }
+
+  protected async handleWithExchange(
+    exchange: McpServerExchange,
+    request: CompleteRequest,
+  ): Promise<CompleteResult> {
+    try {
+      const args = this.buildArgs(exchange, request);
+      const result = await this._method.apply(this._provider, [args]);
+      return this.toCompleteResult(result);
+    } catch (error) {
+      if (error instanceof McpCompleteMethodException) {
+        throw error;
+      }
+      throw new McpCompleteMethodException(
+        `Error invoking completion method: ${this.methodName}`,
+        { cause: error instanceof Error ? error : undefined },
+      );
+    }
   }
 
   protected buildArgs(
@@ -93,26 +180,6 @@ export class McpCompleteMethodCallback {
 
   protected isExchangeType(paramType: unknown): boolean {
     return paramType instanceof McpServerExchange;
-  }
-
-  async apply(
-    exchange: McpServerExchange,
-    request: CompleteRequest,
-  ): Promise<CompleteResult> {
-    assert(request != null, "Request must not be null");
-
-    try {
-      const args = this.buildArgs(exchange, request);
-      const result = await Promise.resolve(
-        this._method.apply(this._provider, [args]),
-      );
-      return this.toCompleteResult(result);
-    } catch (error) {
-      throw new McpCompleteMethodException(
-        `Error invoking complete method: ${String(this._propertyKey)}`,
-        error instanceof Error ? error : undefined,
-      );
-    }
   }
 
   protected toCompleteResult(result: unknown): CompleteResult {
@@ -155,15 +222,15 @@ export class McpCompleteMethodCallback {
     };
   }
 
-  protected resolveMethod(): Function {
-    const method = (this._provider as Record<string | symbol, unknown>)[
+  protected resolveMethod(): (...args: unknown[]) => unknown {
+    const candidate = (this._provider as Record<string | symbol, unknown>)[
       this._propertyKey
     ];
     assert(
-      typeof method === "function",
+      typeof candidate === "function",
       `Method not found: ${String(this._propertyKey)}`,
     );
-    return method as Function;
+    return candidate as (...args: unknown[]) => unknown;
   }
 
   protected getTypeName(value: unknown): string {
@@ -192,5 +259,11 @@ export class McpCompleteMethodCallback {
       "values" in value &&
       Array.isArray((value as { values?: unknown }).values)
     );
+  }
+
+  private get methodName(): string {
+    return typeof this._propertyKey === "string"
+      ? this._propertyKey
+      : this._propertyKey.toString();
   }
 }

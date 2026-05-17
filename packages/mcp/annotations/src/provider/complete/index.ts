@@ -14,9 +14,4 @@
  * limitations under the License.
  */
 
-export { McpCompleteMethodException } from "./mcp-complete-method-callback.js";
-export {
-  McpCompleteMethodCallback,
-  type CompleteRegistration,
-  type McpCompleteMethodCallbackProps,
-} from "./mcp-complete-method-callback.js";
+export { McpCompleteProvider } from "./mcp-complete-provider.js";

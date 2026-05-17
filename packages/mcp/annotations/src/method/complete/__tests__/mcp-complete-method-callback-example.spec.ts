@@ -19,9 +19,9 @@ import "reflect-metadata";
 import type {
   CompleteRequest,
   CompleteResult,
+  McpServer,
 } from "@modelcontextprotocol/server";
 
-import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { MCP_COMPLETE_METADATA_KEY } from "../../../metadata.js";
 import { McpComplete } from "../../../mcp-complete.js";
 import type { McpCompleteMethodArguments } from "../../../mcp-complete.js";
@@ -64,6 +64,7 @@ export class McpCompleteMethodCallbackExample {
           provider: autocompleteProvider,
           propertyKey,
           complete: completeAnnotation,
+          mcpServer: createMockServer(),
         });
 
         if (completeAnnotation.prompt.length > 0) {
@@ -344,11 +345,11 @@ async function testPromptHandler(
 
   console.log(`\nTesting ${description} with input: ${input}`);
 
-  const exchange = createMockExchange();
   const promptName = handlerKey.split("#")[0] ?? "";
   const request = createPromptCompleteRequest(promptName, input);
+  const [, callback] = handler.apply();
 
-  const result = await handler.apply(exchange, request);
+  const result = await callback(request, createMockCtx());
   printCompletionResult(result);
 }
 
@@ -367,11 +368,11 @@ async function testUriHandler(
 
   console.log(`\nTesting ${description} with input: ${input}`);
 
-  const exchange = createMockExchange();
   const uriPattern = handlerKey.split("#")[0] ?? "";
   const request = createUriCompleteRequest(uriPattern, input);
+  const [, callback] = handler.apply();
 
-  const result = await handler.apply(exchange, request);
+  const result = await callback(request, createMockCtx());
   printCompletionResult(result);
 }
 
@@ -425,10 +426,30 @@ function createUriCompleteRequest(
   } as unknown as CompleteRequest;
 }
 
-function createMockExchange(): McpServerExchange {
-  return Object.assign(Object.create(McpServerExchange.prototype), {
-    transportContext: () => McpTransportContext.EMPTY,
-  }) as McpServerExchange;
+function createMockCtx() {
+  return {
+    sessionId: "session-1",
+    mcpReq: {
+      _meta: undefined,
+      signal: new AbortController().signal,
+      notify: () => Promise.resolve(),
+    },
+  } as never;
+}
+
+function createMockServer(): McpServer {
+  return {
+    server: {
+      getClientCapabilities: () => undefined,
+      getClientVersion: () => undefined,
+      listRoots: () => Promise.reject(new Error("listRoots not mocked")),
+      elicitInput: () => Promise.reject(new Error("elicitInput not mocked")),
+      createMessage: () =>
+        Promise.reject(new Error("createMessage not mocked")),
+      sendLoggingMessage: () => Promise.resolve(),
+      ping: () => Promise.resolve(),
+    },
+  } as unknown as McpServer;
 }
 
 function extractUriVariables(uriTemplate: string): string[] {

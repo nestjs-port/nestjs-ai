@@ -18,6 +18,7 @@ import { describe, expect, it } from "vitest";
 import type {
   CompleteRequest,
   CompleteResult,
+  McpServer,
 } from "@modelcontextprotocol/server";
 import { McpComplete } from "../../../mcp-complete.js";
 import type { McpCompleteMethodArguments } from "../../../mcp-complete.js";
@@ -85,9 +86,10 @@ describe("McpCompleteMethodCallback", () => {
       provider: new AsyncCompleteReturnTypes(),
       propertyKey: "completionObject",
       complete: { prompt: "test-prompt", uri: "" },
+      mcpServer: createMockServer(),
     });
 
-    const result = await callback.apply({} as never, createRequest());
+    const result = await callback.handle(createRequest(), createMockCtx());
 
     expect(result.completion.values).toEqual([
       "Async completion object for: value",
@@ -101,9 +103,10 @@ describe("McpCompleteMethodCallback", () => {
       provider: new AsyncCompleteReturnTypes(),
       propertyKey: "completionList",
       complete: { prompt: "test-prompt", uri: "" },
+      mcpServer: createMockServer(),
     });
 
-    const result = await callback.apply({} as never, createRequest());
+    const result = await callback.handle(createRequest(), createMockCtx());
 
     expect(result.completion.values).toEqual([
       "Async list item 1 for: value",
@@ -118,9 +121,10 @@ describe("McpCompleteMethodCallback", () => {
       provider: new AsyncCompleteReturnTypes(),
       propertyKey: "completionString",
       complete: { prompt: "test-prompt", uri: "" },
+      mcpServer: createMockServer(),
     });
 
-    const result = await callback.apply({} as never, createRequest());
+    const result = await callback.handle(createRequest(), createMockCtx());
 
     expect(result.completion.values).toEqual([
       "Async string completion for: value",
@@ -134,12 +138,39 @@ describe("McpCompleteMethodCallback", () => {
       provider: new AsyncCompleteReturnTypes(),
       propertyKey: "directCompletionResult",
       complete: { prompt: "test-prompt", uri: "" },
+      mcpServer: createMockServer(),
     });
 
-    const result = await callback.apply({} as never, createRequest());
+    const result = await callback.handle(createRequest(), createMockCtx());
 
     expect(result.completion.values).toEqual(["Direct completion for value"]);
     expect(result.completion.total).toBe(1);
     expect(result.completion.hasMore).toBe(false);
   });
 });
+
+function createMockServer(): McpServer {
+  return {
+    server: {
+      getClientCapabilities: () => undefined,
+      getClientVersion: () => undefined,
+      listRoots: () => Promise.reject(new Error("listRoots not mocked")),
+      elicitInput: () => Promise.reject(new Error("elicitInput not mocked")),
+      createMessage: () =>
+        Promise.reject(new Error("createMessage not mocked")),
+      sendLoggingMessage: () => Promise.resolve(),
+      ping: () => Promise.resolve(),
+    },
+  } as unknown as McpServer;
+}
+
+function createMockCtx() {
+  return {
+    sessionId: "session-1",
+    mcpReq: {
+      _meta: undefined,
+      signal: new AbortController().signal,
+      notify: () => Promise.resolve(),
+    },
+  } as never;
+}

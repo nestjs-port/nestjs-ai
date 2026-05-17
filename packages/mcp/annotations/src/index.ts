@@ -39,6 +39,7 @@ export type {
   McpCompleteMethodArguments,
   McpCompleteOptions,
 } from "./mcp-complete.js";
+export { McpCompleteProvider } from "./provider/complete/index.js";
 export { McpElicitation } from "./mcp-elicitation.js";
 export type {
   McpElicitationMetadata,

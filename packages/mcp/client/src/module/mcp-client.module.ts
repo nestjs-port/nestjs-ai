@@ -17,18 +17,22 @@
 import {
   Module,
   type DynamicModule,
-  type Provider as NestProvider,
+  type Provider,
+  type FactoryProvider,
 } from "@nestjs/common";
-import type { McpClientCustomizer } from "@nestjs-ai/mcp-common";
+import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 import { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
 import type {
   McpClientModuleAsyncOptions,
+  McpClientRegistration,
   McpClientModuleOptions,
 } from "./mcp-client-module.options.js";
 import {
   MCP_CLIENT_MODULE_OPTIONS_TOKEN,
   MCP_CLIENT_REGISTRATIONS_TOKEN,
 } from "./mcp-client.tokens.js";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 
 @Module({})
 export class McpClientModule {
@@ -36,7 +40,7 @@ export class McpClientModule {
     options: McpClientModuleOptions,
     moduleOptions: {
       global?: boolean;
-      customizerProvider?: NestProvider<McpClientCustomizer>;
+      customizerProvider?: Provider<McpClientCustomizer>;
     } = {},
   ): DynamicModule {
     return McpClientModule.buildDynamicModule({
@@ -74,9 +78,9 @@ export class McpClientModule {
   private static buildDynamicModule(args: {
     global: boolean;
     imports: NonNullable<DynamicModule["imports"]>;
-    customizerProvider?: NestProvider<McpClientCustomizer>;
-    moduleOptionsProvider: NestProvider;
-    optionsProvider: NestProvider;
+    customizerProvider?: Provider<McpClientCustomizer>;
+    moduleOptionsProvider: Provider;
+    optionsProvider: Provider;
   }): DynamicModule {
     const {
       global,
@@ -93,7 +97,32 @@ export class McpClientModule {
         moduleOptionsProvider,
         optionsProvider,
         ...(customizerProvider != null ? [customizerProvider] : []),
-        McpClientAnnotationRegistrar,
+        {
+          provide: McpClientAnnotationRegistrar,
+          useFactory: (
+            options: McpClientModuleOptions,
+            clientRegistrations: McpClientRegistration[],
+            providerInstanceExplorer: ProviderInstanceExplorer,
+            clientCustomizer?: McpClientCustomizer,
+          ) =>
+            new McpClientAnnotationRegistrar(
+              options,
+              clientRegistrations,
+              providerInstanceExplorer,
+              clientCustomizer,
+            ),
+          inject: [
+            MCP_CLIENT_MODULE_OPTIONS_TOKEN,
+            MCP_CLIENT_REGISTRATIONS_TOKEN,
+            PROVIDER_INSTANCE_EXPLORER_TOKEN,
+            {
+              token:
+                (customizerProvider as FactoryProvider)?.provide ??
+                McpClientCustomizer,
+              optional: true,
+            },
+          ],
+        },
       ],
       exports: [MCP_CLIENT_REGISTRATIONS_TOKEN, McpClientAnnotationRegistrar],
       global,

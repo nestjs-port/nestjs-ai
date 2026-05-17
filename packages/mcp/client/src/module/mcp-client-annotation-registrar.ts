@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Inject,
-  Injectable,
-  Optional,
-  type OnModuleDestroy,
-  type OnModuleInit,
-} from "@nestjs/common";
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import {
   Client as McpClient,
   type ListChangedHandlers,
@@ -31,7 +25,7 @@ import {
   LoggerFactory,
   type ProviderInstanceExplorer,
 } from "@nestjs-port/core";
-import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
+import type { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 import {
   McpPromptListChangedProvider,
   McpResourceListChangedProvider,
@@ -46,13 +40,7 @@ import {
   createMcpClientTransport,
   normalizeMcpClientConnectionSpecs,
 } from "./mcp-client-module.options.js";
-import {
-  MCP_CLIENT_MODULE_OPTIONS_TOKEN,
-  MCP_CLIENT_REGISTRATIONS_TOKEN,
-} from "./mcp-client.tokens.js";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 
-@Injectable()
 export class McpClientAnnotationRegistrar
   implements OnModuleInit, OnModuleDestroy
 {
@@ -63,14 +51,9 @@ export class McpClientAnnotationRegistrar
   private registered = false;
 
   constructor(
-    @Inject(MCP_CLIENT_MODULE_OPTIONS_TOKEN)
     private readonly options: McpClientModuleOptions,
-    @Inject(MCP_CLIENT_REGISTRATIONS_TOKEN)
     private readonly clientRegistrations: McpClientRegistration[],
-    @Inject(PROVIDER_INSTANCE_EXPLORER_TOKEN)
     private readonly providerInstanceExplorer: ProviderInstanceExplorer,
-    @Optional()
-    @Inject(McpClientCustomizer)
     private readonly clientCustomizer?: McpClientCustomizer,
   ) {}
 

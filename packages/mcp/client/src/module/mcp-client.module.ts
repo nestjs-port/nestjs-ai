@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import { Module, type DynamicModule, type Provider } from "@nestjs/common";
+import {
+  Module,
+  type DynamicModule,
+  type Provider as NestProvider,
+} from "@nestjs/common";
+import type { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 import { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
 import type {
   McpClientModuleAsyncOptions,
@@ -29,11 +34,15 @@ import {
 export class McpClientModule {
   static forRoot(
     options: McpClientModuleOptions,
-    moduleOptions: { global?: boolean } = {},
+    moduleOptions: {
+      global?: boolean;
+      customizerProvider?: NestProvider<McpClientCustomizer>;
+    } = {},
   ): DynamicModule {
     return McpClientModule.buildDynamicModule({
       global: moduleOptions.global ?? false,
       imports: [],
+      customizerProvider: moduleOptions.customizerProvider,
       moduleOptionsProvider: {
         provide: MCP_CLIENT_MODULE_OPTIONS_TOKEN,
         useValue: options,
@@ -49,6 +58,7 @@ export class McpClientModule {
     return McpClientModule.buildDynamicModule({
       global: options.global ?? false,
       imports: options.imports ?? [],
+      customizerProvider: options.customizerProvider,
       moduleOptionsProvider: {
         provide: MCP_CLIENT_MODULE_OPTIONS_TOKEN,
         useFactory: options.useFactory,
@@ -64,10 +74,17 @@ export class McpClientModule {
   private static buildDynamicModule(args: {
     global: boolean;
     imports: NonNullable<DynamicModule["imports"]>;
-    moduleOptionsProvider: Provider;
-    optionsProvider: Provider;
+    customizerProvider?: NestProvider<McpClientCustomizer>;
+    moduleOptionsProvider: NestProvider;
+    optionsProvider: NestProvider;
   }): DynamicModule {
-    const { global, imports, moduleOptionsProvider, optionsProvider } = args;
+    const {
+      global,
+      imports,
+      customizerProvider,
+      moduleOptionsProvider,
+      optionsProvider,
+    } = args;
 
     return {
       module: McpClientModule,
@@ -75,6 +92,7 @@ export class McpClientModule {
       providers: [
         moduleOptionsProvider,
         optionsProvider,
+        ...(customizerProvider != null ? [customizerProvider] : []),
         McpClientAnnotationRegistrar,
       ],
       exports: [MCP_CLIENT_REGISTRATIONS_TOKEN, McpClientAnnotationRegistrar],

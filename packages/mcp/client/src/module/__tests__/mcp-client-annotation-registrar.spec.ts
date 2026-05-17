@@ -19,10 +19,12 @@ import "reflect-metadata";
 import { fileURLToPath } from "node:url";
 
 import type { Client, Tool } from "@modelcontextprotocol/client";
+import type { Provider } from "@nestjs/common";
 import { McpToolListChanged } from "@nestjs-ai/mcp-annotations";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { describe, expect, it, vi } from "vitest";
+import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 
 import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
 import { MCP_CLIENT_MODULE_OPTIONS_TOKEN } from "../mcp-client.tokens.js";
@@ -160,6 +162,56 @@ describe("McpClientAnnotationRegistrar", () => {
     }
   }, 30_000);
 
+  it("applies customizers to each created client", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+    const customize = vi.fn<(name: string, client: Client) => void>();
+    const customizer = {
+      customize,
+    } satisfies McpClientCustomizer;
+
+    const { moduleRef, registrations } = await bootstrapClientModule(
+      {
+        annotationScanner: {
+          enabled: false,
+        },
+        stdio: {
+          connections: {
+            "stdio-server": createStdioConnection(),
+          },
+        },
+        streamableHttp: {
+          connections: {
+            "http-server": {
+              url: httpServer.baseUrl,
+            },
+          },
+        },
+      },
+      [],
+      () => [],
+      [
+        {
+          provide: McpClientCustomizer,
+          useFactory: () => customizer,
+        },
+      ],
+    );
+
+    try {
+      expect(registrations).toHaveLength(2);
+      expect(customize).toHaveBeenCalledTimes(2);
+      expect(customize.mock.calls.map(([name]) => name)).toEqual([
+        "stdio-server",
+        "http-server",
+      ]);
+      expect(customize.mock.calls[0]?.[1]).toBeDefined();
+      expect(customize.mock.calls[1]?.[1]).toBeDefined();
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
+
   it("registers changed handlers only for the matching connection name", async () => {
     const httpServer = await startStreamableHttpTestServer();
     const provider = new MatchingToolListChangedProvider();
@@ -272,6 +324,7 @@ async function bootstrapClientModule(
   options: McpClientModuleOptions,
   providerInstances: object[] = [],
   getProviderInstances: () => object[] = () => providerInstances,
+  extraProviders: Provider[] = [],
 ): Promise<{
   moduleRef: TestingModule;
   registrations: McpClientRegistration[];
@@ -293,6 +346,7 @@ async function bootstrapClientModule(
           getProviderInstances,
         },
       },
+      ...extraProviders,
     ],
   }).compile();
 

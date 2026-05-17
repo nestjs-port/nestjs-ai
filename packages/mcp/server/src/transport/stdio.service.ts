@@ -24,7 +24,7 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from "@nestjs/common";
-import { MCP_SERVER_TOKEN } from "../module/index.js";
+import { MCP_SERVER_TOKEN } from "../module/mcp-server.tokens.js";
 
 @Injectable()
 export class McpServerStdioService

@@ -24,17 +24,15 @@ import {
 } from "./support/mcp-server-client.js";
 
 describe("McpServerModule", () => {
-  describe("streamable-http (express)", () => {
-    it("exposes prompts through the express adapter", async () => {
-      const { app, client, transport } = await bootstrapHttpClient("express");
+  it("exposes prompts through the express adapter", async () => {
+    const { app, client, transport } = await bootstrapHttpClient("express");
 
-      try {
-        await assertGreetingPrompt(client);
-      } finally {
-        await transport.terminateSession().catch(() => undefined);
-        await client.close().catch(() => undefined);
-        await app.close();
-      }
-    }, 30_000);
-  });
+    try {
+      await assertGreetingPrompt(client);
+    } finally {
+      await transport.terminateSession().catch(() => undefined);
+      await client.close().catch(() => undefined);
+      await app.close();
+    }
+  }, 30_000);
 });

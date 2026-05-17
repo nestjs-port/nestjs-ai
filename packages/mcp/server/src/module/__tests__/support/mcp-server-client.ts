@@ -17,6 +17,7 @@
 import "reflect-metadata";
 
 import { randomUUID } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
 
 import {
@@ -43,6 +44,10 @@ import {
   PromptFixtureModule,
   SERVER_INFO,
 } from "../fixtures/prompt-fixture.js";
+
+const SERVER_PACKAGE_DIR = fileURLToPath(
+  new URL("../../../../", import.meta.url),
+);
 
 export async function bootstrapHttpClient(
   adapter: "express" | "fastify",
@@ -120,6 +125,7 @@ export async function bootstrapStdioClient(fixtureUrl: string): Promise<{
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: ["--import", "tsx", fixtureUrl],
+    cwd: SERVER_PACKAGE_DIR,
   });
 
   await client.connect(transport);

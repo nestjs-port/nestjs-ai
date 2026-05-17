@@ -26,19 +26,17 @@ import {
 } from "./support/mcp-server-client.js";
 
 describe("McpServerModule", () => {
-  describe("stdio", () => {
-    it("exposes prompts through the stdio client transport", async () => {
-      const fixtureUrl = fileURLToPath(
-        new URL("./fixtures/stdio-prompt-server.fixture.ts", import.meta.url),
-      );
-      const { client, transport } = await bootstrapStdioClient(fixtureUrl);
+  it("exposes prompts through the stdio client transport", async () => {
+    const fixtureUrl = fileURLToPath(
+      new URL("./fixtures/stdio-prompt-server.fixture.ts", import.meta.url),
+    );
+    const { client, transport } = await bootstrapStdioClient(fixtureUrl);
 
-      try {
-        await assertGreetingPrompt(client);
-      } finally {
-        await client.close().catch(() => undefined);
-        await transport.close().catch(() => undefined);
-      }
-    }, 30_000);
-  });
+    try {
+      await assertGreetingPrompt(client);
+    } finally {
+      await client.close().catch(() => undefined);
+      await transport.close().catch(() => undefined);
+    }
+  }, 30_000);
 });

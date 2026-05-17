@@ -24,17 +24,15 @@ import {
 } from "./support/mcp-server-client.js";
 
 describe("McpServerModule", () => {
-  describe("streamable-http (fastify)", () => {
-    it("exposes prompts through the fastify adapter", async () => {
-      const { app, client, transport } = await bootstrapHttpClient("fastify");
+  it("exposes prompts through the fastify adapter", async () => {
+    const { app, client, transport } = await bootstrapHttpClient("fastify");
 
-      try {
-        await assertGreetingPrompt(client);
-      } finally {
-        await transport.terminateSession().catch(() => undefined);
-        await client.close().catch(() => undefined);
-        await app.close();
-      }
-    }, 30_000);
-  });
+    try {
+      await assertGreetingPrompt(client);
+    } finally {
+      await transport.terminateSession().catch(() => undefined);
+      await client.close().catch(() => undefined);
+      await app.close();
+    }
+  }, 30_000);
 });

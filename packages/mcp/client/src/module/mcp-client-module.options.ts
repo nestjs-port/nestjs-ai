@@ -24,7 +24,8 @@ import {
   type StdioServerParameters,
   type StreamableHTTPClientTransportOptions,
 } from "@modelcontextprotocol/client";
-import type { InjectionToken, ModuleMetadata } from "@nestjs/common";
+import type { InjectionToken, ModuleMetadata, Provider } from "@nestjs/common";
+import type { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 
 export const DEFAULT_MCP_CLIENT_NAME = "spring-ai-mcp-client";
 export const DEFAULT_MCP_CLIENT_VERSION = "1.0.0";
@@ -102,6 +103,7 @@ export interface McpClientModuleAsyncOptions {
     ...args: never[]
   ) => Promise<McpClientModuleOptions> | McpClientModuleOptions;
   global?: boolean;
+  customizerProvider?: Provider<McpClientCustomizer>;
 }
 
 export interface McpClientRegistration {

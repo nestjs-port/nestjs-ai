@@ -73,13 +73,13 @@ describe("ToolCallbackUtils", () => {
     const aggregated = ToolCallbackUtils.aggregateToolCallbacks({
       toolCallbacks: [directCallback],
       toolCallbackProviders: [provider],
-      includeMcpTools: true,
+      exposeMcpClientTools: true,
     });
 
     expect(aggregated).toEqual([directCallback, providerCallback]);
   });
 
-  it("filters MCP callbacks when includeMcpTools is false", () => {
+  it("filters MCP callbacks when exposeMcpClientTools is false", () => {
     const directCallback = new StandardToolCallback();
     const mcpCallback = new TestMcpToolCallback();
     const provider = createProvider([mcpCallback, directCallback]);
@@ -87,7 +87,7 @@ describe("ToolCallbackUtils", () => {
     const aggregated = ToolCallbackUtils.aggregateToolCallbacks({
       toolCallbacks: [mcpCallback, directCallback],
       toolCallbackProviders: [provider],
-      includeMcpTools: false,
+      exposeMcpClientTools: false,
     });
 
     expect(aggregated).toEqual([directCallback]);
@@ -115,7 +115,7 @@ describe("ToolCallbackUtils", () => {
     const aggregated = ToolCallbackUtils.aggregateToolCallbacks({
       toolCallbacks: [],
       toolCallbackProviders: [provider, provider],
-      includeMcpTools: true,
+      exposeMcpClientTools: true,
     });
 
     expect(aggregated).toEqual([providerCallback]);

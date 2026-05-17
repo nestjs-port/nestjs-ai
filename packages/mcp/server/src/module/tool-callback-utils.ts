@@ -21,7 +21,7 @@ import { McpToolCallback } from "@nestjs-ai/mcp-common";
 export interface AggregateToolCallbacksOptions {
   toolCallbacks: ToolCallback[];
   toolCallbackProviders: ToolCallbackProvider[];
-  includeMcpTools: boolean;
+  exposeMcpClientTools: boolean;
 }
 
 export abstract class ToolCallbackUtils {
@@ -37,7 +37,7 @@ export abstract class ToolCallbackUtils {
     const directToolCallbacks = options.toolCallbacks.filter(
       (toolCallback) =>
         toolCallback != null &&
-        (options.includeMcpTools ||
+        (options.exposeMcpClientTools ||
           !ToolCallbackUtils.isMcpToolCallback(toolCallback)),
     );
 
@@ -49,7 +49,7 @@ export abstract class ToolCallbackUtils {
       }
 
       return (
-        options.includeMcpTools ||
+        options.exposeMcpClientTools ||
         !ToolCallbackUtils.isMcpToolProvider(toolCallbackProvider)
       );
     });
@@ -62,13 +62,13 @@ export abstract class ToolCallbackUtils {
     const hasExcludedToolProvider = options.toolCallbackProviders.some(
       (toolCallbackProvider) =>
         toolCallbackProvider != null &&
-        !options.includeMcpTools &&
+        !options.exposeMcpClientTools &&
         ToolCallbackUtils.isMcpToolProvider(toolCallbackProvider),
     );
 
     if (hasExcludedToolProvider) {
       ToolCallbackUtils._logger.warn(
-        "Found MCP clients. The MCP client tools will not be exposed by the MCP server. If you would like to expose the tools, set includeMcpTools=true.",
+        "Found MCP clients. The MCP client tools will not be exposed by the MCP server. If you would like to expose the tools, set exposeMcpClientTools=true.",
       );
     }
 

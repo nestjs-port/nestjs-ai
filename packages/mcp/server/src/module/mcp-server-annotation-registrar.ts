@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import type { OnModuleInit } from "@nestjs/common";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import {
@@ -24,26 +23,20 @@ import {
   McpToolProvider,
 } from "@nestjs-ai/mcp-annotations";
 import type { ToolRegistration } from "@nestjs-ai/mcp-annotations";
-import type { ToolCallbackProvider } from "@nestjs-ai/model";
+import type { ToolCallback, ToolCallbackProvider } from "@nestjs-ai/model";
 import type { McpServerModuleOptions } from "./mcp-server-module.options.js";
-import {
-  MCP_SERVER_TOKEN,
-  MCP_SERVER_MODULE_OPTIONS_TOKEN,
-} from "./mcp-server.tokens.js";
 import { ToolCallbackUtils } from "./tool-callback-utils.js";
 import { McpServerToolUtils } from "./mcp-server-tool-utils.js";
 
-@Injectable()
 export class McpServerAnnotationRegistrar implements OnModuleInit {
   private registered = false;
 
   constructor(
-    @Inject(MCP_SERVER_TOKEN)
     private readonly mcpServer: McpServer,
-    @Inject(MCP_SERVER_MODULE_OPTIONS_TOKEN)
     private readonly options: McpServerModuleOptions,
-    @Inject(PROVIDER_INSTANCE_EXPLORER_TOKEN)
-    private readonly providerInstanceExplorer: ProviderInstanceExplorer,
+    private readonly toolCallbacks?: ToolCallback[] | null,
+    private readonly toolCallbackProviders?: ToolCallbackProvider[] | null,
+    private readonly providerInstanceExplorer?: ProviderInstanceExplorer,
   ) {}
 
   onModuleInit(): void {
@@ -51,12 +44,12 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
       return;
     }
 
-    const providerInstances =
-      this.providerInstanceExplorer.getProviderInstances();
     const annotationsEnabled = this.options.annotations?.enabled ?? true;
     const toolCallbacksEnabled = this.options.toolCallbacks?.enabled ?? true;
+    const providerInstances =
+      this.providerInstanceExplorer?.getProviderInstances();
 
-    if (annotationsEnabled) {
+    if (annotationsEnabled && providerInstances != null) {
       this.registerPrompts(providerInstances);
       this.registerResources(providerInstances);
     }
@@ -123,13 +116,13 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
   }
 
   private registerTools(
-    toolObjects: object[],
+    toolObjects: object[] | undefined,
     annotationsEnabled: boolean,
     toolCallbacksEnabled: boolean,
   ): void {
     const registrations: ToolRegistration[] = [];
 
-    if (annotationsEnabled) {
+    if (annotationsEnabled && toolObjects != null) {
       const toolProvider = new McpToolProvider({
         toolObjects,
         mcpServer: this.mcpServer,
@@ -139,7 +132,7 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
     }
 
     if (toolCallbacksEnabled) {
-      registrations.push(...this.getToolCallbackRegistrations(toolObjects));
+      registrations.push(...this.getToolCallbackRegistrations());
     }
 
     for (const [
@@ -151,34 +144,17 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
     }
   }
 
-  private getToolCallbackRegistrations(
-    toolObjects: object[],
-  ): ToolRegistration[] {
-    const toolCallbackProviders = toolObjects.filter(
-      (toolObject): toolObject is ToolCallbackProvider =>
-        this.isToolCallbackProvider(toolObject),
-    );
-
+  private getToolCallbackRegistrations(): ToolRegistration[] {
     const toolCallbacks = ToolCallbackUtils.aggregateToolCallbacks({
-      toolCallbacks: [],
-      toolCallbackProviders,
-      includeMcpTools: this.options.toolCallbacks?.includeMcpTools ?? false,
+      toolCallbacks: this.toolCallbacks ?? [],
+      toolCallbackProviders: this.toolCallbackProviders ?? [],
+      exposeMcpClientTools:
+        this.options.toolCallbacks?.exposeMcpClientTools ?? false,
     });
 
     return McpServerToolUtils.toToolRegistrations(
       this.mcpServer,
       toolCallbacks,
     );
-  }
-
-  private isToolCallbackProvider(
-    candidate: object,
-  ): candidate is ToolCallbackProvider {
-    try {
-      const toolCallbacks = (candidate as ToolCallbackProvider).toolCallbacks;
-      return Array.isArray(toolCallbacks);
-    } catch {
-      return false;
-    }
   }
 }

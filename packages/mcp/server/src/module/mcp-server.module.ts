@@ -22,6 +22,14 @@ import {
   type Provider,
   type Type,
 } from "@nestjs/common";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import {
+  TOOL_CALLBACK_PROVIDER_TOKEN,
+  TOOL_CALLBACKS_TOKEN,
+  type ToolCallback,
+  type ToolCallbackProvider,
+} from "@nestjs-ai/model";
+import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { McpServerStdioService } from "../transport/index.js";
 import { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
 import {
@@ -143,7 +151,31 @@ function createServerProviders(): Provider[] {
       provide: McpServer,
       useExisting: MCP_SERVER_TOKEN,
     },
-    McpServerAnnotationRegistrar,
+    {
+      provide: McpServerAnnotationRegistrar,
+      useFactory: (
+        mcpServer: McpServer,
+        options: McpServerModuleOptions,
+        toolCallbacks?: ToolCallback[] | null,
+        toolCallbackProviders?: ToolCallbackProvider[] | null,
+        providerInstanceExplorer?: ProviderInstanceExplorer,
+      ) => {
+        return new McpServerAnnotationRegistrar(
+          mcpServer,
+          options,
+          toolCallbacks,
+          toolCallbackProviders,
+          providerInstanceExplorer,
+        );
+      },
+      inject: [
+        MCP_SERVER_TOKEN,
+        MCP_SERVER_MODULE_OPTIONS_TOKEN,
+        { token: TOOL_CALLBACKS_TOKEN, optional: true },
+        { token: TOOL_CALLBACK_PROVIDER_TOKEN, optional: true },
+        { token: PROVIDER_INSTANCE_EXPLORER_TOKEN, optional: true },
+      ],
+    },
   ];
 }
 

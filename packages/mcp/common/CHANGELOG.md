@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-common
 
+## 0.1.4
+
+### Patch Changes
+
+- add mcp complete support and mcp client customizer
+
 ## 0.1.3
 
 ### Patch Changes

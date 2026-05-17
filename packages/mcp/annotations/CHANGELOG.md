@@ -1,5 +1,13 @@
 # @nestjs-ai/mcp-annotations
 
+## 0.1.3
+
+### Patch Changes
+
+- add mcp complete support and mcp client customizer
+- Updated dependencies
+  - @nestjs-ai/mcp-common@0.1.4
+
 ## 0.1.2
 
 ### Patch Changes

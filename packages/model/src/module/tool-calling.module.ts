@@ -56,19 +56,23 @@ const toolCallbackResolverProvider: Provider = {
   useFactory: (
     toolCallbackResolver?: ToolCallbackResolver | null,
     toolCallbacks?: ToolCallback[] | null,
-    toolCallbackProvider?: ToolCallbackProvider | null,
+    toolCallbackProviders?: ToolCallbackProvider[] | null,
     providerInstanceExplorer?: ProviderInstanceExplorer | null,
   ) =>
     toolCallbackResolver ??
     (providerInstanceExplorer == null
       ? new StaticToolCallbackResolver([
           ...(toolCallbacks ?? []),
-          ...(toolCallbackProvider?.toolCallbacks ?? []),
+          ...(toolCallbackProviders ?? []).flatMap(
+            (toolCallbackProvider) => toolCallbackProvider.toolCallbacks,
+          ),
         ])
       : new DelegatingToolCallbackResolver([
           new StaticToolCallbackResolver([
             ...(toolCallbacks ?? []),
-            ...(toolCallbackProvider?.toolCallbacks ?? []),
+            ...(toolCallbackProviders ?? []).flatMap(
+              (toolCallbackProvider) => toolCallbackProvider.toolCallbacks,
+            ),
           ]),
           new NestProviderToolCallbackResolver(providerInstanceExplorer),
         ])),

@@ -1,5 +1,11 @@
 # @nestjs-ai/model
 
+## 0.1.2
+
+### Patch Changes
+
+- change tool callback proivder array
+
 ## 0.1.1
 
 ### Patch Changes

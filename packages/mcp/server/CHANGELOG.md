@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-server
 
+## 0.1.3
+
+### Patch Changes
+
+- align MCP tool callback wiring
+
 ## 0.1.2
 
 ### Patch Changes

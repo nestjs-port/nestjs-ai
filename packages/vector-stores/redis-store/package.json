@@ -50,7 +50,7 @@
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "^0.1.1",
-    "@nestjs-ai/model": "^0.1.2",
+    "@nestjs-ai/model": "^0.1.3",
     "@nestjs-ai/vector-store": "^0.1.2",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",

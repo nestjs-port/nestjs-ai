@@ -84,8 +84,8 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 |                         | spring-ai-model-chat-memory-jdbc      | `@nestjs-ai/model-chat-memory-repository-jsdbc`   | 100%     |
 |                         | spring-ai-model-chat-memory-cassandra | —                                                 | 0%       |
 | **MCP**                 | spring-ai-mcp                         | `@nestjs-ai/mcp-common`                           | 100%     |
-|                         | spring-ai-starter-mcp-client          | `@nestjs-ai/mcp-client`                           | 90%      |
-|                         | spring-ai-starter-mcp-server          | `@nestjs-ai/mcp-server`                           | 90%      |
+|                         | spring-ai-starter-mcp-client          | `@nestjs-ai/mcp-client`                           | 100%     |
+|                         | spring-ai-starter-mcp-server          | `@nestjs-ai/mcp-server`                           | 100%     |
 |                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                      | 100%     |
 | **Platform**            | —                                     | `@nestjs-ai/platform`                             | 100%     |
 

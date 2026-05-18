@@ -1,5 +1,11 @@
 # @nestjs-ai/model
 
+## 0.1.3
+
+### Patch Changes
+
+- remove unused peer dependency
+
 ## 0.1.2
 
 ### Patch Changes

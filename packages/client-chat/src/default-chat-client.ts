@@ -31,6 +31,7 @@ import {
   StandardSchemaOutputConverter,
   StructuredOutputConverter,
   type ToolCallback,
+  type ToolCallbackProvider,
   ToolCallbacks,
   type ToolObjectInstance,
 } from "@nestjs-ai/model";
@@ -78,6 +79,12 @@ export class DefaultChatClient implements ChatClient {
   ) {
     assert(defaultChatClientRequest, "defaultChatClientRequest cannot be null");
     this._defaultChatClientRequest = defaultChatClientRequest;
+  }
+
+  static isToolCallbackProvider(value: unknown): value is ToolCallbackProvider {
+    return (
+      value != null && typeof value === "object" && "toolCallbacks" in value
+    );
   }
 
   prompt(): ChatClient.ChatClientRequestSpec;
@@ -734,8 +741,7 @@ export namespace DefaultChatClient {
     private readonly _media: Media[] = [];
     private readonly _toolNames: string[] = [];
     private readonly _toolCallbacks: ToolCallback[] = [];
-    private readonly _toolCallbackProviders: ChatClient.ToolCallbackProvider[] =
-      [];
+    private readonly _toolCallbackProviders: ToolCallbackProvider[] = [];
     private readonly _messages: Message[] = [];
     private readonly _userParams: Record<string, unknown> = {};
     private readonly _userMetadata: Record<string, unknown> = {};
@@ -759,7 +765,7 @@ export namespace DefaultChatClient {
       systemParams: Record<string, unknown>,
       systemMetadata: Record<string, unknown>,
       toolCallbacks: ToolCallback[],
-      toolCallbackProviders: ChatClient.ToolCallbackProvider[],
+      toolCallbackProviders: ToolCallbackProvider[],
       messages: Message[],
       toolNames: string[],
       media: Media[],
@@ -781,7 +787,7 @@ export namespace DefaultChatClient {
       systemParams?: Record<string, unknown>,
       systemMetadata?: Record<string, unknown>,
       toolCallbacks?: ToolCallback[],
-      toolCallbackProviders?: ChatClient.ToolCallbackProvider[],
+      toolCallbackProviders?: ToolCallbackProvider[],
       messages?: Message[],
       toolNames?: string[],
       media?: Media[],
@@ -916,7 +922,7 @@ export namespace DefaultChatClient {
       return this._toolCallbacks;
     }
 
-    get toolCallbackProviders(): ChatClient.ToolCallbackProvider[] {
+    getToolCallbackProviders(): ToolCallbackProvider[] {
       return this._toolCallbackProviders;
     }
 
@@ -939,7 +945,7 @@ export namespace DefaultChatClient {
       builder
         .defaultTemplateRenderer(this._templateRenderer)
         .defaultToolCallbacks(this._toolCallbacks)
-        .defaultToolCallbacks(...this._toolCallbackProviders)
+        .defaultToolCallbackProviders(...this._toolCallbackProviders)
         .defaultToolContext(new Map(Object.entries(this._toolContext)))
         .defaultToolNames(...this._toolNames);
 
@@ -1054,21 +1060,17 @@ export namespace DefaultChatClient {
     }
 
     toolCallbacks(
-      ...toolCallbacksOrProviders:
-        | ToolCallback[]
-        | ChatClient.ToolCallbackProvider[]
-        | [ToolCallback[]]
+      ...toolCallbacks: ToolCallback[]
+    ): ChatClient.ChatClientRequestSpec;
+    toolCallbacks(
+      toolCallbacks: ToolCallback[],
+    ): ChatClient.ChatClientRequestSpec;
+    toolCallbacks(
+      ...toolCallbacks: ToolCallback[] | [ToolCallback[]]
     ): ChatClient.ChatClientRequestSpec {
-      assert(toolCallbacksOrProviders, "toolCallbacks cannot be null");
-      const first = toolCallbacksOrProviders[0];
-
-      if (
-        toolCallbacksOrProviders.length === 1 &&
-        Array.isArray(first) &&
-        first.length > 0 &&
-        "toolDefinition" in first[0]
-      ) {
-        const callbacks = first as ToolCallback[];
+      assert(toolCallbacks, "toolCallbacks cannot be null");
+      if (toolCallbacks.length === 1 && Array.isArray(toolCallbacks[0])) {
+        const callbacks = toolCallbacks[0];
         assert(
           callbacks.every((callback) => callback != null),
           "toolCallbacks cannot contain null elements",
@@ -1077,23 +1079,46 @@ export namespace DefaultChatClient {
         return this;
       }
 
-      const values = toolCallbacksOrProviders as (
-        | ToolCallback
-        | ChatClient.ToolCallbackProvider
-      )[];
       assert(
-        values.every((value) => value != null),
+        toolCallbacks.every((callback) => callback != null),
         "toolCallbacks cannot contain null elements",
       );
+      this._toolCallbacks.push(...(toolCallbacks as ToolCallback[]));
+      return this;
+    }
 
-      if (values.length > 0 && "toolCallbacks" in values[0]) {
-        this._toolCallbackProviders.push(
-          ...(values as ChatClient.ToolCallbackProvider[]),
+    toolCallbackProviders(
+      ...toolCallbackProviders: ToolCallbackProvider[]
+    ): ChatClient.ChatClientRequestSpec;
+    toolCallbackProviders(
+      toolCallbackProviders: ToolCallbackProvider[],
+    ): ChatClient.ChatClientRequestSpec;
+    toolCallbackProviders(
+      ...toolCallbackProviders:
+        | ToolCallbackProvider[]
+        | [ToolCallbackProvider[]]
+    ): ChatClient.ChatClientRequestSpec {
+      assert(toolCallbackProviders, "toolCallbackProviders cannot be null");
+      if (
+        toolCallbackProviders.length === 1 &&
+        Array.isArray(toolCallbackProviders[0])
+      ) {
+        const providers = toolCallbackProviders[0];
+        assert(
+          providers.every((provider) => provider != null),
+          "toolCallbackProviders cannot contain null elements",
         );
+        this._toolCallbackProviders.push(...providers);
         return this;
       }
 
-      this._toolCallbacks.push(...(values as ToolCallback[]));
+      assert(
+        toolCallbackProviders.every((provider) => provider != null),
+        "toolCallbackProviders cannot contain null elements",
+      );
+      this._toolCallbackProviders.push(
+        ...(toolCallbackProviders as ToolCallbackProvider[]),
+      );
       return this;
     }
 
@@ -1288,7 +1313,13 @@ export namespace DefaultChatClient {
       spec.tools(...props.tools);
     }
     if (props.toolCallbacks != null && props.toolCallbacks.length > 0) {
-      spec.toolCallbacks(...(props.toolCallbacks as ToolCallback[]));
+      if (DefaultChatClient.isToolCallbackProvider(props.toolCallbacks[0])) {
+        spec.toolCallbackProviders(
+          ...(props.toolCallbacks as ToolCallbackProvider[]),
+        );
+      } else {
+        spec.toolCallbacks(...(props.toolCallbacks as ToolCallback[]));
+      }
     }
     if (props.toolNames != null && props.toolNames.length > 0) {
       spec.toolNames(...props.toolNames);

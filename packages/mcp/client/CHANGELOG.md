@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-client
 
+## 0.1.2
+
+### Patch Changes
+
+- add missing annotation registration
+
 ## 0.1.1
 
 ### Patch Changes

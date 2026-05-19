@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+import type {
+  Client as McpClient,
+  Tool as McpTool,
+} from "@modelcontextprotocol/client";
 import { ToolContext } from "@nestjs-ai/model";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { McpServerExchange } from "../mcp-server-exchange.js";
 import { McpToolUtils } from "../mcp-tool-utils.js";
 
@@ -193,4 +197,40 @@ describe("McpToolUtils", () => {
     expect(McpToolUtils.getMcpExchange(new ToolContext({}))).toBeUndefined();
     expect(McpToolUtils.getMcpExchange(undefined)).toBeUndefined();
   });
+
+  it("get tool callbacks from clients should return empty array for no clients", async () => {
+    await expect(McpToolUtils.getToolCallbacksFromClients([])).resolves.toEqual(
+      [],
+    );
+  });
+
+  it("get tool callbacks from clients should delegate to the provider", async () => {
+    const client = createClient({
+      listTools: vi.fn().mockResolvedValue({ tools: [createTool("tool1")] }),
+    });
+
+    await expect(
+      McpToolUtils.getToolCallbacksFromClients([client]),
+    ).resolves.toHaveLength(1);
+  });
 });
+
+function createTool(name: string): McpTool {
+  return {
+    name,
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  } as McpTool;
+}
+
+function createClient(overrides: Record<string, unknown> = {}): McpClient {
+  const client = {
+    getServerVersion: vi.fn(),
+    listTools: vi.fn(),
+    ...overrides,
+  };
+
+  return client as unknown as McpClient;
+}

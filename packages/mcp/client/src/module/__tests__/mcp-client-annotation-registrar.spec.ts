@@ -18,9 +18,24 @@ import "reflect-metadata";
 
 import { fileURLToPath } from "node:url";
 
-import type { Client, Tool } from "@modelcontextprotocol/client";
+import {
+  Client,
+  type CreateMessageRequest,
+  type CreateMessageResult,
+  type ElicitRequest,
+  type ElicitResult,
+  type LoggingMessageNotification,
+  type ProgressNotification,
+  type Tool,
+} from "@modelcontextprotocol/client";
 import type { Provider } from "@nestjs/common";
-import { McpToolListChanged } from "@nestjs-ai/mcp-annotations";
+import {
+  McpElicitation,
+  McpLogging,
+  McpProgress,
+  McpSampling,
+  McpToolListChanged,
+} from "@nestjs-ai/mcp-annotations";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { describe, expect, it, vi } from "vitest";
@@ -50,6 +65,44 @@ class MatchingToolListChangedProvider {
     clients: ["stdio-server"],
   })
   onToolsChanged(_tools: Tool[]): void {}
+}
+
+class MatchingClientSideAnnotationsProvider {
+  @McpLogging({
+    clients: ["stdio-server"],
+  })
+  onLoggingMessage(_notification: LoggingMessageNotification): void {}
+
+  @McpProgress({
+    clients: ["stdio-server"],
+  })
+  onProgress(_notification: ProgressNotification): void {}
+
+  @McpSampling({
+    clients: ["stdio-server"],
+  })
+  onSampling(_request: CreateMessageRequest): CreateMessageResult {
+    return {
+      role: "assistant",
+      content: {
+        type: "text",
+        text: "sample-response",
+      },
+      model: "sample-model",
+    };
+  }
+
+  @McpElicitation({
+    clients: ["stdio-server"],
+  })
+  onElicitation(_request: ElicitRequest): ElicitResult {
+    return {
+      action: "accept",
+      content: {
+        message: "elicitation-response",
+      },
+    };
+  }
 }
 
 describe("McpClientAnnotationRegistrar", () => {
@@ -210,6 +263,70 @@ describe("McpClientAnnotationRegistrar", () => {
     } finally {
       await moduleRef.close();
       await httpServer.close();
+    }
+  }, 30_000);
+
+  it("registers client-side annotation handlers and capabilities", async () => {
+    const clientPrototype = Client.prototype as any;
+    const setRequestHandlerSpy = vi.spyOn(clientPrototype, "setRequestHandler");
+    const setNotificationHandlerSpy = vi.spyOn(
+      clientPrototype,
+      "setNotificationHandler",
+    );
+    const registerCapabilitiesSpy = vi.spyOn(
+      clientPrototype,
+      "registerCapabilities",
+    );
+
+    const provider = new MatchingClientSideAnnotationsProvider();
+    const { moduleRef, registrations } = await bootstrapClientModule(
+      {
+        stdio: {
+          connections: {
+            "stdio-server": createStdioConnection(),
+          },
+        },
+      },
+      [provider],
+    );
+
+    try {
+      expect(registrations).toHaveLength(1);
+      expect(registerCapabilitiesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sampling: {},
+          elicitation: {},
+        }),
+      );
+
+      const requestHandlerCalls = setRequestHandlerSpy.mock.calls as Array<
+        [string, ...unknown[]]
+      >;
+      expect(requestHandlerCalls.map((call) => call[0])).toEqual(
+        expect.arrayContaining([
+          "sampling/createMessage",
+          "elicitation/create",
+        ]),
+      );
+
+      const notificationHandlerCalls = setNotificationHandlerSpy.mock
+        .calls as Array<[string, ...unknown[]]>;
+      expect(notificationHandlerCalls.map((call) => call[0])).toEqual(
+        expect.arrayContaining([
+          "notifications/message",
+          "notifications/progress",
+        ]),
+      );
+      expect(
+        notificationHandlerCalls.filter(
+          (call) => call[0] === "notifications/progress",
+        ),
+      ).toHaveLength(2);
+    } finally {
+      await moduleRef.close();
+      setRequestHandlerSpy.mockRestore();
+      setNotificationHandlerSpy.mockRestore();
+      registerCapabilitiesSpy.mockRestore();
     }
   }, 30_000);
 

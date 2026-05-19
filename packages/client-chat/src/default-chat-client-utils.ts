@@ -97,7 +97,7 @@ export abstract class DefaultChatClientUtils {
       }
 
       const allToolCallbacks = [...inputRequest.getToolCallbacks()];
-      for (const provider of inputRequest.toolCallbackProviders) {
+      for (const provider of inputRequest.getToolCallbackProviders()) {
         allToolCallbacks.push(...provider.toolCallbacks);
       }
 

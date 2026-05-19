@@ -21,6 +21,7 @@ import type {
   ChatOptions,
   Message,
   ToolCallback,
+  ToolCallbackProvider,
   ToolObjectInstance,
 } from "@nestjs-ai/model";
 import {
@@ -173,15 +174,34 @@ export class DefaultChatClientBuilder implements ChatClient.Builder {
   defaultToolCallbacks(...toolCallbacks: ToolCallback[]): ChatClient.Builder;
   defaultToolCallbacks(toolCallbacks: ToolCallback[]): ChatClient.Builder;
   defaultToolCallbacks(
-    ...toolCallbackProviders: ChatClient.ToolCallbackProvider[]
-  ): ChatClient.Builder;
-  defaultToolCallbacks(...args: unknown[]): ChatClient.Builder {
-    if (args.length === 1 && Array.isArray(args[0])) {
-      this.defaultRequest.toolCallbacks(args[0] as ToolCallback[]);
+    ...toolCallbacks: ToolCallback[] | [ToolCallback[]]
+  ): ChatClient.Builder {
+    if (toolCallbacks.length === 1 && Array.isArray(toolCallbacks[0])) {
+      this.defaultRequest.toolCallbacks(toolCallbacks[0]);
       return this;
     }
-    (this.defaultRequest.toolCallbacks as (...values: unknown[]) => unknown)(
-      ...args,
+    this.defaultRequest.toolCallbacks(...(toolCallbacks as ToolCallback[]));
+    return this;
+  }
+
+  defaultToolCallbackProviders(
+    ...toolCallbackProviders: ToolCallbackProvider[]
+  ): ChatClient.Builder;
+  defaultToolCallbackProviders(
+    toolCallbackProviders: ToolCallbackProvider[],
+  ): ChatClient.Builder;
+  defaultToolCallbackProviders(
+    ...toolCallbackProviders: ToolCallbackProvider[] | [ToolCallbackProvider[]]
+  ): ChatClient.Builder {
+    if (
+      toolCallbackProviders.length === 1 &&
+      Array.isArray(toolCallbackProviders[0])
+    ) {
+      this.defaultRequest.toolCallbackProviders(toolCallbackProviders[0]);
+      return this;
+    }
+    this.defaultRequest.toolCallbackProviders(
+      ...(toolCallbackProviders as ToolCallbackProvider[]),
     );
     return this;
   }

@@ -24,6 +24,7 @@ import type {
   Prompt,
   StructuredOutputConverter,
   ToolCallback,
+  ToolCallbackProvider,
   ToolObjectInstance,
 } from "@nestjs-ai/model";
 import type {
@@ -115,10 +116,6 @@ export namespace ChatClient {
   }
 
   export type Type<T> = new (...args: never[]) => T;
-
-  export interface ToolCallbackProvider {
-    readonly toolCallbacks: ToolCallback[];
-  }
 
   export interface PromptUserSpec {
     text(text: string): PromptUserSpec;
@@ -265,8 +262,12 @@ export namespace ChatClient {
 
     toolCallbacks(toolCallbacks: ToolCallback[]): ChatClientRequestSpec;
 
-    toolCallbacks(
+    toolCallbackProviders(
       ...toolCallbackProviders: ToolCallbackProvider[]
+    ): ChatClientRequestSpec;
+
+    toolCallbackProviders(
+      toolCallbackProviders: ToolCallbackProvider[],
     ): ChatClientRequestSpec;
 
     toolContext(toolContext: Map<string, unknown>): ChatClientRequestSpec;
@@ -379,8 +380,12 @@ export namespace ChatClient {
 
     defaultToolCallbacks(toolCallbacks: ToolCallback[]): Builder;
 
-    defaultToolCallbacks(
+    defaultToolCallbackProviders(
       ...toolCallbackProviders: ToolCallbackProvider[]
+    ): Builder;
+
+    defaultToolCallbackProviders(
+      toolCallbackProviders: ToolCallbackProvider[],
     ): Builder;
 
     defaultToolContext(toolContext: Map<string, unknown>): Builder;

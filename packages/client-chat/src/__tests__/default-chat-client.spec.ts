@@ -29,6 +29,7 @@ import {
   Prompt,
   SystemMessage,
   type ToolCallback,
+  type ToolCallbackProvider,
   UserMessage,
 } from "@nestjs-ai/model";
 import { NoopObservationRegistry } from "@nestjs-port/core";
@@ -2177,7 +2178,7 @@ describe("DefaultChatClient", () => {
 
     it("when tool callback provider then not eagerly evaluated", () => {
       let providerCalls = 0;
-      const provider: ChatClient.ToolCallbackProvider = {
+      const provider: ToolCallbackProvider = {
         get toolCallbacks() {
           providerCalls += 1;
           return [];
@@ -2186,7 +2187,7 @@ describe("DefaultChatClient", () => {
       const chatClient = new DefaultChatClientBuilder(
         createChatModel(),
       ).build();
-      chatClient.prompt().user("test").toolCallbacks(provider);
+      chatClient.prompt().user("test").toolCallbackProviders(provider);
 
       // Verify that getToolCallbacks() was NOT called during configuration
       expect(providerCalls).toBe(0);
@@ -2194,7 +2195,7 @@ describe("DefaultChatClient", () => {
 
     it("when tool callback provider then lazily evaluated on call", async () => {
       let providerCalls = 0;
-      const provider: ChatClient.ToolCallbackProvider = {
+      const provider: ToolCallbackProvider = {
         get toolCallbacks() {
           providerCalls += 1;
           return [];
@@ -2211,7 +2212,7 @@ describe("DefaultChatClient", () => {
       await chatClient
         .prompt()
         .user("test")
-        .toolCallbacks(provider)
+        .toolCallbackProviders(provider)
         .call()
         .content();
 
@@ -2221,7 +2222,7 @@ describe("DefaultChatClient", () => {
 
     it("when tool callback provider then lazily evaluated on stream", async () => {
       let providerCalls = 0;
-      const provider: ChatClient.ToolCallbackProvider = {
+      const provider: ToolCallbackProvider = {
         get toolCallbacks() {
           providerCalls += 1;
           return [];
@@ -2239,7 +2240,7 @@ describe("DefaultChatClient", () => {
         chatClient
           .prompt()
           .user("test")
-          .toolCallbacks(provider)
+          .toolCallbackProviders(provider)
           .stream()
           .content()
           .pipe(defaultIfEmpty("")),
@@ -2252,13 +2253,13 @@ describe("DefaultChatClient", () => {
     it("when multiple tool callback providers then all lazily evaluated", async () => {
       let provider1Calls = 0;
       let provider2Calls = 0;
-      const provider1: ChatClient.ToolCallbackProvider = {
+      const provider1: ToolCallbackProvider = {
         get toolCallbacks() {
           provider1Calls += 1;
           return [];
         },
       };
-      const provider2: ChatClient.ToolCallbackProvider = {
+      const provider2: ToolCallbackProvider = {
         get toolCallbacks() {
           provider2Calls += 1;
           return [];
@@ -2276,7 +2277,7 @@ describe("DefaultChatClient", () => {
       await chatClient
         .prompt()
         .user("test")
-        .toolCallbacks(provider1, provider2)
+        .toolCallbackProviders(provider1, provider2)
         .call()
         .content();
 
@@ -2287,7 +2288,7 @@ describe("DefaultChatClient", () => {
 
     it("when tool callbacks and providers then both used", async () => {
       let providerCalls = 0;
-      const provider: ChatClient.ToolCallbackProvider = {
+      const provider: ToolCallbackProvider = {
         get toolCallbacks() {
           providerCalls += 1;
           return [];
@@ -2304,7 +2305,7 @@ describe("DefaultChatClient", () => {
       await chatClient
         .prompt()
         .user("test")
-        .toolCallbacks(provider)
+        .toolCallbackProviders(provider)
         .call()
         .content();
 

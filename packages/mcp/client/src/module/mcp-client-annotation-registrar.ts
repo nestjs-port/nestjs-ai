@@ -17,8 +17,18 @@
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import {
   Client as McpClient,
+  type ClientContext,
+  type ClientCapabilities,
+  type ElicitRequest,
+  type ElicitResult,
+  type LoggingMessageNotification,
+  type NotificationMethod,
+  type NotificationTypeMap,
+  type ProgressNotification,
   type ListChangedHandlers,
   type ListChangedOptions,
+  type CreateMessageRequest,
+  type CreateMessageResult,
 } from "@modelcontextprotocol/client";
 import type { Prompt, Resource, Tool } from "@modelcontextprotocol/client";
 import {
@@ -27,6 +37,10 @@ import {
 } from "@nestjs-port/core";
 import type { McpClientCustomizer } from "@nestjs-ai/mcp-common";
 import {
+  McpElicitationProvider,
+  McpLoggingProvider,
+  McpProgressProvider,
+  McpSamplingProvider,
   McpPromptListChangedProvider,
   McpResourceListChangedProvider,
   McpToolListChangedProvider,
@@ -91,6 +105,20 @@ export class McpClientAnnotationRegistrar
     providerInstances: object[],
     annotationScannerEnabled: boolean,
   ): Promise<void> {
+    const loggingSpecifications = annotationScannerEnabled
+      ? new McpLoggingProvider(providerInstances).getLoggingSpecifications()
+      : [];
+    const progressSpecifications = annotationScannerEnabled
+      ? new McpProgressProvider(providerInstances).getProgressSpecifications()
+      : [];
+    const samplingSpecifications = annotationScannerEnabled
+      ? new McpSamplingProvider(providerInstances).getSamplingSpecifications()
+      : [];
+    const elicitationSpecifications = annotationScannerEnabled
+      ? new McpElicitationProvider(
+          providerInstances,
+        ).getElicitationSpecifications()
+      : [];
     const promptListChangedSpecifications = new McpPromptListChangedProvider(
       providerInstances,
     ).getPromptListChangedSpecifications();
@@ -113,6 +141,10 @@ export class McpClientAnnotationRegistrar
           promptListChangedSpecifications,
           resourceListChangedSpecifications,
           toolListChangedSpecifications,
+          loggingSpecifications,
+          progressSpecifications,
+          samplingSpecifications,
+          elicitationSpecifications,
           annotationScannerEnabled,
         );
       }
@@ -135,6 +167,18 @@ export class McpClientAnnotationRegistrar
     toolListChangedSpecifications: ReturnType<
       McpToolListChangedProvider["getToolListChangedSpecifications"]
     >,
+    loggingSpecifications: ReturnType<
+      McpLoggingProvider["getLoggingSpecifications"]
+    >,
+    progressSpecifications: ReturnType<
+      McpProgressProvider["getProgressSpecifications"]
+    >,
+    samplingSpecifications: ReturnType<
+      McpSamplingProvider["getSamplingSpecifications"]
+    >,
+    elicitationSpecifications: ReturnType<
+      McpElicitationProvider["getElicitationSpecifications"]
+    >,
     annotationScannerEnabled: boolean,
   ): Promise<void> {
     let mcpClient: McpClient;
@@ -153,6 +197,21 @@ export class McpClientAnnotationRegistrar
     });
 
     try {
+      this.registerClientCapabilities(
+        mcpClient,
+        spec.clientName,
+        samplingSpecifications,
+        elicitationSpecifications,
+      );
+      this.registerClientHandlers(
+        mcpClient,
+        spec.clientName,
+        loggingSpecifications,
+        progressSpecifications,
+        samplingSpecifications,
+        elicitationSpecifications,
+      );
+
       if (this.clientCustomizer != null) {
         this.clientCustomizer.customize(spec.clientName, mcpClient);
       }
@@ -344,6 +403,240 @@ export class McpClientAnnotationRegistrar
         await spec.toolListChangeHandler(null, tools);
       },
     };
+  }
+
+  private registerClientCapabilities(
+    mcpClient: McpClient,
+    clientName: string,
+    samplingSpecifications: ReturnType<
+      McpSamplingProvider["getSamplingSpecifications"]
+    >,
+    elicitationSpecifications: ReturnType<
+      McpElicitationProvider["getElicitationSpecifications"]
+    >,
+  ): void {
+    const capabilities: ClientCapabilities = {};
+
+    if (
+      samplingSpecifications.some((spec) => spec.clients.includes(clientName))
+    ) {
+      capabilities.sampling = {};
+    }
+
+    if (
+      elicitationSpecifications.some((spec) =>
+        spec.clients.includes(clientName),
+      )
+    ) {
+      capabilities.elicitation = {};
+    }
+
+    if (Object.keys(capabilities).length === 0) {
+      return;
+    }
+
+    mcpClient.registerCapabilities(capabilities);
+  }
+
+  private registerClientHandlers(
+    mcpClient: McpClient,
+    clientName: string,
+    loggingSpecifications: ReturnType<
+      McpLoggingProvider["getLoggingSpecifications"]
+    >,
+    progressSpecifications: ReturnType<
+      McpProgressProvider["getProgressSpecifications"]
+    >,
+    samplingSpecifications: ReturnType<
+      McpSamplingProvider["getSamplingSpecifications"]
+    >,
+    elicitationSpecifications: ReturnType<
+      McpElicitationProvider["getElicitationSpecifications"]
+    >,
+  ): void {
+    const loggingHandler = this.createLoggingHandler(
+      clientName,
+      loggingSpecifications,
+    );
+    if (loggingHandler != null) {
+      mcpClient.setNotificationHandler("notifications/message", loggingHandler);
+    }
+
+    const progressHandler = this.createProgressHandler(
+      mcpClient,
+      clientName,
+      progressSpecifications,
+    );
+    if (progressHandler != null) {
+      mcpClient.setNotificationHandler(
+        "notifications/progress",
+        progressHandler,
+      );
+    }
+
+    const samplingHandler = this.createSamplingHandler(
+      clientName,
+      samplingSpecifications,
+    );
+    if (samplingHandler != null) {
+      mcpClient.setRequestHandler("sampling/createMessage", samplingHandler);
+    }
+
+    const elicitationHandler = this.createElicitationHandler(
+      clientName,
+      elicitationSpecifications,
+    );
+    if (elicitationHandler != null) {
+      mcpClient.setRequestHandler("elicitation/create", elicitationHandler);
+    }
+  }
+
+  private createLoggingHandler(
+    clientName: string,
+    loggingSpecifications: ReturnType<
+      McpLoggingProvider["getLoggingSpecifications"]
+    >,
+  ): ((notification: LoggingMessageNotification) => Promise<void>) | undefined {
+    const matchingSpecifications = loggingSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      return undefined;
+    }
+
+    return async (notification: LoggingMessageNotification): Promise<void> => {
+      await Promise.all(
+        matchingSpecifications.map((spec) => spec.loggingHandler(notification)),
+      );
+    };
+  }
+
+  private createProgressHandler(
+    mcpClient: McpClient,
+    clientName: string,
+    progressSpecifications: ReturnType<
+      McpProgressProvider["getProgressSpecifications"]
+    >,
+  ): ((notification: ProgressNotification) => Promise<void>) | undefined {
+    const matchingSpecifications = progressSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      return undefined;
+    }
+
+    const originalHandler = this.getNotificationHandler(
+      mcpClient,
+      "notifications/progress",
+    );
+
+    return async (notification: ProgressNotification): Promise<void> => {
+      if (originalHandler != null) {
+        await originalHandler(notification);
+      }
+
+      await Promise.all(
+        matchingSpecifications.map((spec) =>
+          spec.progressHandler(notification),
+        ),
+      );
+    };
+  }
+
+  private createSamplingHandler(
+    clientName: string,
+    samplingSpecifications: ReturnType<
+      McpSamplingProvider["getSamplingSpecifications"]
+    >,
+  ):
+    | ((
+        request: CreateMessageRequest,
+        context: ClientContext,
+      ) => Promise<CreateMessageResult>)
+    | undefined {
+    const matchingSpecifications = samplingSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      return undefined;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpSampling methods matched client "${clientName}". Only one sampling handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return undefined;
+    }
+
+    return async (
+      request: CreateMessageRequest,
+      _context: ClientContext,
+    ): Promise<CreateMessageResult> => spec.samplingHandler(request);
+  }
+
+  private createElicitationHandler(
+    clientName: string,
+    elicitationSpecifications: ReturnType<
+      McpElicitationProvider["getElicitationSpecifications"]
+    >,
+  ):
+    | ((
+        request: ElicitRequest,
+        context: ClientContext,
+      ) => Promise<ElicitResult>)
+    | undefined {
+    const matchingSpecifications = elicitationSpecifications.filter((spec) =>
+      spec.clients.includes(clientName),
+    );
+
+    if (matchingSpecifications.length === 0) {
+      return undefined;
+    }
+
+    if (matchingSpecifications.length > 1) {
+      throw new Error(
+        `Multiple @McpElicitation methods matched client "${clientName}". Only one elicitation handler can be registered per MCP client.`,
+      );
+    }
+
+    const [spec] = matchingSpecifications;
+    if (spec == null) {
+      return undefined;
+    }
+
+    return async (
+      request: ElicitRequest,
+      _context: ClientContext,
+    ): Promise<ElicitResult> => spec.elicitationHandler(request);
+  }
+
+  private getNotificationHandler<M extends NotificationMethod>(
+    mcpClient: McpClient,
+    method: M,
+  ):
+    | ((notification: NotificationTypeMap[M]) => Promise<void> | void)
+    | undefined {
+    const notificationHandlers = (
+      mcpClient as unknown as {
+        _notificationHandlers?: Map<
+          NotificationMethod,
+          (
+            notification: NotificationTypeMap[NotificationMethod],
+          ) => Promise<void> | void
+        >;
+      }
+    )._notificationHandlers;
+
+    return notificationHandlers?.get(method) as
+      | ((notification: NotificationTypeMap[M]) => Promise<void> | void)
+      | undefined;
   }
 
   private async collectAllPrompts(mcpClient: McpClient): Promise<Prompt[]> {

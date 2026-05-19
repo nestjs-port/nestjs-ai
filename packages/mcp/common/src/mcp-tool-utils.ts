@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import type { Tool as McpTool } from "@modelcontextprotocol/client";
+import type {
+  Client as McpClient,
+  Tool as McpTool,
+} from "@modelcontextprotocol/client";
 import { DefaultToolDefinition } from "@nestjs-ai/model";
-import type { ToolContext, ToolDefinition } from "@nestjs-ai/model";
+import type {
+  ToolCallback,
+  ToolContext,
+  ToolDefinition,
+} from "@nestjs-ai/model";
 
 import { McpServerExchange } from "./mcp-server-exchange.js";
+import { McpToolCallbackProvider } from "./mcp-tool-callback-provider.js";
 
 export abstract class McpToolUtils {
   static prefixedToolName(
@@ -113,5 +121,15 @@ export abstract class McpToolUtils {
       .filter((word) => word !== "")
       .map((word) => word.charAt(0))
       .join("_");
+  }
+
+  static async getToolCallbacksFromClients(
+    mcpClients: McpClient[],
+  ): Promise<ToolCallback[]> {
+    if (mcpClients == null || mcpClients.length === 0) {
+      return [];
+    }
+
+    return McpToolCallbackProvider.toolCallbacks(mcpClients);
   }
 }

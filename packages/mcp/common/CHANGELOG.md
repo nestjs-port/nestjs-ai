@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-common
 
+## 0.1.5
+
+### Patch Changes
+
+- add MCP tool callback utility
+
 ## 0.1.4
 
 ### Patch Changes

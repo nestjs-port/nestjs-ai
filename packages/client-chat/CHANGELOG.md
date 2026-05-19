@@ -1,5 +1,11 @@
 # @nestjs-ai/client-chat
 
+## 0.1.2
+
+### Patch Changes
+
+- split tool callback registration APIs
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @nestjs-ai/mcp-annotations
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @nestjs-ai/mcp-common@0.1.5
+
 ## 0.1.3
 
 ### Patch Changes

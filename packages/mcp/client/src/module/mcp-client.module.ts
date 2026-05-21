@@ -25,6 +25,8 @@ import {
   McpClientCustomizer,
   McpToolCallbackEventBus,
   McpToolCallbackProvider,
+  type McpToolFilter,
+  type McpToolNamePrefixGenerator,
 } from "@nestjs-ai/mcp-common";
 import {
   TOOL_CALLBACK_PROVIDER_TOKEN,
@@ -39,6 +41,8 @@ import type {
 import {
   MCP_CLIENT_MODULE_OPTIONS_TOKEN,
   MCP_CLIENT_REGISTRATIONS_TOKEN,
+  MCP_TOOL_FILTER_TOKEN,
+  MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN,
 } from "./mcp-client.tokens.js";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 
@@ -112,46 +116,63 @@ export class McpClientModule {
         {
           provide: McpToolCallbackProvider,
           useFactory: (
-            clientRegistrations: McpClientRegistration[],
+            options: McpClientModuleOptions,
             eventBus: McpToolCallbackEventBus,
-          ) =>
-            new McpToolCallbackProvider(
-              clientRegistrations.map(({ mcpClient }) => mcpClient),
-              undefined,
-              undefined,
-              eventBus,
-            ),
-          inject: [MCP_CLIENT_REGISTRATIONS_TOKEN, McpToolCallbackEventBus],
-        },
-        {
-          provide: TOOL_CALLBACK_PROVIDER_TOKEN,
-          useFactory: (
-            mcpClientToolCallbackProvider: McpToolCallbackProvider,
-          ): ToolCallbackProvider[] => [mcpClientToolCallbackProvider],
-          inject: [McpToolCallbackProvider],
+            toolFilter?: McpToolFilter,
+            toolNamePrefixGenerator?: McpToolNamePrefixGenerator,
+            toolCallbackProviders?: ToolCallbackProvider[] | null,
+          ) => {
+            if (options.toolCallback?.enabled === false) {
+              return null;
+            }
+
+            let providerBuilder =
+              McpToolCallbackProvider.builder().eventBus(eventBus);
+
+            if (toolFilter != null) {
+              providerBuilder = providerBuilder.toolFilter(toolFilter);
+            }
+
+            if (toolNamePrefixGenerator != null) {
+              providerBuilder = providerBuilder.toolNamePrefixGenerator(
+                toolNamePrefixGenerator,
+              );
+            }
+
+            const provider = providerBuilder.build();
+            toolCallbackProviders?.push(provider);
+
+            return provider;
+          },
+          inject: [
+            MCP_CLIENT_MODULE_OPTIONS_TOKEN,
+            McpToolCallbackEventBus,
+            { token: MCP_TOOL_FILTER_TOKEN, optional: true },
+            { token: MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN, optional: true },
+            { token: TOOL_CALLBACK_PROVIDER_TOKEN, optional: true },
+          ],
         },
         {
           provide: McpClientAnnotationRegistrar,
           useFactory: (
             options: McpClientModuleOptions,
             clientRegistrations: McpClientRegistration[],
-            toolCallbackProvider: McpToolCallbackProvider,
             eventBus: McpToolCallbackEventBus,
             providerInstanceExplorer?: ProviderInstanceExplorer,
             clientCustomizer?: McpClientCustomizer,
+            toolCallbackProvider?: McpToolCallbackProvider | null,
           ) =>
             new McpClientAnnotationRegistrar(
               options,
               clientRegistrations,
-              toolCallbackProvider,
               eventBus,
               providerInstanceExplorer,
               clientCustomizer,
+              toolCallbackProvider,
             ),
           inject: [
             MCP_CLIENT_MODULE_OPTIONS_TOKEN,
             MCP_CLIENT_REGISTRATIONS_TOKEN,
-            McpToolCallbackProvider,
             McpToolCallbackEventBus,
             { token: PROVIDER_INSTANCE_EXPLORER_TOKEN, optional: true },
             {
@@ -160,12 +181,12 @@ export class McpClientModule {
                 McpClientCustomizer,
               optional: true,
             },
+            McpToolCallbackProvider,
           ],
         },
       ],
       exports: [
         MCP_CLIENT_REGISTRATIONS_TOKEN,
-        TOOL_CALLBACK_PROVIDER_TOKEN,
         McpClientAnnotationRegistrar,
         McpToolCallbackProvider,
         McpToolCallbackEventBus,

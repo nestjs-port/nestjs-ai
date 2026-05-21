@@ -71,10 +71,10 @@ export class McpClientAnnotationRegistrar
   constructor(
     private readonly options: McpClientModuleOptions,
     private readonly clientRegistrations: McpClientRegistration[],
-    private readonly toolCallbackProvider: McpToolCallbackProvider,
     private readonly eventBus: McpToolCallbackEventBus,
     private readonly providerInstanceExplorer?: ProviderInstanceExplorer,
     private readonly clientCustomizer?: McpClientCustomizer,
+    private readonly toolCallbackProvider?: McpToolCallbackProvider | null,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -155,7 +155,10 @@ export class McpClientAnnotationRegistrar
         );
       }
 
-      await this.toolCallbackProvider.refresh();
+      this.toolCallbackProvider?.setMcpClients(
+        this.clientRegistrations.map(({ mcpClient }) => mcpClient),
+      );
+      await this.toolCallbackProvider?.refresh();
     } catch (error) {
       for (const registration of this.clientRegistrations.splice(0)) {
         await registration.mcpClient.close().catch(() => undefined);

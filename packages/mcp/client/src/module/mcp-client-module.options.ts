@@ -94,6 +94,15 @@ export interface McpClientModuleOptions {
    * Defaults to `true`.
    */
   annotationScanner?: McpClientAnnotationScannerOptions;
+
+  /**
+   * Controls whether the MCP tool callback provider is registered.
+   *
+   * Defaults to `true`.
+   */
+  toolCallback?: {
+    enabled?: boolean;
+  };
 }
 
 export interface McpClientModuleAsyncOptions {

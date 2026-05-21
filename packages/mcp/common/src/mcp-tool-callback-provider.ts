@@ -54,7 +54,7 @@ function getConnectionInfo(mcpClient: McpClient): McpConnectionInfo {
 }
 
 export class McpToolCallbackProvider implements ToolCallbackProvider {
-  private readonly _mcpClients: McpClient[];
+  private _mcpClients: McpClient[];
 
   private readonly _toolFilter: McpToolFilter;
 
@@ -98,6 +98,16 @@ export class McpToolCallbackProvider implements ToolCallbackProvider {
    */
   get toolCallbacks(): ToolCallback[] {
     return [...this._cachedToolCallbacks];
+  }
+
+  /**
+   * Replaces the MCP clients used for tool discovery.
+   *
+   * @param mcpClients the MCP clients
+   */
+  setMcpClients(mcpClients: McpClient[]): void {
+    assert(mcpClients != null, "MCP clients must not be null");
+    this._mcpClients = [...mcpClients];
   }
 
   /**
@@ -190,6 +200,8 @@ export class McpToolCallbackProviderBuilder {
   private _toolNamePrefixGenerator: McpToolNamePrefixGenerator =
     new DefaultMcpToolNamePrefixGenerator();
 
+  private _eventBus?: McpToolCallbackEventBus;
+
   /**
    * Sets the MCP clients to discover tools from.
    *
@@ -259,6 +271,18 @@ export class McpToolCallbackProviderBuilder {
   }
 
   /**
+   * Sets the event bus used to react to tool list changes.
+   *
+   * @param eventBus the event bus
+   * @returns this builder
+   */
+  eventBus(eventBus: McpToolCallbackEventBus): this {
+    assert(eventBus != null, "Event bus must not be null");
+    this._eventBus = eventBus;
+    return this;
+  }
+
+  /**
    * Builds a provider with the configured parameters.
    *
    * @returns a new provider
@@ -268,6 +292,7 @@ export class McpToolCallbackProviderBuilder {
       this._mcpClients,
       this._toolFilter,
       this._toolNamePrefixGenerator,
+      this._eventBus,
     );
   }
 }

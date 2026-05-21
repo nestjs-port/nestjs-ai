@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/platform",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "description": "NestJS platform integration for NestJS AI",
   "keywords": [
@@ -42,7 +42,7 @@
     "@nestjs/core": "^11.1.11"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/commons": "^0.1.2",
     "@nestjs-ai/template-st": "^0.1.1",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",

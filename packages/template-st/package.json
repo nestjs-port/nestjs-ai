@@ -43,7 +43,7 @@
     "@nestjs-port/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@nestjs-ai/commons": "^0.1.1",
+    "@nestjs-ai/commons": "^0.1.2",
     "@nestjs-port/core": "^0.1.0"
   },
   "engines": {

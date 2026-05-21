@@ -1,5 +1,11 @@
 # @nestjs-ai/retry
 
+## 0.1.2
+
+### Patch Changes
+
+- remove barrel import
+
 ## 0.1.1
 
 ### Patch Changes

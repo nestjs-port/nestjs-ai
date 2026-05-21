@@ -1,5 +1,14 @@
 # @nestjs-ai/platform
 
+## 0.1.2
+
+### Patch Changes
+
+- remove barrel import
+- Updated dependencies
+  - @nestjs-ai/commons@0.1.2
+  - @nestjs-ai/template-st@0.1.1
+
 ## 0.1.1
 
 ### Patch Changes

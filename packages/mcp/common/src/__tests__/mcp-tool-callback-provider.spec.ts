@@ -22,6 +22,7 @@ import type {
 import { describe, expect, it, vi } from "vitest";
 import { DefaultMcpToolNamePrefixGenerator } from "../default-mcp-tool-name-prefix-generator.js";
 import type { McpConnectionInfo } from "../mcp-connection-info.js";
+import { McpToolCallbackEventBus } from "../mcp-tool-callback-event-bus.js";
 import { McpToolCallbackProvider } from "../mcp-tool-callback-provider.js";
 import { McpToolFilter } from "../mcp-tool-filter.js";
 import { McpToolNamePrefixGenerator } from "../mcp-tool-name-prefix-generator.js";
@@ -58,7 +59,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(0);
   });
@@ -66,9 +67,43 @@ describe("McpToolCallbackProvider", () => {
   it("get tool callbacks should return empty array when no clients", async () => {
     const provider = McpToolCallbackProvider.builder().build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(0);
+  });
+
+  it("should refresh cached callbacks when the tools list changes", async () => {
+    const tool1 = createTool("tool1");
+    const tool2 = createTool("tool2");
+
+    const listTools = vi
+      .fn()
+      .mockResolvedValueOnce({ tools: [tool1] })
+      .mockResolvedValueOnce({ tools: [tool2] });
+
+    const mcpClient = createClient({
+      _clientInfo: { name: "testClient", version: "1.0.0" },
+      _capabilities: {} as ClientCapabilities,
+      listTools,
+    });
+
+    const eventBus = new McpToolCallbackEventBus();
+    const provider = new McpToolCallbackProvider(
+      [mcpClient],
+      undefined,
+      undefined,
+      eventBus,
+    );
+
+    await provider.refresh();
+    expect(listTools).toHaveBeenCalledTimes(1);
+
+    eventBus.emitToolsListChanged("testClient");
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
+    expect(listTools).toHaveBeenCalledTimes(2);
+    expect(provider.toolCallbacks).toHaveLength(1);
+    expect(provider.toolCallbacks[0]?.toolDefinition.name).toBe("tool2");
   });
 
   it("get tool callbacks should return callbacks for each tool", async () => {
@@ -87,7 +122,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(2);
   });
@@ -108,7 +143,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    await expect(provider.getToolCallbacks()).rejects.toThrow(
+    await expect(provider.refresh()).rejects.toThrow(
       "Multiple tools with the same name",
     );
 
@@ -117,7 +152,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    await expect(provider2.getToolCallbacks()).rejects.toThrow(
+    await expect(provider2.refresh()).rejects.toThrow(
       "Multiple tools with the same name",
     );
   });
@@ -142,7 +177,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient1, mcpClient2)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(2);
     expect(callbacks[0].toolDefinition.name).toBe("sameName");
@@ -167,7 +202,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(2);
   });
@@ -195,7 +230,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(0);
   });
@@ -229,7 +264,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(2);
     expect(callbacks[0].toolDefinition.name).toBe("tool2");
@@ -265,7 +300,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(mcpClient1, mcpClient2)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].toolDefinition.name).toBe("tool1");
@@ -300,7 +335,7 @@ describe("McpToolCallbackProvider", () => {
       .mcpClients(weatherClient)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].toolDefinition.name).toBe("weather");
@@ -332,7 +367,7 @@ describe("McpToolCallbackProvider", () => {
       .addMcpClient(mcpClient2)
       .build();
 
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
 
     expect(callbacks).toHaveLength(2);
   });

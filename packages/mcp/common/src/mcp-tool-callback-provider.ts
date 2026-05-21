@@ -21,9 +21,14 @@ import type {
   Implementation,
   InitializeResult,
 } from "@modelcontextprotocol/client";
-import { type ToolCallback, ToolUtils } from "@nestjs-ai/model";
+import {
+  type ToolCallback,
+  type ToolCallbackProvider,
+  ToolUtils,
+} from "@nestjs-ai/model";
 import { DefaultMcpToolNamePrefixGenerator } from "./default-mcp-tool-name-prefix-generator.js";
 import { McpConnectionInfo } from "./mcp-connection-info.js";
+import type { McpToolCallbackEventBus } from "./mcp-tool-callback-event-bus.js";
 import { McpToolCallback } from "./mcp-tool-callback.js";
 import { DefaultMcpToolFilter, type McpToolFilter } from "./mcp-tool-filter.js";
 import type { McpToolNamePrefixGenerator } from "./mcp-tool-name-prefix-generator.js";
@@ -48,23 +53,28 @@ function getConnectionInfo(mcpClient: McpClient): McpConnectionInfo {
   });
 }
 
-export class McpToolCallbackProvider {
+export class McpToolCallbackProvider implements ToolCallbackProvider {
   private readonly _mcpClients: McpClient[];
 
   private readonly _toolFilter: McpToolFilter;
 
   private readonly _toolNamePrefixGenerator: McpToolNamePrefixGenerator;
 
-  private _invalidateCache = true;
-
   private _cachedToolCallbacks: ToolCallback[] = [];
 
   private _pendingToolCallbacks: Promise<ToolCallback[]> | null = null;
+
+  private readonly _eventBus?: McpToolCallbackEventBus;
+
+  private readonly _onToolsChanged = (): void => {
+    void this.refresh().catch(() => undefined);
+  };
 
   constructor(
     mcpClients: McpClient[],
     toolFilter: McpToolFilter = new DefaultMcpToolFilter(),
     toolNamePrefixGenerator: McpToolNamePrefixGenerator = new DefaultMcpToolNamePrefixGenerator(),
+    eventBus?: McpToolCallbackEventBus,
   ) {
     assert(mcpClients != null, "MCP clients must not be null");
     assert(toolFilter != null, "Tool filter must not be null");
@@ -76,6 +86,9 @@ export class McpToolCallbackProvider {
     this._mcpClients = [...mcpClients];
     this._toolFilter = toolFilter;
     this._toolNamePrefixGenerator = toolNamePrefixGenerator;
+    this._eventBus = eventBus;
+
+    this._eventBus?.onToolsListChanged(this._onToolsChanged);
   }
 
   /**
@@ -83,17 +96,21 @@ export class McpToolCallbackProvider {
    *
    * @returns tool callbacks for discovered tools
    */
-  async getToolCallbacks(): Promise<ToolCallback[]> {
-    if (!this._invalidateCache) {
-      return [...this._cachedToolCallbacks];
-    }
+  get toolCallbacks(): ToolCallback[] {
+    return [...this._cachedToolCallbacks];
+  }
 
+  /**
+   * Refreshes the cached tool callbacks from the currently configured MCP clients.
+   *
+   * @returns tool callbacks for discovered tools
+   */
+  async refresh(): Promise<ToolCallback[]> {
     if (this._pendingToolCallbacks == null) {
       this._pendingToolCallbacks = this.buildToolCallbacks()
         .then((toolCallbacks) => {
           this.validateToolCallbacks(toolCallbacks);
           this._cachedToolCallbacks = toolCallbacks;
-          this._invalidateCache = false;
           return toolCallbacks;
         })
         .finally(() => {
@@ -102,13 +119,6 @@ export class McpToolCallbackProvider {
     }
 
     return [...(await this._pendingToolCallbacks)];
-  }
-
-  /**
-   * Invalidates the cached tool callbacks so they will be rediscovered.
-   */
-  invalidateCache(): void {
-    this._invalidateCache = true;
   }
 
   /**
@@ -122,7 +132,7 @@ export class McpToolCallbackProvider {
       return [];
     }
 
-    return new McpToolCallbackProvider(mcpClients).getToolCallbacks();
+    return new McpToolCallbackProvider(mcpClients).refresh();
   }
 
   /**

@@ -159,7 +159,7 @@ describe("McpServerAnnotationRegistrar", () => {
       providerInstanceExplorer,
     );
 
-    registrar.onModuleInit();
+    registrar.onApplicationBootstrap();
 
     expect(providerInstanceExplorer.getProviderInstances).toHaveBeenCalledTimes(
       1,
@@ -213,7 +213,7 @@ describe("McpServerAnnotationRegistrar", () => {
       providerInstanceExplorer,
     );
 
-    registrar.onModuleInit();
+    registrar.onApplicationBootstrap();
 
     expect(mcpServer.registerPrompt).not.toHaveBeenCalled();
     expect(mcpServer.registerResource).not.toHaveBeenCalled();
@@ -238,7 +238,7 @@ describe("McpServerAnnotationRegistrar", () => {
       [createToolCallbackProvider([providerCallback])],
     );
 
-    registrar.onModuleInit();
+    registrar.onApplicationBootstrap();
 
     expect(mcpServer.registerPrompt).not.toHaveBeenCalled();
     expect(mcpServer.registerResource).not.toHaveBeenCalled();

@@ -17,21 +17,29 @@
 import {
   Module,
   type DynamicModule,
-  type Provider,
   type FactoryProvider,
+  type Provider,
 } from "@nestjs/common";
-import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
+import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import {
+  McpClientCustomizer,
+  McpToolCallbackEventBus,
+  McpToolCallbackProvider,
+} from "@nestjs-ai/mcp-common";
+import {
+  TOOL_CALLBACK_PROVIDER_TOKEN,
+  type ToolCallbackProvider,
+} from "@nestjs-ai/model";
 import { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
 import type {
   McpClientModuleAsyncOptions,
-  McpClientRegistration,
   McpClientModuleOptions,
+  McpClientRegistration,
 } from "./mcp-client-module.options.js";
 import {
   MCP_CLIENT_MODULE_OPTIONS_TOKEN,
   MCP_CLIENT_REGISTRATIONS_TOKEN,
 } from "./mcp-client.tokens.js";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 
 @Module({})
@@ -98,22 +106,53 @@ export class McpClientModule {
         optionsProvider,
         ...(customizerProvider != null ? [customizerProvider] : []),
         {
+          provide: McpToolCallbackEventBus,
+          useClass: McpToolCallbackEventBus,
+        },
+        {
+          provide: McpToolCallbackProvider,
+          useFactory: (
+            clientRegistrations: McpClientRegistration[],
+            eventBus: McpToolCallbackEventBus,
+          ) =>
+            new McpToolCallbackProvider(
+              clientRegistrations.map(({ mcpClient }) => mcpClient),
+              undefined,
+              undefined,
+              eventBus,
+            ),
+          inject: [MCP_CLIENT_REGISTRATIONS_TOKEN, McpToolCallbackEventBus],
+        },
+        {
+          provide: TOOL_CALLBACK_PROVIDER_TOKEN,
+          useFactory: (
+            mcpClientToolCallbackProvider: McpToolCallbackProvider,
+          ): ToolCallbackProvider[] => [mcpClientToolCallbackProvider],
+          inject: [McpToolCallbackProvider],
+        },
+        {
           provide: McpClientAnnotationRegistrar,
           useFactory: (
             options: McpClientModuleOptions,
             clientRegistrations: McpClientRegistration[],
+            toolCallbackProvider: McpToolCallbackProvider,
+            eventBus: McpToolCallbackEventBus,
             providerInstanceExplorer?: ProviderInstanceExplorer,
             clientCustomizer?: McpClientCustomizer,
           ) =>
             new McpClientAnnotationRegistrar(
               options,
               clientRegistrations,
+              toolCallbackProvider,
+              eventBus,
               providerInstanceExplorer,
               clientCustomizer,
             ),
           inject: [
             MCP_CLIENT_MODULE_OPTIONS_TOKEN,
             MCP_CLIENT_REGISTRATIONS_TOKEN,
+            McpToolCallbackProvider,
+            McpToolCallbackEventBus,
             { token: PROVIDER_INSTANCE_EXPLORER_TOKEN, optional: true },
             {
               token:
@@ -124,7 +163,13 @@ export class McpClientModule {
           ],
         },
       ],
-      exports: [MCP_CLIENT_REGISTRATIONS_TOKEN, McpClientAnnotationRegistrar],
+      exports: [
+        MCP_CLIENT_REGISTRATIONS_TOKEN,
+        TOOL_CALLBACK_PROVIDER_TOKEN,
+        McpClientAnnotationRegistrar,
+        McpToolCallbackProvider,
+        McpToolCallbackEventBus,
+      ],
       global,
     };
   }

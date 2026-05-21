@@ -350,6 +350,9 @@ importers:
       '@nestjs-ai/mcp-common':
         specifier: workspace:*
         version: link:../common
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../model
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)

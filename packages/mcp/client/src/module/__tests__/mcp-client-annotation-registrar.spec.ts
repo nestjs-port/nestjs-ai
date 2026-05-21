@@ -43,7 +43,7 @@ import {
   McpClientCustomizer,
   McpToolCallbackProvider,
 } from "@nestjs-ai/mcp-common";
-import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/model";
+import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
 
 import { McpClientModule } from "../mcp-client.module.js";
 import {

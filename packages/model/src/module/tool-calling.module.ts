@@ -15,7 +15,10 @@
  */
 
 import { Module, type Provider } from "@nestjs/common";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import {
+  PROVIDER_INSTANCE_EXPLORER_TOKEN,
+  TOOL_CALLBACK_PROVIDER_TOKEN,
+} from "@nestjs-ai/commons";
 import type {
   ObservationFilters,
   ProviderInstanceExplorer,
@@ -40,7 +43,6 @@ import {
   ToolCallingObservationConvention,
 } from "../tool/index.js";
 import {
-  TOOL_CALLBACK_PROVIDER_TOKEN,
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
   TOOL_CALLBACK_RESOLVER_TOKEN,
   TOOL_CALLBACKS_TOKEN,

@@ -23,12 +23,9 @@ import {
   type Type,
 } from "@nestjs/common";
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
-import {
-  TOOL_CALLBACK_PROVIDER_TOKEN,
-  TOOL_CALLBACKS_TOKEN,
-  type ToolCallback,
-  type ToolCallbackProvider,
-} from "@nestjs-ai/model";
+import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
+import { TOOL_CALLBACKS_TOKEN } from "@nestjs-ai/model";
+import type { ToolCallback, ToolCallbackProvider } from "@nestjs-ai/model";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { McpServerStdioService } from "../transport/index.js";
 import { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";

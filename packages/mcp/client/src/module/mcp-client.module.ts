@@ -28,10 +28,8 @@ import {
   type McpToolFilter,
   type McpToolNamePrefixGenerator,
 } from "@nestjs-ai/mcp-common";
-import {
-  TOOL_CALLBACK_PROVIDER_TOKEN,
-  type ToolCallbackProvider,
-} from "@nestjs-ai/model";
+import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
+import type { ToolCallbackProvider } from "@nestjs-ai/model";
 import { McpClientAnnotationRegistrar } from "./mcp-client-annotation-registrar.js";
 import type {
   McpClientModuleAsyncOptions,

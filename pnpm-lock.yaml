@@ -642,9 +642,6 @@ importers:
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../commons
-      '@nestjs-ai/model':
-        specifier: workspace:*
-        version: link:../model
       '@nestjs-ai/template-st':
         specifier: workspace:*
         version: link:../template-st

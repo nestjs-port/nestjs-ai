@@ -23,6 +23,7 @@ import {
 import {
   HTTP_CLIENT_TOKEN,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
+  TOOL_CALLBACK_PROVIDER_TOKEN,
 } from "@nestjs-ai/commons";
 import { FetchHttpClient, LoggerFactory } from "@nestjs-port/core";
 import { NestLoggerFactory } from "../logging/index.js";
@@ -82,10 +83,18 @@ export class NestAiModule {
         provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
         useClass: NestProviderInstanceExplorer,
       },
+      {
+        provide: TOOL_CALLBACK_PROVIDER_TOKEN,
+        useValue: [],
+      },
     ];
   }
 
   private static getRootExports(): InjectionToken[] {
-    return [HTTP_CLIENT_TOKEN, PROVIDER_INSTANCE_EXPLORER_TOKEN];
+    return [
+      HTTP_CLIENT_TOKEN,
+      PROVIDER_INSTANCE_EXPLORER_TOKEN,
+      TOOL_CALLBACK_PROVIDER_TOKEN,
+    ];
   }
 }

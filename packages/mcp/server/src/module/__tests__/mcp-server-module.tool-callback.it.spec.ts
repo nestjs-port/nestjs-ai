@@ -35,11 +35,8 @@ import {
   type McpServerModuleOptions,
 } from "../index.js";
 import { McpServerStreamableHttpService } from "../../transport/streamable-http/index.js";
-import {
-  TOOL_CALLBACK_PROVIDER_TOKEN,
-  ToolCallback,
-  type ToolCallbackProvider,
-} from "@nestjs-ai/model";
+import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
+import { ToolCallback, type ToolCallbackProvider } from "@nestjs-ai/model";
 
 const SERVER_INFO = {
   name: "nestjs-ai-mcp-tool-server",

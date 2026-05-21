@@ -37,6 +37,28 @@
   },
   "overrides": [
     {
+      "files": ["packages/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/index.js"],
+                "message": "Import the module file directly instead of a barrel."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/**/index.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
       "files": ["**/*it-shared.ts"],
       "rules": {
         "no-standalone-expect": "off"

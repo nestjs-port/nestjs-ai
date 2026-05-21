@@ -16,10 +16,10 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext } from "../../../chat/index.js";
-import { DefaultToolDefinition } from "../../definition/index.js";
-import { ToolExecutionException } from "../../execution/index.js";
-import { ToolMetadata } from "../../metadata/index.js";
+import { ToolContext } from "../../../chat/model/tool-context.js";
+import { DefaultToolDefinition } from "../../definition/default-tool-definition.js";
+import { ToolExecutionException } from "../../execution/tool-execution-exception.js";
+import { ToolMetadata } from "../../metadata/tool-metadata.js";
 import { FunctionToolCallback } from "../function-tool-callback.js";
 
 class TestFunctionTool {

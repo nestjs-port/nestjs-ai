@@ -1,23 +1,7 @@
-/*
- * Copyright 2025-present the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import type { Client as McpClient } from "@modelcontextprotocol/client";
 import type {
   ClientCapabilities,
   Implementation,
+  Client as McpClient,
   Tool as McpTool,
 } from "@modelcontextprotocol/client";
 import { assert, describe, expect, it, vi } from "vitest";
@@ -67,7 +51,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].toolDefinition.name).toBe("test_tool");
   });
@@ -82,7 +66,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(2);
     expect(callbacks[0].toolDefinition.name).toBe("tool1");
     expect(callbacks[1].toolDefinition.name).toBe("tool2");
@@ -98,7 +82,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(2);
   });
 
@@ -111,7 +95,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(2);
   });
 
@@ -133,7 +117,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].toolDefinition.name).toBe("filtered_tool");
   });
@@ -150,7 +134,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].toolDefinition.name).toBe("custom_tool");
   });
@@ -177,7 +161,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].toolDefinition.name).toBe("prefix_custom-tool");
   });
@@ -235,7 +219,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(2);
   });
 
@@ -251,7 +235,7 @@ describe("McpToolCallbackProviderBuilder", () => {
       .build();
 
     assert.exists(provider);
-    const callbacks = await provider.getToolCallbacks();
+    const callbacks = await provider.refresh();
     expect(callbacks).toHaveLength(2);
     expect(callbacks[0].toolDefinition.name).toBe("tool2");
     expect(callbacks[1].toolDefinition.name).toBe("tool3");

@@ -17,12 +17,9 @@
 import { EOL } from "node:os";
 
 import { describe, expect, it } from "vitest";
-
-import {
-  ExtractedTextFormatter,
-  PagePdfDocumentReader,
-  PdfDocumentReaderConfig,
-} from "../index.js";
+import { ExtractedTextFormatter } from "../extracted-text-formatter.js";
+import { PagePdfDocumentReader } from "../page-pdf-document-reader.js";
+import { PdfDocumentReaderConfig } from "../config/pdf-document-reader-config.js";
 
 describe("PagePdfDocumentReader", () => {
   const TEST_TIMEOUT = 30_000;

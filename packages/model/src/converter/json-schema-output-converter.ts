@@ -16,7 +16,6 @@
 import assert from "node:assert/strict";
 import { EOL } from "node:os";
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
-
 import {
   CompositeResponseTextCleaner,
   type CompositeResponseTextCleanerBuilder,

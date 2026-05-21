@@ -28,15 +28,14 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { assert, beforeEach, describe, expect, it, vi } from "vitest";
-
+import { AnthropicCacheOptions } from "../anthropic-cache-options.js";
+import { AnthropicCacheStrategy } from "../anthropic-cache-strategy.js";
 import {
-  AnthropicCacheOptions,
-  AnthropicCacheStrategy,
   AnthropicChatModel,
   type AnthropicChatModelProps,
-  AnthropicChatOptions,
-  AnthropicSkill,
-} from "../index.js";
+} from "../anthropic-chat-model.js";
+import { AnthropicChatOptions } from "../anthropic-chat-options.js";
+import { AnthropicSkill } from "../anthropic-skill.js";
 
 describe("AnthropicChatModel", () => {
   let anthropicClient: Anthropic;

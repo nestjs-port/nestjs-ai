@@ -21,7 +21,7 @@ import {
   AiProvider,
 } from "@nestjs-ai/commons";
 import { ObservationContext, StringUtils } from "@nestjs-port/core";
-import type { Advisor } from "../advisor/index.js";
+import type { Advisor } from "../advisor/api/advisor.interface.js";
 import { ChatClientAttributes } from "../chat-client-attributes.js";
 import type { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";

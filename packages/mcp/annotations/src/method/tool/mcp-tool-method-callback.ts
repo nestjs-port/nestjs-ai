@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-
 import type {
   CallToolRequest,
   CallToolResult,
@@ -25,12 +24,9 @@ import type {
   ServerContext,
 } from "@modelcontextprotocol/server";
 import { McpServerExchange } from "@nestjs-ai/mcp-common";
-
-import { MetaUtils } from "../../common/index.js";
-import {
-  DefaultMcpRequestContext,
-  type McpRequestContext,
-} from "../../context/index.js";
+import { MetaUtils } from "../../common/meta-utils.js";
+import { DefaultMcpRequestContext } from "../../context/default-mcp-request-context.js";
+import type { McpRequestContext } from "../../context/mcp-request-context.js";
 import { MCP_TOOL_METADATA_KEY } from "../../metadata.js";
 import { McpMeta } from "../../mcp-meta.js";
 import type { McpToolMethodArguments } from "../../mcp-tool.js";

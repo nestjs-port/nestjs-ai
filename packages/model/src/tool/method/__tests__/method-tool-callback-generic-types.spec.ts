@@ -16,9 +16,9 @@
 
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolContext } from "../../../chat/index.js";
-import { DefaultToolDefinition } from "../../definition/index.js";
-import type { ToolCallResultConverter } from "../../execution/index.js";
+import { ToolContext } from "../../../chat/model/tool-context.js";
+import { DefaultToolDefinition } from "../../definition/default-tool-definition.js";
+import type { ToolCallResultConverter } from "../../execution/tool-call-result-converter.js";
 import { MethodToolCallback } from "../method-tool-callback.js";
 
 class TestGenericClass {

@@ -37,7 +37,7 @@ import type { OpenAI } from "openai";
 
 import { OpenAiEmbeddingOptions } from "./open-ai-embedding-options.js";
 import type { OpenAiClient } from "./open-ai-client.js";
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/open-ai-setup.js";
 
 type OpenAiEmbeddingResponse = Awaited<
   ReturnType<OpenAI["embeddings"]["create"]>

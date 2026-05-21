@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { ChatOptions } from "../../chat/index.js";
-import type { ToolCallback } from "../../tool/index.js";
+import type { ChatOptions } from "../../chat/prompt/chat-options.interface.js";
+import type { ToolCallback } from "../../tool/tool-callback.js";
 import type { ToolCallingChatOptions } from "./tool-calling-chat-options.interface.js";
 
 export class DefaultToolCallingChatOptions implements ToolCallingChatOptions {

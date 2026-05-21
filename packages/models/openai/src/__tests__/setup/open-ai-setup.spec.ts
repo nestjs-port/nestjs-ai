@@ -15,7 +15,7 @@
  */
 
 import { assert, describe, expect, it } from "vitest";
-import { ModelProvider, OpenAiSetup } from "../../setup/index.js";
+import { ModelProvider, OpenAiSetup } from "../../setup/open-ai-setup.js";
 
 describe("OpenAiSetupTests", () => {
   it("detect model provider returns microsoft foundry when microsoft foundry flag is true", () => {

@@ -22,7 +22,7 @@ import type {
 } from "@modelcontextprotocol/server";
 import { McpComplete } from "../../../mcp-complete.js";
 import type { McpCompleteMethodArguments } from "../../../mcp-complete.js";
-import { McpCompleteMethodCallback } from "../../index.js";
+import { McpCompleteMethodCallback } from "../mcp-complete-method-callback.js";
 
 class AsyncCompleteReturnTypes {
   @McpComplete({ prompt: "test-prompt" })

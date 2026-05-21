@@ -29,12 +29,10 @@ import { throwError } from "rxjs";
 
 import type { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";
-import type {
-  CallAdvisor,
-  CallAdvisorChain,
-  StreamAdvisor,
-  StreamAdvisorChain,
-} from "./api/index.js";
+import type { CallAdvisor } from "./api/call-advisor.interface.js";
+import type { CallAdvisorChain } from "./api/call-advisor-chain.interface.js";
+import type { StreamAdvisor } from "./api/stream-advisor.interface.js";
+import type { StreamAdvisorChain } from "./api/stream-advisor-chain.interface.js";
 
 interface ValidationResponse {
   valid: boolean;

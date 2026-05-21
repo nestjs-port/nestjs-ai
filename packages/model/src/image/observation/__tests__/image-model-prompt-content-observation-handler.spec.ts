@@ -17,7 +17,9 @@
 import { LoggerFactory, LogLevel, ObservationContext } from "@nestjs-port/core";
 import { RecordingLogger } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ImageMessage, ImageOptionsBuilder, ImagePrompt } from "../../index.js";
+import { ImageMessage } from "../../image-message.js";
+import { ImageOptionsBuilder } from "../../image-options-builder.js";
+import { ImagePrompt } from "../../image-prompt.js";
 import { ImageModelObservationContext } from "../image-model-observation-context.js";
 import { ImageModelPromptContentObservationHandler } from "../image-model-prompt-content-observation-handler.js";
 

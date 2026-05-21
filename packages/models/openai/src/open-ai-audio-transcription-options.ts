@@ -17,7 +17,6 @@
 import type { Milliseconds } from "@nestjs-port/core";
 import type { AudioTranscriptionOptions } from "@nestjs-ai/model";
 import type { TranscriptionCreateParams } from "openai/resources/audio/transcriptions";
-
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,

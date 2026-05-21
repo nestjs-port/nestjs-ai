@@ -27,7 +27,6 @@ import {
 } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { sql } from "@nestjs-port/jsdbc";
-
 import {
   PgDistanceType,
   PgIndexType,

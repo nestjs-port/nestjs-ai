@@ -17,11 +17,8 @@
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
-
-import {
-  MarkdownDocumentReader,
-  MarkdownDocumentReaderConfig,
-} from "../index.js";
+import { MarkdownDocumentReader } from "../markdown-document-reader.js";
+import { MarkdownDocumentReaderConfig } from "../config/markdown-document-reader-config.js";
 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";

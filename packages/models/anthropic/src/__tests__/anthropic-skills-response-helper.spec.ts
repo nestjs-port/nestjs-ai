@@ -16,8 +16,7 @@
 
 import { ChatResponse, ChatResponseMetadata } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-
-import { AnthropicSkillsResponseHelper } from "../index.js";
+import { AnthropicSkillsResponseHelper } from "../anthropic-skills-response-helper.js";
 
 describe("AnthropicSkillsResponseHelper", () => {
   it("extract file ids returns empty for null response", () => {

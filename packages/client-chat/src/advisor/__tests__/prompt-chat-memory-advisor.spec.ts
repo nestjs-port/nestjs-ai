@@ -32,8 +32,8 @@ import { assert, describe, expect, it } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request.js";
 import { ChatClientResponse } from "../../chat-client-response.js";
-import type { AdvisorChain } from "../api/index.js";
-import { Advisor } from "../api/index.js";
+import type { AdvisorChain } from "../api/advisor-chain.js";
+import { Advisor } from "../api/advisor.interface.js";
 import { PromptChatMemoryAdvisor } from "../prompt-chat-memory-advisor.js";
 
 function createChatMemory(): ChatMemory {

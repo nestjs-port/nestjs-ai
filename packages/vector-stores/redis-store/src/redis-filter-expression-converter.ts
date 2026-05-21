@@ -19,7 +19,6 @@ import {
   AbstractFilterExpressionConverter,
   Filter,
 } from "@nestjs-ai/vector-store";
-
 import {
   RedisMetadataField,
   RedisMetadataFieldType,

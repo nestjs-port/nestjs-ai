@@ -17,7 +17,6 @@
 import "reflect-metadata";
 
 import { fileURLToPath } from "node:url";
-
 import {
   Client,
   type CreateMessageRequest,
@@ -39,12 +38,18 @@ import {
 import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { describe, expect, it, vi } from "vitest";
-import { McpClientCustomizer } from "@nestjs-ai/mcp-common";
-import type { ProviderInstanceExplorer } from "@nestjs-port/core";
+import {
+  McpClientCustomizer,
+  McpToolCallbackProvider,
+} from "@nestjs-ai/mcp-common";
+import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
 
-import { McpClientAnnotationRegistrar } from "../mcp-client-annotation-registrar.js";
-import { MCP_CLIENT_MODULE_OPTIONS_TOKEN } from "../mcp-client.tokens.js";
-import { MCP_CLIENT_REGISTRATIONS_TOKEN } from "../mcp-client.tokens.js";
+import { McpClientModule } from "../mcp-client.module.js";
+import {
+  MCP_CLIENT_REGISTRATIONS_TOKEN,
+  MCP_TOOL_FILTER_TOKEN,
+  MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN,
+} from "../mcp-client.tokens.js";
 import type {
   McpClientModuleOptions,
   McpClientRegistration,
@@ -216,6 +221,135 @@ describe("McpClientAnnotationRegistrar", () => {
     }
   }, 30_000);
 
+  it("populates tool callbacks from connected clients", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+    const { moduleRef, registrations, toolCallbackProvider } =
+      await bootstrapClientModule({
+        annotationScanner: {
+          enabled: false,
+        },
+        stdio: {
+          connections: {
+            "stdio-server": createStdioConnection(),
+          },
+        },
+        streamableHttp: {
+          connections: {
+            "http-server": {
+              url: httpServer.baseUrl,
+            },
+          },
+        },
+      });
+
+    try {
+      expect(registrations).toHaveLength(2);
+      expect(toolCallbackProvider.toolCallbacks).toHaveLength(2);
+      expect(
+        toolCallbackProvider.toolCallbacks.map(
+          (callback) => callback.toolDefinition.name,
+        ),
+      ).toEqual(expect.arrayContaining([expect.any(String)]));
+      expect(moduleRef.get(McpToolCallbackProvider)).toBe(toolCallbackProvider);
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
+
+  it("does not register the tool callback provider when disabled", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+    const { moduleRef, registrations } = await bootstrapClientModule({
+      toolCallback: {
+        enabled: false,
+      },
+      annotationScanner: {
+        enabled: false,
+      },
+      stdio: {
+        connections: {
+          "stdio-server": createStdioConnection(),
+        },
+      },
+      streamableHttp: {
+        connections: {
+          "http-server": {
+            url: httpServer.baseUrl,
+          },
+        },
+      },
+    });
+
+    try {
+      expect(registrations).toHaveLength(2);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
+
+  it("uses injected tool filter and prefix generator when provided", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+
+    const toolFilter = {
+      test(connectionInfo: { clientInfo: { name: string } }): boolean {
+        return connectionInfo.clientInfo.name.includes("http-server");
+      },
+    };
+
+    const toolNamePrefixGenerator = {
+      prefixedToolName(_connectionInfo: unknown, tool: Tool): string {
+        return `custom_${tool.name}`;
+      },
+    };
+
+    const { moduleRef, toolCallbackProvider } = await bootstrapClientModule(
+      {
+        annotationScanner: {
+          enabled: false,
+        },
+        stdio: {
+          connections: {
+            "stdio-server": createStdioConnection(),
+          },
+        },
+        streamableHttp: {
+          connections: {
+            "http-server": {
+              url: httpServer.baseUrl,
+            },
+          },
+        },
+      },
+      [],
+      () => [],
+      [
+        {
+          provide: MCP_TOOL_FILTER_TOKEN,
+          useValue: toolFilter,
+        },
+        {
+          provide: MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN,
+          useValue: toolNamePrefixGenerator,
+        },
+      ],
+      undefined,
+    );
+
+    try {
+      const callbacks = toolCallbackProvider.toolCallbacks;
+
+      expect(callbacks).toHaveLength(1);
+      expect(callbacks[0]?.toolDefinition.name).toBe(
+        `custom_${TEST_TOOL_NAME}`,
+      );
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
+
   it("applies customizers to each created client", async () => {
     const httpServer = await startStreamableHttpTestServer();
     const customize = vi.fn<(name: string, client: Client) => void>();
@@ -243,12 +377,11 @@ describe("McpClientAnnotationRegistrar", () => {
       },
       [],
       () => [],
-      [
-        {
-          provide: McpClientCustomizer,
-          useFactory: () => customizer,
-        },
-      ],
+      [],
+      {
+        provide: McpClientCustomizer,
+        useFactory: () => customizer,
+      },
     );
 
     try {
@@ -367,6 +500,49 @@ describe("McpClientAnnotationRegistrar", () => {
     }
   }, 30_000);
 
+  it("refreshes tool callbacks after tool list change notifications", async () => {
+    const httpServer = await startStreamableHttpTestServer();
+    const provider = new MatchingToolListChangedProvider();
+    const { moduleRef, registrations, toolCallbackProvider } =
+      await bootstrapClientModule(
+        {
+          stdio: {
+            connections: {
+              "stdio-server": createStdioConnection(),
+            },
+          },
+          streamableHttp: {
+            connections: {
+              "http-server": {
+                url: httpServer.baseUrl,
+              },
+            },
+          },
+        },
+        [provider],
+      );
+
+    try {
+      const refreshSpy = vi.spyOn(toolCallbackProvider, "refresh");
+      const stdioClient = getClient(registrations, "stdio-server");
+      const listChanged = getClientOptions(stdioClient).listChanged as {
+        tools?: {
+          onChanged?: (
+            error: Error | null,
+            tools?: Tool[] | null,
+          ) => Promise<void>;
+        };
+      };
+
+      await listChanged.tools?.onChanged?.(null, []);
+
+      expect(refreshSpy).toHaveBeenCalled();
+    } finally {
+      await moduleRef.close();
+      await httpServer.close();
+    }
+  }, 30_000);
+
   it("skips annotation scanning when the scanner is disabled", async () => {
     const httpServer = await startStreamableHttpTestServer();
     const provider = new MatchingToolListChangedProvider();
@@ -443,20 +619,20 @@ async function bootstrapClientModule(
   providerInstances: object[] = [],
   getProviderInstances: () => object[] = () => providerInstances,
   extraProviders: Provider[] = [],
+  customizerProvider?: Provider<McpClientCustomizer>,
 ): Promise<{
   moduleRef: TestingModule;
   registrations: McpClientRegistration[];
+  toolCallbackProvider: McpToolCallbackProvider;
 }> {
-  const moduleRef = await Test.createTestingModule({
+  const supportModule = {
+    module: class McpClientTestSupportModule {},
+    exports: [
+      PROVIDER_INSTANCE_EXPLORER_TOKEN,
+      TOOL_CALLBACK_PROVIDER_TOKEN,
+      ...extraProviders.map(resolveProviderToken),
+    ],
     providers: [
-      {
-        provide: MCP_CLIENT_MODULE_OPTIONS_TOKEN,
-        useValue: options,
-      },
-      {
-        provide: MCP_CLIENT_REGISTRATIONS_TOKEN,
-        useValue: [],
-      },
       {
         provide: PROVIDER_INSTANCE_EXPLORER_TOKEN,
         useValue: {
@@ -464,27 +640,20 @@ async function bootstrapClientModule(
         },
       },
       {
-        provide: McpClientAnnotationRegistrar,
-        useFactory: (
-          moduleOptions: McpClientModuleOptions,
-          clientRegistrations: McpClientRegistration[],
-          providerInstanceExplorer: ProviderInstanceExplorer,
-          clientCustomizer?: McpClientCustomizer,
-        ) =>
-          new McpClientAnnotationRegistrar(
-            moduleOptions,
-            clientRegistrations,
-            providerInstanceExplorer,
-            clientCustomizer,
-          ),
-        inject: [
-          MCP_CLIENT_MODULE_OPTIONS_TOKEN,
-          MCP_CLIENT_REGISTRATIONS_TOKEN,
-          PROVIDER_INSTANCE_EXPLORER_TOKEN,
-          { token: McpClientCustomizer, optional: true },
-        ],
+        provide: TOOL_CALLBACK_PROVIDER_TOKEN,
+        useValue: [],
       },
       ...extraProviders,
+    ],
+  };
+
+  const moduleRef = await Test.createTestingModule({
+    imports: [
+      McpClientModule.forRootAsync({
+        imports: [supportModule],
+        useFactory: () => options,
+        customizerProvider,
+      }),
     ],
   }).compile();
 
@@ -492,9 +661,8 @@ async function bootstrapClientModule(
 
   return {
     moduleRef,
-    registrations: moduleRef.get<McpClientRegistration[]>(
-      MCP_CLIENT_REGISTRATIONS_TOKEN,
-    ),
+    registrations: moduleRef.get(MCP_CLIENT_REGISTRATIONS_TOKEN),
+    toolCallbackProvider: moduleRef.get(McpToolCallbackProvider),
   };
 }
 
@@ -532,4 +700,12 @@ function getClientOptions(client: Client): {
     (client as unknown as { _options?: { listChanged?: unknown } })._options ??
     {}
   );
+}
+
+function resolveProviderToken(provider: Provider): string | symbol | Function {
+  if (typeof provider === "function") {
+    return provider;
+  }
+
+  return (provider as { provide: string | symbol | Function }).provide;
 }

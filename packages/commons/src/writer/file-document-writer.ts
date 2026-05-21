@@ -19,11 +19,9 @@ import { createWriteStream } from "node:fs";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { StringUtils } from "@nestjs-port/core";
-import {
-  type Document,
-  type DocumentWriter,
-  MetadataMode,
-} from "../document/index.js";
+import type { Document } from "../document/document.js";
+import type { DocumentWriter } from "../document/document-writer.interface.js";
+import { MetadataMode } from "../document/metadata-mode.js";
 
 export interface FileDocumentWriterProps {
   fileName: string;

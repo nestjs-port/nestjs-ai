@@ -39,7 +39,7 @@ import {
   ObservationFilters,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import { GoogleGenAiCachedContentService } from "../cache/index.js";
+import { GoogleGenAiCachedContentService } from "../cache/google-gen-ai-cached-content-service.js";
 import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model.js";
 import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 import type {

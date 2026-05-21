@@ -16,9 +16,6 @@
 
 // Tool callback inputs.
 export const TOOL_CALLBACKS_TOKEN = Symbol.for("TOOL_CALLBACKS_TOKEN");
-export const TOOL_CALLBACK_PROVIDER_TOKEN = Symbol.for(
-  "TOOL_CALLBACK_PROVIDER_TOKEN",
-);
 
 // Tool callback resolution.
 export const TOOL_CALLBACK_RESOLVER_TOKEN = Symbol.for(

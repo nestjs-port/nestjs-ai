@@ -16,8 +16,7 @@
 
 import { Prompt } from "@nestjs-ai/model";
 import { assert, describe, expect, it } from "vitest";
-
-import type { Advisor } from "../../advisor/index.js";
+import type { Advisor } from "../../advisor/api/advisor.interface.js";
 import { ChatClientAttributes } from "../../chat-client-attributes.js";
 import { ChatClientRequest } from "../../chat-client-request.js";
 import { ChatClientResponse } from "../../chat-client-response.js";

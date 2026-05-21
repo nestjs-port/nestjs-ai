@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ToolCallback } from "../index.js";
+import type { ToolCallback } from "../tool-callback.js";
 
 /**
  * A resolver for {@link ToolCallback} instances.

@@ -22,7 +22,7 @@ import { MCP_TOOL_METADATA_KEY } from "../../metadata.js";
 import {
   McpToolMethodCallback,
   type ToolRegistration,
-} from "../../method/index.js";
+} from "../../method/tool/mcp-tool-method-callback.js";
 import type { McpToolMetadata } from "../../mcp-tool.js";
 import {
   discoverAnnotatedMethodKeys,

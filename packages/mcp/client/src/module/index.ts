@@ -29,4 +29,8 @@ export {
   createMcpClientTransport,
 } from "./mcp-client-module.options.js";
 export { McpClientModule } from "./mcp-client.module.js";
-export { MCP_CLIENT_REGISTRATIONS_TOKEN } from "./mcp-client.tokens.js";
+export {
+  MCP_CLIENT_REGISTRATIONS_TOKEN,
+  MCP_TOOL_FILTER_TOKEN,
+  MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN,
+} from "./mcp-client.tokens.js";

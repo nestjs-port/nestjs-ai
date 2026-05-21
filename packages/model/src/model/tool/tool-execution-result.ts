@@ -1,26 +1,8 @@
-/*
- * Copyright 2023-present the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {
-  AssistantMessage,
-  ChatGenerationMetadata,
-  Generation,
-  type Message,
-  ToolResponseMessage,
-} from "../../chat/index.js";
+import { AssistantMessage } from "../../chat/messages/assistant-message.js";
+import { ChatGenerationMetadata } from "../../chat/metadata/chat-generation-metadata.interface.js";
+import { Generation } from "../../chat/model/generation.js";
+import type { Message } from "../../chat/messages/message.interface.js";
+import { ToolResponseMessage } from "../../chat/messages/tool-response-message.js";
 
 /**
  * The result of a tool execution.

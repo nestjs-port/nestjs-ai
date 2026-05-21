@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-export const MCP_CLIENT_TOKEN = Symbol.for("MCP_CLIENT_TOKEN");
-
 export const MCP_CLIENT_MODULE_OPTIONS_TOKEN = Symbol.for(
   "MCP_CLIENT_MODULE_OPTIONS_TOKEN",
 );
 
 export const MCP_CLIENT_REGISTRATIONS_TOKEN = Symbol.for(
   "MCP_CLIENT_REGISTRATIONS_TOKEN",
+);
+
+export const MCP_TOOL_FILTER_TOKEN = Symbol.for("MCP_TOOL_FILTER_TOKEN");
+
+export const MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN = Symbol.for(
+  "MCP_TOOL_NAME_PREFIX_GENERATOR_TOKEN",
 );

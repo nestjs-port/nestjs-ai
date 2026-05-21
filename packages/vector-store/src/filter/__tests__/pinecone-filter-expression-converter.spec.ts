@@ -15,8 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-
-import { PineconeFilterExpressionConverter } from "../converter/index.js";
+import { PineconeFilterExpressionConverter } from "../converter/pinecone-filter-expression-converter.js";
 import { Filter } from "../filter.js";
 
 describe("PineconeFilterExpressionConverter", () => {

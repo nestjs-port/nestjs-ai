@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { strict as assert } from "node:assert";
-
+import assert from "node:assert/strict";
 import type {
   AudioContent,
   ImageContent,
@@ -25,7 +24,6 @@ import type {
   SamplingMessageContentBlock,
   TextContent,
 } from "@modelcontextprotocol/server";
-
 import type {
   ContextInclusionStrategy,
   ModelPreferenceSpec,

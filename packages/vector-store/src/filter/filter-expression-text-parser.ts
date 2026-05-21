@@ -35,9 +35,7 @@ import {
   type CompoundIdentifierContext,
   type ConstantArrayContext,
   type DecimalConstantContext,
-  FiltersLexer,
   FiltersParser,
-  FiltersVisitor,
   type GroupExpressionContext,
   type InExpressionContext,
   type IntegerConstantContext,
@@ -51,7 +49,9 @@ import {
   type SimpleIdentifierContext,
   type TextConstantContext,
   type WhereContext,
-} from "./antlr4/index.js";
+} from "./antlr4/FiltersParser.js";
+import { FiltersLexer } from "./antlr4/FiltersLexer.js";
+import { FiltersVisitor } from "./antlr4/FiltersVisitor.js";
 import { Filter } from "./filter.js";
 
 export class FilterExpressionTextParser {

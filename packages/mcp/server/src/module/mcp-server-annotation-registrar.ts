@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { OnModuleInit } from "@nestjs/common";
+import type { OnApplicationBootstrap } from "@nestjs/common";
 import type { McpServer, RequestMethod } from "@modelcontextprotocol/server";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import {
@@ -29,7 +29,7 @@ import type { McpServerModuleOptions } from "./mcp-server-module.options.js";
 import { ToolCallbackUtils } from "./tool-callback-utils.js";
 import { McpServerToolUtils } from "./mcp-server-tool-utils.js";
 
-export class McpServerAnnotationRegistrar implements OnModuleInit {
+export class McpServerAnnotationRegistrar implements OnApplicationBootstrap {
   private registered = false;
 
   constructor(
@@ -40,7 +40,7 @@ export class McpServerAnnotationRegistrar implements OnModuleInit {
     private readonly providerInstanceExplorer?: ProviderInstanceExplorer,
   ) {}
 
-  onModuleInit(): void {
+  onApplicationBootstrap(): void {
     if (this.registered) {
       return;
     }

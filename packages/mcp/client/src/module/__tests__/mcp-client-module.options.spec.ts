@@ -17,13 +17,11 @@
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
 import {
   StdioClientTransport,
   StreamableHTTPClientTransport,
 } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
-
 import {
   createMcpClientTransport,
   normalizeMcpClientConnectionSpecs,

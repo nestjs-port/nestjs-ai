@@ -16,10 +16,8 @@
 
 import assert from "node:assert/strict";
 import { LoggerFactory } from "@nestjs-port/core";
-import {
-  AbstractResponseMetadata,
-  type ResponseMetadata,
-} from "../../model/index.js";
+import { AbstractResponseMetadata } from "../../model/abstract-response-metadata.js";
+import type { ResponseMetadata } from "../../model/response-metadata.interface.js";
 import { EmptyRateLimit } from "./empty-rate-limit.js";
 import { EmptyUsage } from "./empty-usage.js";
 import { PromptMetadata } from "./prompt-metadata.js";

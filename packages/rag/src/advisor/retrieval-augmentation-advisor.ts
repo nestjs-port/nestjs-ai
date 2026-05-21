@@ -23,18 +23,15 @@ import {
 } from "@nestjs-ai/client-chat";
 import type { Document } from "@nestjs-ai/commons";
 import { ChatResponse } from "@nestjs-ai/model";
-import {
-  ContextualQueryAugmenter,
-  type QueryAugmenter,
-} from "../generation/index.js";
-import type { DocumentPostProcessor } from "../postretrieval/index.js";
-import type { QueryExpander, QueryTransformer } from "../preretrieval/index.js";
+import { ContextualQueryAugmenter } from "../generation/augmentation/contextual-query-augmenter.js";
+import type { QueryAugmenter } from "../generation/augmentation/query-augmenter.js";
+import type { DocumentPostProcessor } from "../postretrieval/document/document-post-processor.js";
+import type { QueryExpander } from "../preretrieval/query/expansion/query-expander.js";
+import type { QueryTransformer } from "../preretrieval/query/transformation/query-transformer.js";
 import { Query } from "../query.js";
-import {
-  ConcatenationDocumentJoiner,
-  type DocumentJoiner,
-  type DocumentRetriever,
-} from "../retrieval/index.js";
+import { ConcatenationDocumentJoiner } from "../retrieval/join/concatenation-document-joiner.js";
+import type { DocumentJoiner } from "../retrieval/join/document-joiner.js";
+import type { DocumentRetriever } from "../retrieval/search/document-retriever.js";
 
 export interface RetrievalAugmentationAdvisorProps {
   queryTransformers?: QueryTransformer[] | null;

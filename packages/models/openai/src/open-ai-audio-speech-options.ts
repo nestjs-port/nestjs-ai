@@ -16,7 +16,6 @@
 
 import type { TextToSpeechOptions } from "@nestjs-ai/model";
 import type { SpeechCreateParams } from "openai/resources/audio";
-
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,

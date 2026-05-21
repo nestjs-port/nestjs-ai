@@ -15,11 +15,10 @@
  */
 
 import { describe, expect, it } from "vitest";
-
-import { Media, MediaFormat } from "../../content/index.js";
+import { Media, MediaFormat } from "../../content/media.js";
 import type { ContentFormatter } from "../content-formatter.interface.js";
 import { Document } from "../document.js";
-import type { IdGenerator } from "../id/index.js";
+import type { IdGenerator } from "../id/id-generator.interface.js";
 import { MetadataMode } from "../metadata-mode.js";
 
 function getMedia(): Media {

@@ -15,7 +15,10 @@
  */
 
 import { Module, type Provider } from "@nestjs/common";
-import { PROVIDER_INSTANCE_EXPLORER_TOKEN } from "@nestjs-ai/commons";
+import {
+  PROVIDER_INSTANCE_EXPLORER_TOKEN,
+  TOOL_CALLBACK_PROVIDER_TOKEN,
+} from "@nestjs-ai/commons";
 import type {
   ObservationFilters,
   ProviderInstanceExplorer,
@@ -24,23 +27,18 @@ import {
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
 } from "@nestjs-port/core";
+import { DefaultToolCallingManager } from "../model/tool/default-tool-calling-manager.js";
+import type { ToolCallingManager } from "../model/tool/tool-calling-manager.interface.js";
+import { DefaultToolExecutionExceptionProcessor } from "../tool/execution/default-tool-execution-exception-processor.js";
+import { DelegatingToolCallbackResolver } from "../tool/resolution/delegating-tool-callback-resolver.js";
+import { NestProviderToolCallbackResolver } from "../tool/resolution/nest-provider-tool-callback-resolver.js";
+import { StaticToolCallbackResolver } from "../tool/resolution/static-tool-callback-resolver.js";
+import type { ToolCallback } from "../tool/tool-callback.js";
+import type { ToolCallbackProvider } from "../tool/tool-callback-provider.js";
+import type { ToolCallbackResolver } from "../tool/resolution/tool-callback-resolver.interface.js";
+import { ToolCallingContentObservationFilter } from "../tool/observation/tool-calling-content-observation-filter.js";
+import { ToolCallingObservationConvention } from "../tool/observation/tool-calling-observation-convention.js";
 import {
-  DefaultToolCallingManager,
-  type ToolCallingManager,
-} from "../model/index.js";
-import {
-  DefaultToolExecutionExceptionProcessor,
-  DelegatingToolCallbackResolver,
-  NestProviderToolCallbackResolver,
-  StaticToolCallbackResolver,
-  type ToolCallback,
-  type ToolCallbackProvider,
-  type ToolCallbackResolver,
-  ToolCallingContentObservationFilter,
-  ToolCallingObservationConvention,
-} from "../tool/index.js";
-import {
-  TOOL_CALLBACK_PROVIDER_TOKEN,
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
   TOOL_CALLBACK_RESOLVER_TOKEN,
   TOOL_CALLBACKS_TOKEN,

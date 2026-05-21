@@ -15,7 +15,6 @@
  */
 
 import "reflect-metadata";
-
 import type {
   CompleteRequest,
   CompleteResult,
@@ -25,7 +24,7 @@ import { describe, expect, it } from "vitest";
 
 import { McpComplete } from "../../../mcp-complete.js";
 import type { McpCompleteMethodArguments } from "../../../mcp-complete.js";
-import { McpCompleteProvider } from "../index.js";
+import { McpCompleteProvider } from "../mcp-complete-provider.js";
 
 describe("McpCompleteProvider", () => {
   describe("getCompleteSpecifications()", () => {

@@ -15,7 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import { type Filter, FilterExpressionTextParser } from "./filter/index.js";
+import type { Filter } from "./filter/filter.js";
+import { FilterExpressionTextParser } from "./filter/filter-expression-text-parser.js";
 
 export class SearchRequest {
   static readonly SIMILARITY_THRESHOLD_ACCEPT_ALL = 0.0;

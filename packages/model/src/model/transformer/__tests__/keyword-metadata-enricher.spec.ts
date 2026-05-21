@@ -15,14 +15,12 @@
  */
 
 import { Document } from "@nestjs-ai/commons";
-import type { ChatModel } from "../../../chat/index.js";
-import {
-  AssistantMessage,
-  ChatResponse,
-  Generation,
-  type Prompt,
-  PromptTemplate,
-} from "../../../chat/index.js";
+import type { ChatModel } from "../../../chat/model/chat-model.js";
+import { AssistantMessage } from "../../../chat/messages/assistant-message.js";
+import { ChatResponse } from "../../../chat/model/chat-response.js";
+import { Generation } from "../../../chat/model/generation.js";
+import type { Prompt } from "../../../chat/prompt/prompt.js";
+import { PromptTemplate } from "../../../chat/prompt/prompt-template.js";
 import { TemplateRendererFactory } from "@nestjs-ai/commons";
 import { KeywordMetadataEnricher } from "../keyword-metadata-enricher.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";

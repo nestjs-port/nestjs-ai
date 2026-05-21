@@ -29,8 +29,8 @@ import { queueScheduler } from "rxjs";
 import { assert, describe, expect, it } from "vitest";
 
 import { ChatClientRequest } from "../../chat-client-request.js";
-import type { AdvisorChain } from "../api/index.js";
-import { Advisor } from "../api/index.js";
+import type { AdvisorChain } from "../api/advisor-chain.js";
+import { Advisor } from "../api/advisor.interface.js";
 import { MessageChatMemoryAdvisor } from "../message-chat-memory-advisor.js";
 
 function createChatMemory(): ChatMemory {

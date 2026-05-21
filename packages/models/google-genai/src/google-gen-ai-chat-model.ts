@@ -72,17 +72,17 @@ import {
   type RetryTemplate,
 } from "@nestjs-port/core";
 import { defer, from, Observable, switchMap } from "rxjs";
-import { GoogleGenAiCachedContentService } from "./cache/index.js";
+import { GoogleGenAiCachedContentService } from "./cache/google-gen-ai-cached-content-service.js";
+import { GoogleGenAiConstants } from "./common/google-gen-ai-constants.js";
 import {
-  GoogleGenAiConstants,
   type GoogleGenAiSafetySetting,
-  GoogleGenAiThinkingLevel,
   HarmBlockThreshold,
   HarmCategory,
-} from "./common/index.js";
+} from "./common/google-gen-ai-safety-setting.js";
+import { GoogleGenAiThinkingLevel } from "./common/google-gen-ai-thinking-level.js";
 import { GoogleGenAiChatOptions } from "./google-gen-ai-chat-options.js";
-import { GoogleGenAiUsage } from "./metadata/index.js";
-import { GoogleGenAiToolCallingManager } from "./schema/index.js";
+import { GoogleGenAiUsage } from "./metadata/google-gen-ai-usage.js";
+import { GoogleGenAiToolCallingManager } from "./schema/google-genai-tool-calling-manager.js";
 
 enum GeminiMessageType {
   USER = "user",

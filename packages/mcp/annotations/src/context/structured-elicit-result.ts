@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
 import type { ElicitResult } from "@modelcontextprotocol/server";
-import { strict as assert } from "node:assert";
 
 export type ElicitResultAction = ElicitResult["action"];
 

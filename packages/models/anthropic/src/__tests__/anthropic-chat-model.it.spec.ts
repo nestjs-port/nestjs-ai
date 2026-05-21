@@ -40,14 +40,12 @@ import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom, type Observable, toArray } from "rxjs";
 import { assert, beforeAll, describe, expect, it } from "vitest";
-import type { AnthropicWebSearchResult } from "../index.js";
-import {
-  AnthropicChatModel,
-  AnthropicChatOptions,
-  AnthropicCitationDocument,
-  AnthropicWebSearchTool,
-  Citation,
-} from "../index.js";
+import type { AnthropicWebSearchResult } from "../anthropic-web-search-result.js";
+import { AnthropicChatModel } from "../anthropic-chat-model.js";
+import { AnthropicChatOptions } from "../anthropic-chat-options.js";
+import { AnthropicCitationDocument } from "../anthropic-citation-document.js";
+import { AnthropicWebSearchTool } from "../anthropic-web-search-tool.js";
+import { Citation } from "../citation.js";
 import {
   MockWeatherService,
   type WeatherRequest,

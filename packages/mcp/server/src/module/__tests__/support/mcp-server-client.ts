@@ -19,7 +19,6 @@ import "reflect-metadata";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
-
 import {
   Client,
   StdioClientTransport,
@@ -30,14 +29,13 @@ import type { INestApplication } from "@nestjs/common";
 import { FastifyAdapter } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { expect } from "vitest";
-
 import {
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
   MCP_SERVER_TOKEN,
-  McpServerModule,
-  type McpServerModuleOptions,
-} from "../../../index.js";
-import { McpServerStreamableHttpService } from "../../../transport/streamable-http/index.js";
+} from "../../mcp-server.tokens.js";
+import { McpServerModule } from "../../mcp-server.module.js";
+import type { McpServerModuleOptions } from "../../mcp-server-module.options.js";
+import { McpServerStreamableHttpService } from "../../../transport/streamable-http.service.js";
 import {
   PROMPT_NAME,
   PROMPT_TEXT,

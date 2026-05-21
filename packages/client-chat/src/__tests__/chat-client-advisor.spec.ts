@@ -29,7 +29,7 @@ import {
 } from "@nestjs-ai/model";
 import { lastValueFrom, type Observable, of, reduce } from "rxjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PromptChatMemoryAdvisor } from "../advisor/index.js";
+import { PromptChatMemoryAdvisor } from "../advisor/prompt-chat-memory-advisor.js";
 import { ChatClient } from "../chat-client.js";
 
 describe("ChatClientAdvisorTests", () => {

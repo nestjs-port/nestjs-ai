@@ -22,7 +22,7 @@ import {
   EmbeddingResponse,
 } from "@nestjs-ai/model";
 import { beforeEach, describe, expect, it } from "vitest";
-import { Filter } from "../filter/index.js";
+import { Filter } from "../filter/filter.js";
 import { SearchRequest } from "../search-request.js";
 import { SimpleVectorStore } from "../simple-vector-store.js";
 

@@ -1,5 +1,13 @@
 # @nestjs-ai/document-reader-tika
 
+## 0.1.2
+
+### Patch Changes
+
+- remove barrel import
+- Updated dependencies
+  - @nestjs-ai/commons@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

@@ -24,12 +24,12 @@ import {
 } from "@nestjs-ai/commons";
 import type { EmbeddingModel } from "@nestjs-ai/model";
 import { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder.js";
-import type { Filter } from "./filter/index.js";
+import type { Filter } from "./filter/filter.js";
+import { AbstractObservationVectorStore } from "./observation/abstract-observation-vector-store.js";
 import {
-  AbstractObservationVectorStore,
   VectorStoreObservationContext as ObservationContext,
   type VectorStoreObservationContext,
-} from "./observation/index.js";
+} from "./observation/vector-store-observation-context.js";
 import type { SearchRequest } from "./search-request.js";
 import { SimpleVectorStoreContent } from "./simple-vector-store-content.js";
 import { SimpleVectorStoreFilterExpressionEvaluator } from "./simple-vector-store-filter-expression-evaluator.js";

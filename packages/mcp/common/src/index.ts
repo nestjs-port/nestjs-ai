@@ -21,6 +21,10 @@ export {
   McpConnectionInfo,
   type McpConnectionInfoProps,
 } from "./mcp-connection-info.js";
+export {
+  MCP_TOOL_CALLBACKS_LIST_CHANGED_EVENT,
+  McpToolCallbackEventBus,
+} from "./mcp-tool-callback-event-bus.js";
 export { McpServerExchange } from "./mcp-server-exchange.js";
 export {
   McpTransportContext,

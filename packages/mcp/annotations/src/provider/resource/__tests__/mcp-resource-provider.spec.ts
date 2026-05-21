@@ -15,7 +15,6 @@
  */
 
 import "reflect-metadata";
-
 import type {
   ReadResourceResult,
   ServerContext,
@@ -26,7 +25,7 @@ import { describe, expect, it } from "vitest";
 
 import { McpResource } from "../../../mcp-resource.js";
 import type { McpResourceMethodArguments } from "../../../mcp-resource.js";
-import { McpResourceProvider } from "../index.js";
+import { McpResourceProvider } from "../mcp-resource-provider.js";
 
 describe("McpResourceProvider", () => {
   describe("getResourceRegistrations()", () => {

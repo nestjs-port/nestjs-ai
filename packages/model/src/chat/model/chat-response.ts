@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelResponse } from "../../model/index.js";
-import { ChatResponseMetadata } from "../metadata/index.js";
+import type { ModelResponse } from "../../model/model-response.interface.js";
+import { ChatResponseMetadata } from "../metadata/chat-response-metadata.js";
 import type { Generation } from "./generation.js";
 
 export interface ChatResponseProps {

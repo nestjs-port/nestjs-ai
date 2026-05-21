@@ -15,27 +15,30 @@
  */
 
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import {
-  Client as McpClient,
-  type ClientContext,
-  type ClientCapabilities,
-  type ElicitRequest,
-  type ElicitResult,
-  type LoggingMessageNotification,
-  type NotificationMethod,
-  type NotificationTypeMap,
-  type ProgressNotification,
-  type ListChangedHandlers,
-  type ListChangedOptions,
-  type CreateMessageRequest,
-  type CreateMessageResult,
+import type {
+  ClientContext,
+  ClientCapabilities,
+  ElicitRequest,
+  ElicitResult,
+  LoggingMessageNotification,
+  NotificationMethod,
+  NotificationTypeMap,
+  ProgressNotification,
+  ListChangedHandlers,
+  ListChangedOptions,
+  CreateMessageRequest,
+  CreateMessageResult,
 } from "@modelcontextprotocol/client";
+import { Client as McpClient } from "@modelcontextprotocol/client";
 import type { Prompt, Resource, Tool } from "@modelcontextprotocol/client";
 import {
   LoggerFactory,
   type ProviderInstanceExplorer,
 } from "@nestjs-port/core";
-import type { McpClientCustomizer } from "@nestjs-ai/mcp-common";
+import type {
+  McpClientCustomizer,
+  McpToolCallbackProvider,
+} from "@nestjs-ai/mcp-common";
 import {
   McpElicitationProvider,
   McpLoggingProvider,
@@ -45,6 +48,7 @@ import {
   McpResourceListChangedProvider,
   McpToolListChangedProvider,
 } from "@nestjs-ai/mcp-annotations";
+import type { McpToolCallbackEventBus } from "@nestjs-ai/mcp-common";
 import type {
   McpClientConnectionSpec,
   McpClientModuleOptions,
@@ -67,8 +71,10 @@ export class McpClientAnnotationRegistrar
   constructor(
     private readonly options: McpClientModuleOptions,
     private readonly clientRegistrations: McpClientRegistration[],
+    private readonly eventBus: McpToolCallbackEventBus,
     private readonly providerInstanceExplorer?: ProviderInstanceExplorer,
     private readonly clientCustomizer?: McpClientCustomizer,
+    private readonly toolCallbackProvider?: McpToolCallbackProvider | null,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -148,6 +154,11 @@ export class McpClientAnnotationRegistrar
           annotationScannerEnabled,
         );
       }
+
+      this.toolCallbackProvider?.setMcpClients(
+        this.clientRegistrations.map(({ mcpClient }) => mcpClient),
+      );
+      await this.toolCallbackProvider?.refresh();
     } catch (error) {
       for (const registration of this.clientRegistrations.splice(0)) {
         await registration.mcpClient.close().catch(() => undefined);
@@ -312,7 +323,7 @@ export class McpClientAnnotationRegistrar
           prompts = await this.collectAllPrompts(mcpClientGetter());
         }
 
-        await spec.promptListChangeHandler(null, prompts);
+        spec.promptListChangeHandler(null, prompts);
       },
     };
   }
@@ -356,7 +367,7 @@ export class McpClientAnnotationRegistrar
           resources = await this.collectAllResources(mcpClientGetter());
         }
 
-        await spec.resourceListChangeHandler(null, resources);
+        spec.resourceListChangeHandler(null, resources);
       },
     };
   }
@@ -396,11 +407,15 @@ export class McpClientAnnotationRegistrar
           return;
         }
 
-        if (tools == null) {
-          tools = await this.collectAllTools(mcpClientGetter());
-        }
+        try {
+          if (tools == null) {
+            tools = await this.collectAllTools(mcpClientGetter());
+          }
 
-        await spec.toolListChangeHandler(null, tools);
+          spec.toolListChangeHandler(null, tools);
+        } finally {
+          this.eventBus.emitToolsListChanged(clientName);
+        }
       },
     };
   }

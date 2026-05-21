@@ -20,7 +20,7 @@ import type { ElicitRequest } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 
 import { McpElicitation } from "../../../mcp-elicitation.js";
-import { StructuredElicitResult } from "../../../context/index.js";
+import { StructuredElicitResult } from "../../../context/structured-elicit-result.js";
 import { McpElicitationProvider } from "../mcp-elicitation-provider.js";
 
 describe("McpElicitationProvider", () => {

@@ -27,7 +27,7 @@ import type {
   McpCompleteMethodArguments,
 } from "../mcp-complete.js";
 import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
-import { McpCompleteMethodCallback } from "../method/index.js";
+import { McpCompleteMethodCallback } from "../method/complete/mcp-complete-method-callback.js";
 
 class McpCompleteTypeExamples {
   @McpComplete({ prompt: "test-prompt" })

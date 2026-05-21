@@ -44,16 +44,12 @@ import type { ObservationRegistry } from "@nestjs-port/core";
 import { StringUtils } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { filter, map } from "rxjs";
-import type {
-  Advisor,
-  AdvisorObservationConvention,
-  BaseAdvisorChain,
-} from "./advisor/index.js";
-import {
-  ChatModelCallAdvisor,
-  ChatModelStreamAdvisor,
-  DefaultAroundAdvisorChain,
-} from "./advisor/index.js";
+import type { Advisor } from "./advisor/api/advisor.interface.js";
+import type { AdvisorObservationConvention } from "./advisor/observation/advisor-observation-convention.js";
+import type { BaseAdvisorChain } from "./advisor/api/base-advisor-chain.js";
+import { ChatModelCallAdvisor } from "./advisor/chat-model-call-advisor.js";
+import { ChatModelStreamAdvisor } from "./advisor/chat-model-stream-advisor.js";
+import { DefaultAroundAdvisorChain } from "./advisor/default-around-advisor-chain.js";
 import { ChatClient } from "./chat-client.js";
 import { ChatClientAttributes } from "./chat-client-attributes.js";
 import { ChatClientMessageAggregator } from "./chat-client-message-aggregator.js";
@@ -61,12 +57,10 @@ import type { ChatClientRequest } from "./chat-client-request.js";
 import { ChatClientResponse } from "./chat-client-response.js";
 import type { DefaultChatClientBuilder } from "./default-chat-client-builder.js";
 import { DefaultChatClientUtils } from "./default-chat-client-utils.js";
-import {
-  ChatClientObservationContext,
-  type ChatClientObservationConvention,
-  ChatClientObservationDocumentation,
-  DefaultChatClientObservationConvention,
-} from "./observation/index.js";
+import { ChatClientObservationContext } from "./observation/chat-client-observation-context.js";
+import type { ChatClientObservationConvention } from "./observation/chat-client-observation-convention.js";
+import { ChatClientObservationDocumentation } from "./observation/chat-client-observation-documentation.js";
+import { DefaultChatClientObservationConvention } from "./observation/default-chat-client-observation-convention.js";
 import { ResponseEntity } from "./response-entity.js";
 
 type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;

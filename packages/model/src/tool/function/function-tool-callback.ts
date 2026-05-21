@@ -21,19 +21,15 @@ import type {
   StandardSchemaV1,
 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
-import type { ToolContext } from "../../chat/index.js";
-import { JsonSchemaGenerator } from "../../util/index.js";
-import {
-  DefaultToolDefinition,
-  type ToolDefinition,
-} from "../definition/index.js";
-import {
-  DefaultToolCallResultConverter,
-  type ToolCallResultConverter,
-  ToolExecutionException,
-} from "../execution/index.js";
-import { ToolMetadata } from "../metadata/index.js";
-import { ToolUtils } from "../support/index.js";
+import type { ToolContext } from "../../chat/model/tool-context.js";
+import { JsonSchemaGenerator } from "../../util/json/schema/json-schema-generator.js";
+import { DefaultToolDefinition } from "../definition/default-tool-definition.js";
+import type { ToolDefinition } from "../definition/tool-definition.js";
+import { DefaultToolCallResultConverter } from "../execution/default-tool-call-result-converter.js";
+import type { ToolCallResultConverter } from "../execution/tool-call-result-converter.js";
+import { ToolExecutionException } from "../execution/tool-execution-exception.js";
+import { ToolMetadata } from "../metadata/tool-metadata.js";
+import { ToolUtils } from "../support/tool-utils.js";
 import { ToolCallback } from "../tool-callback.js";
 
 type MaybePromise<T> = T | Promise<T>;

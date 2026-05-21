@@ -1,5 +1,14 @@
 # @nestjs-ai/mcp-common
 
+## 0.1.6
+
+### Patch Changes
+
+- remove barrel import
+- Updated dependencies
+  - @nestjs-ai/commons@0.1.2
+  - @nestjs-ai/model@0.1.4
+
 ## 0.1.5
 
 ### Patch Changes

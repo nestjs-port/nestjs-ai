@@ -15,15 +15,13 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelRequest } from "../../model/index.js";
-import {
-  AssistantMessage,
-  type Message,
-  MessageType,
-  SystemMessage,
-  type ToolResponseMessage,
-  UserMessage,
-} from "../messages/index.js";
+import type { ModelRequest } from "../../model/model-request.interface.js";
+import { AssistantMessage } from "../messages/assistant-message.js";
+import type { Message } from "../messages/message.interface.js";
+import { MessageType } from "../messages/message-type.js";
+import { SystemMessage } from "../messages/system-message.js";
+import type { ToolResponseMessage } from "../messages/tool-response-message.js";
+import { UserMessage } from "../messages/user-message.js";
 import type { ChatOptions } from "./chat-options.interface.js";
 
 /**

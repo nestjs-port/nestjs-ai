@@ -20,7 +20,6 @@ export {
   ToolCallingModule,
 } from "./tool-calling.module.js";
 export {
-  TOOL_CALLBACK_PROVIDER_TOKEN,
   TOOL_CALLBACK_RESOLVER_OVERRIDE_TOKEN,
   TOOL_CALLBACK_RESOLVER_TOKEN,
   TOOL_CALLBACKS_TOKEN,

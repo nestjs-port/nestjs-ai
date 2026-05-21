@@ -16,7 +16,7 @@
 
 import { ImagePrompt } from "@nestjs-ai/model";
 import { assert, describe, expect, it } from "vitest";
-import { OpenAiImageGenerationMetadata } from "../../metadata/index.js";
+import { OpenAiImageGenerationMetadata } from "../../metadata/open-ai-image-generation-metadata.js";
 import { OpenAiImageModel } from "../../open-ai-image-model.js";
 import { OpenAiImageOptions } from "../../open-ai-image-options.js";
 

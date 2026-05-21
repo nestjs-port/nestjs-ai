@@ -15,14 +15,13 @@
  */
 
 import { assert, describe, expect, it } from "vitest";
-
 import {
   ModerationOptionsBuilder,
   ModerationPrompt,
   type Moderation,
 } from "@nestjs-ai/model";
-
-import { OpenAiModerationModel, OpenAiModerationOptions } from "../../index.js";
+import { OpenAiModerationModel } from "../../open-ai-moderation-model.js";
+import { OpenAiModerationOptions } from "../../open-ai-moderation-options.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

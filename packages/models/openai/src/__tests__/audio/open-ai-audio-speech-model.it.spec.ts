@@ -16,17 +16,13 @@
 
 import { lastValueFrom, toArray } from "rxjs";
 import { assert, describe, expect, it } from "vitest";
-
 import {
   TextToSpeechPrompt,
   type TextToSpeechResponse,
 } from "@nestjs-ai/model";
-
-import {
-  OpenAiAudioSpeechModel,
-  OpenAiAudioSpeechOptions,
-  type OpenAiAudioSpeechResponseMetadata,
-} from "../../index.js";
+import { OpenAiAudioSpeechModel } from "../../open-ai-audio-speech-model.js";
+import { OpenAiAudioSpeechOptions } from "../../open-ai-audio-speech-options.js";
+import type { OpenAiAudioSpeechResponseMetadata } from "../../metadata/open-ai-audio-speech-response-metadata.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

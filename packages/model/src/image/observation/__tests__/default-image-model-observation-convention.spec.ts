@@ -17,7 +17,8 @@
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { assert, describe, expect, it } from "vitest";
-import { ImageOptionsBuilder, ImagePrompt } from "../../index.js";
+import { ImageOptionsBuilder } from "../../image-options-builder.js";
+import { ImagePrompt } from "../../image-prompt.js";
 import { DefaultImageModelObservationConvention } from "../default-image-model-observation-convention.js";
 import { ImageModelObservationContext } from "../image-model-observation-context.js";
 

@@ -19,8 +19,7 @@ import "reflect-metadata";
 import type { McpServer, ServerContext } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-
-import type { MetaProvider } from "../../../context/index.js";
+import type { MetaProvider } from "../../../context/meta-provider.js";
 import { McpTool } from "../../../mcp-tool.js";
 import type { McpToolMethodArguments } from "../../../mcp-tool.js";
 import { McpToolProvider } from "../mcp-tool-provider.js";

@@ -15,21 +15,21 @@
  */
 
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import {
-  Client as McpClient,
-  type ClientContext,
-  type ClientCapabilities,
-  type ElicitRequest,
-  type ElicitResult,
-  type LoggingMessageNotification,
-  type NotificationMethod,
-  type NotificationTypeMap,
-  type ProgressNotification,
-  type ListChangedHandlers,
-  type ListChangedOptions,
-  type CreateMessageRequest,
-  type CreateMessageResult,
+import type {
+  ClientContext,
+  ClientCapabilities,
+  ElicitRequest,
+  ElicitResult,
+  LoggingMessageNotification,
+  NotificationMethod,
+  NotificationTypeMap,
+  ProgressNotification,
+  ListChangedHandlers,
+  ListChangedOptions,
+  CreateMessageRequest,
+  CreateMessageResult,
 } from "@modelcontextprotocol/client";
+import { Client as McpClient } from "@modelcontextprotocol/client";
 import type { Prompt, Resource, Tool } from "@modelcontextprotocol/client";
 import {
   LoggerFactory,

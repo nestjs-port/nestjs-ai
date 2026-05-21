@@ -15,7 +15,6 @@
  */
 
 import "reflect-metadata";
-
 import type {
   CallToolRequest,
   CallToolResult,

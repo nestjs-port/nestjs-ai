@@ -31,12 +31,10 @@ import { concatWith, defer, EMPTY, filter, from, mergeMap, of } from "rxjs";
 import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
 import { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";
-import type {
-  CallAdvisor,
-  CallAdvisorChain,
-  StreamAdvisor,
-  StreamAdvisorChain,
-} from "./api/index.js";
+import type { CallAdvisor } from "./api/call-advisor.interface.js";
+import type { CallAdvisorChain } from "./api/call-advisor-chain.interface.js";
+import type { StreamAdvisor } from "./api/stream-advisor.interface.js";
+import type { StreamAdvisorChain } from "./api/stream-advisor-chain.interface.js";
 
 export interface ToolCallAdvisorProps {
   toolCallingManager?: ToolCallingManager;

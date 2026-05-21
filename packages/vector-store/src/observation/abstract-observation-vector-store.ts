@@ -22,7 +22,7 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { Filter } from "../filter/index.js";
+import type { Filter } from "../filter/filter.js";
 import type { SearchRequest } from "../search-request.js";
 import { VectorStore } from "../vector-store.js";
 import { DefaultVectorStoreObservationConvention } from "./default-vector-store-observation-convention.js";

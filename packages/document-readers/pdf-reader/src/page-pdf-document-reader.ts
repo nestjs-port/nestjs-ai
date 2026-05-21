@@ -23,9 +23,8 @@ import type {
   PDFDocumentProxy,
   PDFPageProxy,
 } from "pdfjs-dist/types/src/display/api.js";
-
-import { PdfDocumentReaderConfig } from "./config/index.js";
-import { PdfLayoutTextStripperByArea } from "./layout/index.js";
+import { PdfDocumentReaderConfig } from "./config/pdf-document-reader-config.js";
+import { PdfLayoutTextStripperByArea } from "./layout/pdf-layout-text-stripper-by-area.js";
 
 export type PdfResource = string | URL | Buffer;
 

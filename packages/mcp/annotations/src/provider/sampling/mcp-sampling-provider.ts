@@ -16,11 +16,8 @@
 
 import "reflect-metadata";
 import assert from "node:assert/strict";
-
-import {
-  McpSamplingMethodCallback,
-  type SamplingSpecification,
-} from "../../method/index.js";
+import { McpSamplingMethodCallback } from "../../method/sampling/mcp-sampling-method-callback.js";
+import type { SamplingSpecification } from "../../method/sampling/sampling-specification.js";
 import type { McpSamplingMetadata } from "../../mcp-sampling.js";
 import { MCP_SAMPLING_METADATA_KEY } from "../../metadata.js";
 import {

@@ -21,7 +21,7 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
-import type { VectorStoreObservationConvention } from "./observation/index.js";
+import type { VectorStoreObservationConvention } from "./observation/vector-store-observation-convention.js";
 import type { VectorStore } from "./vector-store.js";
 
 /**

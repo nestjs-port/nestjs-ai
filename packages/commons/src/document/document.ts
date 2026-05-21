@@ -16,11 +16,12 @@
 
 import assert from "node:assert/strict";
 import { StringUtils } from "@nestjs-port/core";
-import type { Content, Media } from "../content/index.js";
+import type { Content } from "../content/content.interface.js";
+import type { Media } from "../content/media.js";
 import type { ContentFormatter } from "./content-formatter.interface.js";
 import { DefaultContentFormatter } from "./default-content-formatter.js";
-import type { IdGenerator } from "./id/index.js";
-import { RandomIdGenerator } from "./id/index.js";
+import type { IdGenerator } from "./id/id-generator.interface.js";
+import { RandomIdGenerator } from "./id/random-id-generator.js";
 import { MetadataMode } from "./metadata-mode.js";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

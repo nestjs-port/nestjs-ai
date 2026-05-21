@@ -24,8 +24,7 @@ import {
 } from "@nestjs-ai/model";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-
-import type { Advisor } from "../../advisor/index.js";
+import type { Advisor } from "../../advisor/api/advisor.interface.js";
 import { ChatClientRequest } from "../../chat-client-request.js";
 import { ChatClientObservationContext } from "../chat-client-observation-context.js";
 import { DefaultChatClientObservationConvention } from "../default-chat-client-observation-convention.js";

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { McpPredicates } from "../index.js";
+import { McpPredicates } from "../mcp-predicates.js";
 
 /**
  * URI Template Tests

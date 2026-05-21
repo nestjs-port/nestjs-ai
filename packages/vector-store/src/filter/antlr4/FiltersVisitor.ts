@@ -1,4 +1,3 @@
-
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
 
@@ -23,26 +22,26 @@ import { AbstractParseTreeVisitor } from "antlr4ng";
 // ############################################################
 
 
-import { WhereContext } from "./FiltersParser.js";
-import { CompareExpressionContext } from "./FiltersParser.js";
-import { InExpressionContext } from "./FiltersParser.js";
-import { NinExpressionContext } from "./FiltersParser.js";
-import { IsNullExpressionContext } from "./FiltersParser.js";
-import { IsNotNullExpressionContext } from "./FiltersParser.js";
-import { GroupExpressionContext } from "./FiltersParser.js";
-import { NotExpressionContext } from "./FiltersParser.js";
-import { AndExpressionContext } from "./FiltersParser.js";
-import { OrExpressionContext } from "./FiltersParser.js";
-import { ConstantArrayContext } from "./FiltersParser.js";
-import { CompareContext } from "./FiltersParser.js";
-import { CompoundIdentifierContext } from "./FiltersParser.js";
-import { SimpleIdentifierContext } from "./FiltersParser.js";
-import { QuotedIdentifierContext } from "./FiltersParser.js";
-import { LongConstantContext } from "./FiltersParser.js";
-import { IntegerConstantContext } from "./FiltersParser.js";
-import { DecimalConstantContext } from "./FiltersParser.js";
-import { TextConstantContext } from "./FiltersParser.js";
-import { BooleanConstantContext } from "./FiltersParser.js";
+import type { WhereContext } from "./FiltersParser.js";
+import type { CompareExpressionContext } from "./FiltersParser.js";
+import type { InExpressionContext } from "./FiltersParser.js";
+import type { NinExpressionContext } from "./FiltersParser.js";
+import type { IsNullExpressionContext } from "./FiltersParser.js";
+import type { IsNotNullExpressionContext } from "./FiltersParser.js";
+import type { GroupExpressionContext } from "./FiltersParser.js";
+import type { NotExpressionContext } from "./FiltersParser.js";
+import type { AndExpressionContext } from "./FiltersParser.js";
+import type { OrExpressionContext } from "./FiltersParser.js";
+import type { ConstantArrayContext } from "./FiltersParser.js";
+import type { CompareContext } from "./FiltersParser.js";
+import type { CompoundIdentifierContext } from "./FiltersParser.js";
+import type { SimpleIdentifierContext } from "./FiltersParser.js";
+import type { QuotedIdentifierContext } from "./FiltersParser.js";
+import type { LongConstantContext } from "./FiltersParser.js";
+import type { IntegerConstantContext } from "./FiltersParser.js";
+import type { DecimalConstantContext } from "./FiltersParser.js";
+import type { TextConstantContext } from "./FiltersParser.js";
+import type { BooleanConstantContext } from "./FiltersParser.js";
 
 
 /**

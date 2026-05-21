@@ -17,10 +17,8 @@
 import type { ProgressNotification } from "@modelcontextprotocol/client";
 
 import { MCP_PROGRESS_METADATA_KEY } from "../../metadata.js";
-import {
-  McpProgressMethodCallback,
-  ProgressSpecification,
-} from "../../method/index.js";
+import { McpProgressMethodCallback } from "../../method/progress/mcp-progress-method-callback.js";
+import { ProgressSpecification } from "../../method/progress/progress-specification.js";
 import type { McpProgressMetadata } from "../../mcp-progress.js";
 import {
   discoverAnnotatedMethodKeys,

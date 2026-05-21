@@ -18,8 +18,7 @@ import assert from "node:assert/strict";
 import "reflect-metadata";
 
 import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
-
-import { StructuredElicitResult } from "../../context/index.js";
+import { StructuredElicitResult } from "../../context/structured-elicit-result.js";
 
 export interface McpElicitationMethodCallbackProps {
   provider: object;

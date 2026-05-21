@@ -19,7 +19,6 @@ import "reflect-metadata";
 import { fileURLToPath } from "node:url";
 
 import { describe, it } from "vitest";
-
 import {
   assertGreetingPrompt,
   bootstrapStdioClient,

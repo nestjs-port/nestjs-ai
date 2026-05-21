@@ -17,7 +17,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CheerioDocumentReader } from "../cheerio-document-reader.js";
-import { CheerioDocumentReaderConfig } from "../config/index.js";
+import { CheerioDocumentReaderConfig } from "../config/cheerio-document-reader-config.js";
 
 describe("CheerioDocumentReader", () => {
   it("test simple read", async () => {

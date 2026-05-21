@@ -15,16 +15,14 @@
  */
 
 import "reflect-metadata";
-
 import type {
   GetPromptResult,
   McpServer,
   ServerContext,
 } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
-
-import { DefaultMetaProvider } from "../../../context/index.js";
-import type { MetaProvider } from "../../../context/index.js";
+import { DefaultMetaProvider } from "../../../context/default-meta-provider.js";
+import type { MetaProvider } from "../../../context/meta-provider.js";
 import type { McpPromptMetadata } from "../../../mcp-prompt.js";
 import { McpPromptMethodCallback } from "../mcp-prompt-method-callback.js";
 import {

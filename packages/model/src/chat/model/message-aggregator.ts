@@ -18,15 +18,16 @@ import { type Logger, LoggerFactory } from "@nestjs-port/core";
 import type { Observable } from "rxjs";
 import { defer } from "rxjs";
 import { finalize, tap } from "rxjs/operators";
-import { AssistantMessage, type ToolCall } from "../messages/index.js";
 import {
-  ChatGenerationMetadata,
-  ChatResponseMetadata,
-  DefaultUsage,
-  EmptyRateLimit,
-  PromptMetadata,
-  type RateLimit,
-} from "../metadata/index.js";
+  AssistantMessage,
+  type ToolCall,
+} from "../messages/assistant-message.js";
+import { ChatGenerationMetadata } from "../metadata/chat-generation-metadata.interface.js";
+import { ChatResponseMetadata } from "../metadata/chat-response-metadata.js";
+import { DefaultUsage } from "../metadata/default-usage.js";
+import { EmptyRateLimit } from "../metadata/empty-rate-limit.js";
+import { PromptMetadata } from "../metadata/prompt-metadata.js";
+import type { RateLimit } from "../metadata/rate-limit.js";
 import { ChatResponse } from "./chat-response.js";
 import { Generation } from "./generation.js";
 

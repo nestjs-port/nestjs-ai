@@ -17,25 +17,20 @@
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { assert, describe, expect, it } from "vitest";
-import { DefaultToolCallingChatOptions } from "../../../model/index.js";
-import {
-  DefaultToolDefinition,
-  ToolCallback,
-  type ToolDefinition,
-  ToolMetadata,
-} from "../../../tool/index.js";
-import { AssistantMessage } from "../../messages/index.js";
-import {
-  ChatGenerationMetadata,
-  ChatResponseMetadata,
-  DefaultUsage,
-} from "../../metadata/index.js";
-import { ChatResponse, Generation } from "../../model/index.js";
-import {
-  type ChatOptions,
-  DefaultChatOptions,
-  Prompt,
-} from "../../prompt/index.js";
+import { DefaultToolCallingChatOptions } from "../../../model/tool/default-tool-calling-chat-options.js";
+import { DefaultToolDefinition } from "../../../tool/definition/default-tool-definition.js";
+import { ToolCallback } from "../../../tool/tool-callback.js";
+import type { ToolDefinition } from "../../../tool/definition/tool-definition.js";
+import { ToolMetadata } from "../../../tool/metadata/tool-metadata.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { ChatGenerationMetadata } from "../../metadata/chat-generation-metadata.interface.js";
+import { ChatResponseMetadata } from "../../metadata/chat-response-metadata.js";
+import { DefaultUsage } from "../../metadata/default-usage.js";
+import { ChatResponse } from "../../model/chat-response.js";
+import { Generation } from "../../model/generation.js";
+import type { ChatOptions } from "../../prompt/chat-options.interface.js";
+import { DefaultChatOptions } from "../../prompt/default-chat-options.js";
+import { Prompt } from "../../prompt/prompt.js";
 import { ChatModelObservationContext } from "../chat-model-observation-context.js";
 import { DefaultChatModelObservationConvention } from "../default-chat-model-observation-convention.js";
 

@@ -17,16 +17,14 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import * as commonmark from "commonmark";
 import {
   Document,
   type DocumentBuilder,
   type DocumentReader,
 } from "@nestjs-ai/commons";
-import type { Node as CommonmarkNode } from "commonmark";
-import * as commonmark from "commonmark";
 import fg from "fast-glob";
-
-import { MarkdownDocumentReaderConfig } from "./config/index.js";
+import { MarkdownDocumentReaderConfig } from "./config/markdown-document-reader-config.js";
 
 type MarkdownResource = string | URL | Buffer;
 
@@ -155,7 +153,7 @@ class MarkdownDocumentVisitor {
     this._config = config;
   }
 
-  visit(document: CommonmarkNode): void {
+  visit(document: commonmark.Node): void {
     this._currentDocumentBuilder = Document.builder();
     const walker = document.walker();
     let event = walker.next();
@@ -175,7 +173,7 @@ class MarkdownDocumentVisitor {
     return this._documents;
   }
 
-  private _visitEntering(node: CommonmarkNode): void {
+  private _visitEntering(node: commonmark.Node): void {
     switch (node.type) {
       case "heading":
         this._buildAndFlush();
@@ -255,7 +253,7 @@ class MarkdownDocumentVisitor {
     }
   }
 
-  private _isFencedCodeBlock(node: CommonmarkNode): boolean {
+  private _isFencedCodeBlock(node: commonmark.Node): boolean {
     return Boolean((node as unknown as { _isFenced?: boolean })._isFenced);
   }
 }

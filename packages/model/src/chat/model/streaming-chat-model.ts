@@ -16,9 +16,9 @@
 
 import type { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import type { StreamingModel } from "../../model/index.js";
-import type { Message } from "../messages/index.js";
-import { Prompt } from "../prompt/index.js";
+import type { StreamingModel } from "../../model/streaming-model.interface.js";
+import type { Message } from "../messages/message.interface.js";
+import { Prompt } from "../prompt/prompt.js";
 import type { ChatResponse } from "./chat-response.js";
 
 export abstract class StreamingChatModel implements StreamingModel<

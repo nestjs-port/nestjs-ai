@@ -16,7 +16,6 @@
 
 import assert from "node:assert/strict";
 import "reflect-metadata";
-
 import type {
   CompleteRequest,
   CompleteResult,
@@ -24,8 +23,7 @@ import type {
   ServerContext,
 } from "@modelcontextprotocol/server";
 import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
-
-import { CompleteAdapter } from "../../adapter/index.js";
+import { CompleteAdapter } from "../../adapter/complete-adapter.js";
 import { McpMeta } from "../../mcp-meta.js";
 import type {
   McpCompleteMetadata,

@@ -17,18 +17,16 @@
 import { assert, describe, expect, it } from "vitest";
 import {
   AssistantMessage,
-  ChatResponse,
-  Generation,
-  Prompt,
   type ToolCall,
-  UserMessage,
-} from "../../../chat/index.js";
-import type { ToolCallbackResolver } from "../../../tool/index.js";
-import {
-  DefaultToolDefinition,
-  ToolCallback,
-  ToolMetadata,
-} from "../../../tool/index.js";
+} from "../../../chat/messages/assistant-message.js";
+import { ChatResponse } from "../../../chat/model/chat-response.js";
+import { Generation } from "../../../chat/model/generation.js";
+import { Prompt } from "../../../chat/prompt/prompt.js";
+import { UserMessage } from "../../../chat/messages/user-message.js";
+import type { ToolCallbackResolver } from "../../../tool/resolution/tool-callback-resolver.interface.js";
+import { DefaultToolDefinition } from "../../../tool/definition/default-tool-definition.js";
+import { ToolCallback } from "../../../tool/tool-callback.js";
+import { ToolMetadata } from "../../../tool/metadata/tool-metadata.js";
 import { DefaultToolCallingManager } from "../default-tool-calling-manager.js";
 
 function createMockToolCallback(

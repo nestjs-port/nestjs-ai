@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Filter } from "../filter/index.js";
+import { Filter } from "../filter/filter.js";
 import { SimpleVectorStoreFilterExpressionEvaluator } from "../simple-vector-store-filter-expression-evaluator.js";
 
 describe("SimpleVectorStoreFilterExpressionEvaluator", () => {

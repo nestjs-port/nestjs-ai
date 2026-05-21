@@ -38,7 +38,6 @@ import {
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
 import {
   PgDistanceType,
   PgIndexType,

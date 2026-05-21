@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-
 import type {
   GetPromptResult,
   McpServer,
@@ -26,8 +25,7 @@ import type {
   TextContent,
 } from "@modelcontextprotocol/server";
 import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
-
-import { MetaUtils } from "../../common/index.js";
+import { MetaUtils } from "../../common/meta-utils.js";
 import { McpMeta } from "../../mcp-meta.js";
 import type {
   McpPromptMetadata,

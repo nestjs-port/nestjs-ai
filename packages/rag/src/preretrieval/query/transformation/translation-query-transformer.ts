@@ -19,7 +19,7 @@ import type { ChatClient } from "@nestjs-ai/client-chat";
 import { PromptTemplate } from "@nestjs-ai/model";
 import { type Logger, LoggerFactory, StringUtils } from "@nestjs-port/core";
 import type { Query } from "../../../query.js";
-import { PromptAssert } from "../../../util/index.js";
+import { PromptAssert } from "../../../util/prompt-assert.js";
 import { QueryTransformer } from "./query-transformer.js";
 
 export interface TranslationQueryTransformerProps {

@@ -1,19 +1,3 @@
-/*
- * Copyright 2023-present the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AiObservationAttributes,
   AiObservationMetricAttributes,
@@ -30,10 +14,13 @@ import {
   type Tag,
 } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages/index.js";
-import { ChatResponseMetadata, Usage } from "../../metadata/index.js";
-import { ChatResponse, Generation } from "../../model/index.js";
-import { DefaultChatOptions, Prompt } from "../../prompt/index.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { ChatResponseMetadata } from "../../metadata/chat-response-metadata.js";
+import { Usage } from "../../metadata/usage.js";
+import { ChatResponse } from "../../model/chat-response.js";
+import { Generation } from "../../model/generation.js";
+import { DefaultChatOptions } from "../../prompt/default-chat-options.js";
+import { Prompt } from "../../prompt/prompt.js";
 import { ChatModelMeterObservationHandler } from "../chat-model-meter-observation-handler.js";
 import { ChatModelObservationContext } from "../chat-model-observation-context.js";
 import { DefaultChatModelObservationConvention } from "../default-chat-model-observation-convention.js";

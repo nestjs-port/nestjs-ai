@@ -23,7 +23,7 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { assert, describe, expect, it } from "vitest";
-import { GoogleGenAiThinkingLevel } from "../common/index.js";
+import { GoogleGenAiThinkingLevel } from "../common/google-gen-ai-thinking-level.js";
 import { GoogleGenAiChatModel } from "../google-gen-ai-chat-model.js";
 import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 

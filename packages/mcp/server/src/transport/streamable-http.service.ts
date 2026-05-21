@@ -16,19 +16,19 @@
 
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import type { McpServer } from "@modelcontextprotocol/server";
+import type { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import {
   Inject,
   Injectable,
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from "@nestjs/common";
-import type { McpServerModuleOptions } from "../module/index.js";
+import type { McpServerModuleOptions } from "../module/mcp-server-module.options.js";
 import {
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
   MCP_SERVER_TOKEN,
-} from "../module/index.js";
+} from "../module/mcp-server.tokens.js";
 
 @Injectable()
 export class McpServerStreamableHttpService

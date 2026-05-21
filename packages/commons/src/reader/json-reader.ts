@@ -16,8 +16,8 @@
 
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-
-import { Document, type DocumentReader } from "../document/index.js";
+import { Document } from "../document/document.js";
+import type { DocumentReader } from "../document/document-reader.interface.js";
 import { EmptyJsonMetadataGenerator } from "./empty-json-metadata-generator.js";
 import type { JsonMetadataGenerator } from "./json-metadata-generator.js";
 

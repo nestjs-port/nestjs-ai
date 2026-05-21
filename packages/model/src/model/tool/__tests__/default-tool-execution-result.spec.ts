@@ -15,8 +15,9 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { Message } from "../../../chat/index.js";
-import { AssistantMessage, UserMessage } from "../../../chat/index.js";
+import type { Message } from "../../../chat/messages/message.interface.js";
+import { AssistantMessage } from "../../../chat/messages/assistant-message.js";
+import { UserMessage } from "../../../chat/messages/user-message.js";
 import { DefaultToolExecutionResult } from "../default-tool-execution-result.js";
 
 describe("DefaultToolExecutionResult", () => {

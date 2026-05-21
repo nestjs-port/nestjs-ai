@@ -15,7 +15,7 @@
  */
 
 import type { Document } from "@nestjs-ai/commons";
-import type { ModelRequest } from "../model/index.js";
+import type { ModelRequest } from "../model/model-request.interface.js";
 import { EmbeddingOptions } from "./embedding-options.interface.js";
 
 /**

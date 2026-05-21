@@ -20,9 +20,9 @@ import { LoggerFactory, ParsingUtils } from "@nestjs-port/core";
 import {
   TOOL_METADATA_KEY,
   type ToolAnnotationMetadata,
-} from "../annotation/index.js";
-import type { ToolCallResultConverter } from "../execution/index.js";
-import { DefaultToolCallResultConverter } from "../execution/index.js";
+} from "../annotation/tool.decorator.js";
+import type { ToolCallResultConverter } from "../execution/tool-call-result-converter.js";
+import { DefaultToolCallResultConverter } from "../execution/default-tool-call-result-converter.js";
 import type { ToolCallback } from "../tool-callback.js";
 
 /**

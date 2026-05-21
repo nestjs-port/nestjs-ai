@@ -16,12 +16,10 @@
 
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import type { Message } from "../../messages/index.js";
-import {
-  AssistantMessage,
-  SystemMessage,
-  UserMessage,
-} from "../../messages/index.js";
+import type { Message } from "../../messages/message.interface.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { SystemMessage } from "../../messages/system-message.js";
+import { UserMessage } from "../../messages/user-message.js";
 import { InMemoryChatMemoryRepository } from "../in-memory-chat-memory-repository.js";
 import { MessageWindowChatMemory } from "../message-window-chat-memory.js";
 

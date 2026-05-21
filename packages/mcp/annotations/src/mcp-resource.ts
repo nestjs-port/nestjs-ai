@@ -27,8 +27,8 @@ import type {
   McpServerExchange,
   McpTransportContext,
 } from "@nestjs-ai/mcp-common";
-import { DefaultMetaProvider } from "./context/index.js";
-import type { MetaProvider } from "./context/index.js";
+import { DefaultMetaProvider } from "./context/default-meta-provider.js";
+import type { MetaProvider } from "./context/meta-provider.js";
 import type { McpMeta } from "./mcp-meta.js";
 import { MCP_RESOURCE_METADATA_KEY } from "./metadata.js";
 

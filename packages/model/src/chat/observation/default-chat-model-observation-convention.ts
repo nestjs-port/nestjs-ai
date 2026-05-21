@@ -16,8 +16,8 @@
 
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, KeyValues, StringUtils } from "@nestjs-port/core";
-import type { ToolCallingChatOptions } from "../../model/index.js";
-import type { ChatOptions } from "../prompt/index.js";
+import type { ToolCallingChatOptions } from "../../model/tool/tool-calling-chat-options.interface.js";
+import type { ChatOptions } from "../prompt/chat-options.interface.js";
 import type { ChatModelObservationContext } from "./chat-model-observation-context.js";
 import { ChatModelObservationConvention } from "./chat-model-observation-convention.js";
 

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { DefaultToolDefinition } from "../../definition/index.js";
+import { DefaultToolDefinition } from "../../definition/default-tool-definition.js";
 import { DefaultToolExecutionExceptionProcessor } from "../default-tool-execution-exception-processor.js";
 import { ToolExecutionException } from "../tool-execution-exception.js";
 

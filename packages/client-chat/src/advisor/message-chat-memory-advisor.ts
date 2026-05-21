@@ -24,8 +24,11 @@ import { mergeMap, observeOn, of } from "rxjs";
 import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
 import type { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";
-import type { AdvisorChain, StreamAdvisorChain } from "./api/index.js";
-import { Advisor, BaseAdvisor, BaseChatMemoryAdvisor } from "./api/index.js";
+import type { AdvisorChain } from "./api/advisor-chain.js";
+import type { StreamAdvisorChain } from "./api/stream-advisor-chain.interface.js";
+import { Advisor } from "./api/advisor.interface.js";
+import { BaseAdvisor } from "./api/base-advisor.js";
+import { BaseChatMemoryAdvisor } from "./api/base-chat-memory-advisor.js";
 
 export interface MessageChatMemoryAdvisorProps {
   chatMemory: ChatMemory;

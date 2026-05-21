@@ -27,7 +27,7 @@ import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
 import { TOOL_CALLBACKS_TOKEN } from "@nestjs-ai/model";
 import type { ToolCallback, ToolCallbackProvider } from "@nestjs-ai/model";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
-import { McpServerStdioService } from "../transport/index.js";
+import { McpServerStdioService } from "../transport/stdio.service.js";
 import { McpServerAnnotationRegistrar } from "./mcp-server-annotation-registrar.js";
 import {
   DEFAULT_STREAMABLE_HTTP_ENDPOINT,
@@ -42,10 +42,8 @@ import {
   MCP_SERVER_TOKEN,
   MCP_SERVER_TRANSPORT_TYPE_TOKEN,
 } from "./mcp-server.tokens.js";
-import {
-  createStreamableHttpController,
-  McpServerStreamableHttpService,
-} from "../transport/streamable-http/index.js";
+import { createStreamableHttpController } from "../transport/streamable-http.controller.factory.js";
+import { McpServerStreamableHttpService } from "../transport/streamable-http.service.js";
 
 const DEFAULT_TRANSPORT: McpServerTransportType = "streamable-http";
 

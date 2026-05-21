@@ -15,11 +15,10 @@
  */
 
 import { readFile } from "node:fs/promises";
-
 import {
-  type Client as McpClient,
   StreamableHTTPClientTransport,
   StdioClientTransport,
+  type Client as McpClient,
   type Implementation,
   type StdioServerParameters,
   type StreamableHTTPClientTransportOptions,

@@ -18,8 +18,8 @@ import assert from "node:assert/strict";
 
 import { LoggerFactory } from "@nestjs-port/core";
 import type { Document, DocumentTransformer } from "@nestjs-ai/commons";
-import type { ChatModel } from "../../chat/index.js";
-import { PromptTemplate } from "../../chat/index.js";
+import type { ChatModel } from "../../chat/model/chat-model.js";
+import { PromptTemplate } from "../../chat/prompt/prompt-template.js";
 
 export interface KeywordMetadataEnricherProps {
   /** The model predictor to use for keyword extraction. */

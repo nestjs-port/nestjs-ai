@@ -16,7 +16,6 @@
 
 import assert from "node:assert/strict";
 import type { PDFPageProxy } from "pdfjs-dist/types/src/display/api.js";
-
 import {
   ForkPdfLayoutTextStripper,
   type Region,

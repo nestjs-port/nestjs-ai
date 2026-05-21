@@ -15,7 +15,7 @@
  */
 
 import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
-import { StructuredElicitResult } from "../../../context/index.js";
+import { StructuredElicitResult } from "../../../context/structured-elicit-result.js";
 import { McpElicitation } from "../../../mcp-elicitation.js";
 
 /**

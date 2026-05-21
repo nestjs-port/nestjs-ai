@@ -22,20 +22,16 @@ import { defer, throwError } from "rxjs";
 import { ChatClientMessageAggregator } from "../chat-client-message-aggregator.js";
 import type { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";
-import type {
-  Advisor,
-  CallAdvisor,
-  CallAdvisorChain,
-  StreamAdvisor,
-  StreamAdvisorChain,
-} from "./api/index.js";
-import { BaseAdvisorChain } from "./api/index.js";
-import {
-  AdvisorObservationContext,
-  type AdvisorObservationConvention,
-  AdvisorObservationDocumentation,
-  DefaultAdvisorObservationConvention,
-} from "./observation/index.js";
+import type { Advisor } from "./api/advisor.interface.js";
+import type { CallAdvisor } from "./api/call-advisor.interface.js";
+import type { CallAdvisorChain } from "./api/call-advisor-chain.interface.js";
+import type { StreamAdvisor } from "./api/stream-advisor.interface.js";
+import type { StreamAdvisorChain } from "./api/stream-advisor-chain.interface.js";
+import { BaseAdvisorChain } from "./api/base-advisor-chain.js";
+import { AdvisorObservationContext } from "./observation/advisor-observation-context.js";
+import type { AdvisorObservationConvention } from "./observation/advisor-observation-convention.js";
+import { AdvisorObservationDocumentation } from "./observation/advisor-observation-documentation.js";
+import { DefaultAdvisorObservationConvention } from "./observation/default-advisor-observation-convention.js";
 
 export interface DefaultAroundAdvisorChainProps {
   observationRegistry: ObservationRegistry;

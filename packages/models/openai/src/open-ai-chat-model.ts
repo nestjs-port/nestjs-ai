@@ -70,7 +70,7 @@ import type { FunctionParameters } from "openai/resources/shared";
 import { defer, EMPTY, from, Observable } from "rxjs";
 import { bufferCount, map, switchMap, toArray } from "rxjs/operators";
 import { OpenAiChatOptions } from "./open-ai-chat-options.js";
-import { OpenAiSetup } from "./setup/index.js";
+import { OpenAiSetup } from "./setup/open-ai-setup.js";
 import type { OpenAiClient } from "./open-ai-client.js";
 
 export interface OpenAiChatModelProps {

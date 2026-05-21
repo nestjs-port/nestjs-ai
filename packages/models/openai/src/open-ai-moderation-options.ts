@@ -15,7 +15,6 @@
  */
 
 import type { ModerationOptions } from "@nestjs-ai/model";
-
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,

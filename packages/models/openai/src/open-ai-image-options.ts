@@ -21,7 +21,6 @@ import type {
   ImageGenerateParamsNonStreaming,
   ImageModel,
 } from "openai/resources/images";
-
 import {
   AbstractOpenAiOptions,
   type AbstractOpenAiOptionsProps,

@@ -15,8 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-
-import type { ModelRequest } from "../model/index.js";
+import type { ModelRequest } from "../model/model-request.interface.js";
 import { ImageMessage } from "./image-message.js";
 import type { ImageOptions } from "./image-options.js";
 import { ImageOptionsBuilder } from "./image-options-builder.js";

@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages/index.js";
-import { ChatGenerationMetadata } from "../../metadata/index.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { ChatGenerationMetadata } from "../../metadata/chat-generation-metadata.interface.js";
 import { Generation } from "../generation.js";
 
 describe("Generation", () => {

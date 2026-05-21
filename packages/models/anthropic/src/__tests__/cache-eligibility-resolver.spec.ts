@@ -16,13 +16,10 @@
 
 import { MessageType } from "@nestjs-ai/model";
 import { assert, describe, expect, it } from "vitest";
-
-import {
-  AnthropicCacheOptions,
-  AnthropicCacheStrategy,
-  AnthropicCacheTtl,
-  CacheEligibilityResolver,
-} from "../index.js";
+import { AnthropicCacheOptions } from "../anthropic-cache-options.js";
+import { AnthropicCacheStrategy } from "../anthropic-cache-strategy.js";
+import { AnthropicCacheTtl } from "../anthropic-cache-ttl.js";
+import { CacheEligibilityResolver } from "../cache-eligibility-resolver.js";
 
 describe("CacheEligibilityResolver", () => {
   it("no caching when strategy is none", () => {

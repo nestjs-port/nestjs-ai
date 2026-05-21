@@ -15,13 +15,11 @@
  */
 
 import type { Observable } from "rxjs";
-import type { Model } from "../../model/index.js";
-import type { Message } from "../messages/index.js";
-import {
-  type ChatOptions,
-  DefaultChatOptions,
-  Prompt,
-} from "../prompt/index.js";
+import type { Model } from "../../model/model.interface.js";
+import type { Message } from "../messages/message.interface.js";
+import type { ChatOptions } from "../prompt/chat-options.interface.js";
+import { DefaultChatOptions } from "../prompt/default-chat-options.js";
+import { Prompt } from "../prompt/prompt.js";
 import type { ChatResponse } from "./chat-response.js";
 import { StreamingChatModel } from "./streaming-chat-model.js";
 

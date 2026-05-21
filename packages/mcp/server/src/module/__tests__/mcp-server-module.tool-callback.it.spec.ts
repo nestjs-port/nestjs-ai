@@ -18,7 +18,6 @@ import "reflect-metadata";
 
 import { randomUUID } from "node:crypto";
 import type { AddressInfo } from "node:net";
-
 import {
   Client,
   StreamableHTTPClientTransport,
@@ -27,14 +26,13 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { Injectable, Module, type INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { afterEach, describe, expect, it } from "vitest";
-
 import {
   MCP_SERVER_MODULE_OPTIONS_TOKEN,
   MCP_SERVER_TOKEN,
-  McpServerModule,
-  type McpServerModuleOptions,
-} from "../index.js";
-import { McpServerStreamableHttpService } from "../../transport/streamable-http/index.js";
+} from "../mcp-server.tokens.js";
+import { McpServerModule } from "../mcp-server.module.js";
+import type { McpServerModuleOptions } from "../mcp-server-module.options.js";
+import { McpServerStreamableHttpService } from "../../transport/streamable-http.service.js";
 import { TOOL_CALLBACK_PROVIDER_TOKEN } from "@nestjs-ai/commons";
 import { ToolCallback, type ToolCallbackProvider } from "@nestjs-ai/model";
 

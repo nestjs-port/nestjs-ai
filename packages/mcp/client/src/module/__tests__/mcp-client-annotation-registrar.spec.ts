@@ -17,7 +17,6 @@
 import "reflect-metadata";
 
 import { fileURLToPath } from "node:url";
-
 import {
   Client,
   type CreateMessageRequest,

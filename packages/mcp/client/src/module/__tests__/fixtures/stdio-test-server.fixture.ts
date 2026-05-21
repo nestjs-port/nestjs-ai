@@ -17,7 +17,6 @@
 import "reflect-metadata";
 
 import { McpServer, StdioServerTransport } from "@modelcontextprotocol/server";
-
 import {
   registerTestHandlers,
   TEST_SERVER_INFO,

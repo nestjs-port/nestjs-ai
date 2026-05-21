@@ -20,8 +20,8 @@ import {
   type DocumentTransformer,
   MetadataMode,
 } from "@nestjs-ai/commons";
-import type { ChatModel } from "../../chat/index.js";
-import { PromptTemplate } from "../../chat/index.js";
+import type { ChatModel } from "../../chat/model/chat-model.js";
+import { PromptTemplate } from "../../chat/prompt/prompt-template.js";
 
 /**
  * Title extractor with adjacent sharing that uses generative to extract

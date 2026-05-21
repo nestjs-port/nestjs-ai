@@ -19,10 +19,8 @@ import assert from "node:assert/strict";
 import type { LoggingMessageNotification } from "@modelcontextprotocol/client";
 
 import { MCP_LOGGING_METADATA_KEY } from "../../metadata.js";
-import {
-  LoggingSpecification,
-  McpLoggingMethodCallback,
-} from "../../method/index.js";
+import { LoggingSpecification } from "../../method/logging/logging-specification.js";
+import { McpLoggingMethodCallback } from "../../method/logging/mcp-logging-method-callback.js";
 import type { McpLoggingMetadata } from "../../mcp-logging.js";
 import {
   discoverAnnotatedMethodKeys,

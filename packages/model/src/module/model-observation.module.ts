@@ -20,12 +20,10 @@ import {
   type MeterRegistry,
   ObservationHandlers,
 } from "@nestjs-port/core";
-import {
-  ChatModelCompletionObservationHandler,
-  ChatModelMeterObservationHandler,
-} from "../chat/index.js";
-import { EmbeddingModelMeterObservationHandler } from "../embedding/index.js";
-import { ImageModelPromptContentObservationHandler } from "../image/index.js";
+import { ChatModelCompletionObservationHandler } from "../chat/observation/chat-model-completion-observation-handler.js";
+import { ChatModelMeterObservationHandler } from "../chat/observation/chat-model-meter-observation-handler.js";
+import { EmbeddingModelMeterObservationHandler } from "../embedding/observation/embedding-model-meter-observation-handler.js";
+import { ImageModelPromptContentObservationHandler } from "../image/observation/image-model-prompt-content-observation-handler.js";
 
 const modelObservationHandlerProvider: Provider = {
   provide: Symbol.for("MODEL_OBSERVATION_HANDLER_PROVIDER"),

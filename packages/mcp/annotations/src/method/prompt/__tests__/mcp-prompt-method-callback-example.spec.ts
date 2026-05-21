@@ -15,15 +15,13 @@
  */
 
 import "reflect-metadata";
-
 import type {
   GetPromptResult,
   McpServer,
   PromptMessage,
 } from "@modelcontextprotocol/server";
 import { z } from "zod";
-
-import { DefaultMetaProvider } from "../../../context/index.js";
+import { DefaultMetaProvider } from "../../../context/default-meta-provider.js";
 import { McpServerExchange } from "@nestjs-ai/mcp-common";
 import { McpPrompt } from "../../../mcp-prompt.js";
 import type {

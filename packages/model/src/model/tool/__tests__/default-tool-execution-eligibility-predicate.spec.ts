@@ -17,13 +17,13 @@
 import { describe, expect, it } from "vitest";
 import {
   AssistantMessage,
-  type ChatOptions,
-  ChatResponse,
-  DefaultChatOptions,
-  Generation,
   type ToolCall,
-} from "../../../chat/index.js";
-import type { ToolCallback } from "../../../tool/index.js";
+} from "../../../chat/messages/assistant-message.js";
+import type { ChatOptions } from "../../../chat/prompt/chat-options.interface.js";
+import { ChatResponse } from "../../../chat/model/chat-response.js";
+import { DefaultChatOptions } from "../../../chat/prompt/default-chat-options.js";
+import { Generation } from "../../../chat/model/generation.js";
+import type { ToolCallback } from "../../../tool/tool-callback.js";
 import { DefaultToolExecutionEligibilityPredicate } from "../default-tool-execution-eligibility-predicate.js";
 import type { ToolCallingChatOptions } from "../tool-calling-chat-options.interface.js";
 

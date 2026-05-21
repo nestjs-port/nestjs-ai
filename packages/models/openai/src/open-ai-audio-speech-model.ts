@@ -25,14 +25,13 @@ import {
   TextToSpeechPrompt,
   TextToSpeechResponse,
 } from "@nestjs-ai/model";
-
 import {
   OpenAiAudioSpeechOptions,
   type OpenAiAudioSpeechOptionsProps,
 } from "./open-ai-audio-speech-options.js";
 import type { OpenAiClient } from "./open-ai-client.js";
-import { OpenAiAudioSpeechResponseMetadata } from "./metadata/index.js";
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
+import { OpenAiAudioSpeechResponseMetadata } from "./metadata/open-ai-audio-speech-response-metadata.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/open-ai-setup.js";
 
 export interface OpenAiAudioSpeechModelProps {
   openAiClient?: OpenAiClient | null;

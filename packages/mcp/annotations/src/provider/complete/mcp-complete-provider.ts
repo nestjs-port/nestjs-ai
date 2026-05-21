@@ -15,23 +15,21 @@
  */
 
 import assert from "node:assert/strict";
-
 import type {
   CompleteRequest,
   CompleteResult,
   McpServer,
   ServerContext,
 } from "@modelcontextprotocol/server";
-
-import { CompleteAdapter } from "../../adapter/index.js";
+import { CompleteAdapter } from "../../adapter/complete-adapter.js";
 import { MCP_COMPLETE_METADATA_KEY } from "../../metadata.js";
 import type { McpCompleteMetadata } from "../../mcp-complete.js";
-import { McpCompleteMethodCallback } from "../../method/index.js";
+import { McpCompleteMethodCallback } from "../../method/complete/mcp-complete-method-callback.js";
 import {
   discoverAnnotatedMethodKeys,
   getAnnotatedMethodMetadata,
 } from "../annotation-provider-utils.js";
-import type { CompleteRegistration } from "../../method/index.js";
+import type { CompleteRegistration } from "../../method/complete/mcp-complete-method-callback.js";
 
 export interface McpCompleteProviderProps {
   completeObjects: object[];

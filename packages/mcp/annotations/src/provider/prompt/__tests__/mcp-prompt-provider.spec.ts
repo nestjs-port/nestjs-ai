@@ -15,14 +15,12 @@
  */
 
 import "reflect-metadata";
-
 import type {
   GetPromptResult,
   McpServer,
   ServerContext,
 } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
-
 import {
   ExamplePromptArgsSchema,
   ExamplePromptProvider,

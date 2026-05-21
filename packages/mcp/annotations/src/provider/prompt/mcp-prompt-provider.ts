@@ -18,11 +18,10 @@ import "reflect-metadata";
 import assert from "node:assert/strict";
 
 import type { McpServer } from "@modelcontextprotocol/server";
-
 import {
   McpPromptMethodCallback,
   type PromptRegistration,
-} from "../../method/index.js";
+} from "../../method/prompt/mcp-prompt-method-callback.js";
 import type { McpPromptMetadata } from "../../mcp-prompt.js";
 import { MCP_PROMPT_METADATA_KEY } from "../../metadata.js";
 

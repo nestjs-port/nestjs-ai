@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import type { Document } from "@nestjs-ai/commons";
-import type { Model } from "../model/index.js";
+import type { Model } from "../model/model.interface.js";
 import type { BatchingStrategy } from "./batching-strategy.interface.js";
 import { EmbeddingOptions } from "./embedding-options.interface.js";
 import { EmbeddingRequest } from "./embedding-request.js";

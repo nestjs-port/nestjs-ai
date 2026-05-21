@@ -17,7 +17,7 @@
 import { AiObservationAttributes } from "@nestjs-ai/commons";
 import { KeyValue, ObservationContext } from "@nestjs-port/core";
 import { describe, expect, it } from "vitest";
-import { Usage } from "../../../chat/index.js";
+import { Usage } from "../../../chat/metadata/usage.js";
 import { EmbeddingOptions } from "../../embedding-options.interface.js";
 import { EmbeddingRequest } from "../../embedding-request.js";
 import { EmbeddingResponse } from "../../embedding-response.js";

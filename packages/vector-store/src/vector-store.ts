@@ -18,8 +18,8 @@ import assert from "node:assert/strict";
 import type { Document, DocumentWriter } from "@nestjs-ai/commons";
 import type { BatchingStrategy } from "@nestjs-ai/model";
 import type { ObservationRegistry } from "@nestjs-port/core";
-import type { Filter } from "./filter/index.js";
-import type { VectorStoreObservationConvention } from "./observation/index.js";
+import type { Filter } from "./filter/filter.js";
+import type { VectorStoreObservationConvention } from "./observation/vector-store-observation-convention.js";
 import { SearchRequest } from "./search-request.js";
 import { VectorStoreRetriever } from "./vector-store-retriever.js";
 

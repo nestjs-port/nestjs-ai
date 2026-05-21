@@ -21,8 +21,8 @@ import {
   type TemplateRenderer,
 } from "@nestjs-ai/commons";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import type { Message } from "../messages/index.js";
-import { UserMessage } from "../messages/index.js";
+import type { Message } from "../messages/message.interface.js";
+import { UserMessage } from "../messages/user-message.js";
 import type { ChatOptions } from "./chat-options.interface.js";
 import { Prompt } from "./prompt.js";
 import type { PromptTemplateActions } from "./prompt-template-actions.interface.js";

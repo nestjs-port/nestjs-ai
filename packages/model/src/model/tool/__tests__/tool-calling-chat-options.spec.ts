@@ -15,11 +15,9 @@
  */
 
 import { describe, expect, it } from "vitest";
-import {
-  DefaultToolDefinition,
-  ToolCallback,
-  type ToolDefinition,
-} from "../../../tool/index.js";
+import { DefaultToolDefinition } from "../../../tool/definition/default-tool-definition.js";
+import { ToolCallback } from "../../../tool/tool-callback.js";
+import type { ToolDefinition } from "../../../tool/definition/tool-definition.js";
 import { DefaultToolCallingChatOptions } from "../default-tool-calling-chat-options.js";
 import { ToolCallingChatOptions } from "../tool-calling-chat-options.interface.js";
 

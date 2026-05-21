@@ -19,8 +19,8 @@ import assert from "node:assert/strict";
 import type { ElicitRequest, ElicitResult } from "@modelcontextprotocol/client";
 
 import { MCP_ELICITATION_METADATA_KEY } from "../../metadata.js";
-import { McpElicitationMethodCallback } from "../../method/index.js";
-import { ElicitationSpecification } from "../../method/index.js";
+import { McpElicitationMethodCallback } from "../../method/elicitation/mcp-elicitation-method-callback.js";
+import { ElicitationSpecification } from "../../method/elicitation/elicitation-specification.js";
 import type { McpElicitationMetadata } from "../../mcp-elicitation.js";
 import {
   discoverAnnotatedMethodKeys,

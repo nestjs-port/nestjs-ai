@@ -16,7 +16,7 @@
 
 import assert from "node:assert/strict";
 import { StringUtils } from "@nestjs-port/core";
-import type { Message } from "../messages/index.js";
+import type { Message } from "../messages/message.interface.js";
 import type { ChatMemoryRepository } from "./chat-memory-repository.js";
 
 export class InMemoryChatMemoryRepository implements ChatMemoryRepository {

@@ -20,6 +20,7 @@ import { Test } from "@nestjs/testing";
 import {
   HTTP_CLIENT_TOKEN,
   PROVIDER_INSTANCE_EXPLORER_TOKEN,
+  TOOL_CALLBACK_PROVIDER_TOKEN,
 } from "@nestjs-ai/commons";
 import { NestAiModule } from "@nestjs-ai/platform";
 import type { HttpClient } from "@nestjs-port/core";
@@ -51,6 +52,7 @@ describe("NestAiModule", () => {
 
       assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       assert.exists(moduleRef.get(PROVIDER_INSTANCE_EXPLORER_TOKEN));
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
 
     it("should use explicit HTTP client when provided", async () => {
@@ -59,6 +61,7 @@ describe("NestAiModule", () => {
       }).compile();
 
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
 
     it("should be global by default", async () => {
@@ -70,6 +73,7 @@ describe("NestAiModule", () => {
 
       assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(true);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
 
     it("should respect global: false option", async () => {
@@ -81,6 +85,7 @@ describe("NestAiModule", () => {
 
       assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(false);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
   });
 
@@ -99,6 +104,7 @@ describe("NestAiModule", () => {
       }).compile();
 
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
 
     it("should support async factory returning a Promise", async () => {
@@ -113,6 +119,7 @@ describe("NestAiModule", () => {
       }).compile();
 
       expect(moduleRef.get(HTTP_CLIENT_TOKEN)).toBe(TEST_HTTP_CLIENT);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
 
     it("should be global by default for async", async () => {
@@ -126,6 +133,7 @@ describe("NestAiModule", () => {
 
       assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(true);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
 
     it("should respect global: false for async", async () => {
@@ -140,6 +148,7 @@ describe("NestAiModule", () => {
 
       assert.exists(moduleRef.get(HTTP_CLIENT_TOKEN));
       expect(rootModule.global).toBe(false);
+      expect(moduleRef.get(TOOL_CALLBACK_PROVIDER_TOKEN)).toEqual([]);
     });
   });
 });

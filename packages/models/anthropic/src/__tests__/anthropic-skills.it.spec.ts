@@ -23,14 +23,11 @@ import { Prompt, UserMessage } from "@nestjs-ai/model";
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { assert, beforeAll, describe, expect, it } from "vitest";
-
-import {
-  AnthropicChatModel,
-  AnthropicChatOptions,
-  AnthropicSetup,
-  AnthropicSkill,
-  AnthropicSkillsResponseHelper,
-} from "../index.js";
+import { AnthropicChatModel } from "../anthropic-chat-model.js";
+import { AnthropicChatOptions } from "../anthropic-chat-options.js";
+import { AnthropicSetup } from "../anthropic-setup.js";
+import { AnthropicSkill } from "../anthropic-skill.js";
+import { AnthropicSkillsResponseHelper } from "../anthropic-skills-response-helper.js";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 

@@ -19,10 +19,8 @@ import assert from "node:assert/strict";
 import type { Resource } from "@modelcontextprotocol/server";
 
 import { MCP_RESOURCE_LIST_CHANGED_METADATA_KEY } from "../../../metadata.js";
-import {
-  McpResourceListChangedMethodCallback,
-  ResourceListChangedSpecification,
-} from "../../../method/index.js";
+import { McpResourceListChangedMethodCallback } from "../../../method/changed/resource/mcp-resource-list-changed-method-callback.js";
+import { ResourceListChangedSpecification } from "../../../method/changed/resource/resource-list-changed-specification.js";
 import type { McpResourceListChangedMetadata } from "../../../mcp-resource-list-changed.js";
 import {
   discoverAnnotatedMethodKeys,

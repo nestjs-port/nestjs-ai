@@ -15,7 +15,9 @@
  */
 
 import { assert, describe, expect, it } from "vitest";
-import { Character, ForkPdfLayoutTextStripper, TextLine } from "../index.js";
+import { Character } from "../character.js";
+import { ForkPdfLayoutTextStripper } from "../fork-pdf-layout-text-stripper.js";
+import { TextLine } from "../text-line.js";
 
 describe("TextLine", () => {
   it("test write character at index valid index", () => {

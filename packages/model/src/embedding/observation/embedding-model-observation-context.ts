@@ -15,7 +15,7 @@
  */
 
 import { AiOperationMetadata, AiOperationType } from "@nestjs-ai/commons";
-import { ModelObservationContext } from "../../model/index.js";
+import { ModelObservationContext } from "../../model/observation/model-observation-context.js";
 import type { EmbeddingRequest } from "../embedding-request.js";
 import type { EmbeddingResponse } from "../embedding-response.js";
 

@@ -18,7 +18,7 @@ import "reflect-metadata";
 import assert from "node:assert/strict";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { type Logger, LoggerFactory } from "@nestjs-port/core";
-import { MethodToolCallbackProvider } from "../method/index.js";
+import { MethodToolCallbackProvider } from "../method/method-tool-callback-provider.js";
 import type { ToolCallback } from "../tool-callback.js";
 import type { ToolCallbackResolver } from "./tool-callback-resolver.interface.js";
 

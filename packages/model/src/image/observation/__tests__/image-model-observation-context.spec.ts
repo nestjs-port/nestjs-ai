@@ -15,7 +15,8 @@
  */
 
 import { assert, describe, expect, it } from "vitest";
-import { ImageOptionsBuilder, ImagePrompt } from "../../index.js";
+import { ImageOptionsBuilder } from "../../image-options-builder.js";
+import { ImagePrompt } from "../../image-prompt.js";
 import { ImageModelObservationContext } from "../image-model-observation-context.js";
 
 describe("ImageModelObservationContext", () => {

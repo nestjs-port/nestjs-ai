@@ -15,10 +15,10 @@
  */
 
 import { assert, describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages/index.js";
-import { SystemMessage } from "../../messages/index.js";
-import { ToolResponseMessage } from "../../messages/index.js";
-import { UserMessage } from "../../messages/index.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { SystemMessage } from "../../messages/system-message.js";
+import { ToolResponseMessage } from "../../messages/tool-response-message.js";
+import { UserMessage } from "../../messages/user-message.js";
 import { DefaultChatOptions } from "../default-chat-options.js";
 import { Prompt } from "../prompt.js";
 

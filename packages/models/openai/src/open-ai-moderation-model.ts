@@ -22,7 +22,6 @@ import type {
   ModerationCreateParams,
   ModerationCreateResponse,
 } from "openai/resources/moderations";
-
 import {
   Categories,
   CategoryScores,
@@ -34,8 +33,7 @@ import {
   ModerationResponse,
   ModerationResult,
 } from "@nestjs-ai/model";
-
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/open-ai-setup.js";
 import {
   OpenAiModerationOptions,
   type OpenAiModerationOptionsProps,

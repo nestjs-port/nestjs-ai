@@ -1,19 +1,3 @@
-/*
- * Copyright 2026-present the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   type DynamicModule,
   type FactoryProvider,
@@ -31,14 +15,12 @@ import {
 } from "@nestjs-port/jsdbc";
 
 import { JsdbcChatMemoryRepository } from "../jsdbc-chat-memory-repository.js";
-import {
-  MARIADB_CHAT_MEMORY_SCHEMA,
-  MYSQL_CHAT_MEMORY_SCHEMA,
-  ORACLE_CHAT_MEMORY_SCHEMA,
-  POSTGRESQL_CHAT_MEMORY_SCHEMA,
-  SQL_SERVER_CHAT_MEMORY_SCHEMA,
-  SQLITE_CHAT_MEMORY_SCHEMA,
-} from "../resources/index.js";
+import { MARIADB_CHAT_MEMORY_SCHEMA } from "../resources/mariadb-chat-memory-repository-schema.js";
+import { MYSQL_CHAT_MEMORY_SCHEMA } from "../resources/mysql-chat-memory-repository-schema.js";
+import { ORACLE_CHAT_MEMORY_SCHEMA } from "../resources/oracle-chat-memory-repository-schema.js";
+import { POSTGRESQL_CHAT_MEMORY_SCHEMA } from "../resources/postgresql-chat-memory-repository-schema.js";
+import { SQL_SERVER_CHAT_MEMORY_SCHEMA } from "../resources/sql-server-chat-memory-repository-schema.js";
+import { SQLITE_CHAT_MEMORY_SCHEMA } from "../resources/sqlite-chat-memory-repository-schema.js";
 import type { JsdbcChatMemoryRepositoryProperties } from "./jsdbc-chat-memory-repository-properties.js";
 
 export const JSDBC_CHAT_MEMORY_PROPERTIES_TOKEN = Symbol.for(

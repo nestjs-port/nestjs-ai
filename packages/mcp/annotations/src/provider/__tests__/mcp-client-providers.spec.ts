@@ -15,7 +15,6 @@
  */
 
 import "reflect-metadata";
-
 import type {
   CreateMessageRequest,
   CreateMessageResult,
@@ -36,16 +35,14 @@ import { McpPromptListChanged } from "../../mcp-prompt-list-changed.js";
 import { McpResourceListChanged } from "../../mcp-resource-list-changed.js";
 import { McpSampling } from "../../mcp-sampling.js";
 import { McpToolListChanged } from "../../mcp-tool-list-changed.js";
-import { StructuredElicitResult } from "../../context/index.js";
-import {
-  McpElicitationProvider,
-  McpLoggingProvider,
-  McpProgressProvider,
-  McpPromptListChangedProvider,
-  McpResourceListChangedProvider,
-  McpToolListChangedProvider,
-  McpSamplingProvider,
-} from "../index.js";
+import { StructuredElicitResult } from "../../context/structured-elicit-result.js";
+import { McpElicitationProvider } from "../elicitation/mcp-elicitation-provider.js";
+import { McpLoggingProvider } from "../logging/mcp-logging-provider.js";
+import { McpProgressProvider } from "../progress/mcp-progress-provider.js";
+import { McpPromptListChangedProvider } from "../changed/prompt/mcp-prompt-list-changed-provider.js";
+import { McpResourceListChangedProvider } from "../changed/resource/mcp-resource-list-changed-provider.js";
+import { McpToolListChangedProvider } from "../changed/tool/mcp-tool-list-changed-provider.js";
+import { McpSamplingProvider } from "../sampling/mcp-sampling-provider.js";
 
 describe("provider scans", () => {
   it("discovers sampling methods", async () => {

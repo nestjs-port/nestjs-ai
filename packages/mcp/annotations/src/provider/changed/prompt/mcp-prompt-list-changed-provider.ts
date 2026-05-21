@@ -19,10 +19,8 @@ import assert from "node:assert/strict";
 import type { Prompt } from "@modelcontextprotocol/server";
 
 import { MCP_PROMPT_LIST_CHANGED_METADATA_KEY } from "../../../metadata.js";
-import {
-  McpPromptListChangedMethodCallback,
-  PromptListChangedSpecification,
-} from "../../../method/index.js";
+import { McpPromptListChangedMethodCallback } from "../../../method/changed/prompt/mcp-prompt-list-changed-method-callback.js";
+import { PromptListChangedSpecification } from "../../../method/changed/prompt/prompt-list-changed-specification.js";
 import type { McpPromptListChangedMetadata } from "../../../mcp-prompt-list-changed.js";
 import {
   discoverAnnotatedMethodKeys,

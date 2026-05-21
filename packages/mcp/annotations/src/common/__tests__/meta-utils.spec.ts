@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { MetaUtils } from "../index.js";
+import { MetaUtils } from "../meta-utils.js";
 
 class MetaProviderWithDefaultConstructor {
   getMeta() {

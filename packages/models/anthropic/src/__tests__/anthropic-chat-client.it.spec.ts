@@ -36,8 +36,8 @@ import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { firstValueFrom, map, type Observable, toArray } from "rxjs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
-
-import { AnthropicChatModel, AnthropicChatOptions } from "../index.js";
+import { AnthropicChatModel } from "../anthropic-chat-model.js";
+import { AnthropicChatOptions } from "../anthropic-chat-options.js";
 import {
   MockWeatherService,
   type WeatherRequest,

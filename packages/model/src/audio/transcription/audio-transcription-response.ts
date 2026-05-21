@@ -15,8 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-
-import type { ModelResponse } from "../../model/index.js";
+import type { ModelResponse } from "../../model/model-response.interface.js";
 import type { AudioTranscription } from "./audio-transcription.js";
 import { AudioTranscriptionResponseMetadata } from "./audio-transcription-response-metadata.js";
 

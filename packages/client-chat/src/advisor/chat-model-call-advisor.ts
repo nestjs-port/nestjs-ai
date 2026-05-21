@@ -23,7 +23,8 @@ import { LOWEST_PRECEDENCE, StringUtils } from "@nestjs-port/core";
 import { ChatClientAttributes } from "../chat-client-attributes.js";
 import { ChatClientRequest } from "../chat-client-request.js";
 import { ChatClientResponse } from "../chat-client-response.js";
-import type { CallAdvisor, CallAdvisorChain } from "./api/index.js";
+import type { CallAdvisor } from "./api/call-advisor.interface.js";
+import type { CallAdvisorChain } from "./api/call-advisor-chain.interface.js";
 
 function isStructuredOutputChatOptions(
   chatOptions: unknown,

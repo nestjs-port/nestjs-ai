@@ -21,14 +21,12 @@ import type {
   StandardSchemaV1,
 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
-import type { ToolContext } from "../../chat/index.js";
-import type { ToolDefinition } from "../definition/index.js";
-import {
-  DefaultToolCallResultConverter,
-  type ToolCallResultConverter,
-  ToolExecutionException,
-} from "../execution/index.js";
-import { ToolMetadata } from "../metadata/index.js";
+import type { ToolContext } from "../../chat/model/tool-context.js";
+import type { ToolDefinition } from "../definition/tool-definition.js";
+import { DefaultToolCallResultConverter } from "../execution/default-tool-call-result-converter.js";
+import type { ToolCallResultConverter } from "../execution/tool-call-result-converter.js";
+import { ToolExecutionException } from "../execution/tool-execution-exception.js";
+import { ToolMetadata } from "../metadata/tool-metadata.js";
 import { ToolCallback } from "../tool-callback.js";
 
 type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;

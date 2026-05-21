@@ -1,5 +1,13 @@
 # @nestjs-ai/model
 
+## 0.1.4
+
+### Patch Changes
+
+- remove barrel import
+- Updated dependencies
+  - @nestjs-ai/commons@0.1.2
+
 ## 0.1.3
 
 ### Patch Changes

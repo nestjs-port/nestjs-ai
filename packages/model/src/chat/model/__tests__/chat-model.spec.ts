@@ -15,8 +15,8 @@
  */
 
 import { assert, describe, expect, it, vi } from "vitest";
-import { AssistantMessage } from "../../messages/index.js";
-import { Prompt } from "../../prompt/index.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { Prompt } from "../../prompt/prompt.js";
 import { ChatModel } from "../chat-model.js";
 import { ChatResponse } from "../chat-response.js";
 import { Generation } from "../generation.js";

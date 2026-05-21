@@ -19,9 +19,9 @@ import type {
   StandardJSONSchemaV1,
   StandardSchemaV1,
 } from "@standard-schema/spec";
-import type { ToolContext } from "../../chat/index.js";
-import type { ToolCallResultConverter } from "../execution/index.js";
-import { DefaultToolCallResultConverter } from "../execution/index.js";
+import type { ToolContext } from "../../chat/model/tool-context.js";
+import type { ToolCallResultConverter } from "../execution/tool-call-result-converter.js";
+import { DefaultToolCallResultConverter } from "../execution/default-tool-call-result-converter.js";
 
 type MaybePromise<T> = T | Promise<T>;
 type StandardSchemaWithJsonSchema = StandardSchemaV1 & StandardJSONSchemaV1;

@@ -15,7 +15,7 @@
  */
 
 import type { Media } from "@nestjs-ai/commons";
-import type { Message } from "../messages/index.js";
+import type { Message } from "../messages/message.interface.js";
 
 export interface PromptTemplateMessageActions {
   createMessage(): Message;

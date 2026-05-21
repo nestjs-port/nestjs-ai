@@ -15,13 +15,10 @@
  */
 
 import { assert, describe, expect, it, vi } from "vitest";
-
-import {
-  ExtractedTextFormatter,
-  PagePdfDocumentReader,
-  ParagraphPdfDocumentReader,
-  PdfDocumentReaderConfig,
-} from "../index.js";
+import { ExtractedTextFormatter } from "../extracted-text-formatter.js";
+import { PagePdfDocumentReader } from "../page-pdf-document-reader.js";
+import { ParagraphPdfDocumentReader } from "../paragraph-pdf-document-reader.js";
+import { PdfDocumentReaderConfig } from "../config/pdf-document-reader-config.js";
 
 describe("ParagraphPdfDocumentReader", () => {
   const sample1Pdf = new URL("sample1.pdf", import.meta.url);

@@ -21,8 +21,8 @@ import {
   AiProvider,
 } from "@nestjs-ai/commons";
 import { ObservationContext } from "@nestjs-port/core";
-import type { ToolDefinition } from "../definition/index.js";
-import { ToolMetadata } from "../metadata/index.js";
+import type { ToolDefinition } from "../definition/tool-definition.js";
+import { ToolMetadata } from "../metadata/tool-metadata.js";
 
 export interface ToolCallingObservationContextProps {
   toolDefinition: ToolDefinition;

@@ -15,8 +15,8 @@
  */
 
 import type { Media, TemplateRenderer } from "@nestjs-ai/commons";
-import type { Message } from "../messages/index.js";
-import { SystemMessage } from "../messages/index.js";
+import type { Message } from "../messages/message.interface.js";
+import { SystemMessage } from "../messages/system-message.js";
 import type { ChatOptions } from "./chat-options.interface.js";
 import { Prompt } from "./prompt.js";
 import { PromptTemplate, PromptTemplateBuilder } from "./prompt-template.js";

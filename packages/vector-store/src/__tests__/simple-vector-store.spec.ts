@@ -25,7 +25,7 @@ import {
   EmbeddingResponse,
 } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { FilterExpressionBuilder } from "../filter/index.js";
+import { FilterExpressionBuilder } from "../filter/filter-expression-builder.js";
 import { SearchRequest } from "../search-request.js";
 import { EmbeddingMath, SimpleVectorStore } from "../simple-vector-store.js";
 

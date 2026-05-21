@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { GoogleGenAiThinkingLevel } from "../common/index.js";
+import { GoogleGenAiThinkingLevel } from "../common/google-gen-ai-thinking-level.js";
 import { GoogleGenAiChatOptions } from "../google-gen-ai-chat-options.js";
 
 describe("GoogleGenAiChatOptions", () => {

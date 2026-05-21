@@ -19,8 +19,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Document, type DocumentReader } from "@nestjs-ai/commons";
 import { load } from "cheerio";
-
-import { CheerioDocumentReaderConfig } from "./config/index.js";
+import { CheerioDocumentReaderConfig } from "./config/cheerio-document-reader-config.js";
 
 export interface CheerioDocumentReaderProps {
   htmlResource: string | URL | Buffer;

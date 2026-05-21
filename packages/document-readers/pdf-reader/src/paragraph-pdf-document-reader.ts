@@ -24,9 +24,9 @@ import type {
 import {
   type Paragraph,
   ParagraphManager,
-  PdfDocumentReaderConfig,
-} from "./config/index.js";
-import { PdfLayoutTextStripperByArea } from "./layout/index.js";
+} from "./config/paragraph-manager.js";
+import { PdfDocumentReaderConfig } from "./config/pdf-document-reader-config.js";
+import { PdfLayoutTextStripperByArea } from "./layout/pdf-layout-text-stripper-by-area.js";
 import {
   PagePdfDocumentReader,
   type PdfResource,

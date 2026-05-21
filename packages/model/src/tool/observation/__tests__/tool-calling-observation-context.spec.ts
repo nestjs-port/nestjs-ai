@@ -15,7 +15,7 @@
  */
 
 import { assert, describe, expect, it } from "vitest";
-import { ToolDefinition } from "../../definition/index.js";
+import { ToolDefinition } from "../../definition/tool-definition.js";
 import { ToolCallingObservationContext } from "../tool-calling-observation-context.js";
 
 describe("ToolCallingObservationContext", () => {

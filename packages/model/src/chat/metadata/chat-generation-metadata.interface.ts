@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ResultMetadata } from "../../model/index.js";
+import type { ResultMetadata } from "../../model/result-metadata.interface.js";
 import { DefaultChatGenerationMetadataBuilder } from "./default-chat-generation-metadata-builder.js";
 
 /**

@@ -20,12 +20,11 @@ import assert from "node:assert/strict";
 
 import type { McpServer } from "@modelcontextprotocol/server";
 import { ResourceTemplate } from "@modelcontextprotocol/server";
-
-import { ResourceAdapter } from "../../adapter/index.js";
+import { ResourceAdapter } from "../../adapter/resource-adapter.js";
 import {
   McpResourceMethodCallback,
   type ResourceRegistration,
-} from "../../method/index.js";
+} from "../../method/resource/mcp-resource-method-callback.js";
 import { MCP_RESOURCE_METADATA_KEY } from "../../metadata.js";
 import type { McpResourceMetadata } from "../../mcp-resource.js";
 

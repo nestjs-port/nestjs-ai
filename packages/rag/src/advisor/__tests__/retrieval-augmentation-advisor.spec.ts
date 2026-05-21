@@ -24,9 +24,9 @@ import {
   type Prompt,
 } from "@nestjs-ai/model";
 import { describe, expect, it, vi } from "vitest";
-import type { QueryTransformer } from "../../preretrieval/index.js";
+import type { QueryTransformer } from "../../preretrieval/query/transformation/query-transformer.js";
 import type { Query } from "../../query.js";
-import { DocumentRetriever } from "../../retrieval/index.js";
+import { DocumentRetriever } from "../../retrieval/search/document-retriever.js";
 import { RetrievalAugmentationAdvisor } from "../retrieval-augmentation-advisor.js";
 
 class TestChatModel extends ChatModel {

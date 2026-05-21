@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { Message } from "../../chat/index.js";
+import type { Message } from "../../chat/messages/message.interface.js";
 import { ToolExecutionResult } from "./tool-execution-result.js";
 
 export interface DefaultToolExecutionResultProps {

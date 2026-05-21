@@ -18,7 +18,7 @@ import "reflect-metadata";
 import type { ProviderInstanceExplorer } from "@nestjs-port/core";
 import { assert, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { Tool } from "../../annotation/index.js";
+import { Tool } from "../../annotation/tool.decorator.js";
 import { NestProviderToolCallbackResolver } from "../nest-provider-tool-callback-resolver.js";
 
 class WeatherTools {

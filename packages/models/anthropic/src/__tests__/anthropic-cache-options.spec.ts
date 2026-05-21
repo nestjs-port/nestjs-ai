@@ -16,12 +16,9 @@
 
 import { MessageType } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-
-import {
-  AnthropicCacheOptions,
-  AnthropicCacheStrategy,
-  AnthropicCacheTtl,
-} from "../index.js";
+import { AnthropicCacheOptions } from "../anthropic-cache-options.js";
+import { AnthropicCacheStrategy } from "../anthropic-cache-strategy.js";
+import { AnthropicCacheTtl } from "../anthropic-cache-ttl.js";
 
 describe("AnthropicCacheOptions", () => {
   it("defaults are sane", () => {

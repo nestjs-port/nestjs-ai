@@ -15,15 +15,13 @@
  */
 
 import "reflect-metadata";
-
 import type {
   BlobResourceContents,
   ReadResourceRequest,
   ReadResourceResult,
   TextResourceContents,
 } from "@modelcontextprotocol/server";
-
-import { ResourceAdapter } from "../../../adapter/index.js";
+import { ResourceAdapter } from "../../../adapter/resource-adapter.js";
 import { McpServerExchange, McpTransportContext } from "@nestjs-ai/mcp-common";
 import { MCP_RESOURCE_METADATA_KEY } from "../../../metadata.js";
 import type { McpResourceMetadata } from "../../../mcp-resource.js";

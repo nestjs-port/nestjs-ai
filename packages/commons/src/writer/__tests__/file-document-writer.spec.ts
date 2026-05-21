@@ -19,8 +19,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { beforeEach, describe, expect, it } from "vitest";
-
-import { Document, MetadataMode } from "../../document/index.js";
+import { Document } from "../../document/document.js";
+import { MetadataMode } from "../../document/metadata-mode.js";
 import { FileDocumentWriter } from "../file-document-writer.js";
 
 async function readAllLines(path: string): Promise<string[]> {

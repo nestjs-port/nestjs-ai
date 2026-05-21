@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert/strict";
-
 import { ImageResponseMetadata } from "@nestjs-ai/model";
 import type { ImagesResponse } from "openai/resources/images";
 

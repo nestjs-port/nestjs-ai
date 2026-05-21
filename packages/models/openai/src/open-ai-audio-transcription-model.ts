@@ -28,8 +28,7 @@ import {
 } from "@nestjs-ai/model";
 import type { TranscriptionCreateParamsNonStreaming } from "openai/resources/audio/transcriptions";
 import { toFile } from "openai";
-
-import { OpenAiSetup, type OpenAiSetupProps } from "./setup/index.js";
+import { OpenAiSetup, type OpenAiSetupProps } from "./setup/open-ai-setup.js";
 import type { OpenAiClient } from "./open-ai-client.js";
 import { OpenAiAudioTranscriptionOptions } from "./open-ai-audio-transcription-options.js";
 import { readFile } from "node:fs/promises";

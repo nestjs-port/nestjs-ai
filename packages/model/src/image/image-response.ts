@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert/strict";
-import type { ModelResponse } from "../model/index.js";
+import type { ModelResponse } from "../model/model-response.interface.js";
 import type { ImageGeneration } from "./image-generation.js";
 import { ImageResponseMetadata } from "./image-response-metadata.js";
 

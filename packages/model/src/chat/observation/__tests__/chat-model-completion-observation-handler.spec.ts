@@ -17,9 +17,11 @@
 import { LoggerFactory, LogLevel, ObservationContext } from "@nestjs-port/core";
 import { RecordingLogger } from "@nestjs-port/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { AssistantMessage } from "../../messages/index.js";
-import { ChatResponse, Generation } from "../../model/index.js";
-import { DefaultChatOptions, Prompt } from "../../prompt/index.js";
+import { AssistantMessage } from "../../messages/assistant-message.js";
+import { ChatResponse } from "../../model/chat-response.js";
+import { Generation } from "../../model/generation.js";
+import { DefaultChatOptions } from "../../prompt/default-chat-options.js";
+import { Prompt } from "../../prompt/prompt.js";
 import { ChatModelCompletionObservationHandler } from "../chat-model-completion-observation-handler.js";
 import { ChatModelObservationContext } from "../chat-model-observation-context.js";
 

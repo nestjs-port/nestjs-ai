@@ -19,10 +19,8 @@ import assert from "node:assert/strict";
 import type { Tool } from "@modelcontextprotocol/server";
 
 import { MCP_TOOL_LIST_CHANGED_METADATA_KEY } from "../../../metadata.js";
-import {
-  McpToolListChangedMethodCallback,
-  ToolListChangedSpecification,
-} from "../../../method/index.js";
+import { McpToolListChangedMethodCallback } from "../../../method/changed/tool/mcp-tool-list-changed-method-callback.js";
+import { ToolListChangedSpecification } from "../../../method/changed/tool/tool-list-changed-specification.js";
 import type { McpToolListChangedMetadata } from "../../../mcp-tool-list-changed.js";
 import {
   discoverAnnotatedMethodKeys,

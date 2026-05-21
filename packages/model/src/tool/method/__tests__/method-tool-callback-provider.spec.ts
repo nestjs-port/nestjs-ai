@@ -17,7 +17,10 @@
 import "reflect-metadata";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { Tool, type ToolAnnotationMetadata } from "../../annotation/index.js";
+import {
+  Tool,
+  type ToolAnnotationMetadata,
+} from "../../annotation/tool.decorator.js";
 import { MethodToolCallbackProvider } from "../method-tool-callback-provider.js";
 
 class ValidToolObject {

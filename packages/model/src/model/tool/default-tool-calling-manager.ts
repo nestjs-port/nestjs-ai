@@ -21,26 +21,24 @@ import {
   NoopObservationRegistry,
   type ObservationRegistry,
 } from "@nestjs-port/core";
+import type { AssistantMessage } from "../../chat/messages/assistant-message.js";
+import type { ChatResponse } from "../../chat/model/chat-response.js";
+import type { Message } from "../../chat/messages/message.interface.js";
+import type { Prompt } from "../../chat/prompt/prompt.js";
+import { ToolContext } from "../../chat/model/tool-context.js";
 import {
-  type AssistantMessage,
-  type ChatResponse,
-  type Message,
-  type Prompt,
-  ToolContext,
   type ToolResponse,
   ToolResponseMessage,
-} from "../../chat/index.js";
-import {
-  DefaultToolExecutionExceptionProcessor,
-  type ToolCallback,
-  type ToolCallbackResolver,
-  ToolCallingObservationContext,
-  type ToolCallingObservationConvention,
-  ToolCallingObservationDocumentation,
-  type ToolDefinition,
-  ToolExecutionException,
-  type ToolExecutionExceptionProcessor,
-} from "../../tool/index.js";
+} from "../../chat/messages/tool-response-message.js";
+import { DefaultToolExecutionExceptionProcessor } from "../../tool/execution/default-tool-execution-exception-processor.js";
+import type { ToolCallback } from "../../tool/tool-callback.js";
+import type { ToolCallbackResolver } from "../../tool/resolution/tool-callback-resolver.interface.js";
+import { ToolCallingObservationContext } from "../../tool/observation/tool-calling-observation-context.js";
+import type { ToolCallingObservationConvention } from "../../tool/observation/tool-calling-observation-convention.js";
+import { ToolCallingObservationDocumentation } from "../../tool/observation/tool-calling-observation-documentation.js";
+import type { ToolDefinition } from "../../tool/definition/tool-definition.js";
+import { ToolExecutionException } from "../../tool/execution/tool-execution-exception.js";
+import type { ToolExecutionExceptionProcessor } from "../../tool/execution/tool-execution-exception-processor.interface.js";
 // Import these directly to avoid the barrel re-export cycle through `../../tool`,
 // which can leave these constructors half-initialized during module evaluation.
 import { DefaultToolCallingObservationConvention } from "../../tool/observation/default-tool-calling-observation-convention.js";

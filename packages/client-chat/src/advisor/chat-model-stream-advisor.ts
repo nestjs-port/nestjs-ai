@@ -22,7 +22,8 @@ import { asyncScheduler, map, observeOn } from "rxjs";
 
 import type { ChatClientRequest } from "../chat-client-request.js";
 import { ChatClientResponse } from "../chat-client-response.js";
-import type { StreamAdvisor, StreamAdvisorChain } from "./api/index.js";
+import type { StreamAdvisor } from "./api/stream-advisor.interface.js";
+import type { StreamAdvisorChain } from "./api/stream-advisor-chain.interface.js";
 
 export class ChatModelStreamAdvisor implements StreamAdvisor {
   private readonly _chatModel: ChatModel;

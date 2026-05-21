@@ -15,11 +15,11 @@
  */
 
 import { readFileSync } from "node:fs";
+import type { ChatResponse, Message } from "@nestjs-ai/model";
 import type {
   Model as AnthropicModel,
   Usage as AnthropicSdkUsage,
 } from "@anthropic-ai/sdk/resources/messages";
-import type { ChatResponse, Message } from "@nestjs-ai/model";
 import {
   FunctionToolCallback,
   MessageType,
@@ -30,14 +30,11 @@ import {
 import { LoggerFactory, LogLevel } from "@nestjs-port/core";
 import { ConsoleLoggerFactory } from "@nestjs-port/testing";
 import { assert, describe, expect, it } from "vitest";
-
-import {
-  AnthropicCacheOptions,
-  AnthropicCacheStrategy,
-  AnthropicCacheTtl,
-  AnthropicChatModel,
-  AnthropicChatOptions,
-} from "../index.js";
+import { AnthropicCacheOptions } from "../anthropic-cache-options.js";
+import { AnthropicCacheStrategy } from "../anthropic-cache-strategy.js";
+import { AnthropicCacheTtl } from "../anthropic-cache-ttl.js";
+import { AnthropicChatModel } from "../anthropic-chat-model.js";
+import { AnthropicChatOptions } from "../anthropic-chat-options.js";
 import {
   MockWeatherService,
   type WeatherRequest,

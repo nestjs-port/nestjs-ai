@@ -15,9 +15,9 @@
  */
 
 import { AiOperationMetadata, AiOperationType } from "@nestjs-ai/commons";
-import { ModelObservationContext } from "../../model/index.js";
-import type { ChatResponse } from "../model/index.js";
-import type { Prompt } from "../prompt/index.js";
+import { ModelObservationContext } from "../../model/observation/model-observation-context.js";
+import type { ChatResponse } from "../model/chat-response.js";
+import type { Prompt } from "../prompt/prompt.js";
 
 export class ChatModelObservationContext extends ModelObservationContext<
   Prompt,

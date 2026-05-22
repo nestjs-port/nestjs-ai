@@ -15,5 +15,9 @@
  */
 
 export * from "./common/index.js";
+export {
+  OllamaEmbeddingOptions,
+  type OllamaEmbeddingOptionsProps,
+} from "./ollama-embedding-options.js";
 export { OllamaModel } from "./ollama-model.js";
 export { ThinkOption, type ThinkLevel } from "./think-option.js";

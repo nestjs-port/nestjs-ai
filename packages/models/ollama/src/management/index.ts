@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
+export {
+  ModelManagementOptions,
+  type ModelManagementOptionsProps,
+} from "./model-management-options.js";
+export { PullModelStrategy } from "./pull-model-strategy.js";

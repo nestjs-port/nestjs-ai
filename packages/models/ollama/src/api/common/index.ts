@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
+export { OllamaApiConstants } from "./ollama-api-constants.js";

@@ -14,5 +14,24 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
+/**
+ * Strategy for pulling Ollama models.
+ */
+export enum PullModelStrategy {
+  /**
+   * Always pull the model, even if it's already available. Useful to ensure you're
+   * using the latest version of that model.
+   */
+  ALWAYS = "ALWAYS",
+
+  /**
+   * Only pull the model if it's not already available. It might be an older version of
+   * the model.
+   */
+  WHEN_MISSING = "WHEN_MISSING",
+
+  /**
+   * Never pull the model.
+   */
+  NEVER = "NEVER",
+}

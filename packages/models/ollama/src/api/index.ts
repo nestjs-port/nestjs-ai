@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
+export * from "./common/index.js";
+export { OllamaModel } from "./ollama-model.js";
+export { ThinkOption, type ThinkLevel } from "./think-option.js";

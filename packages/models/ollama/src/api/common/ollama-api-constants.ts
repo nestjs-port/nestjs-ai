@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
+import { AiProvider } from "@nestjs-ai/commons";
+
+/**
+ * Common value constants for Ollama api.
+ */
+export abstract class OllamaApiConstants {
+  public static readonly DEFAULT_BASE_URL = "http://localhost:11434";
+
+  public static readonly PROVIDER_NAME = AiProvider.OLLAMA.value;
+}

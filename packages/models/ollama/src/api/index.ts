@@ -15,6 +15,7 @@
  */
 
 export * from "./common/index.js";
+export { OllamaChatOptions } from "./ollama-chat-options.js";
 export {
   OllamaEmbeddingOptions,
   type OllamaEmbeddingOptionsProps,

@@ -38,6 +38,7 @@
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/retry": "workspace:*",
     "@nestjs-port/core": "^0.1.1",
     "@nestjs-port/testing": "^0.1.0",
     "@nestjs/common": "^11.1.11",
@@ -47,6 +48,7 @@
   "peerDependencies": {
     "@nestjs-ai/commons": "^0.1.2",
     "@nestjs-ai/model": "^0.1.4",
+    "@nestjs-ai/retry": "^0.1.2",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "rxjs": "^7.8.2"

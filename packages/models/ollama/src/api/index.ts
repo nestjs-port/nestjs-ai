@@ -15,6 +15,8 @@
  */
 
 export * from "./common/index.js";
+export { OllamaApi } from "./ollama-api.js";
+export { OllamaApiHelper } from "./ollama-api-helper.js";
 export { OllamaChatOptions } from "./ollama-chat-options.js";
 export {
   OllamaEmbeddingOptions,

@@ -16,7 +16,6 @@
 
 import assert from "node:assert/strict";
 import {
-  type ChatOptions,
   DefaultToolCallingChatOptions,
   type StructuredOutputChatOptions,
   type ToolCallback,
@@ -80,10 +79,6 @@ function createJsonSchemaResponseFormat(
     },
   };
 }
-
-type StructuredOutputChatOptionsBuilder = ChatOptions.Builder & {
-  outputSchema(outputSchema: string | null): ChatOptions.Builder;
-};
 
 export interface OpenAiChatOptionsProps extends AbstractOpenAiOptionsProps {
   frequencyPenalty?: number | null;
@@ -759,7 +754,7 @@ export class OpenAiChatOptions
 export namespace OpenAiChatOptions {
   export class Builder
     extends DefaultToolCallingChatOptions.Builder
-    implements StructuredOutputChatOptionsBuilder
+    implements StructuredOutputChatOptions.Builder
   {
     private static readonly logger = LoggerFactory.getLogger(
       OpenAiChatOptions.name,

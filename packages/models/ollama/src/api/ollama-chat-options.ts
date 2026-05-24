@@ -40,14 +40,13 @@ const NON_SUPPORTED_FIELDS = [
  * @see {@link https://github.com/ollama/ollama/blob/main/api/types.go Ollama Types}
  */
 export class OllamaChatOptions
-  extends DefaultToolCallingChatOptions
-  implements StructuredOutputChatOptions
+  implements ToolCallingChatOptions, StructuredOutputChatOptions
 {
-  // Following fields are options which must be set when the model is loaded into
-  // memory.
-  // See: https://github.com/ggerganov/llama.cpp/blob/master/examples/main/README.md
+  readonly DEFAULT_TOOL_EXECUTION_ENABLED = true as const;
 
-  /** Whether to use NUMA. (Default: false) */
+  /**
+   * Whether to use NUMA. (Default: false)
+   */
   private _useNUMA: boolean | null = null;
 
   /**
@@ -55,7 +54,9 @@ export class OllamaChatOptions
    */
   private _numCtx: number | null = null;
 
-  /** Prompt processing maximum batch size. (Default: 512) */
+  /**
+   * Prompt processing maximum batch size. (Default: 512)
+   */
   private _numBatch: number | null = null;
 
   /**
@@ -73,10 +74,14 @@ export class OllamaChatOptions
    */
   private _mainGPU: number | null = null;
 
-  /** (Default: false) */
+  /**
+   * (Default: false)
+   */
   private _lowVRAM: boolean | null = null;
 
-  /** (Default: true) */
+  /**
+   * (Default: true)
+   */
   private _f16KV: boolean | null = null;
 
   /**
@@ -85,7 +90,9 @@ export class OllamaChatOptions
    */
   private _logitsAll: boolean | null = null;
 
-  /** Load only the vocabulary, not the weights. */
+  /**
+   * Load only the vocabulary, not the weights.
+   */
   private _vocabOnly: boolean | null = null;
 
   /**
@@ -116,9 +123,9 @@ export class OllamaChatOptions
    */
   private _numThread: number | null = null;
 
-  // Following fields are predict options used at runtime.
-
-  /** (Default: 4) */
+  /**
+   * (Default: 4)
+   */
   private _numKeep: number | null = null;
 
   /**
@@ -133,6 +140,20 @@ export class OllamaChatOptions
    * infinite generation, -2 = fill context)
    */
   private _numPredict: number | null = null;
+
+  /**
+   * Reduces the probability of generating nonsense. A higher value (e.g. 100) will
+   * give more diverse answers, while a lower value (e.g. 10) will be more
+   * conservative. (Default: 40)
+   */
+  topK: number | null = null;
+
+  /**
+   * Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse
+   * text, while a lower value (e.g., 0.5) will generate more focused and conservative
+   * text. (Default: 0.9)
+   */
+  topP: number | null = null;
 
   /**
    * Alternative to the top_p, and aims to ensure a balance of quality and variety. The
@@ -150,7 +171,9 @@ export class OllamaChatOptions
    */
   private _tfsZ: number | null = null;
 
-  /** (Default: 1.0) */
+  /**
+   * (Default: 1.0)
+   */
   private _typicalP: number | null = null;
 
   /**
@@ -160,11 +183,27 @@ export class OllamaChatOptions
   private _repeatLastN: number | null = null;
 
   /**
+   * The temperature of the model. Increasing the temperature will make the model
+   * answer more creatively. (Default: 0.8)
+   */
+  temperature: number | null = null;
+
+  /**
    * Sets how strongly to penalize repetitions. A higher value (e.g., 1.5) will
    * penalize repetitions more strongly, while a lower value (e.g., 0.9) will be more
    * lenient. (Default: 1.1)
    */
   private _repeatPenalty: number | null = null;
+
+  /**
+   * (Default: 0.0)
+   */
+  presencePenalty: number | null = null;
+
+  /**
+   * (Default: 0.0)
+   */
+  frequencyPenalty: number | null = null;
 
   /**
    * Enable Mirostat sampling for controlling perplexity. (default: 0, 0 = disabled,
@@ -185,7 +224,9 @@ export class OllamaChatOptions
    */
   private _mirostatEta: number | null = null;
 
-  /** (Default: true) */
+  /**
+   * (Default: true)
+   */
   private _penalizeNewline: boolean | null = null;
 
   /**
@@ -196,6 +237,12 @@ export class OllamaChatOptions
   private _stop: string[] | null = null;
 
   // Following fields are not part of the Ollama Options API but part of the Request.
+
+  /**
+   * Synthetic field not part of the official Ollama API.
+   * Used to allow overriding the model name with prompt options.
+   */
+  model: string | null = null;
 
   /**
    * Sets the desired format of output from the LLM. The only valid values are null or
@@ -216,17 +263,46 @@ export class OllamaChatOptions
   private _truncate: boolean | null = null;
 
   /**
-   * The model should think before responding, if supported. Most models (Qwen 3,
-   * DeepSeek-v3.1, DeepSeek R1) use boolean enable/disable. The GPT-OSS model
-   * requires string levels: "low", "medium", or "high".
-   *
+   * The model should think before responding, if supported.
+   * <p>
+   * Most models (Qwen 3, DeepSeek-v3.1, DeepSeek R1) use boolean enable/disable. The
+   * GPT-OSS model requires string levels: "low", "medium", or "high".
+   * <p>
    * Default Behavior (Ollama 0.12+):
-   * - Thinking-capable models auto-enable thinking by default when this field is not
-   *   set.
-   * - Standard models do not enable thinking by default.
-   * - To explicitly control behavior, use enableThinking() / disableThinking().
+   * <ul>
+   * <li>Thinking-capable models auto-enable thinking by default when this field is not
+   * set.</li>
+   * <li>Standard models do not enable thinking by default.</li>
+   * <li>To explicitly control behavior, use enableThinking() / disableThinking().</li>
+   * </ul>
    */
   private _thinkOption: ThinkOption | null = null;
+
+  private _internalToolExecutionEnabled: boolean | null = null;
+
+  /**
+   * Tool Function Callbacks to register with the ChatModel.
+   * For Prompt Options the toolCallbacks are automatically enabled for the duration of
+   * the prompt execution.
+   * For Default Options the toolCallbacks are registered but disabled by default. Use
+   * the enableFunctions to set the functions from the registry to be used by the
+   * ChatModel chat completion requests.
+   */
+  private _toolCallbacks: ToolCallback[] = [];
+
+  /**
+   * List of functions, identified by their names, to configure for function calling in
+   * the chat completion requests.
+   * Functions with those names must exist in the toolCallbacks registry.
+   * The {@link #toolCallbacks} from the PromptOptions are automatically enabled for the
+   * duration of the prompt execution. Note that function enabled with the default
+   * options are enabled for all chat completion requests. This could impact the token
+   * count and the billing. If the functions is set in a prompt options, then the
+   * enabled functions are only active for the duration of this prompt execution.
+   */
+  private _toolNames: Set<string> = new Set();
+
+  private _toolContext: Record<string, unknown> = {};
 
   static builder(): OllamaChatOptions.Builder {
     return new OllamaChatOptions.Builder();
@@ -383,11 +459,11 @@ export class OllamaChatOptions
     this._seed = seed;
   }
 
-  override get maxTokens(): number | null {
+  get maxTokens(): number | null {
     return this.numPredict;
   }
 
-  override setMaxTokens(maxTokens: number | null): void {
+  setMaxTokens(maxTokens: number | null): void {
     this.setNumPredict(maxTokens);
   }
 
@@ -471,11 +547,11 @@ export class OllamaChatOptions
     this._penalizeNewline = penalizeNewline;
   }
 
-  override get stopSequences(): string[] | null {
+  get stopSequences(): string[] | null {
     return this.stop;
   }
 
-  override setStopSequences(stopSequences: string[] | null): void {
+  setStopSequences(stopSequences: string[] | null): void {
     this.setStop(stopSequences);
   }
 
@@ -501,6 +577,85 @@ export class OllamaChatOptions
 
   setThinkOption(thinkOption: ThinkOption | null): void {
     this._thinkOption = thinkOption;
+  }
+
+  get toolCallbacks(): ToolCallback[] {
+    return [...this._toolCallbacks];
+  }
+
+  setToolCallbacks(toolCallbacks: ToolCallback[]): void {
+    assert(toolCallbacks, "toolCallbacks cannot be null");
+    assert(
+      toolCallbacks.every((toolCallback) => toolCallback != null),
+      "toolCallbacks cannot contain null elements",
+    );
+    this._toolCallbacks = [...toolCallbacks];
+  }
+
+  get toolNames(): Set<string> {
+    return new Set(this._toolNames);
+  }
+
+  setToolNames(toolNames: Set<string>): void {
+    assert(toolNames, "toolNames cannot be null");
+    assert(
+      [...toolNames].every((toolName) => toolName != null),
+      "toolNames cannot contain null elements",
+    );
+    for (const toolName of toolNames) {
+      assert(
+        typeof toolName === "string" && toolName.trim().length > 0,
+        "toolNames cannot contain empty elements",
+      );
+    }
+    this._toolNames = new Set(toolNames);
+  }
+
+  get toolContext(): Record<string, unknown> {
+    return { ...this._toolContext };
+  }
+
+  setToolContext(toolContext: Record<string, unknown>): void {
+    assert(toolContext, "toolContext cannot be null");
+    assert(
+      Object.keys(toolContext).every((key) => key != null),
+      "toolContext cannot contain null keys",
+    );
+    this._toolContext = { ...toolContext };
+  }
+
+  get internalToolExecutionEnabled(): boolean | null {
+    return this._internalToolExecutionEnabled;
+  }
+
+  setInternalToolExecutionEnabled(
+    internalToolExecutionEnabled: boolean | null,
+  ): void {
+    this._internalToolExecutionEnabled = internalToolExecutionEnabled;
+  }
+
+  setModel(model: string | null): void {
+    this.model = model;
+  }
+
+  setFrequencyPenalty(frequencyPenalty: number | null): void {
+    this.frequencyPenalty = frequencyPenalty;
+  }
+
+  setPresencePenalty(presencePenalty: number | null): void {
+    this.presencePenalty = presencePenalty;
+  }
+
+  setTemperature(temperature: number | null): void {
+    this.temperature = temperature;
+  }
+
+  setTopK(topK: number | null): void {
+    this.topK = topK;
+  }
+
+  setTopP(topP: number | null): void {
+    this.topP = topP;
   }
 
   get outputSchema(): string | null {
@@ -563,11 +718,11 @@ export class OllamaChatOptions
     );
   }
 
-  override copy(): OllamaChatOptions {
+  copy(): OllamaChatOptions {
     return this.mutate().build();
   }
 
-  override mutate(): OllamaChatOptions.Builder {
+  mutate(): OllamaChatOptions.Builder {
     return OllamaChatOptions.builder()
       .model(this.model)
       .frequencyPenalty(this.frequencyPenalty)
@@ -612,7 +767,10 @@ export class OllamaChatOptions
 }
 
 export namespace OllamaChatOptions {
-  export class Builder extends DefaultToolCallingChatOptions.Builder {
+  export class Builder
+    extends DefaultToolCallingChatOptions.Builder
+    implements StructuredOutputChatOptions.Builder
+  {
     protected _useNUMA: boolean | null = null;
     protected _numCtx: number | null = null;
     protected _numBatch: number | null = null;
@@ -1000,6 +1158,3 @@ export namespace OllamaChatOptions {
     }
   }
 }
-
-// Re-export for declaration consumers that rely on these types alongside the class.
-export type { ToolCallback, ToolCallingChatOptions };

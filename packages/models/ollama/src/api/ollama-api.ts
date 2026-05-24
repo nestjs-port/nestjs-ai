@@ -16,26 +16,37 @@
 
 import assert from "node:assert/strict";
 
-import { LoggerFactory, type ResponseErrorHandler } from "@nestjs-port/core";
-import { RetryUtils } from "@nestjs-ai/retry";
-import { Observable } from "rxjs";
+import {
+  LoggerFactory,
+  type HttpClient,
+  type ResponseErrorHandler,
+} from "@nestjs-port/core";
+import {
+  defer,
+  filter,
+  finalize,
+  from,
+  map,
+  mergeMap,
+  Observable,
+  scan,
+  tap,
+} from "rxjs";
 
-import { OllamaApiConstants } from "./common/ollama-api-constants.js";
 import { OllamaApiHelper } from "./ollama-api-helper.js";
-import { OllamaChatOptions } from "./ollama-chat-options.js";
 import type { ThinkOption } from "./think-option.js";
 
-const logger = LoggerFactory.getLogger("OllamaApi");
-
 /**
- * Java Client for the Ollama API. {@link https://ollama.ai}
+ * JavaScript Client for the Ollama API. {@link https://ollama.ai}
  */
 export class OllamaApi {
   static readonly REQUEST_BODY_NULL_ERROR = "The request body can not be null.";
 
+  private static readonly logger = LoggerFactory.getLogger(OllamaApi.name);
+
   private readonly baseUrl: string;
 
-  private readonly fetcher: typeof fetch;
+  private readonly httpClient: HttpClient;
 
   private readonly responseErrorHandler: ResponseErrorHandler;
 
@@ -49,22 +60,17 @@ export class OllamaApi {
    */
   private constructor(props: {
     baseUrl: string;
-    fetcher: typeof fetch;
+    httpClient: HttpClient;
     responseErrorHandler: ResponseErrorHandler;
   }) {
     this.baseUrl = props.baseUrl;
-    this.fetcher = props.fetcher;
+    this.httpClient = props.httpClient;
     this.responseErrorHandler = props.responseErrorHandler;
   }
 
-  static builder(): OllamaApi.Builder {
-    return new OllamaApi.Builder();
-  }
-
-  /** @internal Used by {@link OllamaApi.Builder}. */
   static create(props: {
     baseUrl: string;
-    fetcher: typeof fetch;
+    httpClient: HttpClient;
     responseErrorHandler: ResponseErrorHandler;
   }): OllamaApi {
     return new OllamaApi(props);
@@ -84,7 +90,7 @@ export class OllamaApi {
     assert(chatRequest, OllamaApi.REQUEST_BODY_NULL_ERROR);
     assert(!chatRequest.stream, "Stream mode must be disabled.");
 
-    const response = await this.fetcher(`${this.baseUrl}/api/chat`, {
+    const response = await this.httpClient.fetch(`${this.baseUrl}/api/chat`, {
       method: "POST",
       headers: this.defaultHeaders,
       body: JSON.stringify(chatRequest),
@@ -105,68 +111,75 @@ export class OllamaApi {
     assert(chatRequest, OllamaApi.REQUEST_BODY_NULL_ERROR);
     assert(chatRequest.stream, "Request must set the stream property to true.");
 
-    return new Observable<OllamaApi.ChatResponse>((subscriber) => {
+    return defer(() => {
       const controller = new AbortController();
-      let isInsideTool = false;
-      let window: OllamaApi.ChatResponse[] = [];
 
-      const flush = (): void => {
-        if (window.length === 0) {
-          return;
-        }
-        // Merging the window chunks into a single chunk.
-        const merged = window.reduce((prev, curr) =>
-          OllamaApiHelper.merge(prev, curr),
-        );
-        if (logger.isTraceEnabled()) {
-          logger.trace(`${merged}`);
-        }
-        subscriber.next(merged);
-        window = [];
-      };
+      return from(
+        this.httpClient.fetch(`${this.baseUrl}/api/chat`, {
+          method: "POST",
+          headers: this.defaultHeaders,
+          body: JSON.stringify(chatRequest),
+          signal: controller.signal,
+        }),
+      ).pipe(
+        mergeMap((response) =>
+          from(this.handleResponseError(response)).pipe(map(() => response)),
+        ),
+        mergeMap((response) =>
+          streamNdjson<OllamaApi.ChatResponse>(response).pipe(
+            scan(
+              (state, chunk) => {
+                const chunks = [...state.chunks, chunk];
+                const insideTool =
+                  state.insideTool ||
+                  OllamaApiHelper.isStreamingToolCall(chunk);
 
-      (async () => {
-        try {
-          const response = await this.fetcher(`${this.baseUrl}/api/chat`, {
-            method: "POST",
-            headers: this.defaultHeaders,
-            body: JSON.stringify(chatRequest),
-            signal: controller.signal,
-          });
+                if (insideTool && OllamaApiHelper.isStreamingDone(chunk)) {
+                  return {
+                    insideTool: false,
+                    chunks: [],
+                    emit: chunks.reduce(OllamaApiHelper.merge),
+                  };
+                }
 
-          await this.handleResponseError(response);
+                if (!insideTool) {
+                  return {
+                    insideTool: false,
+                    chunks: [],
+                    emit: chunks.reduce(OllamaApiHelper.merge),
+                  };
+                }
 
-          for await (const chunk of streamNdjson<OllamaApi.ChatResponse>(
-            response,
-          )) {
-            if (OllamaApiHelper.isStreamingToolCall(chunk)) {
-              isInsideTool = true;
-            }
-            // Group all chunks belonging to the same function call.
-            window.push(chunk);
-
-            if (isInsideTool && OllamaApiHelper.isStreamingDone(chunk)) {
-              isInsideTool = false;
-              flush();
-            } else if (!isInsideTool) {
-              flush();
-            }
-          }
-
-          flush();
-          subscriber.complete();
-        } catch (error) {
-          if (controller.signal.aborted) {
-            return;
-          }
-          subscriber.error(error);
-        }
-      })();
-
-      return () => {
-        controller.abort();
-      };
+                return {
+                  insideTool: true,
+                  chunks,
+                  emit: null,
+                };
+              },
+              {
+                insideTool: false,
+                chunks: [] as OllamaApi.ChatResponse[],
+                emit: null as OllamaApi.ChatResponse | null,
+              },
+            ),
+            map((state) => state.emit),
+            filter((data): data is OllamaApi.ChatResponse => data != null),
+            tap((data) => {
+              if (OllamaApi.logger.isTraceEnabled()) {
+                OllamaApi.logger.trace(`${data}`);
+              }
+            }),
+          ),
+        ),
+        finalize(() => {
+          controller.abort();
+        }),
+      );
     });
+  }
+
+  static warnEnforcingStreamingOfModelPullRequest(): void {
+    OllamaApi.logger.warn("Enforcing streaming of the model pull request");
   }
 
   /**
@@ -179,7 +192,7 @@ export class OllamaApi {
   ): Promise<OllamaApi.EmbeddingsResponse> {
     assert(embeddingsRequest, OllamaApi.REQUEST_BODY_NULL_ERROR);
 
-    const response = await this.fetcher(`${this.baseUrl}/api/embed`, {
+    const response = await this.httpClient.fetch(`${this.baseUrl}/api/embed`, {
       method: "POST",
       headers: this.defaultHeaders,
       body: JSON.stringify(embeddingsRequest),
@@ -193,7 +206,7 @@ export class OllamaApi {
    * List models that are available locally on the machine where Ollama is running.
    */
   async listModels(): Promise<OllamaApi.ListModelResponse> {
-    const response = await this.fetcher(`${this.baseUrl}/api/tags`, {
+    const response = await this.httpClient.fetch(`${this.baseUrl}/api/tags`, {
       method: "GET",
       headers: this.defaultHeaders,
     });
@@ -211,7 +224,7 @@ export class OllamaApi {
   ): Promise<OllamaApi.ShowModelResponse> {
     assert(showModelRequest, "showModelRequest must not be null");
 
-    const response = await this.fetcher(`${this.baseUrl}/api/show`, {
+    const response = await this.httpClient.fetch(`${this.baseUrl}/api/show`, {
       method: "POST",
       headers: this.defaultHeaders,
       body: JSON.stringify(showModelRequest),
@@ -227,7 +240,7 @@ export class OllamaApi {
   async copyModel(copyModelRequest: OllamaApi.CopyModelRequest): Promise<void> {
     assert(copyModelRequest, "copyModelRequest must not be null");
 
-    const response = await this.fetcher(`${this.baseUrl}/api/copy`, {
+    const response = await this.httpClient.fetch(`${this.baseUrl}/api/copy`, {
       method: "POST",
       headers: this.defaultHeaders,
       body: JSON.stringify(copyModelRequest),
@@ -244,7 +257,7 @@ export class OllamaApi {
   ): Promise<void> {
     assert(deleteModelRequest, "deleteModelRequest must not be null");
 
-    const response = await this.fetcher(`${this.baseUrl}/api/delete`, {
+    const response = await this.httpClient.fetch(`${this.baseUrl}/api/delete`, {
       method: "DELETE",
       headers: this.defaultHeaders,
       body: JSON.stringify(deleteModelRequest),
@@ -266,38 +279,27 @@ export class OllamaApi {
       "Request must set the stream property to true.",
     );
 
-    return new Observable<OllamaApi.ProgressResponse>((subscriber) => {
+    return defer(() => {
       const controller = new AbortController();
 
-      (async () => {
-        try {
-          const response = await this.fetcher(`${this.baseUrl}/api/pull`, {
-            method: "POST",
-            headers: this.defaultHeaders,
-            body: JSON.stringify(pullModelRequest),
-            signal: controller.signal,
-          });
-
-          await this.handleResponseError(response);
-
-          for await (const chunk of streamNdjson<OllamaApi.ProgressResponse>(
-            response,
-          )) {
-            subscriber.next(chunk);
-          }
-
-          subscriber.complete();
-        } catch (error) {
-          if (controller.signal.aborted) {
-            return;
-          }
-          subscriber.error(error);
-        }
-      })();
-
-      return () => {
-        controller.abort();
-      };
+      return from(
+        this.httpClient.fetch(`${this.baseUrl}/api/pull`, {
+          method: "POST",
+          headers: this.defaultHeaders,
+          body: JSON.stringify(pullModelRequest),
+          signal: controller.signal,
+        }),
+      ).pipe(
+        mergeMap((response) =>
+          from(this.handleResponseError(response)).pipe(map(() => response)),
+        ),
+        mergeMap((response) =>
+          streamNdjson<OllamaApi.ProgressResponse>(response),
+        ),
+        finalize(() => {
+          controller.abort();
+        }),
+      );
     });
   }
 
@@ -363,73 +365,9 @@ export namespace OllamaApi {
       /** The index of the function call in the list of tool calls. */
       index?: number | null;
     }
-
-    export function builder(role: Role): MessageBuilder {
-      return new MessageBuilder(role);
-    }
   }
 
-  class MessageBuilder {
-    private readonly _role: Message.Role;
-    private _content?: string | null;
-    private _images?: string[] | null;
-    private _toolCalls?: Message.ToolCall[] | null;
-    private _toolName?: string | null;
-    private _thinking?: string | null;
-
-    constructor(role: Message.Role) {
-      this._role = role;
-    }
-
-    content(content: string | null | undefined): this {
-      this._content = content;
-      return this;
-    }
-
-    images(images: string[] | null | undefined): this {
-      this._images = images;
-      return this;
-    }
-
-    toolCalls(toolCalls: Message.ToolCall[] | null | undefined): this {
-      this._toolCalls = toolCalls;
-      return this;
-    }
-
-    toolName(toolName: string | null | undefined): this {
-      this._toolName = toolName;
-      return this;
-    }
-
-    thinking(thinking: string | null | undefined): this {
-      this._thinking = thinking;
-      return this;
-    }
-
-    build(): Message {
-      const message: Message = { role: this._role };
-      if (this._content != null) {
-        message.content = this._content;
-      }
-      if (this._images != null) {
-        message.images = this._images;
-      }
-      if (this._toolCalls != null) {
-        message.tool_calls = this._toolCalls;
-      }
-      if (this._toolName != null) {
-        message.tool_name = this._toolName;
-      }
-      if (this._thinking != null) {
-        message.thinking = this._thinking;
-      }
-      return message;
-    }
-  }
-
-  export namespace Message {
-    export type Builder = MessageBuilder;
-  }
+  export namespace Message {}
 
   /**
    * Chat request object.
@@ -532,128 +470,6 @@ export namespace OllamaApi {
         };
       }
     }
-
-    export function builder(model: string): ChatRequestBuilder {
-      return new ChatRequestBuilder(model);
-    }
-  }
-
-  class ChatRequestBuilder {
-    private readonly _model: string;
-    private _messages: Message[] = [];
-    private _stream = false;
-    private _format?: unknown;
-    private _keepAlive?: string | null;
-    private _tools: ChatRequest.Tool[] = [];
-    private _options: Record<string, unknown> = {};
-    private _think?: ThinkOption | null;
-
-    constructor(model: string) {
-      assert(model, "The model can not be null.");
-      this._model = model;
-    }
-
-    messages(messages: Message[]): this {
-      this._messages = messages;
-      return this;
-    }
-
-    stream(stream: boolean): this {
-      this._stream = stream;
-      return this;
-    }
-
-    format(format: unknown): this {
-      this._format = format;
-      return this;
-    }
-
-    keepAlive(keepAlive: string | null | undefined): this {
-      this._keepAlive = keepAlive;
-      return this;
-    }
-
-    tools(tools: ChatRequest.Tool[]): this {
-      this._tools = tools;
-      return this;
-    }
-
-    options(options: Record<string, unknown> | OllamaChatOptions): this {
-      assert(options, "The options can not be null.");
-      const map =
-        options instanceof OllamaChatOptions ? options.toMap() : options;
-      this._options = OllamaChatOptions.filterNonSupportedFields(map);
-      return this;
-    }
-
-    think(think: ThinkOption | null | undefined): this {
-      this._think = think;
-      return this;
-    }
-
-    /**
-     * Enable thinking mode for the model.
-     */
-    enableThinking(): this {
-      this._think = true;
-      return this;
-    }
-
-    /**
-     * Disable thinking mode for the model.
-     */
-    disableThinking(): this {
-      this._think = false;
-      return this;
-    }
-
-    /**
-     * Set thinking level to "low" (for GPT-OSS model).
-     */
-    thinkLow(): this {
-      this._think = "low";
-      return this;
-    }
-
-    /**
-     * Set thinking level to "medium" (for GPT-OSS model).
-     */
-    thinkMedium(): this {
-      this._think = "medium";
-      return this;
-    }
-
-    /**
-     * Set thinking level to "high" (for GPT-OSS model).
-     */
-    thinkHigh(): this {
-      this._think = "high";
-      return this;
-    }
-
-    build(): ChatRequest {
-      const request: ChatRequest = {
-        model: this._model,
-        messages: this._messages,
-        stream: this._stream,
-        tools: this._tools,
-        options: this._options,
-      };
-      if (this._format !== undefined) {
-        request.format = this._format;
-      }
-      if (this._keepAlive != null) {
-        request.keep_alive = this._keepAlive;
-      }
-      if (this._think != null) {
-        request.think = this._think;
-      }
-      return request;
-    }
-  }
-
-  export namespace ChatRequest {
-    export type Builder = ChatRequestBuilder;
   }
 
   // --------------------------------------------------------------------------
@@ -829,7 +645,7 @@ export namespace OllamaApi {
     }): PullModelRequest {
       let stream = props.stream ?? true;
       if (!stream) {
-        logger.warn("Enforcing streaming of the model pull request");
+        OllamaApi.warnEnforcingStreamingOfModelPullRequest();
         stream = true;
       }
       return {
@@ -848,76 +664,71 @@ export namespace OllamaApi {
     total: number;
     completed: number;
   }
-
-  export class Builder {
-    private _baseUrl: string = OllamaApiConstants.DEFAULT_BASE_URL;
-
-    private _fetcher: typeof fetch = globalThis.fetch.bind(globalThis);
-
-    private _responseErrorHandler: ResponseErrorHandler =
-      RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER;
-
-    baseUrl(baseUrl: string): this {
-      assert(
-        typeof baseUrl === "string" && baseUrl.length > 0,
-        "baseUrl cannot be null or empty",
-      );
-      this._baseUrl = baseUrl;
-      return this;
-    }
-
-    fetcher(fetcher: typeof fetch): this {
-      assert(fetcher, "fetcher cannot be null");
-      this._fetcher = fetcher;
-      return this;
-    }
-
-    responseErrorHandler(responseErrorHandler: ResponseErrorHandler): this {
-      assert(responseErrorHandler, "responseErrorHandler cannot be null");
-      this._responseErrorHandler = responseErrorHandler;
-      return this;
-    }
-
-    build(): OllamaApi {
-      return OllamaApi.create({
-        baseUrl: this._baseUrl,
-        fetcher: this._fetcher,
-        responseErrorHandler: this._responseErrorHandler,
-      });
-    }
-  }
 }
 
-async function* streamNdjson<T>(response: Response): AsyncIterable<T> {
-  if (!response.body) {
-    return;
-  }
-  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-  let pending = "";
-  try {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (value) {
-        pending += value;
-        let newlineIndex = pending.indexOf("\n");
-        while (newlineIndex !== -1) {
-          const line = pending.slice(0, newlineIndex).trim();
-          pending = pending.slice(newlineIndex + 1);
-          if (line.length > 0) {
-            yield JSON.parse(line) as T;
-          }
-          newlineIndex = pending.indexOf("\n");
-        }
-      }
-      if (done) {
-        const trimmed = pending.trim();
-        if (trimmed.length > 0) {
-          yield JSON.parse(trimmed) as T;
-        }
-        return;
-      }
+function streamNdjson<T>(response: Response): Observable<T> {
+  return new Observable<T>((subscriber) => {
+    if (!response.body) {
+      subscriber.complete();
+      return;
     }
-  } finally {
-    reader.releaseLock();
-  }
+
+    const reader = response.body
+      .pipeThrough(new TextDecoderStream())
+      .getReader();
+    let pending = "";
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        while (!cancelled) {
+          const { value, done } = await reader.read();
+
+          if (value) {
+            pending += value;
+
+            let newlineIndex = pending.indexOf("\n");
+            while (newlineIndex !== -1) {
+              const line = pending.slice(0, newlineIndex).trim();
+              pending = pending.slice(newlineIndex + 1);
+
+              if (line.length > 0) {
+                try {
+                  subscriber.next(JSON.parse(line) as T);
+                } catch {
+                  console.warn("invalid json: ", line);
+                }
+              }
+
+              newlineIndex = pending.indexOf("\n");
+            }
+          }
+
+          if (done) {
+            const trimmed = pending.trim();
+            if (trimmed.length > 0) {
+              try {
+                subscriber.next(JSON.parse(trimmed) as T);
+              } catch {
+                console.warn("invalid json: ", trimmed);
+              }
+            }
+            subscriber.complete();
+            return;
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          subscriber.error(error);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      void reader.cancel().catch(() => undefined);
+    };
+  });
 }

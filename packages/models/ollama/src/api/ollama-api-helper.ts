@@ -127,13 +127,25 @@ function mergeMessage(previous: Message, current: Message): Message {
   const toolCalls = mergeToolCall(previous, current);
   const toolName = mergeToolName(previous, current);
 
-  return OllamaApi.Message.builder(role)
-    .content(content)
-    .thinking(thinking)
-    .images(images)
-    .toolCalls(toolCalls)
-    .toolName(toolName)
-    .build();
+  const message: Message = { role };
+
+  if (content != null) {
+    message.content = content;
+  }
+  if (thinking != null) {
+    message.thinking = thinking;
+  }
+  if (images != null) {
+    message.images = images;
+  }
+  if (toolCalls != null) {
+    message.tool_calls = toolCalls;
+  }
+  if (toolName != null) {
+    message.tool_name = toolName;
+  }
+
+  return message;
 }
 
 function concatStrings(

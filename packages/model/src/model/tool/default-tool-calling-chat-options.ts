@@ -317,11 +317,17 @@ export namespace DefaultToolCallingChatOptions {
           return this.self();
         }
         if (Array.isArray(singleValue)) {
-          this._toolCallbacks = [...singleValue];
+          if (this._toolCallbacks == null) {
+            this._toolCallbacks = [];
+          }
+          this._toolCallbacks.push(...singleValue);
           return this.self();
         }
       }
-      this._toolCallbacks = [...(toolCallbacks as ToolCallback[])];
+      if (this._toolCallbacks == null) {
+        this._toolCallbacks = [];
+      }
+      this._toolCallbacks.push(...(toolCallbacks as ToolCallback[]));
       return this.self();
     }
 
@@ -339,7 +345,12 @@ export namespace DefaultToolCallingChatOptions {
           return this.self();
         }
       }
-      this._toolNames = new Set(toolNames as string[]);
+      if (this._toolNames == null) {
+        this._toolNames = new Set();
+      }
+      for (const toolName of toolNames as string[]) {
+        this._toolNames.add(toolName);
+      }
       return this.self();
     }
 

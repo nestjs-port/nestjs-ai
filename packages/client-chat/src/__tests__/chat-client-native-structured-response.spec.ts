@@ -22,10 +22,6 @@ import { ChatClientAttributes } from "../chat-client-attributes.js";
 import type { ChatClientRequest } from "../chat-client-request.js";
 import type { ChatClientResponse } from "../chat-client-response.js";
 
-type StructuredOutputChatOptionsBuilder = ChatOptions.Builder & {
-  outputSchema(outputSchema: string | null): ChatOptions.Builder;
-};
-
 describe("ChatClient Native Structured Response Tests", () => {
   it("fallback entity test", async () => {
     let capturedPrompt = {} as Prompt;
@@ -336,7 +332,7 @@ class TestStructuredOutputChatOptions
 
 class TestStructuredOutputChatOptionsBuilder
   extends DefaultToolCallingChatOptions.Builder
-  implements StructuredOutputChatOptionsBuilder
+  implements StructuredOutputChatOptions.Builder
 {
   constructor(private _outputSchema: string) {
     super();

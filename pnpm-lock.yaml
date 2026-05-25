@@ -600,6 +600,9 @@ importers:
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@testcontainers/ollama':
+        specifier: ^11.14.0
+        version: 11.14.0
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -2097,6 +2100,9 @@ packages:
 
   '@testcontainers/mysql@11.14.0':
     resolution: {integrity: sha512-0/OKd1gOvnl0qS+RIpmT6J0XKWpjkVyIbOtS3cFTVR8t6Ps7W9TV0U+zp7FPxCmitWuWYPXwH/+RQXF+1jZuZQ==}
+
+  '@testcontainers/ollama@11.14.0':
+    resolution: {integrity: sha512-z9s8spLxKHKOB1XhApDtc3wQj8gnD7JtNSPbp9Nktxsfts4MATXrQ5XGb0jz6ba9UJsXDGadlgqHRfcH7zrnBw==}
 
   '@testcontainers/oraclefree@11.14.0':
     resolution: {integrity: sha512-7Lm1309BZQiU07bntF6gNzPGNqQHf/OALQ4Wz2HKnTbmNLWBI13XN119hc/Xx4HXKW6rGT5/fnNqi7mkJB9s6g==}
@@ -6247,6 +6253,15 @@ snapshots:
       - supports-color
 
   '@testcontainers/mysql@11.14.0':
+    dependencies:
+      testcontainers: 11.14.0
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - bare-buffer
+      - react-native-b4a
+      - supports-color
+
+  '@testcontainers/ollama@11.14.0':
     dependencies:
       testcontainers: 11.14.0
     transitivePeerDependencies:

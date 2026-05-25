@@ -20,6 +20,7 @@ import {
   LoggerFactory,
   type HttpClient,
   type ResponseErrorHandler,
+  FetchHttpClient,
 } from "@nestjs-port/core";
 import {
   defer,
@@ -35,6 +36,14 @@ import {
 
 import { OllamaApiHelper } from "./ollama-api-helper.js";
 import type { ThinkOption } from "./think-option.js";
+import { RetryUtils } from "@nestjs-ai/retry";
+import { OllamaApiConstants } from "./common/ollama-api-constants.js";
+
+export interface OllamaApiProps {
+  baseUrl?: string;
+  httpClient?: HttpClient;
+  responseErrorHandler?: ResponseErrorHandler;
+}
 
 /**
  * JavaScript Client for the Ollama API. {@link https://ollama.ai}
@@ -58,22 +67,11 @@ export class OllamaApi {
   /**
    * Create a new OllamaApi instance
    */
-  private constructor(props: {
-    baseUrl: string;
-    httpClient: HttpClient;
-    responseErrorHandler: ResponseErrorHandler;
-  }) {
-    this.baseUrl = props.baseUrl;
-    this.httpClient = props.httpClient;
-    this.responseErrorHandler = props.responseErrorHandler;
-  }
-
-  static create(props: {
-    baseUrl: string;
-    httpClient: HttpClient;
-    responseErrorHandler: ResponseErrorHandler;
-  }): OllamaApi {
-    return new OllamaApi(props);
+  constructor(props: OllamaApiProps) {
+    this.baseUrl = props.baseUrl ?? OllamaApiConstants.DEFAULT_BASE_URL;
+    this.httpClient = props.httpClient ?? new FetchHttpClient();
+    this.responseErrorHandler =
+      props.responseErrorHandler ?? RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER;
   }
 
   /**
@@ -176,10 +174,6 @@ export class OllamaApi {
         }),
       );
     });
-  }
-
-  static warnEnforcingStreamingOfModelPullRequest(): void {
-    OllamaApi.logger.warn("Enforcing streaming of the model pull request");
   }
 
   /**
@@ -367,8 +361,6 @@ export namespace OllamaApi {
     }
   }
 
-  export namespace Message {}
-
   /**
    * Chat request object.
    */
@@ -447,28 +439,6 @@ export namespace OllamaApi {
          */
         parameters: Record<string, unknown>;
       }
-
-      /**
-       * Create a tool of type 'function' with the given function definition.
-       */
-      export function ofFunction(fn: Function): Tool {
-        return { type: Type.FUNCTION, function: fn };
-      }
-
-      /**
-       * Create a tool function definition from a JSON schema string.
-       */
-      export function functionFromJsonSchema(
-        description: string,
-        name: string,
-        jsonSchema: string,
-      ): Function {
-        return {
-          description,
-          name,
-          parameters: JSON.parse(jsonSchema) as Record<string, unknown>,
-        };
-      }
     }
   }
 
@@ -532,15 +502,6 @@ export namespace OllamaApi {
     dimensions?: number | null;
   }
 
-  export namespace EmbeddingsRequest {
-    /**
-     * Shortcut to create an {@link EmbeddingsRequest} without options.
-     */
-    export function of(model: string, input: string): EmbeddingsRequest {
-      return { model, input: [input] };
-    }
-  }
-
   /**
    * The response object returned from the /embedding endpoint.
    */
@@ -591,12 +552,6 @@ export namespace OllamaApi {
     options?: Record<string, unknown> | null;
   }
 
-  export namespace ShowModelRequest {
-    export function of(model: string): ShowModelRequest {
-      return { model };
-    }
-  }
-
   export interface ShowModelResponse {
     license: string;
     modelfile: string;
@@ -626,36 +581,6 @@ export namespace OllamaApi {
     username?: string | null;
     password?: string | null;
     stream: boolean;
-  }
-
-  export namespace PullModelRequest {
-    export function of(model: string): PullModelRequest {
-      return { model, insecure: false, stream: true };
-    }
-
-    /**
-     * Construct a {@link PullModelRequest} enforcing streaming.
-     */
-    export function create(props: {
-      model: string;
-      insecure?: boolean;
-      username?: string | null;
-      password?: string | null;
-      stream?: boolean;
-    }): PullModelRequest {
-      let stream = props.stream ?? true;
-      if (!stream) {
-        OllamaApi.warnEnforcingStreamingOfModelPullRequest();
-        stream = true;
-      }
-      return {
-        model: props.model,
-        insecure: props.insecure ?? false,
-        username: props.username ?? null,
-        password: props.password ?? null,
-        stream,
-      };
-    }
   }
 
   export interface ProgressResponse {

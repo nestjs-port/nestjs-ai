@@ -17,14 +17,17 @@
 import assert from "node:assert/strict";
 
 import { OllamaContainer } from "@testcontainers/ollama";
-import { lastValueFrom } from "rxjs";
+import { ms } from "@nestjs-port/core";
 
 import { OllamaApi } from "../api/ollama-api.js";
 import { OllamaApiConstants } from "../api/common/ollama-api-constants.js";
+import { ModelManagementOptions } from "../management/model-management-options.js";
+import { OllamaModelManager } from "../management/ollama-model-manager.js";
+import { PullModelStrategy } from "../management/pull-model-strategy.js";
 
 const DEFAULT_IMAGE = "ollama/ollama:0.12.10";
+const DEFAULT_TIMEOUT = ms(600_000);
 const DEFAULT_MAX_RETRIES = 2;
-const DEFAULT_PULL_RETRY_DELAY_MS = 1_000;
 
 type OllamaContainerHandle = {
   getEndpoint(): string;
@@ -43,15 +46,19 @@ export class OllamaTestContext {
 
   private readonly _baseUrl: string;
 
+  private readonly _modelManager: OllamaModelManager;
+
   private readonly _container: OllamaContainerHandle | null;
 
   private constructor(props: {
     api: OllamaApi;
     baseUrl: string;
+    modelManager: OllamaModelManager;
     container: OllamaContainerHandle | null;
   }) {
     this._api = props.api;
     this._baseUrl = props.baseUrl;
+    this._modelManager = props.modelManager;
     this._container = props.container;
   }
 
@@ -78,13 +85,17 @@ export class OllamaTestContext {
       OllamaApiConstants.DEFAULT_BASE_URL;
 
     const api = new OllamaApi({ baseUrl });
-    await this.ensureModelsPresent(
-      api,
-      models,
-      props.maxRetries ?? DEFAULT_MAX_RETRIES,
-    );
+    const modelManager = await OllamaModelManager.create({
+      ollamaApi: api,
+      options: new ModelManagementOptions({
+        pullModelStrategy: PullModelStrategy.WHEN_MISSING,
+        additionalModels: models,
+        timeout: DEFAULT_TIMEOUT,
+        maxRetries: props.maxRetries ?? DEFAULT_MAX_RETRIES,
+      }),
+    });
 
-    return new OllamaTestContext({ api, baseUrl, container });
+    return new OllamaTestContext({ api, baseUrl, modelManager, container });
   }
 
   get api(): OllamaApi {
@@ -95,48 +106,11 @@ export class OllamaTestContext {
     return this._baseUrl;
   }
 
+  get modelManager(): OllamaModelManager {
+    return this._modelManager;
+  }
+
   async stop(): Promise<void> {
     await this._container?.stop();
-  }
-
-  private static async ensureModelsPresent(
-    api: OllamaApi,
-    models: string[],
-    maxRetries: number,
-  ): Promise<void> {
-    for (const model of models) {
-      await this.pullModelWithRetries(api, model, maxRetries);
-    }
-  }
-
-  private static async pullModelWithRetries(
-    api: OllamaApi,
-    model: string,
-    maxRetries: number,
-  ): Promise<void> {
-    let lastError: unknown;
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        await lastValueFrom(
-          api.pullModel({
-            model,
-            stream: true,
-            insecure: false,
-          }),
-        );
-        return;
-      } catch (error) {
-        lastError = error;
-        if (attempt >= maxRetries) {
-          throw error;
-        }
-        await new Promise((resolve) =>
-          setTimeout(resolve, DEFAULT_PULL_RETRY_DELAY_MS),
-        );
-      }
-    }
-
-    throw lastError;
   }
 }

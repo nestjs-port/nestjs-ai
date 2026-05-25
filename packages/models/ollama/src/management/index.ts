@@ -18,4 +18,8 @@ export {
   ModelManagementOptions,
   type ModelManagementOptionsProps,
 } from "./model-management-options.js";
+export {
+  OllamaModelManager,
+  type OllamaModelManagerProps,
+} from "./ollama-model-manager.js";
 export { PullModelStrategy } from "./pull-model-strategy.js";

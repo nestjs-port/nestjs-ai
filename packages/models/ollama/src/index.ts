@@ -16,3 +16,7 @@
 
 export * from "./api/index.js";
 export * from "./management/index.js";
+export {
+  OllamaEmbeddingModel,
+  type OllamaEmbeddingModelProps,
+} from "./ollama-embedding-model.js";

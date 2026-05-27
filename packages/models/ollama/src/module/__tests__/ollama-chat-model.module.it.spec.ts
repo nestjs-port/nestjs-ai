@@ -91,7 +91,7 @@ async function createChatModule(
   properties: OllamaChatProperties,
 ): Promise<TestingModule> {
   const apiModule = OllamaApiModule.forFeature({
-    ollamaApiProps: { baseUrl: context.baseUrl },
+    baseUrl: context.baseUrl,
   });
 
   return Test.createTestingModule({

@@ -93,7 +93,7 @@ export class OllamaEmbeddingModel extends AbstractEmbeddingModel {
 
     const model = this._defaultOptions.model;
     assert(model != null, "model must not be null");
-    this._initializePromise = this.initializeModel(
+    this._initializePromise = this.initializeModels(
       model,
       modelManagementOptions.pullModelStrategy,
     );
@@ -237,13 +237,14 @@ export class OllamaEmbeddingModel extends AbstractEmbeddingModel {
     return new OllamaEmbeddingOptions(builderProps);
   }
 
-  private async initializeModel(
+  private async initializeModels(
     model: string,
     pullModelStrategy: PullModelStrategy,
   ): Promise<void> {
     if (pullModelStrategy !== PullModelStrategy.NEVER) {
       await this._modelManager.pullModel(model, pullModelStrategy);
     }
+    await this._modelManager.initialize();
   }
 }
 

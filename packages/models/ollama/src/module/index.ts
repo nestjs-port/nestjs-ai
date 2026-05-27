@@ -15,6 +15,22 @@
  */
 
 export {
+  OLLAMA_API_MODEL_MODULE_OPTIONS_TOKEN,
+  OllamaApiModule,
+  type OllamaApiModelModuleAsyncOptions,
+  type OllamaApiModelModuleOptions,
+} from "./ollama-api.module.js";
+export {
+  OLLAMA_CHAT_DEFAULT_MODEL,
+  type OllamaChatProperties,
+} from "./ollama-chat-properties.js";
+export {
+  OLLAMA_CHAT_MODEL_MODULE_OPTIONS_TOKEN,
+  OllamaChatModelModule,
+  type OllamaChatModelModuleAsyncOptions,
+  type OllamaChatModelModuleOptions,
+} from "./ollama-chat-model.module.js";
+export {
   OLLAMA_EMBEDDING_DEFAULT_MODEL,
   type OllamaEmbeddingProperties,
 } from "./ollama-embedding-properties.js";

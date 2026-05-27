@@ -21,7 +21,6 @@ import { ms } from "@nestjs-port/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { OllamaEmbeddingOptions } from "../../api/ollama-embedding-options.js";
-import type { OllamaApi } from "../../api/ollama-api.js";
 import { OllamaModel } from "../../api/ollama-model.js";
 import type { OllamaEmbeddingModel } from "../../ollama-embedding-model.js";
 import { OllamaModelManager } from "../../management/ollama-model-manager.js";
@@ -30,6 +29,7 @@ import {
   OLLAMA_TESTS_ENABLED,
   OllamaTestContext,
 } from "../../__tests__/ollama-test-context.js";
+import { OllamaApiModule } from "../ollama-api.module.js";
 import { OllamaEmbeddingModelModule } from "../ollama-embedding-model.module.js";
 import type { OllamaEmbeddingProperties } from "../ollama-embedding-properties.js";
 
@@ -53,7 +53,7 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaEmbeddingModelModuleIT", () => {
   it(
     "single text embedding",
     async () => {
-      const embeddingModel = await createEmbeddingModel(context.api, {
+      const embeddingModel = await createEmbeddingModel(context, {
         options: { model: MODEL },
       });
 
@@ -75,7 +75,7 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaEmbeddingModelModuleIT", () => {
     "embedding with pull",
     async () => {
       const model = ADDITIONAL_MODEL;
-      const embeddingModel = await createEmbeddingModel(context.api, {
+      const embeddingModel = await createEmbeddingModel(context, {
         include: true,
         additionalModels: [ADDITIONAL_MODEL],
         pullModelStrategy: PullModelStrategy.WHEN_MISSING,
@@ -110,7 +110,7 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaEmbeddingModelModuleIT", () => {
   it(
     "module registration",
     async () => {
-      const moduleRef = await createEmbeddingModule(context.api, {
+      const moduleRef = await createEmbeddingModule(context, {
         options: { model: MODEL },
       });
 
@@ -135,19 +135,27 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaEmbeddingModelModuleIT", () => {
 });
 
 async function createEmbeddingModule(
-  ollamaApi: OllamaApi,
+  context: OllamaTestContext,
   properties: OllamaEmbeddingProperties,
 ): Promise<TestingModule> {
+  const apiModule = OllamaApiModule.forFeature({
+    ollamaApiProps: { baseUrl: context.baseUrl },
+  });
+
   return Test.createTestingModule({
-    imports: [OllamaEmbeddingModelModule.forFeature(ollamaApi, properties)],
+    imports: [
+      OllamaEmbeddingModelModule.forFeature(properties, {
+        imports: [apiModule],
+      }),
+    ],
   }).compile();
 }
 
 async function createEmbeddingModel(
-  ollamaApi: OllamaApi,
+  context: OllamaTestContext,
   properties: OllamaEmbeddingProperties,
 ): Promise<OllamaEmbeddingModel> {
-  const moduleRef = await createEmbeddingModule(ollamaApi, properties);
+  const moduleRef = await createEmbeddingModule(context, properties);
   return moduleRef.get<OllamaEmbeddingModel>(EMBEDDING_MODEL_TOKEN);
 }
 

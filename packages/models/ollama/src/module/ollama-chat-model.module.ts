@@ -22,62 +22,75 @@ import {
   type ModuleMetadata,
   type Provider,
 } from "@nestjs/common";
-import { EMBEDDING_MODEL_TOKEN } from "@nestjs-ai/commons";
+import { CHAT_MODEL_TOKEN } from "@nestjs-ai/commons";
 import {
-  EmbeddingModelObservationConvention,
+  ChatModelObservationConvention,
+  DefaultToolExecutionEligibilityPredicate,
   ModelObservationModule,
+  TOOL_CALLING_MANAGER_TOKEN,
+  type ToolCallingManager,
+  ToolCallingModule,
+  ToolExecutionEligibilityPredicate,
 } from "@nestjs-ai/model";
 import {
   NoopObservationRegistry,
   OBSERVATION_REGISTRY_TOKEN,
   type ObservationRegistry,
+  type RetryTemplate,
 } from "@nestjs-port/core";
+import { RetryUtils } from "@nestjs-ai/retry";
 
 import { OllamaApi } from "../api/ollama-api.js";
-import { OllamaEmbeddingOptions } from "../api/ollama-embedding-options.js";
-import { OllamaEmbeddingModel } from "../ollama-embedding-model.js";
+import { OllamaChatOptions } from "../api/ollama-chat-options.js";
+import { OllamaChatModel } from "../ollama-chat-model.js";
 import { ModelManagementOptions } from "../management/model-management-options.js";
 import { PullModelStrategy } from "../management/pull-model-strategy.js";
 import {
-  OLLAMA_EMBEDDING_DEFAULT_MODEL,
-  type OllamaEmbeddingProperties,
-} from "./ollama-embedding-properties.js";
+  OLLAMA_CHAT_DEFAULT_MODEL,
+  type OllamaChatProperties,
+} from "./ollama-chat-properties.js";
 import { OllamaApiModule } from "./ollama-api.module.js";
 
-export const OLLAMA_EMBEDDING_MODEL_MODULE_OPTIONS_TOKEN = Symbol.for(
-  "OLLAMA_EMBEDDING_MODEL_MODULE_OPTIONS_TOKEN",
+export const OLLAMA_CHAT_MODEL_MODULE_OPTIONS_TOKEN = Symbol.for(
+  "OLLAMA_CHAT_MODEL_MODULE_OPTIONS_TOKEN",
 );
 
-export interface OllamaEmbeddingModelModuleOptions {
-  properties: OllamaEmbeddingProperties;
+export interface OllamaChatModelModuleOptions {
+  properties: OllamaChatProperties;
+  retryTemplate?: RetryTemplate | null;
 }
 
-export interface OllamaEmbeddingModelModuleAsyncOptions {
+export interface OllamaChatModelModuleAsyncOptions {
   imports?: ModuleMetadata["imports"];
   inject?: InjectionToken[];
   useFactory: (
     ...args: never[]
-  ) =>
-    | Promise<OllamaEmbeddingModelModuleOptions>
-    | OllamaEmbeddingModelModuleOptions;
+  ) => Promise<OllamaChatModelModuleOptions> | OllamaChatModelModuleOptions;
   global?: boolean;
 }
 
 @Module({})
-export class OllamaEmbeddingModelModule {
+export class OllamaChatModelModule {
   static forFeature(
-    properties: OllamaEmbeddingProperties,
-    options?: { imports?: ModuleMetadata["imports"]; global?: boolean },
+    properties: OllamaChatProperties,
+    options?: {
+      imports?: ModuleMetadata["imports"];
+      global?: boolean;
+      retryTemplate?: RetryTemplate | null;
+    },
   ): DynamicModule {
-    return OllamaEmbeddingModelModule.forFeatureAsync({
+    return OllamaChatModelModule.forFeatureAsync({
       imports: options?.imports,
-      useFactory: () => ({ properties }),
+      useFactory: () => ({
+        properties,
+        retryTemplate: options?.retryTemplate,
+      }),
       global: options?.global,
     });
   }
 
   static forFeatureAsync(
-    options: OllamaEmbeddingModelModuleAsyncOptions,
+    options: OllamaChatModelModuleAsyncOptions,
   ): DynamicModule {
     const providers = createProviders();
     const imports =
@@ -86,11 +99,11 @@ export class OllamaEmbeddingModelModule {
         : [OllamaApiModule.forFeature()];
 
     return {
-      module: OllamaEmbeddingModelModule,
-      imports: [ModelObservationModule, ...imports],
+      module: OllamaChatModelModule,
+      imports: [ModelObservationModule, ToolCallingModule, ...imports],
       providers: [
         {
-          provide: OLLAMA_EMBEDDING_MODEL_MODULE_OPTIONS_TOKEN,
+          provide: OLLAMA_CHAT_MODEL_MODULE_OPTIONS_TOKEN,
           useFactory: options.useFactory,
           inject: options.inject ?? [],
         },
@@ -107,36 +120,44 @@ export class OllamaEmbeddingModelModule {
 function createProviders(): Provider[] {
   return [
     {
-      provide: EMBEDDING_MODEL_TOKEN,
+      provide: CHAT_MODEL_TOKEN,
       useFactory: (
-        moduleOptions: OllamaEmbeddingModelModuleOptions,
+        moduleOptions: OllamaChatModelModuleOptions,
         ollamaApi: OllamaApi,
+        toolCallingManager: ToolCallingManager,
         observationRegistry?: ObservationRegistry,
-        observationConvention?: EmbeddingModelObservationConvention,
+        observationConvention?: ChatModelObservationConvention,
+        toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
       ) =>
-        createOllamaEmbeddingModel(
+        createOllamaChatModel(
           moduleOptions,
           ollamaApi,
+          toolCallingManager,
           observationRegistry,
           observationConvention,
+          toolExecutionEligibilityPredicate,
         ),
       inject: [
-        OLLAMA_EMBEDDING_MODEL_MODULE_OPTIONS_TOKEN,
+        OLLAMA_CHAT_MODEL_MODULE_OPTIONS_TOKEN,
         OllamaApi,
+        TOOL_CALLING_MANAGER_TOKEN,
         { token: OBSERVATION_REGISTRY_TOKEN, optional: true },
-        { token: EmbeddingModelObservationConvention, optional: true },
+        { token: ChatModelObservationConvention, optional: true },
+        { token: ToolExecutionEligibilityPredicate, optional: true },
       ],
     },
   ];
 }
 
-function createOllamaEmbeddingModel(
-  moduleOptions: OllamaEmbeddingModelModuleOptions,
+function createOllamaChatModel(
+  moduleOptions: OllamaChatModelModuleOptions,
   ollamaApi: OllamaApi,
+  toolCallingManager: ToolCallingManager,
   observationRegistry?: ObservationRegistry,
-  observationConvention?: EmbeddingModelObservationConvention,
-): OllamaEmbeddingModel {
-  const { properties } = moduleOptions;
+  observationConvention?: ChatModelObservationConvention,
+  toolExecutionEligibilityPredicate?: ToolExecutionEligibilityPredicate,
+): OllamaChatModel {
+  const { properties, retryTemplate } = moduleOptions;
   const {
     options,
     include,
@@ -145,10 +166,11 @@ function createOllamaEmbeddingModel(
     timeout,
     maxRetries,
   } = properties;
-  const defaultOptions = new OllamaEmbeddingOptions({
-    ...options,
-    model: options?.model ?? OLLAMA_EMBEDDING_DEFAULT_MODEL,
-  });
+  const defaultOptions = options?.copy() ?? OllamaChatOptions.builder().build();
+
+  if (defaultOptions.model == null) {
+    defaultOptions.setModel(OLLAMA_CHAT_DEFAULT_MODEL);
+  }
 
   const modelManagementOptions = new ModelManagementOptions({
     pullModelStrategy:
@@ -158,12 +180,17 @@ function createOllamaEmbeddingModel(
     maxRetries,
   });
 
-  const model = new OllamaEmbeddingModel({
+  const model = new OllamaChatModel({
     ollamaApi,
     defaultOptions,
+    toolCallingManager,
     observationRegistry:
       observationRegistry ?? NoopObservationRegistry.INSTANCE,
     modelManagementOptions,
+    toolExecutionEligibilityPredicate:
+      toolExecutionEligibilityPredicate ??
+      new DefaultToolExecutionEligibilityPredicate(),
+    retryTemplate: retryTemplate ?? RetryUtils.DEFAULT_RETRY_TEMPLATE,
   });
 
   if (observationConvention) {

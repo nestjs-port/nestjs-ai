@@ -139,7 +139,7 @@ async function createEmbeddingModule(
   properties: OllamaEmbeddingProperties,
 ): Promise<TestingModule> {
   const apiModule = OllamaApiModule.forFeature({
-    ollamaApiProps: { baseUrl: context.baseUrl },
+    baseUrl: context.baseUrl,
   });
 
   return Test.createTestingModule({

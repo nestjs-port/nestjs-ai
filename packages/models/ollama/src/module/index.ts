@@ -18,8 +18,8 @@ export {
   OLLAMA_API_MODEL_MODULE_OPTIONS_TOKEN,
   OllamaApiModule,
   type OllamaApiModelModuleAsyncOptions,
-  type OllamaApiModelModuleOptions,
 } from "./ollama-api.module.js";
+export { type OllamaConnectionProperties } from "./ollama-connection-properties.js";
 export {
   OLLAMA_CHAT_DEFAULT_MODEL,
   type OllamaChatProperties,

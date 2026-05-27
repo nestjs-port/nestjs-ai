@@ -23,37 +23,34 @@ import {
   type Provider,
 } from "@nestjs/common";
 
-import { OllamaApi, type OllamaApiProps } from "../api/ollama-api.js";
+import { OllamaApi } from "../api/ollama-api.js";
+import type { OllamaConnectionProperties } from "./ollama-connection-properties.js";
 
 export const OLLAMA_API_MODEL_MODULE_OPTIONS_TOKEN = Symbol.for(
   "OLLAMA_API_MODEL_MODULE_OPTIONS_TOKEN",
 );
-
-export interface OllamaApiModelModuleOptions {
-  ollamaApiProps?: OllamaApiProps;
-}
 
 export interface OllamaApiModelModuleAsyncOptions {
   imports?: ModuleMetadata["imports"];
   inject?: InjectionToken[];
   useFactory: (
     ...args: never[]
-  ) => Promise<OllamaApiModelModuleOptions> | OllamaApiModelModuleOptions;
+  ) => Promise<OllamaConnectionProperties> | OllamaConnectionProperties;
   global?: boolean;
 }
 
 @Module({})
 export class OllamaApiModule {
-  static forFeature(options?: {
-    ollamaApiProps?: OllamaApiProps;
-    imports?: ModuleMetadata["imports"];
-    global?: boolean;
-  }): DynamicModule {
+  static forFeature(
+    properties?: OllamaConnectionProperties,
+    options?: {
+      imports?: ModuleMetadata["imports"];
+      global?: boolean;
+    },
+  ): DynamicModule {
     return OllamaApiModule.forFeatureAsync({
       imports: options?.imports,
-      useFactory: () => ({
-        ollamaApiProps: options?.ollamaApiProps,
-      }),
+      useFactory: () => properties ?? {},
       global: options?.global,
     });
   }
@@ -86,8 +83,8 @@ function createProviders(): Provider[] {
   return [
     {
       provide: OllamaApi,
-      useFactory: (moduleOptions: OllamaApiModelModuleOptions) =>
-        new OllamaApi(moduleOptions.ollamaApiProps ?? {}),
+      useFactory: (properties: OllamaConnectionProperties) =>
+        new OllamaApi({ baseUrl: properties.baseUrl }),
       inject: [OLLAMA_API_MODEL_MODULE_OPTIONS_TOKEN],
     },
   ];

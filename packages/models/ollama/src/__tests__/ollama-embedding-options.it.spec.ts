@@ -20,18 +20,20 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { OllamaEmbeddingOptions } from "../api/ollama-embedding-options.js";
 import { OllamaModel } from "../api/ollama-model.js";
 import { OllamaEmbeddingModel } from "../ollama-embedding-model.js";
-import { OllamaTestContext } from "./ollama-test-context.js";
+import {
+  OLLAMA_TESTS_ENABLED,
+  OllamaTestContext,
+} from "./ollama-test-context.js";
 
 const TEST_TIMEOUT = 600_000;
 const MODEL = OllamaModel.QWEN3_EMBED_8B.name;
-const RUN_REAL_EMBEDDING_TESTS = process.env.OLLAMA_WITH_REUSE === "true";
 
 describe("OllamaEmbeddingOptionsTestsIT", () => {
   let context: OllamaTestContext | null = null;
   let embeddingModel: OllamaEmbeddingModel | null = null;
 
   beforeAll(async () => {
-    if (!RUN_REAL_EMBEDDING_TESTS) {
+    if (!OLLAMA_TESTS_ENABLED) {
       return;
     }
 
@@ -140,7 +142,7 @@ describe("OllamaEmbeddingOptionsTestsIT", () => {
     expect(Object.keys(optionsMap)).not.toHaveLength(0);
   });
 
-  it.skipIf(!RUN_REAL_EMBEDDING_TESTS)(
+  it.skipIf(!OLLAMA_TESTS_ENABLED)(
     "test dimensions parameter with real embedding",
     async () => {
       // Test actual vector model call to verify dimensions parameter is effectively
@@ -176,7 +178,7 @@ describe("OllamaEmbeddingOptionsTestsIT", () => {
     TEST_TIMEOUT,
   );
 
-  it.skipIf(!RUN_REAL_EMBEDDING_TESTS)(
+  it.skipIf(!OLLAMA_TESTS_ENABLED)(
     "test dimensions parameter comparison",
     async () => {
       // Compare scenarios with and without dimensions parameter

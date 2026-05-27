@@ -17,13 +17,16 @@
 import { lastValueFrom, timeout, toArray } from "rxjs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { OllamaTestContext } from "../../__tests__/ollama-test-context.js";
+import {
+  OLLAMA_TESTS_ENABLED,
+  OllamaTestContext,
+} from "../../__tests__/ollama-test-context.js";
 import type { OllamaApi } from "../ollama-api.js";
 
 const TEST_TIMEOUT = 600_000;
 const MODEL = "all-minilm";
 
-describe("OllamaApiModelsIT", () => {
+describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaApiModelsIT", () => {
   let context: OllamaTestContext;
 
   beforeAll(async () => {

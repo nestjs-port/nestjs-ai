@@ -24,13 +24,16 @@ import { ModelManagementOptions } from "../management/model-management-options.j
 import { OllamaModelManager } from "../management/ollama-model-manager.js";
 import { PullModelStrategy } from "../management/pull-model-strategy.js";
 import { OllamaEmbeddingModel } from "../ollama-embedding-model.js";
-import { OllamaTestContext } from "./ollama-test-context.js";
+import {
+  OLLAMA_TESTS_ENABLED,
+  OllamaTestContext,
+} from "./ollama-test-context.js";
 
 const TEST_TIMEOUT = 600_000;
 const MODEL = OllamaModel.NOMIC_EMBED_TEXT.name;
 const ADDITIONAL_MODEL = "all-minilm";
 
-describe("OllamaEmbeddingModelIT", () => {
+describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaEmbeddingModelIT", () => {
   let context: OllamaTestContext;
   let embeddingModel: OllamaEmbeddingModel;
 

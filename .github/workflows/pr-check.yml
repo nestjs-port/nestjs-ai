@@ -58,6 +58,7 @@ jobs:
             --filter=@nestjs-ai/model-anthropic \
             --filter=@nestjs-ai/model-chat-memory-repository-jsdbc \
             --filter=@nestjs-ai/model-google-genai \
+            --filter=@nestjs-ai/model-ollama \
             --filter=@nestjs-ai/model-openai \
             --filter=@nestjs-ai/model-transformers \
             --filter=@nestjs-ai/platform \

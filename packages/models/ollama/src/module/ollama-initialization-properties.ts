@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
-export * from "./module/index.js";
-export {
-  OllamaChatModel,
-  type OllamaChatModelProps,
-} from "./ollama-chat-model.js";
-export {
-  OllamaEmbeddingModel,
-  type OllamaEmbeddingModelProps,
-} from "./ollama-embedding-model.js";
+import type { Milliseconds } from "@nestjs-port/core";
+
+import type { PullModelStrategy } from "../management/pull-model-strategy.js";
+
+/**
+ * Shared initialization settings for Ollama chat and embedding modules.
+ */
+export interface OllamaInitializationProperties {
+  pullModelStrategy?: PullModelStrategy;
+  timeout?: Milliseconds;
+  maxRetries?: number;
+  include?: boolean;
+  additionalModels?: string[];
+}

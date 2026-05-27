@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
-export * from "./module/index.js";
 export {
-  OllamaChatModel,
-  type OllamaChatModelProps,
-} from "./ollama-chat-model.js";
+  OLLAMA_EMBEDDING_DEFAULT_MODEL,
+  type OllamaEmbeddingProperties,
+} from "./ollama-embedding-properties.js";
 export {
-  OllamaEmbeddingModel,
-  type OllamaEmbeddingModelProps,
-} from "./ollama-embedding-model.js";
+  OLLAMA_EMBEDDING_MODEL_MODULE_OPTIONS_TOKEN,
+  OllamaEmbeddingModelModule,
+  type OllamaEmbeddingModelModuleAsyncOptions,
+  type OllamaEmbeddingModelModuleOptions,
+} from "./ollama-embedding-model.module.js";
+export { type OllamaInitializationProperties } from "./ollama-initialization-properties.js";

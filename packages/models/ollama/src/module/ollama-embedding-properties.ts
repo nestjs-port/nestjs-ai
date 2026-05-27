@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-export * from "./api/index.js";
-export * from "./management/index.js";
-export * from "./module/index.js";
-export {
-  OllamaChatModel,
-  type OllamaChatModelProps,
-} from "./ollama-chat-model.js";
-export {
-  OllamaEmbeddingModel,
-  type OllamaEmbeddingModelProps,
-} from "./ollama-embedding-model.js";
+import { OllamaModel } from "../api/ollama-model.js";
+import type { OllamaEmbeddingOptionsProps } from "../api/ollama-embedding-options.js";
+import type { OllamaInitializationProperties } from "./ollama-initialization-properties.js";
+
+export const OLLAMA_EMBEDDING_DEFAULT_MODEL =
+  OllamaModel.MXBAI_EMBED_LARGE.id();
+
+/**
+ * Nest module properties for the Ollama embedding model.
+ */
+export interface OllamaEmbeddingProperties extends OllamaInitializationProperties {
+  options?: Partial<OllamaEmbeddingOptionsProps>;
+}

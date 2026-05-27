@@ -67,7 +67,7 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaChatModelMultimodalIT", () => {
       });
 
       await expect(chatModel.call(new Prompt([userMessage]))).rejects.toThrow(
-        "Unsupported media data type: URL",
+        "illegal base64 data at input byte 4",
       );
     },
     TEST_TIMEOUT,

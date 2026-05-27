@@ -17,6 +17,10 @@
 export * from "./api/index.js";
 export * from "./management/index.js";
 export {
+  OllamaChatModel,
+  type OllamaChatModelProps,
+} from "./ollama-chat-model.js";
+export {
   OllamaEmbeddingModel,
   type OllamaEmbeddingModelProps,
 } from "./ollama-embedding-model.js";

@@ -19,14 +19,17 @@ import { readFileSync } from "node:fs";
 import { lastValueFrom, toArray } from "rxjs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { OllamaTestContext } from "../../__tests__/ollama-test-context.js";
+import {
+  OLLAMA_TESTS_ENABLED,
+  OllamaTestContext,
+} from "../../__tests__/ollama-test-context.js";
 import { OllamaApi } from "../ollama-api.js";
 import { OllamaChatOptions } from "../ollama-chat-options.js";
 import { OllamaModel } from "../ollama-model.js";
 
 const TEST_TIMEOUT = 600_000;
 
-describe("OllamaApiIT", () => {
+describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaApiIT", () => {
   const chatModel = OllamaModel.QWEN_2_5_3B.name;
   const embeddingModel = OllamaModel.NOMIC_EMBED_TEXT.name;
   const thinkingModel = OllamaModel.QWEN3_4B_THINKING.name;

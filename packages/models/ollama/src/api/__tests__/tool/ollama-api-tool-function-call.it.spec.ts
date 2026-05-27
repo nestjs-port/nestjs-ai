@@ -16,7 +16,10 @@
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { OllamaTestContext } from "../../../__tests__/ollama-test-context.js";
+import {
+  OLLAMA_TESTS_ENABLED,
+  OllamaTestContext,
+} from "../../../__tests__/ollama-test-context.js";
 import { OllamaApi } from "../../ollama-api.js";
 import { OllamaModel } from "../../ollama-model.js";
 import {
@@ -27,7 +30,7 @@ import {
 const TEST_TIMEOUT = 600_000;
 const MODEL = OllamaModel.QWEN_2_5_3B.name;
 
-describe("OllamaApiToolFunctionCallIT", () => {
+describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaApiToolFunctionCallIT", () => {
   let context: OllamaTestContext;
   const weatherService = new MockWeatherService();
 

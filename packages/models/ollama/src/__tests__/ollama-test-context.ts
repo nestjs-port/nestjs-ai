@@ -29,6 +29,10 @@ const DEFAULT_IMAGE = "ollama/ollama:0.12.10";
 const DEFAULT_TIMEOUT = ms(600_000);
 const DEFAULT_MAX_RETRIES = 2;
 
+export const OLLAMA_TESTS_ENABLED =
+  process.env.OLLAMA_TESTS_ENABLED === "true" ||
+  process.env.OLLAMA_WITH_REUSE === "true";
+
 type OllamaContainerHandle = {
   getEndpoint(): string;
   stop(): Promise<unknown>;

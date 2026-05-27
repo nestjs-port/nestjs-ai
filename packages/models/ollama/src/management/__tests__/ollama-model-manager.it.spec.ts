@@ -16,14 +16,17 @@
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { OllamaTestContext } from "../../__tests__/ollama-test-context.js";
+import {
+  OLLAMA_TESTS_ENABLED,
+  OllamaTestContext,
+} from "../../__tests__/ollama-test-context.js";
 import { OllamaModel } from "../../api/ollama-model.js";
 import { OllamaModelManager } from "../ollama-model-manager.js";
 
 const TEST_TIMEOUT = 600_000;
 const MODEL = OllamaModel.NOMIC_EMBED_TEXT.name;
 
-describe("OllamaModelManagerIT", () => {
+describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaModelManagerIT", () => {
   let context: OllamaTestContext;
   let modelManager: OllamaModelManager;
 

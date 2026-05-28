@@ -1,5 +1,13 @@
 # @nestjs-ai/model-openai
 
+## 0.1.3
+
+### Patch Changes
+
+- Align OpenAI chat options with the shared structured output builder
+- Updated dependencies
+  - @nestjs-ai/model@0.1.5
+
 ## 0.1.2
 
 ### Patch Changes

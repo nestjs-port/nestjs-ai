@@ -1,5 +1,11 @@
 # @nestjs-ai/model
 
+## 0.1.5
+
+### Patch Changes
+
+- Fix tool callback and tool name accumulation in the default builder
+
 ## 0.1.4
 
 ### Patch Changes

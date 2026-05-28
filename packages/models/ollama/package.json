@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/model-ollama",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": false,
   "description": "Ollama model integration for NestJS AI",
   "keywords": [
@@ -49,7 +49,7 @@
   },
   "peerDependencies": {
     "@nestjs-ai/commons": "^0.1.2",
-    "@nestjs-ai/model": "^0.1.4",
+    "@nestjs-ai/model": "^0.1.5",
     "@nestjs-ai/retry": "^0.1.2",
     "@nestjs-port/core": "^0.1.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",

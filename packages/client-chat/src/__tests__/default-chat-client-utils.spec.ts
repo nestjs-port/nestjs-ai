@@ -312,7 +312,7 @@ describe("DefaultChatClientUtils", () => {
     expect(resultOptions.toolNames).toEqual(new Set(toolNames2));
   });
 
-  it("when tool callbacks and chat options are provided then the tool callbacks override", () => {
+  it("when tool callbacks and chat options are provided then the tool callbacks are appended", () => {
     const toolCallback1 = new TestToolCallback("tool1");
     const chatOptions = DefaultToolCallingChatOptions.builder()
       .toolCallbacks(toolCallback1)
@@ -331,7 +331,7 @@ describe("DefaultChatClientUtils", () => {
     assert.exists(result);
     assert.exists(result.prompt.options);
     assert.exists(resultOptions);
-    expect(resultOptions.toolCallbacks).toEqual([toolCallback2]);
+    expect(resultOptions.toolCallbacks).toEqual([toolCallback1, toolCallback2]);
   });
 
   it("when tool context and chat options are provided then the values are merged", () => {

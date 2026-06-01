@@ -6,7 +6,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `d3e495d2` (Expose conversationHistoryEnabled getter in ToolCallAdvisor.Builder)
+**Last synced Spring AI commit:** `0f9340fb` (Add Anthropic module migration docs)
 
 ## Overview
 

@@ -576,10 +576,7 @@ export namespace DefaultChatClient {
       }
 
       if (
-        context.get(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key) ===
-          true &&
-        (outputConverter instanceof JsonSchemaOutputConverter ||
-          outputConverter instanceof StandardSchemaOutputConverter)
+        context.get(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key) === true
       ) {
         context.set(
           ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key,

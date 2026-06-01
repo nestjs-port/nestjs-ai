@@ -10,6 +10,7 @@ import {
   DefaultToolCallingChatOptions,
   Generation,
   MessageType,
+  StructuredOutputConverter,
   type Prompt,
 } from "@nestjs-ai/model";
 import { describe, expect, it, vi } from "vitest";
@@ -197,6 +198,206 @@ describe("ChatClient Native Structured Response Tests", () => {
     expect(userMessage?.text).toContain("Tell me about John");
   });
 
+  it("native custom output converter response entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+    const outputConverter = new CustomJsonSchemaOutputConverter(
+      USER_JSON_SCHEMA,
+    );
+
+    const responseEntity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions.mutate())
+      .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .responseEntity(outputConverter);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      true,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      true,
+    );
+
+    expect(responseEntity.response).toBe(chatResponse);
+    expect(responseEntity.response?.metadata.get("key1")).toBe("value1");
+    expect(responseEntity.entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toBe("Tell me about John");
+  });
+
+  it("native custom output converter without json schema response entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+    const outputConverter = new CustomJsonSchemaOutputConverter(
+      StructuredOutputConverter.NO_JSON_SCHEMA,
+    );
+    const setOutputSchemaSpy = vi.spyOn(
+      structuredOutputChatOptions,
+      "setOutputSchema",
+    );
+
+    const responseEntity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions.mutate())
+      .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .responseEntity(outputConverter);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      true,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      true,
+    );
+
+    expect(responseEntity.response).toBe(chatResponse);
+    expect(responseEntity.response?.metadata.get("key1")).toBe("value1");
+    expect(responseEntity.entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toContain("Tell me about John");
+    expect(userMessage?.text).toContain(
+      "Your response should be in JSON format",
+    );
+    expect(setOutputSchemaSpy).not.toHaveBeenCalled();
+  });
+
+  it("native custom output converter entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+    const outputConverter = new CustomJsonSchemaOutputConverter(
+      USER_JSON_SCHEMA,
+    );
+
+    const entity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions.mutate())
+      .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .entity(outputConverter);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      true,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      true,
+    );
+
+    expect(entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toBe("Tell me about John");
+  });
+
+  it("native custom output converter without json schema entity test", async () => {
+    let capturedPrompt = {} as Prompt;
+    const chatResponse = createResponse('{"name":"John", "age":30}');
+    const chatModel = {
+      defaultOptions: new TestStructuredOutputChatOptions(),
+      call: vi.fn(async (prompt: Prompt) => {
+        capturedPrompt = prompt;
+        return chatResponse;
+      }),
+      stream: vi.fn(),
+    } as unknown as ChatModel;
+
+    const structuredOutputChatOptions = new TestStructuredOutputChatOptions();
+    const textCallAdvisor = new ContextCatcherCallAdvisor();
+    const outputConverter = new CustomJsonSchemaOutputConverter(
+      StructuredOutputConverter.NO_JSON_SCHEMA,
+    );
+    const setOutputSchemaSpy = vi.spyOn(
+      structuredOutputChatOptions,
+      "setOutputSchema",
+    );
+
+    const entity = await ChatClient.builder(chatModel)
+      .build()
+      .prompt()
+      .options(structuredOutputChatOptions.mutate())
+      .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
+      .advisors(textCallAdvisor)
+      .user("Tell me about John")
+      .call()
+      .entity(outputConverter);
+
+    const context = textCallAdvisor.context;
+
+    expect(context.has(ChatClientAttributes.OUTPUT_FORMAT.key)).toBe(true);
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_SCHEMA.key)).toBe(
+      true,
+    );
+    expect(context.has(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.key)).toBe(
+      true,
+    );
+
+    expect(entity).toEqual({ name: "John", age: 30 });
+
+    const userMessage = capturedPrompt.instructions[0];
+    expect(userMessage?.messageType).toBe(MessageType.USER);
+    expect(userMessage?.text).toContain("Tell me about John");
+    expect(userMessage?.text).toContain(
+      "Your response should be in JSON format",
+    );
+    expect(setOutputSchemaSpy).not.toHaveBeenCalled();
+  });
+
   it("dynamic disable native response entity test", async () => {
     let capturedPrompt = {} as Prompt;
     const chatResponse = createResponse('{"name":"John", "age":30}');
@@ -300,21 +501,7 @@ class TestStructuredOutputChatOptions
   private _outputSchema = "";
 
   override copy(): ChatOptions {
-    const copy = new TestStructuredOutputChatOptions();
-    copy.setOutputSchema(this._outputSchema);
-    copy.setToolCallbacks(this.toolCallbacks);
-    copy.setToolNames(this.toolNames);
-    copy.setToolContext(this.toolContext);
-    copy.setInternalToolExecutionEnabled(this.internalToolExecutionEnabled);
-    copy.setModel(this.model);
-    copy.setFrequencyPenalty(this.frequencyPenalty);
-    copy.setMaxTokens(this.maxTokens);
-    copy.setPresencePenalty(this.presencePenalty);
-    copy.setStopSequences(this.stopSequences);
-    copy.setTemperature(this.temperature);
-    copy.setTopK(this.topK);
-    copy.setTopP(this.topP);
-    return copy;
+    return this;
   }
 
   override mutate(): TestStructuredOutputChatOptionsBuilder {
@@ -354,6 +541,43 @@ const UserEntitySchema = z.object({
   name: z.string(),
   age: z.number(),
 });
+
+const USER_JSON_SCHEMA = `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "age": {
+      "type": "integer"
+    }
+  },
+  "required": ["name", "age"],
+  "additionalProperties": false
+}`;
+
+class CustomJsonSchemaOutputConverter extends StructuredOutputConverter<
+  Record<string, unknown>
+> {
+  constructor(private readonly _jsonSchema: string) {
+    super();
+  }
+
+  get format(): string {
+    return `Your response should be in JSON format.
+The JSON Schema is:
+\`\`\`${this._jsonSchema}\`\`\``;
+  }
+
+  override get jsonSchema(): string {
+    return this._jsonSchema;
+  }
+
+  async convert(source: string): Promise<Record<string, unknown>> {
+    return JSON.parse(source) as Record<string, unknown>;
+  }
+}
 
 class ContextCatcherCallAdvisor implements CallAdvisor {
   private _context = new Map<string, unknown>();

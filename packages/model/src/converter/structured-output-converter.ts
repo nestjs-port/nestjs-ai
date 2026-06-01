@@ -17,10 +17,35 @@
 import type { AsyncConverter } from "@nestjs-port/core";
 import type { FormatProvider } from "./format-provider.js";
 
+/**
+ * Converts the (raw) LLM output into a structured responses of type. The
+ * {@link FormatProvider.format} method should provide the LLM prompt description
+ * of the desired format.
+ */
 export abstract class StructuredOutputConverter<T>
   implements AsyncConverter<string, T>, FormatProvider
 {
+  /**
+   * Constant for when there is no JSON schema available.
+   */
+  static readonly NO_JSON_SCHEMA = "";
+
+  /**
+   * Converts the given source text into the desired target type.
+   */
   abstract convert(source: string): Promise<T>;
 
+  /**
+   * Get the format of the output of a language generative.
+   */
   abstract get format(): string;
+
+  /**
+   * Returns the JSON schema for the structured output of an LLM call.
+   * @returns the JSON schema or {@link StructuredOutputConverter.NO_JSON_SCHEMA} if not
+   * available
+   */
+  get jsonSchema(): string {
+    return StructuredOutputConverter.NO_JSON_SCHEMA;
+  }
 }

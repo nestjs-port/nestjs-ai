@@ -94,7 +94,7 @@ Here is the JSON Schema instance your output must adhere to:
 \`\`\`${StandardSchemaOutputConverter.generateSchema(this._schema)}\`\`\``;
   }
 
-  get jsonSchema(): string {
+  override get jsonSchema(): string {
     return StandardSchemaOutputConverter.generateSchema(this._schema);
   }
 

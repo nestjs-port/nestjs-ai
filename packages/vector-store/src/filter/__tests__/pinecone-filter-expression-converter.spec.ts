@@ -194,7 +194,7 @@ describe("PineconeFilterExpressionConverter", () => {
     let vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
-        new Filter.Key('"country 1 2 3"'),
+        new Filter.Key("country 1 2 3"),
         new Filter.Value("BG"),
       ),
     );
@@ -204,12 +204,37 @@ describe("PineconeFilterExpressionConverter", () => {
     vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
+        new Filter.Key('"country 1 2 3"'),
+        new Filter.Value("BG"),
+      ),
+    );
+
+    expect(vectorExpr).toBe('{"\\"country 1 2 3\\"": {"$eq": "BG"}}');
+
+    vectorExpr = converter.convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
         new Filter.Key("'country 1 2 3'"),
         new Filter.Value("BG"),
       ),
     );
 
-    expect(vectorExpr).toBe('{"country 1 2 3": {"$eq": "BG"}}');
+    expect(vectorExpr).toBe('{"\'country 1 2 3\'": {"$eq": "BG"}}');
+  });
+
+  it("test key with injection payload", () => {
+    let vectorExpr = converter.convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key('x" : { "$or": [ {} ] }, "y'),
+        new Filter.Value("ignored"),
+      ),
+    );
+
+    expect(vectorExpr).toBe(
+      '{"x\\" : { \\"$or\\": [ {} ] }, \\"y": {"$eq": "ignored"}}',
+    );
+    expect(vectorExpr).not.toContain('"$or"');
   });
 
   it("test numeric values", () => {

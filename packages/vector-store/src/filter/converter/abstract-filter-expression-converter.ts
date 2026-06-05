@@ -165,6 +165,10 @@ export abstract class AbstractFilterExpressionConverter implements FilterExpress
     }
   }
 
+  /**
+   * Lucene/Elasticsearch query strings require backslash-escaping of special
+   * characters and spaces.
+   */
   protected static emitLuceneString(
     value: string,
     context: { value: string },
@@ -193,6 +197,7 @@ export abstract class AbstractFilterExpressionConverter implements FilterExpress
         case "|":
         case "<":
         case ">":
+        case " ":
           context.value += `\\${character}`;
           break;
         default:

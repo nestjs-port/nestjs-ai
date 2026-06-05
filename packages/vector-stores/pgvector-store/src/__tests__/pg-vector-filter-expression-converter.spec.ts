@@ -20,6 +20,10 @@ import { Filter } from "@nestjs-ai/vector-store";
 
 import { PgVectorFilterExpressionConverter } from "../pg-vector-filter-expression-converter.js";
 
+function sqlPredicate(jsonPath: string): string {
+  return `metadata::jsonb @@ '${jsonPath.replace(/'/g, "''")}'::jsonpath`;
+}
+
 describe("PgVectorFilterExpressionConverter", () => {
   const converter = new PgVectorFilterExpressionConverter();
 
@@ -33,7 +37,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('$.country == "BG"');
+    expect(vectorExpr).toBe(sqlPredicate('$."country" == "BG"'));
   });
 
   it("tes eq and gte", () => {
@@ -54,7 +58,9 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('$.genre == "drama" && $.year >= 2020');
+    expect(vectorExpr).toBe(
+      sqlPredicate('$."genre" == "drama" && $."year" >= 2020'),
+    );
   });
 
   it("tes in", () => {
@@ -68,7 +74,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '($.genre == "comedy" || $.genre == "documentary" || $.genre == "drama")',
+      sqlPredicate(
+        '($."genre" == "comedy" || $."genre" == "documentary" || $."genre" == "drama")',
+      ),
     );
   });
 
@@ -99,7 +107,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '$.year >= 2020 || $.country == "BG" && $.city != "Sofia"',
+      sqlPredicate(
+        '$."year" >= 2020 || $."country" == "BG" && $."city" != "Sofia"',
+      ),
     );
   });
 
@@ -132,7 +142,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '($.year >= 2020 || $.country == "BG") && !($.city == "Sofia" || $.city == "Plovdiv")',
+      sqlPredicate(
+        '($."year" >= 2020 || $."country" == "BG") && !($."city" == "Sofia" || $."city" == "Plovdiv")',
+      ),
     );
   });
 
@@ -163,7 +175,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '$.isOpen == true && $.year >= 2020 && ($.country == "BG" || $.country == "NL" || $.country == "US")',
+      sqlPredicate(
+        '$."isOpen" == true && $."year" >= 2020 && ($."country" == "BG" || $."country" == "NL" || $."country" == "US")',
+      ),
     );
   });
 
@@ -185,11 +199,23 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.temperature >= -15.6 && $.temperature <= 20.13");
+    expect(vectorExpr).toBe(
+      sqlPredicate('$."temperature" >= -15.6 && $."temperature" <= 20.13'),
+    );
   });
 
   it("test complex identifiers", () => {
-    const vectorExpr = converter.convertExpression(
+    let vectorExpr = converter.convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key("country 1 2 3"),
+        new Filter.Value("BG"),
+      ),
+    );
+
+    expect(vectorExpr).toBe(sqlPredicate('$."country 1 2 3" == "BG"'));
+
+    vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
         new Filter.Key('"country 1 2 3"'),
@@ -197,7 +223,32 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('$."country 1 2 3" == "BG"');
+    expect(vectorExpr).toBe(sqlPredicate('$."\\\"country 1 2 3\\\"" == "BG"'));
+
+    vectorExpr = converter.convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key("'country 1 2 3'"),
+        new Filter.Value("BG"),
+      ),
+    );
+
+    expect(vectorExpr).toBe(sqlPredicate("$.\"''country 1 2 3''\" == \"BG\""));
+  });
+
+  it("test key injection payload", () => {
+    const vectorExpr = converter.convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
+        new Filter.Key('x" : { "$or": [ {} ] }, "y'),
+        new Filter.Value("ignored"),
+      ),
+    );
+
+    expect(vectorExpr).toBe(
+      sqlPredicate('$."x\\" : { \\"$or\\": [ {} ] }, \\"y" == "ignored"'),
+    );
+    expect(vectorExpr).not.toContain('"$or"');
   });
 
   it("test lt", () => {
@@ -210,7 +261,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.value < 100");
+    expect(vectorExpr).toBe(sqlPredicate('$."value" < 100'));
   });
 
   it("test gt", () => {
@@ -223,7 +274,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.score > 100");
+    expect(vectorExpr).toBe(sqlPredicate('$."score" > 100'));
   });
 
   it("test lte", () => {
@@ -236,7 +287,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.amount <= 100.5");
+    expect(vectorExpr).toBe(sqlPredicate('$."amount" <= 100.5'));
   });
 
   it("test nin", () => {
@@ -250,7 +301,7 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '!($.category == "typeA" || $.category == "typeB")',
+      sqlPredicate('!($."category" == "typeA" || $."category" == "typeB")'),
     );
   });
 
@@ -264,7 +315,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('($.status == "active")');
+    expect(vectorExpr).toBe(sqlPredicate('($."status" == "active")'));
   });
 
   it("test single value nin", () => {
@@ -277,7 +328,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('!($.status == "inactive")');
+    expect(vectorExpr).toBe(sqlPredicate('!($."status" == "inactive")'));
   });
 
   it("test numeric in", () => {
@@ -291,7 +342,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      "($.priority == 1 || $.priority == 2 || $.priority == 3)",
+      sqlPredicate(
+        '($."priority" == 1 || $."priority" == 2 || $."priority" == 3)',
+      ),
     );
   });
 
@@ -305,7 +358,9 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("!($.level == 0 || $.level == 10)");
+    expect(vectorExpr).toBe(
+      sqlPredicate('!($."level" == 0 || $."level" == 10)'),
+    );
   });
 
   it("test nested groups", () => {
@@ -358,7 +413,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '(($.score >= 80 && $.type == "A") || ($.score >= 90 && $.type == "B")) && $.status == "valid"',
+      sqlPredicate(
+        '(($."score" >= 80 && $."type" == "A") || ($."score" >= 90 && $."type" == "B")) && $."status" == "valid"',
+      ),
     );
   });
 
@@ -372,7 +429,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.active == false");
+    expect(vectorExpr).toBe(sqlPredicate('$."active" == false'));
   });
 
   it("test boolean ne", () => {
@@ -385,7 +442,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.active != true");
+    expect(vectorExpr).toBe(sqlPredicate('$."active" != true'));
   });
 
   it("test key with dots", () => {
@@ -398,7 +455,9 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('$."config.setting" == "value1"');
+    expect(vectorExpr).toBe(
+      sqlPredicate('$."\\\"config.setting\\\"" == "value1"'),
+    );
   });
 
   it("test empty string", () => {
@@ -411,7 +470,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('$.description == ""');
+    expect(vectorExpr).toBe(sqlPredicate('$."description" == ""'));
   });
 
   it("test null value", () => {
@@ -424,7 +483,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe("$.metadata == null");
+    expect(vectorExpr).toBe(sqlPredicate('$."metadata" == null'));
   });
 
   it("test complex or expression", () => {
@@ -454,7 +513,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe(
-      '$.state == "ready" || $.state == "pending" || $.state == "processing"',
+      sqlPredicate(
+        '$."state" == "ready" || $."state" == "pending" || $."state" == "processing"',
+      ),
     );
   });
 
@@ -471,10 +532,10 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     // Expected format with escaped quotes
-    const expected = '$.department == "\\" || $.department == \\"Finance"';
+    const expected = '$."department" == "\\" || $.department == \\"Finance"';
 
     // Verify the quotes are escaped (backslash + quote)
-    expect(vectorExpr).toBe(expected);
+    expect(vectorExpr).toBe(sqlPredicate(expected));
     expect(vectorExpr).toContain('\\"');
 
     // Critical: verify we don't have the vulnerable pattern: $.department == "" ||
@@ -494,7 +555,7 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     // Should escape both backslash and quote
-    expect(vectorExpr).toBe('$.field == "value\\\\\\""');
+    expect(vectorExpr).toBe(sqlPredicate('$."field" == "value\\\\\\""'));
     // Verify the backslashes are escaped
     expect(vectorExpr).toContain("\\\\");
   });
@@ -510,11 +571,11 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    // In JSON double-quoted strings, single quotes don't need escaping
-    // Jackson treats them as literal characters
-    expect(vectorExpr).toBe("$.field == \"value' || $.other == 'admin\"");
-    // Single quotes are kept as-is (no escaping needed in JSON)
-    expect(vectorExpr).toContain("value' || $.other == 'admin");
+    // Single quotes are doubled when embedded in the SQL string literal
+    expect(vectorExpr).toBe(
+      sqlPredicate("$.\"field\" == \"value'' || $.other == ''admin\""),
+    );
+    expect(vectorExpr).toContain("value'''' || $.other == ''''admin");
   });
 
   it("test injection with control characters", () => {
@@ -529,7 +590,9 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     // Should escape newline and quotes
-    expect(vectorExpr).toBe('$.field == "value\\n|| $.field == \\"admin\\""');
+    expect(vectorExpr).toBe(
+      sqlPredicate('$."field" == "value\\n|| $.field == \\"admin\\""'),
+    );
     // Verify newline is escaped
     expect(vectorExpr).toContain("\\n");
   });
@@ -545,13 +608,14 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    // JSON escaping: double quotes and backslashes escaped, single quotes not escaped
-    expect(vectorExpr).toBe('$.field == "test\\"\\\\\'\\n\\r\\t"');
+    // JSON escaping: double quotes and backslashes escaped, single quotes doubled
+    expect(vectorExpr).toBe(
+      sqlPredicate('$."field" == "test\\"\\\\\'\'\\n\\r\\t"'),
+    );
     // Verify escapes are present
     expect(vectorExpr).toContain('\\"'); // escaped double quote
     expect(vectorExpr).toContain("\\\\"); // escaped backslash
-    // Single quotes are NOT escaped in JSON double-quoted strings
-    expect(vectorExpr).toContain("'");
+    expect(vectorExpr).toContain("''"); // SQL-escaped single quote
   });
 
   it("test injection in list values", () => {
@@ -609,7 +673,7 @@ describe("PgVectorFilterExpressionConverter", () => {
       ),
     );
 
-    expect(vectorExpr).toBe('$.department == "HR Department"');
+    expect(vectorExpr).toBe(sqlPredicate('$."department" == "HR Department"'));
   });
 
   it("test unicode control characters", () => {
@@ -640,10 +704,10 @@ describe("PgVectorFilterExpressionConverter", () => {
     // Verify dates are properly formatted in the JSONPath expression
     // Note: Jackson serializes dates with milliseconds, so .000Z is expected
     expect(vectorExpr).toContain(
-      '$.activationDate == "2024-01-15T10:30:00.000Z"',
+      '$."activationDate" == "2024-01-15T10:30:00.000Z"',
     );
     expect(vectorExpr).toContain(
-      '$.activationDate == "2024-02-20T14:45:00.000Z"',
+      '$."activationDate" == "2024-02-20T14:45:00.000Z"',
     );
     expect(vectorExpr).toContain(" || "); // OR operator between conditions
   });
@@ -659,14 +723,14 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     // Verify dates are properly formatted and wrapped in negation
-    expect(vectorExpr.startsWith("!(")).toBe(true);
-    expect(vectorExpr.endsWith(")")).toBe(true);
+    expect(vectorExpr.startsWith("metadata::jsonb @@ '!(")).toBe(true);
+    expect(vectorExpr.endsWith(")'::jsonpath")).toBe(true);
     // Note: Jackson serializes dates with milliseconds
     expect(vectorExpr).toContain(
-      '$.activationDate == "2024-01-15T10:30:00.000Z"',
+      '$."activationDate" == "2024-01-15T10:30:00.000Z"',
     );
     expect(vectorExpr).toContain(
-      '$.activationDate == "2024-02-20T14:45:00.000Z"',
+      '$."activationDate" == "2024-02-20T14:45:00.000Z"',
     );
   });
 
@@ -684,7 +748,7 @@ describe("PgVectorFilterExpressionConverter", () => {
     );
 
     // Verify Date objects are formatted in JSONPath
-    expect(vectorExpr).toContain("$.activationDate");
+    expect(vectorExpr).toContain('$."activationDate"');
     // Jackson includes milliseconds in date serialization
     expect(vectorExpr).toContain("2024-01-15T10:30:00.000Z");
     expect(vectorExpr).toContain("2024-02-20T14:45:00.000Z");

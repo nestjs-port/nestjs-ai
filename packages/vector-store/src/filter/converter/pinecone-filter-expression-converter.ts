@@ -58,10 +58,8 @@ export class PineconeFilterExpressionConverter extends AbstractFilterExpressionC
     filterKey: Filter.Key,
     context: { value: string },
   ): void {
-    const identifier = this.hasOuterQuotes(filterKey.key)
-      ? this.removeOuterQuotes(filterKey.key)
-      : filterKey.key;
-    context.value += `"${identifier}": `;
+    AbstractFilterExpressionConverter.emitJsonValue(filterKey.key, context);
+    context.value += ": ";
   }
 
   protected override doSingleValue(

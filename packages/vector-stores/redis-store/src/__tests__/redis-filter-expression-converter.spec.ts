@@ -216,6 +216,17 @@ describe("RedisFilterExpressionConverter", () => {
     ).convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
+        new Filter.Key("country 1 2 3"),
+        new Filter.Value("BG"),
+      ),
+    );
+    expect(vectorExpr).toBe("@country 1 2 3:{BG}");
+
+    vectorExpr = converter(
+      RedisMetadataField.tag('"country 1 2 3"'),
+    ).convertExpression(
+      new Filter.Expression(
+        Filter.ExpressionType.EQ,
         new Filter.Key('"country 1 2 3"'),
         new Filter.Value("BG"),
       ),
@@ -223,7 +234,7 @@ describe("RedisFilterExpressionConverter", () => {
     expect(vectorExpr).toBe('@"country 1 2 3":{BG}');
 
     vectorExpr = converter(
-      RedisMetadataField.tag("country 1 2 3"),
+      RedisMetadataField.tag("'country 1 2 3'"),
     ).convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
@@ -360,17 +371,17 @@ describe("RedisFilterExpressionConverter", () => {
     ).convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
-        new Filter.Key('"value with spaces"'),
+        new Filter.Key("value with spaces"),
         new Filter.Value("test"),
       ),
     );
 
-    expect(vectorExpr).toBe('@"value with spaces":{test}');
+    expect(vectorExpr).toBe("@value with spaces:{test}");
   });
 
   it("test nested quoted field names", () => {
     const vectorExpr = converter(
-      RedisMetadataField.tag('value "with" quotes'),
+      RedisMetadataField.tag('"value \\"with\\" quotes"'),
     ).convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
@@ -380,5 +391,41 @@ describe("RedisFilterExpressionConverter", () => {
     );
 
     expect(vectorExpr).toBe('@"value \\"with\\" quotes":{test}');
+  });
+
+  it("rejects unknown keys", () => {
+    expect(() =>
+      converter(RedisMetadataField.tag("country")).convertExpression(
+        new Filter.Expression(
+          Filter.ExpressionType.EQ,
+          new Filter.Key("unknown_field"),
+          new Filter.Value("v"),
+        ),
+      ),
+    ).toThrow("Not allowed filter identifier name: unknown_field");
+  });
+
+  it("rejects key injection payloads", () => {
+    expect(() =>
+      converter(RedisMetadataField.tag("category")).convertExpression(
+        new Filter.Expression(
+          Filter.ExpressionType.EQ,
+          new Filter.Key("category:{evil} @secret"),
+          new Filter.Value("v"),
+        ),
+      ),
+    ).toThrow("Not allowed filter identifier name");
+  });
+
+  it("rejects non numeric values for numeric fields", () => {
+    expect(() =>
+      converter(RedisMetadataField.numeric("year")).convertExpression(
+        new Filter.Expression(
+          Filter.ExpressionType.EQ,
+          new Filter.Key("year"),
+          new Filter.Value("2020] @admin:{true"),
+        ),
+      ),
+    ).toThrow("Numeric value must be a Number");
   });
 });

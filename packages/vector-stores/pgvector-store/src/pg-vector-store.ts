@@ -264,7 +264,7 @@ export class PgVectorStore extends AbstractObservationVectorStore {
     // Execute the delete
     try {
       await this._jdbcTemplate.update(
-        sql`DELETE FROM ${() => table} WHERE metadata::jsonb @@ ${() => `'${nativeFilterExpression}'`}::jsonpath`,
+        sql`DELETE FROM ${() => table} WHERE ${() => nativeFilterExpression}`,
       );
     } catch (e) {
       throw new Error(
@@ -285,7 +285,7 @@ export class PgVectorStore extends AbstractObservationVectorStore {
 
     const jsonPathFilter =
       nativeFilterExpression.length > 0
-        ? ` AND metadata::jsonb @@ '${nativeFilterExpression}'::jsonpath `
+        ? ` AND ${nativeFilterExpression} `
         : "";
 
     const distance = 1 - request.similarityThreshold;

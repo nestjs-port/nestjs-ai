@@ -19,10 +19,8 @@ import {
   AbstractFilterExpressionConverter,
   Filter,
 } from "@nestjs-ai/vector-store";
-import {
-  RedisMetadataField,
-  RedisMetadataFieldType,
-} from "./redis-metadata-field.js";
+import { RedisMetadataFieldType } from "./redis-metadata-field.js";
+import type { RedisMetadataField } from "./redis-metadata-field.js";
 
 class Numeric {
   constructor(
@@ -91,6 +89,10 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
     filterKey: Filter.Key,
     context: { value: string },
   ): void {
+    assert(
+      this._metadataFields.has(filterKey.key),
+      `Not allowed filter identifier name: ${filterKey.key}`,
+    );
     context.value += `@${filterKey.key}:`;
   }
 
@@ -162,9 +164,7 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
     );
     const key = expression.left;
     this.doKey(key, context);
-
-    const field =
-      this._metadataFields.get(key.key) ?? RedisMetadataField.tag(key.key);
+    const field = this.getMetadataField(key.key);
 
     assert(
       expression.right instanceof Filter.Value,
@@ -187,6 +187,12 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
       default:
         throw new Error(`Field type ${field.fieldType} not supported`);
     }
+  }
+
+  private getMetadataField(identifier: string): RedisMetadataField {
+    const field = this._metadataFields.get(identifier);
+    assert(field != null, `No metadata field configured for: ${identifier}`);
+    return field;
   }
 
   private tagStringValue(
@@ -308,10 +314,16 @@ export class RedisFilterExpressionConverter extends AbstractFilterExpressionConv
   }
 
   private inclusive(value: Filter.Value): NumericBoundary {
+    if (typeof value.value !== "number") {
+      throw new Error("Numeric value must be a Number");
+    }
     return new NumericBoundary(value.value, false);
   }
 
   private exclusive(value: Filter.Value): NumericBoundary {
+    if (typeof value.value !== "number") {
+      throw new Error("Numeric value must be a Number");
+    }
     return new NumericBoundary(value.value, true);
   }
 }

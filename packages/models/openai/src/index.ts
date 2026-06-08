@@ -42,6 +42,7 @@ export {
 export type { OpenAiClient } from "./open-ai-client.js";
 export {
   type OpenAiEmbeddingCreateParams,
+  type OpenAiEmbeddingEncodingFormat,
   OpenAiEmbeddingOptions,
   type OpenAiEmbeddingOptionsProps,
 } from "./open-ai-embedding-options.js";

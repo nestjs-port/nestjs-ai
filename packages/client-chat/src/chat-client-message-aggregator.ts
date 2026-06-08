@@ -27,7 +27,9 @@ import { ChatClientResponse } from "./chat-client-response.js";
 export class ChatClientMessageAggregator {
   aggregateChatClientResponse(
     chatClientResponses: Observable<ChatClientResponse>,
-    aggregationHandler: (chatClientResponse: ChatClientResponse) => void,
+    aggregationHandler:
+      | ((chatClientResponse: ChatClientResponse) => void)
+      | ((chatClientResponse: ChatClientResponse) => Promise<void>),
   ): Observable<ChatClientResponse> {
     const context = new Map<string, unknown>();
 
@@ -45,12 +47,13 @@ export class ChatClientMessageAggregator {
               chatResponse != null,
           ),
         ),
-        (aggregatedChatResponse: ChatResponse) => {
-          const aggregatedChatClientResponse = ChatClientResponse.builder()
-            .chatResponse(aggregatedChatResponse)
-            .context(new Map(context))
-            .build();
-          aggregationHandler(aggregatedChatClientResponse);
+        async (aggregatedChatResponse: ChatResponse) => {
+          await aggregationHandler(
+            ChatClientResponse.builder()
+              .chatResponse(aggregatedChatResponse)
+              .context(new Map(context))
+              .build(),
+          );
         },
       )
       .pipe(

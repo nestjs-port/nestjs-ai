@@ -34,7 +34,11 @@ import {
   MessageType,
   PromptTemplate,
 } from "@nestjs-ai/model";
-import { SearchRequest, type VectorStore } from "@nestjs-ai/vector-store";
+import {
+  FilterExpressionBuilder,
+  SearchRequest,
+  type VectorStore,
+} from "@nestjs-ai/vector-store";
 import type { Observable, SchedulerLike } from "rxjs";
 import { mergeMap, observeOn, of } from "rxjs";
 
@@ -124,7 +128,12 @@ LONG_TERM_MEMORY:
     );
     const query = request.prompt.userMessage.text ?? "";
     const topK = this.getChatMemoryTopK(request.context);
-    const filter = `${VectorStoreChatMemoryAdvisor.DOCUMENT_METADATA_CONVERSATION_ID}=='${conversationId}'`;
+    const filter = new FilterExpressionBuilder()
+      .eq(
+        VectorStoreChatMemoryAdvisor.DOCUMENT_METADATA_CONVERSATION_ID,
+        conversationId,
+      )
+      .build();
 
     const searchRequest = SearchRequest.builder()
       .query(query)

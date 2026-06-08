@@ -215,8 +215,8 @@ LONG_TERM_MEMORY:
 
     return new ChatClientMessageAggregator().aggregateChatClientResponse(
       chatClientResponses,
-      (response) => {
-        void this.after(response, streamAdvisorChain);
+      async (response) => {
+        await this.after(response, streamAdvisorChain);
       },
     );
   }

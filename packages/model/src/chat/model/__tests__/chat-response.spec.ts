@@ -211,4 +211,44 @@ describe("ChatResponse", () => {
     expect(resultToolCall?.name).toBe("getCurrentWeather");
     expect(resultToolCall?.arguments).toBe('{"location": "Seoul"}');
   });
+
+  it("message aggregator should wait for async completion handler", async () => {
+    const aggregator = new MessageAggregator();
+
+    const chunk1 = new ChatResponse({
+      generations: [
+        new Generation({
+          assistantMessage: new AssistantMessage({
+            content: "first",
+            media: [],
+          }),
+        }),
+      ],
+    });
+
+    const chunk2 = new ChatResponse({
+      generations: [
+        new Generation({
+          assistantMessage: new AssistantMessage({
+            content: "second",
+            media: [],
+          }),
+        }),
+      ],
+    });
+
+    const streamingResponse = of(chunk1, chunk2);
+    let aggregationCompleted = false;
+
+    await firstValueFrom(
+      aggregator
+        .aggregate(streamingResponse, async () => {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          aggregationCompleted = true;
+        })
+        .pipe(toArray()),
+    );
+
+    expect(aggregationCompleted).toBe(true);
+  });
 });

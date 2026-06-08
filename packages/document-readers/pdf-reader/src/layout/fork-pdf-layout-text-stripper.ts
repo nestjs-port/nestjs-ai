@@ -20,6 +20,7 @@ interface TextToken {
 export class ForkPdfLayoutTextStripper {
   static readonly DEBUG = false;
   static readonly OUTPUT_SPACE_CHARACTER_WIDTH_IN_PT = 4;
+  static readonly MAX_LINES_PER_PAGE = 10_000;
 
   protected async extractTextFromPage(
     page: PDFPageProxy,
@@ -51,9 +52,19 @@ export class ForkPdfLayoutTextStripper {
     let currentLineY = items[0].y;
     let currentLine: TextToken[] = [];
 
+    const appendLine = (line: TextToken[]): void => {
+      if (lines.length >= ForkPdfLayoutTextStripper.MAX_LINES_PER_PAGE) {
+        // Throw rather than allocate crazy number of line objects
+        throw new Error(
+          `Unreasonable number of lines (${lines.length + 1}) computed from content of pdf`,
+        );
+      }
+      lines.push(this._lineToText(line));
+    };
+
     for (const item of items) {
       if (Math.abs(item.y - currentLineY) > 2) {
-        lines.push(this._lineToText(currentLine));
+        appendLine(currentLine);
         currentLineY = item.y;
         currentLine = [item];
       } else {
@@ -62,7 +73,7 @@ export class ForkPdfLayoutTextStripper {
     }
 
     if (currentLine.length > 0) {
-      lines.push(this._lineToText(currentLine));
+      appendLine(currentLine);
     }
 
     return lines.join("\n");

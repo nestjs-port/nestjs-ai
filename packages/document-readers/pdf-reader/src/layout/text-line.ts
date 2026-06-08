@@ -27,6 +27,12 @@ export class TextLine {
   constructor(lineLength: number) {
     if (lineLength < 0) {
       throw new Error("Line length cannot be negative");
+    } else if (lineLength > 14_400) {
+      // Cap to a reasonable limit to prevent attack via excessive char allocation
+      // below.
+      // 14_400 pdf units is the recommendation for the max dimension of a page by
+      // ISO 32000
+      throw new Error(`Unreasonable lineLength of ${lineLength} provided`);
     }
 
     this._lineLength = Math.trunc(

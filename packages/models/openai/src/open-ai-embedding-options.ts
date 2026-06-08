@@ -23,6 +23,9 @@ import {
 } from "./abstract-open-ai-options.js";
 
 export type OpenAiEmbeddingCreateParams = EmbeddingCreateParams;
+export type OpenAiEmbeddingEncodingFormat = NonNullable<
+  EmbeddingCreateParams["encoding_format"]
+>;
 
 export interface OpenAiEmbeddingOptionsProps extends AbstractOpenAiOptionsProps {
   /**
@@ -30,6 +33,10 @@ export interface OpenAiEmbeddingOptionsProps extends AbstractOpenAiOptionsProps 
    * tracking or rate-limiting purposes.
    */
   user?: string | null;
+  /**
+   * The format to return the embeddings in. Can be either float or base64.
+   */
+  encodingFormat?: OpenAiEmbeddingEncodingFormat | null;
   dimensions?: number | null;
 }
 
@@ -39,13 +46,19 @@ export interface OpenAiEmbeddingOptionsProps extends AbstractOpenAiOptionsProps 
  */
 export class OpenAiEmbeddingOptions extends AbstractOpenAiOptions {
   static readonly DEFAULT_EMBEDDING_MODEL = "text-embedding-ada-002";
+  static readonly DEFAULT_ENCODING_FORMAT: OpenAiEmbeddingEncodingFormat =
+    "float";
 
   private _user: string | null = null;
+  private _encodingFormat: OpenAiEmbeddingEncodingFormat | null =
+    OpenAiEmbeddingOptions.DEFAULT_ENCODING_FORMAT;
   private _dimensions: number | null = null;
 
   constructor(props: OpenAiEmbeddingOptionsProps = {}) {
     super(props);
     this._user = props.user ?? null;
+    this._encodingFormat =
+      props.encodingFormat ?? OpenAiEmbeddingOptions.DEFAULT_ENCODING_FORMAT;
     this._dimensions = props.dimensions ?? null;
   }
 
@@ -59,6 +72,14 @@ export class OpenAiEmbeddingOptions extends AbstractOpenAiOptions {
 
   set user(user: string | null) {
     this._user = user ?? null;
+  }
+
+  get encodingFormat(): OpenAiEmbeddingEncodingFormat | null {
+    return this._encodingFormat;
+  }
+
+  set encodingFormat(encodingFormat: OpenAiEmbeddingEncodingFormat | null) {
+    this._encodingFormat = encodingFormat ?? null;
   }
 
   get dimensions(): number | null {
@@ -82,6 +103,9 @@ export class OpenAiEmbeddingOptions extends AbstractOpenAiOptions {
 
     if (this.user != null) {
       params.user = this.user;
+    }
+    if (this.encodingFormat != null) {
+      params.encoding_format = this.encodingFormat;
     }
     if (this.dimensions != null) {
       params.dimensions = this.dimensions;
@@ -115,12 +139,16 @@ export namespace OpenAiEmbeddingOptions {
         this.options.setFetchOptions(value.fetchOptions);
         this.options.setCustomHeaders({ ...value.customHeaders });
         this.options.user = value.user;
+        this.options.encodingFormat = value.encodingFormat;
         this.options.dimensions = value.dimensions;
         return this;
       }
 
       if (value.user != null) {
         this.options.user = value.user;
+      }
+      if (value.encoding_format != null) {
+        this.options.encodingFormat = value.encoding_format;
       }
       if (value.dimensions != null) {
         this.options.dimensions = value.dimensions;
@@ -170,6 +198,9 @@ export namespace OpenAiEmbeddingOptions {
         if (from.user != null) {
           this.options.user = from.user;
         }
+        if (from.encodingFormat != null) {
+          this.options.encodingFormat = from.encodingFormat;
+        }
         if (from.dimensions != null) {
           this.options.dimensions = from.dimensions;
         }
@@ -179,6 +210,11 @@ export namespace OpenAiEmbeddingOptions {
 
     user(user: string): this {
       this.options.user = user;
+      return this;
+    }
+
+    encodingFormat(encodingFormat: OpenAiEmbeddingEncodingFormat): this {
+      this.options.encodingFormat = encodingFormat;
       return this;
     }
 

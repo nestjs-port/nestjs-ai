@@ -239,7 +239,7 @@ describe("PgVectorStoreWithChatMemoryAdvisorIT", () => {
         .topK(4)
         .similarityThreshold(0)
         .filterExpression(
-          `conversationId=='${conversationId}' && messageType._name=='ASSISTANT'`,
+          `conversationId=='${conversationId}' && messageType=='ASSISTANT'`,
         )
         .build(),
     );
@@ -300,7 +300,7 @@ describe("PgVectorStoreWithChatMemoryAdvisorIT", () => {
         .topK(4)
         .similarityThreshold(0)
         .filterExpression(
-          `conversationId=='${conversationId}' && messageType._name=='ASSISTANT'`,
+          `conversationId=='${conversationId}' && messageType=='ASSISTANT'`,
         )
         .build(),
     );
@@ -405,7 +405,7 @@ describe("PgVectorStoreWithChatMemoryAdvisorIT", () => {
       .topK(4)
       .similarityThreshold(0)
       .filterExpression(
-        `conversationId=='${conversationId}' && messageType._name=='ASSISTANT'`,
+        `conversationId=='${conversationId}' && messageType=='ASSISTANT'`,
       )
       .build();
 

@@ -234,7 +234,7 @@ LONG_TERM_MEMORY:
           [VectorStoreChatMemoryAdvisor.DOCUMENT_METADATA_CONVERSATION_ID]:
             conversationId,
           [VectorStoreChatMemoryAdvisor.DOCUMENT_METADATA_MESSAGE_TYPE]:
-            message.messageType,
+            message.messageType.getName(),
         };
 
         if (message.messageType === MessageType.USER) {

@@ -6,7 +6,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `d3e495d2` (Expose conversationHistoryEnabled getter in ToolCallAdvisor.Builder)
+**Last synced Spring AI commit:** `4008b576` (Cleanup unused version properties in root POM)
 
 ## Overview
 
@@ -66,7 +66,7 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 |                         | spring-ai-azure-openai                | —                                                 | 0%       |
 |                         | spring-ai-bedrock                     | —                                                 | 0%       |
 |                         | spring-ai-mistral-ai                  | —                                                 | 0%       |
-|                         | spring-ai-ollama                      | —                                                 | 0%       |
+|                         | spring-ai-ollama                      | `@nestjs-ai/model-ollama`                         | 100%     |
 | **RAG & Vector Stores** | spring-ai-rag                         | `@nestjs-ai/rag`                                  | 100%     |
 |                         | spring-ai-vector-store                | `@nestjs-ai/vector-store`                         | 100%     |
 |                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                   | 100%     |

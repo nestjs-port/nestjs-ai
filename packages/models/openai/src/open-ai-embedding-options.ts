@@ -46,19 +46,15 @@ export interface OpenAiEmbeddingOptionsProps extends AbstractOpenAiOptionsProps 
  */
 export class OpenAiEmbeddingOptions extends AbstractOpenAiOptions {
   static readonly DEFAULT_EMBEDDING_MODEL = "text-embedding-ada-002";
-  static readonly DEFAULT_ENCODING_FORMAT: OpenAiEmbeddingEncodingFormat =
-    "float";
 
   private _user: string | null = null;
-  private _encodingFormat: OpenAiEmbeddingEncodingFormat | null =
-    OpenAiEmbeddingOptions.DEFAULT_ENCODING_FORMAT;
+  private _encodingFormat: OpenAiEmbeddingEncodingFormat | null = null;
   private _dimensions: number | null = null;
 
   constructor(props: OpenAiEmbeddingOptionsProps = {}) {
     super(props);
     this._user = props.user ?? null;
-    this._encodingFormat =
-      props.encodingFormat ?? OpenAiEmbeddingOptions.DEFAULT_ENCODING_FORMAT;
+    this._encodingFormat = props.encodingFormat ?? null;
     this._dimensions = props.dimensions ?? null;
   }
 

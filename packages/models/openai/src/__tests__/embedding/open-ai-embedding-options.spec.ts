@@ -19,17 +19,15 @@ import { describe, expect, it } from "vitest";
 import { OpenAiEmbeddingOptions } from "../../open-ai-embedding-options.js";
 
 describe("OpenAiEmbeddingOptions", () => {
-  it("defaults encoding format to float", () => {
+  it("keeps encoding format unset by default", () => {
     const options = OpenAiEmbeddingOptions.builder()
       .model("test-model")
       .build();
 
     const params = options.toOpenAiCreateParams(["test input"]);
 
-    expect(options.encodingFormat).toBe(
-      OpenAiEmbeddingOptions.DEFAULT_ENCODING_FORMAT,
-    );
-    expect(params.encoding_format).toBe("float");
+    expect(options.encodingFormat).toBeNull();
+    expect(params.encoding_format).toBeUndefined();
   });
 
   it("allows configuring the encoding format", () => {

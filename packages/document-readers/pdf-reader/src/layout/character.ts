@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import { LoggerFactory } from "@nestjs-port/core";
-import { ForkPdfLayoutTextStripper } from "./fork-pdf-layout-text-stripper.js";
-
 export class Character {
-  private static readonly logger = LoggerFactory.getLogger(Character.name);
-
   private readonly _characterValue: string;
   private _index: number;
   private readonly _isCharacterPartOfPreviousWord: boolean;
@@ -42,10 +37,6 @@ export class Character {
     this._isCharacterAtTheBeginningOfNewLine =
       isCharacterAtTheBeginningOfNewLine;
     this._isCharacterCloseToPreviousWord = isCharacterPartOfASentence;
-
-    if (ForkPdfLayoutTextStripper.DEBUG) {
-      Character.logger.info(this.toString());
-    }
   }
 
   get characterValue(): string {

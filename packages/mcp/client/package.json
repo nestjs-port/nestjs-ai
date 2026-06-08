@@ -16,6 +16,9 @@
     "url": "https://github.com/nestjs-port/nestjs-ai",
     "directory": "packages/mcp/client"
   },
+  "bugs": {
+    "url": "https://github.com/nestjs-port/nestjs-ai/issues"
+  },
   "files": [
     "dist",
     "CHANGELOG.md"

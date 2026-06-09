@@ -5,7 +5,7 @@ import {
   Generation,
   type Prompt,
 } from "@nestjs-ai/model";
-import { firstValueFrom, of } from "rxjs";
+import { lastValueFrom, of, reduce } from "rxjs";
 import { assert, describe, expect, it, vi } from "vitest";
 
 import { ChatClient } from "../../chat-client.js";
@@ -80,12 +80,13 @@ describe("SimpleLoggerAdvisor", () => {
       .defaultAdvisors(loggerAdvisor)
       .build();
 
-    const content = await firstValueFrom(
+    const content = await lastValueFrom(
       chatClient
         .prompt()
         .user("Please answer my question XYZ")
         .stream()
-        .content(),
+        .content()
+        .pipe(reduce((acc, value) => acc + value, "")),
     );
 
     expect(content).toBe("Your answer is ZXY");

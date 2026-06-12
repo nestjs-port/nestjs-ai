@@ -1,5 +1,11 @@
 # @nestjs-ai/platform
 
+## 0.1.3
+
+### Patch Changes
+
+- 9b06477: clean up optional template-st renderer log
+
 ## 0.1.2
 
 ### Patch Changes

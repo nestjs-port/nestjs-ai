@@ -19,6 +19,6 @@ import rootConfig from "../../vitest.config.js";
 
 export default mergeConfig(rootConfig, {
   test: {
-    maxWorkers: 2,
+    maxWorkers: 1,
   },
 });

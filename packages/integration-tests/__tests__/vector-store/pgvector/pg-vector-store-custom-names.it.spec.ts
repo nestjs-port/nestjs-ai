@@ -31,7 +31,7 @@ import {
   PgDistanceType,
   PgIndexType,
   PgVectorStore,
-} from "../pg-vector-store.js";
+} from "@nestjs-ai/vector-store-pgvector";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

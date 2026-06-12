@@ -30,6 +30,7 @@ import {
   DefaultVectorStoreObservationConvention,
   SearchRequest,
 } from "@nestjs-ai/vector-store";
+import { ElasticsearchVectorStore } from "@nestjs-ai/vector-store-elasticsearch";
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import {
   ElasticsearchContainer,
@@ -37,13 +38,11 @@ import {
 } from "@testcontainers/elasticsearch";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { ElasticsearchVectorStore } from "../elasticsearch-vector-store.js";
-
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const DEFAULT_INDEX_NAME = "spring-ai-document-index";
 
 const readTestData = (fileName: string): string =>
-  readFileSync(new URL(fileName, import.meta.url), "utf8");
+  readFileSync(new URL(`../resources/${fileName}`, import.meta.url), "utf8");
 
 const createDocuments = (): Document[] => [
   new Document(readTestData("spring.ai.txt"), { meta1: "meta1" }),

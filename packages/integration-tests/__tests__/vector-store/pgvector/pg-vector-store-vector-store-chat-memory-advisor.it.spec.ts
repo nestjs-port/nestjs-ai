@@ -34,7 +34,7 @@ import {
 } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { PgVectorStore } from "../pg-vector-store.js";
+import { PgVectorStore } from "@nestjs-ai/vector-store-pgvector";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

@@ -38,7 +38,7 @@ import {
 import { type Observable, of } from "rxjs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { PgVectorStore } from "../pg-vector-store.js";
+import { PgVectorStore } from "@nestjs-ai/vector-store-pgvector";
 import { SearchRequest } from "@nestjs-ai/vector-store";
 
 describe("PgVectorStoreWithChatMemoryAdvisorIT", () => {

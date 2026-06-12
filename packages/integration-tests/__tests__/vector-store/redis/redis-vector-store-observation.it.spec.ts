@@ -19,6 +19,10 @@ import type { Document } from "@nestjs-ai/commons";
 import { Document as VectorDocument } from "@nestjs-ai/commons";
 import { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
 import { SearchRequest } from "@nestjs-ai/vector-store";
+import {
+  RedisMetadataField,
+  RedisVectorStore,
+} from "@nestjs-ai/vector-store-redis";
 import { TestObservationRegistry } from "@nestjs-port/testing";
 import {
   RedisContainer,
@@ -35,11 +39,8 @@ import {
   it,
 } from "vitest";
 
-import { RedisMetadataField } from "../redis-metadata-field.js";
-import { RedisVectorStore } from "../redis-vector-store.js";
-
 const readTestData = (fileName: string): string =>
-  readFileSync(new URL(fileName, import.meta.url), "utf8");
+  readFileSync(new URL(`../resources/${fileName}`, import.meta.url), "utf8");
 
 const createRedisVectorStoreDocuments = (): Document[] => [
   new VectorDocument("1", readTestData("spring.ai.txt"), { meta1: "meta1" }),

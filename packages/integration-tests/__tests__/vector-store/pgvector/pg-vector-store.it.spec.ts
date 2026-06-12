@@ -60,7 +60,7 @@ const DISTANCE_TYPE_CASES = DISTANCE_TYPES.map(
 );
 
 const readTestData = (fileName: string): string =>
-  readFileSync(new URL(fileName, import.meta.url), "utf8");
+  readFileSync(new URL(`../resources/${fileName}`, import.meta.url), "utf8");
 
 const createDocuments = (): Document[] => [
   new Document(readTestData("spring.ai.txt"), { meta1: "meta1" }),

@@ -120,6 +120,8 @@ export class ElasticsearchVectorStore
   extends AbstractObservationVectorStore
   implements OnModuleInit
 {
+  private static readonly DEFAULT_USER_AGENT = "nestjs-ai-elasticsearch-store";
+
   private static readonly SIMILARITY_TYPE_MAPPING = new Map<
     SimilarityFunction,
     VectorStoreSimilarityMetric
@@ -134,6 +136,7 @@ export class ElasticsearchVectorStore
   private readonly _initializeSchema: boolean;
   private readonly _filterExpressionConverter: FilterExpressionConverter;
   private _indexInitialized = false;
+  private _indexInitializationPromise: Promise<void> | null = null;
 
   constructor(builder: ElasticsearchVectorStoreBuilder) {
     super({
@@ -144,41 +147,14 @@ export class ElasticsearchVectorStore
     });
 
     assert(builder.getClient(), "Elasticsearch client must not be null");
-    this._client = builder.getClient();
+    this._client = builder.getClient().child({
+      headers: {
+        "user-agent": ElasticsearchVectorStore.DEFAULT_USER_AGENT,
+      },
+    });
     this._options = builder.getOptions();
     this._initializeSchema = builder.getInitializeSchema();
     this._filterExpressionConverter = builder.getFilterExpressionConverter();
-  }
-
-  /**
-   * Creates a new builder instance for ElasticsearchVectorStore.
-   * @returns a new ElasticsearchBuilder instance
-   */
-  static builder(
-    client: Client,
-    embeddingModel: EmbeddingModel,
-  ): ElasticsearchVectorStoreBuilder {
-    return new ElasticsearchVectorStoreBuilder(client, embeddingModel);
-  }
-
-  get client(): Client {
-    return this._client;
-  }
-
-  get options(): ElasticsearchVectorStoreOptions {
-    return this._options;
-  }
-
-  get initializeSchema(): boolean {
-    return this._initializeSchema;
-  }
-
-  get filterExpressionConverter(): FilterExpressionConverter {
-    return this._filterExpressionConverter;
-  }
-
-  async onModuleInit(): Promise<void> {
-    await this.ensureIndexInitialized();
   }
 
   protected override async doAdd(documents: Document[]): Promise<void> {
@@ -217,6 +193,21 @@ export class ElasticsearchVectorStore
         }
       }
     }
+  }
+
+  private getDocument(
+    document: Document,
+    embedding: number[],
+    embeddingFieldName: string,
+  ): Record<string, unknown> {
+    assert(document.text != null, "document's text must not be null");
+
+    return {
+      id: document.id,
+      content: document.text,
+      metadata: document.metadata,
+      [embeddingFieldName]: embedding,
+    };
   }
 
   protected override async doDelete(idList: string[]): Promise<void> {
@@ -259,6 +250,13 @@ export class ElasticsearchVectorStore
     }
   }
 
+  private getBulkErrorReason(
+    item: estypes.BulkResponse["items"][number],
+  ): string | null {
+    const responseItem = item.index ?? item.delete;
+    return responseItem?.error?.reason ?? null;
+  }
+
   protected override async doSimilaritySearch(
     request: SearchRequest,
   ): Promise<Document[]> {
@@ -291,45 +289,6 @@ export class ElasticsearchVectorStore
       });
 
     return response.hits.hits.map((hit) => this.toDocument(hit));
-  }
-
-  protected override createObservationContextBuilder(
-    operationName: string,
-  ): VectorStoreObservationContext.Builder {
-    return VectorStoreObservationContext.builder(
-      VectorStoreProvider.ELASTICSEARCH.value,
-      operationName,
-    )
-      .collectionName(this._options.indexName)
-      .dimensions(this._options.dimensions)
-      .fieldName(this._options.embeddingFieldName)
-      .similarityMetric(this.getSimilarityMetric());
-  }
-
-  override getNativeClient<T>(): T | null {
-    return this._client as T;
-  }
-
-  private getDocument(
-    document: Document,
-    embedding: number[],
-    embeddingFieldName: string,
-  ): Record<string, unknown> {
-    assert(document.text != null, "document's text must not be null");
-
-    return {
-      id: document.id,
-      content: document.text,
-      metadata: document.metadata,
-      [embeddingFieldName]: embedding,
-    };
-  }
-
-  private getBulkErrorReason(
-    item: estypes.BulkResponse["items"][number],
-  ): string | null {
-    const responseItem = Object.values(item)[0];
-    return responseItem?.error?.reason ?? null;
   }
 
   private getElasticsearchQueryString(
@@ -392,26 +351,6 @@ export class ElasticsearchVectorStore
     }
   }
 
-  private async ensureIndexInitialized(): Promise<void> {
-    if (this._indexInitialized) {
-      return;
-    }
-
-    // For the index to be present, either it must be pre-created or set the
-    // initializeSchema to true.
-    if (await this.indexExists()) {
-      this._indexInitialized = true;
-      return;
-    }
-
-    if (!this._initializeSchema) {
-      throw new Error("Index not found");
-    }
-
-    await this.createIndexMapping();
-    this._indexInitialized = true;
-  }
-
   private async indexExists(): Promise<boolean> {
     return this._client.indices.exists({ index: this._options.indexName });
   }
@@ -444,11 +383,80 @@ export class ElasticsearchVectorStore
     }
   }
 
+  private async ensureIndexInitialized(): Promise<void> {
+    if (this._indexInitialized) {
+      return;
+    }
+
+    if (this._indexInitializationPromise != null) {
+      await this._indexInitializationPromise;
+      return;
+    }
+
+    this._indexInitializationPromise = this.initializeIndex();
+
+    try {
+      await this._indexInitializationPromise;
+    } finally {
+      if (!this._indexInitialized) {
+        this._indexInitializationPromise = null;
+      }
+    }
+  }
+
+  private async initializeIndex(): Promise<void> {
+    // For the index to be present, either it must be pre-created or set the
+    // initializeSchema to true.
+    if (await this.indexExists()) {
+      this._indexInitialized = true;
+      return;
+    }
+
+    if (!this._initializeSchema) {
+      throw new Error("Index not found");
+    }
+
+    await this.createIndexMapping();
+    this._indexInitialized = true;
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.ensureIndexInitialized();
+  }
+
+  protected override createObservationContextBuilder(
+    operationName: string,
+  ): VectorStoreObservationContext.Builder {
+    return VectorStoreObservationContext.builder(
+      VectorStoreProvider.ELASTICSEARCH.value,
+      operationName,
+    )
+      .collectionName(this._options.indexName)
+      .dimensions(this._options.dimensions)
+      .fieldName(this._options.embeddingFieldName)
+      .similarityMetric(this.getSimilarityMetric());
+  }
+
   private getSimilarityMetric(): string {
     const metric = ElasticsearchVectorStore.SIMILARITY_TYPE_MAPPING.get(
       this._options.similarity,
     );
     return metric != null ? metric.value : this._options.similarity;
+  }
+
+  override getNativeClient<T>(): T | null {
+    return this._client as T;
+  }
+
+  /**
+   * Creates a new builder instance for ElasticsearchVectorStore.
+   * @returns a new ElasticsearchBuilder instance
+   */
+  static builder(
+    client: Client,
+    embeddingModel: EmbeddingModel,
+  ): ElasticsearchVectorStoreBuilder {
+    return new ElasticsearchVectorStoreBuilder(client, embeddingModel);
   }
 }
 
@@ -468,22 +476,6 @@ export class ElasticsearchVectorStoreBuilder extends AbstractVectorStoreBuilder<
     super(embeddingModel);
     assert(client, "Elasticsearch client must not be null");
     this._client = client;
-  }
-
-  getClient(): Client {
-    return this._client;
-  }
-
-  getOptions(): ElasticsearchVectorStoreOptions {
-    return this._options;
-  }
-
-  getInitializeSchema(): boolean {
-    return this._initializeSchema;
-  }
-
-  getFilterExpressionConverter(): FilterExpressionConverter {
-    return this._filterExpressionConverter;
   }
 
   /**
@@ -539,5 +531,21 @@ export class ElasticsearchVectorStoreBuilder extends AbstractVectorStoreBuilder<
    */
   override build(): ElasticsearchVectorStore {
     return new ElasticsearchVectorStore(this);
+  }
+
+  getClient(): Client {
+    return this._client;
+  }
+
+  getOptions(): ElasticsearchVectorStoreOptions {
+    return this._options;
+  }
+
+  getInitializeSchema(): boolean {
+    return this._initializeSchema;
+  }
+
+  getFilterExpressionConverter(): FilterExpressionConverter {
+    return this._filterExpressionConverter;
   }
 }

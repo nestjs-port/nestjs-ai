@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { Client } from "@elastic/elasticsearch";
 import type { FilterExpressionConverter } from "@nestjs-ai/vector-store";
 
-import type { ElasticsearchClientLike } from "../elasticsearch-vector-store.js";
 import type { ElasticsearchVectorStoreOptionsProps } from "../elasticsearch-vector-store-options.js";
 
 export interface ElasticsearchVectorStoreProperties extends ElasticsearchVectorStoreOptionsProps {
-  client?: ElasticsearchClientLike;
+  client?: Client;
   initializeSchema?: boolean;
   filterExpressionConverter?: FilterExpressionConverter;
 }

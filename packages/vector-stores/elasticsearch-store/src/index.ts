@@ -18,7 +18,6 @@ export { ElasticsearchAiSearchFilterExpressionConverter } from "./elasticsearch-
 export {
   ElasticsearchVectorStore,
   ElasticsearchVectorStoreBuilder,
-  type ElasticsearchClientLike,
 } from "./elasticsearch-vector-store.js";
 export {
   ElasticsearchVectorStoreOptions,

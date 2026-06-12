@@ -20,6 +20,11 @@ import {
   Filter,
 } from "@nestjs-ai/vector-store";
 
+/**
+ * ElasticsearchAiSearchFilterExpressionConverter is a class that converts
+ * Filter.Expression objects into Elasticsearch query string representation. It extends
+ * the AbstractFilter ExpressionConverter class.
+ */
 export class ElasticsearchAiSearchFilterExpressionConverter extends AbstractFilterExpressionConverter {
   private readonly _dateFormat = new Intl.DateTimeFormat("en-CA", {
     timeZone: "UTC",

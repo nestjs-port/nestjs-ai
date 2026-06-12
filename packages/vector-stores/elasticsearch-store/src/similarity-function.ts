@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * https://www.elastic.co/guide/en/elasticsearch/reference/master/dense-vector.html
+ * max_inner_product is currently not supported because the distance value is not
+ * normalized and would not comply with the requirement of being between 0 and 1
+ */
 export enum SimilarityFunction {
   L2_NORM = "l2_norm",
   DOT_PRODUCT = "dot_product",

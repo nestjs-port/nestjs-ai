@@ -40,6 +40,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@elastic/elasticsearch": "^9.4.2",
     "@nestjs-ai/commons": "workspace:*",
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
@@ -47,6 +48,7 @@
     "@nestjs/common": "^11.1.11"
   },
   "peerDependencies": {
+    "@elastic/elasticsearch": "^9.4.2",
     "@nestjs-ai/commons": "^0.1.2",
     "@nestjs-ai/model": "^0.1.5",
     "@nestjs-ai/vector-store": "^0.1.3",

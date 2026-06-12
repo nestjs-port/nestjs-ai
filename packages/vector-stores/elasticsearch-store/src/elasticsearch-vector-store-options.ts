@@ -17,47 +17,69 @@
 import { SimilarityFunction } from "./similarity-function.js";
 
 export interface ElasticsearchVectorStoreOptionsProps {
+  /**
+   * The name of the index to store the vectors.
+   */
   indexName?: string;
+
+  /**
+   * The number of dimensions in the vector.
+   */
   dimensions?: number;
+
+  /**
+   * The similarity function to use.
+   */
   similarity?: SimilarityFunction;
+
+  /**
+   * The name of the vector field to search against
+   */
   embeddingFieldName?: string;
 }
 
+/**
+ * Provided Elasticsearch vector option configuration.
+ *
+ * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/dense-vector.html
+ */
 export class ElasticsearchVectorStoreOptions {
-  static readonly DEFAULT_INDEX_NAME = "spring-ai-document-index";
-  static readonly DEFAULT_DIMENSIONS = 1536;
-  static readonly DEFAULT_SIMILARITY = SimilarityFunction.COSINE;
-  static readonly DEFAULT_EMBEDDING_FIELD_NAME = "embedding";
-
   private readonly _indexName: string;
   private readonly _dimensions: number;
   private readonly _similarity: SimilarityFunction;
   private readonly _embeddingFieldName: string;
 
   constructor(props: ElasticsearchVectorStoreOptionsProps = {}) {
-    this._indexName =
-      props.indexName ?? ElasticsearchVectorStoreOptions.DEFAULT_INDEX_NAME;
-    this._dimensions =
-      props.dimensions ?? ElasticsearchVectorStoreOptions.DEFAULT_DIMENSIONS;
-    this._similarity =
-      props.similarity ?? ElasticsearchVectorStoreOptions.DEFAULT_SIMILARITY;
-    this._embeddingFieldName =
-      props.embeddingFieldName ??
-      ElasticsearchVectorStoreOptions.DEFAULT_EMBEDDING_FIELD_NAME;
+    this._indexName = props.indexName ?? "spring-ai-document-index";
+    this._dimensions = props.dimensions ?? 1536;
+    this._similarity = props.similarity ?? SimilarityFunction.COSINE;
+    this._embeddingFieldName = props.embeddingFieldName ?? "embedding";
   }
 
+  /**
+   * The name of the index to store the vectors.
+   */
   get indexName(): string {
     return this._indexName;
   }
 
+  /**
+   * The number of dimensions in the vector.
+   */
   get dimensions(): number {
     return this._dimensions;
   }
 
+  /**
+   * The similarity function to use.
+   */
   get similarity(): SimilarityFunction {
     return this._similarity;
   }
 
+  /**
+   * The name of the vector field to search against
+   */
   get embeddingFieldName(): string {
     return this._embeddingFieldName;
   }

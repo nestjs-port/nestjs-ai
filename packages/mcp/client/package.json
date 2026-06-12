@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/mcp-client",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": false,
   "description": "MCP client support for NestJS AI",
   "keywords": [

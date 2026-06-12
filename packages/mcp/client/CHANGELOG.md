@@ -1,5 +1,11 @@
 # @nestjs-ai/mcp-client
 
+## 0.1.4
+
+### Patch Changes
+
+- 53078ee: Add npm issue tracker metadata.
+
 ## 0.1.3
 
 ### Patch Changes

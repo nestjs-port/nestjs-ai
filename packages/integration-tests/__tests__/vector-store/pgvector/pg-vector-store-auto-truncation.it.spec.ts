@@ -29,7 +29,7 @@ import {
   PgIdType,
   PgIndexType,
   PgVectorStore,
-} from "../pg-vector-store.js";
+} from "@nestjs-ai/vector-store-pgvector";
 import { JsdbcTemplate, sql } from "@nestjs-port/jsdbc";
 import { TypeOrmDataSource } from "@nestjs-port/jsdbc/typeorm";
 import {

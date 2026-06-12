@@ -181,9 +181,15 @@ importers:
 
   packages/integration-tests:
     devDependencies:
+      '@elastic/elasticsearch':
+        specifier: ^9.4.2
+        version: 9.4.2
       '@google/genai':
         specifier: ^1.49.0
         version: 1.49.0
+      '@nestjs-ai/advisors-vector-store':
+        specifier: workspace:*
+        version: link:../advisors/advisors-vector-store
       '@nestjs-ai/client-chat':
         specifier: workspace:*
         version: link:../client-chat
@@ -220,6 +226,9 @@ importers:
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../vector-store
+      '@nestjs-ai/vector-store-elasticsearch':
+        specifier: workspace:*
+        version: link:../vector-stores/elasticsearch-store
       '@nestjs-ai/vector-store-pgvector':
         specifier: workspace:*
         version: link:../vector-stores/pgvector-store
@@ -247,6 +256,9 @@ importers:
       '@nestjs/typeorm':
         specifier: ^11.0.1
         version: 11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
+      '@testcontainers/elasticsearch':
+        specifier: ^11.14.0
+        version: 11.14.0
       '@testcontainers/mariadb':
         specifier: ^11.14.0
         version: 11.14.0
@@ -758,51 +770,24 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/model-openai':
-        specifier: workspace:*
-        version: link:../../models/openai
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
-      '@nestjs-port/testing':
-        specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@testcontainers/elasticsearch':
-        specifier: ^11.14.0
-        version: 11.14.0
-      openai:
-        specifier: ^6.34.0
-        version: 6.34.0(ws@8.19.0)(zod@4.3.6)
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      testcontainers:
-        specifier: ^11.14.0
-        version: 11.14.0
 
   packages/vector-stores/pgvector-store:
     devDependencies:
-      '@nestjs-ai/advisors-vector-store':
-        specifier: workspace:*
-        version: link:../../advisors/advisors-vector-store
-      '@nestjs-ai/client-chat':
-        specifier: workspace:*
-        version: link:../../client-chat
       '@nestjs-ai/commons':
         specifier: workspace:*
         version: link:../../commons
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/model-openai':
-        specifier: workspace:*
-        version: link:../../models/openai
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
@@ -812,30 +797,12 @@ importers:
       '@nestjs-port/jsdbc':
         specifier: ^0.1.0
         version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/typeorm@11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)))(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
-      '@nestjs-port/testing':
-        specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/typeorm':
-        specifier: ^11.0.1
-        version: 11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
-      '@testcontainers/postgresql':
-        specifier: ^11.14.0
-        version: 11.14.0
       pgvector:
         specifier: ^0.2.1
         version: 0.2.1
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      testcontainers:
-        specifier: ^11.14.0
-        version: 11.14.0
-      typeorm:
-        specifier: ^0.3.28
-        version: 0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)
 
   packages/vector-stores/redis-store:
     devDependencies:
@@ -845,30 +812,18 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
-      '@nestjs-ai/model-transformers':
-        specifier: workspace:*
-        version: link:../../models/transformers
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
-      '@nestjs-port/testing':
-        specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@testcontainers/redis':
-        specifier: ^11.14.0
-        version: 11.14.0
       redis:
         specifier: ^5.11.0
         version: 5.11.0
-      testcontainers:
-        specifier: ^11.14.0
-        version: 11.14.0
 
 packages:
 

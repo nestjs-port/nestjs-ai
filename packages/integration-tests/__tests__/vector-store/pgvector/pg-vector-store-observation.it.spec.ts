@@ -30,6 +30,11 @@ import {
   SearchRequest,
   DefaultVectorStoreObservationConvention,
 } from "@nestjs-ai/vector-store";
+import {
+  PgDistanceType,
+  PgIndexType,
+  PgVectorStore,
+} from "@nestjs-ai/vector-store-pgvector";
 import { JsdbcTemplate } from "@nestjs-port/jsdbc";
 import { TypeOrmDataSource } from "@nestjs-port/jsdbc/typeorm";
 import { TestObservationRegistry } from "@nestjs-port/testing";
@@ -38,11 +43,6 @@ import {
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import {
-  PgDistanceType,
-  PgIndexType,
-  PgVectorStore,
-} from "../pg-vector-store.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -56,14 +56,23 @@ describe.skipIf(!OPENAI_API_KEY)("PgVectorStoreObservationIT", () => {
 
   const documents = [
     new Document(
-      readFileSync(new URL("spring.ai.txt", import.meta.url), "utf8"),
+      readFileSync(
+        new URL("../resources/spring.ai.txt", import.meta.url),
+        "utf8",
+      ),
       { meta1: "meta1" },
     ),
     new Document(
-      readFileSync(new URL("time.shelter.txt", import.meta.url), "utf8"),
+      readFileSync(
+        new URL("../resources/time.shelter.txt", import.meta.url),
+        "utf8",
+      ),
     ),
     new Document(
-      readFileSync(new URL("great.depression.txt", import.meta.url), "utf8"),
+      readFileSync(
+        new URL("../resources/great.depression.txt", import.meta.url),
+        "utf8",
+      ),
       { meta2: "meta2" },
     ),
   ];

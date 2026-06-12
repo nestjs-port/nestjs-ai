@@ -18,17 +18,16 @@ import { Document } from "@nestjs-ai/commons";
 import { TransformersEmbeddingModel } from "@nestjs-ai/model-transformers";
 import { SearchRequest } from "@nestjs-ai/vector-store";
 import {
+  RedisDistanceMetric,
+  RedisMetadataField,
+  RedisVectorStore,
+} from "@nestjs-ai/vector-store-redis";
+import {
   RedisContainer,
   type StartedRedisContainer,
 } from "@testcontainers/redis";
 import { createClient, type RedisClientType } from "redis";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-
-import { RedisMetadataField } from "../redis-metadata-field.js";
-import {
-  RedisDistanceMetric,
-  RedisVectorStore,
-} from "../redis-vector-store.js";
 
 describe("RedisVectorStoreDistanceMetricIT", () => {
   let redisContainer: StartedRedisContainer;

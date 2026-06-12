@@ -29,10 +29,9 @@ export class NestAiTemplateRendererInitializer implements OnModuleInit {
       const templateStModuleName = "@nestjs-ai/template-st";
       const templateStModule = await import(templateStModuleName);
       TemplateRendererFactory.bind(new templateStModule.StTemplateRenderer());
-    } catch (error) {
-      this._log.debug(
-        "Skipping StringTemplate renderer binding and using the fallback renderer.",
-        error,
+    } catch {
+      this._log.info(
+        "@nestjs-ai/template-st not found. Using the default template renderer.",
       );
     }
   }

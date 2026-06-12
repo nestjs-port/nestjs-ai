@@ -758,15 +758,33 @@ importers:
       '@nestjs-ai/model':
         specifier: workspace:*
         version: link:../../model
+      '@nestjs-ai/model-openai':
+        specifier: workspace:*
+        version: link:../../models/openai
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../../vector-store
       '@nestjs-port/core':
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
+      '@nestjs-port/testing':
+        specifier: ^0.1.0
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@testcontainers/elasticsearch':
+        specifier: ^11.14.0
+        version: 11.14.0
+      openai:
+        specifier: ^6.34.0
+        version: 6.34.0(ws@8.19.0)(zod@4.3.6)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
+      testcontainers:
+        specifier: ^11.14.0
+        version: 11.14.0
 
   packages/vector-stores/pgvector-store:
     devDependencies:
@@ -2135,6 +2153,9 @@ packages:
 
   '@tediousjs/connection-string@0.5.0':
     resolution: {integrity: sha512-7qSgZbincDDDFyRweCIEvZULFAw5iz/DeunhvuxpL31nfntX3P4Yd4HkHBRg9H8CdqY1e5WFN1PZIz/REL9MVQ==}
+
+  '@testcontainers/elasticsearch@11.14.0':
+    resolution: {integrity: sha512-S+bnwhcO9NjcKpnDd6yviQvmHzFW0V8wA3ZDX2YxBalMKcnRVPHjBohO+pJGnYBWryMi+16qNmbuuDuY8ppRDQ==}
 
   '@testcontainers/mariadb@11.14.0':
     resolution: {integrity: sha512-odoOAFsJDi0Wg9QC+x5GtXQk+il1hxBS2m14tfL5Xn3sYM9/zmGdGMXrbx0ZKtH1ayXHVizzZ6Tv4z8sJa/Ikw==}
@@ -6297,6 +6318,15 @@ snapshots:
   '@standard-schema/utils@0.3.0': {}
 
   '@tediousjs/connection-string@0.5.0': {}
+
+  '@testcontainers/elasticsearch@11.14.0':
+    dependencies:
+      testcontainers: 11.14.0
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - bare-buffer
+      - react-native-b4a
+      - supports-color
 
   '@testcontainers/mariadb@11.14.0':
     dependencies:

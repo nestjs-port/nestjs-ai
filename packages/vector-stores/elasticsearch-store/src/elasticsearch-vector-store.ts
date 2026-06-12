@@ -433,7 +433,6 @@ export class ElasticsearchVectorStore
     )
       .collectionName(this._options.indexName)
       .dimensions(this._options.dimensions)
-      .fieldName(this._options.embeddingFieldName)
       .similarityMetric(this.getSimilarityMetric());
   }
 

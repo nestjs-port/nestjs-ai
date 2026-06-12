@@ -747,6 +747,24 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))
 
+  packages/vector-stores/elasticsearch-store:
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../model
+      '@nestjs-ai/vector-store':
+        specifier: workspace:*
+        version: link:../../vector-store
+      '@nestjs-port/core':
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
+
   packages/vector-stores/pgvector-store:
     devDependencies:
       '@nestjs-ai/advisors-vector-store':

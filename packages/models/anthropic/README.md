@@ -72,6 +72,7 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 |                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                   | 100%     |
 |                         | spring-ai-advisors-vector-store       | `@nestjs-ai/advisors-vector-store`                | 100%     |
 |                         | spring-ai-pgvector-store              | `@nestjs-ai/vector-store-pgvector`                | 100%     |
+|                         | spring-ai-elasticsearch-store         | `@nestjs-ai/vector-store-elasticsearch`           | 100%     |
 |                         | spring-ai-chroma-store                | —                                                 | 0%       |
 |                         | spring-ai-pinecone-store              | —                                                 | 0%       |
 |                         | spring-ai-milvus-store                | —                                                 | 0%       |
@@ -88,6 +89,7 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 |                         | spring-ai-starter-mcp-server          | `@nestjs-ai/mcp-server`                           | 100%     |
 |                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                      | 100%     |
 | **Platform**            | —                                     | `@nestjs-ai/platform`                             | 100%     |
+| **Community**           | spring-ai-session-management          | `@nestjs-ai/session-management`                   | 15%      |
 
 ## Differences from Spring AI
 

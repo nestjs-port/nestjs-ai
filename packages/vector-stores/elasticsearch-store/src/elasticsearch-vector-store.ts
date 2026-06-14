@@ -205,9 +205,41 @@ export class ElasticsearchVectorStore
     return {
       id: document.id,
       content: document.text,
-      metadata: document.metadata,
+      metadata: this.serializeMetadata(document.metadata),
       [embeddingFieldName]: embedding,
     };
+  }
+
+  private serializeMetadata(
+    metadata: Record<string, unknown>,
+  ): Record<string, unknown> {
+    return Object.fromEntries(
+      Object.entries(metadata).map(([key, value]) => [
+        key,
+        this.serializeMetadataValue(value),
+      ]),
+    );
+  }
+
+  private serializeMetadataValue(value: unknown): unknown {
+    if (value instanceof Date) {
+      return value.getTime();
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this.serializeMetadataValue(item));
+    }
+
+    if (value != null && typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, nestedValue]) => [
+          key,
+          this.serializeMetadataValue(nestedValue),
+        ]),
+      );
+    }
+
+    return value;
   }
 
   protected override async doDelete(idList: string[]): Promise<void> {

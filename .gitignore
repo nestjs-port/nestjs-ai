@@ -142,6 +142,7 @@ vite.config.ts.timestamp-*
 .idea/
 .vscode/
 .turbo/
+.codegraph/
 
 # macOS Finder
 .DS_Store

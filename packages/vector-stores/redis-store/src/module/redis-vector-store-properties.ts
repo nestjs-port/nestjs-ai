@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommonVectorStoreProperties } from "@nestjs-ai/vector-store";
+import type { CommonVectorStoreProperties } from "@nestjs-ai/vector-store";
 import type { RedisClientOptions, RedisClientType } from "redis";
 
 import type { RedisMetadataField } from "../redis-metadata-field.js";
@@ -24,13 +24,13 @@ import type {
   RedisVectorAlgorithm,
 } from "../redis-vector-store.js";
 
-export class RedisVectorStoreHnswProperties {
+export interface RedisVectorStoreHnswProperties {
   m?: number;
   efConstruction?: number;
   efRuntime?: number;
 }
 
-export class RedisVectorStoreProperties extends CommonVectorStoreProperties {
+export interface RedisVectorStoreProperties extends CommonVectorStoreProperties {
   client?: RedisClientType;
   clientOptions?: RedisClientOptions;
   indexName?: string;

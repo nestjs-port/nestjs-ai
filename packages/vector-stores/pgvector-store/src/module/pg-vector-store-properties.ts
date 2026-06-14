@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommonVectorStoreProperties } from "@nestjs-ai/vector-store";
+import type { CommonVectorStoreProperties } from "@nestjs-ai/vector-store";
 
 import type {
   PgDistanceType,
@@ -22,7 +22,7 @@ import type {
   PgIndexType,
 } from "../pg-vector-store.js";
 
-export class PgVectorStoreProperties extends CommonVectorStoreProperties {
+export interface PgVectorStoreProperties extends CommonVectorStoreProperties {
   dimensions?: number;
   indexType?: PgIndexType;
   distanceType?: PgDistanceType;

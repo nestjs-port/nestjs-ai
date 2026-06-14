@@ -19,7 +19,7 @@ export {
   RedisVectorStoreModule,
   type RedisVectorStoreModuleAsyncOptions,
 } from "./redis-vector-store.module.js";
-export {
+export type {
   RedisVectorStoreHnswProperties,
   RedisVectorStoreProperties,
 } from "./redis-vector-store-properties.js";

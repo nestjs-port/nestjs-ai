@@ -131,6 +131,30 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
 
+  packages/community/session/session-management:
+    devDependencies:
+      '@nestjs-ai/client-chat':
+        specifier: workspace:*
+        version: link:../../../client-chat
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../../model
+      '@nestjs-port/core':
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
+
   packages/document-readers/cheerio-reader:
     dependencies:
       cheerio:

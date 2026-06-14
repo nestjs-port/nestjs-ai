@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
-export {};
+export {
+  CreateSessionRequest,
+  CreateSessionRequestBuilder,
+} from "./create-session-request.js";
+export { EventFilter, EventFilterBuilder } from "./event-filter.js";
+export { Session, SessionBuilder } from "./session.js";
+export { SessionEvent, SessionEventBuilder } from "./session-event.js";

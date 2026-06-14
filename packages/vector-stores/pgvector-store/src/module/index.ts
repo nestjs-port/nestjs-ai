@@ -20,4 +20,4 @@ export {
   type PgVectorStoreModuleAsyncOptions,
 } from "./pg-vector-store.module.js";
 
-export type { PgVectorStoreProperties } from "./pg-vector-store-properties.js";
+export { PgVectorStoreProperties } from "./pg-vector-store-properties.js";

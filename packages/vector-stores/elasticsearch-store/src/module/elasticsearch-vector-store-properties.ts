@@ -15,12 +15,21 @@
  */
 
 import type { Client } from "@elastic/elasticsearch";
-import type { FilterExpressionConverter } from "@nestjs-ai/vector-store";
+import {
+  CommonVectorStoreProperties,
+  type FilterExpressionConverter,
+} from "@nestjs-ai/vector-store";
 
 import type { ElasticsearchVectorStoreOptionsProps } from "../elasticsearch-vector-store-options.js";
 
-export interface ElasticsearchVectorStoreProperties extends ElasticsearchVectorStoreOptionsProps {
+export class ElasticsearchVectorStoreProperties
+  extends CommonVectorStoreProperties
+  implements ElasticsearchVectorStoreOptionsProps
+{
   client?: Client;
-  initializeSchema?: boolean;
+  indexName?: string;
+  dimensions?: number;
+  similarity?: ElasticsearchVectorStoreOptionsProps["similarity"];
+  embeddingFieldName?: string;
   filterExpressionConverter?: FilterExpressionConverter;
 }

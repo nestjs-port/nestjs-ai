@@ -19,4 +19,4 @@ export {
   ElasticsearchVectorStoreModule,
   type ElasticsearchVectorStoreModuleAsyncOptions,
 } from "./elasticsearch-vector-store.module.js";
-export type { ElasticsearchVectorStoreProperties } from "./elasticsearch-vector-store-properties.js";
+export { ElasticsearchVectorStoreProperties } from "./elasticsearch-vector-store-properties.js";

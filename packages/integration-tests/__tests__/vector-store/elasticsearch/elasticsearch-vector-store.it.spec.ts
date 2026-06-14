@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
@@ -36,7 +37,7 @@ import {
   ElasticsearchContainer,
   type StartedElasticsearchContainer,
 } from "@testcontainers/elasticsearch";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, it } from "vitest";
 
 import { BaseVectorStoreTests } from "../base-vector-store-tests.it-shared.js";
 
@@ -185,19 +186,19 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
       const indexName = this.getIndexName(vectorStoreBeanName);
 
       let stats = await this.getIndexStats(indexName);
-      expect(stats?.total?.docs?.count ?? 0).toBe(0);
+      assert.equal(stats?.total?.docs?.count ?? 0, 0);
 
       await vectorStore.add(documents);
       await this.refreshIndex(indexName);
 
       stats = await this.getIndexStats(indexName);
-      expect(stats?.total?.docs?.count ?? 0).toBe(3);
+      assert.equal(stats?.total?.docs?.count ?? 0, 3);
 
       await vectorStore.delete(["1", "2", "3"]);
       await this.refreshIndex(indexName);
 
       stats = await this.getIndexStats(indexName);
-      expect(stats?.total?.docs?.count ?? 0).toBe(0);
+      assert.equal(stats?.total?.docs?.count ?? 0, 0);
     });
   }
 
@@ -218,15 +219,16 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
 
       const results = await vectorStore.similaritySearch(searchRequest);
 
-      expect(results).toHaveLength(1);
+      assert.equal(results.length, 1);
       const resultDoc = results[0];
-      expect(resultDoc.id).toBe(documents[2]?.id);
-      expect(resultDoc.text).toContain(
-        "The Great Depression (1929–1939) was an economic shock",
+      assert.equal(resultDoc.id, documents[2]?.id);
+      assert.match(
+        resultDoc.text,
+        /The Great Depression \(1929–1939\) was an economic shock/,
       );
-      expect(Object.keys(resultDoc.metadata)).toHaveLength(2);
-      expect(resultDoc.metadata).toHaveProperty("meta2", "meta2");
-      expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
+      assert.equal(Object.keys(resultDoc.metadata).length, 2);
+      assert.equal(resultDoc.metadata.meta2, "meta2");
+      assert.ok(DocumentMetadata.DISTANCE in resultDoc.metadata);
 
       // Remove all documents from the store
       await vectorStore.delete(
@@ -274,8 +276,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("country == 'NL'")
           .build(),
       );
-      expect(results).toHaveLength(1);
-      expect(results[0]?.id).toBe(nlDocument.id);
+      assert.equal(results.length, 1);
+      assert.equal(results[0]?.id, nlDocument.id);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -285,10 +287,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("country == 'BG'")
           .build(),
       );
-      expect(results).toHaveLength(2);
-      expect(results.map((document: Document) => document.id)).toEqual(
-        expect.arrayContaining([bgDocument.id, bgDocument2.id]),
-      );
+      assert.equal(results.length, 2);
+      assertSameIds(results, [bgDocument.id, bgDocument2.id]);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -298,8 +298,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("country == 'BG' && year == 2020")
           .build(),
       );
-      expect(results).toHaveLength(1);
-      expect(results[0]?.id).toBe(bgDocument.id);
+      assert.equal(results.length, 1);
+      assert.equal(results[0]?.id, bgDocument.id);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -309,10 +309,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("country in ['BG']")
           .build(),
       );
-      expect(results).toHaveLength(2);
-      expect(results.map((document: Document) => document.id)).toEqual(
-        expect.arrayContaining([bgDocument.id, bgDocument2.id]),
-      );
+      assert.equal(results.length, 2);
+      assertSameIds(results, [bgDocument.id, bgDocument2.id]);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -322,7 +320,7 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("country in ['BG','NL']")
           .build(),
       );
-      expect(results).toHaveLength(3);
+      assert.equal(results.length, 3);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -332,8 +330,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("country not in ['BG']")
           .build(),
       );
-      expect(results).toHaveLength(1);
-      expect(results[0]?.id).toBe(nlDocument.id);
+      assert.equal(results.length, 1);
+      assert.equal(results[0]?.id, nlDocument.id);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -343,10 +341,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .filterExpression("NOT(country not in ['BG'])")
           .build(),
       );
-      expect(results).toHaveLength(2);
-      expect(results.map((document: Document) => document.id)).toEqual(
-        expect.arrayContaining([bgDocument.id, bgDocument2.id]),
-      );
+      assert.equal(results.length, 2);
+      assertSameIds(results, [bgDocument.id, bgDocument2.id]);
 
       results = await vectorStore.similaritySearch(
         SearchRequest.builder()
@@ -358,8 +354,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           )
           .build(),
       );
-      expect(results).toHaveLength(1);
-      expect(results[0]?.id).toBe(bgDocument2.id);
+      assert.equal(results.length, 1);
+      assert.equal(results[0]?.id, bgDocument2.id);
 
       // Remove all documents from the store
       await vectorStore.delete([bgDocument.id, nlDocument.id, bgDocument2.id]);
@@ -390,12 +386,12 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
 
       let results = await vectorStore.similaritySearch(springSearchRequest);
 
-      expect(results).toHaveLength(1);
+      assert.equal(results.length, 1);
       let resultDoc = results[0];
-      expect(resultDoc.id).toBe(document.id);
-      expect(resultDoc.text).toBe("Spring AI rocks!!");
-      expect(resultDoc.metadata).toHaveProperty("meta1", "meta1");
-      expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
+      assert.equal(resultDoc.id, document.id);
+      assert.equal(resultDoc.text, "Spring AI rocks!!");
+      assert.equal(resultDoc.metadata.meta1, "meta1");
+      assert.ok(DocumentMetadata.DISTANCE in resultDoc.metadata);
 
       const sameIdDocument = new Document(
         document.id,
@@ -413,21 +409,23 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
       await this.pollUntil(async () => {
         const updatedResults =
           await vectorStore.similaritySearch(fooBarSearchRequest);
-        expect(updatedResults[0]?.text).toBe(
+        assert.equal(
+          updatedResults[0]?.text,
           "The World is Big and Salvation Lurks Around the Corner",
         );
       });
 
       results = await vectorStore.similaritySearch(fooBarSearchRequest);
 
-      expect(results).toHaveLength(1);
+      assert.equal(results.length, 1);
       resultDoc = results[0];
-      expect(resultDoc.id).toBe(document.id);
-      expect(resultDoc.text).toBe(
+      assert.equal(resultDoc.id, document.id);
+      assert.equal(
+        resultDoc.text,
         "The World is Big and Salvation Lurks Around the Corner",
       );
-      expect(resultDoc.metadata).toHaveProperty("meta2", "meta2");
-      expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
+      assert.equal(resultDoc.metadata.meta2, "meta2");
+      assert.ok(DocumentMetadata.DISTANCE in resultDoc.metadata);
 
       // Remove all documents from the store
       await vectorStore.delete([document.id]);
@@ -456,7 +454,7 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
         (document: Document) => document.score ?? 0,
       );
 
-      expect(scores).toHaveLength(3);
+      assert.equal(scores.length, 3);
 
       const similarityThreshold = (scores[0]! + scores[1]!) / 2;
 
@@ -468,15 +466,16 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .build(),
       );
 
-      expect(results).toHaveLength(1);
+      assert.equal(results.length, 1);
       const resultDoc = results[0];
-      expect(resultDoc.id).toBe(documents[2]?.id);
-      expect(resultDoc.text).toContain(
-        "The Great Depression (1929–1939) was an economic shock",
+      assert.equal(resultDoc.id, documents[2]?.id);
+      assert.match(
+        resultDoc.text,
+        /The Great Depression \(1929–1939\) was an economic shock/,
       );
-      expect(resultDoc.metadata).toHaveProperty("meta2", "meta2");
-      expect(resultDoc.metadata).toHaveProperty(DocumentMetadata.DISTANCE);
-      expect(resultDoc.score).toBeGreaterThanOrEqual(similarityThreshold);
+      assert.equal(resultDoc.metadata.meta2, "meta2");
+      assert.ok(DocumentMetadata.DISTANCE in resultDoc.metadata);
+      assert.ok((resultDoc.score ?? 0) >= similarityThreshold);
 
       // Remove all documents from the store
       await vectorStore.delete(
@@ -527,8 +526,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .build(),
       );
 
-      expect(resultWithText).toHaveLength(1);
-      expect(resultWithText[0]?.id).toBe(nlDocument.id);
+      assert.equal(resultWithText.length, 1);
+      assert.equal(resultWithText[0]?.id, nlDocument.id);
 
       // with filter expression builder
       const resultsWithBuilder = await vectorStore.similaritySearch(
@@ -542,8 +541,8 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .build(),
       );
 
-      expect(resultsWithBuilder).toHaveLength(1);
-      expect(resultsWithBuilder[0]?.id).toBe(nlDocument.id);
+      assert.equal(resultsWithBuilder.length, 1);
+      assert.equal(resultsWithBuilder[0]?.id, nlDocument.id);
     });
   }
 
@@ -589,9 +588,9 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .build(),
       );
 
-      expect(resultWithText).toHaveLength(2);
-      expect(expectedResultSet.has(resultWithText[0]?.id ?? "")).toBe(true);
-      expect(expectedResultSet.has(resultWithText[1]?.id ?? "")).toBe(true);
+      assert.equal(resultWithText.length, 2);
+      assert.ok(expectedResultSet.has(resultWithText[0]?.id ?? ""));
+      assert.ok(expectedResultSet.has(resultWithText[1]?.id ?? ""));
 
       // with filter expression builder
       const resultsWithBuilder = await vectorStore.similaritySearch(
@@ -605,9 +604,9 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .build(),
       );
 
-      expect(resultsWithBuilder).toHaveLength(2);
-      expect(expectedResultSet.has(resultsWithBuilder[0]?.id ?? "")).toBe(true);
-      expect(expectedResultSet.has(resultsWithBuilder[1]?.id ?? "")).toBe(true);
+      assert.equal(resultsWithBuilder.length, 2);
+      assert.ok(expectedResultSet.has(resultsWithBuilder[0]?.id ?? ""));
+      assert.ok(expectedResultSet.has(resultsWithBuilder[1]?.id ?? ""));
     });
   }
 
@@ -639,7 +638,7 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
           .build(),
       );
 
-      expect(results).toHaveLength(overDefaultSize);
+      assert.equal(results.length, overDefaultSize);
 
       // Remove all documents from the store
       await vectorStore.delete(
@@ -664,17 +663,18 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
 
       // Test successful native client retrieval
       const nativeClient = vectorStore.getNativeClient<Client>();
-      expect(nativeClient).not.toBeNull();
+      assert.notEqual(nativeClient, null);
 
       // Verify client functionality
       const stats = await nativeClient!.indices.stats({ index: indexName });
-      expect(
+      assert.notEqual(
         (
           stats as {
             indices?: Record<string, unknown>;
           }
         ).indices?.[indexName],
-      ).toBeDefined();
+        undefined,
+      );
     });
   }
 
@@ -752,7 +752,7 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
   ): Promise<void> {
     await this.pollUntil(async () => {
       const results = await vectorStore.similaritySearch(searchRequest);
-      expect(results).toHaveLength(expectedLength);
+      assert.equal(results.length, expectedLength);
     });
   }
 
@@ -816,4 +816,11 @@ class ElasticsearchVectorStoreIT extends BaseVectorStoreTests {
       ).indices?.[indexName] ?? null
     );
   }
+}
+
+function assertSameIds(documents: Document[], expectedIds: string[]): void {
+  assert.deepEqual(
+    documents.map((document) => document.id).sort(),
+    [...expectedIds].sort(),
+  );
 }

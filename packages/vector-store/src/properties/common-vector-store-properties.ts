@@ -17,11 +17,11 @@
 export class CommonVectorStoreProperties {
   private _initializeSchema = false;
 
-  get isInitializeSchema(): boolean {
+  get initializeSchema(): boolean {
     return this._initializeSchema;
   }
 
-  setInitializeSchema(initializeSchema: boolean): void {
+  set initializeSchema(initializeSchema: boolean) {
     this._initializeSchema = initializeSchema;
   }
 }

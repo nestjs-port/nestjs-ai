@@ -23,6 +23,22 @@ import {
 } from "@nestjs-ai/model";
 
 /**
+ * Parameters for constructing a {@link SessionEvent}.
+ *
+ * `sessionId` and `message` are required. `id` is auto-generated (random UUID) when
+ * omitted, `timestamp` defaults to the current instant, `metadata` defaults to an empty
+ * record, and `branch` defaults to `null` (a root-level event).
+ */
+export interface SessionEventProps {
+  id?: string;
+  sessionId: string;
+  timestamp?: Date;
+  message: Message;
+  metadata?: Record<string, unknown>;
+  branch?: string | null;
+}
+
+/**
  * An atomic unit in the session's conversation history.
  *
  * `SessionEvent` is a _thin wrapper_ around the existing NestJS AI {@link Message}
@@ -39,8 +55,7 @@ import {
  * - `UserMessage` + {@link isSynthetic} → synthetic shadow prompt that opens a summary turn
  * - `AssistantMessage` + {@link isSynthetic} → compaction summary text that closes a summary turn
  *
- * Events are immutable once created (append-only log semantics). Use {@link builder}
- * to construct instances.
+ * Events are immutable once created (append-only log semantics).
  */
 export class SessionEvent {
   /** Metadata key for the `synthetic` flag (value: `boolean`). */
@@ -56,20 +71,17 @@ export class SessionEvent {
   private readonly _metadata: Record<string, unknown>;
   private readonly _branch: string | null;
 
-  constructor(builder: SessionEventBuilder) {
-    assert(builder.idValue.length > 0, "id must not be null or empty");
-    assert(
-      builder.sessionIdValue.length > 0,
-      "sessionId must not be null or empty",
-    );
-    assert(builder.timestampValue != null, "timestamp must not be null");
-    assert(builder.messageValue != null, "message must not be null");
-    this._id = builder.idValue;
-    this._sessionId = builder.sessionIdValue;
-    this._timestamp = builder.timestampValue;
-    this._message = builder.messageValue;
-    this._metadata = { ...builder.metadataValue };
-    this._branch = builder.branchValue;
+  constructor(props: SessionEventProps) {
+    const id = props.id ?? randomUUID();
+    assert(id.length > 0, "id must not be null or empty");
+    assert(props.sessionId.length > 0, "sessionId must not be null or empty");
+    assert(props.message != null, "message must not be null");
+    this._id = id;
+    this._sessionId = props.sessionId;
+    this._timestamp = props.timestamp ?? new Date();
+    this._message = props.message;
+    this._metadata = { ...props.metadata };
+    this._branch = props.branch ?? null;
   }
 
   /** Unique identity per event. {@link Message} has none. */
@@ -145,103 +157,5 @@ export class SessionEvent {
     return (
       this._message instanceof AssistantMessage && this._message.hasToolCalls()
     );
-  }
-
-  /** Returns a new {@link SessionEventBuilder} for constructing a {@link SessionEvent}. */
-  static builder(): SessionEventBuilder {
-    return new SessionEventBuilder();
-  }
-}
-
-/**
- * Builder for {@link SessionEvent}.
- *
- * Defaults: `id` is auto-generated (random UUID), `timestamp` is the current instant,
- * `metadata` is empty, `branch` is `null`. `sessionId` and `message` are required.
- */
-export class SessionEventBuilder {
-  private _idValue: string = randomUUID();
-  private _sessionIdValue = "";
-  private _timestampValue: Date = new Date();
-  private _messageValue: Message | null = null;
-  private _metadataValue: Record<string, unknown> = {};
-  private _branchValue: string | null = null;
-
-  get idValue(): string {
-    return this._idValue;
-  }
-
-  get sessionIdValue(): string {
-    return this._sessionIdValue;
-  }
-
-  get timestampValue(): Date {
-    return this._timestampValue;
-  }
-
-  get messageValue(): Message | null {
-    return this._messageValue;
-  }
-
-  get metadataValue(): Record<string, unknown> {
-    return this._metadataValue;
-  }
-
-  get branchValue(): string | null {
-    return this._branchValue;
-  }
-
-  /** Overrides the auto-generated event ID. */
-  id(id: string): this {
-    this._idValue = id;
-    return this;
-  }
-
-  /** The session this event belongs to. Required. */
-  sessionId(sessionId: string): this {
-    this._sessionIdValue = sessionId;
-    return this;
-  }
-
-  /** Overrides the default timestamp (the current instant). */
-  timestamp(timestamp: Date): this {
-    this._timestampValue = timestamp;
-    return this;
-  }
-
-  /** The NestJS AI message wrapped by this event. Required. */
-  message(message: Message): this {
-    this._messageValue = message;
-    return this;
-  }
-
-  /** Replaces the entire metadata map. */
-  metadata(metadata: Record<string, unknown>): this;
-  /** Adds a single metadata entry. */
-  metadata(key: string, value: unknown): this;
-  metadata(
-    metadataOrKey: Record<string, unknown> | string,
-    value?: unknown,
-  ): this {
-    if (typeof metadataOrKey === "string") {
-      this._metadataValue[metadataOrKey] = value;
-    } else {
-      this._metadataValue = { ...metadataOrKey };
-    }
-    return this;
-  }
-
-  /**
-   * The dot-separated agent path that produced this event. Pass `null` (the default) for
-   * root-level events.
-   */
-  branch(branch: string | null): this {
-    this._branchValue = branch;
-    return this;
-  }
-
-  /** Builds the {@link SessionEvent}, validating required fields. */
-  build(): SessionEvent {
-    return new SessionEvent(this);
   }
 }

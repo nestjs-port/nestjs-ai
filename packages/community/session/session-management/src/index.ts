@@ -16,8 +16,8 @@
 
 export {
   CreateSessionRequest,
-  CreateSessionRequestBuilder,
+  type CreateSessionRequestProps,
 } from "./create-session-request.js";
-export { EventFilter, EventFilterBuilder } from "./event-filter.js";
-export { Session, SessionBuilder } from "./session.js";
-export { SessionEvent, SessionEventBuilder } from "./session-event.js";
+export { EventFilter, type EventFilterProps } from "./event-filter.js";
+export { Session, type SessionProps } from "./session.js";
+export { SessionEvent, type SessionEventProps } from "./session-event.js";

@@ -20,6 +20,21 @@ import assert from "node:assert/strict";
 const DEFAULT_TTL_MS = 60 * 24 * 60 * 60 * 1000;
 
 /**
+ * Parameters for constructing a {@link Session}.
+ *
+ * `id` and `userId` are required. `createdAt` defaults to the current instant,
+ * `expiresAt` defaults to 60 days from now (pass `null` for no expiry), and `metadata`
+ * defaults to an empty record.
+ */
+export interface SessionProps {
+  id: string;
+  userId: string;
+  createdAt?: Date;
+  expiresAt?: Date | null;
+  metadata?: Record<string, unknown>;
+}
+
+/**
  * Immutable metadata container for a single, continuous conversation between a user and
  * an agent. Holds only identity and lifecycle fields — the event log is stored separately
  * in `SessionRepository` and retrieved on demand via `SessionService`.
@@ -33,14 +48,17 @@ export class Session {
   private readonly _expiresAt: Date | null;
   private readonly _metadata: Record<string, unknown>;
 
-  constructor(builder: SessionBuilder) {
-    assert(builder.idValue.length > 0, "id must not be null or empty");
-    assert(builder.userIdValue.length > 0, "userId must not be null or empty");
-    this._id = builder.idValue;
-    this._userId = builder.userIdValue;
-    this._createdAt = builder.createdAtValue;
-    this._expiresAt = builder.expiresAtValue;
-    this._metadata = { ...builder.metadataValue };
+  constructor(props: SessionProps) {
+    assert(props.id.length > 0, "id must not be null or empty");
+    assert(props.userId.length > 0, "userId must not be null or empty");
+    this._id = props.id;
+    this._userId = props.userId;
+    this._createdAt = props.createdAt ?? new Date();
+    this._expiresAt =
+      props.expiresAt !== undefined
+        ? props.expiresAt
+        : new Date(Date.now() + DEFAULT_TTL_MS);
+    this._metadata = { ...props.metadata };
   }
 
   /** Unique identifier for this session. */
@@ -66,66 +84,5 @@ export class Session {
   /** Arbitrary metadata: model info, tags, agent type, etc. */
   get metadata(): Record<string, unknown> {
     return this._metadata;
-  }
-
-  static builder(): SessionBuilder {
-    return new SessionBuilder();
-  }
-}
-
-export class SessionBuilder {
-  private _idValue = "";
-  private _userIdValue = "";
-  private _createdAtValue: Date = new Date();
-  private _expiresAtValue: Date | null = new Date(Date.now() + DEFAULT_TTL_MS);
-  private _metadataValue: Record<string, unknown> = {};
-
-  get idValue(): string {
-    return this._idValue;
-  }
-
-  get userIdValue(): string {
-    return this._userIdValue;
-  }
-
-  get createdAtValue(): Date {
-    return this._createdAtValue;
-  }
-
-  get expiresAtValue(): Date | null {
-    return this._expiresAtValue;
-  }
-
-  get metadataValue(): Record<string, unknown> {
-    return this._metadataValue;
-  }
-
-  id(id: string): this {
-    this._idValue = id;
-    return this;
-  }
-
-  userId(userId: string): this {
-    this._userIdValue = userId;
-    return this;
-  }
-
-  createdAt(createdAt: Date): this {
-    this._createdAtValue = createdAt;
-    return this;
-  }
-
-  expiresAt(expiresAt: Date | null): this {
-    this._expiresAtValue = expiresAt;
-    return this;
-  }
-
-  metadata(metadata: Record<string, unknown>): this {
-    this._metadataValue = { ...metadata };
-    return this;
-  }
-
-  build(): Session {
-    return new Session(this);
   }
 }

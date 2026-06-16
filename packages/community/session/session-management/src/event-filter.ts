@@ -18,6 +18,41 @@ import type { MessageType } from "@nestjs-ai/model";
 import type { SessionEvent } from "./session-event.js";
 
 /**
+ * Parameters for constructing an {@link EventFilter}. All fields are optional and default
+ * to `null` / `false`, producing a filter equivalent to {@link EventFilter.all}.
+ */
+export interface EventFilterProps {
+  /** Only include events at or after this instant. */
+  from?: Date | null;
+  /** Only include events at or before this instant. */
+  to?: Date | null;
+  /** Only include events whose {@link SessionEvent.messageType} is in this set. */
+  messageTypes?: Set<MessageType> | null;
+  /** When `true`, synthetic framework events (compaction summaries) are excluded. */
+  excludeSynthetic?: boolean;
+  /** Return at most the last `n` matching events (applied after all per-event filters). */
+  lastN?: number | null;
+  /**
+   * Case-insensitive substring to match against `message.text`. Events whose text is
+   * `null` or does not contain the keyword are excluded.
+   */
+  keyword?: string | null;
+  /**
+   * Zero-indexed page number for paginated results. Applied after per-event filtering in
+   * chronological order (oldest first), so page 0 contains the oldest matching events.
+   * Requires {@link EventFilterProps.pageSize} to be set.
+   */
+  page?: number | null;
+  /** Number of results per page. */
+  pageSize?: number | null;
+  /**
+   * Restricts results to events visible to the agent at this dot-separated branch path.
+   * See {@link EventFilter.forBranch} for the full visibility rule.
+   */
+  branch?: string | null;
+}
+
+/**
  * Criteria for filtering {@link SessionEvent}s when retrieving session history.
  *
  * Filters are composable: all non-null criteria must match for an event to be included.
@@ -41,16 +76,16 @@ import type { SessionEvent } from "./session-event.js";
  * (a root event), equals `Y`, or is a dot-prefix ancestor of `Y` (e.g. `"orch"` is an
  * ancestor of `"orch.researcher"`).
  *
- * Use the static factory methods for common cases or {@link builder} for custom
+ * Use the static factory methods for common cases or the props constructor for custom
  * combinations:
  *
  * ```ts
- * const filter = EventFilter.builder()
- *   .from(new Date("2025-01-01T00:00:00Z"))
- *   .messageTypes(new Set([MessageType.USER, MessageType.ASSISTANT]))
- *   .excludeSynthetic(true)
- *   .branch("orch.researcher")
- *   .build();
+ * const filter = new EventFilter({
+ *   from: new Date("2025-01-01T00:00:00Z"),
+ *   messageTypes: new Set([MessageType.USER, MessageType.ASSISTANT]),
+ *   excludeSynthetic: true,
+ *   branch: "orch.researcher",
+ * });
  * ```
  */
 export class EventFilter {
@@ -67,12 +102,12 @@ export class EventFilter {
   private readonly _pageSize: number | null;
   private readonly _branch: string | null;
 
-  constructor(builder: EventFilterBuilder) {
-    let keyword = builder.keywordValue;
-    let messageTypes = builder.messageTypesValue;
-    let page = builder.pageValue;
-    const pageSize = builder.pageSizeValue;
-    const lastN = builder.lastNValue;
+  constructor(props: EventFilterProps = {}) {
+    let keyword = props.keyword ?? null;
+    let messageTypes = props.messageTypes ?? null;
+    let page = props.page ?? null;
+    const pageSize = props.pageSize ?? null;
+    const lastN = props.lastN ?? null;
 
     keyword =
       keyword != null && keyword.trim().length > 0
@@ -99,15 +134,15 @@ export class EventFilter {
       page = 0;
     }
 
-    this._from = builder.fromValue;
-    this._to = builder.toValue;
+    this._from = props.from ?? null;
+    this._to = props.to ?? null;
     this._messageTypes = messageTypes;
-    this._excludeSynthetic = builder.excludeSyntheticValue;
+    this._excludeSynthetic = props.excludeSynthetic ?? false;
     this._lastN = lastN;
     this._keyword = keyword;
     this._page = page;
     this._pageSize = pageSize;
-    this._branch = builder.branchValue;
+    this._branch = props.branch ?? null;
   }
 
   get from(): Date | null {
@@ -147,32 +182,32 @@ export class EventFilter {
   }
 
   merge(other: EventFilter): EventFilter {
-    return EventFilter.builder()
-      .from(other._from ?? this._from)
-      .to(other._to ?? this._to)
-      .messageTypes(other._messageTypes ?? this._messageTypes)
-      .excludeSynthetic(other._excludeSynthetic || this._excludeSynthetic)
-      .lastN(other._lastN ?? this._lastN)
-      .keyword(other._keyword ?? this._keyword)
-      .page(other._page ?? this._page)
-      .pageSize(other._pageSize ?? this._pageSize)
-      .branch(other._branch ?? this._branch)
-      .build();
+    return new EventFilter({
+      from: other._from ?? this._from,
+      to: other._to ?? this._to,
+      messageTypes: other._messageTypes ?? this._messageTypes,
+      excludeSynthetic: other._excludeSynthetic || this._excludeSynthetic,
+      lastN: other._lastN ?? this._lastN,
+      keyword: other._keyword ?? this._keyword,
+      page: other._page ?? this._page,
+      pageSize: other._pageSize ?? this._pageSize,
+      branch: other._branch ?? this._branch,
+    });
   }
 
   /** Returns all events with no filtering. */
   static all(): EventFilter {
-    return EventFilter.builder().build();
+    return new EventFilter();
   }
 
   /** Returns the last `n` events. */
   static lastN(n: number): EventFilter {
-    return EventFilter.builder().lastN(n).build();
+    return new EventFilter({ lastN: n });
   }
 
   /** Excludes synthetic (framework-generated) events such as compaction summaries. */
   static realOnly(): EventFilter {
-    return EventFilter.builder().excludeSynthetic(true).build();
+    return new EventFilter({ excludeSynthetic: true });
   }
 
   /**
@@ -187,11 +222,7 @@ export class EventFilter {
     page = 0,
     pageSize: number = EventFilter.DEFAULT_PAGE_SIZE,
   ): EventFilter {
-    return EventFilter.builder()
-      .keyword(keyword)
-      .page(page)
-      .pageSize(pageSize)
-      .build();
+    return new EventFilter({ keyword, page, pageSize });
   }
 
   /**
@@ -209,12 +240,7 @@ export class EventFilter {
    * `"orchestrator.researcher"`)
    */
   static forBranch(agentBranch: string): EventFilter {
-    return EventFilter.builder().branch(agentBranch).build();
-  }
-
-  /** Returns a new {@link EventFilterBuilder} for constructing a custom {@link EventFilter}. */
-  static builder(): EventFilterBuilder {
-    return new EventFilterBuilder();
+    return new EventFilter({ branch: agentBranch });
   }
 
   // Per-event predicate
@@ -264,128 +290,5 @@ export class EventFilter {
       // eventBranch == null: root event, visible to all agents
     }
     return true;
-  }
-}
-
-/**
- * Builder for {@link EventFilter}. All fields default to `null` / `false`, producing a
- * filter equivalent to {@link EventFilter.all} when no setters are called.
- */
-export class EventFilterBuilder {
-  private _fromValue: Date | null = null;
-  private _toValue: Date | null = null;
-  private _messageTypesValue: Set<MessageType> | null = null;
-  private _excludeSyntheticValue = false;
-  private _lastNValue: number | null = null;
-  private _keywordValue: string | null = null;
-  private _pageValue: number | null = null;
-  private _pageSizeValue: number | null = null;
-  private _branchValue: string | null = null;
-
-  get fromValue(): Date | null {
-    return this._fromValue;
-  }
-
-  get toValue(): Date | null {
-    return this._toValue;
-  }
-
-  get messageTypesValue(): Set<MessageType> | null {
-    return this._messageTypesValue;
-  }
-
-  get excludeSyntheticValue(): boolean {
-    return this._excludeSyntheticValue;
-  }
-
-  get lastNValue(): number | null {
-    return this._lastNValue;
-  }
-
-  get keywordValue(): string | null {
-    return this._keywordValue;
-  }
-
-  get pageValue(): number | null {
-    return this._pageValue;
-  }
-
-  get pageSizeValue(): number | null {
-    return this._pageSizeValue;
-  }
-
-  get branchValue(): string | null {
-    return this._branchValue;
-  }
-
-  /** Only include events at or after this instant. */
-  from(from: Date | null): this {
-    this._fromValue = from;
-    return this;
-  }
-
-  /** Only include events at or before this instant. */
-  to(to: Date | null): this {
-    this._toValue = to;
-    return this;
-  }
-
-  /** Only include events whose {@link SessionEvent.messageType} is in this set. */
-  messageTypes(messageTypes: Set<MessageType> | null): this {
-    this._messageTypesValue = messageTypes;
-    return this;
-  }
-
-  /** When `true`, synthetic framework events (compaction summaries) are excluded. */
-  excludeSynthetic(excludeSynthetic: boolean): this {
-    this._excludeSyntheticValue = excludeSynthetic;
-    return this;
-  }
-
-  /**
-   * Return at most the last `n` matching events (applied after all per-event filters).
-   */
-  lastN(lastN: number | null): this {
-    this._lastNValue = lastN;
-    return this;
-  }
-
-  /**
-   * Case-insensitive substring to match against `message.text`. Events whose text is
-   * `null` or does not contain the keyword are excluded.
-   */
-  keyword(keyword: string | null): this {
-    this._keywordValue = keyword;
-    return this;
-  }
-
-  /**
-   * Zero-indexed page number for paginated results. Applied after per-event filtering in
-   * chronological order (oldest first), so page 0 contains the oldest matching events.
-   * Requires {@link pageSize} to be set.
-   */
-  page(page: number | null): this {
-    this._pageValue = page;
-    return this;
-  }
-
-  /** Number of results per page. Defaults to {@link EventFilter.DEFAULT_PAGE_SIZE}. */
-  pageSize(pageSize: number | null): this {
-    this._pageSizeValue = pageSize;
-    return this;
-  }
-
-  /**
-   * Restricts results to events visible to the agent at this dot-separated branch path.
-   * See {@link EventFilter.forBranch} for the full visibility rule.
-   */
-  branch(branch: string | null): this {
-    this._branchValue = branch;
-    return this;
-  }
-
-  /** Constructs the {@link EventFilter}. */
-  build(): EventFilter {
-    return new EventFilter(this);
   }
 }

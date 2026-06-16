@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
+import type { Milliseconds } from "@nestjs-port/core";
 import assert from "node:assert/strict";
+
+/**
+ * Parameters for constructing a {@link CreateSessionRequest}.
+ *
+ * `userId` is required. `id` defaults to `null` (the service generates a UUID),
+ * `timeToLive` defaults to `null` (no expiry), and `metadata` defaults to an empty record.
+ */
+export interface CreateSessionRequestProps {
+  /** An explicit session ID. If omitted or `null`, the service generates a UUID. */
+  id?: string | null;
+  userId: string;
+  /** Time-to-live in milliseconds, or `null` for no expiry. */
+  timeToLive?: Milliseconds | null;
+  metadata?: Record<string, unknown>;
+}
 
 /**
  * Parameters for creating a new `Session`.
@@ -22,15 +38,15 @@ import assert from "node:assert/strict";
 export class CreateSessionRequest {
   private readonly _id: string | null;
   private readonly _userId: string;
-  private readonly _timeToLive: number | null;
+  private readonly _timeToLive: Milliseconds | null;
   private readonly _metadata: Record<string, unknown>;
 
-  constructor(builder: CreateSessionRequestBuilder) {
-    assert(builder.userIdValue.length > 0, "userId must not be null or empty");
-    this._id = builder.idValue;
-    this._userId = builder.userIdValue;
-    this._timeToLive = builder.timeToLiveValue;
-    this._metadata = { ...builder.metadataValue };
+  constructor(props: CreateSessionRequestProps) {
+    assert(props.userId.length > 0, "userId must not be null or empty");
+    this._id = props.id ?? null;
+    this._userId = props.userId;
+    this._timeToLive = props.timeToLive ?? null;
+    this._metadata = { ...props.metadata };
   }
 
   /** Returns the requested session ID, or `null` if the service should generate one. */
@@ -43,75 +59,11 @@ export class CreateSessionRequest {
   }
 
   /** Time-to-live in milliseconds, or `null` for no expiry. */
-  get timeToLive(): number | null {
+  get timeToLive(): Milliseconds | null {
     return this._timeToLive;
   }
 
   get metadata(): Record<string, unknown> {
     return this._metadata;
-  }
-
-  static builder(): CreateSessionRequestBuilder {
-    return new CreateSessionRequestBuilder();
-  }
-}
-
-export class CreateSessionRequestBuilder {
-  private _idValue: string | null = null;
-  private _userIdValue = "";
-  private _timeToLiveValue: number | null = null;
-  private _metadataValue: Record<string, unknown> = {};
-
-  get idValue(): string | null {
-    return this._idValue;
-  }
-
-  get userIdValue(): string {
-    return this._userIdValue;
-  }
-
-  get timeToLiveValue(): number | null {
-    return this._timeToLiveValue;
-  }
-
-  get metadataValue(): Record<string, unknown> {
-    return this._metadataValue;
-  }
-
-  /** Sets an explicit session ID. If omitted, the service generates a UUID. */
-  id(id: string | null): this {
-    this._idValue = id;
-    return this;
-  }
-
-  userId(userId: string): this {
-    this._userIdValue = userId;
-    return this;
-  }
-
-  /** Time-to-live in milliseconds, or `null` for no expiry. */
-  timeToLive(timeToLive: number | null): this {
-    this._timeToLiveValue = timeToLive;
-    return this;
-  }
-
-  /** Merges the given entries into the metadata map. */
-  metadata(metadata: Record<string, unknown>): this;
-  /** Adds a single metadata entry. */
-  metadata(key: string, value: unknown): this;
-  metadata(
-    metadataOrKey: Record<string, unknown> | string,
-    value?: unknown,
-  ): this {
-    if (typeof metadataOrKey === "string") {
-      this._metadataValue[metadataOrKey] = value;
-    } else {
-      this._metadataValue = { ...this._metadataValue, ...metadataOrKey };
-    }
-    return this;
-  }
-
-  build(): CreateSessionRequest {
-    return new CreateSessionRequest(this);
   }
 }

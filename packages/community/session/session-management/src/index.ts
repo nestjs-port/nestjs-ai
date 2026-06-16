@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+export * from "./compaction/index.js";
 export {
   CreateSessionRequest,
   type CreateSessionRequestProps,
 } from "./create-session-request.js";
+export { DefaultSessionService } from "./default-session-service.js";
 export { EventFilter, type EventFilterProps } from "./event-filter.js";
 export { InMemorySessionRepository } from "./in-memory-session-repository.js";
 export { Session, type SessionProps } from "./session.js";
 export type { SessionRepository } from "./session-repository.js";
 export { SessionEvent, type SessionEventProps } from "./session-event.js";
+export { SessionService } from "./session-service.js";

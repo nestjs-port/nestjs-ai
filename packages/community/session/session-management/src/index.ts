@@ -20,4 +20,5 @@ export {
 } from "./create-session-request.js";
 export { EventFilter, type EventFilterProps } from "./event-filter.js";
 export { Session, type SessionProps } from "./session.js";
+export type { SessionRepository } from "./session-repository.js";
 export { SessionEvent, type SessionEventProps } from "./session-event.js";

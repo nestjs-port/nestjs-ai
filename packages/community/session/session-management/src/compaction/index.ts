@@ -24,7 +24,25 @@ export {
 } from "./compaction-result.js";
 export type { CompactionStrategy } from "./compaction-strategy.js";
 export type { CompactionTrigger } from "./compaction-trigger.js";
+export { CompositeCompactionTrigger } from "./composite-compaction-trigger.js";
+export {
+  RecursiveSummarizationCompactionStrategy,
+  type RecursiveSummarizationCompactionStrategyProps,
+} from "./recursive-summarization-compaction-strategy.js";
 export {
   SlidingWindowCompactionStrategy,
   type SlidingWindowCompactionStrategyProps,
 } from "./sliding-window-compaction-strategy.js";
+export {
+  TokenCountCompactionStrategy,
+  type TokenCountCompactionStrategyProps,
+} from "./token-count-compaction-strategy.js";
+export {
+  TokenCountTrigger,
+  type TokenCountTriggerProps,
+} from "./token-count-trigger.js";
+export { TurnCountTrigger } from "./turn-count-trigger.js";
+export {
+  TurnWindowCompactionStrategy,
+  type TurnWindowCompactionStrategyProps,
+} from "./turn-window-compaction-strategy.js";

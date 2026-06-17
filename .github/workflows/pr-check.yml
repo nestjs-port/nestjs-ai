@@ -64,6 +64,7 @@ jobs:
             --filter=@nestjs-ai/platform \
             --filter=@nestjs-ai/rag \
             --filter=@nestjs-ai/retry \
+            --filter=@nestjs-ai/session \
             --filter=@nestjs-ai/template-st \
             --filter=@nestjs-ai/vector-store
 

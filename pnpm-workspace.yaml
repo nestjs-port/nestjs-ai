@@ -1,11 +1,5 @@
 packages:
-  - 'packages/*'
-  - 'packages/mcp/*'
-  - 'packages/vector-stores/*'
-  - 'packages/memory/repository/*'
-  - 'packages/models/*'
-  - 'packages/advisors/*'
-  - 'packages/document-readers/*'
+  - 'packages/**'
 
 allowBuilds:
   '@nestjs/core': true

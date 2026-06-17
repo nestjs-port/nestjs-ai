@@ -2,7 +2,7 @@
   "name": "@nestjs-ai/vector-store-pgvector",
   "version": "0.1.2",
   "private": false,
-  "description": "JSDbC-backed PostgreSQL pgvector vector store for NestJS AI",
+  "description": "JSDBC-backed PostgreSQL pgvector vector store for NestJS AI",
   "keywords": [
     "ai",
     "nestjs",

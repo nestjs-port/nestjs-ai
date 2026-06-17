@@ -21,10 +21,10 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { CompactionRequest } from "../compaction/compaction-request.js";
-import { TokenCountCompactionStrategy } from "../compaction/token-count-compaction-strategy.js";
-import { SessionEvent } from "../session-event.js";
-import { Session } from "../session.js";
+import { CompactionRequest } from "../compaction-request.js";
+import { TokenCountCompactionStrategy } from "../token-count-compaction-strategy.js";
+import { SessionEvent } from "../../session-event.js";
+import { Session } from "../../session.js";
 
 /**
  * Tests for {@link TokenCountCompactionStrategy}.

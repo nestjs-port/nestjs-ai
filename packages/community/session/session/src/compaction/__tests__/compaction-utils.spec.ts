@@ -20,8 +20,8 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { CompactionUtils } from "../compaction/compaction-utils.js";
-import { SessionEvent } from "../session-event.js";
+import { CompactionUtils } from "../compaction-utils.js";
+import { SessionEvent } from "../../session-event.js";
 
 /**
  * Unit tests for {@link CompactionUtils.snapToTurnStart}.

@@ -23,10 +23,10 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CompactionRequest } from "../compaction/compaction-request.js";
-import { RecursiveSummarizationCompactionStrategy } from "../compaction/recursive-summarization-compaction-strategy.js";
-import { SessionEvent } from "../session-event.js";
-import { Session } from "../session.js";
+import { CompactionRequest } from "../compaction-request.js";
+import { RecursiveSummarizationCompactionStrategy } from "../recursive-summarization-compaction-strategy.js";
+import { SessionEvent } from "../../session-event.js";
+import { Session } from "../../session.js";
 
 /**
  * Tests for {@link RecursiveSummarizationCompactionStrategy}.

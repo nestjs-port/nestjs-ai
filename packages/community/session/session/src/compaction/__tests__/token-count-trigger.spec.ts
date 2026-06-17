@@ -17,10 +17,10 @@
 import type { MediaContent, TokenCountEstimator } from "@nestjs-ai/commons";
 import { AssistantMessage, UserMessage } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { CompactionRequest } from "../compaction/compaction-request.js";
-import { TokenCountTrigger } from "../compaction/token-count-trigger.js";
-import { SessionEvent } from "../session-event.js";
-import { Session } from "../session.js";
+import { CompactionRequest } from "../compaction-request.js";
+import { TokenCountTrigger } from "../token-count-trigger.js";
+import { SessionEvent } from "../../session-event.js";
+import { Session } from "../../session.js";
 
 /**
  * Tests for {@link TokenCountTrigger}.

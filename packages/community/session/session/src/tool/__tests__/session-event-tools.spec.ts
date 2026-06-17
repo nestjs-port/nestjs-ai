@@ -16,12 +16,12 @@
 
 import { AssistantMessage, ToolContext, UserMessage } from "@nestjs-ai/model";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CreateSessionRequest } from "../create-session-request.js";
-import { DefaultSessionService } from "../default-session-service.js";
-import { InMemorySessionRepository } from "../in-memory-session-repository.js";
-import { SessionEvent } from "../session-event.js";
-import type { SessionService } from "../session-service.js";
-import { SessionEventTools } from "../tool/session-event-tools.js";
+import { CreateSessionRequest } from "../../create-session-request.js";
+import { DefaultSessionService } from "../../default-session-service.js";
+import { InMemorySessionRepository } from "../../in-memory-session-repository.js";
+import { SessionEvent } from "../../session-event.js";
+import type { SessionService } from "../../session-service.js";
+import { SessionEventTools } from "../session-event-tools.js";
 
 /**
  * Tests for {@link SessionEventTools.conversationSearch}.

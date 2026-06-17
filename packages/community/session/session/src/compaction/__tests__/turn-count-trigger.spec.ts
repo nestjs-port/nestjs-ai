@@ -16,10 +16,10 @@
 
 import { AssistantMessage, UserMessage } from "@nestjs-ai/model";
 import { describe, expect, it } from "vitest";
-import { CompactionRequest } from "../compaction/compaction-request.js";
-import { TurnCountTrigger } from "../compaction/turn-count-trigger.js";
-import { SessionEvent } from "../session-event.js";
-import { Session } from "../session.js";
+import { CompactionRequest } from "../compaction-request.js";
+import { TurnCountTrigger } from "../turn-count-trigger.js";
+import { SessionEvent } from "../../session-event.js";
+import { Session } from "../../session.js";
 
 /**
  * Tests for {@link TurnCountTrigger}.

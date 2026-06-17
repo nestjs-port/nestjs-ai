@@ -28,15 +28,15 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { beforeEach, describe, expect, it } from "vitest";
-import { SessionMemoryAdvisor } from "../advisor/session-memory-advisor.js";
-import { SlidingWindowCompactionStrategy } from "../compaction/sliding-window-compaction-strategy.js";
-import { TurnCountTrigger } from "../compaction/turn-count-trigger.js";
-import { CreateSessionRequest } from "../create-session-request.js";
-import { DefaultSessionService } from "../default-session-service.js";
-import { EventFilter } from "../event-filter.js";
-import { InMemorySessionRepository } from "../in-memory-session-repository.js";
-import { SessionEvent } from "../session-event.js";
-import type { SessionService } from "../session-service.js";
+import { SessionMemoryAdvisor } from "../session-memory-advisor.js";
+import { SlidingWindowCompactionStrategy } from "../../compaction/sliding-window-compaction-strategy.js";
+import { TurnCountTrigger } from "../../compaction/turn-count-trigger.js";
+import { CreateSessionRequest } from "../../create-session-request.js";
+import { DefaultSessionService } from "../../default-session-service.js";
+import { EventFilter } from "../../event-filter.js";
+import { InMemorySessionRepository } from "../../in-memory-session-repository.js";
+import { SessionEvent } from "../../session-event.js";
+import type { SessionService } from "../../session-service.js";
 
 /**
  * Integration tests for {@link SessionMemoryAdvisor}. No external LLM is required — the

@@ -161,6 +161,30 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
 
+  packages/community/session/session-jsdbc:
+    devDependencies:
+      '@nestjs-ai/commons':
+        specifier: workspace:*
+        version: link:../../../commons
+      '@nestjs-ai/model':
+        specifier: workspace:*
+        version: link:../../../model
+      '@nestjs-ai/session':
+        specifier: workspace:*
+        version: link:../session
+      '@nestjs-port/core':
+        specifier: ^0.1.1
+        version: 0.1.1(rxjs@7.8.2)
+      '@nestjs-port/jsdbc':
+        specifier: ^0.1.0
+        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/typeorm@11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)))(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
+      '@nestjs/common':
+        specifier: ^11.1.11
+        version: 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/testing':
+        specifier: ^11.1.11
+        version: 11.1.19(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
+
   packages/document-readers/cheerio-reader:
     dependencies:
       cheerio:

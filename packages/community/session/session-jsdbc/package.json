@@ -1,0 +1,62 @@
+{
+  "name": "@nestjs-ai/session-jsdbc",
+  "version": "0.0.1",
+  "private": false,
+  "description": "JSDBC-backed SessionRepository implementation for NestJS AI Session",
+  "keywords": [
+    "ai",
+    "jsdbc",
+    "nestjs",
+    "repository",
+    "session"
+  ],
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "bugs": {
+    "url": "https://github.com/nestjs-port/nestjs-ai/issues"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/community/session/session-jsdbc"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/session": "workspace:*",
+    "@nestjs-port/core": "^0.1.1",
+    "@nestjs-port/jsdbc": "^0.1.0",
+    "@nestjs/common": "^11.1.11",
+    "@nestjs/testing": "^11.1.11"
+  },
+  "peerDependencies": {
+    "@nestjs-ai/commons": "^0.1.2",
+    "@nestjs-ai/model": "^0.1.5",
+    "@nestjs-ai/session": "^0.0.1",
+    "@nestjs-port/core": "^0.1.0",
+    "@nestjs-port/jsdbc": "^0.1.0",
+    "@nestjs/common": "^10.0.0 || ^11.0.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

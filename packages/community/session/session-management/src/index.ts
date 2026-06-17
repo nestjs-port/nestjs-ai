@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export * from "./advisor/index.js";
 export * from "./compaction/index.js";
 export {
   CreateSessionRequest,

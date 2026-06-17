@@ -131,7 +131,7 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
 
-  packages/community/session/session-management:
+  packages/community/session/session:
     devDependencies:
       '@nestjs-ai/client-chat':
         specifier: workspace:*

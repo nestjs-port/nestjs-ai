@@ -90,6 +90,7 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 |                         | spring-ai-mcp-annotations             | `@nestjs-ai/mcp-annotations`                      | 100%     |
 | **Platform**            | —                                     | `@nestjs-ai/platform`                             | 100%     |
 | **Community**           | spring-ai-session                     | `@nestjs-ai/session`                              | 100%     |
+|                         | spring-ai-session-jdbc                | `@nestjs-ai/session-jsdbc`                        | 100%     |
 
 ## Differences from Spring AI
 

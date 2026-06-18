@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+export {
+  JsdbcSessionRepository,
+  JsdbcSessionRepositoryBuilder,
+} from "./jsdbc-session-repository.js";
 export { JsdbcSessionRepositoryDialect } from "./jsdbc-session-repository-dialect.js";
 export { JsdbcSessionRepositoryDialectFactory } from "./jsdbc-session-repository-dialect-factory.js";
 export { MysqlSessionRepositoryDialect } from "./mysql-session-repository-dialect.js";

@@ -184,18 +184,9 @@ importers:
       '@nestjs/testing':
         specifier: ^11.1.11
         version: 11.1.19(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(@nestjs/platform-express@11.1.18)
-      '@testcontainers/postgresql':
-        specifier: ^11.14.0
-        version: 11.14.0
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
-      testcontainers:
-        specifier: ^11.14.0
-        version: 11.14.0
-      typeorm:
-        specifier: ^0.3.28
-        version: 0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)
 
   packages/document-readers/cheerio-reader:
     dependencies:
@@ -289,6 +280,12 @@ importers:
       '@nestjs-ai/platform':
         specifier: workspace:*
         version: link:../platform
+      '@nestjs-ai/session':
+        specifier: workspace:*
+        version: link:../community/session/session
+      '@nestjs-ai/session-jsdbc':
+        specifier: workspace:*
+        version: link:../community/session/session-jsdbc
       '@nestjs-ai/vector-store':
         specifier: workspace:*
         version: link:../vector-store
@@ -305,8 +302,8 @@ importers:
         specifier: ^0.1.1
         version: 0.1.1(rxjs@7.8.2)
       '@nestjs-port/jsdbc':
-        specifier: ^0.1.0
-        version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/typeorm@11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)))(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
+        specifier: ^0.1.1
+        version: 0.1.1(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/typeorm@11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)))(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
       '@nestjs-port/observation':
         specifier: ^0.1.0
         version: 0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)
@@ -1555,38 +1552,6 @@ packages:
     engines: {node: '>=22.12.0'}
     peerDependencies:
       rxjs: ^7.0.0
-
-  '@nestjs-port/jsdbc@0.1.0':
-    resolution: {integrity: sha512-afp/JqQ1UT+teMG6/VKBlusWiGyb/4DSinrv6GhVoMYnXmtUhtkh6DKvre1LxXpb6mAIue0B2t30sUcq/P+0iA==}
-    engines: {node: '>=22.12.0'}
-    peerDependencies:
-      '@mikro-orm/core': ^7.0.0
-      '@nestjs-port/core': ^0.1.0
-      '@nestjs/common': ^10.0.0 || ^11.0.0
-      '@nestjs/sequelize': ^11.0.0
-      '@nestjs/typeorm': ^10.0.0 || ^11.0.0
-      '@prisma/client': ^6.18.0
-      class-transformer: ^0.4.0 || ^0.5.0
-      drizzle-orm: ^0.45.0
-      sequelize: ^6.37.0
-      typeorm: ^0.3.0
-    peerDependenciesMeta:
-      '@mikro-orm/core':
-        optional: true
-      '@nestjs/sequelize':
-        optional: true
-      '@nestjs/typeorm':
-        optional: true
-      '@prisma/client':
-        optional: true
-      class-transformer:
-        optional: true
-      drizzle-orm:
-        optional: true
-      sequelize:
-        optional: true
-      typeorm:
-        optional: true
 
   '@nestjs-port/jsdbc@0.1.1':
     resolution: {integrity: sha512-pMCP3ycYHHUYssCZzymVJNJsZC/sRyCszJ3yiXBEIG4jQh1hhKa7napS7/0GkrvKjbt0AuS6zXzwywzCsAf/vw==}
@@ -5993,16 +5958,6 @@ snapshots:
   '@nestjs-port/core@0.1.1(rxjs@7.8.2)':
     dependencies:
       rxjs: 7.8.2
-
-  '@nestjs-port/jsdbc@0.1.0(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/typeorm@11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)))(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))':
-    dependencies:
-      '@nestjs-port/core': 0.1.1(rxjs@7.8.2)
-      '@nestjs/common': 11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@standard-schema/spec': 1.1.0
-      '@standard-schema/utils': 0.3.0
-    optionalDependencies:
-      '@nestjs/typeorm': 11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))
-      typeorm: 0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)
 
   '@nestjs-port/jsdbc@0.1.1(@nestjs-port/core@0.1.1(rxjs@7.8.2))(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/typeorm@11.0.1(@nestjs/common@11.1.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1)))(typeorm@0.3.28(mongodb@6.21.0)(mssql@11.0.1(@azure/core-client@1.10.1))(mysql2@3.22.3(@types/node@25.5.0))(oracledb@6.10.0)(pg@8.20.0)(redis@5.11.0)(sql.js@1.14.1))':
     dependencies:

@@ -27,7 +27,12 @@ import {
   type JsdbcChatMemoryRepositoryDialect,
   JsdbcChatMemoryRepositoryDialectFactory,
 } from "@nestjs-ai/model-chat-memory-repository-jsdbc";
-import type { JsdbcTemplate, SqlFragment } from "@nestjs-port/jsdbc";
+import {
+  type JsdbcTemplate,
+  sql,
+  type SqlFragment,
+  toSqlTemplate,
+} from "@nestjs-port/jsdbc";
 import { expect } from "vitest";
 
 /**
@@ -222,16 +227,20 @@ export class AbstractJdbcChatMemoryRepositoryIT {
   }
 
   private withMetadataColumns(fragment: SqlFragment): SqlFragment {
-    return {
-      strings: [
-        fragment.strings[0]?.replace(
-          "content, type",
-          "conversation_id, content, type, timestamp",
-        ) ?? "",
-        ...fragment.strings.slice(1),
-      ] as unknown as TemplateStringsArray,
-      expressions: fragment.expressions,
-    };
+    const template = toSqlTemplate(fragment);
+    const strings = [
+      template.strings[0]?.replace(
+        "content, type",
+        "conversation_id, content, type, timestamp",
+      ) ?? "",
+      ...template.strings.slice(1),
+    ];
+    return sql(
+      Object.assign(strings, {
+        raw: strings,
+      }) as unknown as TemplateStringsArray,
+      ...template.expressions,
+    );
   }
 
   private normalizeRow(

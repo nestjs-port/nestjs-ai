@@ -53,10 +53,12 @@ const logger = LoggerFactory.getLogger("JsdbcSessionRepository");
  * tool calls / tool responses).
  *
  * The `event_version` column is incremented atomically on every
- * {@link appendEvent} and {@link replaceEvents}. The compare-and-swap variant of
- * `replaceEvents` issues a conditional `UPDATE ... WHERE event_version = ?` first;
- * when zero rows are updated the swap is abandoned and `false` is returned. All
- * mutating operations run inside a JSDBC transaction.
+ * {@link appendEvent} and {@link compactEvents}. `compactEvents` issues a conditional
+ * `UPDATE ... WHERE event_version = ?` first; when zero rows are updated the swap is
+ * abandoned and `false` is returned. Compacted events are soft-deleted (archived) and
+ * retained; the log is rebuilt ordered by a database-assigned `seq` column so it reflects
+ * conversation order rather than wall-clock `timestamp`. All mutating operations run
+ * inside a JSDBC transaction.
  */
 export class JsdbcSessionRepository implements SessionRepository {
   constructor(
@@ -139,38 +141,19 @@ export class JsdbcSessionRepository implements SessionRepository {
     });
   }
 
-  replaceEvents(sessionId: string, events: SessionEvent[]): Promise<void>;
-  replaceEvents(
+  async compactEvents(
     sessionId: string,
-    events: SessionEvent[],
+    archivedEvents: SessionEvent[],
+    retainedEvents: SessionEvent[],
     expectedVersion: number,
-  ): Promise<boolean>;
-  async replaceEvents(
-    sessionId: string,
-    events: SessionEvent[],
-    expectedVersion?: number,
-  ): Promise<void | boolean> {
+  ): Promise<boolean> {
     assert(
       StringUtils.hasText(sessionId),
       "sessionId must not be null or empty",
     );
-    assert(events != null, "events must not be null");
+    assert(archivedEvents != null, "archivedEvents must not be null");
+    assert(retainedEvents != null, "retainedEvents must not be null");
     await this.requireSessionExists(sessionId);
-
-    if (expectedVersion === undefined) {
-      await this.template.transaction(async () => {
-        await this.template.update(
-          sql`DELETE FROM AI_SESSION_EVENT WHERE session_id = ${sessionId}`,
-        );
-        for (const event of events) {
-          await this.insertEvent(event);
-        }
-        await this.template.update(
-          sql`UPDATE AI_SESSION SET event_version = event_version + 1 WHERE id = ${sessionId}`,
-        );
-      });
-      return;
-    }
 
     return await this.template.transaction(async () => {
       // Atomically claim the version slot. If another writer already changed it,
@@ -181,10 +164,24 @@ export class JsdbcSessionRepository implements SessionRepository {
       if (updated === 0) {
         return false;
       }
+      // Read the previously-archived events (oldest prefix) so they survive the
+      // delete-and-reinsert. The whole log is rebuilt in order so the auto-assigned
+      // `seq` reflects the logical conversation order: previously-archived events,
+      // then newly-archived events, then the new active window (summary + recent).
+      const previouslyArchived = await this.template.queryForList(
+        sql`SELECT e.id, e.session_id, e.timestamp, e.message_type, e.message_content, e.message_data, e.synthetic, e.archived, e.branch, e.metadata FROM AI_SESSION_EVENT e WHERE e.session_id = ${sessionId} AND e.archived = ${true} ORDER BY e.seq ASC`,
+        (row) => this.mapSessionEvent(row),
+      );
       await this.template.update(
         sql`DELETE FROM AI_SESSION_EVENT WHERE session_id = ${sessionId}`,
       );
-      for (const event of events) {
+      for (const event of previouslyArchived) {
+        await this.insertEvent(event);
+      }
+      for (const event of archivedEvents) {
+        await this.insertEvent(event.asArchived());
+      }
+      for (const event of retainedEvents) {
         await this.insertEvent(event);
       }
       return true;
@@ -213,7 +210,7 @@ export class JsdbcSessionRepository implements SessionRepository {
     assert(filter != null, "filter must not be null");
 
     const fragments: SqlFragment[] = [
-      sql`SELECT e.id, e.session_id, e.timestamp, e.message_type, e.message_content, e.message_data, e.synthetic, e.branch, e.metadata FROM AI_SESSION_EVENT e WHERE e.session_id = ${sessionId} `,
+      sql`SELECT e.id, e.session_id, e.timestamp, e.message_type, e.message_content, e.message_data, e.synthetic, e.archived, e.branch, e.metadata FROM AI_SESSION_EVENT e WHERE e.session_id = ${sessionId} `,
     ];
 
     if (filter.from != null) {
@@ -224,14 +221,13 @@ export class JsdbcSessionRepository implements SessionRepository {
     }
     if (filter.messageTypes != null && filter.messageTypes.size > 0) {
       const names = [...filter.messageTypes].map((mt) => mt.getName());
-      fragments.push(sql`AND e.message_type IN (`);
-      names.forEach((name, index) => {
-        fragments.push(index === 0 ? sql`${name}` : sql`, ${name}`);
-      });
-      fragments.push(sql`) `);
+      fragments.push(sql`AND e.message_type IN ${names} `);
     }
     if (filter.excludeSynthetic) {
       fragments.push(sql`AND e.synthetic = ${false} `);
+    }
+    if (filter.excludeArchived) {
+      fragments.push(sql`AND e.archived = ${false} `);
     }
     if (filter.branch != null) {
       // Visibility: null branch (root events) OR exact match OR caller is a
@@ -246,18 +242,18 @@ export class JsdbcSessionRepository implements SessionRepository {
     }
 
     if (filter.lastN != null) {
-      fragments.push(sql`ORDER BY e.timestamp DESC LIMIT ${filter.lastN} `);
+      fragments.push(sql`ORDER BY e.seq DESC LIMIT ${filter.lastN} `);
     } else if (filter.pageSize != null) {
       const page = filter.page != null ? filter.page : 0;
       fragments.push(
-        sql`ORDER BY e.timestamp ASC LIMIT ${filter.pageSize} OFFSET ${page * filter.pageSize} `,
+        sql`ORDER BY e.seq ASC LIMIT ${filter.pageSize} OFFSET ${page * filter.pageSize} `,
       );
     } else {
-      fragments.push(sql`ORDER BY e.timestamp ASC `);
+      fragments.push(sql`ORDER BY e.seq ASC `);
     }
 
     const result = await this.template.queryForList(
-      mergeFragments(fragments),
+      sql.join(fragments),
       (row) => this.mapSessionEvent(row),
     );
 
@@ -274,7 +270,7 @@ export class JsdbcSessionRepository implements SessionRepository {
   private async insertEvent(event: SessionEvent): Promise<void> {
     const message = event.message;
     await this.template.update(
-      sql`INSERT INTO AI_SESSION_EVENT (id, session_id, timestamp, message_type, message_content, message_data, synthetic, branch, metadata) VALUES (${event.id}, ${event.sessionId}, ${event.timestamp}, ${message.messageType.getName()}, ${message.text}, ${this.messageDataToJson(message)}, ${event.isSynthetic()}, ${event.branch}, ${this.toJsonOrNull(event.metadata)})`,
+      sql`INSERT INTO AI_SESSION_EVENT (id, session_id, timestamp, message_type, message_content, message_data, synthetic, archived, branch, metadata) VALUES (${event.id}, ${event.sessionId}, ${event.timestamp}, ${message.messageType.getName()}, ${message.text}, ${this.messageDataToJson(message)}, ${event.isSynthetic()}, ${event.isArchived()}, ${event.branch}, ${this.toJsonOrNull(event.metadata)})`,
     );
   }
 
@@ -421,6 +417,7 @@ export class JsdbcSessionRepository implements SessionRepository {
       message,
       branch: (column(row, "branch") as string | null) ?? null,
       metadata,
+      archived: toBoolean(column(row, "archived")),
     });
   }
 
@@ -565,28 +562,4 @@ function toBoolean(value: unknown): boolean {
     value === "1" ||
     value === "true"
   );
-}
-
-/**
- * Concatenates a list of {@link SqlFragment}s into a single fragment, preserving
- * the positional bound values. JSDBC's `sql` tag has no native fragment
- * composition, so the dynamic `findEvents` query is assembled by merging the
- * `strings`/`expressions` arrays directly.
- */
-function mergeFragments(fragments: SqlFragment[]): SqlFragment {
-  const strings: string[] = [""];
-  const expressions: unknown[] = [];
-  for (const fragment of fragments) {
-    strings[strings.length - 1] += fragment.strings[0];
-    for (let i = 0; i < fragment.expressions.length; i++) {
-      expressions.push(fragment.expressions[i]);
-      strings.push(fragment.strings[i + 1] ?? "");
-    }
-  }
-  return {
-    strings: Object.assign(strings.slice(), {
-      raw: strings.slice(),
-    }) as unknown as TemplateStringsArray,
-    expressions,
-  };
 }

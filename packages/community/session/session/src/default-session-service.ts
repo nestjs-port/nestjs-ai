@@ -36,11 +36,17 @@ const DEFAULT_TTL_MS = 60 * 24 * 60 * 60 * 1000;
  */
 export class DefaultSessionService extends SessionService {
   private readonly _sessionRepository: SessionRepository;
+  private readonly _defaultTimeToLiveMs: number;
 
-  constructor(sessionRepository: SessionRepository) {
+  constructor(
+    sessionRepository: SessionRepository,
+    defaultTimeToLiveMs: number = DEFAULT_TTL_MS,
+  ) {
     super();
     assert(sessionRepository != null, "sessionRepository must not be null");
+    assert(defaultTimeToLiveMs != null, "defaultTimeToLiveMs must not be null");
     this._sessionRepository = sessionRepository;
+    this._defaultTimeToLiveMs = defaultTimeToLiveMs;
   }
 
   async create(request: CreateSessionRequest): Promise<Session> {
@@ -49,7 +55,7 @@ export class DefaultSessionService extends SessionService {
     const expiresAt =
       request.timeToLive != null
         ? new Date(now.getTime() + request.timeToLive)
-        : new Date(now.getTime() + DEFAULT_TTL_MS);
+        : new Date(now.getTime() + this._defaultTimeToLiveMs);
     const sessionId =
       request.id != null && request.id.trim().length > 0
         ? request.id
@@ -146,9 +152,12 @@ export class DefaultSessionService extends SessionService {
     // the CAS will detect the version mismatch and return false — we skip silently,
     // as the concurrent writer already handled the session.
     const version = await this._sessionRepository.getEventVersion(session.id);
+
+    // Operate on the active context window only — already-archived events are retained for
+    // Recall Storage and must not be re-processed (or re-summarized) by compaction.
     const events = await this._sessionRepository.findEvents(
       session.id,
-      EventFilter.all(),
+      EventFilter.active(),
     );
     const request = CompactionRequest.of(session, events);
 
@@ -163,8 +172,9 @@ export class DefaultSessionService extends SessionService {
     const result = await strategy.compact(request);
 
     if (result.archivedEvents.length > 0) {
-      const replaced = await this._sessionRepository.replaceEvents(
+      const replaced = await this._sessionRepository.compactEvents(
         session.id,
+        result.archivedEvents,
         result.compactedEvents,
         version,
       );

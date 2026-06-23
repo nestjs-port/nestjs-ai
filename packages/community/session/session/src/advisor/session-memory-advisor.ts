@@ -73,7 +73,7 @@ export interface SessionMemoryAdvisorProps {
  * **Concurrent compaction safety:** If two requests for the same session complete
  * concurrently, both `after()` calls may reach the compaction step simultaneously.
  * Compaction uses an optimistic compare-and-swap write via
- * {@link SessionRepository.replaceEvents}, so only the first writer succeeds; the second
+ * {@link SessionRepository.compactEvents}, so only the first writer succeeds; the second
  * detects the version mismatch and skips silently. No compaction result is lost or
  * corrupted.
  */
@@ -185,6 +185,11 @@ export class SessionMemoryAdvisor extends BaseAdvisor {
         eventFilter = this._eventFilter.merge(requestEventFilter);
       }
     }
+
+    // Always exclude archived events from the active context window — they were compacted
+    // out and live on only for Recall Storage search. Merging forces the flag on regardless
+    // of the configured or per-request filter.
+    eventFilter = eventFilter.merge(EventFilter.active());
 
     const events = await this._sessionService.getEvents(sessionId, eventFilter);
     const history = events.map((e) => e.message);

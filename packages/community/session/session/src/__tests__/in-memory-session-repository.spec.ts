@@ -166,92 +166,129 @@ describe("InMemorySessionRepository", () => {
     expect(await repository.getEventVersion(session.id)).toBe(2);
   });
 
-  it("replace events with correct version succeeds", async () => {
+  it("compact events with correct version succeeds", async () => {
     const session = buildSession("user-7");
     await repository.save(session);
-    await repository.appendEvent(
-      new SessionEvent({
-        sessionId: session.id,
-        message: UserMessage.of("msg-1"),
-      }),
-    );
+    const e1 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("msg-1"),
+    });
+    const e2 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("msg-2"),
+    });
+    await repository.appendEvent(e1);
+    await repository.appendEvent(e2);
 
     const version = await repository.getEventVersion(session.id);
-    const replacement = [
-      new SessionEvent({
-        sessionId: session.id,
-        message: UserMessage.of("compacted"),
-      }),
-    ];
+    const summary = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("summary"),
+    });
 
-    const replaced = await repository.replaceEvents(
+    const replaced = await repository.compactEvents(
       session.id,
-      replacement,
+      [e1],
+      [summary, e2],
       version,
     );
 
     expect(replaced).toBe(true);
     expect(await repository.getEventVersion(session.id)).toBe(version + 1);
+    // Active view excludes the archived event
     expect(
-      await repository.findEvents(session.id, EventFilter.all()),
-    ).toHaveLength(1);
-    expect(
-      (await repository.findEvents(session.id, EventFilter.all()))[0].message
-        .text,
-    ).toBe("compacted");
+      (await repository.findEvents(session.id, EventFilter.active())).map(
+        (e) => e.message.text,
+      ),
+    ).toEqual(["summary", "msg-2"]);
+    // Full view still contains the archived event (Recall Storage), ahead of the
+    // active window, and it is flagged archived.
+    const all = await repository.findEvents(session.id, EventFilter.all());
+    expect(all.map((e) => e.message.text)).toEqual([
+      "msg-1",
+      "summary",
+      "msg-2",
+    ]);
+    expect(all[0].isArchived()).toBe(true);
+    expect(all[1].isArchived()).toBe(false);
   });
 
-  it("replace events with stale version fails", async () => {
+  it("compact events with stale version fails", async () => {
     const session = buildSession("user-8");
     await repository.save(session);
-    await repository.appendEvent(
-      new SessionEvent({
-        sessionId: session.id,
-        message: UserMessage.of("msg-1"),
-      }),
-    );
+    const e1 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("msg-1"),
+    });
+    await repository.appendEvent(e1);
 
     const staleVersion = (await repository.getEventVersion(session.id)) - 1;
-    const replacement = [
-      new SessionEvent({
-        sessionId: session.id,
-        message: UserMessage.of("should-not-land"),
-      }),
-    ];
+    const summary = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("should-not-land"),
+    });
 
-    const replaced = await repository.replaceEvents(
+    const replaced = await repository.compactEvents(
       session.id,
-      replacement,
+      [e1],
+      [summary],
       staleVersion,
     );
 
     expect(replaced).toBe(false);
-    // Original event is still there
-    expect(
-      await repository.findEvents(session.id, EventFilter.all()),
-    ).toHaveLength(1);
-    expect(
-      (await repository.findEvents(session.id, EventFilter.all()))[0].message
-        .text,
-    ).toBe("msg-1");
+    // Original event is still there and is not archived
+    const all = await repository.findEvents(session.id, EventFilter.all());
+    expect(all).toHaveLength(1);
+    expect(all[0].message.text).toBe("msg-1");
+    expect(all[0].isArchived()).toBe(false);
   });
 
-  it("replace events version incremented on unconditional replace", async () => {
+  it("compact events preserves previously archived events", async () => {
     const session = buildSession("user-9");
     await repository.save(session);
-    await repository.appendEvent(
-      new SessionEvent({
-        sessionId: session.id,
-        message: UserMessage.of("original"),
-      }),
-    );
+    const e1 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("e1"),
+    });
+    const e2 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("e2"),
+    });
+    const e3 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("e3"),
+    });
+    await repository.appendEvent(e1);
+    await repository.appendEvent(e2);
+    await repository.appendEvent(e3);
 
-    const versionBefore = await repository.getEventVersion(session.id);
-    await repository.replaceEvents(session.id, []);
+    // First pass: archive e1, keep summary-1 + e2 + e3
+    const summary1 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("s1"),
+    });
+    const v1 = await repository.getEventVersion(session.id);
+    await repository.compactEvents(session.id, [e1], [summary1, e2, e3], v1);
 
-    expect(await repository.getEventVersion(session.id)).toBe(
-      versionBefore + 1,
-    );
+    // Second pass: archive e2, drop the superseded summary-1, keep summary-2 + e3
+    const summary2 = new SessionEvent({
+      sessionId: session.id,
+      message: UserMessage.of("s2"),
+    });
+    const v2 = await repository.getEventVersion(session.id);
+    await repository.compactEvents(session.id, [e2], [summary2, e3], v2);
+
+    // e1 (previously archived) is preserved; e2 newly archived; superseded s1 dropped
+    expect(
+      (await repository.findEvents(session.id, EventFilter.all())).map(
+        (e) => e.message.text,
+      ),
+    ).toEqual(["e1", "e2", "s2", "e3"]);
+    expect(
+      (await repository.findEvents(session.id, EventFilter.active())).map(
+        (e) => e.message.text,
+      ),
+    ).toEqual(["s2", "e3"]);
   });
 
   function buildSession(userId: string): Session {

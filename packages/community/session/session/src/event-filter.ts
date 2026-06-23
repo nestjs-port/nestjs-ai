@@ -50,6 +50,12 @@ export interface EventFilterProps {
    * See {@link EventFilter.forBranch} for the full visibility rule.
    */
   branch?: string | null;
+  /**
+   * When `true`, events archived by compaction are excluded. Used to build the active
+   * context window; leave `false` (the default) for Recall Storage searches that must
+   * see the full history.
+   */
+  excludeArchived?: boolean;
 }
 
 /**
@@ -101,6 +107,7 @@ export class EventFilter {
   private readonly _page: number | null;
   private readonly _pageSize: number | null;
   private readonly _branch: string | null;
+  private readonly _excludeArchived: boolean;
 
   constructor(props: EventFilterProps = {}) {
     let keyword = props.keyword ?? null;
@@ -143,6 +150,7 @@ export class EventFilter {
     this._page = page;
     this._pageSize = pageSize;
     this._branch = props.branch ?? null;
+    this._excludeArchived = props.excludeArchived ?? false;
   }
 
   get from(): Date | null {
@@ -181,6 +189,10 @@ export class EventFilter {
     return this._branch;
   }
 
+  get excludeArchived(): boolean {
+    return this._excludeArchived;
+  }
+
   merge(other: EventFilter): EventFilter {
     return new EventFilter({
       from: other._from ?? this._from,
@@ -192,12 +204,18 @@ export class EventFilter {
       page: other._page ?? this._page,
       pageSize: other._pageSize ?? this._pageSize,
       branch: other._branch ?? this._branch,
+      excludeArchived: other._excludeArchived || this._excludeArchived,
     });
   }
 
   /** Returns all events with no filtering. */
   static all(): EventFilter {
     return new EventFilter();
+  }
+
+  /** Returns only active (non-archived) events. */
+  static active(): EventFilter {
+    return new EventFilter({ excludeArchived: true });
   }
 
   /** Returns the last `n` events. */
@@ -252,6 +270,9 @@ export class EventFilter {
    */
   matches(event: SessionEvent): boolean {
     if (this._excludeSynthetic && event.isSynthetic()) {
+      return false;
+    }
+    if (this._excludeArchived && event.isArchived()) {
       return false;
     }
     if (this._from != null && event.timestamp < this._from) {

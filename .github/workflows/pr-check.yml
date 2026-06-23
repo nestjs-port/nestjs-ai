@@ -57,6 +57,8 @@ jobs:
             --filter=@nestjs-ai/model \
             --filter=@nestjs-ai/model-anthropic \
             --filter=@nestjs-ai/model-chat-memory-repository-jsdbc \
+            --filter=@nestjs-ai/model-chat-memory-repository-mongodb \
+            --filter=@nestjs-ai/model-chat-memory-repository-redis \
             --filter=@nestjs-ai/model-google-genai \
             --filter=@nestjs-ai/model-ollama \
             --filter=@nestjs-ai/model-openai \
@@ -65,16 +67,15 @@ jobs:
             --filter=@nestjs-ai/rag \
             --filter=@nestjs-ai/retry \
             --filter=@nestjs-ai/session \
+            --filter=@nestjs-ai/session-jsdbc \
             --filter=@nestjs-ai/template-st \
-            --filter=@nestjs-ai/vector-store
+            --filter=@nestjs-ai/vector-store \
+            --filter=@nestjs-ai/vector-store-pgvector \
+            --filter=@nestjs-ai/vector-store-redis
 
       - name: Run container-backed tests
         run: |
           pnpm exec turbo run test \
             --filter=@nestjs-ai/document-reader-tika \
             --filter=@nestjs-ai/integration-tests \
-            --filter=@nestjs-ai/model-chat-memory-repository-redis \
-            --filter=@nestjs-ai/model-chat-memory-repository-mongodb \
-            --filter=@nestjs-ai/vector-store-pgvector \
-            --filter=@nestjs-ai/vector-store-redis \
             --concurrency=1

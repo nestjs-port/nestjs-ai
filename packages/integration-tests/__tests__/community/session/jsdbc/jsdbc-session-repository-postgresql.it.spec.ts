@@ -26,6 +26,11 @@ import {
   UserMessage,
 } from "@nestjs-ai/model";
 import { EventFilter, Session, SessionEvent } from "@nestjs-ai/session";
+import {
+  JsdbcSessionRepository,
+  POSTGRESQL_SESSION_SCHEMA,
+  PostgresSessionRepositoryDialect,
+} from "@nestjs-ai/session-jsdbc";
 import { JsdbcTemplate, sql } from "@nestjs-port/jsdbc";
 import { TypeOrmDataSource } from "@nestjs-port/jsdbc/typeorm";
 import {
@@ -34,9 +39,6 @@ import {
 } from "@testcontainers/postgresql";
 import { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { JsdbcSessionRepository } from "../jsdbc-session-repository.js";
-import { PostgresSessionRepositoryDialect } from "../postgres-session-repository-dialect.js";
-import { POSTGRESQL_SESSION_SCHEMA } from "../resources/postgresql-session-repository-schema.js";
 
 /**
  * Tests for {@link JsdbcSessionRepository} backed by a PostgreSQL container.

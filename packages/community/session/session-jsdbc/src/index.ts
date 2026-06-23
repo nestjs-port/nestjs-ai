@@ -20,6 +20,7 @@ export {
 } from "./jsdbc-session-repository.js";
 export { JsdbcSessionRepositoryDialect } from "./jsdbc-session-repository-dialect.js";
 export { JsdbcSessionRepositoryDialectFactory } from "./jsdbc-session-repository-dialect-factory.js";
+export * from "./module/index.js";
 export { MysqlSessionRepositoryDialect } from "./mysql-session-repository-dialect.js";
 export { PostgresSessionRepositoryDialect } from "./postgres-session-repository-dialect.js";
 export * from "./resources/index.js";

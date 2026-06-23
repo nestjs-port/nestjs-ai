@@ -14,6 +14,11 @@ import {
 export interface SessionModuleOptions {
   /** The repository the session service is backed by. */
   sessionRepository: SessionRepository;
+  /**
+   * Default session lifetime in milliseconds, applied when a `CreateSessionRequest` does
+   * not set its own `timeToLive`. Defaults to 60 days.
+   */
+  defaultTimeToLiveMs?: number;
   global?: boolean;
 }
 
@@ -24,6 +29,11 @@ export interface SessionModuleAsyncOptions {
   useFactory: (
     ...args: never[]
   ) => Promise<SessionRepository> | SessionRepository;
+  /**
+   * Default session lifetime in milliseconds, applied when a `CreateSessionRequest` does
+   * not set its own `timeToLive`. Defaults to 60 days.
+   */
+  defaultTimeToLiveMs?: number;
   global?: boolean;
 }
 
@@ -41,6 +51,7 @@ export class SessionModule {
   static forRoot(options: SessionModuleOptions): DynamicModule {
     return SessionModule.forRootAsync({
       useFactory: () => options.sessionRepository,
+      defaultTimeToLiveMs: options.defaultTimeToLiveMs,
       global: options.global,
     });
   }
@@ -58,7 +69,10 @@ export class SessionModule {
         {
           provide: SESSION_SERVICE_TOKEN,
           useFactory: (sessionRepository: SessionRepository) =>
-            new DefaultSessionService(sessionRepository),
+            new DefaultSessionService(
+              sessionRepository,
+              options.defaultTimeToLiveMs,
+            ),
           inject: [SESSION_REPOSITORY_TOKEN],
         },
       ],

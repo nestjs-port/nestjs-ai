@@ -36,6 +36,7 @@ export interface SessionEventProps {
   message: Message;
   metadata?: Record<string, unknown>;
   branch?: string | null;
+  archived?: boolean;
 }
 
 /**
@@ -70,6 +71,7 @@ export class SessionEvent {
   private readonly _message: Message;
   private readonly _metadata: Record<string, unknown>;
   private readonly _branch: string | null;
+  private readonly _archived: boolean;
 
   constructor(props: SessionEventProps) {
     const id = props.id ?? randomUUID();
@@ -82,6 +84,7 @@ export class SessionEvent {
     this._message = props.message;
     this._metadata = { ...props.metadata };
     this._branch = props.branch ?? null;
+    this._archived = props.archived ?? false;
   }
 
   /** Unique identity per event. {@link Message} has none. */
@@ -129,6 +132,39 @@ export class SessionEvent {
    */
   isRootEvent(): boolean {
     return this._branch === null;
+  }
+
+  /**
+   * Returns `true` if this event has been archived by compaction. Archived events are
+   * removed from the active context window injected into the prompt, but are retained in
+   * the event log and remain searchable via the Recall Storage tools (see
+   * `SessionEventTools`). They implement the MemGPT recall pattern: the full verbatim
+   * history is preserved even after older events have been summarized out of the active
+   * window.
+   * @returns `true` if this event is archived, `false` otherwise
+   */
+  isArchived(): boolean {
+    return this._archived;
+  }
+
+  /**
+   * Returns a copy of this event marked as archived. Identity ({@link id} and
+   * {@link sessionId}) is preserved. Returns `this` when the event is already archived.
+   * @returns an archived copy of this event
+   */
+  asArchived(): SessionEvent {
+    if (this._archived) {
+      return this;
+    }
+    return new SessionEvent({
+      id: this._id,
+      sessionId: this._sessionId,
+      timestamp: this._timestamp,
+      message: this._message,
+      metadata: this._metadata,
+      branch: this._branch,
+      archived: true,
+    });
   }
 
   /**

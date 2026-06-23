@@ -54,38 +54,48 @@ export interface SessionRepository {
   appendEvent(event: SessionEvent): Promise<void>;
 
   /**
-   * Replaces the entire event log for the given session with the provided list. Used after
-   * compaction to atomically swap the event list.
-   * @throws if the session does not exist
-   */
-  replaceEvents(sessionId: string, events: SessionEvent[]): Promise<void>;
-
-  /**
-   * Compare-and-swap variant of {@link replaceEvents}: atomically replaces the event log
-   * only if the current event-log version equals `expectedVersion`. Returns `true` when the
-   * swap succeeded, `false` when another writer had already mutated the event log (a
-   * concurrent compaction or append) between the caller's read and this write.
+   * Atomically applies a compaction result to the session's event log using an optimistic
+   * compare-and-swap. The swap is performed only if the current event-log version equals
+   * `expectedVersion`; otherwise the call is a no-op and returns `false` (another writer
+   * mutated the log between the caller's read and this write).
+   *
+   * Archived events are _retained_ in the log (soft-deleted via
+   * {@link SessionEvent.isArchived}) so they remain searchable by the Recall Storage tools.
+   * On success the resulting active log is, in order:
+   * 1. all events that were already archived (preserved as-is),
+   * 2. the events in `archivedEvents`, now marked archived,
+   * 3. the events in `retainedEvents` (the new active window, typically a synthetic summary
+   *    turn followed by the most recent events), marked active.
+   *
+   * Any previously-active event that appears in neither list (e.g. a superseded synthetic
+   * summary) is removed.
    *
    * Callers should read {@link getEventVersion} _before_ reading events via
    * {@link findEvents}, then pass that version here. If this method returns `false` the
    * caller should treat the compaction as a no-op — the concurrent writer already handled
    * the session.
+   * @param sessionId the session whose log is being compacted
+   * @param archivedEvents events to mark archived (must already exist in the log)
+   * @param retainedEvents the new active event set, in chronological order
+   * @param expectedVersion the event-log version the caller observed
+   * @returns `true` when the swap succeeded, `false` on a version mismatch
    * @throws if the session does not exist
    */
-  replaceEvents(
+  compactEvents(
     sessionId: string,
-    events: SessionEvent[],
+    archivedEvents: SessionEvent[],
+    retainedEvents: SessionEvent[],
     expectedVersion: number,
   ): Promise<boolean>;
 
   /**
    * Returns the current event-log version for the given session. The version is incremented
-   * atomically on every {@link appendEvent} and {@link replaceEvents} call. Returns `0` when
+   * atomically on every {@link appendEvent} and {@link compactEvents} call. Returns `0` when
    * the session does not exist or has no events yet.
    *
    * Read this _before_ calling {@link findEvents} to obtain a version that is guaranteed to
    * be ≤ the version of the events you subsequently read, which is the safe ordering for
-   * passing to {@link replaceEvents}.
+   * passing to {@link compactEvents}.
    */
   getEventVersion(sessionId: string): Promise<number>;
 
@@ -95,7 +105,7 @@ export interface SessionRepository {
    * Events are always returned in chronological order (oldest first).
    *
    * **Existence contract:** returns an empty list when the session does not exist, rather
-   * than throwing. This differs from {@link appendEvent} and {@link replaceEvents}, which
+   * than throwing. This differs from {@link appendEvent} and {@link compactEvents}, which
    * throw for unknown sessions. The silent-empty behaviour allows callers to query event
    * history without first checking whether the session exists (the "read before write"
    * pattern used by `SessionMemoryAdvisor`).

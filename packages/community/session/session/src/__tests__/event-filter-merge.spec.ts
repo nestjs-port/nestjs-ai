@@ -110,6 +110,23 @@ describe("EventFilterMerge", () => {
     );
   });
 
+  // --- excludeArchived is OR-ed ---
+
+  it("exclude archived is true when either side is true", () => {
+    expect(EventFilter.all().merge(EventFilter.active()).excludeArchived).toBe(
+      true,
+    );
+    expect(EventFilter.active().merge(EventFilter.all()).excludeArchived).toBe(
+      true,
+    );
+  });
+
+  it("exclude archived is false when both are false", () => {
+    expect(EventFilter.all().merge(EventFilter.all()).excludeArchived).toBe(
+      false,
+    );
+  });
+
   // --- merging two EventFilter.all() produces all() ---
 
   it("merging two all filters produces all", () => {

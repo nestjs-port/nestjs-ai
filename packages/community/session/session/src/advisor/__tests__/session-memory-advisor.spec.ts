@@ -181,9 +181,13 @@ describe("SessionMemoryAdvisor", () => {
     }
 
     // Compaction runs synchronously after each turn, so by the time we get here
-    // the sliding window (maxEvents=2) has already been applied.
-    const events = await sessionService.getEvents(sessionId);
-    expect(events.length).toBeLessThanOrEqual(2);
+    // the sliding window (maxEvents=2) has already been applied to the active context.
+    // (The compacted events are archived, not deleted, so the full log is larger.)
+    const active = await sessionService.getEvents(
+      sessionId,
+      EventFilter.active(),
+    );
+    expect(active.length).toBeLessThanOrEqual(2);
   });
 
   it("before promotes all system messages to front", async () => {

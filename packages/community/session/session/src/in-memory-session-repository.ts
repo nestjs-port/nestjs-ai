@@ -100,34 +100,34 @@ export class InMemorySessionRepository implements SessionRepository {
     );
   }
 
-  replaceEvents(sessionId: string, events: SessionEvent[]): Promise<void>;
-  replaceEvents(
+  async compactEvents(
     sessionId: string,
-    events: SessionEvent[],
+    archivedEvents: SessionEvent[],
+    retainedEvents: SessionEvent[],
     expectedVersion: number,
-  ): Promise<boolean>;
-  async replaceEvents(
-    sessionId: string,
-    events: SessionEvent[],
-    expectedVersion?: number,
-  ): Promise<void | boolean> {
+  ): Promise<boolean> {
     assert(
       StringUtils.hasText(sessionId),
       "sessionId must not be null or empty",
     );
-    assert(events != null, "events must not be null");
+    assert(archivedEvents != null, "archivedEvents must not be null");
+    assert(retainedEvents != null, "retainedEvents must not be null");
     const existing = this._store.get(sessionId);
     if (existing == null) {
       throw new Error(`Session not found: ${sessionId}`);
     }
-    if (expectedVersion === undefined) {
-      this._store.set(sessionId, existing.withEvents([...events]));
-      return;
-    }
     if (existing.version !== expectedVersion) {
       return false;
     }
-    this._store.set(sessionId, existing.withEvents([...events]));
+    // Preserve previously-archived events (always the oldest prefix), then the
+    // newly-archived events (marked archived), then the new active window. Any other
+    // previously-active event (e.g. a superseded synthetic summary) is dropped.
+    const newEvents: SessionEvent[] = [
+      ...existing.events.filter((e) => e.isArchived()),
+      ...archivedEvents.map((e) => e.asArchived()),
+      ...retainedEvents,
+    ];
+    this._store.set(sessionId, existing.withEvents(newEvents));
     return true;
   }
 

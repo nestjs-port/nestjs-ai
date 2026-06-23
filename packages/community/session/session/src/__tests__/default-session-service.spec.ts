@@ -45,6 +45,49 @@ describe("DefaultSessionService", () => {
     expect(await service.getEvents(session.id)).toHaveLength(0);
   });
 
+  it("create applies default time to live when request has none", async () => {
+    // Default TTL is 60 days.
+    const sixtyDaysMs = 60 * 24 * 60 * 60 * 1000;
+    const before = Date.now();
+    const session = await service.create(
+      new CreateSessionRequest({ userId: "user-1" }),
+    );
+
+    const expiresAt = session.expiresAt?.getTime() ?? 0;
+    expect(expiresAt).toBeGreaterThanOrEqual(before + sixtyDaysMs - 5000);
+    expect(expiresAt).toBeLessThanOrEqual(Date.now() + sixtyDaysMs + 5000);
+  });
+
+  it("create honours configured default time to live", async () => {
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    const customService = new DefaultSessionService(
+      new InMemorySessionRepository(),
+      twoHoursMs,
+    );
+
+    const before = Date.now();
+    const session = await customService.create(
+      new CreateSessionRequest({ userId: "user-1" }),
+    );
+
+    const expiresAt = session.expiresAt?.getTime() ?? 0;
+    expect(expiresAt).toBeGreaterThanOrEqual(before + twoHoursMs - 5000);
+    expect(expiresAt).toBeLessThanOrEqual(Date.now() + twoHoursMs + 5000);
+  });
+
+  it("create prefers request time to live over default", async () => {
+    const before = Date.now();
+    const session = await service.create(
+      new CreateSessionRequest({
+        userId: "user-1",
+        timeToLive: ms(30 * 60 * 1000),
+      }),
+    );
+
+    const expiresAt = session.expiresAt?.getTime() ?? 0;
+    expect(expiresAt).toBeLessThan(before + 60 * 60 * 1000);
+  });
+
   it("append message then get messages returns that message", async () => {
     const session = await service.create(
       new CreateSessionRequest({ userId: "user-1" }),
@@ -110,10 +153,57 @@ describe("DefaultSessionService", () => {
     expect(result.eventsRemoved()).toBe(3);
     expect(result.compactedEvents).toHaveLength(2);
 
-    const messages = await service.getMessages(session.id);
-    expect(messages).toHaveLength(2);
-    expect(messages[0].text).toBe("msg-4");
-    expect(messages[1].text).toBe("msg-5");
+    // Active window keeps only the last two events
+    const active = await service.getEvents(session.id, EventFilter.active());
+    expect(active.map((e) => e.message.text)).toEqual(["msg-4", "msg-5"]);
+
+    // The three compacted events are archived, not deleted — still available for Recall
+    // Storage search via the full (unfiltered) view.
+    const all = await service.getEvents(session.id);
+    expect(all.map((e) => e.message.text)).toEqual([
+      "msg-1",
+      "msg-2",
+      "msg-3",
+      "msg-4",
+      "msg-5",
+    ]);
+    expect(
+      all.filter((e) => e.isArchived()).map((e) => e.message.text),
+    ).toEqual(["msg-1", "msg-2", "msg-3"]);
+  });
+
+  it("compacted events remain searchable via recall storage", async () => {
+    // Regression for issue #21: compaction must archive (not delete) events so the
+    // Recall Storage keyword search can still surface them after the active context
+    // window has moved on.
+    const session = await service.create(
+      new CreateSessionRequest({ userId: "user-1" }),
+    );
+    await service.appendMessage(
+      session.id,
+      UserMessage.of("the secret code is alpha-7"),
+    );
+    for (let i = 1; i <= 5; i++) {
+      await service.appendMessage(session.id, UserMessage.of(`filler-${i}`));
+    }
+
+    await service.compact(
+      session.id,
+      { shouldCompact: () => true },
+      new SlidingWindowCompactionStrategy({ maxEvents: 2 }),
+    );
+
+    // The first message is archived out of the active window...
+    const active = await service.getEvents(session.id, EventFilter.active());
+    expect(active.some((e) => e.message.text?.includes("alpha-7"))).toBe(false);
+    // ...but a keyword search (the Recall Storage filter) still finds it.
+    const recalled = await service.getEvents(
+      session.id,
+      EventFilter.keywordSearch("alpha-7"),
+    );
+    expect(recalled).toHaveLength(1);
+    expect(recalled[0].message.text).toBe("the secret code is alpha-7");
+    expect(recalled[0].isArchived()).toBe(true);
   });
 
   it("compact no op when trigger does not fire", async () => {
@@ -172,10 +262,8 @@ describe("DefaultSessionService", () => {
     expect(result.eventsRemoved()).toBe(3);
     expect(result.compactedEvents).toHaveLength(2);
 
-    const messages = await service.getMessages(session.id);
-    expect(messages).toHaveLength(2);
-    expect(messages[0].text).toBe("msg-4");
-    expect(messages[1].text).toBe("msg-5");
+    const active = await service.getEvents(session.id, EventFilter.active());
+    expect(active.map((e) => e.message.text)).toEqual(["msg-4", "msg-5"]);
   });
 
   it("get events with filter applies filter", async () => {
@@ -203,7 +291,7 @@ describe("DefaultSessionService", () => {
     }
 
     // Two threads race to compact the same session to a window of 2.
-    // The CAS in replaceEvents guarantees that only the first writer lands;
+    // The CAS in compactEvents guarantees that only the first writer lands;
     // the second detects a version mismatch and skips silently.
     const results = await Promise.all([
       service.compact(
@@ -223,11 +311,9 @@ describe("DefaultSessionService", () => {
       results[0].eventsRemoved() + results[1].eventsRemoved();
     expect(totalRemoved).toBe(3);
 
-    // The surviving event list must be exactly the last 2 messages.
-    const messages = await service.getMessages(session.id);
-    expect(messages).toHaveLength(2);
-    expect(messages[0].text).toBe("msg-4");
-    expect(messages[1].text).toBe("msg-5");
+    // The surviving active window must be exactly the last 2 messages.
+    const active = await service.getEvents(session.id, EventFilter.active());
+    expect(active.map((e) => e.message.text)).toEqual(["msg-4", "msg-5"]);
   });
 
   // --- deleteExpiredSessions ---

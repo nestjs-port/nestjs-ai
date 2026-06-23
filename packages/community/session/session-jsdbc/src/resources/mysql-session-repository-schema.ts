@@ -41,6 +41,7 @@ CREATE INDEX idx_ai_session_expires_at
   // language=SQL
   sql`
 CREATE TABLE IF NOT EXISTS AI_SESSION_EVENT (
+    seq             BIGINT        NOT NULL AUTO_INCREMENT,
     id              VARCHAR(255)  NOT NULL PRIMARY KEY,
     session_id      VARCHAR(255)  NOT NULL,
     timestamp       DATETIME(6)   NOT NULL,
@@ -48,15 +49,17 @@ CREATE TABLE IF NOT EXISTS AI_SESSION_EVENT (
     message_content LONGTEXT,
     message_data    LONGTEXT,
     synthetic       TINYINT(1)    NOT NULL DEFAULT 0,
+    archived        TINYINT(1)    NOT NULL DEFAULT 0,
     branch          VARCHAR(500),
     metadata        LONGTEXT,
+    UNIQUE KEY uq_ai_session_event_seq (seq),
     CONSTRAINT fk_ai_session_event_session
         FOREIGN KEY (session_id) REFERENCES AI_SESSION (id) ON DELETE CASCADE
 );
 `,
   // language=SQL
   sql`
-CREATE INDEX idx_ai_session_event_session_ts
-    ON AI_SESSION_EVENT (session_id, timestamp);
+CREATE INDEX idx_ai_session_event_session_seq
+    ON AI_SESSION_EVENT (session_id, seq);
 `,
 ];

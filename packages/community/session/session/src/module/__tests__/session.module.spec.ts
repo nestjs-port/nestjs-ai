@@ -79,4 +79,26 @@ describe("SessionModule", () => {
       sharedRepository,
     );
   });
+
+  it("forRoot applies the configured defaultTimeToLiveMs to created sessions", async () => {
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        SessionModule.forRoot({
+          sessionRepository: new InMemorySessionRepository(),
+          defaultTimeToLiveMs: twoHoursMs,
+        }),
+      ],
+    }).compile();
+
+    const service = moduleRef.get<SessionService>(SESSION_SERVICE_TOKEN);
+    const before = Date.now();
+    const session = await service.create(
+      new CreateSessionRequest({ userId: "user-ttl" }),
+    );
+
+    const expiresAt = session.expiresAt?.getTime() ?? 0;
+    expect(expiresAt).toBeGreaterThanOrEqual(before + twoHoursMs - 5000);
+    expect(expiresAt).toBeLessThanOrEqual(Date.now() + twoHoursMs + 5000);
+  });
 });

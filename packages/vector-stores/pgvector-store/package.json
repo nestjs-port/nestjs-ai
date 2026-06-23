@@ -45,7 +45,7 @@
     "@nestjs-ai/model": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-port/core": "^0.1.1",
-    "@nestjs-port/jsdbc": "^0.1.0",
+    "@nestjs-port/jsdbc": "^0.1.1",
     "@nestjs/common": "^11.1.11",
     "pgvector": "^0.2.1"
   },
@@ -54,7 +54,7 @@
     "@nestjs-ai/model": "^0.1.5",
     "@nestjs-ai/vector-store": "^0.1.4",
     "@nestjs-port/core": "^0.1.0",
-    "@nestjs-port/jsdbc": "^0.1.0",
+    "@nestjs-port/jsdbc": "^0.1.1",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "pgvector": "^0.2.0"
   }

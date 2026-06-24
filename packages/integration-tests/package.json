@@ -40,6 +40,7 @@
     "@nestjs-ai/session-jsdbc": "workspace:*",
     "@nestjs-ai/vector-store": "workspace:*",
     "@nestjs-ai/vector-store-elasticsearch": "workspace:*",
+    "@nestjs-ai/vector-store-mariadb": "workspace:*",
     "@nestjs-ai/vector-store-pgvector": "workspace:*",
     "@nestjs-ai/vector-store-redis": "workspace:*",
     "@nestjs-port/core": "^0.1.1",

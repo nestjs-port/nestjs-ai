@@ -18,41 +18,42 @@ import "reflect-metadata";
 
 import {
   JsdbcSessionRepository,
-  POSTGRESQL_SESSION_SCHEMA,
-  PostgresSessionRepositoryDialect,
+  MYSQL_SESSION_SCHEMA,
+  MysqlSessionRepositoryDialect,
 } from "@nestjs-ai/session-jsdbc";
 import { JsdbcTemplate } from "@nestjs-port/jsdbc";
 import { TypeOrmDataSource } from "@nestjs-port/jsdbc/typeorm";
 import {
-  PostgreSqlContainer,
-  type StartedPostgreSqlContainer,
-} from "@testcontainers/postgresql";
+  MySqlContainer,
+  type StartedMySqlContainer,
+} from "@testcontainers/mysql";
 import { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 import { AbstractJsdbcSessionRepositoryIT } from "./abstract-jsdbc-session-repository.it-shared.js";
 
 /** A custom dialect subclass used to verify branch-filter SQL is sourced from the dialect. */
-class CustomPostgresDialect extends PostgresSessionRepositoryDialect {
+class CustomMysqlDialect extends MysqlSessionRepositoryDialect {
   override getBranchFilterFragment(branch: string) {
-    return super.getBranchFilterFragment(branch); // delegates to default || impl
+    return super.getBranchFilterFragment(branch); // delegates to the CONCAT() impl
   }
 }
 
-describe("JsdbcSessionRepositoryPostgresqlIT", () => {
-  let postgresContainer: StartedPostgreSqlContainer;
+describe("JsdbcSessionRepositoryMysqlIT", () => {
+  let mysqlContainer: StartedMySqlContainer;
   let typeormDataSource: DataSource;
   let integration: AbstractJsdbcSessionRepositoryIT;
 
   beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer("postgres:17-alpine")
+    mysqlContainer = await new MySqlContainer("mysql:8.0.42")
       .withDatabase("session_integration")
       .withUsername("jsdbc")
-      .withPassword("jsdbc")
+      .withUserPassword("jsdbc")
+      .withRootPassword("jsdbc")
       .start();
 
     typeormDataSource = new DataSource({
-      type: "postgres",
-      url: postgresContainer.getConnectionUri(),
+      type: "mysql",
+      url: mysqlContainer.getConnectionUri(),
       synchronize: false,
       logging: false,
     });
@@ -60,7 +61,7 @@ describe("JsdbcSessionRepositoryPostgresqlIT", () => {
 
     const jsdbcDataSource = new TypeOrmDataSource(typeormDataSource);
     const jsdbcTemplate = new JsdbcTemplate(jsdbcDataSource);
-    for (const fragment of POSTGRESQL_SESSION_SCHEMA) {
+    for (const fragment of MYSQL_SESSION_SCHEMA) {
       await jsdbcTemplate.update(fragment);
     }
 
@@ -69,7 +70,7 @@ describe("JsdbcSessionRepositoryPostgresqlIT", () => {
       .build();
     const customDialectRepository = await JsdbcSessionRepository.builder()
       .dataSource(jsdbcDataSource)
-      .dialect(new CustomPostgresDialect())
+      .dialect(new CustomMysqlDialect())
       .build();
 
     integration = new AbstractJsdbcSessionRepositoryIT(
@@ -81,7 +82,7 @@ describe("JsdbcSessionRepositoryPostgresqlIT", () => {
 
   afterAll(async () => {
     await typeormDataSource?.destroy();
-    await postgresContainer?.stop();
+    await mysqlContainer?.stop();
   }, 60_000);
 
   beforeEach(async () => {

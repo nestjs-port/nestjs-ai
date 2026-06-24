@@ -171,7 +171,13 @@ Please adjust these commands based on your specific configuration and the capabi
       );
     }
 
-    if (alwaysQuote) {
+    if (normalizedIdentifier.length > 64) {
+      throw new Error(
+        `Identifier '${identifier}' should only contain alphanumeric characters and underscores`,
+      );
+    }
+
+    if (alwaysQuote || normalizedIdentifier.length === 64) {
       return `\`${normalizedIdentifier.replace(/`/g, "``")}\``;
     }
 

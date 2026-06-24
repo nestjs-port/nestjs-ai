@@ -292,6 +292,9 @@ importers:
       '@nestjs-ai/vector-store-elasticsearch':
         specifier: workspace:*
         version: link:../vector-stores/elasticsearch-store
+      '@nestjs-ai/vector-store-mariadb':
+        specifier: workspace:*
+        version: link:../vector-stores/mariadb-store
       '@nestjs-ai/vector-store-pgvector':
         specifier: workspace:*
         version: link:../vector-stores/pgvector-store

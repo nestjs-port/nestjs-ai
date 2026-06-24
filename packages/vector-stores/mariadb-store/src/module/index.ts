@@ -1,8 +1,9 @@
 /*
- * Copyright 2023-present the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may obtain a copy of the License at
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      https://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,11 +14,9 @@
  * limitations under the License.
  */
 
-export { MariaDBFilterExpressionConverter } from "./maria-db-filter-expression-converter.js";
-export { MariaDBSchemaValidator } from "./maria-db-schema-validator.js";
-export * from "./module/index.js";
 export {
-  MariaDBDistanceType,
-  MariaDBVectorStore,
-  MariaDBVectorStoreBuilder,
-} from "./maria-db-vector-store.js";
+  MARIADB_VECTOR_STORE_PROPERTIES_TOKEN,
+  MariaDBVectorStoreModule,
+  type MariaDBVectorStoreModuleAsyncOptions,
+} from "./maria-db-vector-store.module.js";
+export type { MariaDBVectorStoreProperties } from "./maria-db-vector-store-properties.js";

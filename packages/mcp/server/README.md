@@ -70,6 +70,7 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 | **RAG & Vector Stores** | spring-ai-rag                         | `@nestjs-ai/rag`                                  | 100%     |
 |                         | spring-ai-vector-store                | `@nestjs-ai/vector-store`                         | 100%     |
 |                         | spring-ai-redis-store                 | `@nestjs-ai/vector-store-redis`                   | 100%     |
+|                         | spring-ai-mariadb-store               | `@nestjs-ai/vector-store-mariadb`                 | 100%     |
 |                         | spring-ai-advisors-vector-store       | `@nestjs-ai/advisors-vector-store`                | 100%     |
 |                         | spring-ai-pgvector-store              | `@nestjs-ai/vector-store-pgvector`                | 100%     |
 |                         | spring-ai-elasticsearch-store         | `@nestjs-ai/vector-store-elasticsearch`           | 100%     |
@@ -241,7 +242,10 @@ nestjs-ai/
 │   │   ├── server/               # MCP server support
 │   │   └── annotations/          # MCP annotations and decorators
 │   ├── vector-stores/
-│   │   └── redis-store/          # Redis vector store
+│   │   ├── redis-store/          # Redis vector store
+│   │   ├── pgvector-store/       # PostgreSQL pgvector store
+│   │   ├── elasticsearch-store/  # Elasticsearch vector store
+│   │   └── mariadb-store/        # MariaDB vector store
 │   ├── memory/
 │   │   └── repository/
 │   │       ├── model-chat-memory-repository-redis/   # Redis-backed chat memory

@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/session-jsdbc",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": false,
   "description": "JSDBC-backed SessionRepository implementation for NestJS AI Session",
   "keywords": [

@@ -23,7 +23,7 @@ import { MariaDBFilterExpressionConverter } from "../maria-db-filter-expression-
 describe("MariaDBFilterExpressionConverterTests", () => {
   const converter = new MariaDBFilterExpressionConverter("metadata");
 
-  it("testEQ", () => {
+  it("test eq", () => {
     // country == "BG"
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -35,7 +35,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toBe("JSON_VALUE(`metadata`, '$.\"country\"') = 'BG'");
   });
 
-  it("tesEqAndGte", () => {
+  it("test eq and gte", () => {
     // genre == "drama" AND year >= 2020
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -57,7 +57,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("tesIn", () => {
+  it("test in", () => {
     // genre in ["comedy", "documentary", "drama"]
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -71,7 +71,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testNe", () => {
+  it("test ne", () => {
     // year >= 2020 OR country == "BG" AND city != "Sofia"
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -101,7 +101,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testGroup", () => {
+  it("test group", () => {
     // (year >= 2020 OR country == "BG") AND city NIN ["Sofia", "Plovdiv"]
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -133,7 +133,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testBoolean", () => {
+  it("test boolean", () => {
     // isOpen == true AND year >= 2020 AND country IN ["BG", "NL", "US"]
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -163,7 +163,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testDecimal", () => {
+  it("test decimal", () => {
     // temperature >= -15.6 && temperature <= +20.13
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -185,7 +185,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testComplexIdentifiers", () => {
+  it("test complex identifiers", () => {
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
@@ -198,7 +198,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testEmptyList", () => {
+  it("test empty list", () => {
     // category IN []
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -210,7 +210,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toBe("JSON_VALUE(`metadata`, '$.\"category\"') IN ()");
   });
 
-  it("testSingleItemList", () => {
+  it("test single item list", () => {
     // status IN ["active"]
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -224,7 +224,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testNullValue", () => {
+  it("test null value", () => {
     // description == null
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -238,7 +238,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testNestedJsonPath", () => {
+  it("test nested json path", () => {
     // entity.profile.name == "EntityA"
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -252,7 +252,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testNumericStringValue", () => {
+  it("test numeric string value", () => {
     // id == "1"
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -264,7 +264,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toBe("JSON_VALUE(`metadata`, '$.\"id\"') = '1'");
   });
 
-  it("testZeroValue", () => {
+  it("test zero value", () => {
     // count == 0
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -276,7 +276,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toBe("JSON_VALUE(`metadata`, '$.\"count\"') = 0");
   });
 
-  it("testComplexNestedGroups", () => {
+  it("test complex nested groups", () => {
     // ((fieldA >= 100 AND fieldB == "X1") OR (fieldA >= 50 AND fieldB == "Y2")) AND
     // fieldC != "inactive"
     const vectorExpr = converter.convertExpression(
@@ -329,7 +329,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testMixedDataTypes", () => {
+  it("test mixed data types", () => {
     // active == true AND score >= 1.5 AND tags IN ["featured", "premium"] AND
     // version == 1
     const vectorExpr = converter.convertExpression(
@@ -368,7 +368,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testNinWithMixedTypes", () => {
+  it("test nin with mixed types", () => {
     // status NIN ["A", "B", "C"]
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -382,7 +382,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testEmptyStringValue", () => {
+  it("test empty string value", () => {
     // description != ""
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -396,7 +396,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testArrayIndexAccess", () => {
+  it("test array index access", () => {
     // tags[0] == "important"
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -412,7 +412,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
 
   // Security Tests - SQL Injection Prevention
 
-  it("testSqlInjectionWithSingleQuoteEscape", () => {
+  it("test sql injection with single quote escape", () => {
     // Attempt to inject: department == '' OR '1'='1'
     // Malicious value: ' OR '1'='1
     const maliciousValue = "' OR '1'='1";
@@ -432,7 +432,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toBe(expected);
   });
 
-  it("testSqlInjectionWithBackslashEscape", () => {
+  it("test sql injection with backslash escape", () => {
     // Attempt to inject using backslash escape: value\'
     const maliciousValue = "value\\'";
     const vectorExpr = converter.convertExpression(
@@ -450,7 +450,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testSqlInjectionWithDoubleQuote", () => {
+  it("test sql injection with double quote", () => {
     // Attempt to inject using double quotes: value" OR field="admin
     const maliciousValue = 'value" OR field="admin';
     const vectorExpr = converter.convertExpression(
@@ -468,7 +468,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testSqlInjectionWithControlCharacters", () => {
+  it("test sql injection with control characters", () => {
     // Attempt to inject using newline: value\n OR field='admin'
     const maliciousValue = "value\n OR field='admin'";
     const vectorExpr = converter.convertExpression(
@@ -489,7 +489,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).not.toContain("'\n");
   });
 
-  it("testSqlInjectionWithMultipleEscapes", () => {
+  it("test sql injection with multiple escapes", () => {
     // Complex injection with multiple special characters
     const maliciousValue = "test'\"\\'\n\r\t";
     const vectorExpr = converter.convertExpression(
@@ -508,7 +508,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testSqlInjectionInListValues", () => {
+  it("test sql injection in list values", () => {
     // Attempt injection through IN clause
     const maliciousValue1 = "HR' OR department='Finance";
     const maliciousValue2 = "Engineering";
@@ -525,7 +525,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain("Engineering");
   });
 
-  it("testSqlInjectionInComplexExpression", () => {
+  it("test sql injection in complex expression", () => {
     // Attempt injection in a complex AND/OR expression
     const maliciousValue = "' OR role='admin' OR dept='";
     const vectorExpr = converter.convertExpression(
@@ -551,7 +551,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain(" AND ");
   });
 
-  it("testNormalStringsNotAffected", () => {
+  it("test normal strings not affected", () => {
     // Verify normal strings work correctly after escaping fix
     const normalValue = "HR Department";
     const vectorExpr = converter.convertExpression(
@@ -567,7 +567,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testUnicodeControlCharacters", () => {
+  it("test unicode control characters", () => {
     // Test Unicode control characters are escaped
     const valueWithControlChar = "test\u0000value"; // null character
     const vectorExpr = converter.convertExpression(
@@ -582,7 +582,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain("\\u0000");
   });
 
-  it("testDateValue", () => {
+  it("test date value", () => {
     // Test that Date objects are properly formatted as ISO 8601 strings
     const testDate = new Date("2024-01-15T10:30:00Z");
     const vectorExpr = converter.convertExpression(
@@ -600,7 +600,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testDateStringValue", () => {
+  it("test date string value", () => {
     // Test that ISO date strings are normalized to Date objects and formatted
     // correctly
     const vectorExpr = converter.convertExpression(
@@ -618,7 +618,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testDateWithMilliseconds", () => {
+  it("test date with milliseconds", () => {
     // Test that ISO date strings with milliseconds are handled correctly
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -633,7 +633,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain("2024-01-15T10:30:00");
   });
 
-  it("testDateInINClause", () => {
+  it("test date in in clause", () => {
     // Test that Date objects in IN clauses are properly formatted
     const date1 = new Date("2024-01-15T10:30:00Z");
     const date2 = new Date("2024-02-20T14:45:00Z");
@@ -652,7 +652,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain("IN (");
   });
 
-  it("testDateStringInINClause", () => {
+  it("test date string in in clause", () => {
     // Test that ISO date strings in IN clauses are normalized and formatted
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
@@ -668,7 +668,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain("'2024-02-20T14:45:00.000Z'");
   });
 
-  it("testDateComparison", () => {
+  it("test date comparison", () => {
     // Test date comparison with GTE operator
     const testDate = new Date("2024-01-01T00:00:00Z");
     const vectorExpr = converter.convertExpression(
@@ -684,7 +684,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testDateInComplexExpression", () => {
+  it("test date in complex expression", () => {
     // Test date in complex AND expression
     const startDate = new Date("2024-01-01T00:00:00Z");
     const vectorExpr = converter.convertExpression(
@@ -712,7 +712,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).toContain(" AND ");
   });
 
-  it("testKeyWithSingleQuote", () => {
+  it("test key with single quote", () => {
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
@@ -726,7 +726,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     expect(vectorExpr).not.toContain("'$.\"x\"' OR");
   });
 
-  it("testQuotedIdentifierFromTextParser", () => {
+  it("test quoted identifier from text parser", () => {
     const expr = new FilterExpressionTextParser().parse(
       "'safe_key' == 'value'",
     );
@@ -736,7 +736,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testKeyWithApostrophe", () => {
+  it("test key with apostrophe", () => {
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
@@ -749,7 +749,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testKeyWithBackslash", () => {
+  it("test key with backslash", () => {
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,
@@ -762,7 +762,7 @@ describe("MariaDBFilterExpressionConverterTests", () => {
     );
   });
 
-  it("testKeyWithBackslashAndSingleQuote", () => {
+  it("test key with backslash and single quote", () => {
     const vectorExpr = converter.convertExpression(
       new Filter.Expression(
         Filter.ExpressionType.EQ,

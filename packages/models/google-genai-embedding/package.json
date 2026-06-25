@@ -1,0 +1,60 @@
+{
+  "name": "@nestjs-ai/model-google-genai-embedding",
+  "version": "0.0.1",
+  "private": false,
+  "description": "Google GenAI embedding model integration for NestJS AI",
+  "keywords": [
+    "ai",
+    "embedding",
+    "google",
+    "model",
+    "nestjs"
+  ],
+  "homepage": "https://nestjs-port.github.io/nestjs-ai",
+  "bugs": {
+    "url": "https://github.com/nestjs-port/nestjs-ai/issues"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs-port/nestjs-ai",
+    "directory": "packages/models/google-genai-embedding"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@google/genai": "^1.49.0",
+    "@nestjs-ai/commons": "workspace:*",
+    "@nestjs-ai/model": "workspace:*",
+    "@nestjs-ai/retry": "workspace:*",
+    "@nestjs-port/core": "^0.1.1",
+    "@nestjs/common": "^11.1.11"
+  },
+  "peerDependencies": {
+    "@google/genai": "^1.49.0",
+    "@nestjs-ai/commons": "^0.1.2",
+    "@nestjs-ai/model": "^0.1.5",
+    "@nestjs-ai/retry": "^0.1.2",
+    "@nestjs-port/core": "^0.1.0",
+    "@nestjs/common": "^10.0.0 || ^11.0.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

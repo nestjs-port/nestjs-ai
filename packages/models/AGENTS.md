@@ -3,12 +3,12 @@
 ## Package Identity
 
 - Provider implementations for external model vendors.
-- Current providers: OpenAI and Google GenAI.
+- Current providers: OpenAI, Google GenAI chat, and Google GenAI embeddings.
 
 ## Setup & Run
 
-- Build providers: `pnpm --filter @nestjs-ai/model-openai build && pnpm --filter @nestjs-ai/model-google-genai build`
-- Typecheck providers: `pnpm --filter @nestjs-ai/model-openai typecheck && pnpm --filter @nestjs-ai/model-google-genai typecheck`
+- Build providers: `pnpm --filter @nestjs-ai/model-openai build && pnpm --filter @nestjs-ai/model-google-genai build && pnpm --filter @nestjs-ai/model-google-genai-embedding build`
+- Typecheck providers: `pnpm --filter @nestjs-ai/model-openai typecheck && pnpm --filter @nestjs-ai/model-google-genai typecheck && pnpm --filter @nestjs-ai/model-google-genai-embedding typecheck`
 - Test OpenAI package scope: `pnpm test packages/models/openai/src`
 - Test Google GenAI package scope: `pnpm test packages/models/google-genai/src`
 

@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-ai/vector-store-mariadb",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": false,
   "description": "MariaDB vector store for NestJS AI",
   "keywords": [

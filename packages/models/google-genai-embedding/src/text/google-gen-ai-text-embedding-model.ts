@@ -58,7 +58,7 @@ export class GoogleGenAiTextEmbeddingModel extends AbstractEmbeddingModel {
   private static readonly DEFAULT_OBSERVATION_CONVENTION =
     new DefaultEmbeddingModelObservationConvention();
 
-  private static readonly KNOWN_EMBEDDING_DIMENSIONS = new Map<string, number>(
+  static readonly #KNOWN_EMBEDDING_DIMENSIONS = new Map<string, number>(
     GoogleGenAiTextEmbeddingModelName.values().map(
       (modelName): [string, number] => [modelName.name, modelName.dimensions],
     ),
@@ -239,13 +239,13 @@ export class GoogleGenAiTextEmbeddingModel extends AbstractEmbeddingModel {
     assert(model != null, "model must not be null");
 
     const knownDimension =
-      GoogleGenAiTextEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.get(model);
+      GoogleGenAiTextEmbeddingModel.#KNOWN_EMBEDDING_DIMENSIONS.get(model);
     if (knownDimension != null) {
       return knownDimension;
     }
 
     const computedDimension = await super.dimensions();
-    GoogleGenAiTextEmbeddingModel.KNOWN_EMBEDDING_DIMENSIONS.set(
+    GoogleGenAiTextEmbeddingModel.#KNOWN_EMBEDDING_DIMENSIONS.set(
       model,
       computedDimension,
     );

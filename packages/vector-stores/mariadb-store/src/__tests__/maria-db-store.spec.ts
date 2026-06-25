@@ -37,17 +37,23 @@ describe("MariaDBStoreTests", () => {
       false,
       "`1234567890123456789012345678901234567890123456789012345678901234`",
     ],
-  ])("%s - enquote identifier validation", (tableName, alwaysQuote, expected) => {
-    expect(
-      MariaDBSchemaValidator.validateAndEnquoteIdentifier(
-        tableName,
-        alwaysQuote,
-      ),
-    ).toBe(expected);
-  });
+  ])(
+    "%s - enquote identifier validation",
+    (tableName, alwaysQuote, expected) => {
+      expect(
+        MariaDBSchemaValidator.validateAndEnquoteIdentifier(
+          tableName,
+          alwaysQuote,
+        ),
+      ).toBe(expected);
+    },
+  );
 
   it.each([
-    ["12345678901234567890123456789012345678901234567890123456789012345", false],
+    [
+      "12345678901234567890123456789012345678901234567890123456789012345",
+      false,
+    ],
     ["12345678901234567890123456789012345678901234567890123456789012345", true],
     ["customvectorstore;drop table users;", false],
     ["some\u0000notpossibleValue", true],

@@ -93,7 +93,7 @@ describe.skipIf(!OPENAI_API_KEY)(
       observationRegistry = TestObservationRegistry.create();
 
       vectorStore = ElasticsearchVectorStore.builder(client, embeddingModel)
-        .observationRegistry(observationRegistry as never)
+        .observationRegistry(observationRegistry)
         .customObservationConvention(null)
         .initializeSchema(true)
         .build();

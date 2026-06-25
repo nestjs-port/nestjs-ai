@@ -77,7 +77,7 @@ describe("RedisVectorStoreObservationIT", () => {
     observationRegistry = TestObservationRegistry.create();
 
     vectorStore = RedisVectorStore.builder(client, embeddingModel)
-      .observationRegistry(observationRegistry as never)
+      .observationRegistry(observationRegistry)
       .customObservationConvention(null)
       .initializeSchema(true)
       .metadataFields(

@@ -18,10 +18,14 @@ import { readFileSync } from "node:fs";
 
 import { Module } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { Document, EMBEDDING_MODEL_TOKEN, VECTOR_STORE_TOKEN } from "@nestjs-ai/commons";
 import {
-  MariaDBVectorStore,
+  Document,
+  EMBEDDING_MODEL_TOKEN,
+  VECTOR_STORE_TOKEN,
+} from "@nestjs-ai/commons";
+import {
   MariaDBVectorStoreModule,
+  type MariaDBVectorStore,
   type MariaDBVectorStoreProperties,
 } from "@nestjs-ai/vector-store-mariadb";
 import { SearchRequest } from "@nestjs-ai/vector-store";
@@ -71,10 +75,10 @@ describe("MariaDBVectorStoreModuleIT", () => {
 
   beforeAll(async () => {
     mariaDbContainer = await new MariaDbContainer("mariadb:11.7-rc")
-      .withDatabase("postgres")
-      .withUsername("postgres")
-      .withUserPassword("postgres")
-      .withRootPassword("postgres")
+      .withDatabase("mariadb")
+      .withUsername("mariadb")
+      .withUserPassword("mariadbpwd")
+      .withRootPassword("mariadbpwd")
       .start();
 
     typeormDataSource = new DataSource({
@@ -105,14 +109,17 @@ describe("MariaDBVectorStoreModuleIT", () => {
     try {
       await vectorStore.onModuleInit();
 
-      expect(
-        await isTableExists(DEFAULT_SCHEMA_NAME, DEFAULT_TABLE_NAME),
-      ).toBe(true);
+      expect(await isTableExists(DEFAULT_SCHEMA_NAME, DEFAULT_TABLE_NAME)).toBe(
+        true,
+      );
 
       await vectorStore.add(documents);
 
       const results = await vectorStore.similaritySearch(
-        SearchRequest.builder().query("What is Great Depression?").topK(1).build(),
+        SearchRequest.builder()
+          .query("What is Great Depression?")
+          .topK(1)
+          .build(),
       );
 
       expect(results).toHaveLength(1);
@@ -137,8 +144,14 @@ describe("MariaDBVectorStoreModuleIT", () => {
     ["test:vector_store:id:metadata:embedding:content"],
     ["test:my_table:my_id:my_metadata:my_embedding:my_content"],
   ])("creates custom schema and table for %s", async (schemaTableName) => {
-    const [schemaName, tableName, idName, metaName, embeddingName, contentName] =
-      schemaTableName.split(":");
+    const [
+      schemaName,
+      tableName,
+      idName,
+      metaName,
+      embeddingName,
+      contentName,
+    ] = schemaTableName.split(":");
     const { moduleRef, vectorStore } = await createVectorStore({
       schemaName,
       tableName,
@@ -157,12 +170,7 @@ describe("MariaDBVectorStoreModuleIT", () => {
       expect(await isSchemaExists(schemaName)).toBe(true);
       expect(await isTableExists(schemaName, tableName)).toBe(true);
       expect(await getColumnNames(schemaName, tableName)).toEqual(
-        expect.arrayContaining([
-          idName,
-          contentName,
-          metaName,
-          embeddingName,
-        ]),
+        expect.arrayContaining([idName, contentName, metaName, embeddingName]),
       );
     } finally {
       await moduleRef.close();
@@ -287,5 +295,4 @@ describe("MariaDBVectorStoreModuleIT", () => {
 
     return rows.map((row) => String(row.column_name));
   }
-
 });

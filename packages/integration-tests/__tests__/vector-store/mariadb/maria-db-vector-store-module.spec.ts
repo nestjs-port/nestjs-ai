@@ -34,9 +34,12 @@ describe("MariaDBVectorStoreModule", () => {
     it("should resolve VECTOR_STORE_TOKEN via NestJS DI with embedding model", async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          MariaDBVectorStoreModule.forFeature({}, {
-            imports: [createDependencyModule()],
-          }),
+          MariaDBVectorStoreModule.forFeature(
+            {},
+            {
+              imports: [createDependencyModule()],
+            },
+          ),
         ],
       }).compile();
 
@@ -50,9 +53,12 @@ describe("MariaDBVectorStoreModule", () => {
 
     it("should not export properties token", async () => {
       const dependencyModule = createDependencyModule();
-      const featureModule = MariaDBVectorStoreModule.forFeature({}, {
-        imports: [dependencyModule],
-      });
+      const featureModule = MariaDBVectorStoreModule.forFeature(
+        {},
+        {
+          imports: [dependencyModule],
+        },
+      );
 
       const moduleRef = await Test.createTestingModule({
         imports: [featureModule],
@@ -72,9 +78,12 @@ describe("MariaDBVectorStoreModule", () => {
 
     it("should default global to false", async () => {
       const dependencyModule = createDependencyModule();
-      const featureModule = MariaDBVectorStoreModule.forFeature({}, {
-        imports: [dependencyModule],
-      });
+      const featureModule = MariaDBVectorStoreModule.forFeature(
+        {},
+        {
+          imports: [dependencyModule],
+        },
+      );
 
       const moduleRef = await Test.createTestingModule({
         imports: [featureModule],
@@ -91,10 +100,13 @@ describe("MariaDBVectorStoreModule", () => {
 
     it("should support global option", async () => {
       const dependencyModule = createDependencyModule();
-      const featureModule = MariaDBVectorStoreModule.forFeature({}, {
-        imports: [dependencyModule],
-        global: true,
-      });
+      const featureModule = MariaDBVectorStoreModule.forFeature(
+        {},
+        {
+          imports: [dependencyModule],
+          global: true,
+        },
+      );
 
       const moduleRef = await Test.createTestingModule({
         imports: [featureModule],

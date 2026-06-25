@@ -29,21 +29,27 @@ describe("MariaDBVectorStoreBuilderTests", () => {
 
   it("should fail on missing embedding model", () => {
     expect(() =>
-      MariaDBVectorStore.builder(jdbcTemplate, null as unknown as EmbeddingModel)
-        .build(),
+      MariaDBVectorStore.builder(
+        jdbcTemplate,
+        null as unknown as EmbeddingModel,
+      ).build(),
     ).toThrow(/EmbeddingModel must be configured/);
   });
 
   it("should fail on missing jdbc template", () => {
     expect(() =>
-      MariaDBVectorStore.builder(null as unknown as JsdbcTemplate, embeddingModel)
-        .build(),
+      MariaDBVectorStore.builder(
+        null as unknown as JsdbcTemplate,
+        embeddingModel,
+      ).build(),
     ).toThrow(/JdbcTemplate must not be null/);
   });
 
   it("should use default values", () => {
-    const vectorStore = MariaDBVectorStore.builder(jdbcTemplate, embeddingModel)
-      .build() as unknown as {
+    const vectorStore = MariaDBVectorStore.builder(
+      jdbcTemplate,
+      embeddingModel,
+    ).build() as unknown as {
       _vectorTableName: string;
       _schemaName: string | null;
       _schemaValidation: boolean;

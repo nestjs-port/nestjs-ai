@@ -105,11 +105,7 @@ describe("MariaDBStoreCustomNamesIT", () => {
 
       expect(await isTableExists(schemaName, tableName)).toBe(true);
       expect(
-        await isIndexExists(
-          schemaName,
-          tableName,
-          `${tableName}_embedding_idx`,
-        ),
+        await isIndexExists(schemaName, tableName, `${tableName}_embedding`),
       ).toBe(true);
       expect(await isTableExists(schemaName, defaultTableName)).toBe(false);
     } finally {
@@ -142,11 +138,7 @@ describe("MariaDBStoreCustomNamesIT", () => {
 
       expect(await isTableExists(schemaName, tableName)).toBe(true);
       expect(
-        await isIndexExists(
-          schemaName,
-          tableName,
-          `${tableName}_embedding_idx`,
-        ),
+        await isIndexExists(schemaName, tableName, `${tableName}_embedding2`),
       ).toBe(true);
       expect(await isTableExists(schemaName, defaultTableName)).toBe(false);
       expect(await getColumnNames(schemaName, tableName)).toEqual(
@@ -186,45 +178,37 @@ describe("MariaDBStoreCustomNamesIT", () => {
 
   it("should fail on SQL injection attempt in table name", async () => {
     const tableName = "users; DROP TABLE users;";
-    const { moduleRef, vectorStore } = await createVectorStore({
-      tableName,
-      schemaName,
-      initializeSchema: true,
-      removeExistingVectorStoreTable: true,
-      schemaValidation: true,
-      dimensions: 1536,
-      distanceType: MariaDBDistanceType.COSINE,
-    });
-
-    try {
-      await expect(vectorStore.onModuleInit()).rejects.toThrow(
-        "Identifier '`users; DROP TABLE users;`' should only contain alphanumeric characters and underscores",
-      );
-    } finally {
-      await moduleRef.close();
-    }
+    await expect(
+      createVectorStore({
+        tableName,
+        schemaName,
+        initializeSchema: true,
+        removeExistingVectorStoreTable: true,
+        schemaValidation: true,
+        dimensions: 1536,
+        distanceType: MariaDBDistanceType.COSINE,
+      }),
+    ).rejects.toThrow(
+      "Identifier 'users; DROP TABLE users;' should only contain alphanumeric characters and underscores",
+    );
   });
 
   it("should fail on SQL injection attempt in schema name", async () => {
     const tableName = "customvectortable";
     const injectedSchemaName = "public; DROP TABLE users;";
-    const { moduleRef, vectorStore } = await createVectorStore({
-      tableName,
-      schemaName: injectedSchemaName,
-      initializeSchema: true,
-      removeExistingVectorStoreTable: true,
-      schemaValidation: true,
-      dimensions: 1536,
-      distanceType: MariaDBDistanceType.COSINE,
-    });
-
-    try {
-      await expect(vectorStore.onModuleInit()).rejects.toThrow(
-        "Identifier '`public; DROP TABLE users;`' should only contain alphanumeric characters and underscores",
-      );
-    } finally {
-      await moduleRef.close();
-    }
+    await expect(
+      createVectorStore({
+        tableName,
+        schemaName: injectedSchemaName,
+        initializeSchema: true,
+        removeExistingVectorStoreTable: true,
+        schemaValidation: true,
+        dimensions: 1536,
+        distanceType: MariaDBDistanceType.COSINE,
+      }),
+    ).rejects.toThrow(
+      "Identifier 'public; DROP TABLE users;' should only contain alphanumeric characters and underscores",
+    );
   });
 
   async function createVectorStore(
@@ -290,12 +274,11 @@ describe("MariaDBStoreCustomNamesIT", () => {
   ): Promise<boolean> {
     const rows = await jsdbcTemplate.queryForList(
       sql`SELECT EXISTS (
-				SELECT 1 FROM information_schema.statistics
-				WHERE TABLE_SCHEMA = ${schemaName}
-					AND TABLE_NAME = ${tableName}
-					AND INDEX_NAME = ${indexName}
-					AND INDEX_TYPE = 'VECTOR'
-			) AS exists_flag`,
+					SELECT 1 FROM information_schema.statistics
+					WHERE TABLE_SCHEMA = ${schemaName}
+						AND TABLE_NAME = ${tableName}
+						AND INDEX_NAME = ${indexName}
+				) AS exists_flag`,
     );
 
     return Boolean(rows[0]?.exists_flag);

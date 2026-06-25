@@ -83,7 +83,11 @@ describe("MariaDBVectorStoreModuleIT", () => {
 
     typeormDataSource = new DataSource({
       type: "mariadb",
-      url: mariaDbContainer.getConnectionUri(),
+      host: mariaDbContainer.getHost(),
+      port: mariaDbContainer.getPort(),
+      username: mariaDbContainer.getUsername(),
+      password: "mariadbpwd",
+      database: mariaDbContainer.getDatabase(),
       synchronize: false,
       logging: false,
     });
@@ -141,8 +145,8 @@ describe("MariaDBVectorStoreModuleIT", () => {
   }, 240_000);
 
   it.each([
-    ["test:vector_store:id:metadata:embedding:content"],
-    ["test:my_table:my_id:my_metadata:my_embedding:my_content"],
+    ["mariadb:vector_store:id:metadata:embedding:content"],
+    ["mariadb:my_table:my_id:my_metadata:my_embedding:my_content"],
   ])("creates custom schema and table for %s", async (schemaTableName) => {
     const [
       schemaName,
@@ -177,7 +181,7 @@ describe("MariaDBVectorStoreModuleIT", () => {
     }
   });
 
-  it.each([["test:vector_store_disabled"], ["test:my_table_disabled"]])(
+  it.each([["mariadb:vector_store_disabled"], ["mariadb:my_table_disabled"]])(
     "does not initialize schema when disabled for %s",
     async (schemaTableName) => {
       const [schemaName, tableName] = schemaTableName.split(":");

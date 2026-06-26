@@ -61,6 +61,7 @@ MCP-related work is now split into separate `common`, `client`, `server`, and `a
 |                         | spring-ai-template-st                 | `@nestjs-ai/template-st`                          | 100%     |
 | **Model Providers**     | spring-ai-openai                      | `@nestjs-ai/model-openai`                         | 100%     |
 |                         | spring-ai-google-genai                | `@nestjs-ai/model-google-genai`                   | 100%     |
+|                         | spring-ai-google-genai-embedding      | `@nestjs-ai/model-google-genai-embedding`         | 100%     |
 |                         | spring-ai-transformers                | `@nestjs-ai/model-transformers`                   | 100%     |
 |                         | spring-ai-anthropic                   | `@nestjs-ai/model-anthropic`                      | 100%     |
 |                         | spring-ai-azure-openai                | —                                                 | 0%       |
@@ -234,6 +235,7 @@ nestjs-ai/
 │   ├── models/
 │   │   ├── openai/               # OpenAI provider
 │   │   ├── google-genai/         # Google GenAI (Gemini / Vertex AI) provider
+│   │   ├── google-genai-embedding/ # Google GenAI text embedding provider
 │   │   ├── anthropic/            # Anthropic (Claude) provider
 │   │   └── transformers/         # Hugging Face local embeddings
 │   ├── mcp/

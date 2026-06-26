@@ -216,11 +216,13 @@ image::spring-ai-chat-completions-clients.jpg[align="center", width="1000px"]
 
 * xref:api/chat/openai-chat.adoc[OpenAI Chat Completion] (streaming, multi-modality & function-calling support)
 * xref:api/chat/google-genai-chat.adoc[Google GenAI Chat Completion] (streaming, multi-modality & function-calling support)
+* xref:api/chat/anthropic-chat.adoc[Anthropic Chat Completion] (streaming, multi-modality & function-calling support)
+* xref:api/chat/ollama-chat.adoc[Ollama Chat Completion] (streaming, multi-modality & function-calling support)
 
 [NOTE]
 ====
 The following chat model integrations from Spring AI are not yet available in NestJS AI:
-Anthropic, Azure OpenAI, Amazon Bedrock, Mistral AI, Ollama, DeepSeek, Groq, MiniMax, Moonshot AI, NVIDIA, Perplexity AI, and QianFan.
+Azure OpenAI, Amazon Bedrock, Mistral AI, DeepSeek, Groq, MiniMax, Moonshot AI, NVIDIA, Perplexity AI, and QianFan.
 ====
 
 TIP: Find a detailed comparison of the available Chat Models in the xref:api/chat/comparison.adoc[Chat Models Comparison] section.

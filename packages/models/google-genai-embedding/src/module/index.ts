@@ -15,8 +15,12 @@
  */
 
 export {
-  GoogleGenAiEmbeddingConnectionDetails,
-  type GoogleGenAiEmbeddingConnectionDetailsProps,
-} from "./google-gen-ai-embedding-connection-details.js";
-export * from "./module/index.js";
-export * from "./text/index.js";
+  GOOGLE_GEN_AI_TEXT_EMBEDDING_PROPERTIES_TOKEN,
+  GoogleGenAiTextEmbeddingModelModule,
+  type GoogleGenAiTextEmbeddingModelModuleAsyncOptions,
+} from "./google-gen-ai-text-embedding-model.module.js";
+export {
+  GOOGLE_GEN_AI_TEXT_EMBEDDING_DEFAULT_MODEL,
+  type GoogleGenAiEmbeddingConnectionProperties,
+  type GoogleGenAiTextEmbeddingProperties,
+} from "./google-gen-ai-embedding-properties.js";

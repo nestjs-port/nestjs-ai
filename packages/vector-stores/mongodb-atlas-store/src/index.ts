@@ -20,6 +20,7 @@ export {
   MongoDBAtlasVectorStore,
   MongoDBAtlasVectorStoreBuilder,
 } from "./mongodb-atlas-vector-store.js";
+export { VectorSearchAggregation } from "./vector-search-aggregation.js";
 export type {
   MongoDBAtlasVectorStoreDocument,
   MongoDBAtlasVectorStoreTarget,

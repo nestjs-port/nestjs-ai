@@ -16,6 +16,20 @@
 
 import type { Document } from "mongodb";
 
+/**
+ * Parses a MongoDB Atlas filter expression string produced by the
+ * {@link MongoDBAtlasFilterExpressionConverter} into a query object. The converter
+ * emits operator keys (e.g. `$eq`) without quotes, following MongoDB's relaxed
+ * extended JSON syntax, so they are quoted before JSON parsing.
+ */
+export function parseFilterExpression(filter: string): Record<string, unknown> {
+  const normalized = filter.replace(
+    /([{,]\s*)(\$[a-zA-Z]+)(\s*:)/g,
+    `$1"$2"$3`,
+  );
+  return JSON.parse(normalized) as Record<string, unknown>;
+}
+
 export class VectorSearchAggregation {
   constructor(
     private readonly _embeddings: number[],
@@ -36,7 +50,7 @@ export class VectorSearchAggregation {
     };
 
     if (this._filter !== "") {
-      vectorSearch.filter = JSON.parse(this._filter) as Record<string, unknown>;
+      vectorSearch.filter = parseFilterExpression(this._filter);
     }
 
     return {

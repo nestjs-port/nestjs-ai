@@ -15,26 +15,44 @@
  */
 
 import assert from "node:assert/strict";
+import type { OnModuleInit } from "@nestjs/common";
 import {
-  type Document,
-  type DocumentMetadata,
+  Document,
+  DocumentMetadata,
   VectorStoreProvider,
   VectorStoreSimilarityMetric,
 } from "@nestjs-ai/commons";
 import type { EmbeddingModel } from "@nestjs-ai/model";
+import { EmbeddingOptions } from "@nestjs-ai/model";
 import {
   AbstractObservationVectorStore,
   AbstractVectorStoreBuilder,
+  type Filter,
   type SearchRequest,
   VectorStoreObservationContext,
 } from "@nestjs-ai/vector-store";
-import type { Collection, Db, MongoClient } from "mongodb";
+import { LoggerFactory } from "@nestjs-port/core";
+import type {
+  Collection,
+  Db,
+  MongoClient,
+  SearchIndexDescription,
+} from "mongodb";
+
+import { MongoDBAtlasFilterExpressionConverter } from "./mongodb-atlas-filter-expression-converter.js";
+import {
+  parseFilterExpression,
+  VectorSearchAggregation,
+} from "./vector-search-aggregation.js";
+
+const INDEX_ALREADY_EXISTS_ERROR_CODE = 68;
+const INDEX_ALREADY_EXISTS_ERROR_CODE_NAME = "IndexAlreadyExists";
 
 export interface MongoDBAtlasVectorStoreDocument {
-  id: string;
+  _id: string;
   content: string;
   embedding: number[];
-  metadata: DocumentMetadata;
+  metadata: Record<string, unknown>;
 }
 
 export type MongoDBAtlasVectorStoreTarget =
@@ -42,13 +60,84 @@ export type MongoDBAtlasVectorStoreTarget =
   | Db
   | MongoClient;
 
-export class MongoDBAtlasVectorStore extends AbstractObservationVectorStore {
+/**
+ * MongoDB Atlas-based vector store implementation using the Atlas Vector Search.
+ *
+ * The store uses a MongoDB collection to persist vector embeddings along with their
+ * associated document content and metadata. By default, it uses the "vector_store"
+ * collection with a vector search index for similarity search operations.
+ *
+ * Features:
+ * - Automatic schema initialization with configurable collection and index creation
+ * - Support for cosine similarity search
+ * - Metadata filtering using MongoDB Atlas Search syntax
+ * - Configurable similarity thresholds for search results
+ * - Batch processing support with configurable batching strategies
+ * - Observation and metrics support
+ *
+ * Basic usage example:
+ * ```typescript
+ * const vectorStore = MongoDBAtlasVectorStore.builder(mongoClient, embeddingModel)
+ *   .collectionName("vector_store")
+ *   .initializeSchema(true)
+ *   .build();
+ *
+ * // Add documents
+ * await vectorStore.add([
+ *   Document.builder().text("content1").metadata({ key1: "value1" }).build(),
+ *   Document.builder().text("content2").metadata({ key2: "value2" }).build(),
+ * ]);
+ *
+ * // Search with filters
+ * const results = await vectorStore.similaritySearch(
+ *   SearchRequest.builder()
+ *     .query("search text")
+ *     .topK(5)
+ *     .similarityThreshold(0.7)
+ *     .filterExpression("key1 == 'value1'")
+ *     .build(),
+ * );
+ * ```
+ *
+ * Advanced configuration example:
+ * ```typescript
+ * const vectorStore = MongoDBAtlasVectorStore.builder(mongoClient, embeddingModel)
+ *   .collectionName("custom_vectors")
+ *   .indexName("custom_vector_index")
+ *   .pathName("custom_embedding")
+ *   .numCandidates(500)
+ *   .metadataFieldsToFilter("category", "author")
+ *   .initializeSchema(true)
+ *   .build();
+ * ```
+ *
+ * Database Requirements:
+ * - MongoDB Atlas cluster with Vector Search enabled
+ * - Collection with vector search index configured
+ * - Collection schema with id (string), content (string), metadata (document), and
+ *   embedding (vector) fields
+ * - Proper access permissions for index and collection operations
+ */
+export class MongoDBAtlasVectorStore
+  extends AbstractObservationVectorStore
+  implements OnModuleInit
+{
+  private readonly logger = LoggerFactory.getLogger(
+    MongoDBAtlasVectorStore.name,
+  );
+
+  static readonly ID_FIELD_NAME = "_id";
+  static readonly METADATA_FIELD_NAME = "metadata";
+  static readonly CONTENT_FIELD_NAME = "content";
+  static readonly SCORE_FIELD_NAME = "score";
+
   static readonly DEFAULT_COLLECTION_NAME = "vector_store";
   static readonly DEFAULT_INDEX_NAME = "vector_index";
   static readonly DEFAULT_PATH_NAME = "embedding";
   static readonly DEFAULT_NUM_CANDIDATES = 200;
 
   private readonly _collection: Collection<MongoDBAtlasVectorStoreDocument>;
+  private readonly _db: Db | null;
   private readonly _mongoClient: MongoClient | null;
   private readonly _initializeSchema: boolean;
   private readonly _collectionName: string;
@@ -57,6 +146,7 @@ export class MongoDBAtlasVectorStore extends AbstractObservationVectorStore {
   private readonly _dbName: string | null;
   private readonly _metadataFieldsToFilter: Set<string>;
   private readonly _numCandidates: number;
+  private readonly _filterExpressionConverter: MongoDBAtlasFilterExpressionConverter;
 
   constructor(builder: MongoDBAtlasVectorStoreBuilder) {
     super({
@@ -76,13 +166,16 @@ export class MongoDBAtlasVectorStore extends AbstractObservationVectorStore {
       builder.configuredMetadataFieldsToFilter,
     );
     this._numCandidates = builder.configuredNumCandidates;
+    this._filterExpressionConverter =
+      builder.configuredFilterExpressionConverter;
 
-    const { collection, mongoClient } = resolveMongoTarget(
+    const { collection, db, mongoClient } = resolveMongoTarget(
       builder.target,
       this._collectionName,
       this._dbName,
     );
     this._collection = collection;
+    this._db = db;
     this._mongoClient = mongoClient;
   }
 
@@ -93,22 +186,182 @@ export class MongoDBAtlasVectorStore extends AbstractObservationVectorStore {
     return new MongoDBAtlasVectorStoreBuilder(target, embeddingModel);
   }
 
-  override getNativeClient<T>(): T | null {
-    return this._mongoClient as T;
+  async onModuleInit(): Promise<void> {
+    if (!this._initializeSchema) {
+      return;
+    }
+
+    // Create the collection if it does not exist
+    if (this._db != null) {
+      const existing = await this._db
+        .listCollections({ name: this._collectionName })
+        .toArray();
+      if (existing.length === 0) {
+        await this._db.createCollection(this._collectionName);
+      }
+    }
+    // Create search index
+    await this.createSearchIndex();
   }
 
-  protected override async doAdd(_documents: Document[]): Promise<void> {
-    throw new Error("MongoDB Atlas vector store scaffold is not implemented");
+  private async createSearchIndex(): Promise<void> {
+    try {
+      await this._collection.createSearchIndex(
+        await this.createSearchIndexDefinition(),
+      );
+    } catch (e) {
+      // Ignore any IndexAlreadyExists errors
+      if (isIndexAlreadyExistsError(e)) {
+        return;
+      }
+      throw e;
+    }
   }
 
-  protected override async doDelete(_idList: string[]): Promise<void> {
-    throw new Error("MongoDB Atlas vector store scaffold is not implemented");
+  /**
+   * Provides the Definition for the search index
+   */
+  private async createSearchIndexDefinition(): Promise<SearchIndexDescription> {
+    const dimensions = await this._embeddingModel.dimensions();
+
+    const fields: Record<string, unknown>[] = [
+      {
+        type: "vector",
+        path: this._pathName,
+        numDimensions: dimensions,
+        similarity: "cosine",
+      },
+    ];
+
+    for (const fieldName of this._metadataFieldsToFilter) {
+      fields.push({ type: "filter", path: `metadata.${fieldName}` });
+    }
+
+    return {
+      name: this._indexName,
+      type: "vectorSearch",
+      definition: { fields },
+    };
+  }
+
+  /**
+   * Maps a Bson Document to a Spring AI Document
+   * @param mongoDocument the mongoDocument to map to a Spring AI Document
+   * @return the Spring AI Document
+   */
+  private mapMongoDocument(mongoDocument: Record<string, unknown>): Document {
+    const id = mongoDocument[MongoDBAtlasVectorStore.ID_FIELD_NAME] as string;
+    const content = mongoDocument[
+      MongoDBAtlasVectorStore.CONTENT_FIELD_NAME
+    ] as string;
+    const score = mongoDocument[
+      MongoDBAtlasVectorStore.SCORE_FIELD_NAME
+    ] as number;
+    const metadata = mongoDocument[
+      MongoDBAtlasVectorStore.METADATA_FIELD_NAME
+    ] as Record<string, unknown>;
+
+    metadata[DocumentMetadata.DISTANCE] = 1 - score;
+
+    return Document.builder()
+      .id(id)
+      .text(content)
+      .metadata(metadata)
+      .score(score)
+      .build();
+  }
+
+  protected override async doAdd(documents: Document[]): Promise<void> {
+    const embeddings = await this._embeddingModel.embed(
+      documents,
+      EmbeddingOptions.builder().build(),
+      this._batchingStrategy,
+    );
+    for (let i = 0; i < documents.length; i++) {
+      const document = documents[i];
+      await this._collection.replaceOne(
+        { _id: document.id },
+        {
+          content: document.text ?? "",
+          metadata: document.metadata,
+          embedding: embeddings[i],
+        },
+        { upsert: true },
+      );
+    }
+  }
+
+  protected override async doDelete(idList: string[]): Promise<void> {
+    await this._collection.deleteMany({ _id: { $in: idList } });
+  }
+
+  protected override async doDeleteByFilterExpression(
+    filterExpression: Filter.Expression,
+  ): Promise<void> {
+    assert(filterExpression != null, "Filter expression must not be null");
+
+    try {
+      const nativeFilterExpression =
+        this._filterExpressionConverter.convertExpression(filterExpression);
+      const query = parseFilterExpression(nativeFilterExpression) as Parameters<
+        typeof this._collection.deleteMany
+      >[0];
+      const deleteResult = await this._collection.deleteMany(query);
+
+      this.logger.debug(
+        `Deleted ${deleteResult.deletedCount} documents matching filter expression`,
+      );
+    } catch (e) {
+      throw new Error("Failed to delete documents by filter", { cause: e });
+    }
   }
 
   protected override async doSimilaritySearch(
-    _request: SearchRequest,
+    request: SearchRequest,
   ): Promise<Document[]> {
-    throw new Error("MongoDB Atlas vector store scaffold is not implemented");
+    const nativeFilterExpressions =
+      request.filterExpression != null
+        ? this._filterExpressionConverter.convertExpression(
+            request.filterExpression,
+          )
+        : "";
+
+    const queryEmbedding = await this._embeddingModel.embed(request.query);
+    const vectorSearch = new VectorSearchAggregation(
+      queryEmbedding,
+      this._pathName,
+      this._numCandidates,
+      this._indexName,
+      request.topK,
+      nativeFilterExpressions,
+    );
+
+    const pipeline = [
+      vectorSearch.toDocument(),
+      {
+        $addFields: {
+          [MongoDBAtlasVectorStore.SCORE_FIELD_NAME]: {
+            $meta: "vectorSearchScore",
+          },
+        },
+      },
+      {
+        $match: {
+          [MongoDBAtlasVectorStore.SCORE_FIELD_NAME]: {
+            $gte: request.similarityThreshold,
+          },
+        },
+      },
+    ];
+
+    const results = await this._collection
+      .aggregate<Record<string, unknown>>(pipeline)
+      .toArray();
+    return results.map((d) => this.mapMongoDocument(d));
+  }
+
+  override getNativeClient<T>(): T | null {
+    return this._mongoClient as T;
   }
 
   protected override createObservationContextBuilder(
@@ -131,24 +384,26 @@ function resolveMongoTarget(
   dbName: string | null,
 ): {
   collection: Collection<MongoDBAtlasVectorStoreDocument>;
+  db: Db | null;
   mongoClient: MongoClient | null;
 } {
   if (isCollectionTarget(target)) {
-    return { collection: target, mongoClient: null };
+    return { collection: target, db: null, mongoClient: null };
   }
 
   if (isDbTarget(target)) {
     return {
       collection:
         target.collection<MongoDBAtlasVectorStoreDocument>(collectionName),
+      db: target,
       mongoClient: null,
     };
   }
 
+  const db = target.db(dbName ?? undefined);
   return {
-    collection: target
-      .db(dbName ?? undefined)
-      .collection<MongoDBAtlasVectorStoreDocument>(collectionName),
+    collection: db.collection<MongoDBAtlasVectorStoreDocument>(collectionName),
+    db,
     mongoClient: target,
   };
 }
@@ -172,6 +427,17 @@ function isDbTarget(target: MongoDBAtlasVectorStoreTarget): target is Db {
   );
 }
 
+function isIndexAlreadyExistsError(error: unknown): boolean {
+  if (error == null || typeof error !== "object") {
+    return false;
+  }
+  const { code, codeName } = error as { code?: number; codeName?: string };
+  return (
+    code === INDEX_ALREADY_EXISTS_ERROR_CODE ||
+    codeName === INDEX_ALREADY_EXISTS_ERROR_CODE_NAME
+  );
+}
+
 export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<MongoDBAtlasVectorStoreBuilder> {
   readonly target: MongoDBAtlasVectorStoreTarget;
   private _collectionName = MongoDBAtlasVectorStore.DEFAULT_COLLECTION_NAME;
@@ -181,6 +447,8 @@ export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<M
   private _initializeSchema = false;
   private _metadataFieldsToFilter: string[] = [];
   private _numCandidates = MongoDBAtlasVectorStore.DEFAULT_NUM_CANDIDATES;
+  private _filterExpressionConverter =
+    new MongoDBAtlasFilterExpressionConverter();
 
   constructor(
     target: MongoDBAtlasVectorStoreTarget,
@@ -190,18 +458,30 @@ export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<M
     this.target = target;
   }
 
+  /**
+   * Configures the collection name. This must match the name of the collection for
+   * the Vector Search Index in Atlas.
+   */
   collectionName(collectionName: string): this {
     assert(collectionName.trim() !== "", "collectionName must not be empty");
     this._collectionName = collectionName;
     return this;
   }
 
+  /**
+   * Configures the vector index name. This must match the name of the Vector Search
+   * Index Name in Atlas.
+   */
   indexName(indexName: string): this {
     assert(indexName.trim() !== "", "indexName must not be empty");
     this._indexName = indexName;
     return this;
   }
 
+  /**
+   * Configures the path name. This must match the name of the field indexed for the
+   * Vector Search Index in Atlas.
+   */
   pathName(pathName: string): this {
     assert(pathName.trim() !== "", "pathName must not be empty");
     this._pathName = pathName;
@@ -213,19 +493,39 @@ export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<M
     return this;
   }
 
+  /**
+   * Sets whether to initialize the schema.
+   */
   initializeSchema(initializeSchema: boolean): this {
     this._initializeSchema = initializeSchema;
     return this;
   }
 
+  /**
+   * Sets the metadata fields to filter in vector search.
+   */
   metadataFieldsToFilter(...metadataFieldsToFilter: string[]): this {
     this._metadataFieldsToFilter = metadataFieldsToFilter;
     return this;
   }
 
+  /**
+   * Sets the number of candidates for vector search.
+   */
   numCandidates(numCandidates: number): this {
     assert(numCandidates > 0, "numCandidates must be greater than zero");
     this._numCandidates = numCandidates;
+    return this;
+  }
+
+  /**
+   * Sets the filter expression converter.
+   */
+  filterExpressionConverter(
+    converter: MongoDBAtlasFilterExpressionConverter,
+  ): this {
+    assert(converter != null, "filterExpressionConverter must not be null");
+    this._filterExpressionConverter = converter;
     return this;
   }
 
@@ -255,6 +555,10 @@ export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<M
 
   get configuredNumCandidates(): number {
     return this._numCandidates;
+  }
+
+  get configuredFilterExpressionConverter(): MongoDBAtlasFilterExpressionConverter {
+    return this._filterExpressionConverter;
   }
 
   build(): MongoDBAtlasVectorStore {

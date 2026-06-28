@@ -16,6 +16,7 @@
 
 export { AbstractVectorStoreBuilder } from "./abstract-vector-store-builder.js";
 export * from "./filter/index.js";
+export { AbstractFilterExpressionConverter } from "./filter/converter/index.js";
 export * from "./observation/index.js";
 export * from "./properties/index.js";
 export { SearchRequest, SearchRequestBuilder } from "./search-request.js";

@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import type { Collection, Db, MongoClient, MongoClientOptions } from "mongodb";
+import type { MongoClient, MongoClientOptions } from "mongodb";
 
 import type { CommonVectorStoreProperties } from "@nestjs-ai/vector-store";
 
-import type { MongoDBAtlasVectorStoreDocument } from "../mongodb-atlas-vector-store.js";
-
 export interface MongoDBAtlasVectorStoreProperties extends CommonVectorStoreProperties {
-  collection?: Collection<MongoDBAtlasVectorStoreDocument>;
-  db?: Db;
   mongoClient?: MongoClient;
   mongoClientOptions?: MongoClientOptions;
   connectionString?: string;

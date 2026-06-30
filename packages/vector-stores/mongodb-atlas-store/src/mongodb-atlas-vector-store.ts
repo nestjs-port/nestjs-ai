@@ -32,12 +32,7 @@ import {
   VectorStoreObservationContext,
 } from "@nestjs-ai/vector-store";
 import { LoggerFactory } from "@nestjs-port/core";
-import type {
-  Collection,
-  Db,
-  MongoClient,
-  SearchIndexDescription,
-} from "mongodb";
+import type { Collection, MongoClient, SearchIndexDescription } from "mongodb";
 
 import { MongoDBAtlasFilterExpressionConverter } from "./mongodb-atlas-filter-expression-converter.js";
 import {
@@ -54,11 +49,6 @@ export interface MongoDBAtlasVectorStoreDocument {
   embedding: number[];
   metadata: Record<string, unknown>;
 }
-
-export type MongoDBAtlasVectorStoreTarget =
-  | Collection<MongoDBAtlasVectorStoreDocument>
-  | Db
-  | MongoClient;
 
 /**
  * MongoDB Atlas-based vector store implementation using the Atlas Vector Search.
@@ -137,8 +127,7 @@ export class MongoDBAtlasVectorStore
   static readonly DEFAULT_NUM_CANDIDATES = 200;
 
   private readonly _collection: Collection<MongoDBAtlasVectorStoreDocument>;
-  private readonly _db: Db | null;
-  private readonly _mongoClient: MongoClient | null;
+  private readonly _mongoClient: MongoClient;
   private readonly _initializeSchema: boolean;
   private readonly _collectionName: string;
   private readonly _indexName: string;
@@ -155,8 +144,6 @@ export class MongoDBAtlasVectorStore
       customObservationConvention: builder.getCustomObservationConvention(),
       batchingStrategy: builder.getBatchingStrategy(),
     });
-    assert(builder.target, "MongoDB Atlas target must not be null");
-
     this._initializeSchema = builder.configuredInitializeSchema;
     this._collectionName = builder.configuredCollectionName;
     this._indexName = builder.configuredIndexName;
@@ -169,21 +156,17 @@ export class MongoDBAtlasVectorStore
     this._filterExpressionConverter =
       builder.configuredFilterExpressionConverter;
 
-    const { collection, db, mongoClient } = resolveMongoTarget(
-      builder.target,
-      this._collectionName,
-      this._dbName,
-    );
-    this._collection = collection;
-    this._db = db;
-    this._mongoClient = mongoClient;
+    this._mongoClient = builder.mongoClient;
+    this._collection = this._mongoClient
+      .db(this._dbName ?? undefined)
+      .collection<MongoDBAtlasVectorStoreDocument>(this._collectionName);
   }
 
   static builder(
-    target: MongoDBAtlasVectorStoreTarget,
+    mongoClient: MongoClient,
     embeddingModel: EmbeddingModel,
   ): MongoDBAtlasVectorStoreBuilder {
-    return new MongoDBAtlasVectorStoreBuilder(target, embeddingModel);
+    return new MongoDBAtlasVectorStoreBuilder(mongoClient, embeddingModel);
   }
 
   async onModuleInit(): Promise<void> {
@@ -192,14 +175,14 @@ export class MongoDBAtlasVectorStore
     }
 
     // Create the collection if it does not exist
-    if (this._db != null) {
-      const existing = await this._db
-        .listCollections({ name: this._collectionName })
-        .toArray();
-      if (existing.length === 0) {
-        await this._db.createCollection(this._collectionName);
-      }
+    const db = this._mongoClient.db(this._dbName ?? undefined);
+    const existing = await db
+      .listCollections({ name: this._collectionName })
+      .toArray();
+    if (existing.length === 0) {
+      await db.createCollection(this._collectionName);
     }
+
     // Create search index
     await this.createSearchIndex();
   }
@@ -378,55 +361,6 @@ export class MongoDBAtlasVectorStore
   }
 }
 
-function resolveMongoTarget(
-  target: MongoDBAtlasVectorStoreTarget,
-  collectionName: string,
-  dbName: string | null,
-): {
-  collection: Collection<MongoDBAtlasVectorStoreDocument>;
-  db: Db | null;
-  mongoClient: MongoClient | null;
-} {
-  if (isCollectionTarget(target)) {
-    return { collection: target, db: null, mongoClient: null };
-  }
-
-  if (isDbTarget(target)) {
-    return {
-      collection:
-        target.collection<MongoDBAtlasVectorStoreDocument>(collectionName),
-      db: target,
-      mongoClient: null,
-    };
-  }
-
-  const db = target.db(dbName ?? undefined);
-  return {
-    collection: db.collection<MongoDBAtlasVectorStoreDocument>(collectionName),
-    db,
-    mongoClient: target,
-  };
-}
-
-function isCollectionTarget(
-  target: MongoDBAtlasVectorStoreTarget,
-): target is Collection<MongoDBAtlasVectorStoreDocument> {
-  return (
-    typeof (target as Collection<MongoDBAtlasVectorStoreDocument>).find ===
-      "function" &&
-    typeof (target as Collection<MongoDBAtlasVectorStoreDocument>).insertOne ===
-      "function"
-  );
-}
-
-function isDbTarget(target: MongoDBAtlasVectorStoreTarget): target is Db {
-  return (
-    typeof (target as Db).collection === "function" &&
-    typeof (target as Db).createCollection === "function" &&
-    typeof (target as Db).listCollections === "function"
-  );
-}
-
 function isIndexAlreadyExistsError(error: unknown): boolean {
   if (error == null || typeof error !== "object") {
     return false;
@@ -439,7 +373,7 @@ function isIndexAlreadyExistsError(error: unknown): boolean {
 }
 
 export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<MongoDBAtlasVectorStoreBuilder> {
-  readonly target: MongoDBAtlasVectorStoreTarget;
+  readonly mongoClient: MongoClient;
   private _collectionName = MongoDBAtlasVectorStore.DEFAULT_COLLECTION_NAME;
   private _indexName = MongoDBAtlasVectorStore.DEFAULT_INDEX_NAME;
   private _pathName = MongoDBAtlasVectorStore.DEFAULT_PATH_NAME;
@@ -450,12 +384,9 @@ export class MongoDBAtlasVectorStoreBuilder extends AbstractVectorStoreBuilder<M
   private _filterExpressionConverter =
     new MongoDBAtlasFilterExpressionConverter();
 
-  constructor(
-    target: MongoDBAtlasVectorStoreTarget,
-    embeddingModel: EmbeddingModel,
-  ) {
+  constructor(mongoClient: MongoClient, embeddingModel: EmbeddingModel) {
     super(embeddingModel);
-    this.target = target;
+    this.mongoClient = mongoClient;
   }
 
   /**

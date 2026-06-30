@@ -33,10 +33,7 @@ import type { ObservationRegistry } from "@nestjs-port/core";
 import { OBSERVATION_REGISTRY_TOKEN } from "@nestjs-port/core";
 import { MongoClient } from "mongodb";
 
-import {
-  MongoDBAtlasVectorStore,
-  type MongoDBAtlasVectorStoreTarget,
-} from "../mongodb-atlas-vector-store.js";
+import { MongoDBAtlasVectorStore } from "../mongodb-atlas-vector-store.js";
 import type { MongoDBAtlasVectorStoreProperties } from "./mongodb-atlas-vector-store-properties.js";
 
 export const MONGODB_ATLAS_VECTOR_STORE_PROPERTIES_TOKEN = Symbol.for(
@@ -102,8 +99,11 @@ function createProviders(): Provider[] {
         observationConvention?: VectorStoreObservationConvention,
         batchingStrategy?: BatchingStrategy,
       ): Promise<MongoDBAtlasVectorStore> => {
-        const target = await resolveMongoTarget(properties);
-        const builder = MongoDBAtlasVectorStore.builder(target, embeddingModel);
+        const mongoClient = await resolveMongoClient(properties);
+        const builder = MongoDBAtlasVectorStore.builder(
+          mongoClient,
+          embeddingModel,
+        );
 
         applyMongoDBAtlasVectorStoreProperties(builder, properties);
 
@@ -130,17 +130,9 @@ function createProviders(): Provider[] {
   ];
 }
 
-async function resolveMongoTarget(
+async function resolveMongoClient(
   properties: MongoDBAtlasVectorStoreProperties,
-): Promise<MongoDBAtlasVectorStoreTarget> {
-  if (properties.collection != null) {
-    return properties.collection;
-  }
-
-  if (properties.db != null) {
-    return properties.db;
-  }
-
+): Promise<MongoClient> {
   if (properties.mongoClient != null) {
     await properties.mongoClient.connect();
     return properties.mongoClient;
@@ -156,7 +148,7 @@ async function resolveMongoTarget(
   }
 
   throw new Error(
-    "MongoDB Atlas vector store collection, db, mongoClient, or connectionString must be set",
+    "MongoDB Atlas vector store mongoClient or connectionString must be set",
   );
 }
 

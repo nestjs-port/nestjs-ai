@@ -295,6 +295,9 @@ importers:
       '@nestjs-ai/vector-store-mariadb':
         specifier: workspace:*
         version: link:../vector-stores/mariadb-store
+      '@nestjs-ai/vector-store-mongodb-atlas':
+        specifier: workspace:*
+        version: link:../vector-stores/mongodb-atlas-store
       '@nestjs-ai/vector-store-pgvector':
         specifier: workspace:*
         version: link:../vector-stores/pgvector-store

@@ -36,7 +36,8 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepack": "cp ../../README.md README.md"
   },
   "devDependencies": {
     "@nestjs-port/core": "^0.1.1",

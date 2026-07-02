@@ -36,7 +36,8 @@
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepack": "cp ../../../README.md README.md"
   },
   "dependencies": {
     "@nestjs-ai/mcp-common": "workspace:*",

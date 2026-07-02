@@ -38,7 +38,7 @@
     "clean": "rimraf dist",
     "test": "vitest run",
     "generate:antlr": "pnpm dlx antlr-ng -l -v -Dlanguage=TypeScript -o src/filter/antlr4 src/filter/antlr4/Filters.g4",
-    "prepack": "cp ../../README.md README.md"
+    "prepack": "shx cp ../../README.md README.md"
   },
   "dependencies": {
     "antlr4ng": "^3.0.16"

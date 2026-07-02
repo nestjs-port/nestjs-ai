@@ -37,7 +37,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run",
-    "prepack": "cp ../../../README.md README.md"
+    "prepack": "shx cp ../../../README.md README.md"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

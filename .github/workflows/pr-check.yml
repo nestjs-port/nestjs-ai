@@ -71,6 +71,7 @@ jobs:
             --filter=@nestjs-ai/session-jsdbc \
             --filter=@nestjs-ai/template-st \
             --filter=@nestjs-ai/vector-store \
+            --filter=@nestjs-ai/vector-store-mongodb-atlas \
             --filter=@nestjs-ai/vector-store-pgvector \
             --filter=@nestjs-ai/vector-store-redis
 

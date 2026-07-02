@@ -37,7 +37,7 @@
     "clean": "rimraf dist",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepack": "cp ../../README.md README.md"
+    "prepack": "shx cp ../../README.md README.md"
   },
   "devDependencies": {
     "@nestjs-port/core": "^0.1.1",

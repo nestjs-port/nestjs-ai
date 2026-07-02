@@ -37,7 +37,7 @@
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
-    "prepack": "cp ../../../README.md README.md"
+    "prepack": "shx cp ../../../README.md README.md"
   },
   "devDependencies": {
     "@google/genai": "^1.49.0",

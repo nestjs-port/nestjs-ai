@@ -36,7 +36,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run",
-    "prepack": "cp ../../../../README.md README.md"
+    "prepack": "shx cp ../../../../README.md README.md"
   },
   "devDependencies": {
     "@nestjs-ai/commons": "workspace:*",

@@ -184,8 +184,16 @@ export class PgVectorStore extends AbstractObservationVectorStore {
     );
 
     const batchedDocuments = this.batchDocuments(documents);
-    for (const batch of batchedDocuments) {
-      await this.insertOrUpdateBatch(batch, documents, embeddings);
+    for (
+      let batchIndex = 0;
+      batchIndex < batchedDocuments.length;
+      batchIndex++
+    ) {
+      await this.insertOrUpdateBatch(
+        batchedDocuments[batchIndex],
+        embeddings,
+        batchIndex * this._maxDocumentBatchSize,
+      );
     }
   }
 
@@ -204,17 +212,18 @@ export class PgVectorStore extends AbstractObservationVectorStore {
 
   private async insertOrUpdateBatch(
     batch: Document[],
-    documents: Document[],
     embeddings: number[][],
+    embeddingOffset: number,
   ): Promise<void> {
     const table = this.getFullyQualifiedTableName();
     await this._jdbcTemplate.transaction(async () => {
-      for (const document of batch) {
+      for (let batchIndex = 0; batchIndex < batch.length; batchIndex++) {
+        const document = batch[batchIndex];
         const id = this.convertIdToPgType(document.id);
         const content = document.text;
         const json = this.toJson(document.metadata);
         const embedding = toVectorSqlLiteral(
-          embeddings[documents.indexOf(document)],
+          embeddings[embeddingOffset + batchIndex],
         );
 
         await this._jdbcTemplate.update(

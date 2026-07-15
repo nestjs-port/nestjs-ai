@@ -6,7 +6,7 @@
 
 > A TypeScript/NestJS port of [Spring AI](https://github.com/spring-projects/spring-ai) — bringing the same powerful AI abstraction layer to the Node.js ecosystem.
 
-**Last synced Spring AI commit:** `4008b576` (Cleanup unused version properties in root POM)
+**Last synced Spring AI commit:** `8075262b0` (refactor: improve time complexity and reduce memory allocations)
 
 ## Overview
 

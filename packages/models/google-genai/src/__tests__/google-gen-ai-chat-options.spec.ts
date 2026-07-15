@@ -69,6 +69,17 @@ describe("GoogleGenAiChatOptions", () => {
     expect(copy).not.toBe(original);
   });
 
+  it("should preserve responseMimeType when copied", () => {
+    const original = GoogleGenAiChatOptions.builder()
+      .responseMimeType("application/json")
+      .build();
+
+    const copy = original.copy();
+
+    expect(copy.responseMimeType).toBe("application/json");
+    expect(copy).not.toBe(original);
+  });
+
   it("should compare equal for identical thinkingBudget values", () => {
     const options1 = GoogleGenAiChatOptions.builder()
       .model("test-model")

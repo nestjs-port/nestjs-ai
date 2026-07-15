@@ -77,7 +77,7 @@ describe("OllamaChatRequest", () => {
 
     expect(request.model).toBe(OllamaModel.QWEN_2_5_3B.id());
     expect(request.options.temperature).toBe(0.8);
-    expect(request.options.top_k).toBeUndefined();
+    expect(request.options.top_k).toBe(99);
     expect(request.options.num_gpu).toBe(2);
     expect(request.options.top_p).toBe(0.5);
   });

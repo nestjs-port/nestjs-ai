@@ -207,8 +207,10 @@ describe("AnthropicChatModel", () => {
     const originalPrompt = new Prompt("Test", runtimeOptions);
     const requestPrompt = model.buildRequestPrompt(originalPrompt);
 
-    expect(requestPrompt.options).toBe(runtimeOptions);
+    expect(requestPrompt.options).not.toBe(runtimeOptions);
     const mergedOptions = requestPrompt.options as AnthropicChatOptions;
+    expect(mergedOptions.model).toBe("default-model");
+    expect(mergedOptions.maxTokens).toBe(1000);
     assert.exists(mergedOptions.cacheOptions);
     expect(mergedOptions.cacheOptions.strategy).toBe(
       AnthropicCacheStrategy.SYSTEM_ONLY,

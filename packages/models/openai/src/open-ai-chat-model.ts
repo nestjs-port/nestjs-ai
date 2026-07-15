@@ -36,7 +36,6 @@ import {
   MessageType,
   Prompt,
   type ToolCall,
-  ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolDefinition,
   type ToolExecutionEligibilityPredicate,
@@ -148,6 +147,7 @@ export class OpenAiChatModel extends ChatModel {
 
   protected override async callPrompt(prompt: Prompt): Promise<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
+    this.verifyPromptChatOptions(requestPrompt);
     return this.internalCall(requestPrompt, null);
   }
 
@@ -255,6 +255,7 @@ export class OpenAiChatModel extends ChatModel {
 
   protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
+    this.verifyPromptChatOptions(requestPrompt);
     return this.internalStream(requestPrompt, null);
   }
 
@@ -665,32 +666,6 @@ export class OpenAiChatModel extends ChatModel {
   }
 
   /**
-   * Builds the request prompt by merging runtime options with default options.
-   * @param prompt the original prompt
-   * @returns the prompt with merged options
-   */
-  buildRequestPrompt(prompt: Prompt): Prompt {
-    const requestBuilder = this._options.mutate();
-
-    if (prompt.options != null) {
-      if (prompt.options.topK != null) {
-        this.logger.warn(
-          "The topK option is not supported by OpenAI chat models. Ignoring.",
-        );
-      }
-      requestBuilder.combineWith(
-        prompt.options.mutate() as OpenAiChatOptions.Builder,
-      );
-    }
-
-    const requestOptions = requestBuilder.build();
-
-    ToolCallingChatOptions.validateToolCallbacks(requestOptions.toolCallbacks);
-
-    return new Prompt(prompt.instructions, requestOptions);
-  }
-
-  /**
    * Creates a chat completion request from the given prompt.
    * @param prompt the prompt containing messages and options
    * @param stream whether this is a streaming request
@@ -1047,6 +1022,14 @@ export class OpenAiChatModel extends ChatModel {
 
   get defaultOptions(): ChatOptions {
     return this._options.copy();
+  }
+
+  private verifyPromptChatOptions(prompt: Prompt): void {
+    if (prompt.options?.topK != null) {
+      this.logger.warn(
+        "The topK option is not supported by OpenAI chat models. Ignoring.",
+      );
+    }
   }
 
   /**

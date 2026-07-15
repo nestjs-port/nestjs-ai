@@ -54,7 +54,6 @@ import {
   MessageType,
   Prompt,
   type ToolCall,
-  ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolExecutionEligibilityPredicate,
   ToolExecutionResult,
@@ -248,16 +247,6 @@ export class GoogleGenAiChatModel extends ChatModel {
     }
 
     return response;
-  }
-
-  buildRequestPrompt(prompt: Prompt): Prompt {
-    // Process runtime options
-    const runtimeOptions =
-      (prompt.options as GoogleGenAiChatOptions | null) ?? this._defaultOptions;
-
-    ToolCallingChatOptions.validateToolCallbacks(runtimeOptions.toolCallbacks);
-
-    return new Prompt(prompt.instructions, runtimeOptions);
   }
 
   protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {

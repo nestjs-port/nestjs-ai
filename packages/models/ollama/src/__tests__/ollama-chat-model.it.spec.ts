@@ -135,10 +135,7 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaChatModelIT", () => {
       });
 
       // ollama specific options
-      const ollamaOptions = OllamaChatOptions.builder()
-        .model(MODEL)
-        .lowVRAM(true)
-        .build();
+      const ollamaOptions = OllamaChatOptions.builder().lowVRAM(true).build();
 
       const response = await chatModel.call(
         new Prompt([systemMessage, userMessage], ollamaOptions),
@@ -324,7 +321,6 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaChatModelIT", () => {
       const prompt = userPromptTemplate.create(
         { country: "denmark" },
         OllamaChatOptions.builder()
-          .model(MODEL)
           .format(JSON.parse(schemaOutputConverter.jsonSchema))
           .build(),
       );
@@ -349,7 +345,6 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaChatModelIT", () => {
         "utf8",
       );
       const chatOptions = OllamaChatOptions.builder()
-        .model(MODEL)
         .outputSchema(jsonSchemaAsText)
         .build();
       const prompt = new Prompt("Tell me about Canada.", chatOptions);
@@ -386,7 +381,6 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaChatModelIT", () => {
       // Advisor to verify that native structured output is being used
       const nativeStructuredOutputUsed = { value: false };
       const chatOptions = OllamaChatOptions.builder()
-        .model(MODEL)
         .format(expectedOutputSchemaMap)
         .build();
       if (chatOptions.format === expectedOutputSchemaMap) {
@@ -464,7 +458,6 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)("OllamaChatModelIT", () => {
       const conversationId = randomUUID();
 
       const chatOptions = OllamaChatOptions.builder()
-        .model(MODEL)
         .toolCallbacks([createMultiplyToolCallback()])
         .internalToolExecutionEnabled(false)
         .build();

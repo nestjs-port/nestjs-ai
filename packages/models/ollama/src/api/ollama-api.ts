@@ -345,6 +345,8 @@ export namespace OllamaApi {
      * The relevant tool call.
      */
     export interface ToolCall {
+      /** The identifier of the tool call. */
+      id?: string | null;
       function: ToolCallFunction;
     }
 

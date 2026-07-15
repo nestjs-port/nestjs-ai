@@ -281,6 +281,7 @@ export class OllamaChatModel extends ChatModel {
         const toolCalls =
           assistantMessage.toolCalls.length > 0
             ? assistantMessage.toolCalls.map((toolCall) => ({
+                id: toolCall.id,
                 function: {
                   name: toolCall.name,
                   arguments: JSON.parse(toolCall.arguments) as Record<
@@ -504,7 +505,7 @@ export class OllamaChatModel extends ChatModel {
     const message = ollamaResponse.message;
     const toolCalls =
       message?.tool_calls?.map((toolCall) => ({
-        id: "",
+        id: toolCall.id ?? "",
         type: "function",
         name: toolCall.function.name,
         arguments: JSON.stringify(toolCall.function.arguments),

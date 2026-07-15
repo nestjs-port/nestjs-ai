@@ -129,6 +129,32 @@ describe.skipIf(!OLLAMA_TESTS_ENABLED)(
       },
       TEST_TIMEOUT,
     );
+
+    it(
+      "populates tool call id",
+      async () => {
+        const promptOptions = OllamaChatOptions.builder()
+          .model(MODEL)
+          .toolCallbacks([createWeatherToolCallback()])
+          .internalToolExecutionEnabled(false)
+          .build();
+
+        const response = await chatModel.call(
+          new Prompt(
+            [
+              new UserMessage({
+                content: "What are the weather conditions in San Francisco?",
+              }),
+            ],
+            promptOptions,
+          ),
+        );
+
+        expect(response.result?.output.toolCalls).toHaveLength(1);
+        expect(response.result?.output.toolCalls[0].id).toBeTruthy();
+      },
+      TEST_TIMEOUT,
+    );
   },
 );
 

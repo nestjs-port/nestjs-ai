@@ -73,7 +73,6 @@ import {
   Prompt,
   type Message as SpringMessage,
   type ToolCall,
-  ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolDefinition,
   type ToolExecutionEligibilityPredicate,
@@ -584,17 +583,6 @@ export class AnthropicChatModel extends ChatModel {
     }
 
     return null;
-  }
-
-  buildRequestPrompt(prompt: Prompt): Prompt {
-    const runtimeOptions =
-      prompt.options instanceof AnthropicChatOptions
-        ? prompt.options
-        : this._options;
-
-    ToolCallingChatOptions.validateToolCallbacks(runtimeOptions.toolCallbacks);
-
-    return new Prompt(prompt.instructions, runtimeOptions);
   }
 
   /**

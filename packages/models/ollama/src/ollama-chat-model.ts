@@ -34,7 +34,6 @@ import {
   MessageAggregator,
   MessageType,
   Prompt,
-  ToolCallingChatOptions,
   type ToolCallingManager,
   type ToolDefinition,
   type ToolExecutionEligibilityPredicate,
@@ -234,11 +233,13 @@ export class OllamaChatModel extends ChatModel {
 
   protected override async callPrompt(prompt: Prompt): Promise<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
+    this.verifyPromptChatOptions(requestPrompt);
     return this.internalCall(requestPrompt, null);
   }
 
   protected override streamPrompt(prompt: Prompt): Observable<ChatResponse> {
     const requestPrompt = this.buildRequestPrompt(prompt);
+    this.verifyPromptChatOptions(requestPrompt);
     return this.internalStream(requestPrompt, null);
   }
 
@@ -246,19 +247,11 @@ export class OllamaChatModel extends ChatModel {
     return OllamaChatOptions.fromOptions(this._defaultOptions);
   }
 
-  buildRequestPrompt(prompt: Prompt): Prompt {
-    const requestOptions =
-      prompt.options instanceof OllamaChatOptions
-        ? prompt.options
-        : this._defaultOptions;
-
-    if (!StringUtils.hasText(requestOptions.model)) {
+  private verifyPromptChatOptions(prompt: Prompt): void {
+    const chatOptions = prompt.options;
+    if (chatOptions != null && !StringUtils.hasText(chatOptions.model)) {
       throw new Error("model cannot be null or empty");
     }
-
-    ToolCallingChatOptions.validateToolCallbacks(requestOptions.toolCallbacks);
-
-    return prompt.mutate().chatOptions(requestOptions).build();
   }
 
   ollamaChatRequest(prompt: Prompt, stream: boolean): OllamaApi.ChatRequest {

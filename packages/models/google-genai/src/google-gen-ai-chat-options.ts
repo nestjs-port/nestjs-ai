@@ -293,6 +293,7 @@ export namespace GoogleGenAiChatOptions {
 
     clone(): this {
       const copy = super.clone() as this;
+      copy._responseMimeType = this._responseMimeType;
       if (this._safetySettings != null) {
         copy._safetySettings = [...this._safetySettings];
       }

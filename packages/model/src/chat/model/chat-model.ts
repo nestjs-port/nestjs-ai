@@ -20,8 +20,10 @@ import type { Message } from "../messages/message.interface.js";
 import type { ChatOptions } from "../prompt/chat-options.interface.js";
 import { DefaultChatOptions } from "../prompt/default-chat-options.js";
 import { Prompt } from "../prompt/prompt.js";
+import { ToolCallingChatOptions } from "../../model/tool/tool-calling-chat-options.interface.js";
 import type { ChatResponse } from "./chat-response.js";
 import { StreamingChatModel } from "./streaming-chat-model.js";
+import type { ToolCallingChatOptions as ToolCallingChatOptionsType } from "../../model/tool/tool-calling-chat-options.interface.js";
 
 export abstract class ChatModel
   extends StreamingChatModel
@@ -55,6 +57,22 @@ export abstract class ChatModel
 
   get defaultOptions(): ChatOptions {
     return new DefaultChatOptions();
+  }
+
+  buildRequestPrompt(prompt: Prompt): Prompt {
+    const optionsBuilder = this.defaultOptions.mutate();
+    if (prompt.options != null) {
+      optionsBuilder.combineWith(prompt.options.mutate());
+    }
+
+    const options = optionsBuilder.build();
+    if ("toolCallbacks" in options) {
+      ToolCallingChatOptions.validateToolCallbacks(
+        (options as ToolCallingChatOptionsType).toolCallbacks,
+      );
+    }
+
+    return new Prompt(prompt.instructions, options);
   }
 
   protected override streamPrompt(_prompt: Prompt): Observable<ChatResponse> {

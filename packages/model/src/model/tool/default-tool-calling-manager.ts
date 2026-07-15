@@ -106,16 +106,15 @@ export class DefaultToolCallingManager implements ToolCallingManager {
     assert(chatOptions, "chatOptions cannot be null");
 
     const toolCallbacks: ToolCallback[] = [...chatOptions.toolCallbacks];
+    const existingToolNames = new Set(
+      chatOptions.toolCallbacks.map((tool) => tool.toolDefinition.name),
+    );
 
     for (const toolName of chatOptions.toolNames) {
       // Skip the tool if it is already present in the request toolCallbacks.
       // That might happen if a tool is defined in the options
       // both as a ToolCallback and as a tool name.
-      if (
-        chatOptions.toolCallbacks.some(
-          (tool) => tool.toolDefinition.name === toolName,
-        )
-      ) {
+      if (existingToolNames.has(toolName)) {
         continue;
       }
       const toolCallback = this._toolCallbackResolver.resolve(toolName);
